@@ -37,7 +37,7 @@ r56_idea_company_cat_incorporated
 r56_laws_gender_total_equality
 (the r56 prefix, the thing it is, the sub-thing, then the name itself)
 
-If for some reason you need greater access to the Git, ask for Collaborator status from Greatexperiment.
+If for some reason you need greater access to the Git, or don't understand any of the above, ask Greatexperiment.
 
 
 
