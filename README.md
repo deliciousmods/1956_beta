@@ -5,7 +5,7 @@ This is the Readme guide for using Github with Road to 56.
 
 1. Sign up with Github if you haven't already, and request membership / collaborator status from Greatexperiment
 2. Download the client from the github site
-3. File -> Clone -> URL -> deliciousmods/1956_beta
+3. In the program, File -> Clone -> URL -> deliciousmods/1956_beta
 4. Set the local directory as your documents > Paradox Interactive > Hearts of Iron IV > mod folder
 5. Clone the project and download
 6. Move the 1956_beta.mod file from the new folder into the mod folder
@@ -20,12 +20,12 @@ The working version of the mod is the beta_edits branch, but you can't edit it d
 
 You can also, at any time, create "issues" to be tracked on the site. These are basically bug reports and feature requests. 
 Be sure to add appropriate labels such as:
- Confirmed/Unconfirmed (Has the issue been verified or not)
- Minor/Moderate/Serious (The importance of the issue)
- Bug (Something that's broken due to a mistake or error)
- Tweak (A small change or adjustment that should be made, but is not a bug.)
- Update (Something is outdated)
- Enhancement (A suggestion for improvement)
+1. Confirmed/Unconfirmed (Has the issue been verified or not)
+2. Minor/Moderate/Serious (The importance of the issue)
+3. Bug (Something that's broken due to a mistake or error)
+4. Tweak (A small change or adjustment that should be made, but is not a bug.)
+5. Update (Something is outdated)
+6. Enhancement (A suggestion for improvement)
  
 Please use the following guidelines before submitting a pull request or uploading your edits:
 1. Make sure your code is clean and well commented. Even if your code works, it needs to be readable, and organized with proper spacing and indentation. Broken code will be automatically rejected.
@@ -34,7 +34,7 @@ Please use the following guidelines before submitting a pull request or uploadin
 4. Use 56 naming conventions wherever possible. Generally this goes along the lines of:
 r56_portrait_minister_bob_bobson 
 r56_idea_company_cat_incorporated 
-r56_laws_gender_total_equality
+r56_laws_gender_total_equality 
 (the r56 prefix, the thing it is, the sub-thing, then the name itself)
 
 If for some reason you need greater access rights to the Git, or don't understand any of the above, ask Greatexperiment.
