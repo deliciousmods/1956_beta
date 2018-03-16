@@ -3,9 +3,9 @@ Road to 56 Beta Build
 
 This is the Readme guide for using Github with Road to 56. 
 
-1. Sign up with Github if you haven't already
+1. Sign up with Github if you haven't already, and request membership / collaborator status from Greatexperiment
 2. Download the client from the github site
-3. File -> Clone -> URL -> Greatexperiment/1956_beta
+3. File -> Clone -> URL -> deliciousmods/1956_beta
 4. Set the local directory as your documents > Paradox Interactive > Hearts of Iron IV > mod folder
 5. Clone the project and download
 6. Move the 1956_beta.mod file from the new folder into the mod folder
