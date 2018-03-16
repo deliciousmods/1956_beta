@@ -32,5 +32,6 @@ Please use the following guidelines before submitting a pull request or uploadin
 2. Make sure you thoroughly implement AI within your code where needed. This means making sure historical outcomes are about 4 times as likely as ahistorical ones, is_historical_focus_on is in place where relevant, and you use the Sanity scripts in warmaking situations.
 3. Never overwrite or clone files from Vanilla unless absolutely needed. In other words, don't just copy the whole technologies.gfx file and append your stuff to the end.
 4. Use 56 naming conventions wherever possible. Generally this goes along the lines of r56_portrait_minister_bob_bobson, r56_idea_company_cat_incorporated, r56_laws_gender_total_equality. Basically the r56 prefix, the thing it is, the sub-thing, then the name itself.
+5. All graphics must use DXT5 compression as per the Nvidia dds plugin. It must also follow the standard type size found in 56, which you can find by looking at the graphic files in the mod itself.
 
 If for some reason you need greater access rights to the Git, or don't understand any of the above, ask Greatexperiment.
