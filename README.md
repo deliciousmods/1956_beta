@@ -31,10 +31,6 @@ Please use the following guidelines before submitting a pull request or uploadin
 1. Make sure your code is clean and well commented. Even if your code works, it needs to be readable, and organized with proper spacing and indentation. Broken code will be automatically rejected.
 2. Make sure you thoroughly implement AI within your code where needed, and use the AI Sanity scripts in all warmaking events and focuses.
 3. Never overwrite or clone files from Vanilla unless absolutely needed. In other words, don't just copy the whole technologies.gfx file and append your stuff to the end.
-4. Use 56 naming conventions wherever possible. Generally this goes along the lines of:
-r56_portrait_minister_bob_bobson 
-r56_idea_company_cat_incorporated 
-r56_laws_gender_total_equality 
-(the r56 prefix, the thing it is, the sub-thing, then the name itself)
+4. Use 56 naming conventions wherever possible. Generally this goes along the lines of r56_portrait_minister_bob_bobson, r56_idea_company_cat_incorporated, r56_laws_gender_total_equality. Basically the r56 prefix, the thing it is, the sub-thing, then the name itself.
 
 If for some reason you need greater access rights to the Git, or don't understand any of the above, ask Greatexperiment.
