@@ -9,7 +9,7 @@ This is the Readme guide for using Github with Road to 56.
 4. Set the local directory as your documents > Paradox Interactive > Hearts of Iron IV > mod folder
 5. Clone the project and download
 6. Move the 1956_beta.mod file from the new folder into the mod folder
-7. Under 'current branch' create a new one using the format yourusername_edits Example: Greatexperiment_edits
+7. Under 'current branch' create a new one using the format yourusername_edits Example: Greatexperiment_edits. Note: This only applies if you aren't just contributing to a specific project, like a translation. If you are - use the relevant branch (1956_german, etc)
 8. Publish your branch to the git.
 9. You can now work from your local version of 56.
 10. At anytime you can "Fetch origin" to update your current files with whatever branch you want. Master is the definitive branch, and only editable by Greatexperiment. Beta_edits is the one everyone should be checking their files on.
