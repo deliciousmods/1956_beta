@@ -3,14 +3,13 @@ Road to 56 Beta Build
 
 This is the Readme guide for using Github with Road to 56. 
 
-1. Sign up with Github if you haven't already, and request membership / collaborator status from Greatexperiment
+1. Sign up with Github if you haven't already, and request membership / team assignment from Greatexperiment. If you don't do this, you won't be able to write changes to the mod.
 2. Download the client from the github site
 3. In the program, File -> Clone -> URL -> deliciousmods/1956_beta
 4. Set the local directory as your documents > Paradox Interactive > Hearts of Iron IV > mod folder
 5. Clone the project and download
 6. Move the 1956_beta.mod file from the new folder into the mod folder
-7. Under 'current branch' create a new one using the format yourusername_edits Example: Greatexperiment_edits. Note: This only applies if you aren't just contributing to a specific project, like a translation. If you are - use the relevant branch (1956_german, etc)
-8. Publish your branch to the git.
+7. Under 'current branch' grab whichever one you're assigned to, or create one if you're working on a personal addition to the mod.
 9. You can now work from your local version of 56.
 10. At anytime you can "Fetch origin" to update your current files with whatever branch you want. Master is the definitive branch, and only editable by Greatexperiment. Beta_edits is the one everyone should be checking their files on.
 11. All edits you do will automatically display in the client. You must then select and review all relevant files,
