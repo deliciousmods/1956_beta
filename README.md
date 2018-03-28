@@ -3,7 +3,7 @@ Road to 56 Beta Build
 
 This is the Readme guide for using Github with Road to 56. 
 
-1. Sign up with Github if you haven't already, and request membership / team assignment from Greatexperiment. If you don't do this, you won't be able to write changes to the mod.
+1. Sign up with Github if you haven't already, and request membership / team assignment from Greatexperiment. If you don't do this, you won't be able to write changes to the mod. This is important!
 2. Download the client from the github site
 3. In the program, File -> Clone -> URL -> deliciousmods/1956_beta
 4. Set the local directory as your documents > Paradox Interactive > Hearts of Iron IV > mod folder
