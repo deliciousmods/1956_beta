@@ -1,0 +1,889 @@
+﻿#There's a limit to how many events can fit in a namespace.  To play it safe, I'm working with around 100.
+#This event namespace manages the event pulses.  The idea is they go off each month, and check for various
+#triggers and the like as appropriate.
+
+###########################
+#  Event pulse
+###########################
+
+add_namespace = dnmeventp
+
+#Hidden event to use days = X random = X instead of MTTH for opening variant events
+#First event sets up the annual pulses, which manage the monthly pulses.  There's a separate event for the first year's monthly pulses, as it's not a full year.
+country_event = {
+	id = dnmeventp.1
+
+	hidden = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = { #Checks whether nation has advanced ship designs (triggered event changes designer idea if so)
+			limit = {
+				OR = {
+					has_country_flag = ship_design_companies
+					has_country_flag = late_war_designer
+				}
+				NOT = {
+					has_country_flag = advanced_ship_design_companies
+				}
+				OR = {
+					has_tech = advanced_destroyer
+					has_tech = advanced_submarine
+					has_tech = advanced_light_cruiser
+					has_tech = advanced_heavy_cruiser
+					has_tech = advanced_carrier
+				}
+			}
+			ROOT = { country_event { id = tpov_navaldesign.2 days = 5 random = 5 } }
+		}
+		if = { #Checks whether minor has enough NIC to upgrade their ship designer idea (triggered event upgrades if so)
+			limit = {
+				has_country_flag = ship_design_companies
+				NOT = {
+					OR = {
+						tag = ENG
+						tag = FRA
+						tag = GER
+						tag = ITA
+						tag = JAP
+						tag = SOV
+						tag = USA
+					}
+				}
+			}
+			ROOT = { country_event { id = tpov_navaldesign.3 days = 5 random = 5 } }
+		}
+		if = { #Checks whether navy outnumbered by an opponent
+			limit = {
+				ROOT = { has_navy_size = { size > 1 } }
+			}
+			ROOT = { country_event { id = dnmeventp.16 days = 5 random = 5 } }
+		}
+		if = { #Runs checks of whether navy short of various types of ships and sets flags appropriately
+			limit = {
+				ROOT = { num_of_naval_factories > 1 }
+			}
+			ROOT = { country_event { id = dnmeventp.17 days = 5 random = 5 } }
+		}
+		if = { #Check to see whether a country has ceased to exist or not (so drops out of the monthly pulse)
+			limit = {
+				has_country_flag = tpov_exists
+				exists = no
+			}
+		ROOT = { clr_country_flag = tpov_exists	}			
+		}
+		#ROOT = { country_event { id = dnmeventp.2 } } #Test event to check monthly pulse is working - tag out for actual playing (!) but handy to leave in for testing.
+		if = { #Event to stop AI nations having any naval XP - they get historic stats.
+			limit = {
+				is_ai = yes
+				ROOT = { num_of_naval_factories > 0 }
+			}
+			ROOT = { navy_experience = -500 }
+		}
+	}
+
+	option = {}
+}
+
+country_event = { # Test event to check the pulse is firing.
+	id = dnmeventp.2
+
+	is_triggered_only = yes
+
+	title = "Testing the monthly pulse"
+	desc = "This event tests that the monthly pulse is firing - the picture is nice, but not relevant :)"
+	picture = GFX_tribal_eng
+
+	option = {
+		name = "Press me"
+	}
+}
+
+country_event = { #Checks whether a country that didn't exist does now, and needs to get in on the monthly pulse action.
+	id = dnmeventp.12
+
+	hidden = yes
+
+	trigger = {
+		NOT = { has_country_flag = tpov_exists }
+		exists = yes
+	}
+
+	mean_time_to_happen = { days = 30 }
+
+	immediate = {
+		ROOT = {
+			set_country_flag = tpov_exists
+			country_event = { id = dnmeventp.13 days = 30 } #Goes through the cycle again in 30 days time
+			country_event = { id = dnmeventp.1 days = 1 random = 5 } #The event that actually checks things/fires
+		}
+	}
+
+	option = {}
+}
+
+country_event = {
+	id = dnmeventp.13
+
+	hidden = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if {
+			limit = { #This drops countries that no longer exist (checked in the pulse) out of the cycle.
+				ROOT = { has_country_flag = tpov_exists }
+			}
+			country_event = { id = dnmeventp.13 days = 30 } #Goes through the cycle again in 30 days time
+			country_event = { id = dnmeventp.1 days = 1 random = 5 } #The event that actually checks things/fires 	other checking events.	
+		}
+	}
+
+	option = {}
+}
+
+country_event = { #Checks whether a navy is out-numbered by an opponent and sets flag appropriately.
+	id = dnmeventp.16
+
+	hidden = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_outnumbered_navy }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 1 } } any_enemy_country = { has_navy_size = { size > 10 } } }
+					AND = { ROOT = { has_navy_size = { size > 5 } } any_enemy_country = { has_navy_size = { size > 20 } } }
+					AND = { ROOT = { has_navy_size = { size > 10 } } any_enemy_country = { has_navy_size = { size > 30 } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } any_enemy_country = { has_navy_size = { size > 40 } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } any_enemy_country = { has_navy_size = { size > 60 } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } any_enemy_country = { has_navy_size = { size > 100 } } }
+					AND = { ROOT = { has_navy_size = { size > 80 } } any_enemy_country = { has_navy_size = { size > 160 } } }
+					AND = { ROOT = { has_navy_size = { size > 120 } } any_enemy_country = { has_navy_size = { size > 240 } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } any_enemy_country = { has_navy_size = { size > 300 } } }
+					AND = { ROOT = { has_navy_size = { size > 275 } } any_enemy_country = { has_navy_size = { size > 450 } } }
+					AND = { ROOT = { has_navy_size = { size > 400 } } any_enemy_country = { has_navy_size = { size > 600 } } }
+					AND = { ROOT = { has_navy_size = { size > 500 } } any_enemy_country = { has_navy_size = { size > 750 } } }
+					AND = { ROOT = { has_navy_size = { size > 700 } } any_enemy_country = { has_navy_size = { size > 1050 } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } any_enemy_country = { has_navy_size = { size > 1500 } } }
+					AND = { ROOT = { has_navy_size = { size > 1400 } } any_enemy_country = { has_navy_size = { size > 2100 } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } any_enemy_country = { has_navy_size = { size > 3000 } } }
+					AND = { ROOT = { has_navy_size = { size > 2800 } } any_enemy_country = { has_navy_size = { size > 4200 } } }
+					AND = { ROOT = { has_navy_size = { size > 4000 } } any_enemy_country = { has_navy_size = { size > 6000 } } }
+					AND = { ROOT = { has_navy_size = { size > 5500 } } any_enemy_country = { has_navy_size = { size > 8500 } } }
+					AND = { ROOT = { has_navy_size = { size > 8000 } } any_enemy_country = { has_navy_size = { size > 12000 } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_outnumbered_navy }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_outnumbered_navy }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 1 } } any_enemy_country = { has_navy_size = { size > 10 } } }
+						AND = { ROOT = { has_navy_size = { size > 5 } } any_enemy_country = { has_navy_size = { size > 20 } } }
+						AND = { ROOT = { has_navy_size = { size > 10 } } any_enemy_country = { has_navy_size = { size > 30 } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } any_enemy_country = { has_navy_size = { size > 40 } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } any_enemy_country = { has_navy_size = { size > 60 } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } any_enemy_country = { has_navy_size = { size > 100 } } }
+						AND = { ROOT = { has_navy_size = { size > 80 } } any_enemy_country = { has_navy_size = { size > 160 } } }
+						AND = { ROOT = { has_navy_size = { size > 120 } } any_enemy_country = { has_navy_size = { size > 240 } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } any_enemy_country = { has_navy_size = { size > 300 } } }
+						AND = { ROOT = { has_navy_size = { size > 275 } } any_enemy_country = { has_navy_size = { size > 450 } } }
+						AND = { ROOT = { has_navy_size = { size > 400 } } any_enemy_country = { has_navy_size = { size > 600 } } }
+						AND = { ROOT = { has_navy_size = { size > 500 } } any_enemy_country = { has_navy_size = { size > 750 } } }
+						AND = { ROOT = { has_navy_size = { size > 700 } } any_enemy_country = { has_navy_size = { size > 1050 } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } any_enemy_country = { has_navy_size = { size > 1500 } } }
+						AND = { ROOT = { has_navy_size = { size > 1400 } } any_enemy_country = { has_navy_size = { size > 2100 } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } any_enemy_country = { has_navy_size = { size > 3000 } } }
+						AND = { ROOT = { has_navy_size = { size > 2800 } } any_enemy_country = { has_navy_size = { size > 4200 } } }
+						AND = { ROOT = { has_navy_size = { size > 4000 } } any_enemy_country = { has_navy_size = { size > 6000 } } }
+						AND = { ROOT = { has_navy_size = { size > 5500 } } any_enemy_country = { has_navy_size = { size > 8500 } } }
+						AND = { ROOT = { has_navy_size = { size > 8000 } } any_enemy_country = { has_navy_size = { size > 12000 } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_outnumbered_navy }
+		}
+	}
+
+	option = {}
+}
+
+country_event = { #Runs checks of whether navy short of various types of ships and sets flags appropriately
+	id = dnmeventp.17
+
+	hidden = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_50 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 5 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 8 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 10 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 25 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 38 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 50 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 75 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 100 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 150 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 225 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 375 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 500 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 750 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 1000 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1500 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 2250 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3750 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 5000 type = screen_ship } } }	
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_balanced_screens_50 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_50 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 5 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 8 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 10 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 25 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 38 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 50 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 75 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 100 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 150 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 225 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 375 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 500 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 750 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 1000 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1500 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 2250 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3750 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 5000 type = screen_ship } } }	
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_balanced_screens_50 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_40 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 4 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 6 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 8 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 12 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 20 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 40 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 60 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 80 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 120 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 180 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 400 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 600 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 800 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1200 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1800 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3000 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 4000 type = screen_ship } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_balanced_screens_40 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_40 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 4 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 6 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 8 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 12 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 20 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 40 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 60 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 80 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 120 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 180 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 400 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 600 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 800 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1200 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1800 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3000 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 4000 type = screen_ship } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_balanced_screens_40 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_30 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 3 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 5 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 6 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 9 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 23 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 45 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 60 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 90 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 135 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 225 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 450 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 600 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 900 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1350 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 2250 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 3000 type = screen_ship } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_balanced_screens_30 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_30 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 3 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 5 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 6 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 9 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 23 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 45 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 60 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 90 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 135 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 225 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 450 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 600 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 900 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1350 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 2250 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 3000 type = screen_ship } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_balanced_screens_30 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_20 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 2 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 3 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 4 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 6 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 10 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 20 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 40 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 60 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 90 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 150 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 200 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 400 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 600 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 900 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 1500 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 2000 type = screen_ship } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_balanced_screens_20 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_20 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 2 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 3 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 4 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 6 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 10 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 20 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 40 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 60 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 90 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 150 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 200 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 400 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 600 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 900 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 1500 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 2000 type = screen_ship } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_balanced_screens_20 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_10 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 1 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 2 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 2 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 3 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 5 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 8 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 10 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 20 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 45 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 75 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 100 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 150 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 200 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 450 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 750 type = screen_ship } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 1000 type = screen_ship } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_balanced_screens_10 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_10 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 1 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 2 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 2 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 3 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 5 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 8 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 10 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 15 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 20 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 30 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 45 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 75 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 100 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 150 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 200 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 300 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 450 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 750 type = screen_ship } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 1000 type = screen_ship } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_balanced_screens_10 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_60 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 9 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 12 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 18 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 45 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 90 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 120 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 180 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 270 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 450 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 900 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 1200 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1800 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 2700 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 4500 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 6000 type = submarine } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_raiding_subs_60 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_60 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 9 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 12 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 18 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 45 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 90 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 120 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 180 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 270 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 450 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 900 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 1200 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1800 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 2700 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 4500 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 6000 type = submarine } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_raiding_subs_60 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_50 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 5 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 8 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 10 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 25 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 38 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 50 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 75 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 100 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 150 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 225 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 375 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 750 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 500 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 1000 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1500 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 2250 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3750 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 5000 type = submarine } } }	
+
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_raiding_subs_50 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_50 }
+				NOT = {
+					OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 5 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 8 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 10 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 25 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 38 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 50 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 75 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 100 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 150 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 225 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 375 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 750 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 500 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 1000 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1500 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 2250 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3750 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 5000 type = submarine } } }	
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_raiding_subs_50 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_40 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 4 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 8 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 12 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 20 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 40 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 80 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 120 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 180 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 400 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 800 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1200 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1800 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3000 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 4000 type = submarine } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_raiding_subs_40 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_40 }
+				NOT = {
+					OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 4 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 8 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 12 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 20 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 40 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 80 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 120 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 180 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 400 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 800 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 1200 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1800 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 3000 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 4000 type = submarine } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_raiding_subs_40 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_30 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 3 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 5 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 9 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 23 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 45 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 90 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 135 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 225 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 450 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 900 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1350 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 2250 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 3000 type = submarine } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_raiding_subs_30 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_30 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 3 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 5 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 9 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 23 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 45 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 90 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 135 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 225 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 450 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 900 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 1350 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 2250 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 3000 type = submarine } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_raiding_subs_30 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_20 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 2 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 3 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 4 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 10 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 20 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 40 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 90 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 150 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 200 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 400 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 900 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 1500 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 2000 type = submarine } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_raiding_subs_20 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_20 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 2 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 3 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 4 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 6 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 10 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 20 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 40 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 60 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 90 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 150 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 200 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 400 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 600 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 900 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 1500 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 2000 type = submarine } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_raiding_subs_20 }
+		}
+		if = {
+			limit = {
+				NOT = {
+					ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_10 }
+				}
+				OR = {
+					AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 1 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 2 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 2 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 3 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 5 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 8 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 10 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 20 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 45 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 75 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 100 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 150 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 200 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 450 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 750 type = submarine } } }
+					AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 1000 type = submarine } } }
+				}
+			}
+			ROOT = { set_country_flag = TPOV_AI_navy_raiding_subs_10 }
+		}
+		if = {
+			limit = {
+				ROOT = { has_country_flag = TPOV_AI_navy_raiding_subs_10 }
+				NOT = {
+					OR = {
+						AND = { ROOT = { has_navy_size = { size > 10 } } ROOT = { has_navy_size = { size < 1 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 15 } } ROOT = { has_navy_size = { size < 2 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 20 } } ROOT = { has_navy_size = { size < 2 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 30 } } ROOT = { has_navy_size = { size < 3 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 50 } } ROOT = { has_navy_size = { size < 5 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 75 } } ROOT = { has_navy_size = { size < 8 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 100 } } ROOT = { has_navy_size = { size < 10 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 150 } } ROOT = { has_navy_size = { size < 15 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 200 } } ROOT = { has_navy_size = { size < 20 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 300 } } ROOT = { has_navy_size = { size < 30 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 450 } } ROOT = { has_navy_size = { size < 45 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 750 } } ROOT = { has_navy_size = { size < 75 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1000 } } ROOT = { has_navy_size = { size < 100 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 1500 } } ROOT = { has_navy_size = { size < 150 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 2000 } } ROOT = { has_navy_size = { size < 200 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 3000 } } ROOT = { has_navy_size = { size < 300 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 4500 } } ROOT = { has_navy_size = { size < 450 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 7500 } } ROOT = { has_navy_size = { size < 750 type = submarine } } }
+						AND = { ROOT = { has_navy_size = { size > 10000 } } ROOT = { has_navy_size = { size < 1000 type = submarine } } }
+					}
+				}
+			}
+			ROOT = { clr_country_flag = TPOV_AI_navy_raiding_subs_10 }
+		}
+#		if = { # 'blank' template for future naval conditions to be added
+#			limit = {
+#				NOT = {
+#					ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_50 }
+#				}
+#				OR = {
+#				}
+#			}
+#			ROOT = { set_country_flag = TPOV_AI_navy_balanced_screens_50 }
+#		}
+#		if = {
+#			limit = {
+#				ROOT = { has_country_flag = TPOV_AI_navy_balanced_screens_50 }
+#				NOT = {
+#					OR = {
+#					}
+#				}
+#			}
+#			ROOT = { clr_country_flag = TPOV_AI_navy_balanced_screens_50 }
+#		}
+	}
+
+	option = {}
+}
