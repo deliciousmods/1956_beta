@@ -32,6 +32,7 @@ Please use the following guidelines before submitting a pull request or uploadin
 3. Never overwrite or clone files from Vanilla unless absolutely needed. In other words, don't just copy the whole technologies.gfx file and append your stuff to the end.
 4. Use 56 naming conventions wherever possible. Generally this goes along the lines of r56_portrait_minister_bob_bobson, r56_idea_company_cat_incorporated, r56_laws_gender_total_equality. Basically the r56 prefix, the thing it is, the sub-thing, then the name itself.
 5. All graphics must use DXT5 compression and be dds format, as per the Nvidia plugin. It must also follow the standard sizes found in 56, which you can find by looking at the graphic files in the mod itself.
-6. Be sure to note all changes you make. Really. The easiest way to do this is to open an issue report for each major change, and keep notes there if required. This is so that Greatexperiment can make patch notes.
+6. Be sure to note all changes you make. Really. The easiest way to do this is to open an issue report for each major change, and keep notes there if required.
+7. On the wiki page here there is a 'Patch Notes' page - put your alterations there. This is very important! Please note that if you haven't been added to a team you may not have wiki editing access. Please be sure to contact Greatexperiment if you haven't been assigned yet.
 
 If for some reason you need greater access rights to the Git, or don't understand any of the above, ask Greatexperiment.
