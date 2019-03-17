@@ -40,34 +40,6 @@ country_event = {
 	}
 }
 
-# World Police
-country_event = {
-	id = usa.2
-	title = usa.2.t
-	desc = usa.2.d
-	picture = GFX_report_event_usa_heavy_cruiser
-
-	is_triggered_only = yes
-
-	
-	option = { 
-		name = usa.2.a
-		every_other_country = {
-			limit = {
-				OR = {
-					has_government = fascism
-					has_government = communism
-				}
-			}
-			save_event_target_as = war_target
-			ROOT = {
-				create_wargoal = { type = annex_everything target = event_target:war_target }
-			}
-		}
-	}
-
-}
-
 # Pearl Harbor Gambit
 country_event = {
 	id = usa.3
@@ -81,7 +53,7 @@ country_event = {
 		tag = JAP
 		USA = {
 			focus_progress = {
-				focus = USA_war_plan_orange
+				focus = USA_pearl_harbor_gambit
 				progress > 0.1
 			}
 		}
@@ -93,7 +65,7 @@ country_event = {
 			factor = 0.5
 			USA = {
 				focus_progress = {
-					focus = USA_war_plan_orange
+					focus = USA_pearl_harbor_gambit
 					progress > 0.6
 				}
 			}
@@ -126,7 +98,15 @@ country_event = {
 		name = usa.4.a
 		custom_effect_tooltip = usa.4.a.tt
 		hidden_effect = {
-			ENG = {	load_oob = "ENG_destroyers_for_bases" }
+			if = {
+				limit = { not = { has_dlc = "Man the Guns" } }
+				ENG = {	load_oob = "ENG_destroyers_for_bases" }
+				CAN = { load_oob = "CAN_destroyers_for_bases" }
+			}
+			else = {
+				ENG = {	load_oob = "ENG_destroyers_for_bases_mtg" }
+				CAN = { load_oob = "CAN_destroyers_for_bases_mtg" }
+			}
 			ENG = {
 				if = { limit = { 696 = { is_controlled_by = ENG } }
 					remove_state_core = 696
@@ -147,7 +127,7 @@ country_event = {
 					remove_state_core = 691
 				}
 			}
-			CAN = { load_oob = "CAN_destroyers_for_bases" }
+			
 		}
 		USA = {
 			if = { limit = { 696 = { is_controlled_by = ENG } }
@@ -172,6 +152,7 @@ country_event = {
 				target = ROOT
 				modifier = destroyers_for_bases_opinion
 			}
+			country_event = { id = usa.401 days = 3 }
 		}
 	}
 
@@ -181,6 +162,20 @@ country_event = {
 		ai_chance = { factor = 0 }
 	}
 
+}
+
+# Britain accepts offer
+country_event = {
+	id = usa.401
+	title = usa.401.t
+	desc = usa.401.desc
+	picture = GFX_report_event_usa_destroyers
+
+	is_triggered_only = yes
+	
+	option = { 
+		name = usa.401.a
+	}
 }
 
 # Britain refuses offer
@@ -212,13 +207,58 @@ country_event = {
 		date > 1936.1.1
 		date < 1937.1.1
 	}
-	
+
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					OR = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_union_representation_act
+					}
+				}
+				country_event = { id = usa.32 days = 730 } # midterms
+			}
+			else = {
+				country_event = { id = usa.35 days = 730 } # midterms
+			}
+		}
+	}
+
 	option = { 	
 		name = usa.6.a
 		ai_chance = {
 			factor = 75
+			modifier = {
+				OR = {
+					has_game_rule = {
+						rule = USA_ai_behavior
+						option = FASCIST
+					}
+					has_country_flag = USA_AI_RANDOM_FASCIST
+				}
+				has_dlc = "Man the Guns"
+				factor = 0
+			}
 		}		
 		add_ideas = new_deal
+		if = {
+			limit = {
+				OR = {
+					has_completed_focus = USA_voter_registration_act
+					has_completed_focus = USA_union_representation_act
+				}
+			}
+			country_event = usa.32
+		}
+		else = {
+			set_variable = { election_factor = random }
+			add_to_variable = { election_factor = -0.5 }
+			USA_election_senate = yes
+			USA_election_house = yes
+			custom_effect_tooltip = usa_congress_elections_tt_bad
+			country_event = usa.30
+		}
 	}
 
 	option = { 
@@ -231,6 +271,13 @@ country_event = {
 			}
 		}		
 		set_party_name = { ideology = democratic long_name = USA_republican_party name = USA_republican_party }
+		set_variable = { election_factor = random }
+		add_to_variable = { election_factor = -0.6 }
+		USA_election_senate = yes
+		USA_election_house = yes
+		USA_flip_support = yes
+		custom_effect_tooltip = usa_congress_elections_tt_good
+		add_political_power = 120
 		if = {
 			limit = {
 				has_idea = standard_oil_california
@@ -253,6 +300,7 @@ country_event = {
 				staunch_constitutionalist
 			}
 		}
+		country_event = usa.31
 	}
 }
 
@@ -272,15 +320,46 @@ country_event = {
 		date < 1941.1.1
 		has_idea = new_deal
 	}
+
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					OR = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_union_representation_act
+					}
+				}
+				country_event = { id = usa.32 days = 730 } # midterms
+			}
+			else = {
+				country_event = { id = usa.35 days = 730 } # midterms
+			}
+		}
+	}
 	
 	option = {
 		name = usa.7.a
 		ai_chance = {
 			factor = 75
 		}
-		add_political_power = 40
-		add_stability = -0.15
-		remove_ideas = great_depression
+		if = {
+			limit = {
+				OR = {
+					has_completed_focus = USA_voter_registration_act
+					has_completed_focus = USA_union_representation_act
+				}
+			}
+			country_event = usa.32
+		}
+		else = {
+			set_variable = { election_factor = random }
+			add_to_variable = { election_factor = -0.5 }
+			USA_election_senate = yes
+			USA_election_house = yes
+			custom_effect_tooltip = usa_congress_elections_tt_bad
+			country_event = usa.30
+		}
 	}
 
 	option = {
@@ -295,6 +374,13 @@ country_event = {
 		set_party_name = { ideology = democratic long_name = USA_republican_party name = USA_republican_party }
 		remove_ideas = new_deal
 		add_ideas = wilkies_new_deal
+		set_variable = { election_factor = random }
+		add_to_variable = { election_factor = -0.6 }
+		add_political_power = 120
+		USA_election_senate = yes
+		USA_election_house = yes
+		USA_flip_support = yes
+		custom_effect_tooltip = usa_congress_elections_tt_good
 		create_country_leader = {
 			name = "Wendell Wilkie"
 			desc = "POLITICS_WENDELL_WILKIE_DESC"
@@ -305,7 +391,7 @@ country_event = {
 				
 			}
 		}
-		remove_ideas = great_depression
+		country_event = usa.31 #weighted towards gain of support
 	}
 }
 
@@ -325,12 +411,44 @@ country_event = {
 		date < 1941.1.1
 		NOT = { has_idea = new_deal }
 	}
+
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					OR = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_union_representation_act
+					}
+				}
+				country_event = { id = usa.32 days = 730 } # midterms
+			}
+			else = {
+				country_event = { id = usa.35 days = 730 } # midterms
+			}
+		}
+	}
 	
 	option = { 
 		name = usa.8.a
 		add_political_power = -40
-		add_stability = 0.1
-		remove_ideas = great_depression
+		if = {
+			limit = {
+				OR = {
+					has_completed_focus = USA_voter_registration_act
+					has_completed_focus = USA_union_representation_act
+				}
+			}
+			country_event = usa.32
+		}
+		else = {
+			set_variable = { election_factor = random }
+			add_to_variable = { election_factor = -0.5 }
+			USA_election_senate = yes
+			USA_election_house = yes
+			custom_effect_tooltip = usa_congress_elections_tt_bad
+			country_event = usa.30
+		}
 	}
 
 	option = { 
@@ -338,7 +456,14 @@ country_event = {
 		set_party_name = { ideology = democratic long_name = USA_democratic_party name = USA_democratic_party }
 		add_ideas = new_deal
 		retire_country_leader = yes
-		remove_ideas = great_depression
+		add_political_power = 120
+		set_variable = { election_factor = random }
+		add_to_variable = { election_factor = -0.6 }
+		USA_election_senate = yes
+		USA_election_house = yes
+		USA_flip_support = yes
+		custom_effect_tooltip = usa_congress_elections_tt_good
+		country_event = usa.31
 	}
 }
 
@@ -350,7 +475,22 @@ country_event = {
 	picture = GFX_report_event_usa_election_roosevelt_dewey
 
 	is_triggered_only = yes
-
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					OR = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_union_representation_act
+					}
+				}
+				country_event = { id = usa.32 days = 730 } # midterms
+			}
+			else = {
+				country_event = { id = usa.35 days = 730 } # midterms
+			}
+		}
+	}
 	trigger = {
 		tag = USA
 		democratic > 0.5
@@ -366,6 +506,23 @@ country_event = {
 			factor = 75
 		}
 		add_political_power = 10
+		if = {
+			limit = {
+				OR = {
+					has_completed_focus = USA_voter_registration_act
+					has_completed_focus = USA_union_representation_act
+				}
+			}
+			country_event = usa.32
+		}
+		else = {
+			set_variable = { election_factor = random }
+			add_to_variable = { election_factor = -0.5 }
+			USA_election_senate = yes
+			USA_election_house = yes
+			custom_effect_tooltip = usa_congress_elections_tt_bad
+			country_event = usa.30
+		}
 	}
 
 	option = { 
@@ -379,16 +536,24 @@ country_event = {
 		}		
 		remove_ideas = new_deal
 		set_party_name = { ideology = democratic long_name = USA_republican_party name = USA_republican_party }
+		set_variable = { election_factor = random }
+		add_to_variable = { election_factor = -0.6 }
+		USA_election_senate = yes
+		USA_election_house = yes
+		USA_flip_support = yes
+		add_political_power = 120
+		custom_effect_tooltip = usa_congress_elections_tt_good
 		create_country_leader = {
 			name = "Thomas E. Dewey"
 			desc = "POLITICS_THOMAS_DEWEY_DESC"
-			picture = "Portrait_USA_Generic_2.dds"
+			picture = "portrait_USA_thomas_dewey.dds"
 			expire = "1965.1.1"
 			ideology = conservatism
 			traits = {
 				
 			}
 		}
+		country_event = usa.31
 	}
 }
 
@@ -400,7 +565,22 @@ country_event = {
 	picture = GFX_report_event_usa_election_generic
 
 	is_triggered_only = yes
-
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					OR = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_union_representation_act
+					}
+				}
+				country_event = { id = usa.32 days = 730 } # midterms
+			}
+			else = {
+				country_event = { id = usa.35 days = 730 } # midterms
+			}
+		}
+	}
 	trigger = {
 		tag = USA
 		democratic > 0.5
@@ -412,17 +592,42 @@ country_event = {
 	option = { 
 		name = usa.10.a
 		add_political_power = 10
+		if = {
+			limit = {
+				OR = {
+					has_completed_focus = USA_voter_registration_act
+					has_completed_focus = USA_union_representation_act
+				}
+			}
+			country_event = usa.32
+		}
+		else = {
+			set_variable = { election_factor = random }
+			add_to_variable = { election_factor = -0.5 }
+			USA_election_senate = yes
+			USA_election_house = yes
+			custom_effect_tooltip = usa_congress_elections_tt_bad
+			country_event = usa.30
+		}
 	}
 
 	option = { 
 		name = usa.10.b
 		add_ideas = new_deal
 		set_party_name = { ideology = democratic long_name = USA_democratic_party name = USA_democratic_party }
+		set_variable = { election_factor = random }
+		add_to_variable = { election_factor = -0.6 }
+		USA_election_senate = yes
+		USA_election_house = yes
+		USA_flip_support = yes
+		add_political_power = 120
+		custom_effect_tooltip = usa_congress_elections_tt_good
 		if = {
 			limit = { has_idea = wilkies_new_deal }
 			remove_ideas = wilkies_new_deal
 		}
 		retire_country_leader = yes
+		country_event = usa.31
 	}
 }
 
@@ -434,7 +639,22 @@ country_event = {
 	picture = GFX_report_event_usa_election_roosevelt_macarthur
 
 	is_triggered_only = yes
-
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					OR = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_union_representation_act
+					}
+				}
+				country_event = { id = usa.32 days = 730 } # midterms
+			}
+			else = {
+				country_event = { id = usa.35 days = 730 } # midterms
+			}
+		}
+	}
 	trigger = {
 		tag = USA
 		democratic > 0.5
@@ -453,6 +673,23 @@ country_event = {
 			factor = 25
 		}	
 		add_political_power = 10
+		if = {
+			limit = {
+				OR = {
+					has_completed_focus = USA_voter_registration_act
+					has_completed_focus = USA_union_representation_act
+				}
+			}
+			country_event = usa.32
+		}
+		else = {
+			set_variable = { election_factor = random }
+			add_to_variable = { election_factor = -0.5 }
+			USA_election_senate = yes
+			USA_election_house = yes
+			custom_effect_tooltip = usa_congress_elections_tt_bad
+			country_event = usa.30
+		}
 	}
 
 	option = { 
@@ -466,6 +703,13 @@ country_event = {
 		}
 		remove_ideas = new_deal
 		set_party_name = { ideology = democratic long_name = USA_republican_party name = USA_republican_party }
+		set_variable = { election_factor = random }
+		add_to_variable = { election_factor = -0.6 }
+		USA_election_senate = yes
+		USA_election_house = yes
+		USA_flip_support = yes
+		add_political_power = 120
+		custom_effect_tooltip = usa_congress_elections_tt_good
 		create_country_leader = {
 			name = "Douglas MacArthur"
 			desc = "POLITICS_DOUGLAS_MACARTHUR_DESC"
@@ -476,6 +720,7 @@ country_event = {
 				
 			}
 		}
+		country_event = usa.31
 		remove_unit_leader = 57
 	}
 }
@@ -637,10 +882,14 @@ country_event = {
 		ai_chance = {
 			factor = 20			
 			modifier = {
-				factor = 0
-				OR = { 
-					has_global_flag = bra_doutrina_contestada
-					has_country_flag = bra_doutrina_contestada
+				factor = 0.2
+				FROM = {
+					FROM = {
+						strength_ratio = {
+							tag = USA
+							ratio > 0.8
+						}
+					}
 				}
 			}
 		}
@@ -656,10 +905,14 @@ country_event = {
 		ai_chance = {
 			factor = 5
 			modifier = {
-				factor = 100
-				OR = { 
-					has_global_flag = bra_doutrina_contestada
-					has_country_flag = bra_doutrina_contestada
+				factor = 0
+				FROM = {
+					FROM = {
+						strength_ratio = {
+							tag = USA
+							ratio < 0.5
+						}
+					}
 				}
 			}
 		}
@@ -885,5 +1138,779 @@ country_event = {
 	option = {
 		name = usa.24.b
 		ai_chance = { factor = 0 }
+	}
+}
+
+# US congress elections - outcome
+country_event = {
+	id = usa.30
+	title = usa.30.t
+	desc = usa.30.desc
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	option = {
+		name = usa.30.a
+		clear_variable = sen_loc
+		clear_variable = ror_loc
+		clear_variable = senators_for_reelection
+		clear_variable = representatives_for_reelection
+	}
+
+}
+# elections - new president, opposition/support switch roles
+country_event = {
+	id = usa.31
+	title = usa.31.t
+	desc = usa.31.desc
+	picture = GFX_report_event_usa_election_generic
+
+	is_triggered_only = yes
+
+	option = {
+		name = usa.31.a
+		clear_variable = sen_loc
+		clear_variable = ror_loc
+		clear_variable = senators_for_reelection
+		clear_variable = representatives_for_reelection
+	}
+
+}
+# elections in the US - player has a majority guaranteed
+country_event = {
+	id = usa.32
+	title = usa.32.t
+	desc = usa.32.desc
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+	trigger = {
+		OR = {
+			has_completed_focus = USA_voter_registration_act
+			has_completed_focus = USA_union_representation_act
+		}
+	}
+
+	option = {
+		name = usa.32.a
+		USA_return_majority = yes
+	}
+
+}
+
+#midterm elections
+country_event = {
+	id = usa.35
+	title = usa.35.t
+	desc = usa.35.desc
+	picture = GFX_report_event_election_vote
+	hidden = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					OR = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_union_representation_act
+					}
+				}
+			}
+			random_list = {
+				50 = {
+					set_variable = { election_factor = random }
+					add_to_variable = { election_factor = -0.6 }
+					USA_election_senate = yes
+					USA_election_house = yes
+					country_event = usa.30
+				}
+				50 = {
+					set_variable = { election_factor = random }
+					add_to_variable = { election_factor = -0.3 }
+					USA_election_senate = yes
+					USA_election_house = yes
+					country_event = usa.30
+				}
+			}
+		}
+		else = {
+			country_event = usa.32
+		}
+	}
+
+	option = {
+		name = usa.35.a
+		
+	}
+
+}
+#small support event - senate
+country_event = {
+	id = usa.40
+	title = usa.40.t
+	desc = usa.40.desc
+	picture = GFX_report_event_FDR_speech
+
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.40.a
+		USA_senate_small_support = yes
+		hidden_effect = {
+			country_event = { id = usa.50 days = 70 random = 10 }
+		}
+	}
+
+}
+# small support event - house
+country_event = {
+	id = usa.41
+	title = usa.41.t
+	desc = usa.41.desc
+	picture = GFX_report_event_FDR_speech
+
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.41.a
+		USA_house_small_support = yes
+		hidden_effect = {
+			country_event = { id = usa.51 days = 70 random = 10 }
+		}
+	}
+
+}
+
+#small opposition event - senate
+country_event = {
+	id = usa.42
+	title = usa.42.t
+	desc = usa.42.desc
+	picture = GFX_report_event_journalists_speech
+
+	is_triggered_only = yes
+	
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.42.a
+		USA_senate_small_opposition = yes
+		hidden_effect = {
+			country_event = { id = usa.50 days = 70 random = 10 }
+		}
+	}
+
+}
+# small opposition event - house
+country_event = {
+	id = usa.43
+	title = usa.43.t
+	desc = usa.43.desc
+	picture = GFX_report_event_journalists_speech
+
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.43.a
+		USA_house_small_opposition = yes
+		hidden_effect = {
+			country_event = { id = usa.51 days = 70 random = 10 }
+		}
+	}
+
+}
+
+#medium support event - senate
+country_event = {
+	id = usa.44
+	title = usa.44.t
+	desc = usa.44.desc
+	picture = GFX_report_event_FDR_speech
+
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.44.a
+		USA_senate_medium_support = yes
+		hidden_effect = {
+			country_event = { id = usa.50 days = 70 random = 20 }
+		}
+	}
+
+}
+# medium support event - house
+country_event = {
+	id = usa.45
+	title = usa.45.t
+	desc = usa.45.desc
+	picture = GFX_report_event_FDR_speech
+
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.45.a
+		USA_house_medium_support = yes
+		hidden_effect = {
+			country_event = { id = usa.51 days = 70 random = 10 }
+		}
+	}
+
+}
+
+#medium opposition event - senate
+country_event = {
+	id = usa.46
+	title = usa.46.t
+	desc = usa.46.desc
+	picture = GFX_report_event_journalists_speech
+
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.46.a
+		USA_senate_medium_opposition = yes
+		hidden_effect = {
+			country_event = { id = usa.50 days = 70 random = 20 }
+		}
+	}
+
+}
+# medium opposition event - house
+country_event = {
+	id = usa.47
+	title = usa.47.t
+	desc = usa.47.desc
+	picture = GFX_report_event_journalists_speech
+
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	option = {
+		name = usa.47.a
+		USA_house_medium_opposition = yes
+		hidden_effect = {
+			country_event = { id = usa.51 days = 70 random = 10 }
+		}
+	}
+
+}
+
+# dispatcher event - senate
+country_event = {
+	id = usa.50
+	Hidden = yes
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	immediate = {
+		random_list = {
+			20 = { 
+				modifier = {
+					not = { congress_medium_support_trigger = yes }
+					factor = 1.25
+				}
+				modifier = {
+					not = { congress_low_support_trigger = yes }
+					factor = 2
+				}
+				country_event = { id = usa.40 days = 15 random = 6 } #small support
+			} 
+			20 = { 
+				modifier = {
+					check_variable = { var = senators_support value = quorum_high compare = greater_than_or_equals }
+					factor = 3
+				}
+				modifier = {
+					has_idea_with_trait = fascist_demagogue
+					factor = 2
+				}
+				modifier = {
+					has_idea_with_trait = communist_revolutionary
+					factor = 2
+				}
+				country_event = { id = usa.42 days = 20 random = 6 } #small opposition 
+			} 
+			15 = { 
+				modifier = {
+					not = { congress_medium_support_trigger = yes }
+					factor = 1.25
+				}
+				modifier = {
+					not = { congress_low_support_trigger = yes }
+					factor = 2
+				}
+				country_event = { id = usa.44 days = 20 random = 10 } #medium support
+			} 
+			15 = { 
+				modifier = {
+					check_variable = { var = senators_support value = quorum_high compare = greater_than_or_equals }
+					factor = 3
+				}
+				modifier = {
+					has_idea_with_trait = fascist_demagogue
+					factor = 2
+				}
+				modifier = {
+					has_idea_with_trait = communist_revolutionary
+					factor = 2
+				}
+				country_event = { id = usa.46 days = 20 random = 10 }  #medium opposition
+			}
+			30 = { #investment opportunity
+				modifier = {
+					has_country_flag = USA_congress_investment
+					factor = 0
+				}
+				modifier = {
+					has_completed_focus = USA_wpa
+					factor = 1.5
+				} 
+				country_event = { id = usa.60 days = 10 random = 15 } 
+			} 
+		}
+	}
+}
+
+# dispatcher event - house
+country_event = {
+	id = usa.51
+	Hidden = yes
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	immediate = {
+		random_list = {
+			35 = { 
+				modifier = {
+					check_variable = { representatives_support < 218 }
+					factor = 1.5
+				}
+				modifier = {
+					check_variable = { representatives_support < 180 }
+					factor = 3
+				}
+				country_event = { id = usa.41 days = 15 random = 6 } #small support
+			} 
+			25 = {
+				modifier = {
+					check_variable = { representatives_support > 260 }
+					factor = 2
+				}
+				modifier = {
+					check_variable = { representatives_support < 180 }
+					factor = 0.5
+				}
+				modifier = {
+					has_idea_with_trait = fascist_demagogue
+					factor = 2
+				}
+				modifier = {
+					has_idea_with_trait = communist_revolutionary
+					factor = 2
+				} 
+				country_event = { id = usa.43 days = 20 random = 6 } #small opposition
+			} 
+			25 = { 
+				modifier = {
+					check_variable = { representatives_support < 180 }
+					factor = 1.5
+				}
+				modifier = {
+					check_variable = { representatives_support < 100 }
+					factor = 10
+				}
+				country_event = { id = usa.45 days = 25 random = 10 } #medium support
+			} 
+			15 = { 
+				modifier = {
+					check_variable = { representatives_support > 260 }
+					factor = 2
+				}
+				modifier = {
+					check_variable = { representatives_support > 400 }
+					factor = 10
+				}
+				modifier = {
+					check_variable = { representatives_support < 180 }
+					factor = 0.5
+				}
+				modifier = {
+					check_variable = { representatives_support < 100 }
+					factor = 0
+				}
+				modifier = {
+					has_idea_with_trait = fascist_demagogue
+					factor = 2
+				}
+				modifier = {
+					has_idea_with_trait = communist_revolutionary
+					factor = 2
+				}
+				country_event = { id = usa.47 days = 30 random = 15 } #medium opposition
+			} 
+		}
+	}
+}
+# senator wants investment in their state - hidden dispatch event
+country_event = {
+	id = usa.60
+	hidden = yes
+	is_triggered_only = yes
+	trigger = {
+		tag = USA
+		NOT = {
+			OR = {
+				has_completed_focus = USA_voter_registration_act
+				has_completed_focus = USA_union_representation_act
+			}
+		}
+	}
+
+	immediate = {
+		set_country_flag = USA_congress_investment
+		clear_global_event_target = USA_congress_investment_state
+		random_list = {
+			25 = {
+				modifier = {
+					NOT = {
+						any_owned_state = {
+							is_core_of = ROOT
+							is_controlled_by = ROOT
+							free_building_slots = {
+								building = industrial_complex
+								size > 0
+								include_locked = no
+							}
+						}
+					}
+					factor = 0
+				}
+				random_owned_state = {
+					limit = {
+						is_core_of = ROOT
+						is_controlled_by = ROOT
+						free_building_slots = {
+							building = industrial_complex
+							size > 0
+							include_locked = no
+						}
+					}
+					
+					save_global_event_target_as = USA_congress_investment_state
+					state_event = { id = usa.61 trigger_for = controller }
+				}
+			}
+			25 = {
+				modifier = {
+					NOT = {
+						any_owned_state = {
+							is_core_of = ROOT
+							is_controlled_by = ROOT
+							free_building_slots = {
+								building = arms_factory
+								size > 0
+								include_locked = no
+							}
+						}
+					}
+					factor = 0
+				}
+				modifier = {
+					has_completed_focus = USA_military_construction
+					factor = 2
+				}
+				random_owned_state = {
+					limit = {
+						is_core_of = ROOT
+						is_controlled_by = ROOT
+						free_building_slots = {
+							building = arms_factory
+							size > 0
+							include_locked = no
+						}
+					}
+					save_global_event_target_as = USA_congress_investment_state
+					state_event = { id = usa.62 trigger_for = controller }
+				}
+			}
+			25 = { 
+				modifier = {
+					NOT = {
+						any_owned_state = {
+							is_core_of = ROOT
+							is_controlled_by = ROOT
+							is_coastal = yes
+							free_building_slots = {
+								building = dockyard
+								size > 0
+								include_locked = no
+							}
+						}
+					}
+					factor = 0
+				}
+				random_owned_state = {
+					limit = {
+						is_core_of = ROOT
+						is_controlled_by = ROOT
+						free_building_slots = {
+							building = dockyard
+							size > 0
+							include_locked = no
+						}
+					}
+					save_global_event_target_as = USA_congress_investment_state
+					state_event = { id = usa.64 trigger_for = controller }
+				}
+			}
+			25 = {
+				modifier = {
+					NOT = {
+						any_owned_state = {
+							is_core_of = ROOT
+							free_building_slots = {
+								building = infrastructure
+								size > 0
+								include_locked = no
+							}
+						}
+					}
+					factor = 0
+				}
+				modifier = {
+					has_completed_focus = USA_USACE_projects
+					factor = 2
+				}
+				random_owned_state = {
+					limit = {
+						is_core_of = ROOT
+						is_controlled_by = ROOT
+						free_building_slots = {
+							building = infrastructure
+							size > 0
+							include_locked = no
+						}
+					}
+					save_global_event_target_as = USA_congress_investment_state
+					state_event = { id = usa.63 trigger_for = controller }
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = { id = usa.50 days = 70 random = 10 }
+		}
+	}
+}
+# senator wants investment in civilian factory
+country_event = {
+	id = usa.61
+	title = usa.61.t
+	desc = usa.61.desc
+	picture = GFX_report_event_generic_sign_treaty3
+	
+	is_triggered_only = yes
+	
+
+	option = {
+		name = usa.61.a #accept
+		ai_chance = {
+			factor = 0
+		}
+		unlock_decision_tooltip = { decision = USA_invest_in_state_factory show_effect_tooltip = yes }
+		event_target:USA_congress_investment_state = {
+			set_state_flag = USA_congress_build_factory
+			set_variable = { factory_goal = industrial_complex_level }
+			add_to_variable = { factory_goal = 1 }
+		}
+	}
+	option = {
+		name = usa.61.b #refuse
+		ai_chance = {
+			factor = 100
+		}
+		ROOT = { clr_country_flag = USA_congress_investment }
+		clear_global_event_target = USA_congress_investment_state
+	}
+}
+
+# senator wants investment in military factory
+country_event = {
+	id = usa.62
+	title = usa.61.t
+	desc = usa.62.desc
+	picture = GFX_report_event_tank_factory
+	
+	is_triggered_only = yes
+	
+
+	option = {
+		name = usa.62.a #accept
+		ai_chance = {
+			factor = 0
+		}
+		unlock_decision_tooltip = { decision = USA_invest_in_state_arms_factory show_effect_tooltip = yes }
+		event_target:USA_congress_investment_state = {
+			set_state_flag = USA_congress_build_arms_factory
+			set_variable = { arms_factory_goal = arms_factory_level }
+			add_to_variable = { arms_factory_goal = 1 }
+		}
+	}
+	option = {
+		name = usa.62.b #refuse
+		ai_chance = {
+			factor = 100
+		}
+		ROOT = { clr_country_flag = USA_congress_investment }
+		clear_global_event_target = USA_congress_investment_state
+	}
+}
+# senator wants investment in infrastructure
+country_event = {
+	id = usa.63
+	title = usa.63.t
+	desc = usa.63.desc
+	picture = GFX_report_event_generic_train
+	
+	is_triggered_only = yes
+	
+
+	option = {
+		name = usa.63.a #accept
+		ai_chance = {
+			factor = 0
+		}
+		unlock_decision_tooltip = { decision = USA_invest_in_state_infrastructure show_effect_tooltip = yes }
+		event_target:USA_congress_investment_state = {
+			set_state_flag = USA_congress_build_infrastructure
+			set_variable = { infrastructure_goal = infrastructure_level }
+			add_to_variable = { infrastructure_goal = 1 }
+		}
+	}
+	option = {
+		name = usa.63.b #refuse
+		ai_chance = {
+			factor = 100
+		}
+		ROOT = { clr_country_flag = USA_congress_investment }
+		clear_global_event_target = USA_congress_investment_state
+	}
+}
+# senator wants investment in dockyards
+country_event = {
+	id = usa.64
+	title = usa.64.t
+	desc = usa.64.desc
+	picture = GFX_report_event_ast_navy
+	
+	is_triggered_only = yes
+	
+
+	option = {
+		name = usa.64.a #accept
+		ai_chance = {
+			factor = 0
+		}
+		unlock_decision_tooltip = { decision = USA_invest_in_state_dockyard show_effect_tooltip = yes }
+		event_target:USA_congress_investment_state = {
+			set_state_flag = USA_congress_build_dockyard
+			set_variable = { dockyard_goal = building_level@dockyard }
+			add_to_variable = { dockyard_goal = 1 }
+		}
+	}
+	option = {
+		name = usa.64.b #refuse
+		ai_chance = {
+			factor = 100
+		}
+		ROOT = { clr_country_flag = USA_congress_investment }
+		clear_global_event_target = USA_congress_investment_state
 	}
 }
