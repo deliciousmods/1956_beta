@@ -24,7 +24,7 @@ NDefines.NAir.COMBAT_MULTIPLANE_CAP = 4.0
 NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_PLANE_CHANCE = 1.5		-- Chance to hit a plane in airbase when it is bombed.
 NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_PLANE_DAMAGE_FACTOR = 1.5
 NDefines.NAir.COMBAT_BETTER_AGILITY_DAMAGE_REDUCTION = 0.75
-	
+NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
 NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = {  -- chances to gain a personality trait for new generals
 	0.80, -- 50% for first trait
 	0.40,  -- 15% for second trait after that
