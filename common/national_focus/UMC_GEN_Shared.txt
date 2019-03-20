@@ -670,22 +670,46 @@
 		}
 
 		available = {
-			AND = {
-				GER = {
-					exists = yes
-					has_capitulated = no
-					has_opinion = { target = ROOT value > 49 }
+			if = {
+				limit = {
+					NOT = {
+						OR = {
+							original_tag = GER
+							original_tag = WGR
+							original_tag = DDR
+						}
+					}
+				}
+
+				AND = {
+					OR = {
+						GER = {
+							exists = yes
+							has_capitulated = no
+							has_opinion = { target = ROOT value > 49 }
+							has_government = ROOT
+							NOT = {
+								has_war_with = ROOT
+							}					
+						}
+						WGR = {
+							exists = yes
+							has_capitulated = no
+							has_opinion = { target = ROOT value > 49 }
+							has_government = ROOT
+							NOT = {
+								has_war_with = ROOT
+							}
+						}					
+					}
+				}
+				OR = {
+					has_government = democratic
+					has_government = fascism
+					has_government = neutrality
 				}
 			}
-			OR = {
-				has_government = democratic
-				has_government = fascism
-				has_government = neutrality
-				GER = { has_government = ROOT }
-			}
-			NOT = {
-				has_war_with = GER
-			}
+
 		}
 
 		completion_reward = {
@@ -710,8 +734,37 @@
 				uses = 1
 				category = industry
 			}
+			if = {
+				limit = {
+					GER = {
+						has_government = ROOT
+						NOT = {
+							OR = {
+								original_tag = GER
+								original_tag = WGR
+								original_tag = DDR
+							}						
+						}					
+					}
+				}
+				add_opinion_modifier = { target = GER modifier = gen_invited_german }
+			}
+			if = {
+				limit = {
+					WGR = {
+						has_government = ROOT
+						NOT = {
+							OR = {
+								original_tag = GER
+								original_tag = WGR
+								original_tag = DDR
+							}						
+						}
+					}
+				}
+				add_opinion_modifier = { target = WGR modifier = gen_invited_german }
+			}			
 			
-			add_opinion_modifier = { target = GER modifier = gen_invited_german }
 		}
 	}
 
@@ -831,10 +884,10 @@
 		x = 0
 		y = 2
 		offset = {
-		x = 0
-		y = -1
-		trigger = {
-			tag = SOV
+			x = 0
+			y = -1
+			trigger = {
+				tag = SOV
 			}
 		}
 
@@ -876,10 +929,10 @@
 		icon = GFX_focus_chi_mission_to_the_us
 		prerequisite = { focus = GEN_Military_Buildup }
 		offset = {
-		x = 1
-		y = 0
-		trigger = {
-			tag = SOV
+			x = 1
+			y = 0
+			trigger = {
+				tag = SOV
 			}
 		}
 		x = -2
@@ -1906,31 +1959,62 @@
 		available_if_capitulated = yes
 
 		available = {
-			AND = {
-				GER = {
-					exists = yes
-					has_capitulated = no
-					has_opinion = { target = ROOT value > 49 }
+			if = {
+				limit = {
+					NOT = {
+						OR = {
+							original_tag = GER
+							original_tag = WGR
+							original_tag = DDR
+						}
+					}
+				}
+				OR = {
+					AND = {
+						GER = {
+							exists = yes
+							has_capitulated = no
+							has_opinion = { target = ROOT value > 49 }
+							not = {
+								has_War_with = ROOT
+							}						
+						}
+						OR = {
+							has_government = fascism
+							has_government = neutrality
+							has_government = democratic
+						}
+					}
+					AND = {
+						WGR = {
+							exists = yes
+							has_capitulated = no
+							has_opinion = { target = ROOT value > 49 }
+							not = {
+								has_War_with = ROOT
+							}						
+						}
+						OR = {
+							has_government = fascism
+							has_government = neutrality
+							has_government = democratic
+						}
+					}
 				}
 			}
-			OR = {
-				has_government = fascism
-				has_government = neutrality
-				GER = { has_government = ROOT }
-			}
-			not = {
-				has_War_with = GER
+			if = {
+				limit = {
+					OR = {
+						original_tag = GER
+						original_tag = WGR
+						original_tag = DDR
+					}
+				}
+				has_country_flag = unavailable				
 			}
 		}
 		
 		completion_reward = {
-			GER = {
-				add_ai_strategy = {
-					type = support
-					id = "ROOT"
-					value = 25
-				}
-			}
 			
 			add_tech_bonus = {
 				name = fighter_bonus
@@ -1947,8 +2031,50 @@
 				technology = tactical_bomber1
 				technology = tactical_bomber2	
 			}
-			
-			add_opinion_modifier = { target = GER modifier = gen_aircraft_german }
+			if = {
+				limit = {
+					GER = {
+						has_government = ROOT
+						NOT = {
+							OR = {
+								original_tag = GER
+								original_tag = WGR
+								original_tag = DDR
+							}						
+						}					
+					}
+				}
+				add_opinion_modifier = { target = GER modifier = gen_aircraft_german }
+				GER = {
+					add_ai_strategy = {
+						type = support
+						id = "ROOT"
+						value = 25
+					}
+				}				
+			}
+			if = {
+				limit = {
+					WGR = {
+						has_government = ROOT
+						NOT = {
+							OR = {
+								original_tag = GER
+								original_tag = WGR
+								original_tag = DDR
+							}						
+						}
+					}
+				}
+				add_opinion_modifier = { target = WGR modifier = gen_aircraft_german }
+				WGR = {
+					add_ai_strategy = {
+						type = support
+						id = "ROOT"
+						value = 25
+					}
+				}				
+			}			
 		}
 	}
 	
@@ -2061,33 +2187,6 @@
 			}
 		}
 	}
-	
-	shared_focus = {
-		id = GEN_Close_Air_Support
-		icon = GFX_goal_generic_CAS
-		prerequisite = { focus = GEN_Fighter_Competition }
-		
-		x = -2
-		y = 1
-		relative_position_id = GEN_Bomber_Competition
-		
-		cost = 5
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 2
-		}
-		
-		completion_reward = {
-			add_tech_bonus = {
-				name = bomber_bonus
-				bonus = 1
-				uses = 1
-				category = cas_bomber
-			}
-		}
-	}
 
 	shared_focus = {
 		id = GEN_Bomber_Competition
@@ -2184,7 +2283,6 @@
 			}	
 		}
 	}
-
 	shared_focus = {
 		id = GEN_Close_Air_Support
 		icon = GFX_goal_generic_CAS
@@ -2205,7 +2303,7 @@
 		completion_reward = {
 			add_tech_bonus = {
 				name = bomber_bonus
-				bonus = 0.5
+				bonus = 1
 				uses = 1
 				category = cas_bomber
 			}
@@ -3187,7 +3285,7 @@
 		}
 
 		completion_reward = {
-			add_ideas = collectivist_ethos_focus
+			add_timed_idea = { idea = collectivist_ethos_focus days = 1095 }
 		}
 	}
 	
@@ -3234,7 +3332,7 @@
 		}
 
 		completion_reward = {
-			add_ideas = nationalism
+			add_timed_idea = { idea = nationalism days = 1095 }
 		}
 	}
 	
@@ -3330,11 +3428,11 @@
 			if = {
 				limit = { original_tag = CHI }
 				has_government = communism
-				else = {
-					OR = {
-						has_government = communism
-						has_government = neutrality
-					}
+			}
+			else = {
+				OR = {
+					has_government = communism
+					has_government = neutrality
 				}
 			}
 		}
@@ -3367,7 +3465,7 @@
 		}
 
 		completion_reward = {
-			add_ideas = internationalism
+			add_timed_idea = { idea = internationalism days = 1095 }
 		}
 	}	
 	
