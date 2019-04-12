@@ -61,10 +61,8 @@ NDefines.NNavy.SPOTTING_SPEED_EFFECT_FOR_INITIAL_UNIT_TRANSFER_SPOTTING = 1.20 -
 -- DESIGNS
 --------------------------------------------------------------------------------------------------------------
 
-NDefines.NAI.DIVISION_UPGRADE_MIN_XP = 5							                -- Minimum XP before attempting to upgrade a division template.
+NDefines.NAI.DIVISION_UPGRADE_MIN_XP = 15							                -- Minimum XP before attempting to upgrade a division template.
 NDefines.NAI.DIVISION_CREATE_MIN_XP = 400 --100							            -- Minimum XP before attempting to create a fresh new division template.
-NDefines.NAI.VARIANT_UPGRADE_MIN_XP = 50 --50					                    -- Minimum XP before attempting to create a new variant.
-NDefines.NAI.UPGRADE_XP_RUSH_UPDATE = 5 --150								        -- If XP is above this on the daily tick the AI will attempt to spend it
 NDefines.NAI.DIVISION_DESIGN_COMBAT_WIDTH_TARGET_WEIGHT = -10000 -- -200	        -- This score is reduced the farther the width is from the target width (if set)
 NDefines.NAI.UPGRADE_PERCENTAGE_OF_FORCES = 0.25 --0.1
 NDefines.NAI.UPGRADES_DEFICIT_LIMIT_DAYS = 365 --180 --50                           -- Ai will avoid upgrading units in the field to new templates if it takes longer than this to fullfill their equipment need
@@ -98,7 +96,6 @@ NDefines.NAI.WANTED_MAX_FUEL_BUFFER_IN_DAYS_FOR_NAVY_MAX_CONSUMPTION = 365  -- A
 NDefines.NMilitary.PLAN_EXECUTE_RUSH = -10
 NDefines.NAI.FALLBACK_LOSING_FACTOR = 0.0 					                    -- The lower this number  the longer the AI will hold the line before sending them to the fallback line
 NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 24                                 	-- if we are in combat for this amount and it goes shitty then try skipping it
-NDefines.NAI.PLAN_MOVE_MIN_ORG_TO_ENEMY_PROVINCE = 20.0						-- Minimum organization a unit must have to consider moving into an enemy province (not attack move)
 NDefines.NAI.PLAN_ATTACK_MIN_ORG_FACTOR_LOW = 0.85							-- Minimum org % for a unit to actively attack an enemy unit when executing a plan
 NDefines.NAI.PLAN_ATTACK_MIN_STRENGTH_FACTOR_LOW = 0.85						-- Minimum strength for a unit to actively attack an enemy unit when executing a plan
 NDefines.NAI.PLAN_ATTACK_MIN_ORG_FACTOR_MED = 0.65							-- (LOW,MED,HIGH) corresponds to the plan execution agressiveness level.
@@ -114,52 +111,16 @@ NDefines.NAI.STR_UNIT_NORMAL = 0.75 --6												-- Strength (equipment) % for
 NDefines.NAI.PLAN_FACTION_WEAK_TO_ABORT = 0.5 --0.50		0.65		        -- % or more of units in an order to consider ececuting the plan
 NDefines.NAI.ORG_UNIT_WEAK = 0.45 --0.45												-- Organization % for unit to be considered weak
 NDefines.NAI.STR_UNIT_WEAK = 0.4 --0.45												-- Strength (equipment) % for unit to be considered weak
-NDefines.NAI.PLAN_AVG_PREPARATION_TO_EXECUTE = 0.5				            -- % or more average plan preparation before executing
 NDefines.NAI.AI_FRONT_MOVEMENT_FACTOR_FOR_READY = 0.5			                -- If less than this fraction of units on a front is moving  AI sees it as ready for action
-NDefines.NAI.PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 1		                    -- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
-NDefines.NAI.PLAN_ACTIVATION_PLAYER_WEIGHT_FACTOR = 1 		                -- AI countries will hold on activating plans if player controlled countries have plans in the same location. Majors count extra (value of 1 will negate this)
 NDefines.NAI.PLAN_MIN_SIZE_FOR_FALLBACK = 5000					                -- A country with less provinces than this will not draw fallback plans  but rather station their troops along the front
 NDefines.NAI.MAX_SCREEN_TASKFORCES_FOR_CONVOY_DEFENSE_MIN = 0.40 -- maximum ratio of all screen-ships forces to be used in convoy defense (increases up to max as AI loses convoys).
-NDefines.NAI.MAX_SCREEN_TASKFORCES_FOR_MINE_SWEEPING = 0.05 -- maximum ratio of screens forces to be used in mine sweeping
-NDefines.NAI.MAX_SCREEN_TASKFORCES_FOR_MINE_LAYING = 0.05 -- maximum ratio of screens forces to be used in mine laying
 NDefines.NAI.MAX_FUEL_CONSUMPTION_RATIO_FOR_NAVY_TRAINING = 1 				-- ai will use at most this ratio of affordable fuel for naval training
 NDefines.NAI.MAX_FUEL_CONSUMPTION_RATIO_FOR_AIR_TRAINING = 1
 NDefines.NAI.MAX_FULLY_TRAINED_SHIP_RATIO_FOR_TRAINING = 1.0 					-- ai will not train a taskforce if fully trained ships are above this ratio
 NDefines.NAI.MAX_DISTANCE_NALAV_INVASION = 300.0								-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
-NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 1000								-- If the enemy has a navy at least these many times stronger that the own, don't bother invading
-							-- AI will generally attempt to merge fleets into this size but as a soft limit.
-NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 12								-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
+NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 4								-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
 NDefines.NAI.MAX_INVASION_SIZE = 12
-NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 300									-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels.
 NDefines.NAI.SUB_TASKFORCE_MAX_SHIP_COUNT = 10 				-- optimum sub count for sub taskforces
-NDefines.NAI.SCREENS_TO_CAPITAL_RATIO = 3.5					-- screens to capital/carrier count in carrier & capital taskforces
-
-
-NDefines.NAI.HIGH_PRIO_NAVAL_MISSION_SCORES = {  -- priorities for regions to get assigned to a mission
-	0, -- HOLD (consumes fuel HOLD_MISSION_MOVEMENT_COST fuel while moving)
-	3800, -- PATROL		
-	1000, -- STRIKE FORCE 
-	1500, -- CONVOY RAIDING
-	1000, -- CONVOY ESCORT
-	-1, -- MINES PLANTING	
-	300, -- MINES SWEEPING	
-	0, -- TRAIN
-	0, -- RESERVE_FLEET
-	1000, -- NAVAL INVASION SUPPORT
-}
-
-NDefines.NAI.MAX_MISSION_PER_TASKFORCE = {  -- max mission region/taskforce ratio
-	0, -- HOLD (consumes fuel HOLD_MISSION_MOVEMENT_COST fuel while moving)
-	1.5, -- PATROL		
-	6, -- STRIKE FORCE 
-	1.5, -- CONVOY RAIDING
-	4, -- CONVOY ESCORT
-	2, -- MINES PLANTING
-	2, -- MINES SWEEPING
-	0, -- TRAIN
-	0, -- RESERVE_FLEET
-	10, -- NAVAL INVASION SUPPORT
-}
 
 --------------------------------------------------------------------------------------------------------------
 -- AIR AI
