@@ -14,7 +14,7 @@ NDefines.NMilitary.EXPERIENCE_COMBAT_FACTOR = 0.05
 NDefines.NMilitary.ARMY_EXP_BASE_LEVEL = 5
 NDefines.NAir.AIR_WING_XP_LEVELS = {20, 40, 60, 80, 100, 140, 180, 220, 260, 300, 390, 480, 570, 660, 750, 780, 810, 840, 870, 900}
 NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
-NDefines.NAir.AIR_WING_FLIGHT_SPEED_MULT = 0.002					-- Global speed multiplier for airplanes (affects fe.transferring to another base)
+NDefines.NAir.AIR_WING_FLIGHT_SPEED_MULT = 0.02					-- Global speed multiplier for airplanes (affects fe.transferring to another base)
 NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 150					-- Max stats
 NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 150
 NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 200
@@ -28,4 +28,7 @@ NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = {  -- chances to gain a persona
 	0.80, -- 50% for first trait
 	0.40,  -- 15% for second trait after that
 	0.05  --
+}
+NCountry = {
+	BASE_MOBILIZATION_SPEED = 0.015, -- from 0.01 to 0.015
 }
