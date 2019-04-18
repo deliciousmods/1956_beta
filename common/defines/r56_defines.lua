@@ -17,7 +17,7 @@ NDefines.NMilitary.ARMY_EXP_BASE_LEVEL = 5
 NDefines.NAir.AIR_WING_XP_LEVELS = {20, 40, 60, 80, 100, 140, 180, 220, 260, 300, 390, 480, 570, 660, 750, 780, 810, 840, 870, 900}
 NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
 NDefines.NAir.AIR_WING_XP_LOSS_WHEN_KILLED = 200
-NDefines.NAir.AIR_WING_FLIGHT_SPEED_MULT = 0.01					-- Global speed multiplier for airplanes (affects fe.transferring to another base)
+NDefines.NAir.AIR_WING_FLIGHT_SPEED_MULT = 0.015					-- Global speed multiplier for airplanes (affects fe.transferring to another base)
 NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 200					-- Max stats
 NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 200
 NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 200
@@ -39,6 +39,10 @@ NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = {  -- chances to gain a persona
 	0.80, -- 50% for first trait
 	0.40,  -- 15% for second trait after that
 	0.05  --
+}
+
+NCountry = {
+	BASE_MOBILIZATION_SPEED = 0.015, -- from 0.01 to 0.015
 }
 
 -- QoL improvement:
@@ -141,4 +145,3 @@ NDefines.NAI.LAND_DEFENSE_FIGHERS_PER_PLANE = 0.1       -- [1.0]  -- Amount of a
 NDefines.NAI.LAND_COMBAT_FIGHTERS_PER_PLANE = 2         -- [4]    -- Limit of CAS wings requested by enemy armies
 NDefines.NAI.LAND_COMBAT_CAS_PER_ENEMY_ARMY = 10        -- [1.0]  -- str bombing total importance scale (every str bombing score get's multiplied by it)
 NDefines.NAI.STR_BOMB_MIN_ENEMY_FIGHTERS_IN_AREA = 400  -- If amount of enemy fighters is higher than this mission won't perform
-
