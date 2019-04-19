@@ -17,12 +17,12 @@ NDefines.NMilitary.ARMY_EXP_BASE_LEVEL = 5
 NDefines.NAir.AIR_WING_XP_LEVELS = {20, 40, 60, 80, 100, 140, 180, 220, 260, 300, 390, 480, 570, 660, 750, 780, 810, 840, 870, 900}
 NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
 NDefines.NAir.AIR_WING_XP_LOSS_WHEN_KILLED = 200
-NDefines.NAir.AIR_WING_FLIGHT_SPEED_MULT = 0.01					-- Global speed multiplier for airplanes (affects fe.transferring to another base)
+NDefines.NAir.AIR_WING_FLIGHT_SPEED_MULT = 0.015					-- Global speed multiplier for airplanes (affects fe.transferring to another base)
 NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 200					-- Max stats
 NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 200
 NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 200
 NDefines.NAir.AIR_WING_MAX_STATS_SPEED = 1500					-- Used to balance the damage done while bombing.
-NDefines.NAir.COMBAT_STAT_IMPORTANCE_SPEED = 1.5            
+NDefines.NAir.COMBAT_STAT_IMPORTANCE_SPEED = 1.5
 NDefines.NAir.COMBAT_MULTIPLANE_CAP = 4.0
 NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_PLANE_CHANCE = 2.0		-- Chance to hit a plane in airbase when it is bombed.
 NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_PLANE_DAMAGE_FACTOR = 2.0
@@ -41,6 +41,10 @@ NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = {  -- chances to gain a persona
 	0.80, -- 50% for first trait
 	0.40,  -- 15% for second trait after that
 	0.05  --
+}
+
+NCountry = {
+	BASE_MOBILIZATION_SPEED = 0.015, -- from 0.01 to 0.015
 }
 
 -- QoL improvement:
