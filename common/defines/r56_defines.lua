@@ -33,7 +33,7 @@ NDefines.NAir.AIR_WING_XP_LOSS_REDUCTION_OVER_FRIENDLY_TERRITORY_FACTOR = 0.7
 NDefines.NCountry.BASE_RESEARCH_SLOTS = 3
 NDefines.NAI.MAX_FUEL_CONSUMPTION_RATIO_FOR_NAVY_TRAINING = 1 				-- ai will use at most this ratio of affordable fuel for naval training
 NDefines.NAI.MAX_FUEL_CONSUMPTION_RATIO_FOR_AIR_TRAINING = 1
-NDefines.NTechnology.BASE_TECH_COST = 75
+NDefines.NTechnology.BASE_TECH_COST = 80
 NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 6		-- Base year ahead penalty
 
 NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = {  -- chances to gain a personality trait for new generals
