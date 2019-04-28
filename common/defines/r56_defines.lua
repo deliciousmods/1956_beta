@@ -4,10 +4,6 @@ NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_WIDTH = 10
 NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_HEIGHT = 8196
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_WIDTH = 41
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_HEIGHT = 24000
--- Gameplay
-NDefines.NGame.LAG_DAYS_FOR_LOWER_SPEED = 100					-- Days of client lag for decrease of gamespeed
-NDefines.NGame.LAG_DAYS_FOR_PAUSE = 100						-- Days of client lag for pause of gamespeed.
-NDefines.NGame.COMBAT_LOG_MAX_MONTHS = 36
 -- Diplomacy
 NDefines.NGame.BASE_SEND_ATTACHE_COST = 10
 NDefines.NGame.BASE_SEND_ATTACHE_CP_COST = 10.0
