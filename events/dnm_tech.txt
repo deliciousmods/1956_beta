@@ -1,0 +1,205 @@
+﻿#DNM Tech
+#Draft event system for Rule the Waves-style tech system in HoI4
+#
+##########################
+#FLAGS
+##########################
+#
+#Each tech needs a series of flags:
+##	- A global flag for whether it has been discovered at all.
+#Other flags needed:
+#	- country flags for temporary research bonuses - ie, NFs don't give a fifty per cent research bonus, they'll now give a "intensive research into X" bonus.  Use tech groups so that this still shows up as a research bonus in the tech trees, but remember to change how that presents (hopefully just a localisation thing).
+#	- country flags for research specialisation - ie, country X is generally quite good at [pick tech group].  These would be mostly permanent flags, granted at the start of the game, or through NFs, but could be taken away by event as well (eg, Stalin's purges?)
+#
+############################
+#EVENT STRUCTURE
+############################
+#
+#Use modifiers in mean_time_to_happen to vary tech research time by various characteristics.  These modifiers look to be percentage based, so should be possible to include tech (and other) law research bonuses/maluses in here (as well as bonsues/maluses from other areas).
+#
+#Characteristics to include in the modifiers should include: Date, trade laws, research institute flag bonuses (use flags for permanent tech buffs, such as the mechanical computing line).  Test that modifiers are cumulative.
+#
+#Use triggers on the options to have different options whether a temporary research flag is used or not (so that there can be a hidden effect to remove the research flag where one existed).  Should appear identical to player.  Could use multiple options/flags to allow for 2/3 stacked research bonuses, so NF bonuses aren't too mixed up.
+#
+#
+#############################
+#TECH TREE
+#############################
+#
+#Scratch idea of tech overview - at least initially - likely to be very complicated, and involve spammy events.  Just have specific bonus for researching a particular tech, but if it was possible to have.
+#
+#Short-term branching techs (so 1940 heavy tank could be 'infantry tank' like Cromwell or 'heavy tank' like tiger) would be cool.  Not sure if easily possible (would have to be able to display as such in tech tree).
+#
+#Use defines to make research time for tech the vanilla way to last decades, so that techs can only be gained through events.
+#
+#
+#############################
+#OTHER THOUGHTs
+#############################
+#
+#Use Industry design companies to house multiple ideas that can represent tech research ideas.  These can be unlocked over time through events and what-have-you.
+#
+#Over time, generic tech events can be replaced by specific events for individual countries, adding oodles of flavour.
+#
+#save_event_target_as could be used with random_country (and then at war, or similar) and encryption/decryption checks to add in "spies discover that the enemy has researched 'X'" style events.
+#
+#Could have 'difficulty' or 'making progress' events - such that, there's a random chance that each tech has a supplementary event that adds a modifier to the MTTH.  Not sure when MTTH modifiers are calculated though - may not be something that works well in-game (have tested - MTTH modifiers are dynamic, can be added).
+#
+# When balancing, adjust the days = X in MTTH happen for each tech event.  Have this identical for each event, then add a modifier for whether the tech is easy/hard to research.
+#
+#Can probably still have 'general focus' techs as well as specific focus - just have an effect that the 'general focus' tech is researched when the specific tech is, along with a triggered event that resets the tech level to 0 (as always, test).  
+#
+#################################
+#IDEAS ON CODE
+#################################
+#
+add_namespace = dnmtech
+#
+country_event = {
+	id = dnmtech.1
+	title = dnmtech.1.t
+	desc = dnmtech.1.d
+	picture = GFX_report_event_gathering_protest
+
+	trigger = {
+		has_country_flag = dnmtech_enabled
+		can_research = improved_destroyer
+	}
+
+	mean_time_to_happen = {
+		days = 100
+		modifier = {
+			factor = 0.01
+			has_country_flag = mtth_test
+		}
+#		modifier = {
+#			factor = 0.8
+#			tag = ENG
+#		}
+#		modifier = {
+#			factor = 0.2
+#			tag = ENG
+#		}
+
+#		modifier = {
+#			factor = 0.90
+#			has_idea = 
+#			}
+#		modifier = {
+#			factor = 0.5
+#			has_country_flag = dd_tech_bonus
+#		}
+#		modifier = {
+#			factor  = 1.5
+#			date < 31.12.1935
+#		}
+#		modifier = {
+#			factor = 1.5
+#			date < 31.12.1934
+#		}
+#		modifier = {
+#			factor = 1.5
+#			date < 31.12.1933
+#		}
+#		modifier = {
+#			factor = 0.90
+#			date > 1.1.1938
+#		}
+#		modifier = {
+#			factor = 0.90
+#			date > 1.1.1940
+#		}
+#		modifier = {
+#			factor = 0.90
+#			date > 1.1.1942
+#		}
+	}
+
+	option = {
+		name = dnmtech.1
+			trigger = {
+				has_country_flag = dd_tech_bonus			
+				}
+		set_technology = { improved_destroyer = 1}
+		clr_country_flag = dd_tech_bonus
+	}
+	option = {
+		name = dnmtech.1
+			trigger = {
+				NOT = {
+					has_country_flag = dd_tech_bonus			
+					}
+				}
+		set_technology = { improved_destroyer = 1}
+	}
+}
+
+
+# Test event to see whether modifiers changed after the event had first started it's MTTH time (and they do - woot!)
+#country_event = {
+#	id = dnmtech.2
+#	title = dnmtech.2.t
+#	desc = dnmtech.2.d
+#	picture = GFX_report_event_gathering_protest
+#
+#	trigger = {
+#		can_research = improved_destroyer
+#	}
+#
+#	mean_time_to_happen = {
+#		days = 1
+#	}
+#
+#	option = {
+#		name = dnmtech.1
+#		set_country_flag = mtth_test
+#	}
+#
+#}
+#
+# Test events for a MTTH then tech-triggering event (both work, woot!)
+#
+#country_event = {
+#	id = dnmtech.3
+#	hidden = yes
+#
+#	trigger = {
+#		NOT = {
+#		has_country_flag = hidden_event_test1
+#		}
+#	}
+#
+#	mean_time_to_happen = {
+#		days = 2
+#	}
+#
+#	immediate = {
+#		set_country_flag = hidden_event_test1	
+#	}
+#
+#	option  = {}
+#}
+#
+#country_event = {
+#	id = dnmtech.4
+#
+#	hidden = yes
+#
+#	trigger = {
+#		has_country_flag = hidden_event_test1
+#	}
+#
+#	mean_time_to_happen = {
+#		days = 2
+#	}
+#
+#	immediate = {
+#		ROOT = {
+#			set_technology = {
+#				atomic_research = 1
+#			}
+#		}
+#	}
+#
+#	option  = {}
+#}

@@ -1,0 +1,4 @@
+-- Gameplay
+NDefines.NGame.LAG_DAYS_FOR_LOWER_SPEED = 100
+NDefines.NGame.LAG_DAYS_FOR_PAUSE = 100
+NDefines.NGame.COMBAT_LOG_MAX_MONTHS = 36
