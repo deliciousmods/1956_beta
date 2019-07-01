@@ -1397,7 +1397,9 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		available = {
-
+			NOT = {
+	  			has_completed_focus = LAT_a_rejection_of_ulmanis
+	  		}
 		}
 
 		ai_will_do = {
@@ -1618,7 +1620,7 @@ focus_tree = {
 	}
 
 	focus = {
-		id = LAT_a_rejection_Of_ulmanis
+		id = LAT_a_rejection_of_ulmanis
 		icon = GFX_focus_generic_support_the_left_right
 		mutually_exclusive = { focus = LAT_ulmanis_in_control_of_the_government }
 		x = 44
@@ -1650,6 +1652,7 @@ focus_tree = {
 					has_country_leader = { ruling_only = yes name = "Alberts Kviesis" }
 				}
 				remove_country_leader_trait = LAT_ulmanis_puppet
+				add_country_leader_trait = cabinet_crisis
 			}
 			
 			set_country_flag = LAT_invalidation
@@ -1658,6 +1661,8 @@ focus_tree = {
 
 		completion_reward = {
 			add_political_power = 50
+			
+			add_stability = -0.05
 
 		}
 	}
@@ -1665,9 +1670,8 @@ focus_tree = {
 	focus = {
 		id = LAT_assemble_a_new_seima
 		icon = GFX_goal_LAT_assemble_parliament
-		prerequisite = { focus = LAT_a_rejection_Of_ulmanis}
-		relative_position_id = LAT_a_rejection_Of_ulmanis
-		mutually_exclusive = { focus = LAT_proclaim_the_peoples_republic focus = LAT_radical_opposition }
+		prerequisite = { focus = LAT_a_rejection_of_ulmanis}
+		relative_position_id = LAT_a_rejection_of_ulmanis
 		x = -4
 		y = 1
 		cost = 10
@@ -1675,8 +1679,13 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		available = {
-			OR = {
+			if = {
+				limit = {
+					date > 1937.01.01
+				}
 				has_government = democratic
+			}
+			else = {
 				has_country_flag = LAT_alberts_kviesis_reestablished_democracy
 			}
 		}
@@ -1935,22 +1944,63 @@ focus_tree = {
 }
 
 focus = {
-	id = LAT_proclaim_the_peoples_republic
-	icon = GFX_goal_LAT_communists_win
-	prerequisite = { focus = LAT_a_rejection_Of_ulmanis }
-	relative_position_id = LAT_a_rejection_Of_ulmanis
-	mutually_exclusive = { focus = LAT_assemble_a_new_seima focus = LAT_radical_opposition }
+	id = LAT_coalition_with_the_communists
+	icon = GFX_focus_generic_soviet_politics
+	prerequisite = { focus = LAT_a_rejection_of_ulmanis }
+	relative_position_id = LAT_a_rejection_of_ulmanis
 	x = 3
 	y = 1
 	cost = 7.15
 
 	available_if_capitulated = yes
 
-	available = {
-		OR = {
+	available = { 
+		if = {
+			limit = {
+				date > 1937.01.01
+			}
 			has_government = communism
+		}
+		else = {
 			has_country_flag = LAT_communist_influence_flag
+		}		 
+	}
+
+	ai_will_do = {
+		factor = 3
+	}
+
+	bypass = {
+	}
+
+	completion_reward = {
+		add_popularity = { ideology = communism popularity = 0.1 }
+		add_timed_idea = {
+			idea = internationalism
+			days = 365
 		}	  
+  }
+}
+
+focus = {
+	id = LAT_proclaim_the_peoples_republic
+	icon = GFX_goal_LAT_communists_win
+	prerequisite = { focus = LAT_coalition_with_the_communists }
+	relative_position_id = LAT_coalition_with_the_communists
+	x = 0
+	y = 1
+	cost = 7.15
+
+	available_if_capitulated = yes
+
+	available = { 
+		OR = {
+			AND = {
+				has_country_flag = LAT_communist_influence_flag
+				communism > 0.35
+			}
+			has_government = communism
+		}		 
 	}
 
 	ai_will_do = {
@@ -2223,10 +2273,9 @@ focus = {
 
 focus = {
 	id = LAT_radical_opposition
-	icon = GFX_goal_anti_comintern_pact
-	prerequisite = { focus = LAT_a_rejection_Of_ulmanis }
-	relative_position_id = LAT_a_rejection_Of_ulmanis
-	mutually_exclusive = { focus = LAT_assemble_a_new_seima focus = LAT_proclaim_the_peoples_republic }
+	icon = GFX_goal_support_fascism
+	prerequisite = { focus = LAT_a_rejection_of_ulmanis }
+	relative_position_id = LAT_a_rejection_of_ulmanis
 	x = 10
 	y = 1
 	cost = 10
@@ -2234,11 +2283,14 @@ focus = {
 	available_if_capitulated = yes
 
 	available = {
-		NOT = {
-			OR = {
-				has_country_flag = LAT_communist_influence_flag
-				has_country_flag = LAT_alberts_kviesis_reestablished_democracy
-			}				
+		if = {
+			limit = {
+				date > 1937.01.01
+			}
+			has_government = fascism
+		}
+		else = {
+			has_country_flag = LAT_fascist_influence_flag
 		}
 
 	}
@@ -2256,7 +2308,7 @@ focus = {
 			idea = nationalism
 			days = 365
 		}		
-  }
+ 	}
 }
 
 
@@ -2272,10 +2324,13 @@ focus = {
 	available_if_capitulated = yes
 
 	available = {
-		#OR = {
+		OR = {
+			AND = {
+				has_country_flag = LAT_fascist_influence_flag
+				fascism > 0.35
+			}
 			has_government = fascism
-			#has_country_flag = LAT_communist_influence_flag
-		#}	
+		}	
 	}
 
 	ai_will_do = {
