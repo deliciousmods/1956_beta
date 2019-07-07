@@ -13,8 +13,7 @@ focus_tree = {
 	default = no
 	reset_on_civilwar = no
 
-	shared_focus = GEN_Aviation_Effort
-	shared_focus = GEN_Naval_Effort
+	shared_focus = LIT_Naval_Effort
 
 	#	focus = {
 	#		id = LIT_
@@ -60,7 +59,7 @@ focus_tree = {
 		cost = 10
 
 		available = {
-
+		  has_country_flag = LIT_political_path_decided
 		}
 
 		ai_will_do = {
@@ -196,14 +195,6 @@ focus = {
 	prerequisite = { focus = LIT_doctrine_effort_2 }
 	x = 0
 	y = 2
-	offset = {
-	x = 0
-	y = -1
-	trigger = {
-		tag = SOV
-		}
-	}
-
 	relative_position_id = LIT_doctrine_effort_2
 	cost = 10
 
@@ -734,9 +725,1691 @@ focus = {
 }
 
 focus = {
+	id = LIT_Naval_Effort
+	icon = GFX_focus_generic_shipbuilding
+	x = 52
+	y = 0
+	cost = 10
+	available_if_capitulated = yes
+
+	ai_will_do = {
+		factor = 2
+	}
+
+	available = {
+	  has_country_flag = LIT_political_path_decided
+		any_state = {
+			is_coastal = yes
+			is_controlled_by = ROOT
+		}
+	}
+
+	complete_tooltip = {
+		navy_experience = 25
+		add_extra_state_shared_building_slots = 3
+		add_building_construction = {
+			type = dockyard
+			level = 3
+			instant_build = yes
+		}
+	}
+
+	completion_reward = {
+		navy_experience = 25
+		if = {
+			limit = {
+				NOT = {
+					any_owned_state = {
+						dockyard > 0
+						free_building_slots = {
+							building = dockyard
+							size > 2
+							include_locked = yes
+						}
+					}
+				}
+				any_owned_state = {
+					is_coastal = yes
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					is_coastal = yes
+					free_building_slots = {
+						building = dockyard
+						size > 2
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 3
+				add_building_construction = {
+					type = dockyard
+					level = 3
+					instant_build = yes
+				}
+			}
+			set_country_flag = naval_effort_built
+		}
+		if = {
+			limit = {
+				NOT = { has_country_flag = naval_effort_built }
+				any_owned_state = {
+					dockyard > 0
+					free_building_slots = {
+						building = dockyard
+						size > 2
+						include_locked = yes
+					}
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					dockyard > 0
+					free_building_slots = {
+						building = dockyard
+						size > 2
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 3
+				add_building_construction = {
+					type = dockyard
+					level = 3
+					instant_build = yes
+				}
+			}
+			set_country_flag = naval_effort_built
+		}
+		if = {
+			limit = {
+				NOT = { has_country_flag = naval_effort_built }
+				NOT = {
+					any_owned_state = {
+						free_building_slots = {
+							building = dockyard
+							size > 2
+							include_locked = yes
+						}
+					}
+				}
+			}
+			random_state = {
+				limit = {
+					controller = { tag = ROOT }
+					free_building_slots = {
+						building = dockyard
+						size > 2
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 3
+				add_building_construction = {
+					type = dockyard
+					level = 3
+					instant_build = yes
+				}
+			}
+		}
+
+		add_equipment_to_stockpile = { type = convoy_1 amount = 10 }
+
+		#custom_effect_tooltip = GEN_Generals_Other_nav_tt
+	}
+}
+
+
+focus = {
+	id = LIT_Small_Navy
+	icon = GFX_goal_generic_navy_doctrines_tactics
+	prerequisite = { focus = LIT_Naval_Effort }
+	mutually_exclusive = { focus = LIT_Sea_Dominance }
+
+	x = -1
+	y = 1
+	relative_position_id = LIT_Naval_Effort
+	cost = 7.9
+
+	available_if_capitulated = yes
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = sub_op_bonus
+			bonus = 1
+			uses = 2
+			technology = convoy_interdiction_ti
+			technology = unrestricted_submarine_warfare
+			technology = wolfpacks
+			technology = advanced_submarine_warfare
+			technology = combined_operations_raiding
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Submarine
+	icon = GFX_goal_generic_navy_submarine
+	prerequisite = { focus = LIT_Small_Navy }
+
+	x = -1
+	y = 1
+	relative_position_id = LIT_Small_Navy
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = ss_bonus
+			bonus = 1
+			uses = 1
+			category = ss_tech
+		}
+
+		#custom_effect_tooltip = GEN_Generals_Other_nav_tt
+	}
+}
+
+
+focus = {
+	id = LIT_Sea_Dominance
+	icon = GFX_goal_sea_navy
+	prerequisite = { focus = LIT_Naval_Effort }
+	mutually_exclusive = { focus = LIT_Small_Navy }
+
+	x = 1
+	y = 1
+	relative_position_id = LIT_Naval_Effort
+
+	cost = 7.9
+
+	available_if_capitulated = yes
+
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = fleet_in_being_bonus
+			bonus = 1
+			uses = 2
+			category = fleet_in_being_tree
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Study_Ships
+	icon = GFX_goal_generic_intelligence_exchange
+	prerequisite = { focus = LIT_Sea_Dominance }
+
+	x = 2
+	y = 1
+	relative_position_id = LIT_Sea_Dominance
+
+	allow_branch = {
+		NOT = {
+			original_tag = SOV
+		}
+	}
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		navy_experience = 100
+		add_tech_bonus = {
+			name = ships_bonus
+			bonus = 0.25
+			uses = 1
+			category = cv_tech
+		}
+		add_tech_bonus = {
+			name = ships_bonus
+			bonus = 0.25
+			uses = 1
+			category = bb_tech
+		}
+		add_tech_bonus = {
+			name = ships_bonus
+			bonus = 0.25
+			uses = 1
+			category = bc_tech
+		}
+		add_tech_bonus = {
+			name = ships_bonus
+			bonus = 0.25
+			uses = 1
+			category = ca_tech
+		}
+		add_tech_bonus = {
+			name = ships_bonus
+			bonus = 0.25
+			uses = 1
+			category = cl_tech
+		}
+		add_tech_bonus = {
+			name = ships_bonus
+			bonus = 0.25
+			uses = 1
+			category = dd_tech
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Ships_American
+	icon = GFX_focus_chi_mission_to_the_us
+	prerequisite = { focus = LIT_Study_Ships }
+
+	x = -1
+	y = 1
+	relative_position_id = LIT_Study_Ships
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	available = {
+		AND = {
+			USA = {
+				exists = yes
+				has_capitulated = no
+				has_opinion = { target = ROOT value > 49 }
+			}
+		}
+		OR = {
+			has_government = democratic
+			has_government = neutrality
+			USA = { has_government = ROOT }
+		}
+		not = {
+			has_War_with = USA
+		}
+	}
+
+	bypass = {
+	}
+
+
+	completion_reward = {
+		USA = {
+			add_ai_strategy = {
+				type = support
+				id = "ROOT"
+				value = 25
+			}
+		}
+		add_ideas = LIT_american_ship_production_methods
+		add_opinion_modifier = { target = USA modifier = GEN_ships_american }
+	}
+}
+
+
+focus = {
+	id = LIT_Ships_England
+	icon = GFX_focus_chi_british_cooperation
+	prerequisite = { focus = LIT_Study_Ships }
+
+	x = 1
+	y = 1
+	relative_position_id = LIT_Study_Ships
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	available = {
+		AND = {
+			ENG = {
+				exists = yes
+				has_capitulated = no
+				has_opinion = { target = ROOT value > 49 }
+			}
+		}
+		OR = {
+			has_government = democratic
+			has_government = neutrality
+			ENG = { has_government = ROOT }
+		}
+		not = {
+			has_War_with = ENG
+		}
+	}
+
+	completion_reward = {
+		ENG = {
+			add_ai_strategy = {
+				type = support
+				id = "ROOT"
+				value = 25
+			}
+		}
+		add_ideas = ENG_escort_effort_focus
+
+		add_opinion_modifier = { target = ENG modifier = GEN_ships_british }
+	}
+}
+
+
+focus = {
+	id = LIT_Dockyards
+	icon = GFX_goal_generic_construct_naval_dockyard
+	prerequisite = { focus = LIT_Small_Navy focus = LIT_Sea_Dominance }
+
+	x = -1
+	y = 2
+	relative_position_id = LIT_Sea_Dominance
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		has_tech = construction2
+	}
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		random_owned_controlled_state = {
+			limit = {
+				dockyard > 0
+				free_building_slots = {
+					building = dockyard
+					size > 1
+					include_locked = yes
+				}
+			}
+			add_extra_state_shared_building_slots = 3
+			add_building_construction = {
+				type = dockyard
+				level = 3
+				instant_build = yes
+			}
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Carrier
+	icon = GFX_goal_generic_navy_carrier
+	prerequisite = { focus = LIT_Dockyards }
+
+	x = 1
+	y = 1
+	relative_position_id = LIT_Dockyards
+	cost = 7.9
+
+	available_if_capitulated = yes
+
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = capital_ships_bonus
+			bonus = 1
+			uses = 1
+			category = cv_tech
+		}
+
+		custom_effect_tooltip = GEN_Generals_Other_nav_tt
+	}
+}
+
+
+focus = {
+	id = LIT_Navy_Aircrafts
+	icon = GFX_goal_generic_air_naval_bomber
+	prerequisite = { focus = LIT_Carrier }
+
+	x = 0
+	y = 2
+	relative_position_id = LIT_Carrier
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	available = {
+
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = nav_bomber_bonus
+			bonus = 0.5
+			uses = 2
+			category = naval_air
+		}
+	}
+
+	ai_will_do = {
+	factor = 1
+	}
+}
+
+
+focus = {
+	id = LIT_Battleship
+	icon = GFX_goal_generic_navy_battleship
+	prerequisite = { focus = LIT_Dockyards }
+
+	x = -1
+	y = 1
+	relative_position_id = LIT_Dockyards
+	cost = 7.9
+
+	available_if_capitulated = yes
+
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = capital_ships_bonus
+			bonus = 1
+			uses = 1
+			category = bb_tech
+
+		}
+		add_tech_bonus = {
+			name = capital_ships_bonus
+			bonus = 1
+			uses = 1
+			category = bc_tech
+		}
+
+		custom_effect_tooltip = GEN_Generals_Other_nav_tt
+	}
+}
+
+
+focus = {
+	id = LIT_Destroyer
+	icon = GFX_goal_generic_wolf_pack
+	prerequisite = { focus = LIT_Battleship focus = LIT_Carrier }
+
+	x = -1
+	y = 1
+	relative_position_id = LIT_Battleship
+	cost = 3.6
+
+	available_if_capitulated = yes
+
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = dd_bonus
+			bonus = 1
+			uses = 1
+			category = dd_tech
+
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Cruisers
+	icon = GFX_goal_generic_navy_cruiser
+	prerequisite = { focus = LIT_Battleship focus = LIT_Carrier }
+
+	x = 1
+	y = 1
+	relative_position_id = LIT_Battleship
+	cost = 5
+
+	available_if_capitulated = yes
+
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = cr_bonus
+			bonus = 1
+			uses = 1
+			category = ca_tech
+
+		}
+		add_tech_bonus = {
+			name = cr_bonus
+			bonus = 1
+			uses = 1
+			category = cl_tech
+		}
+	}
+}
+
+focus = {
+	id = LIT_Naval_Doctrine
+	icon = GFX_goal_generic_navy_doctrines_tactics
+	prerequisite = { focus = LIT_Cruisers focus = LIT_Destroyer focus = LIT_Battleship }
+
+	x = 0
+	y = 2
+	relative_position_id = LIT_Battleship
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+
+	ai_will_do = {
+		factor = 1
+		modifier = {
+			factor = 0
+			all_owned_state = {
+				OR = {
+					is_coastal = no
+					dockyard < 1
+				}
+			}
+		}
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = fleet_in_being_bonus
+			bonus = 1
+			uses = 1
+			category = fleet_in_being_tree
+		}
+
+		custom_effect_tooltip = GEN_Generals_Other_nav_tt
+	}
+}
+
+focus = {
+	id = LIT_Aviation_Effort
+	icon = GFX_goal_generic_build_airforce
+	x = 39
+	y = 0
+	cost = 10
+
+	available_if_capitulated = yes
+
+ available = {
+   has_country_flag = LIT_political_path_decided
+ }
+
+	ai_will_do = {
+		factor = 2
+	}
+
+	completion_reward = {
+		air_experience = 25
+
+		random_owned_controlled_state = {
+			limit = {
+				free_building_slots = {
+					building = air_base
+					size > 1
+				}
+			}
+			add_building_construction = {
+				type = air_base
+				level = 2
+				instant_build = yes
+			}
+		}
+		random_owned_controlled_state = {
+			limit = {
+				free_building_slots = {
+					building = air_base
+					size > 1
+				}
+			}
+			add_building_construction = {
+				type = air_base
+				level = 2
+				instant_build = yes
+			}
+		}
+
+		add_tech_bonus = {
+			name = air_doc_bonus
+			bonus = 1
+			uses = 1
+			category = air_doctrine
+		}
+	}
+}
+
+focus = {
+	id = LIT_Foreign_Design
+	icon = GFX_goal_generic_intelligence_exchange
+	prerequisite = { focus = LIT_Aviation_Effort }
+	mutually_exclusive = { focus = LIT_Own_Design }
+
+	allow_branch = {
+		NOT = {
+			original_tag = SOV
+		}
+	}
+
+
+	x = 4
+	y = 1
+	relative_position_id = LIT_Aviation_Effort
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		air_experience = 25
+		#add_to_tech_sharing_group = HUN_joint_air_development_group
+		add_to_tech_sharing_group = HUN_joint_air_development_group
+	}
+}
+
+
+focus = {
+	id = LIT_Aircraft_England
+	icon = GFX_goal_fighters_uk
+	prerequisite = { focus = LIT_Foreign_Design }
+	mutually_exclusive = { focus = LIT_Aircraft_american }
+
+	x = -5
+	y = 1
+	relative_position_id = LIT_Foreign_Design
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		AND = {
+			ENG = {
+				exists = yes
+				has_capitulated = no
+				has_opinion = { target = ROOT value > 49 }
+			}
+		}
+		OR = {
+			has_government = democratic
+			has_government = neutrality
+			ENG = { has_government = ROOT }
+		}
+		not = {
+			has_War_with = ENG
+		}
+	}
+
+	completion_reward = {
+		ENG = {
+			add_ai_strategy = {
+				type = support
+				id = "ROOT"
+				value = 25
+			}
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = early_fighter
+			technology = fighter1
+			technology = fighter2
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = cv_early_fighter
+			technology = cv_fighter1
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = naval_bomber1
+			technology = naval_bomber2
+		}
+
+		add_opinion_modifier = { target = ENG modifier = GEN_aircraft_england }
+	}
+}
+
+focus = {
+	id = LIT_Aircraft_american
+	icon = GFX_goal_fighters_usa
+	prerequisite = { focus = LIT_Foreign_Design }
+	mutually_exclusive = { focus = LIT_Aircraft_England }
+
+	x = -3
+	y = 1
+	relative_position_id = LIT_Foreign_Design
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		AND = {
+			USA = {
+				exists = yes
+				has_capitulated = no
+				has_opinion = { target = ROOT value > 49 }
+			}
+		}
+		OR = {
+			has_government = democratic
+			has_government = neutrality
+			USA = { has_government = ROOT }
+		}
+		not = {
+			has_War_with = USA
+		}
+	}
+
+	completion_reward = {
+		USA = {
+			add_ai_strategy = {
+				type = support
+				id = "ROOT"
+				value = 25
+			}
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = early_fighter
+			technology = fighter1
+			technology = fighter2
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = cv_early_fighter
+			technology = cv_fighter1
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = naval_bomber1
+			technology = naval_bomber2
+		}
+
+		add_opinion_modifier = { target = USA modifier = GEN_aircraft_american }
+	}
+}
+
+
+focus = {
+	id = LIT_Aircraft_Soviet
+	icon = GFX_goal_fighters_soviet
+	prerequisite = { focus = LIT_Foreign_Design }
+	mutually_exclusive = { focus = LIT_Aircraft_japanese }
+
+	x = -1
+	y = 1
+	relative_position_id = LIT_Foreign_Design
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		AND = {
+			SOV = {
+				exists = yes
+				has_capitulated = no
+				has_opinion = { target = ROOT value > 49 }
+			}
+		}
+		OR = {
+			has_government = communism
+			has_government = neutrality
+			SOV = { has_government = ROOT }
+		}
+		not = {
+			has_War_with = SOV
+		}
+	}
+
+	completion_reward = {
+		SOV = {
+			add_ai_strategy = {
+				type = support
+				id = "ROOT"
+				value = 25
+			}
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = early_fighter
+			technology = fighter1
+			technology = fighter2
+		}
+
+		add_tech_bonus = {
+			name = bomber_bonus
+			bonus = 1
+			uses = 1
+			technology = strategic_bomber1
+			technology = strategic_bomber2
+		}
+
+		add_opinion_modifier = { target = SOV modifier = GEN_aircraft_soviet }
+	}
+}
+focus = {
+	id = LIT_Aircraft_japanese
+	icon = GFX_goal_fighters_japan
+	prerequisite = { focus = LIT_Foreign_Design }
+	mutually_exclusive = { focus = LIT_Aircraft_Soviet }
+
+	x = 1
+	y = 1
+	relative_position_id = LIT_Foreign_Design
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		AND = {
+			JAP = {
+				exists = yes
+				has_capitulated = no
+				has_opinion = { target = ROOT value > 49 }
+			}
+		}
+		OR = {
+			has_government = fascism
+			has_government = neutrality
+			JAP = { has_government = ROOT }
+		}
+		not = {
+			has_War_with = JAP
+		}
+	}
+
+	completion_reward = {
+		JAP = {
+			add_ai_strategy = {
+				type = support
+				id = "ROOT"
+				value = 25
+			}
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = early_fighter
+			technology = fighter1
+			technology = fighter2
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = cv_early_fighter
+			technology = cv_fighter1
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = naval_bomber1
+			technology = naval_bomber2
+		}
+
+		add_opinion_modifier = { target = JAP modifier = GEN_aircraft_japanese }
+	}
+}
+focus = {
+	id = LIT_Aircraft_Italian
+	icon = GFX_goal_fighters_italy
+	prerequisite = { focus = LIT_Foreign_Design }
+	mutually_exclusive = { focus = LIT_Aircraft_German }
+
+	x = 3
+	y = 1
+	relative_position_id = LIT_Foreign_Design
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		AND = {
+			ITA = {
+				exists = yes
+				has_capitulated = no
+				has_opinion = { target = ROOT value > 49 }
+			}
+		}
+		OR = {
+			has_government = fascism
+			has_government = neutrality
+			ITA = { has_government = ROOT }
+		}
+		NOT = {
+			has_War_with = ITA
+		}
+	}
+
+	completion_reward = {
+		ITA = {
+			add_ai_strategy = {
+				type = support
+				id = "ROOT"
+				value = 25
+			}
+		}
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = CAS1
+			technology = CAS2
+		}
+
+		add_tech_bonus = {
+			name = bomber_bonus
+			bonus = 1
+			uses = 1
+			technology = tactical_bomber1
+			technology = tactical_bomber2
+		}
+
+		add_opinion_modifier = { target = ITA modifier = GEN_aircraft_italian }
+	}
+}
+focus = {
+	id = LIT_Aircraft_German
+	icon = GFX_goal_fighters_germany
+	prerequisite = { focus = LIT_Foreign_Design }
+	mutually_exclusive = { focus = LIT_Aircraft_Italian}
+
+	x = 5
+	y = 1
+	relative_position_id = LIT_Foreign_Design
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		if = {
+			limit = {
+				NOT = {
+					OR = {
+						original_tag = GER
+						original_tag = WGR
+						original_tag = DDR
+					}
+				}
+			}
+			OR = {
+				AND = {
+					GER = {
+						exists = yes
+						has_capitulated = no
+						has_opinion = { target = ROOT value > 49 }
+						not = {
+							has_War_with = ROOT
+						}
+					}
+					OR = {
+						has_government = fascism
+						has_government = neutrality
+						has_government = democratic
+					}
+				}
+				AND = {
+					WGR = {
+						exists = yes
+						has_capitulated = no
+						has_opinion = { target = ROOT value > 49 }
+						not = {
+							has_War_with = ROOT
+						}
+					}
+					OR = {
+						has_government = fascism
+						has_government = neutrality
+						has_government = democratic
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				OR = {
+					original_tag = GER
+					original_tag = WGR
+					original_tag = DDR
+				}
+			}
+			has_country_flag = unavailable
+		}
+	}
+
+	completion_reward = {
+
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			technology = CAS1
+			technology = CAS2
+		}
+
+		add_tech_bonus = {
+			name = bomber_bonus
+			bonus = 1
+			uses = 1
+			technology = tactical_bomber1
+			technology = tactical_bomber2
+		}
+		if = {
+			limit = {
+				GER = {
+					has_government = ROOT
+					NOT = {
+						OR = {
+							original_tag = GER
+							original_tag = WGR
+							original_tag = DDR
+						}
+					}
+				}
+			}
+			add_opinion_modifier = { target = GER modifier = GEN_aircraft_german }
+			GER = {
+				add_ai_strategy = {
+					type = support
+					id = "ROOT"
+					value = 25
+				}
+			}
+		}
+		if = {
+			limit = {
+				WGR = {
+					has_government = ROOT
+					NOT = {
+						OR = {
+							original_tag = GER
+							original_tag = WGR
+							original_tag = DDR
+						}
+					}
+				}
+			}
+			add_opinion_modifier = { target = WGR modifier = GEN_aircraft_german }
+			WGR = {
+				add_ai_strategy = {
+					type = support
+					id = "ROOT"
+					value = 25
+				}
+			}
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Fighter_Competition
+	icon = GFX_goal_zero_blue
+	prerequisite = { focus = LIT_Aircraft_England focus = LIT_Aircraft_German focus = LIT_Aircraft_Soviet focus = LIT_Aircraft_Italian focus = LIT_Aircraft_japanese}
+
+	x = 1
+	y = 1
+	relative_position_id = LIT_Aircraft_american
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	ai_will_do = {
+		factor = 2
+	}
+
+	completion_reward = {
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_England
+				NOT = { has_War_with = GER }
+			}
+
+			add_equipment_to_stockpile = {
+				type = fighter_equipment
+				amount = 20
+				producer = ENG
+			}
+			add_equipment_to_stockpile = {
+				type = cv_fighter_equipment_0
+				amount = 15
+				producer = ENG
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_american
+				NOT = { has_War_with = USA }
+			}
+
+			add_equipment_to_stockpile = {
+				type = fighter_equipment
+				amount = 20
+				producer = USA
+			}
+			add_equipment_to_stockpile = {
+				type = cv_fighter_equipment_0
+				amount = 15
+				producer = USA
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_Soviet
+				NOT = { has_War_with = SOV }
+			}
+
+			add_equipment_to_stockpile = {
+				type = fighter_equipment
+				amount = 20
+				producer = SOV
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_German
+				NOT = { has_War_with = GER }
+			}
+
+			add_equipment_to_stockpile = {
+				type = fighter_equipment
+				amount = 15
+				producer = GER
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_Italian
+				NOT = { has_war_with = ITA }
+			}
+
+			add_equipment_to_stockpile = {
+				type = fighter_equipment
+				amount = 15
+				producer = ITA
+			}
+		}
+
+
+		if = {
+			limit = {
+				NOT = { has_completed_focus = LIT_Aircraft_England }
+				NOT = { has_completed_focus = LIT_Aircraft_Soviet }
+				NOT = { has_completed_focus = LIT_Aircraft_German }
+				NOT = { has_completed_focus = LIT_Aircraft_Italian }
+			}
+
+			custom_effect_tooltip = GEN_Fighter_Competition_EXPL
+		}
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			category = light_fighter
+		}
+	}
+}
+
+focus = {
+	id = LIT_Bomber_Competition
+	icon = GFX_goal_generic_air_bomber
+	prerequisite = { focus = LIT_Aircraft_German focus = LIT_Aircraft_England focus = LIT_Aircraft_american focus = LIT_Aircraft_Soviet focus = LIT_Aircraft_Italian focus = LIT_Aircraft_japanese}
+
+	x = 3
+	y = 1
+	relative_position_id = LIT_Aircraft_american
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	ai_will_do = {
+		factor = 2
+	}
+
+	completion_reward = {
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_England
+				NOT = { has_War_with = ENG }
+			}
+
+			add_equipment_to_stockpile = {
+				type = nav_bomber_equipment
+				amount = 15
+				producer = ENG
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_Soviet
+				NOT = { has_War_with = SOV }
+			}
+
+			add_equipment_to_stockpile = {
+				type = strat_bomber_equipment
+				amount = 15
+				producer = SOV
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_German
+				NOT = { has_War_with = GER }
+			}
+
+			add_equipment_to_stockpile = {
+				type = CAS_equipment
+				amount = 15
+				producer = GER
+			}
+			add_equipment_to_stockpile = {
+				type = tac_bomber_equipment
+				amount = 10
+				producer = GER
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = LIT_Aircraft_Italian
+				NOT = { has_war_with = ITA }
+			}
+
+			add_equipment_to_stockpile = {
+				type = CAS_equipment
+				amount = 15
+				producer = ITA
+			}
+			add_equipment_to_stockpile = {
+				type = tac_bomber_equipment
+				amount = 10
+				producer = ITA
+			}
+		}
+		if = {
+			limit = {
+				NOT = { has_completed_focus = LIT_Aircraft_England }
+				NOT = { has_completed_focus = LIT_Aircraft_Soviet }
+				NOT = { has_completed_focus = LIT_Aircraft_German }
+				NOT = { has_completed_focus = LIT_Aircraft_Italian }
+			}
+
+			custom_effect_tooltip = GEN_Fighter_Competition_EXPL
+		}
+		add_tech_bonus = {
+			name = bomber_bonus
+			bonus = 1
+			uses = 1
+			category = cas_bomber
+			category = tactical_bomber
+		}
+	}
+}
+focus = {
+	id = LIT_Close_Air_Support
+	icon = GFX_goal_generic_CAS
+	prerequisite = { focus = LIT_Fighter_Competition }
+
+	x = -2
+	y = 1
+	relative_position_id = LIT_Bomber_Competition
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	ai_will_do = {
+		factor = 2
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = bomber_bonus
+			bonus = 1
+			uses = 1
+			category = cas_bomber
+		}
+	}
+}
+
+focus = {
+	id = LIT_aircraft_design_cooperation
+	icon = GFX_focus_manufacturers_cooperation
+	prerequisite = { focus = LIT_Fighter_Competition focus = LIT_Bomber_Competition }
+	relative_position_id = LIT_Bomber_Competition
+
+	x = -1
+	y = 2
+
+	cost = 5
+
+	available = {
+		is_in_faction = yes
+	}
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		add_to_tech_sharing_group = HUN_joint_air_development_group
+	}
+}
+
+
+focus = {
+	id = LIT_German_Rocketry
+	icon = GFX_focus_rocketry
+	prerequisite = { focus = LIT_Aircraft_German }
+
+	x = 0
+	y = 1
+	relative_position_id = LIT_Aircraft_German
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	available = {
+		GER	= { has_tech = experimental_rockets }
+	}
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = GER_rocketry_focus
+			bonus = 1
+			uses = 1
+			category = rocketry
+		}
+	}
+}
+
+focus = {
+	id = LIT_Shared_Air_Doctrine
+	icon = GFX_goal_generic_air_doctrine
+	prerequisite = { focus = LIT_Fighter_Competition focus = LIT_Bomber_Competition }
+
+	x = 0
+	y = 1
+	relative_position_id = LIT_Bomber_Competition
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	ai_will_do = {
+		factor = 2
+	}
+
+	completion_reward = {
+		air_experience = 25
+
+		add_tech_bonus = {
+			name = air_doc_bonus
+			bonus = 1
+			uses = 1
+			category = air_doctrine
+		}
+
+		#custom_effect_tooltip = GEN_Generals_Other_tt
+	}
+}
+
+
+
+focus = {
+	id = LIT_Own_Design
+	icon = GFX_goal_generic_air_production
+	prerequisite = { focus = LIT_Aviation_Effort }
+	mutually_exclusive = { focus = LIT_Foreign_Design }
+	x = -3
+	y = 1
+	relative_position_id = LIT_Aviation_Effort
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		add_ideas = HUN_indigenous_designs
+	}
+}
+
+
+focus = {
+	id = LIT_Own_Fighter
+	icon = GFX_goal_generic_air_fighter
+	prerequisite = { focus = LIT_Own_Design }
+
+	x = -1
+	y = 2
+	relative_position_id = LIT_Own_Design
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = fighter_bonus
+			bonus = 1
+			uses = 1
+			category = light_fighter
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Own_Bomber
+	icon = GFX_goal_generic_air_bomber
+	prerequisite = { focus = LIT_Own_Design }
+
+	x = 0
+	y = 1
+	relative_position_id = LIT_Own_Design
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = bomber_bonus
+			bonus = 1
+			uses = 1
+			category = cas_bomber
+			category = tactical_bomber
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Own_Naval_Bomber
+	icon = GFX_goal_generic_air_naval_bomber
+	prerequisite = { focus = LIT_Own_Design }
+
+	x = 1
+	y = 2
+	relative_position_id = LIT_Own_Design
+
+	cost = 5
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		add_tech_bonus = {
+			name = nav_bomber_bonus
+			bonus = 1
+			uses = 1
+			category = naval_bomber
+		}
+	}
+}
+
+
+focus = {
+	id = LIT_Own_Air_Doctrine
+	icon = GFX_goal_generic_air_doctrine
+	prerequisite = { focus = LIT_Own_Fighter focus = LIT_Own_Bomber focus = LIT_Own_Naval_Bomber }
+
+	x = -1
+	y = 1
+	relative_position_id = LIT_Own_Naval_Bomber
+
+	cost = 10
+
+	available_if_capitulated = yes
+
+	completion_reward = {
+		air_experience = 25
+
+		add_tech_bonus = {
+			name = air_doc_bonus
+			bonus = 1
+			uses = 2
+			category = air_doctrine
+		}
+
+		#custom_effect_tooltip = GEN_Generals_Other_tt
+	}
+}
+
+focus = {
 	id = LIT_unban_the_LSDP
 	icon = GFX_goal_uruguay_democracy_and_socialism
-	x = 18
+	x = 23
 	y = 0
 
 	cost = 5
@@ -773,7 +2446,7 @@ focus = {
 	id = LIT_alliance_with_far_left
 	icon = GFX_focus_generic_soviet_politics
 	prerequisite = { focus = LIT_unban_the_LSDP }
-	x = -5
+	x = -3
 	y = 1
 	relative_position_id = LIT_unban_the_LSDP
 
