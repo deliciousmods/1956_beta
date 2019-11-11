@@ -25,8 +25,8 @@ Thanks!
 
 **IMPORTANT**
 
-A. If you agree to make assets for Road to 56, we retain use of that material even if you leave the team.
-B. This does not apply to work or assets made for other mods that were simply added to Road to 56. 
-C. Additionally, you may ask to withdraw your work if the material isn't live yet. (published via patch)
-D. To Emphasize: We retain use of all work made for us if you decide to leave the team.
-E. If you want to discuss particulars contact Greatexperiment on Discord.
+1. If you agree to make assets for Road to 56, we retain use of that material even if you leave the team.
+2. This does not apply to work or assets made for other mods that were simply added to Road to 56. 
+3. Additionally, you may ask to withdraw your work if the material isn't live yet. (published via patch)
+4. To Emphasize: We retain use of all work made for us if you decide to leave the team.
+5. If you want to discuss particulars contact Greatexperiment on Discord.
