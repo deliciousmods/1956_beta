@@ -20,8 +20,6 @@ Also, be sure to check our wiki for all the standards we use. The file structure
 
 If for some reason you need greater access rights to the Git, or don't understand any of the above, ask Greatexperiment on Discord. 
 
-Thanks!
-
 
 **IMPORTANT**
 
@@ -30,3 +28,5 @@ Thanks!
 3. Additionally, you may ask to withdraw your work if the material isn't live yet. (published via patch)
 4. To Emphasize: We retain use of all work made for us if you decide to leave the team.
 5. If you want to discuss particulars contact Greatexperiment on Discord.
+
+Thanks!
