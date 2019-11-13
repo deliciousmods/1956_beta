@@ -1,3 +1,5 @@
-﻿picture="box.jpg"
-remote_file_id="1088963694"
-supported_version="1.8.*"
+version="1.8.*"
+tags={
+	"Historical"
+}
+name="1956_git"
