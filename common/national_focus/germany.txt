@@ -3758,7 +3758,7 @@ focus_tree = {
 		id = GER_danzig_for_guarantees
 		icon = GFX_focus_generic_polish_deal
 		prerequisite = { focus = GER_restore_the_empire }
-		prerequisite = { focus = GER_demand_memel }
+		prerequisite = { focus = GER_demand_memel_kaiser_dnvp }
 		available = { 
 			is_puppet = no
 			NOT = { has_war_with = POL }
@@ -3989,7 +3989,8 @@ focus_tree = {
 	}
 	
 	focus = {
-		id = GER_demand_memel
+		id = GER_demand_memel_kaiser_dnvp
+		text = GER_demand_memel
 		icon = GFX_goal_generic_forceful_treaty
 		prerequisite = { focus = GER_restore_the_empire focus = GER_anschluss_dnvp }
 		available = { is_puppet = no }
@@ -4449,7 +4450,7 @@ focus_tree = {
 		id = GER_demand_sudetenland_dnvp
 		text = GER_demand_sudetenland
 		icon = GFX_goal_demand_sudetenland
-		prerequisite { focus = GER_demand_memel }
+		prerequisite { focus = GER_demand_memel_kaiser_dnvp }
 		prerequisite = { focus = GER_anschluss_dnvp }
 		will_lead_to_war_with = CZE
 		will_lead_to_war_with = FRA
@@ -4632,6 +4633,190 @@ focus_tree = {
 						}
 					}
 				}
+			}
+		}
+	}
+	
+	focus = {
+		id = GER_danzig_or_war_dnvp
+		text = GER_danzig_or_war
+		icon = GFX_goal_generic_demand_territory
+		prerequisite = { focus = GER_demand_memel_kaiser_dnvp }
+		prerequisite = { focus = GER_demand_sudetenland_dnvp }
+		will_lead_to_war_with = POL
+		
+		available = {
+			is_puppet = no
+			r56_script_i_am_sane = yes
+			OR = {
+				85 = {
+					owner = {
+						original_tag = POL
+					}
+					controller = {
+						original_tag = POL
+					}
+				}
+				AND = {
+					DNZ = {
+						is_subject_of = POL
+					}
+					85 = {
+						owner = {
+							original_tag = DNZ
+						}
+						controller = {
+							original_tag = DNZ
+						}
+					}
+				}
+			}
+			has_army_manpower = { size > 949999 } #100 div
+			#Make custom trigger tooltip here
+			OR = {
+				POL = {
+					has_civil_war = no
+				}
+				#custom_trigger_tooltip = {
+					#tooltip = GER_danzig_trigger_polish_civil_war
+					AND = {
+						any_other_country = {
+							original_tag = POL
+							has_civil_war = yes
+							OR = {
+								is_in_faction_with = ROOT
+								has_volunteers_amount_from = {
+									tag = GER
+									count > 0
+								}
+							}
+						}
+					}
+				#}
+			}
+		}
+
+		bypass = {
+			OR = {
+				has_war_with = POL
+				is_in_faction_with = POL
+				NOT = {
+					85 = {
+						OR = {
+							controller = {
+								original_tag = POL
+							}
+							owner = {
+								original_tag = POL
+							}
+							controller = {
+								original_tag = DNZ
+							}
+							owner = {
+								original_tag = DNZ
+							}
+						}
+					}
+				}
+			}
+		}
+		cancel_if_invalid = no
+		x = -1
+		y = 1
+		relative_position_id = GER_demand_sudetenland_dnvp
+		cost = 10
+		ai_will_do = {
+			factor = 10	
+			modifier = {
+				factor = 0
+				OR = {
+					date < 1939.1.1
+					any_neighbor_country = {
+						has_war_with = GER
+						NOT = { has_capitulated = yes }
+						strength_ratio = {
+							tag = GER
+							ratio > 0.6
+						}
+					}
+				}
+			}
+		}	
+		completion_reward = {
+			add_named_threat = { threat = 5 name = GER_danzig_or_war }
+			if = {
+				limit = {
+					OR = {
+						85 = {
+							controller = {
+								tag = POL
+								has_civil_war = no
+							}
+						}
+						85 = {
+							controller = {
+								tag = DNZ
+								has_civil_war = no
+							}
+						}
+					}
+				}
+				effect_tooltip = {
+					transfer_state = 85
+					add_state_core = 85
+					remove_state_claim = 86
+					remove_state_claim = 762
+				}
+				POL = {
+					country_event = { id = germany.86 }
+					if = {
+						limit = { NOT = { is_in_faction_with = ROOT } }
+						custom_effect_tooltip = needs_approval
+					}
+					if = {
+						limit = { 
+							is_in_faction_with = ROOT 
+							ROOT = { is_faction_leader = yes }
+						}
+						custom_effect_tooltip = GER_danzig_or_war_POL_faction_GER_leader
+					}
+					if = {
+						limit = {
+							is_in_faction_with = ROOT 
+							NOT = { ROOT = { is_faction_leader = yes } }
+						}
+						custom_effect_tooltip = GER_danzig_or_war_POL_faction_GER_noleader
+					}
+				}
+			}
+			if = {
+				limit = {
+					85 = {
+						owner = {
+							OR = {
+								original_tag = POL
+								tag = POL
+								original_tag = DNZ
+								tag = DNZ
+							}
+						}
+					}
+				}
+				random_other_country = {
+					limit = {
+						original_tag = POL
+						has_civil_war = yes
+						OR = {
+							is_in_faction_with = GER
+							has_volunteers_amount_from = {
+								tag = GER
+								count > 0
+							}
+						}
+					}
+					country_event = { id = germany.113 days = 1 }
+				}
+				custom_effect_tooltip = GER_danzig_or_war_POL_civil_war
 			}
 		}
 	}
@@ -5635,7 +5820,10 @@ focus_tree = {
 			factor = 10
 		}	
 		completion_reward = {
-			
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
 		}
 	}
 	
