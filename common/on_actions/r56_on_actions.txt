@@ -421,6 +421,52 @@ on_actions = {
 ###---> On Declare War <><> <><> <><>
 	on_declare_war = {
 		effect = {
+			#remove Italian control over Albania if they are at war
+			if = {
+				limit = {
+					ROOT = {
+						OR = {
+							original_tag = ALB
+							original_tag = ITA
+						}						
+					}
+					FROM = {
+						OR = {
+							original_tag = ALB
+							original_tag = ITA
+						}
+					}
+				}
+				ITA = {
+					remove_resource_rights = 44
+					remove_resource_rights = 797
+				}
+				ALB = {
+					clr_country_flag = ALB_italian_resource_concessions
+				}						
+			}
+			#Remove Soviet-Japanese oil agreement on North Sakhalin if they are at war.
+			if = {
+				limit = {
+					ROOT = {
+						OR = {
+							original_tag = JAP
+							original_tag = SOV
+						}					
+					}
+					FROM = {
+						OR = {
+							original_tag = JAP
+							original_tag = SOV
+						}
+					}
+				}
+				JAP = {
+					remove_resource_rights = 655
+					remove_opinion_modifier = { target = SOV modifier = JAP_SOV_sakhalin_oil_agreement }
+				}						
+			}
+			#Japanese civil war			
 			if = {
 				limit = {
 					ROOT = {
@@ -507,7 +553,50 @@ on_actions = {
 						}
 					}	
 				}
-			}		
+			}
+			#democratic civil war
+			if = {
+				limit = {
+					ROOT = {
+						original_tag = JAP
+						has_government = democratic						
+					}
+					FROM = {
+						original_tag = JAP
+						has_government = fascism
+						#has_country_leader = {
+						#	name = "Hirohito"
+						#	ruling_only = yes
+						#}					
+					}
+				}
+				ROOT = {
+					#add hirohito idea here if not added by showa consitution focus.
+					if = {
+						limit = {
+							NOT = {
+								has_completed_focus = JAP_strengthen_civilian_government
+							}
+						}
+						add_ideas = JAP_hirohito
+					}
+					
+				}				
+				FROM = {
+					create_country_leader = {
+						name = "Hideki Tojo"
+						desc = "Hideki Tojo"
+						picture = "gfx/leaders/JAP/Portrait_Japan_Generic_land_2.dds"
+						expire = "1965.1.1"
+						ideology = fascism_ideology
+						traits = {
+							army_connections
+						}
+					}
+					add_war_support = 0.8
+					set_cosmetic_tag = JAP2	
+				}
+			}				
 			if = {
 				limit = {
 					ROOT = {
@@ -547,10 +636,12 @@ on_actions = {
 					FROM = {
 						original_tag = HUN
 						has_government = fascism
-						has_country_leader = {
-							name = "Miklós Horthy"
-							ruling_only = yes
-						}					
+						NOT = {
+							has_country_leader = {
+								name = "Ferenc Szalasi"
+								ruling_only = yes
+							}							
+						}
 					}
 				}
 				FROM = {
@@ -995,7 +1086,22 @@ on_actions = {
 	
 ###---> On Government Change <><> <><> <><>
 	on_government_change = {
-		effect = {			
+		effect = {
+			#ensure that concessions are removed in Albania if fascist regime collapse
+			if = {
+				limit = {
+					tag = ITA
+					country_exists = ALB
+				}
+				ITA = {
+					remove_resource_rights = 44
+					remove_resource_rights = 797
+				}
+				ALB = {
+					clr_country_flag = ALB_italian_resource_concessions
+				}				
+			}
+
 			if = {
 				limit = {
 					tag = MAN
@@ -1468,7 +1574,37 @@ on_actions = {
 					}
 				}
 				set_party_name = { ideology = fascism long_name = HUN_arrow_cross_party_long name = HUN_arrow_cross_party }												  
-			}			
+			}
+			
+			if = {
+				limit = {
+					ROOT = {
+						tag = ZIM
+					}
+					FROM = {
+						NOT = {
+							tag = ENG
+						}
+					}
+				}
+				ZIM = {
+					drop_cosmetic_tag = yes #british colony flag
+				}
+			}
+			
+			if = {
+				limit = {
+					ROOT = {
+						tag = ZIM
+					}
+					FROM = {
+						tag = ENG
+					}
+				}
+				ZIM = {
+					set_cosmetic_tag = ZIM_ENG
+				}
+			}
 		}
 	}
 	
@@ -1651,6 +1787,38 @@ on_actions = {
 					}
 				}
 			}
+			
+			if = {
+				limit = {
+					ROOT = {
+						tag = ZIM
+					}
+					FROM = {
+						NOT = {
+							tag = ENG
+						}
+					}
+				}
+				ZIM = {
+					drop_cosmetic_tag = yes #british colony flag
+				}
+			}
+		}
+	}
+	
+###---> On Release As Puppet <><> <><> <><>
+	on_release_as_free = {
+		effect = {
+			if = {
+				limit = {
+					ROOT = {
+						tag = ZIM
+					}
+				}
+				ZIM = {
+					drop_cosmetic_tag = yes #british colony flag
+				}
+			}
 		}
 	}
 	
@@ -1666,11 +1834,10 @@ on_actions = {
 			SOV = {
 				give_resource_rights = { receiver = JAP state = 655 }
 			}						
-
-			POL = {
-				set_technology = {
-					butadiene_processing = 1
-				}
+			#Italian control over Albanian underground
+			ALB = {
+				give_resource_rights = { receiver = ITA state = 797 }
+				give_resource_rights = { receiver = ITA state = 44 }
 			}
 			85 = {
 				add_building_construction = {
@@ -2302,6 +2469,10 @@ on_actions = {
 				}
 				SAF = {
 					retire_country_leader = yes
+				}
+				#added by Darkneon312
+				ZIM = {
+					drop_cosmetic_tag = yes
 				}
 			}			
 			if = {
@@ -2950,6 +3121,20 @@ on_actions = {
 						has_government = communism
 					}
 					POL = { set_party_name = { ideology = democratic long_name = POL_PSL_long name = POL_PSL_party } }
+				}
+			}
+		}
+	}
+	
+	###---> On Liberate (ONLY during peace conference) <><> <><> <><>
+	on_liberate = {
+		effect = {
+			if = {
+				limit = {
+					TAG = ZIM
+				}
+				ZIM = {
+					drop_cosmetic_tag = yes #british colony flag
 				}
 			}
 		}
