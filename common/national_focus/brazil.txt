@@ -15,7 +15,7 @@ focus_tree = {
 	
 	default = no
 	
-	continuous_focus_position = { x = 1675 y = 750 }
+	continuous_focus_position = { x = 1800 y = 1000 }
 
 ###---> Start of Tree/Politcal <><> <><> <><>
 
@@ -78,7 +78,7 @@ focus_tree = {
 		id = bra_consegnac
 		icon = GFX_focus_generic_combined_arms
 		prerequisite = { focus = bra_modernizacao_armadas }
-		x = 8
+		x = 9
 		y = 2
 		relative_position_id = bra_a_voz_do_brasil
 		cost = 5
@@ -938,7 +938,7 @@ focus = {
 		prerequisite = { focus = bra_belem_porto }
 		icon = GFX_goal_generic_navy_doctrines_tactics
 		relative_position_id = bra_belem_porto
-		x = 0
+		x = -1
 		y = 1
 		cost = 5
 		completion_reward = {
@@ -954,9 +954,9 @@ focus = {
 	focus = {
 		id = bra_almirantado
 		icon = GFX_focus_generic_navy_battleship2
-		prerequisite = { focus = bra_modernizacao_marinha }
-		relative_position_id = bra_modernizacao_marinha
-		x = 0
+		prerequisite = { focus = bra_belem_porto }
+		relative_position_id = bra_belem_porto
+		x = 1
 		y = 1
 		cost = 5
 		completion_reward = {
@@ -982,7 +982,7 @@ focus = {
 	focus = {
 		id = bra_submarinos
 		icon = GFX_goal_generic_navy_submarine
-		prerequisite = { focus = bra_almirantado }
+		prerequisite = { focus = bra_almirantado focus = bra_modernizacao_marinha }
 		relative_position_id = bra_almirantado
 		x = 0
 		y = 1
@@ -1000,9 +1000,9 @@ focus = {
 	focus = {
 		id = bra_cruzadores
 		icon = GFX_goal_generic_navy_battleship
-		prerequisite = { focus = bra_submarinos }
-		relative_position_id = bra_submarinos
-		x = 0
+		prerequisite = { focus = bra_almirantado focus = bra_modernizacao_marinha }
+		relative_position_id = bra_almirantado
+		x = -2
 		y = 1
 		cost = 10
 		completion_reward = {
@@ -1021,9 +1021,9 @@ focus = {
 	focus = {
 		id = bra_natal_porto
 		icon = GFX_focus_generic_cruiser2
-		prerequisite = { focus = bra_cruzadores }
-		relative_position_id = bra_cruzadores
-		x = 0
+		prerequisite = { focus = bra_cruzadores focus = bra_submarinos }
+		relative_position_id = bra_submarinos
+		x = -1
 		y = 1
 		cost = 10
 		available = { 498  =  { is_owned_by = BRA } }
@@ -1031,27 +1031,6 @@ focus = {
 			498 = { add_extra_state_shared_building_slots = 2 }
 			498 = { add_building_construction = { type = naval_base province = 10933 level = 2 instant_build = yes } }
 			498 = { add_building_construction = { type = dockyard level = 1 instant_build = yes } }
-			
-			if = {
-				limit = {
-					AND = {
-						has_idea = bra_industrial_elite
-					}
-				}
-				modify_timed_idea = {
-					idea = bra_industrial_elite
-					days = 35
-				}
-			}
-			else_if = {
-				limit = {
-					NOT = { has_idea = bra_industrial_elite }
-				}
-				add_timed_idea = {
-					idea = bra_industrial_elite
-					days = 35
-				}
-			}
 		}
 	}
 ###-----> Army Branch <><> <><> <><> <><> 
@@ -2602,27 +2581,43 @@ focus = {
 		ai_will_do = {
 			factor = 1
 		}
-		available = {
+		available = { 
 			OR = {
 				has_government = democratic
 				has_government = neutrality
 			}
-			ENG = { 
-					has_government = democratic
-					is_puppet = no
-					is_faction_leader = yes
-					has_war = yes
-			}
-			USA = { 
-					has_government = democratic
-					is_puppet = no
-					is_faction_leader = no
-					has_war = yes
-			}
-		}
+			is_subject = no
+			is_in_faction = no
+			any_other_country = {
+				NOT = { has_war_with = ROOT }
+				is_faction_leader = yes
+				is_major = yes
+				has_government = democratic
+			}			
+		}		
 		completion_reward = {
-			ENG = { country_event = { days = 1 id = bra.7 } }
-		}
+			if = {
+				limit = {
+					ENG = {
+						has_government = democratic
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = ENG
+							has_war_with = ROOT
+						}
+					}					
+				}
+				ENG = { country_event = { days = 1 id = bra.7 } }
+			}
+			else = {
+				r56_other_faction_invite_democratic = yes
+			}
+			
+		}		
 	}
 	
 	focus = {
@@ -2762,11 +2757,54 @@ focus = {
 		x = -1
 		y = 1
 		cost = 5
+
+		available = {
+			OR = {
+				SOV = {
+					NOT = { has_war_with = ROOT }
+					has_government = communism
+					has_capitulated = no
+					is_faction_leader = yes
+				}
+				any_other_country = {
+					is_major = yes
+					has_government = communism
+					is_faction_leader = yes
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			is_subject = no
+			is_in_faction = no
+			communism > 0.5
+		}
+
 		completion_reward = {
-			SOV = { country_event = { days = 1 id = bra.7 } }
-			add_opinion_modifier = { target = SOV modifier = bra_comercio_modifier }
-			add_opinion_modifier = { target = SOV modifier = bra_amigo_modifier }
-			SOV = { add_opinion_modifier = { target = BRA modifier = bra_amigo_outro_modifier } }
+			if = {
+				limit = {
+					SOV = {
+						has_government = communism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = SOV
+							has_war_with = ROOT
+						}
+					}					
+				}
+				
+				SOV = { country_event = { days = 1 id = bra.7 } }
+				add_opinion_modifier = { target = SOV modifier = bra_comercio_modifier }
+				add_opinion_modifier = { target = SOV modifier = bra_amigo_modifier }
+				SOV = { add_opinion_modifier = { target = BRA modifier = bra_amigo_outro_modifier } }
+				
+			}
+			else = {
+				r56_other_faction_invite_communism = yes
+			}			
+
 		}
 	}
 	focus = {
@@ -2782,18 +2820,36 @@ focus = {
 		cost = 5
 		completion_reward = {
 			if = {
-				limit = { 
-					PAR = { 
-						AND = { 
-							has_government = communism
-							NOT = { is_in_faction = yes }
+				limit = {
+					any_other_country = {
+						NOT = {
+							original_tag = SOV
 						}
+						is_faction_leader = yes
+						has_government = communism
+						NOT = {
+							has_war_with = ROOT
+						}	
 					}
-				}	
-				add_to_faction = PAR
+				}
+				r56_other_faction_invite_communism_NOT_SOV = yes					
 			}
-			set_rule = { can_create_factions = yes }
-			create_faction = "Internacional Americana"
+			else = {
+				set_rule = { can_create_factions = yes }
+				create_faction = "Internacional Americana"
+				if = {
+					limit = { 
+						PAR = { 
+							AND = { 
+								has_government = communism
+								NOT = { is_in_faction = yes }
+							}
+						}
+					}	
+					add_to_faction = PAR
+				}				
+			}			
+
 			add_opinion_modifier = { target = SOV modifier = bra_comercio_inimigo_modifier }
 			add_opinion_modifier = { target = SOV modifier = bra_inimigo_modifier }
 			SOV = { add_opinion_modifier = { target = BRA modifier = bra_inimigo_outro_modifier } }
