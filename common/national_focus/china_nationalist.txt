@@ -37,9 +37,41 @@ focus_tree = {
 		cost = 5
 		
 		ai_will_do = {
-			factor = 0.5
+			factor = 1
+			modifier = {
+				JAP = {
+					OR = {
+						focus_progress = {
+							focus = JAP_support_the_kodoha_faction
+							progress > 0.6
+						}
+						focus_progress = {
+							focus = JAP_the_unthinkable_option
+							progress > 0.4
+						}						
+
+					}
+				
+				}
+				factor = 25
+			}			
 			modifier = {
 				is_historical_focus_on = yes
+				NOT = {
+					JAP = {
+						OR = {
+							focus_progress = {
+								focus = JAP_support_the_kodoha_faction
+								progress > 0.6
+							}
+							focus_progress = {
+								focus = JAP_the_unthinkable_option
+								progress > 0.4
+							}
+						}
+										
+					}					
+				}
 				factor = 0
 			}
 		}
@@ -300,6 +332,28 @@ focus_tree = {
 					}
 				}
 				GXC = {
+					country_event = { id = kmt.74 days = 5 }
+				}
+			}
+			if = {
+				limit = {
+					country_exists = MEN
+					NOT = {
+						MEN = {
+							is_puppet_of = JAP
+						}
+					}
+					OR = {
+						NOT = { MEN = { is_in_faction_with = CHI }}
+						MEN = {
+							OR = {
+								is_puppet = no
+								is_puppet_of = CHI
+							}
+						}
+					}
+				}
+				MEN = {
 					country_event = { id = kmt.74 days = 5 }
 				}
 			}
@@ -1816,7 +1870,7 @@ focus_tree = {
 		x = 11
 		y = 5
 
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
@@ -2902,7 +2956,24 @@ focus_tree = {
 		x = 9
 		y = 5
 		cost = 10
+        ai_will_do = {
+			factor = 8
+			modifier = {
+				strength_ratio = {
+					tag = JAP
+					ratio < 0.8
+				}
+				factor = 0
+			}
+			modifier = {
+				NOT = {
+					has_tech = transport
+				}
+				factor = 0
+			}			
+        }		
 		available = {
+
 			custom_trigger_tooltip = {
 				tooltip = demand_taiwan_tt
 				hidden_trigger = {
@@ -3194,7 +3265,7 @@ focus_tree = {
 				}
 			}
 		}
-		x = 5
+		x = 3
 		y = 2
 		cost = 10
 		bypass = {
@@ -3523,7 +3594,7 @@ focus_tree = {
 		
 		completion_reward = {
 			add_tech_bonus = {
-				bonus = 0.35
+				bonus = 1
 				uses = 1
 				category = electronics
 			}
@@ -3681,7 +3752,7 @@ focus_tree = {
 		
 	focus = {
 		id = KMT_political_effort
-		icon = GFX_focus_prc_social_democracy
+		icon = GFX_goal_CHI_national_reform
 		x = 33
 		y = 0
 		cost = 10
@@ -3714,6 +3785,10 @@ focus_tree = {
 		icon = GFX_goal_CHI_end_the_peoples_tutelage
 		mutually_exclusive = { focus = KMT_unitary_semi_presidential_republic }
 		mutually_exclusive = { focus = KMT_promote_nationalism }
+		prerequisite = { focus = KMT_political_effort }
+		available = {
+			is_puppet = no
+		}
 		bypass = {
 			has_government = democratic
 			NOT = {
@@ -3735,6 +3810,9 @@ focus_tree = {
 		prerequisite = { focus = KMT_political_effort }
 		mutually_exclusive = { focus = KMT_democratic_republic }
 		mutually_exclusive = { focus = KMT_promote_nationalism }
+		available = {
+			is_puppet = no
+		}
 		x = 25
 		y = 1
 		cost = 10
@@ -3750,6 +3828,12 @@ focus_tree = {
 		prerequisite = { focus = KMT_political_effort }
 		mutually_exclusive = { focus = KMT_democratic_republic }
 		mutually_exclusive = { focus = KMT_unitary_semi_presidential_republic }
+		available = {
+			OR = {
+				is_puppet = no
+				is_puppet_of = JAP
+			}
+		}
 		bypass = {
 			has_government = fascism	
 		}
@@ -3809,7 +3893,6 @@ focus_tree = {
 		y = 4
 		cost = 10
 		completion_reward = {
-			add_political_power = -100
 			add_ideas = KMT_central_power
 		}
 	}
@@ -3829,9 +3912,10 @@ focus_tree = {
 				can_create_factions = yes
 				can_puppet = yes
 			}
-			add_political_power = -250
-			remove_ideas = KMT_central_power
-			add_ideas = KMT_despotism
+			swap_ideas = {
+				remove_idea = KMT_central_power
+				add_idea = KMT_despotism
+			}
 			hidden_effect = {
 				kill_country_leader = yes
 				create_country_leader = {
@@ -3867,39 +3951,50 @@ focus_tree = {
 	
 	focus = {
 		id = KMT_voting_rights
-		icon = GFX_focus_generic_treaty
-		prerequisite = { focus = KMT_trans_pacific_friendship_focus focus = KMT_draw_closer_to_the_empire }
+		icon = GFX_goal_consitution
+		prerequisite = { focus = KMT_implement_parliamentary_system }
 		available = {
-			NOT = {
-				has_government = fascism
-			}
+			has_government = democratic
 		}
-		x = 31
+		x = 32
 		y = 3
 		cost = 10
 		completion_reward = {
-			add_political_power = 150
-			custom_effect_tooltip = KMT_voting_rights_tt
-			hidden_effect = {
-				country_event = { id = kmt.20 }
-			}
+			add_ideas = KMT_voting_rights
 			set_rule = {
 				can_generate_female_aces = yes
 			}
 		}
 	}
+
+	focus = {
+		id = KMT_georgist_tax_reform
+		icon = GFX_focus_POL_agrarian_reform
+		prerequisite = { focus = KMT_implement_parliamentary_system }
+		available = {
+			NOT = {
+				has_government = fascism
+			}
+		}
+		x = 30
+		y = 3
+		cost = 10
+		completion_reward = {
+			add_ideas = KMT_georgist_tax_reform
+		}
+	}
 	
 	focus = {
 		id = KMT_implement_parliamentary_system
-		icon = GFX_goal_generic_construct_civilian
-		prerequisite = { focus = KMT_voting_rights }
+		icon = GFX_goal_generic_wheat
+		prerequisite = { focus = KMT_democratic_republic }
 		available = {
 			NOT = {
 				has_government = fascism
 			}
 		}
 		x = 31
-		y = 4
+		y = 2
 		cost = 10
 		completion_reward = {
 			add_ideas = KMT_parliament
@@ -3913,12 +4008,13 @@ focus_tree = {
 	focus = {
 		id = KMT_universal_sufferage
 		icon = GFX_goal_CHI_three_principes_of_the_people
-		prerequisite = { focus = KMT_implement_parliamentary_system }
+		prerequisite = { focus = KMT_voting_rights }
+		prerequisite = { focus = KMT_georgist_tax_reform }
 		available = {
 			has_government = democratic
 		}
 		x = 31
-		y = 5
+		y = 4
 		cost = 10
 		completion_reward = {
 			add_ideas = KMT_universal_sufferage_ns
@@ -3929,40 +4025,69 @@ focus_tree = {
 		id = KMT_european_friend
 		icon = GFX_allies
 		prerequisite = { focus = KMT_universal_sufferage }
-		prerequisite = { focus = KMT_draw_closer_to_the_empire }
 		mutually_exclusive = { focus = KMT_alone_in_the_east }
+		x = 30
+		y = 5
+		cost = 10
 		available = {
-			has_government = democratic
-			ENG = {
-				has_government = democratic
-				NOT = {
-					is_puppet = yes
+			is_puppet = no
+			OR = {
+				ENG = {
+					NOT = { has_war_with = ROOT }
+					has_government = democratic
+					has_capitulated = no
+					is_faction_leader = yes
+					has_opinion = {
+						target = ROOT
+						value > 0
+					}					
 				}
-				has_opinion = {
-					target = CHI
-					value > 0
+				any_other_country = {
+					is_major = yes
+					has_government = democratic
+					is_faction_leader = yes
+					NOT = { has_war_with = ROOT }
+					has_opinion = {
+						target = ROOT
+						value > 0
+					}					
 				}
-				is_faction_leader = yes
-			}
-			NOT = {
-				has_war_with = ENG
 			}
 		}
-		x = 30
-		y = 6
-		cost = 10
+
 		bypass = {
-			has_government = democratic
-			ENG = {
-				has_government = democratic
-			}
 			is_in_faction_with = ENG
 		}
 		
 		completion_reward = {
-			ENG = {
-				country_event = { id = kmt.21 days = 3 }
+			if = {
+				limit = {
+					ENG = {
+						has_government = democratic
+						is_faction_leader = yes
+						NOT = {
+							OR = {
+								has_completed_focus = ENG_a_change_in_course
+								has_completed_focus = ENG_visit_germany
+							}	
+						}
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = ENG
+							has_war_with = ROOT
+						}
+					}					
+				}
+				ENG = {
+					country_event = { id = kmt.21 days = 3 }
+				}
 			}
+			else = {
+				r56_other_faction_invite_democratic = yes
+			}			
 		}
 	}
 	
@@ -3975,7 +4100,7 @@ focus_tree = {
 			has_government = democratic
 		}
 		x = 32
-		y = 6
+		y = 5
 		cost = 10
 		
 		completion_reward = {
@@ -3992,7 +4117,7 @@ focus_tree = {
 			has_government = democratic
 		}
 		x = 33
-		y = 7
+		y = 6
 		cost = 10
 		
 		completion_reward = {
@@ -4009,7 +4134,7 @@ focus_tree = {
 			has_government = democratic
 		}
 		x = 29
-		y = 7
+		y = 6
 		cost = 10
 		
 		completion_reward = {
@@ -4030,24 +4155,12 @@ focus_tree = {
 		y = 2
 		cost = 10
 		available = {
-			NOT = {
-				has_war_with = JAP
-				JAP = {
-					OR = {
-						focus_progress = {
-						    focus = JAP_intervene_in_china
-						    progress > 0.1
-						}
-						has_completed_focus = JAP_intervene_in_china
-					}
-				}
-			}
+			is_puppet = no
 		}
 		
 		completion_reward = {
 			set_country_flag = new_life
 			add_ideas = kmt_military_youth
-			add_stability = 0.15
 			add_popularity = {
 				ideology = fascism
 				popularity = 0.1
@@ -4066,6 +4179,27 @@ focus_tree = {
 		x = 40
 		y = 2
 		cost = 10
+		available = {
+			OR = {
+				is_puppet_of = JAP
+				AND = {
+					NOT = {
+						has_war_with = JAP
+					}
+					NOT = {
+						OR = {
+							JAP = {
+								focus_progress = {
+							    focus = JAP_intervene_in_china
+							    progress > 0.1
+							}
+								has_completed_focus = JAP_intervene_in_china
+							}
+						}
+					}
+				}
+			}
+		}
 		
 		completion_reward = {
 			add_ideas = KMT_militarism
@@ -4089,22 +4223,13 @@ focus_tree = {
 				ideology = fascism
 				popularity = 0.25
 			}
-			every_country = {
-				limit = {
-					has_government = communism
-				}
-				add_opinion_modifier = {
-					target = ROOT
-					modifier = KMT_commie_banned
-				}
-			}
 			add_ideas = KMT_communism_banned
 		}
 	}
 	
 	focus = {
 		id = KMT_planning_our_empire
-		icon = GFX_goal_generic_more_territorial_claims
+		icon = GFX_goal_CHI_rebuild_the_empire
 		prerequisite = { focus = KMT_ban_communism }
 		available = {
 			has_government = fascism
@@ -5023,7 +5148,7 @@ focus_tree = {
 			}
 		}
 		x = 31
-		y = 7
+		y = 6
 		cost = 10
 		bypass = {
 			custom_trigger_tooltip = {
@@ -5655,7 +5780,7 @@ focus_tree = {
 	
 	focus = {
 		id = KMT_monetary_reform
-		icon = GFX_goal_generic_consumer_goods
+		icon = GFX_focus_mex_privatisation
 		available = {
 			has_war = no
 			has_idea = KMT_jinyuanquan_inflation
@@ -6246,7 +6371,7 @@ focus_tree = {
 		cost = 10
 		
 		completion_reward = {
-			add_political_power = -500
+			add_political_power = -200
 			add_stability = -0.15
 			add_popularity = {
 				ideology = communism
@@ -6440,7 +6565,7 @@ focus_tree = {
 				load_oob = "CHI_harsh_takeover_oob"
 			}
 			add_timed_idea = {
-				days = 1000
+				days = 365
 				idea = KMT_harsh_takeover
 			}
 		}	
@@ -6485,7 +6610,7 @@ focus_tree = {
 	
 	focus = {
 		id = KMT_focus_on_our_own_army
-		icon = GFX_goal_generic_army_doctrines
+		icon = GFX_goal_CHI_focus_on_central_army
 		prerequisite = { focus = KMT_modernize_army focus = KMT_increase_funding_of_german_weaponary }
 		mutually_exclusive = { focus = KMT_incorporate_warlord_forces }
 		x = 16
@@ -6706,7 +6831,7 @@ focus_tree = {
 		}
 		prerequisite = { focus = KMT_support_pro_japanese_faction }
 		x = 42
-		y = 5
+		y = 4
 		cost = 10
 		
 		completion_reward = {
@@ -6919,7 +7044,7 @@ focus_tree = {
 		}
 		prerequisite = { focus = KMT_re_elaborate_hakko_ichiu }
 		x = 42
-		y = 4
+		y = 5
 		cost = 10
 		
 		completion_reward = {
@@ -6931,7 +7056,7 @@ focus_tree = {
 		id = KMT_draw_closer_to_the_empire
 		icon = GFX_goal_tfv_strengthen_commonwealth_ties
 		prerequisite = { focus = KMT_democratic_republic }
-		x = 30
+		x = 29
 		y = 2
 		cost = 2.5
 		
@@ -6943,7 +7068,7 @@ focus_tree = {
 			ENG = {
 				add_opinion_modifier = {
 					target = CHI
-					modifier = KMT_closer_to_britain_ENG
+					modifier = KMT_closer_to_britain
 				}
 			}
 		}
@@ -6951,9 +7076,9 @@ focus_tree = {
 	
 	focus = {
 		id = KMT_trans_pacific_friendship_focus
-		icon = GFX_goal_molotov_ribbentrop_pact
+		icon = GFX_Goal_USA_befriend_america
 		prerequisite = { focus = KMT_democratic_republic }
-		x = 32
+		x = 33
 		y = 2
 		cost = 2.5
 		
@@ -6968,22 +7093,6 @@ focus_tree = {
 					modifier = KMT_trans_pacific_friendship
 				}
 			}
-		}
-	}
-	
-	focus = {
-		id = KMT_resisist
-		icon = GFX_goal_anti_comintern_pact
-		available = {
-			has_government = democratic
-		}
-		prerequisite = { focus = KMT_trans_pacific_friendship_focus }
-		x = 33
-		y = 3
-		cost = 10
-		
-		completion_reward = {
-			add_ideas = KMT_resist_the_reds
 		}
 	}		
 	
@@ -7770,9 +7879,9 @@ focus_tree = {
 	focus = {
 		id = KMT_introduce_shipbuilding_technology_usa
 		icon = GFX_goal_generic_construct_naval_dockyard
-		prerequisite = { focus = KMT_resisist }
-		x = 33
-		y = 4
+		prerequisite = { focus = KMT_trans_pacific_friendship_focus }
+		x = 34
+		y = 3
 		cost = 10
 		available = {
 			is_puppet = no
