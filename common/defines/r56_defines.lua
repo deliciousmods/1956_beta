@@ -196,14 +196,34 @@ NAI = {
 	DIPLOMACY_FACTION_SURRENDER_LEVEL = 20, 	-- How much the recipient nation losing matters for joining a faction
 	DIPLO_PREFER_OTHER_FACTION = -200,			-- The country has yet to ask some other faction it would prefer to be a part of.
 
-
+	PRODUCTION_EQUIPMENT_SURPLUS_FACTOR = 0.15,	-- Base value for how much of currently used equipment the AI will at least strive to have in stock
 										
-
-
-
-
-
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_LOW = 0.60,	-- Minimum strength for a unit to actively attack an enemy unit when executing a plan
+	PLAN_ATTACK_MIN_ORG_FACTOR_MED = 0.75,		-- (LOW,MED,HIGH) corresponds to the plan execution agressiveness level.
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_MED = 0.50,	
+	PLAN_ATTACK_MIN_ORG_FACTOR_HIGH = 0.25,		
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_HIGH = 0.40,
+	ORG_UNIT_WEAK = 0.4,						-- Organization % for unit to be considered weak
+	STR_UNIT_WEAK = 0.4,						-- Strength (equipment) % for unit to be considered weak
 	
+	ORG_UNIT_NORMAL = 0.7,						-- Organization % for unit to be considered normal
+	STR_UNIT_NORMAL = 0.7,						-- Strength (equipment) % for unit to be considered normal
+
+	MAX_ALLOWED_NAVAL_DANGER = 50,				-- AI will ignore naval paths that has danger value of above this threshold while assigning units
+	
+	FASCISTS_ALLY_DEMOCRACIES = -150,
+	FASCISTS_ALLY_COMMUNISTS = -150,
+	COMMUNISTS_ALLY_FASCISTS = -150,
+	DEMOCRACIES_ALLY_COMMUNISTS = -75,
+	COMMUNISTS_ALLY_DEMOCRACIES = -75,
+	
+	DESPERATE_AI_WEAK_UNIT_STR_LIMIT = 0.1,					-- ai will increase number of units assigned to break from desperate situations when units are start falling lower than this str limit
+	DESPERATE_AI_MIN_ORG_BEFORE_ATTACK = 0.9,					-- ai will wait for this much org to attack an enemy prov in desperate situations
+	DESPERATE_AI_MIN_ORG_BEFORE_MOVE = 0.25,					-- ai will wait for this much org to move in desperate situations
+	DESPERATE_ATTACK_WITHOUT_ORG_WHEN_NO_ORG_GAIN = 180,		-- if ai can't regain enough org to attack in this many hours, it will go truly desperate and attack anyway (still has to wait for move org)
+
+
+
 	DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
 		-- Army Values
 		0.5, -- default_morale
@@ -274,6 +294,8 @@ NAI = {
 	},
 
 
+	INVASION_COASTAL_PROVS_PER_ORDER = 28,				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
+
 	MAX_UNITS_FACTOR_INVASION_ORDER = 1.0,				-- Factor for max number of units to assign to naval invasion orders
 	DESIRED_UNITS_FACTOR_INVASION_ORDER = 1.0,			-- Factor for desired number of units to assign to naval invasion orders
 	MIN_UNITS_FACTOR_INVASION_ORDER = 0.5,				-- Factor for min number of units to assign to naval invasion orders #was 1.0 should reduce low unit number naval invasions
@@ -281,10 +303,14 @@ NAI = {
 
 	NEW_LEADER_EXTRA_PP_FACTOR = 1.5,					-- Country must have at least this many times extra PP to get new admirals or army leaders #Was 2.0
 	ATTACK_HEAVILY_DEFENDED_LIMIT = 0.7,				-- AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%) #was 0.5
-	HOUR_BAD_COMBAT_REEVALUATE = 72,                   -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
+	HOUR_BAD_COMBAT_REEVALUATE = 48,                   -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
 
 	
 
+	PRODUCTION_LINE_SWITCH_SURPLUS_NEEDED_MODIFIER = 0.1,	-- Is modified by efficency modifiers.
+	PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 2.0,			-- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
+	PLAN_ACTIVATION_PLAYER_WEIGHT_FACTOR = 2.0,		-- AI countries will hold on activating plans if player controlled countries have plans in the same location. Majors count extra (value of 1 will negate this)
+	AREA_DEFENSE_BASE_IMPORTANCE = 4,					-- Area defense order base importance value (used for determining order of troop selections)
 	
 	
 	ALLY_SUPPLY_RATIO_FOR_UNIT_PRODUCTION = 0.00,		-- supply ratio of ally supply chunks will be added to our own supply chunks (since we will fight around allies as well) modified by produce_unit_for_ally_supply_chunks strat
