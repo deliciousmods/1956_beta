@@ -4027,6 +4027,7 @@ focus_tree = {
 					POL = {
 						exists = yes
 						is_subject = no
+						is_in_faction = no
 						NOT = { has_government = communism }
 					}
 				}
@@ -5170,8 +5171,12 @@ focus_tree = {
 
 		available = {
 			is_subject = no
+			SOV = {
+				exists = yes
+				has_government = communism
+			}
 			FIN = {
-				has_war = yes
+				has_war_with = SOV
 				NOT = {
 					has_war_with = ROOT
 				}
@@ -5212,6 +5217,48 @@ focus_tree = {
 	}
 	
 	focus = {
+		id = GER_foriegn_volunteers
+		icon = GFX_goal_generic_axis_build_infantry
+		prerequisite = { focus = GER_bulwark_against_bolshevism focus = GER_stance_against_fascism }
+		x = 2
+		y = 1
+		relative_position_id = GER_bulwark_against_bolshevism
+		cost = 5
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			is_subject = no
+			if = {
+				limit = {
+					has_completed_focus = GER_bulwark_against_bolshevism
+				}
+				NOT = { has_government = communism }
+			}
+			if = {
+				limit = {
+					has_completed_focus = GER_stance_against_fascism
+				}
+				NOT = { has_government = fascism }
+			}
+		}
+		
+		bypass = {
+
+		}
+
+		cancel_if_invalid = yes
+		continue_if_invalid = no
+		available_if_capitulated = no
+
+		completion_reward = {
+			add_ideas = GER_foriegn_volunteers
+		}
+	}
+	
+	focus = {
 		id = GER_anti_communist_bloc
 		icon = GFX_goal_soviet_threat
 		prerequisite = { focus = GER_bulwark_against_bolshevism }
@@ -5233,7 +5280,6 @@ focus_tree = {
 			factor = 10
 		}	
 		completion_reward = {
-			add_ideas = JAP_anti_communist_volunteers
 			set_rule = { can_create_factions = yes }
 			create_faction = "Anti-Communist Bloc"
 			if = {
@@ -5326,8 +5372,8 @@ focus_tree = {
 		id = GER_strike_at_the_source
 		icon = GFX_focus_ger_strike_at_the_source
 		prerequisite = { focus = GER_anti_communist_bloc }
-		x = 0
-		y = 2
+		x = 1
+		y = 1
 		relative_position_id = GER_anti_communist_bloc
 		cost = 10
 		available = {
@@ -5345,7 +5391,6 @@ focus_tree = {
 					}
 				}
 			}
-			num_faction_members > 3
 		}
 		
 		ai_will_do = {
@@ -5367,6 +5412,77 @@ focus_tree = {
 					type = antagonize
 					id = "GER"
 					value = 200
+				}
+			}
+		}
+	}
+	
+	focus = {
+		id = GER_the_outcome_of_the_civil_war
+		icon = GFX_goal_generic_occupy_states_ongoing_war
+		prerequisite = { focus = GER_strike_at_the_source focus = GER_topple_mussolini }
+		available = {
+			is_subject = no
+			has_global_flag = scw_over
+			if = {
+				limit = { has_completed_focus = GER_anti_communist_bloc }
+				any_country = {
+					original_tag = SPR
+					has_government = communism
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			if = {
+				limit = { has_completed_focus = GER_anti_fascist_front }
+				any_country = {
+					original_tag = SPA
+					has_government = fascism
+					NOT = { has_war_with = ROOT }
+				}
+			}
+		}
+		x = 1
+		y = 1
+		relative_position_id = GER_strike_at_the_source
+		cost = 10
+		ai_will_do = {
+			factor = 1
+		}
+		
+		completion_reward = {
+			custom_effect_tooltip = GER_spain_neutral_wargoal_tt
+			hidden_effect = {
+				if = {
+					limit = { has_completed_focus = GER_anti_communist_bloc }
+					random_other_country = {
+						limit = {
+							original_tag = SPR
+							has_government = communism
+						}
+						GER = {
+							create_wargoal = {
+								type = annex_everything
+								target = PREV
+								expire = 0
+							}
+						}
+					}
+				}
+				if = {
+					limit = { has_completed_focus = GER_anti_fascist_front }
+					random_other_country = {
+						limit = {
+							original_tag = SPA
+							has_government = fascism
+						}
+						GER = {
+							create_wargoal = {
+								type = annex_everything
+								target = PREV
+								expire = 0
+							}
+						}
+					}
 				}
 			}
 		}
@@ -5412,11 +5528,13 @@ focus_tree = {
 				}
 				if = {
 					limit = {
-						has_country_flag = ger_adenuer_leading_zentrum
-						#has_country_leader = {
-						#	name = "Konrad Adenauer"
-						#	ruling_only = no
-						#}
+						OR = {
+							has_country_flag = ger_adenuer_leading_zentrum
+							has_country_leader = {
+								name = "Konrad Adenauer"
+								ruling_only = no
+							}
+						}
 					}
 					create_country_leader = {
 						name = "Konrad Adenauer"
@@ -5486,7 +5604,8 @@ focus_tree = {
 			factor = 10
 		}	
 		completion_reward = {
-			add_ideas = GER_the_conservative_republic
+			#add_ideas = GER_the_conservative_republic
+			add_political_power = 200
 			if = {
 				limit = {
 					has_completed_focus = GER_becks_plot
@@ -5727,6 +5846,10 @@ focus_tree = {
 		available = {
 			is_subject = no
 			NOT = { has_government = fascism }
+			ITA = {
+				exists = yes
+				has_government = fascism
+			}
 		}
 		x = -5
 		y = 1
@@ -5737,7 +5860,11 @@ focus_tree = {
 		}
 		
 		completion_reward = {
-			
+			add_ideas = GER_stance_against_fascism
+			custom_effect_tooltip = GER_stance_against_fascism_tt
+			ITA = { 
+				add_opinion_modifier = { target = GER modifier = embargo } 
+			}
 		}
 	}
 	
@@ -5756,8 +5883,12 @@ focus_tree = {
 
 		available = {
 			is_subject = no
+			ITA = {
+				exists = yes
+				has_government = fascism
+			}
 			GRE = {
-				has_war = yes
+				has_war_with = ITA
 				NOT = {
 					has_war_with = ROOT
 				}
@@ -5805,6 +5936,58 @@ focus_tree = {
 		completion_reward = {
 			set_rule = { can_create_factions = yes }
 			create_faction = "Anti-Fascist Front"
+			if = {
+				limit = {
+					FRA = {
+						exists = yes
+						is_subject = no
+						is_in_faction = no
+						NOT = { has_government = fascism }
+					}
+				}
+				FRA = {
+					country_event = generic.5
+				}
+			}
+			if = {
+				limit = {
+					YUG = {
+						exists = yes
+						is_subject = no
+						is_in_faction = no
+						NOT = { has_government = fascism }
+					}
+				}
+				YUG = {
+					country_event = generic.5
+				}
+			}
+			if = {
+				limit = {
+					ALB = {
+						exists = yes
+						is_subject = no
+						is_in_faction = no
+						NOT = { has_government = fascism }
+					}
+				}
+				ALB = {
+					country_event = generic.5
+				}
+			}
+			if = {
+				limit = {
+					GRE = {
+						exists = yes
+						is_subject = no
+						is_in_faction = no
+						NOT = { has_government = fascism }
+					}
+				}
+				GRE = {
+					country_event = generic.5
+				}
+			}
 		}
 	}
 	
@@ -5812,7 +5995,7 @@ focus_tree = {
 		id = GER_intervene_in_austria
 		icon = GFX_goal_generic_political_pressure
 		prerequisite = { focus = GER_anti_fascist_front }
-		x = 0
+		x = 1
 		y = 1
 		relative_position_id = GER_anti_fascist_front
 		cost = 10
@@ -5839,16 +6022,25 @@ focus_tree = {
 	focus = {
 		id = GER_topple_mussolini
 		icon = GFX_focus_ger_assassinate_mussolini
-		prerequisite = { focus = GER_intervene_in_austria }
-		x = 0
+		prerequisite = { focus = GER_anti_fascist_front }
+		x = -1
 		y = 1
-		relative_position_id = GER_intervene_in_austria
+		relative_position_id = GER_anti_fascist_front
 		cost = 10
 		available = {
 			is_subject = no
 			ITA = {
 				exists = yes
 				has_government = fascism
+			}
+			OR = {
+				is_neighbor_of = ITA
+				AND = {
+					any_country = {
+						is_in_faction_with = ROOT
+						is_neighbor_of = ITA
+					}
+				}
 			}
 		}
 		ai_will_do = {
@@ -5857,30 +6049,9 @@ focus_tree = {
 		completion_reward = {
 			create_wargoal = {
 				target = ITA
-				type = puppet_wargoal_focus
+				type = topple_government
+				expire = 0
 			}
-		}
-	}
-	
-	focus = {
-		id = GER_no_tyranny_in_europe
-		icon = GFX_focus_generic_strike_at_democracy1
-		prerequisite = { focus = GER_topple_mussolini }
-		x = 0
-		y = 1
-		relative_position_id = GER_topple_mussolini
-		cost = 10
-		available = {
-			is_subject = no
-			has_government = democratic
-		}
-		ai_will_do = {
-			factor = 10
-		}	
-		completion_reward = {
-			add_war_support = 0.1
-			unlock_decision_category_tooltip = GER_no_tyranny_in_europe
-			custom_effect_tooltip = GER_no_tyranny_in_europe_tt
 		}
 	}
 	
@@ -6305,10 +6476,29 @@ focus_tree = {
 	}
 	
 	focus = {
+		id = GER_demand_italian_non_aggression
+		icon = GFX_goal_generic_forceful_treaty
+		prerequisite = { focus = GER_european_monroe_doctrine focus = GER_protect_poland }
+		x = -1
+		y = 1
+		relative_position_id = GER_franco_german_military_exercises
+		cost = 5
+		available = {
+			
+		}
+		ai_will_do = {
+			factor = 10
+		}	
+		completion_reward = {
+			#SOV = { country_event = }
+		}
+	}
+	
+	focus = {
 		id = GER_demand_russian_non_aggression
 		icon = GFX_goal_generic_forceful_treaty
-		prerequisite = { focus = GER_protect_poland focus = GER_european_monroe_doctrine }
-		x = 0
+		prerequisite = { focus = GER_european_monroe_doctrine focus = GER_protect_poland }
+		x = 1
 		y = 1
 		relative_position_id = GER_franco_german_military_exercises
 		cost = 5
