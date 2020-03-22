@@ -27,20 +27,16 @@ NDefines.NMilitary.BASE_DIVISION_BRIGADE_GROUP_COST = 8 -- Base cost to unlock a
 NDefines.NMilitary.BASE_DIVISION_BRIGADE_CHANGE_COST = 4 -- Base cost to change a regiment column.
 NDefines.NMilitary.BASE_DIVISION_SUPPORT_SLOT_COST = 10
 
-NDefines.NMilitary.TACTIC_SWAP_FREQUENCEY = 12
 NDefines.NMilitary.BASE_LEADER_TRAIT_GAIN_XP = 0.7
 NDefines.NMilitary.UNIT_EXPERIENCE_PER_COMBAT_HOUR = 0.000175
 NDefines.NMilitary.FIELD_EXPERIENCE_MAX_PER_DAY = 12
-NDefines.NMilitary.SPEED_REINFORCEMENT_BONUS = 0.1
 NDefines.NMilitary.ENCIRCLED_DISBAND_MANPOWER_FACTOR = 0.1
 NDefines.NMilitary.PLAYER_ORDER_PLANNING_DECAY = 0.005
-NDefines.NMilitary.PLAN_SUPPLY_FACTOR = 0.2
 NDefines.NMilitary.DISBAND_MANPOWER_LOSS = 0.0
+NDefines.NMilitary.PLAN_SPREAD_ATTACK_WEIGHT = 4 --AI should concentrate forces more, a bit experimental
 
 NDefines.NMilitary.FIELD_MARSHAL_XP_RATIO = 0.7
 NDefines.NMilitary.COMMANDER_LEVEL_UP_STAT_WEIGHTS = {5, 5, 3, 4}
-NDefines.NMilitary.PLAN_EXECUTE_CAREFUL_MAX_FORT = 4
-NDefines.NMilitary.FUEL_CAPACITY_DEFAULT_HOURS = 192
 NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances to gain a personality trait for new generals
 	0.80, --50% for first trait
 	0.40, --15% for second trait after that
@@ -49,7 +45,7 @@ NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances
 
 -- Technology
 NDefines.NTechnology.BASE_TECH_COST = 80
-NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 6 -- Base year ahead penalty
+NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 5 -- Base year ahead penalty
 NDefines.NTechnology.BASE_RESEARCH_POINTS_SAVED = 50.0
 
 -- Air Combat
@@ -62,22 +58,9 @@ NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 200 -- Max stats
 NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 200
 NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 200
 NDefines.NAir.AIR_WING_MAX_STATS_SPEED = 1500 -- Used to balance the damage done while bombing.
-NDefines.NAir.COMBAT_STAT_IMPORTANCE_SPEED = 1.5
-NDefines.NAir.COMBAT_MULTIPLANE_CAP = 2.0
-NDefines.NAir.DETECT_CHANCE_FROM_OCCUPATION = 0.15
-NDefines.NAir.ACCIDENT_CHANCE_BASE = 0.03
-NDefines.NAir.COMBAT_DAMAGE_SCALE = 0.2
-NDefines.NAir.EFFICIENCY_REGION_CHANGE_DAILY_GAIN_TACTICAL_BOMBER = 0.100
-NDefines.NAir.EFFICIENCY_REGION_CHANGE_DAILY_GAIN_STRATEGIC_BOMBER = 0.036
-NDefines.NAir.AIR_WING_COUNTRY_XP_FROM_TRAINING_FACTOR = 0.0075
-NDefines.NAir.DISRUPTION_ATTACK_FACTOR = 1.0
-NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_PLANE_CHANCE = 2.0 -- Chance to hit a plane in airbase when it is bombed.
-NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_PLANE_DAMAGE_FACTOR = 2.0
-NDefines.NAir.DETECT_CHANCE_FROM_NIGHT = -0.9
-NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_SHIP_CHANCE = 0.1
-NDefines.NAir.BASE_STRATEGIC_BOMBING_HIT_SHIP_DAMAGE_FACTOR = 50
 NDefines.NAir.AIR_WING_XP_LOSS_REDUCTION_OVER_FRIENDLY_TERRITORY_FACTOR = 0.7
-NDefines.NAir.BOMBING_TARGETING_RANDOM_FACTOR = 0.05
+NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Conversion scale for planes to air supply #original was 0.05
+
 NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to create a mission
 		0.0, -- AIR_SUPERIORITY
 		0.0, -- CAS
@@ -96,52 +79,6 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
 
 -- Politics
 NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 0
-
--- Ai behaviour
-NDefines.NAI.FALLBACK_LOSING_FACTOR = 0
-NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 24
-NDefines.NAI.MAX_FUEL_CONSUMPTION_RATIO_FOR_NAVY_TRAINING = 1 -- ai will use at most this ratio of affordable fuel for naval training
-NDefines.NAI.MAX_FUEL_CONSUMPTION_RATIO_FOR_AIR_TRAINING = 1
-NDefines.NAI.ORG_UNIT_WEAK = 0.55
-NDefines.NAI.STR_UNIT_WEAK = 0.55
-NDefines.NAI.ORG_UNIT_NORMAL = 0.75
-NDefines.NAI.STR_UNIT_NORMAL = 0.75
-NDefines.NAI.ORG_UNIT_STRONG = 0.95
-NDefines.NAI.STR_UNIT_STRONG = 0.95
-NDefines.NAI.PLAN_AVG_PREPARATION_TO_EXECUTE = 0.9
-NDefines.NAI.VARIANT_UPGRADE_MIN_XP = 200
-NDefines.NAI.GARRISON_FRACTION = 0.05
-NDefines.NAI.DYNAMIC_STRATEGIES_THREAT_FACTOR = 6.0
-NDefines.NAI.BASE_DISTANCE_TO_CARE = 400.0
-NDefines.NAI.ATTACK_HEAVILY_DEFENDED_LIMIT = 1.1
-NDefines.NAI.UPGRADE_DIVISION_RELUCTANCE = 14
-
-NDefines.NAI.AI_FRONT_MOVEMENT_FACTOR_FOR_READY = 0.1 --default 0.25
-NDefines.NAI.PLAN_VALUE_TO_EXECUTE = -0.2 --default -0.5
-
-NDefines.NAI.FORTIFIED_RATIO_TO_CONSIDER_A_FRONT_FORTIFIED = 0.3
-NDefines.NAI.HEAVILY_FORTIFIED_RATIO_TO_CONSIDER_A_FRONT_FORTIFIED = 0.3
-NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 400
-
--- Navy
-NDefines.NNavy.NAVY_VISIBILITY_BONUS_ON_RETURN_FOR_REPAIR = 0.6
-NDefines.NNavy.NAVAL_TRANSFER_BASE_SPEED = 7
-NDefines.NNavy.CARRIER_STACK_PENALTY_EFFECT = 0.9
-NDefines.NNavy.SHORE_BOMBARDMENT_CAP = 0.30
-NDefines.NNavy.PRIDE_OF_THE_FLEET_UNASSIGN_COST = 50
-NDefines.NNavy.OUT_OF_FUEL_EVASION_FACTOR = -0.75
-NDefines.NNavy.ATTRITION_DAMAGE_STR = 0.02
-NDefines.NNavy.NAVAL_MINES_ACCIDENT_CRITICAL_HIT_CHANCES = 0.21
-NDefines.NNavy.NAVAL_SUPREMACY_CAN_INVADE = 0.75
-NDefines.NNavy.NAVAL_MINES_IN_REGION_MAX = 2000.0
-NDefines.NNavy.NAVAL_MINES_SWEEPING_SPEED_MULT = 0.01
-NDefines.NNavy.NAVAL_MINES_NAVAL_SUPREMACY_FACTOR = 0.75
-NDefines.NNavy.NAVAL_MINES_ACCIDENT_CRITICAL_HIT_CHANCES = 0.10
-NDefines.NNavy.NAVAL_MINES_ACCIDENT_STRENGTH_LOSS = 50.0
-NDefines.NNavy.UNIT_TRANSFER_SPOTTING_SPEED_MULT = 1.0 -- 5.0 -- Spotting speed mult against unit transfers
-NDefines.NNavy.UNIT_TRANSFER_DETECTION_CHANCE_BASE = 4.17 --25.02 -- Unit transfer and naval invasion base chance detection percentage (if this fails no detection is done on that tick)
-NDefines.NNavy.BASE_SPOTTING_EFFECT_FOR_INITIAL_UNIT_TRANSFER_SPOTTING = 0.35 --10.0 -- same as BASE_SPOTTING_EFFECT_FOR_INITIAL_CONVOY_SPOTTING but for naval transfer convoys
-NDefines.NNavy.SPOTTING_SPEED_EFFECT_FOR_INITIAL_UNIT_TRANSFER_SPOTTING = 1.20 --20.0 -- same as SPOTTING_SPEED_EFFECT_FOR_INITIAL_CONVOY_SPOTTING but for naval transfer convoys
 
 NMilitary = {
 
@@ -196,14 +133,34 @@ NAI = {
 	DIPLOMACY_FACTION_SURRENDER_LEVEL = 20, 	-- How much the recipient nation losing matters for joining a faction
 	DIPLO_PREFER_OTHER_FACTION = -200,			-- The country has yet to ask some other faction it would prefer to be a part of.
 
-
+	PRODUCTION_EQUIPMENT_SURPLUS_FACTOR = 0.15,	-- Base value for how much of currently used equipment the AI will at least strive to have in stock
 										
-
-
-
-
-
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_LOW = 0.60,	-- Minimum strength for a unit to actively attack an enemy unit when executing a plan
+	PLAN_ATTACK_MIN_ORG_FACTOR_MED = 0.75,		-- (LOW,MED,HIGH) corresponds to the plan execution agressiveness level.
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_MED = 0.50,	
+	PLAN_ATTACK_MIN_ORG_FACTOR_HIGH = 0.25,		
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_HIGH = 0.40,
+	ORG_UNIT_WEAK = 0.4,						-- Organization % for unit to be considered weak
+	STR_UNIT_WEAK = 0.4,						-- Strength (equipment) % for unit to be considered weak
 	
+	ORG_UNIT_NORMAL = 0.7,						-- Organization % for unit to be considered normal
+	STR_UNIT_NORMAL = 0.7,						-- Strength (equipment) % for unit to be considered normal
+
+	MAX_ALLOWED_NAVAL_DANGER = 50,				-- AI will ignore naval paths that has danger value of above this threshold while assigning units
+	
+	FASCISTS_ALLY_DEMOCRACIES = -150,
+	FASCISTS_ALLY_COMMUNISTS = -150,
+	COMMUNISTS_ALLY_FASCISTS = -150,
+	DEMOCRACIES_ALLY_COMMUNISTS = -75,
+	COMMUNISTS_ALLY_DEMOCRACIES = -75,
+	
+	DESPERATE_AI_WEAK_UNIT_STR_LIMIT = 0.1,					-- ai will increase number of units assigned to break from desperate situations when units are start falling lower than this str limit
+	DESPERATE_AI_MIN_ORG_BEFORE_ATTACK = 0.9,					-- ai will wait for this much org to attack an enemy prov in desperate situations
+	DESPERATE_AI_MIN_ORG_BEFORE_MOVE = 0.25,					-- ai will wait for this much org to move in desperate situations
+	DESPERATE_ATTACK_WITHOUT_ORG_WHEN_NO_ORG_GAIN = 180,		-- if ai can't regain enough org to attack in this many hours, it will go truly desperate and attack anyway (still has to wait for move org)
+
+
+
 	DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
 		-- Army Values
 		0.5, -- default_morale
@@ -274,6 +231,8 @@ NAI = {
 	},
 
 
+	INVASION_COASTAL_PROVS_PER_ORDER = 28,				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
+
 	MAX_UNITS_FACTOR_INVASION_ORDER = 1.0,				-- Factor for max number of units to assign to naval invasion orders
 	DESIRED_UNITS_FACTOR_INVASION_ORDER = 1.0,			-- Factor for desired number of units to assign to naval invasion orders
 	MIN_UNITS_FACTOR_INVASION_ORDER = 0.5,				-- Factor for min number of units to assign to naval invasion orders #was 1.0 should reduce low unit number naval invasions
@@ -281,10 +240,14 @@ NAI = {
 
 	NEW_LEADER_EXTRA_PP_FACTOR = 1.5,					-- Country must have at least this many times extra PP to get new admirals or army leaders #Was 2.0
 	ATTACK_HEAVILY_DEFENDED_LIMIT = 0.7,				-- AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%) #was 0.5
-	HOUR_BAD_COMBAT_REEVALUATE = 72,                   -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
+	HOUR_BAD_COMBAT_REEVALUATE = 48,                   -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
 
 	
 
+	PRODUCTION_LINE_SWITCH_SURPLUS_NEEDED_MODIFIER = 0.1,	-- Is modified by efficency modifiers.
+	PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 2.0,			-- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
+	PLAN_ACTIVATION_PLAYER_WEIGHT_FACTOR = 2.0,		-- AI countries will hold on activating plans if player controlled countries have plans in the same location. Majors count extra (value of 1 will negate this)
+	AREA_DEFENSE_BASE_IMPORTANCE = 4,					-- Area defense order base importance value (used for determining order of troop selections)
 	
 	
 	ALLY_SUPPLY_RATIO_FOR_UNIT_PRODUCTION = 0.00,		-- supply ratio of ally supply chunks will be added to our own supply chunks (since we will fight around allies as well) modified by produce_unit_for_ally_supply_chunks strat

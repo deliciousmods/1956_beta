@@ -20,6 +20,57 @@ country_event = {
 		}
 		if = {
 			limit = {
+				FROM = { has_completed_focus = PRC_the_united_front }
+			}
+			if = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					FROM = { is_in_faction = no }
+				}
+				FROM = {
+					set_rule = { can_create_factions = yes }
+					create_faction = chinese_united_front
+				}
+			}
+			else_if = {
+				limit = {
+					ROOT = { is_faction_leader  = yes }
+				}
+				ROOT = {
+					add_to_faction = FROM
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				FROM = { has_completed_focus = PRC_the_new_communism_beacon }
+			}
+			if = {
+				limit = {
+					NOT = { is_in_faction_with = FROM }
+					FROM = { is_in_faction = no }
+				}
+				FROM = {
+					set_rule = { can_create_factions = yes }
+					create_faction = PRC_government_of_national_defense
+				}
+			}
+			else_if = {
+				limit = {
+					ROOT = { is_faction_leader  = yes }
+				}
+				ROOT = {
+					add_to_faction = FROM
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = "CHI"
+					value = 200
+				}
+			}
+		}
+		if = {
+			limit = {
 				FROM = { is_faction_leader = yes }
 			}
 			FROM = { add_to_faction = ROOT }
@@ -161,9 +212,19 @@ country_event = {
 	title = wtt_prc.20.t
 	desc = wtt_prc.20.desc
 	picture = GFX_report_event_japan_army_mountainside
-
-	is_triggered_only = yes
 	
+	is_triggered_only = yes
+	trigger = {
+		AND = {
+			NOT = { has_war_with = event_target:WTT_communist_china }
+			OR = {
+				MAN = { is_puppet_of = JAP }
+				MEN = { is_puppet_of = JAP }
+				is_neighbor_of = CHI
+				is_neighbor_of = PRC
+			}
+		}
+	}
 	option = {
 		name = wtt_prc.20.a #don't do anything
 		ai_chance = {
@@ -174,8 +235,101 @@ country_event = {
 			}
 		}
 		add_stability = -0.05
-		add_war_support = 0.05
+		add_war_support = -0.05
 		
+	}
+
+	option = {
+		name = wtt_prc.20.b #go to war
+		ai_chance = {
+			base = 80
+		}
+		create_wargoal = {
+			type = annex_everything
+			target = event_target:WTT_communist_china
+		}
+		create_wargoal = {
+			type = annex_everything
+			target = event_target:WTT_current_china_leader
+		}
+	}
+
+	option = {
+		name = wtt_prc.20.c #retreat from the continent
+		ai_chance = {
+			base = 0
+			modifier = {
+				has_government = democratic
+				add = 50
+			}
+		}
+		if = {
+			limit = {
+				controls_state = 527
+			}
+			KOR = { transfer_state = 527 }
+		}
+		if = {
+			limit = {
+				controls_state = 525
+			}
+			KOR = { transfer_state = 525 }
+		}
+		if = {
+			limit = {
+				MAN = {
+					is_subject_of = JAP
+				}
+			}
+			if = {
+				limit = {
+					controls_state = 609
+				}
+				MAN = {
+					transfer_state = 609
+				}
+			}
+			if = {
+				limit = {
+					controls_state = 745
+				}
+				MAN = {
+					transfer_state = 745
+				}
+			}
+			set_autonomy = { target = MAN autonomy_state = autonomy_free }
+		}
+		else_if = {
+			limit = {
+				not = {
+					has_war_with = event_target:WTT_current_china_leader
+				}
+			}			
+			if = {
+				limit = {
+					controls_state = 609
+				}
+				event_target:WTT_current_china_leader = {
+					transfer_state = 609
+				}
+			}
+			if = {
+				limit = {
+					controls_state = 745
+				}
+				event_target:WTT_current_china_leader = {
+					transfer_state = 745
+				}
+			}
+		}
+		if = {
+			limit = {
+				MEN = {
+					is_subject_of = JAP
+				}
+			}
+			set_autonomy = { target = MEN autonomy_state = autonomy_free }
+		}
 	}
 }
 
@@ -445,6 +599,44 @@ country_event = {
 	
 	option = {
 		name = wtt_prc.30.a #okay
+	}
+}
+
+# Hidden event to 'age' Franco after 1950
+country_event = {
+	id = wtt_prc.33
+
+	trigger = {
+		tag = PRC
+		has_country_leader = {
+		    name = "Mao Zedong"
+		    ruling_only = yes
+		}
+		date > 1950.1.1
+	}
+
+	mean_time_to_happen = {
+		days = 2
+	}
+
+	fire_only_once = yes
+
+	hidden = yes
+
+	immediate = {
+		hidden_effect = {
+			retire_country_leader = yes
+			create_country_leader = {
+				name = "Mao Zedong"
+				desc = "POLITICS_MAO_ZEDONG_DESC"
+				picture = "Portrait_China_Mao_Zedong.dds"
+				expire = "1965.1.1"
+				ideology = marxism
+				traits = {
+					
+				}
+			}
+		}
 	}
 }
 
