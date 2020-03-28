@@ -1277,7 +1277,7 @@ country_event = {
 			FRA = { country_event = germany.41 }
 		}
 		CZE = {
-			add_opinion_modifier = { target = ENG modifier = western_betrayal }
+			add_opinion_modifier = { target = ROOT modifier = western_betrayal }
 		}
 		if = {
 			limit = {
@@ -1299,6 +1299,7 @@ country_event = {
 		}
 		if = {
 			limit = {
+				tag = ENG
 				CZE = { is_guaranteed_by = ENG }
 			}
 			ENG = {
@@ -1313,6 +1314,13 @@ country_event = {
 					value = 100
 				}
 			}
+		}
+		if = {
+			limit = {
+				CZE = { is_in_faction_with = ROOT }
+				is_faction_leader = yes
+			}
+			remove_from_faction = CZE
 		}
 	}
 	option = { # Support the Czechs
@@ -1393,25 +1401,19 @@ country_event = {
 					generator = { 69 }
 				}
 			}
-		}																						###### Change made for CZKE mod  line disabled
-		if = {
-			limit = { CZE = { is_in_faction = no } }
-			add_to_faction = CZE
 		}
-		CZE = {
-			add_ai_strategy = {
-				type = alliance
-				id = "ENG"
-				value = 200
+		if = {
+			limit = { 
+				is_in_faction = yes
+				CZE = { is_in_faction = no }	   
 			}
-		}
-		if = {
-			limit = {
-				FRA = {
-					NOT = { has_war_with = CZE }
+			random_country = {
+				limit = {
+					is_faction_leader = yes
+					is_in_faction_with = ROOT #this may in fact be ROOT, since countries are in a faction with themselves!
 				}
-			}
-			FRA = { country_event = germany.42 }
+				add_to_faction = CZE
+			}							   
 		}
 		if = {
 			limit = {
@@ -1488,7 +1490,17 @@ country_event = {
 				is_in_faction_with = CZE
 				is_faction_leader = yes
 			}
-			dismantle_faction = yes
+			if = {
+				limit = {
+					NOT = {
+						any_other_country = { #check if CZE and FRA are the only countries in this faction
+							NOT = { original_tag = CZE }
+							is_in_faction_with = ROOT
+						}
+					}
+				}
+				dismantle_faction = yes 
+			}			  
 		}
 		if = {
 			limit = {
@@ -1574,17 +1586,29 @@ country_event = {
 				}
 			}
 		}
-		if = {
 			limit = { is_in_faction_with = ENG }
-			ENG = {
-				country_event = germany.43
-				remove_from_faction = FRA
+			ENG = { 
+				country_event = germany.43 
+				if = {
+					limit = {
+						is_faction_leader = yes
+					}
+					remove_from_faction = FRA
+					else = {
+						FRA = { remove_from_faction = ENG }
+					}
+				}
 			}
 		}
-		if = {
 			limit = { is_in_faction_with = GER }
-			GER = {
-				remove_from_faction = FRA
+			if = {
+				limit = { GER = { is_faction_leader = yes } }
+				GER = { 
+					remove_from_faction = FRA
+				}
+				else = {
+					remove_from_faction = GER
+				}
 			}
 		}
 		if = {
@@ -1606,14 +1630,14 @@ country_event = {
 			}
 		}
 		if = {
-			limit = {
 				OR = {
 					is_in_faction = no
-					is_faction_leader = no
-					is_in_faction_with = ENG
+					AND = {
+						is_faction_leader = no
+						is_in_faction_with = ENG
+					}
 					is_in_faction_with = GER
-				}
-				NOT = { is_in_faction_with = CZE }
+				}				  
 				CZE = { is_in_faction = no }
 			}
 			create_faction = "french_alliance"
@@ -1629,7 +1653,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				NOT = { is_in_faction_with = CZE }
+				is_in_faction = no
 				CZE = {
 					is_faction_leader = yes
 					has_completed_focus = CZKE_revive_little_entente
