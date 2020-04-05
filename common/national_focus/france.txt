@@ -4087,7 +4087,9 @@
 				AND = {
 					NOT = { has_completed_focus = FRA_support_the_legitimatises }
 					SPB = {
-						exists = no
+						exists = yes
+						is_subject = no
+						is_in_faction = no
 					}
 				}
 			}
@@ -4178,7 +4180,7 @@
 	}
 	focus = {
 		id = FRA_support_the_legitimatises
-		icon = GFX_goal_unkown
+		icon = GFX_r56_goal_FRA_orleanism
 		cost = 10
 		prerequisite = {
 			focus = FRA_papal_rehabilitation
@@ -4200,13 +4202,63 @@
 			factor = 2
 		}
 		completion_reward = {
-
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				if = {
+					limit = {
+						OR = {
+							NOT = { has_global_flag = SPB_alfonso_xiii_dead }
+							date < 1941.2.21
+						}
+					}
+					create_country_leader = {
+						name = "Alphonse I"
+						desc = "POLITICS_ALFONSO_XIII_DESC"
+						picture = GFX_portrait_SPA_alfonso_xiii
+						expire = "1965.1.1"
+						ideology = absolute_monarchism
+						traits = {
+							disgraced_monarch
+						}
+					}
+				}
+				else = {
+					create_country_leader = {
+						name = "Jacques II"
+						desc = "POLITICS_JAIME_IV_DESC"
+						picture = GFX_portrait_fra_infante_jaime
+						expire = "1965.1.1"
+						ideology = absolute_monarchism
+						traits = {
+							the_legitimist
+						}
+					}
+				}
+				set_politics = { ruling_party = neutrality }
+				hidden_effect = {
+					news_event = { id = lar_news.8 days = 3 random_days = 5 }
+				}
+			}
+			else = {
+				create_country_leader = {
+					name = "Jean III"
+					desc = "POLITICS_JUAN_III_DESC"
+					picture = "gfx/leaders/SPR/r56_portrait_SPR_Juan_III.dds"
+					expire = "1965.1.1"
+					ideology = absolute_monarchism
+					traits = {
+					}
+				}
+				set_politics = { ruling_party = neutrality }
+			}
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 	focus = {
 		id = FRA_side_with_the_orleanists
-		icon = GFX_r56_goal_FRA_orleanism
+		icon = GFX_focus_focus_fra_orleans_restoration
 		cost = 10
 		prerequisite = {
 			focus = FRA_papal_rehabilitation
@@ -4818,7 +4870,7 @@
 	}
 	focus = {
 		id = FRA_secure_the_crown_of_spain
-		icon = GFX_goal_unkown
+		icon = GFX_goal_generic_position_armies
 		cost = 10
 		prerequisite = {
 			focus = FRA_intervene_in_the_spanish_civil_war
@@ -4830,23 +4882,83 @@
 		}
 		available = {
 			has_global_flag = scw_over
+			is_subject = no
+			has_government = neutrality
+			if = {
+				limit = {
+					SPB = {
+						exists = yes
+					}
+				}
+				is_in_faction = yes
+			}
 		}
+		bypass = {
+			has_global_flag = scw_over
+			SPB = {
+				exists = yes
+			}
+		}
+		will_lead_to_war_with = SPR
 		relative_position_id = FRA_intervene_in_the_spanish_civil_war
 		available_if_capitulated = no
 		ai_will_do = {
 			factor = 5
 		}
 		completion_reward = {
-			
+			if = {
+				limit = {
+					country_exists = SPB
+				}
+				SPB = { country_event = france.124 }
+			}
+			else = {
+				41 = {
+					OWNER = {
+						ROOT = {
+							create_wargoal = {
+								type = annex_everything
+								target = PREV
+								expire = 0
+							}
+						}
+					}
+				}
+			}
 		}
-		search_filters = {  }
 	}
 	focus = {
 		id = FRA_proclaim_the_dual_monarchy
-		icon = GFX_goal_unkown
+		icon = GFX_goal_generic_demand_territory
 		cost = 10
 		prerequisite = {
 			focus = FRA_secure_the_crown_of_spain
+		}
+		available = {
+			is_subject = no
+			has_government = neutrality
+			OR = {
+				SPB = {
+					exists = yes
+					has_capitulated = no
+					NOT = {
+						has_war_with = FRA
+					}
+					has_government = neutrality
+				}
+				SPR = {
+					is_subject_of = FRA
+				}
+				AND = {
+					SPR = {
+						exists = no
+					}
+					any_state = {
+						is_core_of = SPR
+						is_owned_by = FRA
+					}
+				}
+			}
 		}
 		x = 0
 		y = 1
@@ -4856,7 +4968,73 @@
 			factor = 5
 		}
 		completion_reward = {
-			
+			if = {
+				limit = {
+					SPB = {
+						exists = yes
+					}
+				}
+				SPB = {
+					every_unit_leader = {
+						set_nationality = ROOT
+					}
+				}
+				annex_country = { target = SPB transfer_troops = yes }
+				every_state = {
+					limit = {
+						is_core_of = SPB
+					}
+					add_core_of = ROOT
+				}
+				add_stability = -0.1
+				set_cosmetic_tag = FRANCO_SPAIN
+			}
+			else_if = {
+				limit = {
+					SPR = {
+						is_subject_of = ROOT
+					}
+				}
+				SPR = {
+					every_unit_leader = {
+						set_nationality = ROOT
+					}
+				}
+				annex_country = {
+					target = SPR
+					transfer_troops = yes
+				}
+				every_state = {
+					limit = {
+						is_core_of = SPR
+					}
+					add_core_of = FRA
+				}
+				add_stability = -0.1
+				set_cosmetic_tag = FRANCO_SPAIN
+			}
+			else_if = {
+				limit = {
+					SPR = {
+						exists = no
+					}
+					any_state = {
+						is_core_of = SPR
+						is_owned_by = FRA
+					}
+				}
+				every_state = {
+					limit = {
+						is_core_of = SPR
+					}
+					add_core_of = FRA
+				}
+				add_stability = -0.1
+				set_cosmetic_tag = FRANCO_SPAIN
+			}
+			else = {
+				custom_effect_tooltip = FRA_proclaim_the_dual_monarchy_tt
+			}
 		}
 		search_filters = {  }
 	}
@@ -4909,11 +5087,21 @@
 				target = SPA
 			}
 			set_rule = { can_send_volunteers = yes }
+			add_ai_strategy = {
+				type = support
+				id = SPA
+				value = 100
+			}
+			add_ai_strategy = {
+				type = protect
+				id = SPA
+				value = 100
+			}
 		}
 	}
 	focus = {
 		id = FRA_anti_german_front
-		icon = GFX_goal_unkown
+		icon = GFX_focus_generic_diplomatic_treaty
 		cost = 10
 		prerequisite = {
 			focus = FRA_support_the_spanish_nationalists
@@ -4931,9 +5119,33 @@
 			factor = 3
 		}
 		completion_reward = {
-			
+			set_rule = {
+				can_create_factions = yes
+			}
+			create_faction = FRA_anti_german_front
+			add_opinion_modifier = {
+				target = GER
+				modifier = FRA_anti_german_front
+			}
+			GER = {
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = FRA_anti_german_front
+				}
+			}
+			add_war_support = 0.2
+			add_ai_strategy = {
+				type = antagonize
+				id = GER
+				value = 50
+			}
+			add_ai_strategy = {
+				type = contain
+				id = GER
+				value = 50
+			}
 		}
-		search_filters = {  }
+		search_filters = { FOCUS_FILTER_WAR_SUPPORT }
 	}
 	focus = {
 		id = FRA_ally_italy
@@ -4994,6 +5206,12 @@
 			SPA = {
 				is_in_faction = no
 				is_subject = no
+				NOT = {
+					has_government = communism
+				}
+			}
+			SPC = {
+				exists = no
 			}
 		}
 		bypass = {
@@ -5036,7 +5254,7 @@
 		relative_position_id = FRA_ally_italy
 		available_if_capitulated = no
 		ai_will_do = {
-			factor = 3
+			factor = 1
 		}
 		will_lead_to_war_with = SOV
 		completion_reward = {
@@ -5045,14 +5263,19 @@
 					NOT = {
 						is_in_faction_with = FRA
 					}
-					any_owned_state = {
-						is_coastal = yes
+					OR = {
+						capital_scope = {
+							is_on_continent = europe
+						}
+						any_owned_state = {
+							is_coastal = yes
+						}
 					}
 					has_government = communism
 				}
 				FRA = {
 					create_wargoal = {
-						type = annex_everything
+						type = topple_government
 						target = PREV
 						expire = 0
 					}
@@ -5183,8 +5406,9 @@
 					POL = {
 						is_in_faction = no
 						exists = yes
+						is_subject = no
+						has_government = neutrality
 						NOT = {
-							has_government = communism
 							has_war_with = FRA
 						}
 					}
@@ -5238,6 +5462,7 @@
 				create_wargoal = {
 					type = take_claimed_state
 					target = BEL
+					expire = 0
 				}
 			}
 			if = {
@@ -5247,6 +5472,7 @@
 				create_wargoal = {
 					type = take_claimed_state
 					target = VLA
+					expire = 0
 				}
 			}
 			if = {
@@ -5256,15 +5482,18 @@
 				create_wargoal = {
 					type = take_claimed_state
 					target = WLL
+					expire = 0
 				}
 			}
 			create_wargoal = {
 				type = take_claimed_state
 				target = LUX
+				expire = 0
 			}
 			create_wargoal = {
 				type = take_claimed_state
 				target = HOL
+				expire = 0
 			}
 		}
 		search_filters = { FOCUS_FILTER_ANNEXATION }
@@ -5296,6 +5525,7 @@
 			create_wargoal = {
 				type = puppet_wargoal_focus
 				target = ENG
+				expire = 0
 			}
 		}
 		search_filters = { FOCUS_FILTER_ANNEXATION }
@@ -5330,6 +5560,7 @@
 			create_wargoal = {
 				type = annex_everything
 				target = ITA
+				expire = 0
 			}
 			158 = {
 				add_claim_by = FRA
@@ -5470,6 +5701,7 @@
 				create_wargoal = {
 					type = puppet_wargoal_focus
 					target = GER
+					expire = 0
 				}
 			}
 			if = {
@@ -5481,6 +5713,7 @@
 				create_wargoal = {
 					type = puppet_wargoal_focus
 					target = PRE
+					expire = 0
 				}
 			}
 		}
@@ -5602,7 +5835,7 @@
 			is_subject = no
 			any_state = { 
 				is_core_of = ITA
-				is_controlled_by = ITA
+				is_controlled_by = ROOT
 			}
 			ITA = {
 				OR = {
@@ -5665,18 +5898,17 @@
 		available_if_capitulated = no
 
 		completion_reward = {
-			add_claim_of = 103
-			add_claim_of = 102
-			add_claim_of = 736
-			add_claim_of = 163
-			add_claim_of = 104
-			add_claim_of = 109
+			add_state_claim = 103
+			add_state_claim = 102
+			add_state_claim = 736
+			add_state_claim = 163
 			103 = {
 				OWNER = {
 					ROOT = {
 						create_wargoal = {
 							target = PREV
 							type = annex_everything
+							expire = 0
 						}
 					}
 				}
@@ -7598,7 +7830,7 @@
 				create_wargoal = {
 					type = puppet_wargoal_focus
 					target = SPC
-					
+					expire = 0
 				}
 			}
 		}
