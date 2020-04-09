@@ -68,6 +68,7 @@ country_event = {
 					country_event = { id = lar_spain.4 } # Nationalists working against the government
 					country_event = { id = lar_spain.5 }
 					activate_mission = SPR_military_plot_republicans
+					add_ideas = SPR_government_power_struggle
 				}
 			}
 			if = {
@@ -131,6 +132,7 @@ country_event = {
 			    name = SPR_izquierda_republicana_party
 			}
 		}
+		add_political_power = 5
 		if = {
 			limit = {
 				NOT = {
@@ -152,6 +154,7 @@ country_event = {
 				}
 			}
 		}
+		effect_tooltip = { add_ideas = SPR_government_power_struggle }
 		custom_effect_tooltip = SPR_republican_garrison_control_decisions_tt
 	}
 
@@ -5577,7 +5580,7 @@ country_event = {
 				}
 				if = {
 					limit = {
-						num_of_controlled_states > 11
+						num_of_controlled_states > 10
 						controls_state = 791
 					}
 					SPB = {
@@ -5586,7 +5589,7 @@ country_event = {
 				}
 				if = {
 					limit = {
-						num_of_controlled_states > 13
+						num_of_controlled_states > 11
 						controls_state = 174
 					}
 					SPB = {
@@ -5595,11 +5598,55 @@ country_event = {
 				}
 				if = {
 					limit = {
-						num_of_controlled_states > 15
+						num_of_controlled_states > 13
 						controls_state = 171
 					}
 					SPB = {
 						transfer_state = 171
+					}
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 14
+						has_global_flag = scw_early_end
+					}
+					random_owned_state = {
+						limit = {
+							any_neighbor_state = {
+								OR = {
+									state = 171
+									state = 172
+									state = 174
+									state = 176
+									state = 791
+								}
+							}
+							has_state_flag = SPR_core_of_spain_flag
+							is_controlled_by = ROOT
+							is_capital = no
+						}
+						SPB = {
+							transfer_state = PREV
+						}
+					}
+					random_owned_state = {
+						limit = {
+							any_neighbor_state = {
+								OR = {
+									state = 171
+									state = 172
+									state = 174
+									state = 176
+									state = 791
+								}
+							}
+							has_state_flag = SPR_core_of_spain_flag
+							is_controlled_by = ROOT
+							is_capital = no
+						}
+						SPB = {
+							transfer_state = PREV
+						}
 					}
 				}
 			}
@@ -5885,7 +5932,7 @@ country_event = {
 					limit = {
 						owns_state = 172
 					}
-					set_capital = PREV
+					set_capital = 172
 				}
 				else = {
 					random_owned_state = {
@@ -6052,26 +6099,33 @@ country_event = {
 			}
 
 			## SPA triggers Carlist Uprising ##
-			# If POR has already joined SCW, it will join the war against SPB as well
-			if = { #POR supporting SPD
+			# If any country has already joined SCW, it will join the war against SPB as well
+			if = { #Country supporting SPD
 				limit = {
-					POR = { has_country_flag = POR_supports_SPD_flag }
+					any_country = { has_country_flag = supports_SPD_flag }
 				}
-				POR = {
+				every_country = {
+					limit = { has_country_flag = supports_SPD_flag }
 					add_to_war = { targeted_alliance = SPD enemy = SPB hostility_reason = asked_to_join }
 				}
-				random_country = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
+				if = {
 					limit = {
-						has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						any_country = { has_country_flag = POR_non_aligned_portugal_supports_SPA_flag }
 					}
-					add_to_war = { targeted_alliance = SPA enemy = SPB hostility_reason = asked_to_join }
+					random_country = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
+						limit = {
+							has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						}
+						add_to_war = { targeted_alliance = SPA enemy = SPB hostility_reason = asked_to_join }
+					}
 				}
 			}
-			else_if = { #POR supporting SPA
+			if = { #Country supporting SPA
 				limit = {
-					POR = { has_country_flag = POR_supports_SPA_flag }
+					any_country = { has_country_flag = supports_SPA_flag }
 				}
-				POR = {
+				every_country = {
+					limit = { has_country_flag = supports_SPA_flag }
 					add_to_war = { targeted_alliance = SPA enemy = SPB hostility_reason = asked_to_join }
 				}
 			}
@@ -6304,7 +6358,7 @@ country_event = {
 					limit = {
 						owns_state = 172
 					}
-					set_capital = PREV
+					set_capital = 172
 				}
 				else = {
 					random_owned_state = {
@@ -6444,8 +6498,8 @@ country_event = {
 			}
 
 			## SPB triggers Carlist Uprising ##
-			### All Portuguese Aid goes to SPA ###
-			#Op. modifier goes to SPA
+			### All foreign Aid goes to SPA ###
+			#Portuguese Op. modifier goes to SPA
 			if = {
 				limit = {
 					has_opinion_modifier = POR_helped_in_civil_war
@@ -6461,37 +6515,39 @@ country_event = {
 					}
 				}
 			}
-			if = { #POR supporting SPA
-				limit = {
-					POR = { has_country_flag = POR_supports_SPA_flag }
+			if = {#Country supporting SPA
+				limit = { 
+					any_country = { has_country_flag = supports_SPA_flag }
 				}
-				SPA = {
-					diplomatic_relation = {
-						country = POR
-						relation = military_access
-						active = yes
+				every_country = {
+					limit = {
+						 has_country_flag = supports_SPA_flag
 					}
-				}
-				POR = {
 					diplomatic_relation = {
 						country = SPA
 						relation = military_access
 						active = yes
 					}
+					SPA = {
+						diplomatic_relation = {
+							country = PREV
+							relation = military_access
+							active = yes
+						}
+					}
 					#Join war against all SPA enemies
-					if = {
-						limit = { country_exists = SPD }
-						add_to_war = { targeted_alliance = SPA enemy = SPD hostility_reason = asked_to_join }
-					}
-					if = {
-						limit = { country_exists = SPC }
-						add_to_war = { targeted_alliance = SPA enemy = SPC hostility_reason = asked_to_join }
-					}
-					if = {
-						limit = { country_exists = SPB }
-						add_to_war = { targeted_alliance = SPA enemy = SPB hostility_reason = asked_to_join }
+					every_country = {
+						limit = { has_war_with = SPA }
+						PREV = {
+							add_to_war = {
+								targeted_alliance = SPA
+								enemy = PREV
+								hostility_reason = asked_to_join
+							}
+						}
 					}
 				}
+			
 				#Transfer troops in territory belonging to SPA allies back home
 				every_state = {
 					limit = {
@@ -6508,19 +6564,27 @@ country_event = {
 					}
 				}
 			}
-			else_if = {	#POR supporting SPD
+			if = {	#Country supporting SPD
 				limit = {
-					POR = { has_country_flag = POR_supports_SPD_flag }
+					any_country = { has_country_flag = supports_SPD_flag }
 				}
-				POR = {
-					# POR joins war against SPA
+				every_country = {
+					limit = {
+						has_country_flag = supports_SPD_flag
+					}
+					# Country joins war against SPA
 					add_to_war = { targeted_alliance = SPD enemy = SPA hostility_reason = asked_to_join }
 				}
-				random_country = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
+				if = {
 					limit = {
-						has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						any_country = { has_country_flag = POR_non_aligned_portugal_supports_SPA_flag }
 					}
-					add_to_war = { targeted_alliance = SPA enemy = SPB hostility_reason = asked_to_join }
+					random_country = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
+						limit = {
+							has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						}
+						add_to_war = { targeted_alliance = SPA enemy = SPB hostility_reason = asked_to_join }
+					}
 				}
 			}
 			every_state = {
@@ -6528,6 +6592,7 @@ country_event = {
 					has_state_flag = SPR_core_of_spain_flag
 				}
 				add_core_of = SPB
+				add_core_of = SPA
 			}
 			news_event = { id = lar_news.10 days = 1 }
 		}
@@ -6739,6 +6804,51 @@ country_event = {
 						}
 					}
 				}
+				if = {
+					limit = {
+						num_of_controlled_states > 15
+						has_global_flag = scw_early_end
+					}
+					SPC = {
+						transfer_state = 167
+					}
+					random_owned_state = {
+						limit = {
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									state = 166
+									state = 167
+								}
+							}
+							has_state_flag = SPR_core_of_spain_flag
+							is_controlled_by = ROOT
+							is_capital = no
+						}
+						SPC = {
+							transfer_state = PREV
+						}
+					}
+					random_owned_state = {
+						limit = {
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									state = 166
+									state = 167
+								}
+							}
+							has_state_flag = SPR_core_of_spain_flag
+							is_controlled_by = ROOT
+							is_capital = no
+						}
+						SPC = {
+							transfer_state = PREV
+						}
+					}
+				}
 			}
 			else = { # You're not getting out of a civil war by voluntarily giving up the targetable locations, pal!
 				random_state = {
@@ -6854,8 +6964,13 @@ country_event = {
 				}
 				if = {
 					limit = {
-						num_of_controlled_states > 2
-						num_of_controlled_states < 4
+						OR = {
+							AND = {
+								num_of_controlled_states > 2
+								num_of_controlled_states < 4
+							}
+							has_global_flag = scw_early_end
+						}
 					}
 					every_owned_state = {
 						create_unit = {
@@ -6998,34 +7113,42 @@ country_event = {
 			}
 
 			## SPD triggers Anarchist Uprising ##
-			# If POR has already joined SCW, it will join the war against SPC as well
-			if = { #POR supporting SPD
+			# If any country has already joined SCW, it will join the war against SPC as well
+			if = { #Country supporting SPD
 				limit = {
-					POR = { has_country_flag = POR_supports_SPD_flag }
+					any_country = { has_country_flag = supports_SPD_flag }
 				}
-				POR = {
+				every_country = {
+					limit = { has_country_flag = supports_SPD_flag }
 					add_to_war = { targeted_alliance = SPD enemy = SPC hostility_reason = asked_to_join }
 				}
-				random_country = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
+				if = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
 					limit = {
-						has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						any_country = { has_country_flag = POR_non_aligned_portugal_supports_SPA_flag }
 					}
+					random_country = {
+						limit = {
+							has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						}
+						add_to_war = { targeted_alliance = SPA enemy = SPC hostility_reason = asked_to_join }
+					}
+				}
+			}
+			if = { #Country supporting SPA
+				limit = {
+					any_country = { has_country_flag = supports_SPA_flag }
+				}
+				every_country = {
+					limit = { has_country_flag = supports_SPA_flag }
 					add_to_war = { targeted_alliance = SPA enemy = SPC hostility_reason = asked_to_join }
 				}
 			}
-			else_if = { #POR supporting SPA
+			if = { #Country supporting SPB
 				limit = {
-					POR = { has_country_flag = POR_supports_SPA_flag }
+					any_country = { has_country_flag = supports_SPB_flag }
 				}
-				POR = {
-					add_to_war = { targeted_alliance = SPA enemy = SPC hostility_reason = asked_to_join }
-				}
-			}
-			else_if = { #POR supporting SPB
-				limit = {
-					POR = { has_country_flag = POR_supports_SPB_flag }
-				}
-				POR = {
+				every_country = {
+					limit = { has_country_flag = supports_SPB_flag }
 					add_to_war = { targeted_alliance = SPB enemy = SPC hostility_reason = asked_to_join }
 				}
 			}
@@ -7199,6 +7322,14 @@ country_event = {
 					    popularity = 1
 					}
 				}
+				set_rule = {
+				    can_puppet = no
+				    can_create_factions = no
+				    can_join_factions = no
+				    can_boost_own_ideology = no
+					can_generate_female_aces = yes
+					can_create_collaboration_government = no
+				}
 			}
 			if = {
 				limit = {
@@ -7235,15 +7366,38 @@ country_event = {
 					    popularity = 1
 					}
 				}
-			}
-			set_rule = {
-			    can_puppet = no
-			    can_create_factions = no
-			    can_join_factions = no
-			    can_boost_own_ideology = no
-				can_generate_female_aces = yes
-				can_create_collaboration_government = no
-			}
+				create_field_marshal = {
+					name = "José Rovira"
+					portrait_path = "gfx/leaders/Europe/Portrait_Europe_Generic_land_5.dds"
+					traits = { infantry_officer politically_connected }
+					skill = 3
+				    attack_skill = 2
+				    defense_skill = 2
+				    planning_skill = 2
+				    logistics_skill = 3
+				}
+				create_corps_commander = {
+					name = "Carmel Rosa Baserba"
+					portrait_path = "gfx/leaders/Europe/Portrait_Europe_Generic_land_1.dds"
+					traits = { trait_cautious infantry_officer }
+					skill = 3
+				    attack_skill = 2
+				    defense_skill = 2
+				    planning_skill = 2
+				    logistics_skill = 2
+				}
+				create_corps_commander = {
+					name = "Luis Rastrollo"
+					portrait_path = "gfx/leaders/Europe/Portrait_Europe_Generic_land_19.dds"
+					traits = { politically_connected }
+					skill = 1
+				    attack_skill = 1
+				    defense_skill = 2
+				    planning_skill = 1
+				    logistics_skill = 1
+				}
+				set_rule = { can_generate_female_aces = yes	}
+			}	
 			remove_ideas = SPR_the_maximum_concession
 			add_ideas = closed_economy
 			SPC = {
@@ -7286,10 +7440,194 @@ country_event = {
 				set_capital = 165
 				every_state = {
 					limit = {
-						NOT = { state = 165 }
-						NOT = { state = 794 }
-						NOT = { state = 166 }
+						OR = {
+							state = 165
+							state = 794
+							state = 166
+						}
 						is_controlled_by = ROOT
+					}
+					set_state_flag = SPR_anarchist_state_flag
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 7
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							NOT = { state = 41 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 9
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							NOT = { state = 41 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 11
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							NOT = { state = 41 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 13
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							NOT = { state = 41 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 15
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 17
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+				}
+				if = {
+					limit = {
+						num_of_controlled_states > 19
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+					random_state = {
+						limit = {
+							NOT = { state = 165 }
+							NOT = { state = 794 }
+							NOT = { state = 166 }
+							is_controlled_by = ROOT
+							NOT = { has_state_flag = SPR_anarchist_state_flag }
+							any_neighbor_state = {
+								OR = {
+									state = 165
+									state = 794
+									has_state_flag = SPR_anarchist_state_flag
+								}
+							}
+						}
+						set_state_flag = SPR_anarchist_state_flag
+					}
+				}
+				every_state = {
+					limit = {
+						is_controlled_by = ROOT
+						NOT = { has_state_flag = SPR_anarchist_state_flag }
 					}
 					SPD = {
 						transfer_state = PREV
@@ -7315,6 +7653,7 @@ country_event = {
 				}
 				every_state = {
 					limit = {
+						has_state_flag = SPR_core_of_spain_flag
 						NOT = { state = 165 }
 						NOT = { state = 794 }
 						NOT = { state = 166 }
@@ -7545,7 +7884,7 @@ country_event = {
 			}
 
 			## SPC triggers Anarchist Uprising ##
-			### Portuguese Aid goes to SPD ###
+			### Foreign aid goes to SPD ###
 			#Op. modifier goes to SPD.
 			if = {
 				limit = {
@@ -7562,35 +7901,36 @@ country_event = {
 					}
 				}
 			}
-			if = { #POR supporting SPD
+			if = { #Country supporting SPD
 				limit = {
-					POR = { has_country_flag = POR_supports_SPD_flag }
+					any_country = { has_country_flag = supports_SPD_flag }
 				}
-				SPD = {
-					diplomatic_relation = {
-						country = POR
-						relation = military_access
-						active = yes
+				every_country = {
+					limit = {
+						 has_country_flag = supports_SPD_flag
 					}
-				}			
-				POR = {
 					diplomatic_relation = {
 						country = SPD
 						relation = military_access
 						active = yes
 					}
+					SPD = {
+						diplomatic_relation = {
+							country = PREV
+							relation = military_access
+							active = yes
+						}
+					}
 					#Join war against all SPD enemies
-					if = {
-						limit = { country_exists = SPA }
-						add_to_war = { targeted_alliance = SPD enemy = SPA hostility_reason = asked_to_join }
-					}
-					if = {
-						limit = { country_exists = SPC }
-						add_to_war = { targeted_alliance = SPD enemy = SPC hostility_reason = asked_to_join }
-					}
-					if = {
-						limit = { country_exists = SPB }
-						add_to_war = { targeted_alliance = SPD enemy = SPB hostility_reason = asked_to_join }
+					every_country = {
+						limit = { has_war_with = SPD }
+						PREV = {
+							add_to_war = {
+								targeted_alliance = SPD
+								enemy = PREV
+								hostility_reason = asked_to_join
+							}
+						}
 					}
 				}
 				#Transfer troops in territory belonging to SPD allies back home
@@ -7608,28 +7948,33 @@ country_event = {
 						to_state_array = owned_controlled_states
 					}
 				}
-				random_country = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
+				if = { #Portuguese Non-aligned tag (spawned via Workers of Iberia, Unite! focus) will join war
 					limit = {
-						has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						any_country = { has_country_flag = POR_non_aligned_portugal_supports_SPA_flag }
 					}
+					random_country = {
+						limit = {
+							has_country_flag = POR_non_aligned_portugal_supports_SPA_flag
+						}
+						add_to_war = { targeted_alliance = SPA enemy = SPD hostility_reason = asked_to_join }
+					}
+				}
+			}
+			if = {	#Country supporting SPA
+				limit = {
+					any_country = { has_country_flag = supports_SPA_flag }
+				}
+				every_country = {# Country joins war against SPD
+					limit = { has_country_flag = supports_SPA_flag }
 					add_to_war = { targeted_alliance = SPA enemy = SPD hostility_reason = asked_to_join }
 				}
 			}
-			else_if = {	#POR supporting SPA
+			if = {	#Country supporting SPB
 				limit = {
-					POR = { has_country_flag = POR_supports_SPA_flag }
+					any_country = { has_country_flag = supports_SPB_flag }
 				}
-				POR = {
-					# POR joins war against SPC
-					add_to_war = { targeted_alliance = SPA enemy = SPD hostility_reason = asked_to_join }
-				}
-			}
-			else_if = {	#POR supporting SPB
-				limit = {
-					POR = { has_country_flag = POR_supports_SPB_flag }
-				}
-				POR = {
-					# POR joins war against SPC
+				every_country = {# Country joins war against SPD
+					limit = { has_country_flag = supports_SPB_flag }
 					add_to_war = { targeted_alliance = SPB enemy = SPD hostility_reason = asked_to_join }
 				}
 			}
@@ -7697,6 +8042,7 @@ country_event = {
 					has_state_flag = SPR_core_of_spain_flag
 				}
 				add_core_of = SPC
+				add_core_of = SPD
 			}
 			news_event = { id = lar_news.11 days = 1 }
 		}
@@ -8904,6 +9250,7 @@ country_event = {
 				transfer_state = 459
 				transfer_state = 460
 				transfer_state = 513
+				transfer_state = 514
 				transfer_state = 458
 				transfer_state = 665
 			}
@@ -8955,12 +9302,13 @@ country_event = {
 				add_state_claim = 459
 				add_state_claim = 460
 				add_state_claim = 513
+				add_state_claim = 514
 				add_state_claim = 458
 				add_state_claim = 665
 				create_wargoal = {
 					type = take_state_focus
 					target = ROOT
-					generator = { 461 462 459 460 513 458 665 }
+					generator = { 461 462 459 460 513 514 458 665 }
 					expire = 0
 				}
 			}
@@ -8989,6 +9337,7 @@ country_event = {
 		transfer_state = 459
 		transfer_state = 460
 		transfer_state = 513
+		transfer_state = 514
 		transfer_state = 458
 		transfer_state = 665
 	}
@@ -9010,12 +9359,13 @@ country_event = {
 		add_state_claim = 459
 		add_state_claim = 460
 		add_state_claim = 513
+		add_state_claim = 514
 		add_state_claim = 458
 		add_state_claim = 665
 		create_wargoal = {
 			type = take_state_focus
 			target = FROM
-			generator = { 461 462 459 460 513 458 665 }
+			generator = { 461 462 459 460 513 514 458 665 }
 			expire = 0
 		}
 	}
@@ -9369,6 +9719,9 @@ country_event = {
 			    popularity = 100
 			}
 		}
+		POR ={
+			set_rule = { can_join_factions = no	}
+		}
 	}
 }
 
@@ -9474,6 +9827,7 @@ country_event = {
 				has_government = communism
 			}
 		}
+		SOV = { set_country_flag = SPR_relocated_gold_reserves_selection_flag_sov }
 		SOV = { country_event = { id = lar_spain.52 hours = 6 random_hours = 6 } }
 	}
 	option = { # Send to #1
@@ -9570,7 +9924,7 @@ country_event = {
 			has_completed_focus = SPR_relocate_the_gold_reserves
 		}
 		OR = {
-			tag = SOV
+			has_country_flag = SPR_relocated_gold_reserves_selection_flag_sov
 			has_country_flag = SPR_relocated_gold_reserves_selection_flag1
 			has_country_flag = SPR_relocated_gold_reserves_selection_flag2
 			has_country_flag = SPR_relocated_gold_reserves_selection_flag3
@@ -10977,6 +11331,66 @@ country_event = {
 					transfer_state = 165
 					transfer_state = 167
 					transfer_state = 794
+				}
+			}
+		}
+	}
+}
+
+# Event for Spain that the president is dismissed
+country_event = {
+	id = lar_spain.90
+	title = lar_spain.90.t
+	desc = lar_spain.90.desc
+	picture = GFX_report_event_generic_parliament
+
+	trigger = {
+		tag = SPR
+		date > 1936.4.20
+		NOT = { has_global_flag = spanish_civil_war }
+	}
+
+	mean_time_to_happen = {
+		days = 2
+	}
+
+	fire_only_once = yes
+
+	option = { # Ok
+		name = lar_spain.90.a
+		if = {
+			limit = {
+				has_dlc = "La Resistance"
+			}
+			if = {
+				limit = {
+					has_completed_focus = SPR_the_popular_front
+				}
+				remove_ideas = SPR_government_power_struggle
+				add_political_power = 10
+			}
+			retire_country_leader = yes
+			create_country_leader = {
+				name = "Manuel Azaña"
+				desc = "POLITICS_MANUEL_AZANA_DESC"
+				picture = "Portrait_Spain_Manuel_Azana.dds"
+				expire = "1965.1.1"
+				ideology = conservatism
+				traits = {
+					figurehead_president
+				}
+			}
+		}
+		else = {
+			retire_country_leader = yes
+			create_country_leader = {
+				name = "Manuel Azaña"
+				desc = "POLITICS_MANUEL_AZANA_DESC"
+				picture = "Portrait_Spain_Manuel_Azana.dds"
+				expire = "1965.1.1"
+				ideology = conservatism
+				traits = {
+		
 				}
 			}
 		}
