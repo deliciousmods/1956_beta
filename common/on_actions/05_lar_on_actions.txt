@@ -1,0 +1,1490 @@
+on_actions = {
+
+	# called when an operative performing an offensive mission in a country
+	# has been spotted
+	on_operative_on_mission_spotted = {
+
+		effect = {
+            # SCOPE  the operative
+            # ROOT   the country the operative was performing its mission in
+            # FROM   the country the operative is operating for
+
+			# base values
+            set_temp_variable = {
+                var = capture_chance
+                value = 90
+            }
+            set_temp_variable = {
+                var = kill_chance
+                value = 10
+            }			
+
+            # nullify kill chance for some missions
+            if = {
+                limit = {
+                    OR = {
+                        operative_leader_mission = control_trade
+                        operative_leader_mission = diplomatic_pressure
+                    }
+                }
+                set_temp_variable = {
+                    var = kill_chance
+                    value = 0
+                }
+            }
+
+            # Capture chance modifier unused as it would just increased or decrease death chance
+            #multiply_temp_variable = {
+            #   var = capture_chance
+            #   value = own_capture_chance_factor # the operative's capture chance modifiers
+            #}
+            #clamp_temp_variable = {
+            #   var = capture_chance
+            #   min = 0
+            #   max = 100
+            #}
+
+            random_list = {
+                #log = yes # log picked effect in game.log
+
+                temp_var:capture_chance = {
+                   	capture_operative = {
+                   	    captured_by = ROOT
+                   	}  	
+                }
+                temp_var:kill_chance = {
+                    kill_operative = {
+                        killed_by = ROOT
+                    }
+                }
+
+            }
+
+        }
+        
+    }
+
+	on_operative_captured = {
+		effect = {
+			# SCOPE  the operative
+			# ROOT   the country the operative was performing its mission in
+			# FROM   the country the operative is operating for
+			operative_leader_event = {
+					id = lar_operative_event.6
+					recipient = ROOT
+					originator = ROOT
+					set_from_from = ROOT
+					set_from = FROM
+					days = 1
+			}
+			if = {
+				limit = {
+					NOT = { has_unit_leader_flag = le_clerc1 }
+				}
+				set_unit_leader_flag = le_clerc1
+			}
+			else_if = {
+				limit = {
+					has_unit_leader_flag = le_clerc1
+				}
+				set_unit_leader_flag = le_clerc2
+			}
+			random_list = {
+				log = yes
+				90 = { #regular
+					operative_leader_event = {
+						id = lar_operative_event.1
+						set_from_from = ROOT
+					}
+				}
+				10 = { #operative turned
+					modifier = {
+						has_trait = operative_tough
+						factor = 0 #tough operatives never get turned
+					}
+					modifier = {
+						has_trait = operative_double_agent
+						factor = 0 #no tripple agents please
+					}
+					turn_operative = { turned_by = ROOT }
+					# ensure the operative has the nationality of the country he is coming from
+					add_nationality = FROM
+					operative_leader_event = {
+            	    	id = lar_operative_event.5
+						set_from_from = FROM #tells the event which nationality to add
+            		}
+            	}
+			}
+		}
+	}
+
+	on_operative_death = {
+		effect = {
+			# SCOPE  the operative
+			# ROOT   the killer country (optional)
+			# FROM   the country the operative is operating for
+			if = {
+				limit = {
+					country_exists = ROOT
+				}
+
+				# operative killed by a country, likelly while on mission
+				operative_leader_event = {
+					id = lar_operative_event.3
+					set_from_from = ROOT
+				}
+			}
+			else = {
+				# other cause of death
+			}
+			
+			if = {
+				limit = {
+					FROM = {
+						NOT = { is_ai = yes }
+						has_done_agency_upgrade = upgrade_suicide_pills
+					}
+				}
+				set_global_flag = kill_me_alive_flag
+			}
+		}
+	}
+	
+	# SCOPE_UNIT_LEADER [
+	#	ROOT, FROM
+	#	FROM.FROM : SCOPE_STATE ( will only be set if the operation has a specific selection_target )
+	# ]
+	on_operative_detected_during_operation = {
+		effect = {
+			random_list = {
+				40 = {
+					force_operative_leader_into_hiding = 45
+					operative_leader_event = {
+						id = lar_operative_event.2
+						set_from_from = FROM
+					}
+				}
+				35 = {
+					capture_operative = {
+						captured_by = FROM
+					}
+				}
+				20 = {
+					harm_operative_leader = 90
+					operative_leader_event = {
+						id = lar_operative_event.4
+						set_from_from = FROM
+					}
+				}
+				5 = {
+					kill_operative = {
+						killed_by = FROM
+					}
+				}
+			}
+		}
+	}
+
+	on_operation_completed = {
+		effect = {
+			# same scope setup as in operation outcome:
+			# THIS: the operation
+			# ROOT: the initiating country
+			# FROM: the target country
+			#log = "This: [This.GetName] From: [From.GetName] Root: [Root.GetName]"
+			
+			if = {
+				limit = {
+					ROOT = { has_country_flag = just_freed_operative_flag }
+				}
+				every_operative = {
+					if = {
+						limit = {
+							NOT = { has_trait = operative_escape_artist }
+						}
+						random_list = {
+							15 = { add_unit_leader_trait = operative_escape_artist }
+							85 = {}
+						}
+					}
+				}
+				ROOT = { clr_country_flag = just_freed_operative_flag }
+			}
+			every_operative = { #add target nationality if linguist
+				if = {
+					limit = {
+						has_trait = operative_linguist
+						NOT = { operative_leader_mission = no_mission }
+						NOT = { has_nationality = FROM }
+					}
+					random_list = {
+						20 = { add_nationality = FROM }
+						80 = {}
+					}
+				}
+			}
+			every_operative = {
+				if = {
+					limit = {
+						has_nationality = FRA
+					}
+					ROOT = {
+						add_to_variable = {
+							var = fra_nat
+							value = 1
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_nationality = ENG
+					}
+					ROOT = {
+						add_to_variable = {
+							var = eng_nat
+							value = 1
+						}
+					}
+				}
+			}
+			ROOT = {
+				if = {
+					limit = {
+						check_variable = { fra_nat > 0 }
+						check_variable = { eng_nat > 0 }
+					}
+					set_country_flag = achievement_listen_carefully_flag
+				}
+				set_variable = {
+					var = fra_nat
+					value = 0
+				}
+				set_variable = {
+					var = eng_nat
+					value = 0
+				}
+			}
+		}
+	}
+
+	on_startup = {
+		effect = {
+			SPR = {
+				if = {
+					limit = {
+						date < 1936.1.2
+						AND = {
+							has_dlc = "La Resistance"
+							NOT = {
+								has_game_rule = {
+									rule = SPR_focus_tree_selection
+									option = R56_TREE
+								}
+							}
+						}
+					}
+					country_lock_all_division_template = yes
+					every_state = {
+						limit = {
+							is_core_of = SPR
+						}
+						remove_core_of = SPA
+						remove_core_of = SPB
+						remove_core_of = SPC
+					}
+					if = {
+						limit = {
+							difficulty > 1
+							is_ai = no
+						}
+						SPR = {
+							add_to_variable = { var = spa_civil_war_divisions_counter_var value = 7 }
+						}
+					}
+				}
+				if = {
+					limit = {
+						date > 1939.1.1
+						AND = {
+							has_dlc = "La Resistance"
+							NOT = {
+								has_game_rule = {
+									rule = SPR_focus_tree_selection
+									option = R56_TREE
+								}
+							}
+						}
+					}
+					every_state = {
+						limit = {
+							is_core_of = SPR
+						}
+						remove_core_of = SPD
+						remove_core_of = SPB
+						remove_core_of = SPC
+						remove_core_of = d01
+					}
+					every_state = {
+						limit = {
+							OR = {
+								state = 41
+								state = 165
+								state = 167
+								state = 168
+								state = 173
+								state = 175
+								state = 790
+								state = 792
+								state = 793
+								state = 794
+							}
+						}
+						remove_core_of = SPA
+						start_resistance = yes
+					}
+				}
+			}
+		}
+	}
+
+	# ROOT is capitulated country, FROM is winner
+	on_capitulation = {
+		effect = {
+		}
+	}
+
+	# called a country fully decrypts cipher of a target country
+	# scope is the target country that its cipher is decrypted
+	# from scope is the decrypter country
+	on_fully_decrypted_cipher = {
+
+	}
+
+	# called when a country activates its active cipher bonuses against a target
+	# scope is the target country
+	# from scope is the country that activates its bonuses
+	on_activated_active_decryption_bonuses = {
+
+	}
+
+	#FROM is the one that joins the faction
+	on_create_faction = {
+		effect = {
+			# SPA Iberian Pact - either POR or SPA join a faction - the other must be added too.
+			if = {
+				limit = {
+					has_country_flag = SPA_iberian_pact
+				}
+				save_event_target_as = iberian_pact_invitee
+				every_other_country = {
+					limit = {
+						OR = {
+							original_tag = POR
+							original_tag = SPA
+						}
+						has_country_flag = SPA_iberian_pact
+						NOT = { is_in_faction_with = ROOT }
+						NOT = { is_in_faction = yes }
+					}
+					country_event = lar_spain.28
+				}
+			}
+		}
+	}
+
+	#FROM is faction leader on join faction requests. THIS DOES NOT FIRE ON ADD_TO_FACTION EFFECT! USE ON_OFFER_JOIN_FACTION!
+	on_join_faction = {
+		effect = {
+			# SPA Iberian Pact - either POR or SPA join a faction - the other must be added too.
+			if = {
+				limit = {
+					has_country_flag = SPA_iberian_pact
+				}
+				set_country_flag = SPA_iberian_pact_invitee
+				FROM = { set_country_flag = SPA_iberian_pact_faction_leader }
+				every_other_country = {
+					limit = {
+						OR = {
+							original_tag = POR
+							original_tag = SPA
+						}
+						has_country_flag = SPA_iberian_pact
+						is_in_faction = no
+					}
+					country_event = lar_spain.28
+				}
+			}
+		}
+	}
+
+	#FROM is country getting invited.
+	on_offer_join_faction = {
+		effect = {
+			# SPA Iberian Pact - either POR or SPA join a faction - the other must be added too.
+			if = {
+				limit = {
+					FROM = { has_country_flag = SPA_iberian_pact }
+				}
+				set_country_flag = SPA_iberian_pact_faction_leader
+				FROM = { set_country_flag = SPA_iberian_pact_invitee }
+				every_country = {
+					limit = {
+						OR = {
+							original_tag = POR
+							original_tag = SPA
+						}
+						has_country_flag = SPA_iberian_pact
+						NOT = { tag = FROM }
+						is_in_faction = no
+					}
+					#country_event = lar_spain.28
+					country_event = { id = lar_spain.28 hours = 1 }
+				}
+			}
+		}
+	}
+
+	# called when a country send volunteers to another
+	# ROOT is sender, FROM is receiver
+	on_send_volunteers = {
+		effect = {
+			if = {
+				limit = {
+					SPR_scw_in_progress = yes
+					FROM = { tag = SPA }
+				}
+				set_country_flag = SPR_sent_volunteers_to_SPA_flag
+			}
+			if = {
+				limit = {
+					SPR_scw_in_progress = yes
+					FROM = { tag = SPD }
+				}
+				set_country_flag = SPR_sent_volunteers_to_SPD_flag
+			}
+		}
+	}
+
+	#FROM is war target
+	on_declare_war = {
+		effect = {
+			if = {
+				limit = {
+					tag = SPA
+					FROM = {
+						tag = SPD
+					}
+				}
+				every_unit_leader = {
+					limit = {
+						has_unit_leader_flag = SPR_reassigned_flag
+					}
+					add_timed_unit_leader_trait = {
+						trait = reassigned
+						days = 60
+					}
+				}
+			}
+			# SPA Iberian Pact - either POR or SPA join a war - the other must join too.
+			if = {
+				limit = {
+					has_country_flag = SPA_iberian_pact
+					FROM = { NOT = { has_country_flag = SPA_iberian_pact } }
+				}
+				hidden_effect = {
+					FROM = { set_country_flag = SPA_iberian_pact_enemy_flag }
+				}
+				every_other_country = {
+					limit = {
+						OR = {
+							original_tag = POR
+							original_tag = SPA
+						}
+						has_country_flag = SPA_iberian_pact
+					}
+					country_event = lar_spain.29
+				}
+			}
+			else_if = {
+				limit = {
+					NOT = { has_country_flag = SPA_iberian_pact }
+			 		FROM = { has_country_flag = SPA_iberian_pact }
+				}
+				hidden_effect = {
+					set_country_flag = SPA_iberian_pact_enemy_flag
+				}
+				every_country = {
+					limit = {
+						OR = {
+							original_tag = POR
+							original_tag = SPA
+						}
+						has_country_flag = SPA_iberian_pact
+						NOT = { tag = FROM }
+					}
+					country_event = lar_spain.29
+				}
+			}
+			#Clean up Franco in case of double Franco
+			hidden_effect = {
+				while_loop_effect = {
+					limit = {
+						has_country_leader = {
+							name = "Francisco Franco"
+							ruling_only = yes
+						}
+						FROM = {
+							has_country_leader = {
+								name = "Francisco Franco"
+								ruling_only = yes
+							}
+						}
+					}
+					retire_country_leader = yes
+				}
+				#Clean up Mola in case of double Mola
+				while_loop_effect = {
+					limit = {
+						has_country_leader = {
+							name = "Emilio Mola"
+							ruling_only = yes
+						}
+						FROM = {
+							has_country_leader = {
+								name = "Emilio Mola"
+								ruling_only = yes
+							}
+						}
+					}
+					retire_country_leader = yes
+				}
+				#Clean up Primo de Rivera in case of already dead
+				if = {
+					limit = {
+						has_country_leader = {
+							name = "José Antonio Primo de Rivera"
+							ruling_only = yes
+						}
+						FROM = {
+							has_completed_focus = SPA_martyrdom_for_primo_de_rivera
+						}
+					}
+					retire_country_leader = yes
+				}
+			}
+		}
+	}
+	#ROOT is winner #FROM gets annexed - This fires just before FROM gets annexed, meaning the country and everything it owns still exists. It will also fire on_annex and on_civil_war_end
+	on_civil_war_end_before_annexation = {
+		effect = {
+			if = { # Nationalist victory SCW
+				limit = {
+					FROM = {
+						original_tag = SPR
+					}
+					has_completed_focus = SPA_a_great_spain
+					SPR_scw_in_progress = yes
+					NOT = {
+						has_global_flag = SPR_carlist_uprising_flag
+						has_completed_focus = SPA_fuse_the_parties
+					}
+					NOT = {
+						any_other_country = {
+							NOT = {
+								tag = ROOT
+								tag = FROM
+							}
+							original_tag = SPR
+							exists = yes
+						}
+					}
+				}
+				country_event = { id = lar_news.28 }
+			}
+			if = { # Republican victory SCW
+				limit = {
+					FROM = {
+						original_tag = SPR
+					}
+					has_completed_focus = SPR_the_popular_front
+					SPR_scw_in_progress = yes
+					NOT = { has_global_flag = SPR_anarchist_uprising_flag }
+					NOT = {
+						any_other_country = {
+							NOT = {
+								tag = ROOT
+								tag = FROM
+							}
+							original_tag = SPR
+							exists = yes
+						}
+					}
+				}
+				country_event = { id = lar_news.29 }
+			}
+			if = { # Nationalist victory SCW
+				limit = {
+					FROM = {
+						original_tag = SPR
+					}
+					has_completed_focus = SPA_a_great_spain
+					SPR_scw_in_progress = yes
+					OR = {
+						has_global_flag = SPR_carlist_uprising_flag
+						has_completed_focus = SPA_fuse_the_parties
+					}
+					NOT = {
+						any_other_country = {
+							NOT = {
+								tag = ROOT
+								tag = FROM
+							}
+							original_tag = SPR
+							exists = yes
+						}
+					}
+				}
+				country_event = { id = lar_news.1 }
+				set_global_flag = nationalist_victory
+				set_global_flag = scw_over
+			}
+			if = { # Republican victory SCW
+				limit = {
+					FROM = {
+						original_tag = SPR
+					}
+					has_completed_focus = SPR_the_popular_front
+					SPR_scw_in_progress = yes
+					has_global_flag = SPR_anarchist_uprising_flag
+					NOT = {
+						any_other_country = {
+							NOT = {
+								tag = ROOT
+								tag = FROM
+							}
+							original_tag = SPR
+							exists = yes
+						}
+					}
+				}
+				country_event = { id = lar_news.2 }
+				set_global_flag = republican_victory
+				set_global_flag = scw_over
+				if = { #If SPD has Portuguese mutineers, send them back
+					limit = {
+						tag = SPD
+						has_country_flag = POR_got_portuguese_mutineers_flag
+					}
+					POR = { country_event = { id = lar_portugal_navy_mutiny.5 days = 5 random_days = 3 } }
+				}
+			}
+			if = { # Remove Portuguese "Volunteers in the War" National Spirit
+				limit = { 
+					original_tag = SPR
+					has_global_flag = scw_over
+				}
+				POR = {
+					if = {
+						limit = {
+							has_idea = POR_volunteers_in_the_war_nationalist
+						}
+						remove_ideas = POR_volunteers_in_the_war_nationalist
+					}
+					else_if = {
+						limit = {
+							has_idea = POR_volunteers_in_the_war_republican
+						}
+						remove_ideas = POR_volunteers_in_the_war_republican
+					}
+					else_if = {
+						limit = {
+							has_idea = POR_volunteers_in_the_war_carlist
+						}
+						remove_ideas = POR_volunteers_in_the_war_carlist
+					}
+				}
+			}
+		}
+	}
+
+	#ROOT is winner #FROM gets annexed - This will also fire on_annex
+	on_civil_war_end = {
+		effect = {
+			# give French focus tree to French communists if they win one of their civil wars (we have several now)
+			if = {
+				limit = {
+					original_tag = FRA
+					has_government = communism
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = FRA
+						NOT = { has_government = communism }
+					}
+				}
+				load_focus_tree = { tree = french_focus keep_completed = no }
+				complete_national_focus = FRA_radicalize_front
+				if = {
+					limit = {
+						has_country_leader = {
+							ruling_only = yes
+							name = "Léon Jouhaux"
+						}
+					}
+					unlock_national_focus = FRA_work_with_the_cgt
+				}
+				else = {
+					unlock_national_focus = FRA_pcf_sfio_coalition
+				}
+			}
+			if = {
+				limit = {
+					original_tag = FRA
+					has_government = fascism
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = FRA
+						NOT = { has_government = fascism }
+					}
+				}
+				load_focus_tree = { tree = french_focus keep_completed = no }
+				complete_national_focus = FRA_far_right_leagues
+				complete_national_focus = FRA_front_liberte
+				unlock_national_focus = FRA_support_ppf
+			}
+			if = {
+				limit = {
+					original_tag = FRA
+					has_government = democratic
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = FRA
+						NOT = { has_government = democratic }
+					}
+				}
+				load_focus_tree = { tree = french_focus keep_completed = no }
+				complete_national_focus = FRA_status_quo
+			}
+			if = {
+				limit = {
+					original_tag = FRA
+					has_government = neutrality
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = FRA
+						NOT = { has_government = neutrality }
+					}
+				}
+				load_focus_tree = { tree = french_focus keep_completed = no }
+				complete_national_focus = FRA_action_francaise
+			}
+			# Give back POR focus tree to Salazarist Portugal if they win the civil war.
+			if = {
+				limit = {
+					AND = {
+						has_dlc = "La Resistance"
+						NOT = {
+							has_game_rule = {
+								rule = POR_focus_tree_selection
+								option = R56_TREE
+							}
+						}
+					}
+					original_tag = POR
+					has_government = neutrality
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = POR
+						OR = {
+							has_government = fascism
+							has_government = communism
+						}
+					}
+				}
+				load_focus_tree = { tree = portuguese_focus keep_completed = no }
+				unlock_national_focus = POR_estado_novo
+				unlock_national_focus = POR_support_the_spanish_nationalists
+				unlock_national_focus = POR_portuguese_legion
+				unlock_national_focus = POR_strengthen_the_regime
+			}
+			# Give back POR focus tree to Fascist Portugal if they win the civil war.
+			if = {
+				limit = {
+					AND = {
+						has_dlc = "La Resistance"
+						NOT = {
+							has_game_rule = {
+								rule = POR_focus_tree_selection
+								option = R56_TREE
+							}
+						}
+					}
+					original_tag = POR
+					has_government = fascism
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = POR
+						OR = {
+							has_government = neutrality
+							has_government = democratic
+						}
+					}
+				}
+				load_focus_tree = { tree = portuguese_focus keep_completed = no }
+				unlock_national_focus = POR_estado_novo
+				unlock_national_focus = POR_support_the_spanish_nationalists
+				unlock_national_focus = POR_portuguese_legion
+				unlock_national_focus = POR_national_syndicalism
+			}
+		}
+	}
+
+	# ROOT is capitulated country, FROM is winner
+	on_capitulation = {
+		effect = {
+			if = { # If SPD lost the SCW but their allies thereafter win it
+				limit = {
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					FROM = { has_country_flag = supports_SPD_flag }
+					SPD = { exists = no }
+				}
+				random_state = {
+					limit = {
+						controller = { has_country_flag = supports_SPD_flag }
+						has_state_flag = SPR_original_core
+						if = {
+							limit = {
+								any_state = {
+									controller = { has_full_control_of_state = PREV }
+									has_state_flag = SPR_original_core
+								}
+							}
+							controller = { has_full_control_of_state = PREV	}
+						}
+						if = {
+							limit = {
+								any_state = {
+									controller = { has_full_control_of_state = PREV }
+									is_core_of = SPD
+								}
+							}
+							is_core_of = SPD
+						}
+						else_if = {
+							limit = {
+								any_state = {
+									controller = { NOT = { has_full_control_of_state = PREV } }
+									is_core_of = SPD
+								}
+							}
+							is_core_of = SPD
+						}
+					}
+					SPD = {
+						transfer_state = PREV
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPA }
+									SPA = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPA
+							    type = civil_war
+							}
+							add_civil_war_target = SPA
+						}
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPB }
+									SPB = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPB
+							    type = civil_war
+							}
+							add_civil_war_target = SPB
+						}
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPC }
+									SPC = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPC
+							    type = civil_war
+							}
+							add_civil_war_target = SPC
+						}
+					}
+				}
+				FROM = {
+					diplomatic_relation = {
+						country = SPD
+						relation = military_access
+						active = yes
+					}
+				}
+				SPD = {
+					diplomatic_relation = {
+						country = FROM
+						relation = military_access
+						active = yes
+					}
+				}
+				every_country = {
+					limit = {
+						OR = {
+							has_country_flag = supports_SPA_flag
+							has_country_flag = supports_SPB_flag
+						}
+					}
+					SPD = {
+						declare_war_on = {
+							target = PREV 
+							type = topple_government
+						}
+					}
+				}
+			}
+			if = { # If SPA lost the SCW but their allies thereafter win it
+				limit = {
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					FROM = { has_country_flag = supports_SPA_flag }
+					SPA = { exists = no }
+				}
+				random_state = {
+					limit = {
+						controller = { has_country_flag = supports_SPA_flag }
+						has_state_flag = SPR_original_core
+						if = {
+							limit = {
+								any_state = {
+									controller = { has_full_control_of_state = PREV }
+									has_state_flag = SPR_original_core
+								}
+							}
+							controller = { has_full_control_of_state = PREV }
+						}
+						if = {
+							limit = {
+								any_state = {
+									controller = { has_full_control_of_state = PREV }
+									is_core_of = SPA
+								}
+							}
+							is_core_of = SPA
+						}
+						else_if = {
+							limit = {
+								any_state = {
+									controller = { NOT = { has_full_control_of_state = PREV } }
+									is_core_of = SPA
+								}
+							}
+							is_core_of = SPA
+						}
+					}
+					SPA = {
+						transfer_state = PREV
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPA }
+									SPD = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPA
+							    type = civil_war
+							}
+							add_civil_war_target = SPD
+						}
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPB }
+									SPB = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPB
+							    type = civil_war
+							}
+							add_civil_war_target = SPB
+						}
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPC }
+									SPC = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPC
+							    type = civil_war
+							}
+							add_civil_war_target = SPC
+						}
+					}
+				}
+				FROM = {
+					diplomatic_relation = {
+						country = SPA
+						relation = military_access
+						active = yes
+					}
+				}
+				SPA = {
+					diplomatic_relation = {
+						country = FROM
+						relation = military_access
+						active = yes
+					}
+				}
+				every_country = {
+					limit = {
+						OR = {
+							has_country_flag = supports_SPD_flag
+							has_country_flag = supports_SPB_flag
+						}
+					}
+					SPA = {
+						declare_war_on = {
+							target = PREV 
+							type = topple_government
+						}
+					}
+				}
+			}
+			if = { # If SPB lost the SCW but their allies thereafter win it
+				limit = {
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					FROM = { has_country_flag = supports_SPB_flag }
+					SPB = { exists = no }
+				}
+				random_state = {
+					limit = {
+						controller = { has_country_flag = supports_SPB_flag }
+						has_state_flag = SPR_original_core
+						if = {
+							limit = {
+								any_state = {
+									controller = { has_full_control_of_state = PREV }
+									has_state_flag = SPR_original_core
+								}
+							}
+							controller = { has_full_control_of_state = PREV }
+						}
+						if = {
+							limit = {
+								any_state = {
+									controller = { has_full_control_of_state = PREV }
+									is_core_of = SPB
+								}
+							}
+							is_core_of = SPB
+						}
+						else_if = {
+							limit = {
+								any_state = {
+									controller = { NOT = { has_full_control_of_state = PREV } }
+									is_core_of = SPB
+								}
+							}
+							is_core_of = SPB
+						}
+					}
+					SPB = {
+						transfer_state = PREV
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPA }
+									SPD = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPA
+							    type = civil_war
+							}
+							add_civil_war_target = SPD
+						}
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPD }
+									SPB = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPD
+							    type = civil_war
+							}
+							add_civil_war_target = SPB
+						}
+						if = {
+							limit = {
+								OR = {
+									FROM = { tag = SPC }
+									SPC = { exists = yes }
+								}
+							}
+							declare_war_on = {
+							    target = SPC
+							    type = civil_war
+							}
+							add_civil_war_target = SPC
+						}
+					}
+				}
+				FROM = {
+					diplomatic_relation = {
+						country = SPB
+						relation = military_access
+						active = yes
+					}
+				}
+				SPB = {
+					diplomatic_relation = {
+						country = FROM
+						relation = military_access
+						active = yes
+					}
+				}
+				every_country = {
+					limit = {
+						OR = {
+							has_country_flag = supports_SPD_flag
+							has_country_flag = supports_SPA_flag
+						}
+					}
+					SPB = {
+						declare_war_on = {
+							target = PREV 
+							type = topple_government
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	#ROOT is winner #FROM gets annexed - This fires just before FROM gets annexed, meaning the country and everything it owns still exists. It will also fire on_annex and on_civil_war_end
+	on_civil_war_end_before_annexation {
+		effect = {
+			if = { # Carlists Defeated, civil war not over
+				limit = {
+					FROM = {
+						tag = SPB
+						has_completed_focus = SPA_supremacy_of_the_communion
+					}
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					any_other_country = {
+						NOT = {
+							tag = ROOT
+							tag = SPB
+						}
+						original_tag = SPR
+						exists = yes
+					}
+				}
+				country_event = lar_spain.11
+			}
+			if = { # Fascists Defeated, civil war not over
+				limit = {
+					FROM = {
+						tag = SPA
+						has_completed_focus = SPA_the_phalanx_ascendant
+					}
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					any_other_country = {
+						NOT = {
+							tag = ROOT
+							tag = SPA
+						}
+						original_tag = SPR
+						exists = yes
+					}
+				}
+				country_event = lar_spain.12
+			}
+			if = { # Franco Defeated, civil war not over
+				limit = {
+					FROM = {
+						tag = SPA
+						has_completed_focus = SPA_unify_the_nationalist_front
+					}
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					any_other_country = {
+						NOT = {
+							tag = ROOT
+							tag = SPA
+						}
+						original_tag = SPR
+						exists = yes
+					}
+				}
+				country_event = lar_spain.13
+			}
+			if = { # Anarchists Defeated, civil war not over
+				limit = {
+					FROM = {
+						tag = SPC
+						has_completed_focus = SPR_regional_defense_council_of_aragon
+					}
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					any_other_country = {
+						NOT = {
+							tag = ROOT
+							tag = SPC
+						}
+						original_tag = SPR
+						exists = yes
+					}
+				}
+				country_event = lar_spain.14
+			}
+			if = { # Independent Communist Defeated, civil war not over
+				limit = {
+					FROM = {
+						tag = SPC
+						has_completed_focus = SPR_the_anti_fascist_workers_revolution
+					}
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					any_other_country = {
+						NOT = {
+							tag = ROOT
+							tag = SPC
+						}
+						original_tag = SPR
+						exists = yes
+					}
+				}
+				country_event = lar_spain.15
+			}
+			if = { # Democrats Defeated, civil war not over
+				limit = {
+					FROM = {
+						tag = SPD
+						has_completed_focus = SPR_maintain_the_second_republic
+					}
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					any_other_country = {
+						NOT = {
+							tag = ROOT
+							tag = SPD
+						}
+						original_tag = SPR
+						exists = yes
+					}
+				}
+				country_event = lar_spain.16
+			}
+			if = { # Stalinist Communists Defeated, civil war not over
+				limit = {
+					FROM = {
+						tag = SPD
+						has_completed_focus = SPR_the_anti_fascist_workers_revolution
+					}
+					original_tag = SPR
+					SPR_scw_in_progress = yes
+					any_other_country = {
+						NOT = {
+							tag = ROOT
+							tag = SPD
+						}
+						original_tag = SPR
+						exists = yes
+					}
+				}
+				country_event = lar_spain.17
+			}
+		}
+	}
+
+	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
+	on_state_control_changed = {
+		effect = {
+			if = {
+				limit = {
+					tag = FRA
+					has_completed_focus = FRA_french_forces_of_the_interior
+					FROM.FROM = {
+						is_core_of = ROOT
+						not = { has_state_flag = FRA_core_state_liberated }
+					}
+				}
+				FROM.FROM = {
+					set_state_flag = FRA_core_state_liberated
+					create_unit = {
+						division = "name = \"1re Demi-Brigade de Chasseurs\" division_template = \"FFI Demi-Brigade\" start_experience_factor = 0"  
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"2me Demi-Brigade de Chasseurs\" division_template = \"FFI Demi-Brigade\" start_experience_factor = 0"  
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"3me Demi-Brigade de Chasseurs\" division_template = \"FFI Demi-Brigade\" start_experience_factor = 0"  
+						owner = ROOT
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM.FROM = {
+						OR = {
+							state = 165
+							state = 171
+							state = 792
+						}
+					}
+					OR = {
+						has_completed_focus = SPA_strengthen_the_supreme_reality_of_spain
+						has_completed_focus = SPA_adopt_the_26_points
+						has_completed_focus = SPA_confirm_the_fueros
+						has_completed_focus = SPR_all_must_bear_the_torch
+						has_completed_focus = SPR_all_must_do_their_part
+						has_completed_focus = SPR_red_bulwark_in_the_west
+					}
+				}
+				FROM.FROM = {
+					remove_dynamic_modifier = { modifier = autonomous_state }
+					remove_dynamic_modifier = { modifier = semi_autonomous_state }
+				}
+			}
+			if = {
+				limit = {
+					FROM.FROM = {
+						OR = {
+							state = 165
+							state = 171
+							state = 792
+						}
+					}
+					OR = {
+						AND = {
+							has_completed_focus = SPR_united_under_socialism
+							NOT = { has_completed_focus = SPR_all_must_do_their_part }
+						}
+						AND = {
+							has_completed_focus = SPR_solidify_government_control
+							NOT = { has_completed_focus = SPR_red_bulwark_in_the_west }
+						}
+					}
+				}
+				FROM.FROM = {
+					remove_dynamic_modifier = { modifier = autonomous_state }
+					add_dynamic_modifier = { modifier = semi_autonomous_state }
+				}
+			}
+		}
+	}
+
+	#THIS is country that has just gotten into a war
+	on_war = {
+		effect = {
+			if = {
+				limit = {
+					tag = VIC
+				}
+				set_rule = { 
+					can_join_factions = yes
+					can_create_factions = yes
+					can_not_declare_war = no #I hate this thing so much
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = SPA_iberian_pact
+				}
+				save_event_target_as = iberian_pact_war_target
+				random_other_country = {
+					limit = {
+						has_country_flag = SPA_iberian_pact
+						NOT = {
+							has_war_together_with = ROOT
+						}
+					}
+					country_event = lar_spain.29
+				}
+			}
+		}
+	}
+
+	on_weekly = {
+		effect = {
+			if = {
+				limit = { 
+					has_intelligence_agency = yes
+					is_ai = yes
+				}
+				update_operation_ai = yes
+			}
+		}
+	}
+
+	on_annex = {
+		effect = {
+			# Portuguese Anarchism
+			if = {
+				limit = {
+					original_tag = POR
+					has_government = neutrality
+					has_country_flag = SPR_portuguese_anarchism_flag
+					FROM = {
+						original_tag = POR
+					}
+					SPC = {
+						exists = yes
+						has_completed_focus = SPR_portuguese_anarchism
+					}
+				}
+				SPC = { country_event = lar_spain.50 }
+			}
+			if = {
+				limit = {
+					original_tag = POR
+					has_global_flag = SPR_portuguese_anarchism_flag
+					FROM = {
+						original_tag = POR
+						has_country_flag = SPR_portuguese_anarchism_flag
+					}
+				}
+				clr_global_flag = SPR_portuguese_anarchism_flag
+				set_rule = { can_join_factions = yes }
+			}
+		}
+	}
+	
+	# scope is operative
+	# from scope is the country 
+	#on_operative_recruited = {
+	#	effect = {
+	#	
+	#	}
+	#}
+	
+	# scope is operative
+	# from scope is the country 
+	#on_operative_created = {
+	#	effect = {
+	#	
+	#	}
+	#}
+}

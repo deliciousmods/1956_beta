@@ -15,26 +15,158 @@
 # contain
 # area_priority
 
+# Example of strategy for intelligence agency
+#example_strategy = {
+#
+#	enable = {
+#		original_tag = FRA
+#	}
+#
+#	ai_strategy = {
+#		type = intelligence_agency_usable_factories
+#		# no need of id for this one
+#		value = 10
+#	}
+#
+#	ai_strategy = {
+#		type = intelligence_agency_branch_desire_factor
+#		id = branch_defense
+#		value = -50    # -50% on the AI weight
+#	}
+#}
+
+
+# example unit buffer strategy. this strategy will make ai buffer/garrison some units in a target area  which can be used in orders that is in target areas
+# 
+# ai_strategy = {
+# 	type = put_unit_buffers
+# 	
+#	# ratio of total armeis in country to be buffered
+# 	ratio = 0.4
+#
+#	# you can specify an order id. ratio of same orders ids will be share same ratio
+# 	order_id = 2
+# 	
+# 	# states to put garrison orders (if no state is friendly, strat is invalid)
+# 	states = { 
+# 		125
+# 		126
+# 		127
+# 		128
+# 		129
+# 		338
+# 		123
+# 		122 
+# 	}
+# 	
+#	# ai areas that the orders will use these buffers in
+# 	area = europe
+# 	area = asia
+# 	
+# 	# by default if you have orders in target areas, the buffer will request less units. 
+#	# you can override this to disable the feature
+# 	subtract_invasions_from_need = yes
+# 	subtract_fronts_from_need = yes
+# }
+
+
+#used for controlling invasion or regular fronts
+#ai_strategy = {
+# 	type = front_control
+#
+#	#you can define a target in following ways. you can define more than one
+#
+#	tag = GER 				# target against a specific country
+#	state = 42 				# target on a state
+#	strategic_region = 65	# target on a strategic region
+#	area = europe			# target on a specific ai area
+#	country_trigger = { always = no } 	# a trigger to check agaisnt a specific country. scope is enemy country from scope is our country
+#	state_trigger = { always = no } 	# a trigger to check agaisnt a state. scope is state. from scope is enemy country from.from scope is our country
+#
+#	ratio = 0.0 # the strategy is enabled only if ratio of the front covered by this strat's targets greater than this ratio
+#
+#	priority = 0 # default 0, higher prio strats will override lower
+#	ordertype = front # front or invasion. if set this strategy will only apply to that specific order type
+#	execution_type = careful # one of careful balanced rush rush_weak. if set will override the execution type of front (only for front orders)
+#	execute_order = yes # yes or no. if set will override execute or not decision of front
+#	manual_attack = yes # default yes. if no ai will not do manual pokes at enemy (only for front orders)
+#}
+
+#used for increasing/decreasing unit requests for invasions or fronts
+#ai_strategy = {
+#	# use one of them
+# 	type = front_unit_request
+# 	type = invasion_unit_request
+#
+#	#invasions will check invasion target, fronts will check provinces at front
+#
+#	tag = GER 				# province of a specific country
+#	state = 42 				# province on a state
+#	strategic_region = 65	# province on a strategic region
+#	area = europe			# province on a specific ai area
+#	country_trigger = { always = no } 	# a trigger to check agaisnt a specific country. scope is enemy country from scope is our country
+#	state_trigger = { always = no } 	# a trigger to check agaisnt a state. scope is state. from scope is enemy country from.from scope is our country
+#
+#	value = 40				# will be added as a factor over regular requests
+#}
+
+# makes ai do an operation 
+# ai_strategy = {
+# 	type = operative_operation
+# 	operation = operation_id
+# 	value = 900 # score compared to other operations & missions
+# 	operation_target = GER # target
+#	state = 1 # if specified ai will prefer this states for targeted operations assuming they are valid target
+#	state = 2
+#	region = 1 # if specified ai will prefer this regions for targeted operations assuming they are valid
+#	region = 2
+#	priority = 100 # ai will prefer state/region of the highest prio strategy
+# }
+
+# ai_strategy = {
+# 	type = operative_mission
+# 	mission = build_intel_network # mission token
+# 	value = 800 # score compared to other operations & missions
+# 	mission_target = GER # target
+#	state = 1 # if specified ai will prefer this states for targeted operations assuming they are valid target
+#	state = 2
+#	priority = 100 # ai will prefer state of the highest prio strategy
+# }
+
+default_build_infrastructure = {
+	enable = {
+		NOT = {
+			original_tag = USA
+		}
+
+		date > 1942.01.01
+		any_state = {
+			is_controlled_by = ROOT
+			is_core_of = ROOT
+			infrastructure < 8
+		}
+
+	}
+	abort_when_not_enabled = yes
+	ai_strategy = {
+		type = building_target
+		id = infrastructure
+		value = 4
+	}
+}
+
 default_unit_production = {
 	enable = {
 		always = yes
-		NOT = {
+		NOT = { original_tag = GER } NOT = { original_tag = FRA } NOT = { original_tag = CHI  } NOT = { original_tag = ENG  }
+		not = { original_tag = CZE } 
+		Not = {
 			OR = {
-				original_tag = ENG
-				original_tag = CHI
-				original_tag = GER
-				original_tag = FRA
-				original_tag = CZE
 				original_tag = JAP
-				original_tag = HUN
 			}
 		}
 	}
-	ai_strategy = { #motorized
-		type = role_ratio
-		id = motorized
-		value = 0
-	}	
+	
 	ai_strategy = {
 		type = role_ratio
 		id = paratroopers
@@ -56,7 +188,7 @@ default_unit_production = {
 	ai_strategy = {
 		type = role_ratio
 		id = armor
-		value = 5
+		value = 2
 	}
 
 	ai_strategy = {
@@ -75,7 +207,7 @@ default_unit_production = {
 	ai_strategy = {
 		type = unit_ratio
 		id = cas
-		value = 10
+		value = 5
 	}
 	
 	ai_strategy = {
@@ -408,11 +540,12 @@ default_garrison_production = {
 		value = 5
 	}
 	
-	ai_strategy = {
-		type = role_ratio
-		id = suppression
-		value = 2
-	}
+	# Old garrison system against resistance
+	# ai_strategy = {
+	# 	type = role_ratio
+	# 	id = suppression
+	# 	value = 2
+	# }
 }
 
 default_mountaineers_production = {
@@ -465,8 +598,8 @@ default_mobile_production = {
 
 	ai_strategy = {
 		type = role_ratio
-		id = motorized
-		value = 3
+		id = mobile
+		value = 2
 	}
 }
 
@@ -508,7 +641,6 @@ highered_armored_production = {
 		value = 5
 	}
 }
-
 
 slightly_naval_focused_nation = {
 	enable = {
@@ -726,7 +858,7 @@ DEFAULT_template_design = {
 	ai_strategy = {
 		type = template_prio
 		id = motorized
-		value = 7
+		value = 10
 	}
 
 	ai_strategy = {
@@ -820,116 +952,7 @@ DEFAULT_template_design = {
 		value = 10
 	}
 }
-r56_motorized_production = {
-	enable = {
-		has_tech = motorised_infantry
-		num_of_military_factories > 10
-		NOT = {
-			OR = {
-				original_tag = MON
-				original_tag = BHU
-				original_tag = TIB
-				original_tag = SAU
-				original_tag = TAN
-			}
 
-		}
-	}
-	abort = {
-		num_of_military_factories < 11
-	}
-
-	ai_strategy = {
-		type = role_ratio
-		id = cavalry
-		value = -5
-	}
-
-	ai_strategy = {
-		type = role_ratio
-		id = motorized
-		value = 3
-	}
-}
-
-r56_late_motorized_production = {
-	enable = {
-		OR = {
-			has_tech = mechanised_infantry
-			AND = {
-				date > 1940.1.1
-				has_tech = motorised_infantry
-			}
-		}
-		OR = {
-			original_tag = MON
-			original_tag = BHU
-			original_tag = TIB
-			original_tag = SAU
-			original_tag = TAN
-		}
-	}
-	abort = {
-		always = no
-	}
-
-	ai_strategy = {
-		type = role_ratio
-		id = cavalry
-		value = -10
-	}
-
-	ai_strategy = {
-		type = role_ratio
-		id = motorized
-		value = 3
-	}
-}
-
-r56_limit_motorized_production = {
-	enable = {
-		has_tech = motorised_infantry
-		num_of_military_factories > 10
-		OR = {
-			num_of_military_factories < 30
-			oil < 20
-		}
-	}
-
-	abort_when_not_enabled = yes
-
-	ai_strategy = {
-		type = role_ratio
-		id = motorized
-		value = -6
-	}
-	ai_strategy = {
-		type = role_ratio
-		id = infantry
-		value = 6
-	}
-}
-
-more_motorized_production = {
-	enable = {
-		has_tech = motorised_infantry
-		num_of_military_factories > 30
-		oil > 30
-	}
-
-	abort_when_not_enabled = yes
-
-	ai_strategy = {
-		type = role_ratio
-		id = motorized
-		value = 6
-	}
-	ai_strategy = {
-		type = role_ratio
-		id = infantry
-		value = -6
-	}
-}
 save_admiral_pp_for_later = {
 	enable = {
 		has_war = no
@@ -977,3 +1000,207 @@ do_not_waste_pp_if_saving_for_manpower_laws = {
 	}
 }
 
+build_intelligence_agency_as_major = {
+	enable = {
+		is_major = yes
+		OR = {
+			has_war = yes
+			date > 1938.1.1
+		}
+	}
+
+	ai_strategy = {
+		type = intelligence_agency_usable_factories
+		value = 5
+	}
+
+}
+
+build_intelligence_agency = {
+	enable = {
+		date > 1940.1.1
+		has_war = no
+		num_of_civilian_factories > 25
+	}
+	abort = {
+		OR = {
+			has_war = yes
+			num_of_civilian_factories < 25
+		}
+	}
+
+	ai_strategy = {
+		type = intelligence_agency_usable_factories
+		value = 5
+	}
+
+}
+
+upgrade_intelligence_agency = {
+	enable = {
+		date > 1940.1.1
+		num_of_civilian_factories > 50
+	}
+	abort = {
+		OR = {
+			num_of_civilian_factories < 40
+		}
+	}
+
+	ai_strategy = {
+		type = intelligence_agency_usable_factories
+		value = 5
+	}
+}
+
+upgrade_intelligence_agency_as_spy_master = {
+	enable = {
+		is_spymaster = yes
+		OR = {
+			has_war = no
+			num_of_civilian_factories > 50
+		}
+	}
+	abort = {
+		is_spymaster = no
+		num_of_civilian_factories < 40
+	}
+
+	ai_strategy = {
+		type = intelligence_agency_usable_factories
+		value = 10
+	}
+}
+
+addintelligence_agency_normal_upgrade_prio = {
+	enable = {
+		always = yes
+	}
+
+	ai_strategy = {
+		type = intelligence_agency_branch_desire_factor
+		id = branch_intelligence
+		value = 1000
+	}
+	ai_strategy = {
+		type = intelligence_agency_branch_desire_factor
+		id = branch_defense
+		value = 1000
+	}
+	ai_strategy = {
+		type = intelligence_agency_branch_desire_factor
+		id = branch_operation
+		value = 500
+	}
+	ai_strategy = {
+		type = intelligence_agency_branch_desire_factor
+		id = branch_operative
+		value = 100
+	}
+	ai_strategy = {
+		type = intelligence_agency_branch_desire_factor
+		id = branch_crypto
+		value = 2000
+	}	
+}
+
+ask_foreign_manpower_as_major = {
+	enable = {
+		is_major = yes
+		garrison_manpower_need > 200000
+	}
+	
+	abort = {
+		garrison_manpower_need < 100000
+	}
+
+	ai_strategy = {
+		type = asking_foreign_garrison
+		value = 100
+		# id = ITA # id is optionnal. If it is filled, the value will just apply for this country. If not, the value will apply for all countries.
+	}
+}
+
+more_upgrades_as_spymaster = {
+
+	enable = {
+		is_spymaster = yes
+	}
+	
+	abort = {
+		is_spymaster = no
+	}
+
+	ai_strategy = {
+		type = agency_ai_base_num_factories_factor
+		value = -50    # -50% on the define
+	}
+
+	ai_strategy = {
+		type = agency_ai_per_upgrade_factories_factor
+		value = -25    # -25% on the define
+	}
+}
+
+
+put_garrisons_on_high_prio = {
+	enable = {
+		always = yes
+	}
+	
+	ai_strategy = {
+		type = garrison_reinforcement_priority
+		value = 100 # positive is high prio, negative is low prio
+	}
+}
+
+default_spyplanes_production = {
+	enable = {
+		has_tech = scout_plane1
+		is_major = yes
+		#OR = {
+		#	has_equipment = {
+		#		scout_plane_equipment > 50
+		#	}
+		#	has_deployed_air_force_size = {
+		#		size > 50
+		#		type = scout_plane
+		#	}
+		#}
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = unit_ratio
+		id = scout_plane
+		value = -99
+	}
+
+	ai_strategy = {
+		type = equipment_production_factor
+		id = scout_plane
+		value = -99
+	}
+
+	ai_strategy = {
+		type = equipment_production_min_factories
+		id = scout_plane
+		value = 1
+	}
+}
+
+minors_dont_spy = {
+	enable = {
+		has_tech = scout_plane1
+		is_major = no
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = unit_ratio
+		id = scout_plane
+		value = -10
+	}
+}
