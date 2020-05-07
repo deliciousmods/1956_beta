@@ -5,7 +5,7 @@ NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_HEIGHT = 8196
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_WIDTH = 41
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_HEIGHT = 24000
 -- Focuses
-NDefines.NFocus.MAX_SAVED_FOCUS_PROGRESS = 15
+NDefines.NFocus.MAX_SAVED_FOCUS_PROGRESS = 14
 
 -- Country balance
 NDefines.NCountry.SPECIAL_FORCES_CAP_BASE = 0.1
@@ -41,11 +41,12 @@ NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances
 	0.80, --50% for first trait
 	0.40, --15% for second trait after that
 	0.05
+	0.01
 }
 
 -- Technology
 NDefines.NTechnology.BASE_TECH_COST = 80
-NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 5 -- Base year ahead penalty
+NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 4.5 -- Base year ahead penalty
 NDefines.NTechnology.BASE_RESEARCH_POINTS_SAVED = 50.0
 
 -- Air Combat
