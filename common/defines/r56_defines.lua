@@ -40,8 +40,8 @@ NDefines.NMilitary.COMMANDER_LEVEL_UP_STAT_WEIGHTS = {5, 5, 3, 4}
 NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances to gain a personality trait for new generals
 	0.80, --50% for first trait
 	0.40, --15% for second trait after that
-	0.05
-	0.01
+	0.05,
+	0.01,
 }
 
 -- Technology
