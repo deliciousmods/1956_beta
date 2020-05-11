@@ -51,7 +51,10 @@ focus_tree = {
         prerequisite = {
             focus = PAK_General_Election
         }
-        mutually_exclusive = {
+		available = {
+			neutrality > 0.4
+		}
+		mutually_exclusive = {
             focus = PAK_Multipartism
         }
         x = 0
@@ -61,7 +64,10 @@ focus_tree = {
             factor = 40
         }
 		completion_reward = {
-
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
         }
 
     }
@@ -182,6 +188,12 @@ focus_tree = {
         }
         x = 2
         y = 3
+		completion_reward = {
+			every_owned_state = {
+				limit = { is_core_of = PAK }
+				add_extra_state_shared_building_slots = 1
+			}
+		}
 
     }
     focus = {
@@ -210,6 +222,9 @@ focus_tree = {
         id = PAK_Multipartism
         icon = GFX_goal_generic_multipartism
         cost = 10.00#3.50
+		available = {
+			democratic > 0.4
+		}
         prerequisite = {
             focus = PAK_General_Election
         }
@@ -223,7 +238,12 @@ focus_tree = {
             factor = 40
         }
 		completion_reward = {
-
+			set_politics = {
+				ruling_party = democratic
+				last_election = "1936.03.14"
+				election_frequency = 48
+				elections_allowed = yes
+			}
         }
 
     }
@@ -287,7 +307,17 @@ focus_tree = {
         relative_position_id = PAK_General_Election
         ai_will_do = { factor = 1 }
 		completion_reward = {
-
+			every_country = {
+				limit = {
+					OR = {
+						is_major = yes
+						is_faction_leader = yes
+						num_of_factories > 50
+					}
+					has_government = democratic
+				}
+				
+			}
         }
 
     }
@@ -317,6 +347,14 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Rebalance_the_Military_Budget
         }
+		available = {
+			any_country = {
+				is_major = yes
+				has_government = democratic
+				NOT = { has_war_with = PAK }
+				is_faction_leader = yes
+			}
+		}
         x = 7
         y = 5
         relative_position_id = PAK_General_Election
@@ -445,6 +483,7 @@ focus_tree = {
         id = PAK_War_Propaganda
         icon = GFX_goal_generic_control_the_radio
         cost = 10.00#3.50
+		
         prerequisite = {
             focus = PAK_Ally_the_High_Command
         }
@@ -456,7 +495,7 @@ focus_tree = {
         relative_position_id = PAK_General_Election
         ai_will_do = { factor = 1 }
 		completion_reward = {
-
+			add_war_support = 0.15
         }
 
     }
@@ -475,8 +514,63 @@ focus_tree = {
         relative_position_id = PAK_General_Election
         ai_will_do = { factor = 1 }
 		completion_reward = {
-			create_faction = "Pan Muslim Pact"
-			every_country = {
+			if = { 
+				limit = {
+					any_country = {
+						OR = {
+							tag = BAN
+							tag = PER
+							tag = AFG
+							tag = IRQ
+							tag = INS
+							tag = TAJ
+							tag = TMS
+							tag = KYR
+							tag = UZB
+							tag = MAL
+						}
+						OR = {
+							has_government = neutrality
+							has_government = democratic
+						}
+						is_subject = no
+						is_faction_leader = yes
+						NOT = {
+							has_war_with = PAK
+						}
+					}
+				}	
+				random_country = {
+					limit = {
+						OR = {
+							tag = BAN
+							tag = PER
+							tag = AFG
+							tag = IRQ
+							tag = INS
+							tag = TAJ
+							tag = TMS
+							tag = KYR
+							tag = UZB
+							tag = MAL
+						}
+						OR = {
+							has_government = neutrality
+							has_government = democratic
+						}
+						is_subject = no
+						is_faction_leader = yes
+						NOT = {
+							has_war_with = PAK
+						}
+					}
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = { NOT = { is_in_faction = yes } }
+				create_faction = "Pan Muslim Pact"
+				every_country = {
 					limit = {
 						OR = {
 							tag = BAN
@@ -500,8 +594,9 @@ focus_tree = {
 							has_war_with = PAK
 						}
 					}
-					country_event = generic.2
+					country_event = generic.5
 				}
+			}
         }
 
     }
@@ -564,7 +659,7 @@ focus_tree = {
 							has_war_with = PAK
 						}
 					}
-					country_event = generic.2
+					country_event = generic.5
 				}
 			}
 			else_if = {
@@ -596,7 +691,7 @@ focus_tree = {
 							has_war_with = PAK
 						}
 					}
-					country_event = generic.2
+					country_event = generic.5
 				}
 			}
 		}
@@ -620,6 +715,13 @@ focus_tree = {
         id = PAK_Align_Japan
         icon = GFX_goal_JAP_defence
         cost = 10.00#10.00
+		available = {
+			JAP = {
+				has_government = fascism
+				is_faction_leader = yes
+				NOT = { has_war_with = PAK }
+			}
+		}
         prerequisite = {
             focus = PAK_Disband_the_Council
         }
@@ -637,20 +739,116 @@ focus_tree = {
 		}
 
     }
+	
+    focus = {
+        id = PAK_The_Graveyard_of_Empires
+        icon = GFX_goal_PER_retake_afghanistan
+        cost = 10.00#10.00
+		available = {
+			NOT = { is_in_faction_with = AFG }
+			surrender_progress < 0.1
+			AFG = { exists = yes }
+		}
+        prerequisite = {
+            focus = PAK_Align_the_Soviet_Union
+			focus = PAK_Align_Japan
+			focus = PAK_Our_Own_Path
+        }
+        x = 6
+        y = 6
+		completion_reward = {
+			create_wargoal = {
+   	 			type = puppet_wargoal_focus
+    			target = AFG
+				expire = 0
+			}
+		}
+
+    }
+    focus = {
+        id = PAK_Down_with_Persia
+        icon = GFX_goal_ENG_attack_iran
+		available = {
+			NOT = { is_in_faction_with = PER }
+			PER = { exists = yes }
+			surrender_progress < 0.1
+			OR = {
+				ROOT = { controls_state = 415 }
+				AND = {
+					any_country = {
+						controls_state = 415
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+					}
+				}
+			}	
+		}
+        cost = 10.00#10.00
+        prerequisite = {
+            focus = PAK_The_Graveyard_of_Empires
+        }
+        x = 5
+        y = 7
+		completion_reward = {
+			create_wargoal = {
+   	 			type = puppet_wargoal_focus
+    			target = PER
+				expire = 0
+			}
+		}
+
+    }
+    focus = {
+        id = PAK_Into_India
+        icon = GFX_goal_ENG_attack_iran
+        cost = 10.00#10.00
+		available = {
+			NOT = { is_in_faction_with = RAJ }
+			RAJ = { exists = yes }
+			surrender_progress < 0.1
+			OR = {
+				ROOT = { controls_state = 440 }
+				AND = {
+					any_country = {
+						controls_state = 440
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+					}
+				}
+			}	
+		}
+        prerequisite = {
+            focus = PAK_The_Graveyard_of_Empires
+        }
+        x = 7
+        y = 7
+		completion_reward = {
+			create_wargoal = {
+   	 			type = puppet_wargoal_focus
+    			target = RAJ
+				expire = 0
+			}
+		}
+
+    }
     focus = {
         id = PAK_Economic_Cooperation
         icon = GFX_goal_generic_road
         cost = 10.00#10.00
         prerequisite = {
-            focus = PAK_Align_Japan
-            focus = PAK_Our_Own_Path
             focus = PAK_Align_the_Soviet_Union
+			focus = PAK_Align_Japan
+			focus = PAK_Our_Own_Path
         }
 		available = {
 			is_in_faction = yes
 			num_faction_members > 1
 		}
-        x = 7
+        x = 8
         y = 6
 		ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -682,6 +880,7 @@ focus_tree = {
 		}
 
     }
+	
     focus = {
         id = PAK_Unite_the_Proletariat
         icon = GFX_goal_workers_support
@@ -691,6 +890,9 @@ focus_tree = {
         }
         x = 4
         y = 3
+		completion_reward = {
+			add_ideas = r56i_laws_social_unity 
+		}
 
     }
     focus = {
@@ -716,6 +918,11 @@ focus_tree = {
         }
         x = 4
         y = 4
+		completion_reward = {
+			random_owned_controlled_state = {add_extra_state_shared_building_slots = 2 add_building_construction = { type = industrial_complex level = 2 instant_build = yes}  }
+			random_owned_controlled_state = {add_extra_state_shared_building_slots = 1 add_building_construction = { type = industrial_complex level = 1 instant_build = yes}  }
+
+		}
 
     }
     focus = {
@@ -754,6 +961,13 @@ focus_tree = {
         id = PAK_Align_the_Soviet_Union
         icon = GFX_goal_generic_soviet_assistance
         cost = 10.00#10.00
+		available = {
+			SOV = {
+				has_government = communism
+				is_faction_leader = yes
+				NOT = { has_war_with = PAK }
+			}
+		}
         prerequisite = {
             focus = PAK_A_Federal_Pakistan
         }
@@ -817,9 +1031,9 @@ focus_tree = {
         id = PAK_Pakistan_Armed_Forces
         icon = GFX_goal_army
         cost = 10.00#5.00
-        x = 49
+        x = 39
         y = 0
-        ai_will_do = { factor = 1 }
+        ai_will_do = { factor = 15 }
 		completion_reward = {
 
         }
@@ -829,7 +1043,7 @@ focus_tree = {
         id = PAK_Form_the_Navy
         icon = GFX_goal_generic_construct_naval_dockyard
         cost = 10.00#5.00
-        x = 43
+        x = 33
         y = 1
         prerequisite = {
             focus = PAK_Pakistan_Armed_Forces
@@ -844,7 +1058,7 @@ focus_tree = {
         id = PAK_Form_the_Air_Force
         icon = GFX_focus_generic_paratrooper
         cost = 10.00#5.00
-        x = 48
+        x = 38
         y = 1
         prerequisite = {
             focus = PAK_Pakistan_Armed_Forces
@@ -866,7 +1080,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Pakistan_Armed_Forces
         }
-        x = 54
+        x = 44
         y = 1
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -886,7 +1100,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Form_the_Navy
         }
-        x = 42
+        x = 32
         y = 2
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -905,7 +1119,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Think_Big
         }
-        x = 42
+        x = 32
         y = 3
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -924,7 +1138,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Form_the_Navy
         }
-        x = 44
+        x = 34
         y = 2
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -939,7 +1153,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Coast_Protection
         }
-        x = 44
+        x = 34
         y = 3
         ai_will_do = { factor = 1 }
 		completion_reward = {}
@@ -952,7 +1166,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Form_the_Air_Force
         }
-        x = 47
+        x = 37
         y = 2
         ai_will_do = { factor = 1 }
 		completion_reward = {}
@@ -965,7 +1179,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_New_Fighter_Designs
         }
-        x = 47
+        x = 37
         y = 3
         ai_will_do = { factor = 1 }
 		completion_reward = {}
@@ -978,7 +1192,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Form_the_Air_Force
         }
-        x = 49
+        x = 39
         y = 2
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -993,7 +1207,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Aviation_Training
         }
-        x = 49
+        x = 39
         y = 3
         ai_will_do = { factor = 1 }
 		completion_reward = {}
@@ -1006,7 +1220,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Reform_the_Army
         }
-        x = 52
+        x = 42
         y = 2
         ai_will_do = { factor = 1 }
 		completion_reward = {}
@@ -1022,10 +1236,12 @@ focus_tree = {
         mutually_exclusive = {
             focus = PAK_Local_Arms_Developement
         }
-        x = 51
+        x = 41
         y = 3
         ai_will_do = { factor = 1 }
-		completion_reward = {}
+		completion_reward = {
+			add_ideas = GEN_Licences_I
+		}
 
     }
     focus = {
@@ -1038,7 +1254,7 @@ focus_tree = {
         mutually_exclusive = {
             focus = PAK_Foreign_Equipment
         }
-        x = 53
+        x = 43
         y = 3
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1059,7 +1275,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Reform_the_Army
         }
-        x = 56
+        x = 46
         y = 2
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1077,7 +1293,7 @@ focus_tree = {
         mutually_exclusive = {
             focus = PAK_Radically_Different_Tactics
         }
-        x = 55
+        x = 45
         y = 3
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1094,7 +1310,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Frigate_Based_Navy
         }
-        x = 43
+        x = 33
         y = 4
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1116,7 +1332,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Frigate_Based_Navy
         }
-        x = 46
+        x = 36
         y = 4
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1138,7 +1354,7 @@ focus_tree = {
         mutually_exclusive = {
             focus = PAK_Fall_back_on_the_Great_War
         }
-        x = 57
+        x = 47
         y = 3
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1163,7 +1379,7 @@ focus_tree = {
             focus = PAK_Radically_Different_Tactics
             focus = PAK_Fall_back_on_the_Great_War
         }
-        x = 56
+        x = 46
         y = 4
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1183,7 +1399,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Ground_To_Air_Facilities
         }
-        x = 48
+        x = 38
         y = 4
         ai_will_do = { factor = 1 }
 		completion_reward = { }
@@ -1199,7 +1415,7 @@ focus_tree = {
         mutually_exclusive = {
             focus = PAK_Steel_Mines
         }
-        x = 50
+        x = 40
         y = 4
         ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1222,7 +1438,7 @@ focus_tree = {
         mutually_exclusive = {
             focus = PAK_Bauxite_Mines
         }
-        x = 52
+        x = 42
         y = 4
 		ai_will_do = { factor = 1 }
 		completion_reward = {
@@ -1240,7 +1456,7 @@ focus_tree = {
         cost = 10.00#5.00
         x = 25
         y = 0
-		ai_will_do = { factor = 1 }
+		ai_will_do = { factor = 15 }
 		completion_reward = {
 			440 = { add_building_construction = { type = infrastructure level = 2 instant_build = yes } }
 			443 = { add_building_construction = { type = infrastructure level = 2 instant_build = yes } }
@@ -1261,17 +1477,9 @@ focus_tree = {
 		}
 		ai_will_do = { factor = 1 }
 		completion_reward = {
-			add_ideas = r56i_laws_social_revolutionary
+			add_research_slot = 1
 		}
 		
-
-    }
-    focus = {
-        id = PAK_Further_Our_Reach
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        x = 35
-        y = 0
 
     }
     focus = {
@@ -1284,6 +1492,7 @@ focus_tree = {
         prerequisite = {
             focus = PAK_Expand_Industrial_Complexes
         }
+		ai_will_do = { factor = 1 }
         x = 23
         y = 3
 
@@ -1297,7 +1506,7 @@ focus_tree = {
         }
         x = 25
         y = 1
-		ai_will_do = { factor = 1 }
+		ai_will_do = { factor = 5 }
 		completion_reward = {
 			440 = { add_extra_state_shared_building_slots = 2 }
 			443 = { add_extra_state_shared_building_slots = 2 }
@@ -1313,7 +1522,7 @@ focus_tree = {
         }
         x = 24
         y = 2
-		ai_will_do = { factor = 1 }
+		ai_will_do = { factor = 20 }
 		completion_reward = {
 			 random_owned_state = {
                 limit = {
@@ -1359,7 +1568,13 @@ focus_tree = {
         }
         x = 26
         y = 2
-		ai_will_do = { factor = 1 }
+		ai_will_do = { 
+			factor = 1 
+			modifier = {
+				add = 49
+				date > 1937.11.05
+			}
+		}
 		completion_reward = {
 			 random_owned_state = {
                 limit = {
@@ -1448,93 +1663,6 @@ focus_tree = {
 
     }
     focus = {
-        id = PAK_Economic_Dependence
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Further_Our_Reach
-        }
-        mutually_exclusive = {
-            focus = PAK_Gather_the_Troops_at_Quetta
-        }
-        x = 32
-        y = 1
-
-    }
-    focus = {
-        id = PAK_Administrational_Dependence
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Economic_Dependence
-        }
-        x = 32
-        y = 2
-
-    }
-    focus = {
-        id = PAK_Gather_the_Troops_at_Quetta
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Further_Our_Reach
-        }
-        mutually_exclusive = {
-            focus = PAK_Economic_Dependence
-        }
-        x = 34
-        y = 1
-
-    }
-    focus = {
-        id = PAK_Strike_at_Dawn
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Gather_the_Troops_at_Quetta
-        }
-        x = 34
-        y = 2
-
-    }
-    focus = {
-        id = PAK_Appeal_to_the_Marginalised_Muslims
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Strike_at_Dawn
-            focus = PAK_Administrational_Dependence
-        }
-        x = 33
-        y = 3
-
-    }
-    focus = {
-        id = PAK_Ready_Our_Troops
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Further_Our_Reach
-        }
-        mutually_exclusive = {
-            focus = PAK_Coerse_Sinkiang
-        }
-        x = 36
-        y = 1
-
-    }
-    focus = {
-        id = PAK_Cross_the_Kaschmir
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Ready_Our_Troops
-        }
-        x = 36
-        y = 2
-
-    }
-    focus = {
         id = PAK_Further_Expand_Industrial_Complexes
         icon = GFX_goal_unknown
         cost = 10.00#5.00
@@ -1549,7 +1677,9 @@ focus_tree = {
         }
         x = 24
         y = 4
-		ai_will_do = { factor = 1 }
+		ai_will_do = { 
+			factor = 20
+		}
 		completion_reward = {
 			 random_owned_state = {
                 limit = {
@@ -1601,7 +1731,13 @@ focus_tree = {
         }
         x = 26
         y = 4
-		ai_will_do = { factor = 1 }
+		ai_will_do = { 
+			factor = 1 
+			modifier = {
+				add = 49
+				date > 1937.11.05
+			}
+		}
 		completion_reward = {
 			 random_owned_state = {
                 limit = {
@@ -1645,57 +1781,6 @@ focus_tree = {
         }
         x = 28
         y = 4
-
-    }
-    focus = {
-        id = PAK_Coerse_Sinkiang
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Further_Our_Reach
-        }
-        mutually_exclusive = {
-            focus = PAK_Ready_Our_Troops
-        }
-        x = 38
-        y = 1
-
-    }
-    focus = {
-        id = PAK_The_Final_Strike
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Appeal_to_the_Marginalised_Muslims
-        }
-        prerequisite = {
-            focus = PAK_Further_Recruitment
-        }
-        x = 35
-        y = 4
-
-    }
-    focus = {
-        id = PAK_A_New_Regime
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_Coerse_Sinkiang
-        }
-        x = 38
-        y = 2
-
-    }
-    focus = {
-        id = PAK_Further_Recruitment
-        icon = GFX_goal_unknown
-        cost = 10.00#5.00
-        prerequisite = {
-            focus = PAK_A_New_Regime
-            focus = PAK_Cross_the_Kaschmir
-        }
-        x = 37
-        y = 3
 
     }
 }
