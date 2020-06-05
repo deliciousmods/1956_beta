@@ -687,9 +687,19 @@ on_actions = {
 		effect = {
 			if = {
 				limit = {
+					tag = GER
+					FROM = { 
+						tag = SOV
+					}
+					NOT = { has_global_flag = fall_of_berlin_sov }
+				}
+				play_victory_parade_effect = yes
+			}
+			if = {
+				limit = {
 					NOT = { original_tag = GER }
 					NOT = { has_government = fascism }
-					NOT = { has_civil_war = yes }
+					has_civil_war = no
 					NOT = {
 						AND = {
 							FROM = {
@@ -1485,10 +1495,103 @@ on_actions = {
 		effect = {
 		}
 	}
+	#ROOT = country that joined a war
+	on_war = {
+		effect = {
+			if = {
+				limit = {
+					tag = USA
+					has_war_with = JAP
+					NOT = { has_global_flag = day_of_infamy_happened }
+					has_country_leader = { name = "Franklin Delano Roosevelt" ruling_only = yes }
+				}
+				play_day_of_infamy_effect = yes
+			}
+			if = {
+				limit = {
+					tag = ENG
+					has_war_with = GER
+					has_country_leader = { name = "Neville Chamberlain" ruling_only = yes }
+				}
+				play_war_with_germany_effect = yes
+			}
+		}
+	}
+	#ROOT = attacking side
+	#FROM = defending side
+	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
+	on_war_relation_added = {
+		effect = {
+			if = {
+				limit = {
+					tag = GER
+					FROM = { 
+						tag = SOV 
+						has_government = communism
+					}
+				}
+				set_global_flag = { flag = barbarossa_counter value = 1 days = 60 }
+			}
+		}
+	}
+	#ROOT - country that just went to peace
+	on_peaceconference_ended = {
+		effect = {
+			if = {
+				limit = {
+					tag = USA
+					is_historical_focus_on = yes
+					has_global_flag = day_of_infamy_happened
+					has_government = democratic
+					JAP = { has_government = democratic }
+				}
+				play_guns_are_silent_effect = yes
+			}
+		}
+	}
 
 	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
 	on_state_control_changed = {
 		effect = {
+			if = {
+				limit = {
+					tag = FRA #to avoid third party taking over
+					FROM = {
+						is_in_faction_with = GER
+					}
+					FROM.FROM = { 
+						is_core_of = FRA 
+						NOT = {
+							state = 459
+							state = 460
+							state = 513
+						}
+					}
+					FRA = {
+						has_capitulated = yes
+						is_in_faction_with = USA
+					}
+					NOT = { has_global_flag = d_day_happened }
+				}
+				play_order_of_the_day_effect = yes
+			}
+			if = {
+				limit = {
+					tag = "PHI"
+					FROM = {
+						is_in_faction_with = JAP
+					}
+					FROM.FROM = { 
+						is_core_of = "PHI" 
+					}
+					"PHI" = {
+						has_capitulated = yes
+						is_in_faction_with = USA
+					}
+					NOT = { has_global_flag = i_have_returned_happened }
+				}
+				play_i_have_returned_effect = yes
+			}
 			if = {
 				limit = {
 					OR = {
