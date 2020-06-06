@@ -10,7 +10,7 @@ country_event = {
 	title = spain.1.t
 	desc = spain.1.d
 	picture = GFX_report_event_spain_civil_war_soldiers
-	
+	 
 	fire_only_once = yes
 	
 	trigger = {
@@ -18,7 +18,10 @@ country_event = {
 		tag = SPR
 		has_defensive_war = no
 		NOT = { has_government = fascism }
-		date > 1936.2.16 # Trigger at some point after 1936 elections
+		OR = {
+			date > 1936.7.17
+			has_completed_focus = SPR_strike_first
+		}
 		OR = {
 			NOT = { has_dlc = "La Resistance" }
 			has_global_flag = spr_r56_focus_tree
@@ -26,7 +29,7 @@ country_event = {
 	}
 
 	mean_time_to_happen = {
-		days = 150	# Historical outbreak time after elections
+		days = 2
 	}
 
 	immediate = {
@@ -60,8 +63,25 @@ country_event = {
 		set_country_flag = sided_with_the_nationalists_spanish_civil_war_flag
 		remove_ideas = SPR_the_black_years
 		add_ideas = SPR_r56_non_intervention_agreement
-		custom_effect_tooltip = SPR_r56_general_n_tt
-		set_political_power = 0
+	
+		if = {
+			limit = {
+				has_completed_focus = SPR_back_the_ceda
+			}
+			set_political_power = 75
+		}
+		else = {
+			set_political_power = 0
+		}
+		
+		if = {
+			limit = {
+				has_completed_focus = SPR_establish_a_conspiracy
+			}
+			army_experience = 10
+		}
+		
+
 		hidden_effect = {
 			set_country_flag = rallied_spanish_generals	
 			set_capital = 176
@@ -274,10 +294,12 @@ country_event = {
 				}
 				set_cosmetic_tag = SPR_republican_spain_cosmetic
 				remove_ideas = SPR_the_black_years
+				remove_ideas = SPR_r56_strike_first
 				add_ideas = SPR_r56_non_intervention_agreement
 				set_country_flag = spanish_civil_war_started_flag
 				set_country_flag = sided_with_the_republicans_spanish_civil_war_flag
 				load_oob = "SPR_Civil_War"
+				load_focus_tree = { tree = Spain_focus keep_completed = yes }
 				set_equipment_fraction = 0.5
 				set_stability = 0.9
 				set_war_support = 0.8
@@ -433,6 +455,16 @@ country_event = {
 
 			#country_event = { id = spain.2 days = 7 }
 		}
+		if = {
+			limit = {
+				has_completed_focus = SPR_the_army_of_africa_connection
+			}
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = 1000
+			}
+		}
+		custom_effect_tooltip = SPR_r56_general_n_tt
 		custom_effect_tooltip = nationalists_chosen
 	}
 	option = { # Support Republicans
@@ -443,8 +475,24 @@ country_event = {
 		remove_ideas = SPR_the_black_years
 		add_ideas = SPR_r56_non_intervention_agreement
 		set_country_flag = rallied_spanish_generals	
-		custom_effect_tooltip = SPR_r56_general_r_tt
-		set_political_power = 0
+		if = {
+			limit = {
+				has_completed_focus = SPR_maintain_the_popular_front
+			}
+			set_political_power = 75
+		}
+		else = {
+			set_political_power = 0
+		}
+		
+		if = {
+			limit = {
+				has_completed_focus = SPR_maintain_the_civil_guards_loyality
+			}
+			army_experience = 10
+		}
+
+		
 		hidden_effect = {
 			start_civil_war = {
 				ideology = fascism
@@ -510,7 +558,7 @@ country_event = {
 			create_corps_commander = {
 				name = "Enrique Lister"
 				portrait_path = "gfx/leaders/SPR/r56_portrait_SPR_Enrique_Lister.dds"
-				traits = { politically_connected infantry_officer trickster trait_SPR_stalinist_loyalties }
+				traits = { politically_connected infantry_officer trickster trait_SPR_republican_loyalties }
 				skill = 3
 				attack_skill = 2
 				defense_skill = 3
@@ -579,14 +627,13 @@ country_event = {
 				coordination_skill = 1	
 			}
 
-		}
-
 		random_other_country = {
 			limit = {
 				original_tag = SPR
 				has_government = fascism
 			}
 			add_ideas = SPR_r56_non_intervention_agreement
+			remove_ideas = SPR_r56_strike_first
 			set_country_flag = spanish_civil_war_started_flag
 			set_country_flag = sided_with_the_nationalists_spanish_civil_war_flag
 			set_equipment_fraction = 0.5
@@ -808,8 +855,18 @@ country_event = {
 		set_equipment_fraction = 0.5
 		set_stability = 0.9
 		set_war_support = 0.8
-		
+	}
+		if = {
+			limit = {
+				has_completed_focus = SPR_proclaim_a_general_strike
+			}
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = 1000
+			}
+		}
 		#country_event = { id = spain.3 days = 7 }
+		custom_effect_tooltip = SPR_r56_general_r_tt
 		custom_effect_tooltip = republicans_chosen
 	}
 }
@@ -1068,7 +1125,7 @@ country_event = {
 		name = spain.9.a
 		add_popularity = {
 			ideology = communism
-			popularity = 0.1
+			popularity = 0.05
 		}
 		hidden_effect = {
 			SPR = { country_event = { days = 144 id = spain.1 } }
@@ -1091,158 +1148,6 @@ country_event = {
 	}
 }
 
-# Spanish Civil War if Franco is elected
-country_event = {
-	id = spain.10
-	title = spain.1.t
-	desc = spain.10.d
-	picture = GFX_report_event_spain_civil_war_soldiers
-	
-	fire_only_once = yes
-	
-	trigger = {
-		NOT = { has_global_flag = scw_over }
-		has_country_flag = SPR_communist_civil_war
-		has_defensive_war = no
-		date > 1936.2.16 # Trigger at some point after 1936 elections
-		OR = {
-			NOT = { has_dlc = "La Resistance" }
-			has_global_flag = SPR_R56_focus_tree
-		}
-	}
-
-	mean_time_to_happen = {
-		days = 151	# Historical outbreak time after elections
-	}
-	option = { # Support Nationalists
-		name = spain.1.a
-		trigger = { is_ai = no }
-		set_country_flag = spanish_civil_war_started_flag
-		set_country_flag = sided_with_the_nationalists_spanish_civil_war_flag
-		remove_ideas = SPR_the_black_years
-		add_ideas = SPR_r56_non_intervention_agreement
-		hidden_effect = {
-			set_capital = 176
-			start_civil_war = {
-				ruling_party = fascism
-				ideology = democratic
-				size = 0.5
-				capital = 41
-				states = { 41 165 167 168 173 175 790 792 793 794 }
-			}
-			set_popularities = {
-				neutrality = 40
-				fascism = 60
-			}
-			random_other_country = {
-				limit = {
-					original_tag = SPR
-					has_government = democratic
-				}
-				ROOT = {
-					random_unit_leader = {
-						limit = {
-							has_id  = 6011
-						}
-						set_nationality = PREV.PREV.PREV
-						
-					}
-				}
-				set_cosmetic_tag = SPR_republican_spain_cosmetic
-				remove_ideas = SPR_the_black_years
-				add_ideas = SPR_r56_non_intervention_agreement
-				set_country_flag = spanish_civil_war_started_flag
-				set_country_flag = sided_with_the_republicans_spanish_civil_war_flag
-				load_oob = "SPR_Civil_War"
-				set_equipment_fraction = 0.5
-				set_stability = 0.9
-				set_war_support = 0.8
-				#country_event = { id = spain.3 days = 1 }
-			}
-			news_event = { hours = 6 id = news.63 }
-			set_global_flag = spanish_civil_war
-			
-			load_oob = "SPA_Civil_War"
-			set_equipment_fraction = 0.5
-			set_stability = 0.9
-			set_war_support = 0.8
-			random_other_country = {
-				limit = {
-					original_tag = SPR
-					has_government = democratic
-				}
-				add_ideas = SPR_r56_non_intervention_agreement
-				load_focus_tree = { tree = Spain_focus keep_completed = yes }
-				set_popularities = {
-					democratic = 50
-					communism = 50
-				}
-				set_cosmetic_tag = SPR_civil_war
-			}
-
-			#country_event = { id = spain.2 days = 7 }
-		}
-		custom_effect_tooltip = nationalists_chosen
-	}
-	option = { # Support Republicans
-		name = spain.1.b
-		set_country_flag = spanish_civil_war_started_flag
-		set_country_flag = sided_with_the_republicans_spanish_civil_war_flag
-		set_cosmetic_tag = SPR_republican_spain_cosmetic
-		remove_ideas = SPR_the_black_years
-		add_ideas = SPR_r56_non_intervention_agreement
-		hidden_effect = {
-			start_civil_war = {
-				ideology = fascism
-				size = 0.5
-				capital = 176
-				states = { 166 169 170 171 172 174 176 177 178 290 297 699 788 789 791 }
-			}
-			random_other_country = {
-				limit = {
-					original_tag = SPR
-					has_government = fascism
-				}
-				add_ideas = SPR_r56_non_intervention_agreement
-				set_country_flag = spanish_civil_war_started_flag
-				set_country_flag = sided_with_the_nationalists_spanish_civil_war_flag
-				set_equipment_fraction = 0.5
-				set_stability = 0.9
-				set_war_support = 0.8
-				#country_event = { id = spain.2 days = 1 }
-				load_oob = "SPA_Civil_War"
-				load_focus_tree = { tree = Spain_focus keep_completed = yes }
-				set_popularities = {
-					fascism = 60
-					neutrality = 40
-				}
-			}
-			news_event = { hours = 6 id = news.63 }
-			set_global_flag = spanish_civil_war
-			
-			set_popularities = {
-				democratic = 50
-				communism = 50
-			}	
-			random_other_country = {
-				limit = {
-					original_tag = SPR
-					has_government = fascism
-				}
-				set_cosmetic_tag = SPR_civil_war
-				remove_ideas = SPR_the_black_years
-			}
-			load_oob = "SPR_Civil_War"
-			set_equipment_fraction = 0.5
-			set_stability = 0.9
-			set_war_support = 0.8
-			
-			#country_event = { id = spain.3 days = 7 }
-		}
-		custom_effect_tooltip = republicans_chosen
-	}
-	
-}
 
 # Dissolution of the Cortes
 #country_event = {
