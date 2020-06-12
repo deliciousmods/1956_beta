@@ -275,3 +275,36 @@ NAI = {
 
 	},
 }
+NOperatives = {
+
+	MAX_OPERATIVE_SLOT_FROM_AGENCY_UPGRADES = 2,	-- max operative slots gained from upgrades
+
+	OPERATIVE_MISSION_DETECTION_CHANCE_FACTOR = {
+		-- Factor multiplied to the detection chance of an agent on mission before the offsets
+		0.0, -- NoMission
+		1.0, -- BuildIntelNetwork
+		1.0, -- QuietIntelNetwork
+		1.0, -- CounterIntelligence
+		0.0, -- RootOutResistance
+		2.0, -- BoostIdeology
+		0.1, -- ControlTrade
+		0.1, -- DiplomaticPressure
+		2.0, -- Propaganda
+	},
+	
+	COUNTER_INTELLIGENCE_FOREIGN_AGENT_FACTOR = 1.1,			-- Multiplier to the counter intelligence provided by foreign (ally) operatives
+
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_XP_GAIN = 100,					-- Xp gain when an enemy operative is captured in the country the operative is assigned to counter intelligence to. Apply to a single randomly selected operative
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_OWN_COUNTRY_FOR_XP = 3,			-- An integer on how likely an operative operating in his own country is to get selected for the xp reward on enemy operative capture
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
+
+    
+    -- risk and outcome texts. each number array should match its labels in size, but its ok to have different amount of risk levels than outcomes
+	RISK_LEVELS = { 0.1, 0.2, 0.3 },       -- each risk level comes with a label to display for operations if it goes abve that number. If below the first it will isntead show the good outcomes 
+	RISK_LEVELS_LABELS = { "RISK_LOW", "RISK_MID", "RISK_HIGH" },
+	OUTCOME_LEVELS = { 0.0, 0.2, 0.3 },    -- outcome levels are shown if risk is below its first entry instead
+	OUTCOME_LEVELS_LABELS = { "OUTCOME_BASE", "OUTCOME_GOOD", "OUTCOME_VGOOD" },
+
+	TECH_STEAL_EQUIPMENT_FACTOR = 4,
+	TECH_STEAL_YEAR_FACTOR = 4,
+},
