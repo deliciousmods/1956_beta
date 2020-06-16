@@ -274,4 +274,27 @@ NAI = {
 		'nuclear_reactor',
 
 	},
+NOperatives = {
+	OPERATIVE_MISSION_DETECTION_CHANCE_FACTOR = {
+		-- Factor multiplied to the detection chance of an agent on mission before the offsets
+		0.0, -- NoMission
+		1.0, -- BuildIntelNetwork
+		1.0, -- QuietIntelNetwork
+		1.0, -- CounterIntelligence
+		0.0, -- RootOutResistance
+		2.0, -- BoostIdeology
+		0.1, -- ControlTrade
+		0.1, -- DiplomaticPressure
+		2.0, -- Propaganda
+	},
+	
+	COUNTER_INTELLIGENCE_FOREIGN_AGENT_FACTOR = 1.1,			-- Multiplier to the counter intelligence provided by foreign (ally) operatives
+
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_XP_GAIN = 100,					-- Xp gain when an enemy operative is captured in the country the operative is assigned to counter intelligence to. Apply to a single randomly selected operative
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_OWN_COUNTRY_FOR_XP = 3,			-- An integer on how likely an operative operating in his own country is to get selected for the xp reward on enemy operative capture
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
+
+},	
 }
+
+
