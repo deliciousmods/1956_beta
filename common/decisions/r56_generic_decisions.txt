@@ -1,4 +1,5 @@
 the_return_of_the_old_guard_category = {
+	
 	hold_the_neutrality_national_referendum = {
 
 		icon = generic_political_discourse
@@ -43,7 +44,208 @@ the_return_of_the_old_guard_category = {
 		}
 	}
 }
+crisis = {
+	r56_alone_faction_leader = {
+
+		icon = generic_civil_support
+
+		allowed = {
+
+		}
+
+		#Fail trigger
+		available = {
+			OR = {
+				num_faction_members > 1
+				is_faction_leader = no
+			}
+			
+		}
+
+		days_mission_timeout = 365
+
+		fire_only_once = yes
+
+		is_good = no
+
+		activation = {
+			is_faction_leader = yes
+			num_faction_members < 2
+			NOT = {
+				OR = {
+					AND = {
+						original_tag = MEX
+						OR = {
+							has_completed_focus = MEX_focus_bolivarian_alliance
+							has_completed_focus = MEX_focus_hispanic_alliance
+						}
+					}
+					AND = {
+						original_tag = GER
+						OR = {
+							has_government = fascism
+							has_government = neutrality
+						}
+						
+					}
+					AND = {
+						original_tag = JAP
+						has_government = fascism
+					}
+					AND = {
+						original_tag = SOV
+						has_government = communism
+					}										
+					AND = {
+						original_tag = ENG
+						has_government = democratic
+					}					
+				}
+			}			
+		}
+
+		#Fail
+		timeout_effect = {
+			dismantle_faction = yes
+			hidden_effect = {
+				country_event = { id = r56i.event.15 }	
+			}		
+				
+		}
+		#Success
+		complete_effect = {
+			add_stability = 0.02
+		}
+	}	
+}
 political_actions = {
+
+	r56_declare_independence = {
+
+		icon = eng_trade_unions_demand
+
+		allowed = {
+			tag = CAN
+			
+		}	
+
+		available = {
+			compare_autonomy_progress_ratio > 0.98
+			surrender_progress < 0.3
+		}
+		visible = {
+			has_completed_focus = CAN_patriation
+			is_ai = yes
+			NOT = {
+				has_country_flag = has_declared_independence
+			}
+		}
+		cost = 25	
+		complete_effect = {
+			hidden_effect = {
+				news_event = { id = r56i.event.13 }
+				set_country_flag = has_declared_independence
+			}
+			OVERLORD = {
+				end_puppet = ROOT					
+			}
+			every_country = {
+				limit = {
+					is_in_faction_with = ROOT
+				}
+				add_opinion_modifier = {
+					modifier = faction_traitor
+					target = ROOT
+					days = 730
+				}
+				add_opinion_modifier = {
+					modifier = faction_traitor_trade
+					target = ROOT
+					days = 730
+				}			
+			}		
+			leave_faction = yes
+			drop_cosmetic_tag = yes
+
+			every_country = {
+				limit ={
+					has_war_with = ROOT
+					OR = {
+						AND = {
+							is_in_faction = no
+							has_government = ROOT
+						}						
+						AND = {
+							is_faction_leader = yes
+							has_government = ROOT
+						}
+						AND = {
+							is_in_faction = yes
+							any_country = {
+								is_faction_leader = yes
+								is_in_faction_with = PREV
+								has_government = ROOT
+							}
+						}
+					}
+				}
+				white_peace = ROOT	
+			}	
+		}
+        ai_will_do = {
+			factor = 5000
+		}
+	}
+
+	r56_allow_militia_formation = {
+
+		icon = ger_military_buildup
+
+		allowed = {
+			always = yes
+		}
+
+		fire_only_once = yes
+
+		available = {
+				has_war_support > 0.30
+		}
+
+		visible = {
+			has_war_support > 0.14
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 25
+		}
+
+		days_remove = 90
+
+		remove_effect = {
+			#order of effects matter, don't change - SpicyAlfredo
+			custom_effect_tooltip = r56_militia_tt
+			hidden_effect = {
+				set_technology = {
+					r56_militia_tech = 1
+				}
+			}
+			If = {
+				limit = {
+					NOT = {
+						has_country_flag = r56_militia_formation_flag
+					}
+				}
+				hidden_effect = {
+					load_oob = "r56_unlock_militia"
+				}
+				custom_effect_tooltip = UNLOCK_DIVISION_TEMPLATE
+			}
+			set_country_flag = r56_militia_formation_flag
+		}
+	}
+
 	r56_deploy_heavy_aa_capital = {
 	
 		icon = ger_military_buildup
@@ -132,7 +334,92 @@ political_actions = {
 		}
 	}		
 }
+economy_decisions = {
+	r56_coordinate_land_equipment_manufacturers = {
 
+		icon = generic_industry
+
+		allowed = {
+			always = yes
+		}
+	
+		available = {
+			amount_taken_ideas = {
+			    amount > 0
+			    slots = {
+			        tank_manufacturer
+			    }
+			}
+			amount_taken_ideas = {
+			    amount > 0
+			    slots = {
+			        materiel_manufacturer
+			    }
+			}
+			amount_taken_ideas = {
+			    amount > 0
+			    slots = {
+			        industrial_concern
+			    }
+			}			
+		}
+
+		cost = 50 
+		days_remove = 365
+
+		remove_effect = {
+		}
+
+		complete_effect = {
+			add_timed_idea = {
+			    idea = r56_land_equipment_manufacturers_coordination
+			    days = 365
+			}						
+		}			
+	}
+	r56_coordinate_naval_equipment_manufacturers = {
+
+		icon = generic_naval
+
+		allowed = {
+			always = yes
+		}
+	
+		available = {
+			amount_taken_ideas = {
+			    amount > 0
+			    slots = {
+			        naval_manufacturer
+			    }
+			}
+			amount_taken_ideas = {
+			    amount > 0
+			    slots = {
+			        materiel_manufacturer
+			    }
+			}
+			amount_taken_ideas = {
+			    amount > 0
+			    slots = {
+			        industrial_concern
+			    }
+			}
+			any_state = {
+				is_coastal = yes
+				is_controlled_by = ROOT
+			}						
+		}
+		cost = 50 
+		days_remove = 365
+
+		complete_effect = {
+			add_timed_idea = {
+			    idea = r56_naval_equipment_manufacturers_coordination
+			    days = 365
+			}						
+		}			
+	}	
+}
 war_measures = {
 	#cause crahes at the moment
 #	seize_machine_toolings_in_state = {

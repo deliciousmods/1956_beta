@@ -90,6 +90,7 @@ focus_tree = {
 		completion_reward = {
 			add_ideas = ROM_preserve_greater_romania
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -160,6 +161,7 @@ focus_tree = {
 		completion_reward = {
 			add_ideas = ROM_a_deal_with_the_devil_2
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -231,6 +233,7 @@ focus_tree = {
 		completion_reward = {
 			add_ideas = ROM_romanian_volunteer_brigades
 		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	focus = {
@@ -251,13 +254,19 @@ focus_tree = {
 					has_capitulated = yes
 				}
 			}
+			modifier = {
+				factor = 0.01
+				has_idea = GER_align_romania
+				fascism > 0.4
+				
+			}				
 		}
 
 		available = {
 			SOV = { is_faction_leader = yes }
+			is_puppet = no
 			is_in_faction = no
 			NOT = { has_war_with = SOV }
-			is_subject = no
 			NOT = {
 				any_other_country = {
 					is_in_faction_with = SOV
@@ -357,6 +366,7 @@ focus_tree = {
 			add_to_tech_sharing_group = ROM_invite_german_advisors_tech_group
 			GER = { add_to_tech_sharing_group = ROM_invite_german_advisors_tech_group }
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -395,11 +405,12 @@ focus_tree = {
 				modifier = ROM_license_german_equipment
 			}
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
 		id = ROM_join_axis
-		icon = GFX_goal_support_fascism
+		icon = GFX_r56_goal_generic_the_axis
 		prerequisite = { focus = ROM_invite_german_advisors }
 		x = 0
 		y = 4
@@ -416,36 +427,55 @@ focus_tree = {
 				}
 			}
 		}
-
-		available = {
-			GER = { 
-				is_faction_leader = yes
-				has_government = fascism
-			}
-			is_in_faction = no
-			NOT = { has_war_with = GER }
-			is_subject = no
-			NOT = {
-				any_other_country = {
-					is_in_faction_with = GER
-					has_war_with = ROM
-				}
-			}
-		}
+		cancel_if_invalid = yes
+		continue_if_invalid = no
+		available_if_capitulated = yes
 
 		bypass = {
 			is_in_faction_with = GER
 		}
 
-		cancel_if_invalid = yes
-		continue_if_invalid = no
-		available_if_capitulated = yes
-
-
-		completion_reward = {
-			GER = {
-				country_event = generic.2
+		available = {
+			is_in_faction = no
+			is_puppet = no
+			any_other_country = {
+				is_major = yes
+				has_government = fascism
+				is_faction_leader = yes
+				NOT = { has_war_with = ROOT }
+				has_opinion = {
+					target = ROOT
+					value > 0
+				}					
 			}
+		}
+		completion_reward = {
+			if = {
+				limit = {
+					GER = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+						exists = yes
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = GER
+							has_war_with = ROOT
+						}
+					}					
+				}
+				GER = {
+					country_event = generic.2
+				}
+			}
+			else = {
+				get_best_alliance_match_fascism_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+			}		
 		}
 	}
 
@@ -503,6 +533,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -543,9 +574,11 @@ focus_tree = {
 			create_wargoal = {
 				type = take_state_focus
 				target = SOV
+				expire = 0
 				generator = { 192 198 }
 			}
 		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	focus = {
@@ -604,8 +637,26 @@ focus_tree = {
 			is_in_faction = no
 			is_subject = no
 			OR = {
-				country_exists = POL
-				country_exists = CZE
+				AND = {
+					country_exists = POL
+					is_in_faction = no
+					exists = yes 
+					is_puppet = no
+					OR = {
+						has_government = democratic
+						has_government = neutrality
+					}					
+				}
+				AND = {
+					country_exists = CZE
+					is_in_faction = no
+					exists = yes 
+					is_puppet = no
+					OR = {
+						has_government = democratic
+						has_government = neutrality
+					}								
+				}
 			}
 		}
 
@@ -658,6 +709,7 @@ focus_tree = {
 				news_event = { id = news.317 days = 1 }
 			}
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -778,6 +830,7 @@ focus_tree = {
 			
 			}
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -793,7 +846,11 @@ focus_tree = {
 		ai_will_do = {
 			factor = 1
 			modifier = {
-				factor = 0
+				factor = 0.2
+				ENG = { surrender_progress > 0.2 }
+			}
+			modifier = {
+				factor = 0.01
 				OR = {
 					ENG = {
 						has_capitulated = yes
@@ -803,22 +860,23 @@ focus_tree = {
 					}
 				}
 			}
+			modifier = {
+				factor = 0.01
+				has_idea = GER_align_romania
+				fascism > 0.4
+				
+			}			
 		}
 
-		available = {
-			ENG = {
+		available = {			
+			any_other_country = {
+				NOT = { has_war_with = ROOT }
 				is_faction_leader = yes
+				is_major = yes
 				has_government = democratic
 			}
+			is_puppet = no
 			is_in_faction = no
-			NOT = { has_war_with = ENG }
-			is_subject = no
-			NOT = {
-				any_other_country = {
-					is_in_faction_with = ENG
-					has_war_with = ROM
-				}
-			}
 		}
 
 		bypass = {
@@ -831,15 +889,113 @@ focus_tree = {
 
 
 		completion_reward = {
-			ENG = {
-				country_event = generic.2
+			if = {
+				limit = {
+					ENG = {
+						has_government = democratic
+						is_faction_leader = yes
+						has_capitulated = no
+					}
+				}
+				ENG = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					USA = {
+						has_government = democratic
+						is_faction_leader = yes
+						has_capitulated = no
+					}
+				}
+				USA = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					any_other_country = {
+						has_government = democratic
+						is_faction_leader = yes
+						is_major = yes
+						has_capitulated = no
+						num_of_factories > 70
+					}
+				}
+				random_other_country = {
+					limit = {
+						has_government = democratic
+						is_faction_leader = yes
+						is_major = yes
+						num_of_factories > 70
+					}
+					country_event = generic.2
+				}				
+			}
+			else_if = {
+				limit = {
+					any_other_country = {
+						has_government = democratic
+						is_faction_leader = yes
+						is_major = yes
+						has_capitulated = no
+						num_of_factories > 50
+					}
+				}
+				random_other_country = {
+					limit = {
+						has_government = democratic
+						is_faction_leader = yes
+						is_major = yes
+						num_of_factories > 50
+					}
+					country_event = generic.2
+				}				
+			}			
+			else_if = {
+				limit = {
+					any_other_country = {
+						has_government = democratic
+						is_faction_leader = yes
+						is_major = yes
+						has_capitulated = no
+					}
+				}
+				random_other_country = {
+					limit = {
+						has_government = democratic
+						is_faction_leader = yes
+						is_major = yes
+						has_capitulated = no
+					}
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					any_other_country = {
+						has_government = democratic
+						is_faction_leader = yes
+
+						has_capitulated = no
+					}
+				}
+				random_other_country = {
+					limit = {
+						has_government = democratic
+						is_faction_leader = yes
+						has_capitulated = no
+					}
+					country_event = generic.2
+				}
 			}
 		}
 	}
 
 	focus = {
 		id = ROM_joint_allied_staff_college
-		icon = GFX_goal_generic_allies_build_infantry
+		icon = GFX_r56_goal_generic_democratic_army
 		prerequisite = { focus = ROM_join_allies }
 		prerequisite = { focus = ROM_military_modernization }
 		x = 1
@@ -876,6 +1032,7 @@ focus_tree = {
 				FRA = { add_to_tech_sharing_group = ROM_joint_allied_staff_college_tech_group }
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	############################
@@ -917,6 +1074,7 @@ focus_tree = {
 				category = industry
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -1004,6 +1162,7 @@ focus_tree = {
 				set_state_flag = ROM_national_defense_industry_AF2
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -1036,6 +1195,7 @@ focus_tree = {
 		completion_reward = {
 			add_ideas = ROM_agrarian_reform
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -1095,6 +1255,16 @@ focus_tree = {
 					instant_build = yes
 				}
 			}
+			random_state = {
+				limit = {
+					has_state_flag = ROM_danubian_transport_network_Inf_4
+				}
+				add_building_construction = {
+					type = infrastructure
+					level = 1
+					instant_build = yes
+				}
+			}			
 		}
 
 		completion_reward = {
@@ -1143,7 +1313,23 @@ focus_tree = {
 				}
 				set_state_flag = ROM_danubian_transport_network_Inf_3
 			}
+			random_owned_controlled_state = {
+				prioritize = { 818 }
+				limit = {
+					free_building_slots = {
+						building = infrastructure
+						size > 0
+					}
+				}
+				add_building_construction = {
+					type = infrastructure
+					level = 1
+					instant_build = yes
+				}
+				set_state_flag = ROM_danubian_transport_network_Inf_3
+			}			
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -1189,6 +1375,9 @@ focus_tree = {
 
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = {
+					46
+				}
 				limit = {
 					ROOT = { has_full_control_of_state = PREV } 
 					free_building_slots = {
@@ -1206,6 +1395,7 @@ focus_tree = {
 				set_state_flag = ROM_malaxa_IC
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -1269,24 +1459,35 @@ focus_tree = {
 
 		complete_tooltip = {
 			random_state = {
+				prioritize = {
+					84
+				}
 				limit = {
 					has_state_flag = ROM_hunedoara_steel_works_IC
 				}
-				add_extra_state_shared_building_slots = 2
+				add_extra_state_shared_building_slots = 3
 				add_building_construction = {
 					type = industrial_complex
-					level = 2
+					level = 1
 					instant_build = yes
 				}
+				add_building_construction = {
+					type = steel_mill
+					level = 2
+					instant_build = yes
+				}				
 				add_resource = {
 					type = steel
-					amount = 8
+					amount = 12
 				}
 			}
 		}
 
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = {
+					84
+				}				
 				limit = {
 					ROOT = { has_full_control_of_state = PREV } 
 					free_building_slots = {
@@ -1295,12 +1496,17 @@ focus_tree = {
 						include_locked = yes
 					}
 				}
-				add_extra_state_shared_building_slots = 2
+				add_extra_state_shared_building_slots = 3
 				add_building_construction = {
 					type = industrial_complex
-					level = 2
+					level = 1
 					instant_build = yes
 				}
+				add_building_construction = {
+					type = steel_mill
+					level = 2
+					instant_build = yes
+				}	
 				set_state_flag = ROM_hunedoara_steel_works_IC
 				add_resource = {
 					type = steel
@@ -1308,6 +1514,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -1371,6 +1578,7 @@ focus_tree = {
 			custom_effect_tooltip = available_designer
 			show_ideas_tooltip = ROM_iar
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -1409,6 +1617,71 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+	focus = {
+		id = ROM_oil_refining_infrastructure
+		icon = GFX_goal_refining
+		prerequisite = { focus = ROM_expand_ploiesti_oil_production }
+		x = 2
+		y = 1
+		relative_position_id = ROM_expand_ploiesti_oil_production
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			has_full_control_of_state = 46			
+		}
+
+		bypass = {
+
+		}
+
+		cancel_if_invalid = yes
+		continue_if_invalid = no
+		available_if_capitulated = no
+
+		complete_tooltip = {
+
+		}
+
+		completion_reward = {
+			random_owned_controlled_state = {
+				prioritize = { 46 }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = fuel_silo
+					level = 1
+					instant_build = yes
+				}
+			}
+			random_owned_controlled_state = {
+				prioritize = { 81 }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = fuel_silo
+					level = 1
+					instant_build = yes
+				}
+			}			
+			
+			add_tech_bonus = {
+				name = industrial_bonus
+				bonus = 1
+				uses = 1
+				category = refining_tech
+			}
+			add_tech_bonus = {
+				name = excavation_tech_bonus
+				bonus = 0.5
+				uses = 1
+				category = excavation_tech
+			}			
+		}
 	}
 
 	focus = {
@@ -1440,6 +1713,7 @@ focus_tree = {
 		completion_reward = {
 			add_research_slot = 1
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -1506,6 +1780,7 @@ focus_tree = {
 			add_ideas = ROM_balkans_dominance
 			set_rule = { can_create_factions = yes }
 		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	focus = {
@@ -1649,8 +1924,10 @@ focus_tree = {
 			create_wargoal = {
 				type = puppet_wargoal_focus
 				target = GRE
+				expire = 0
 			}
 		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	focus = {
@@ -1701,6 +1978,7 @@ focus_tree = {
 				create_wargoal = {
 					type = annex_everything
 					target = YUG
+					expire = 0
 				}
 				else = {				
 					YUG = {
@@ -1709,6 +1987,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	focus = {
@@ -1787,8 +2066,10 @@ focus_tree = {
 			create_wargoal = {
 				type = puppet_wargoal_focus
 				target = TUR
+				expire = 0
 			}
 		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	#############################
@@ -1837,6 +2118,7 @@ focus_tree = {
 			}
 			remove_ideas = neutrality_idea
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -1894,6 +2176,7 @@ focus_tree = {
 			}
 			
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -1925,6 +2208,7 @@ focus_tree = {
 		completion_reward = {
 			add_ideas = ROM_fortify_the_borders
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -1976,6 +2260,7 @@ focus_tree = {
 		completion_reward = {
 			add_political_power = 120
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -2015,6 +2300,7 @@ focus_tree = {
 				remove_idea = ROM_the_sentinel_of_the_motherland
 			}			
 		}
+		search_filters = { FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -2055,6 +2341,7 @@ focus_tree = {
 			}
 			remove_country_leader_trait = hedonist
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -2095,6 +2382,7 @@ focus_tree = {
 			add_country_leader_trait = camarilla_leader
 			add_ideas = ROM_the_sentinel_of_the_motherland
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -2127,6 +2415,7 @@ focus_tree = {
 		completion_reward = {
 			add_research_slot = 1
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -2172,11 +2461,35 @@ focus_tree = {
 		cost = 10
 
 		ai_will_do = {
-			factor = 1
+			factor = 0
 			modifier = {
 				factor = 0
 				has_war_with = SOV
 			}
+			modifier = {
+				factor = 0
+				has_government = neutrality
+				is_in_faction_with = POL
+				OR = {
+					is_in_faction_with = YUG
+					is_in_faction_with = CZE
+				}
+			}
+			modifier = {
+				add = 10
+				has_idea_with_trait = communist_revolutionary
+			}
+			modifier = {
+				add = 60
+				surrender_progress > 0.1
+				any_owned_state = {
+					is_controlled_by = SOV
+				}
+				SOV = {
+					has_government = communism
+				}				
+				enemies_strength_ratio > 1
+			}									
 		}
 
 		available = {
@@ -2184,7 +2497,6 @@ focus_tree = {
 			SOV = {
 				is_faction_leader = yes
 				has_government = communism
-				NOT = { has_war_with = ROM}
 			}
 		}
 
@@ -2230,6 +2542,7 @@ focus_tree = {
 			add_opinion_modifier = { modifier = ROM_appoint_soviet_friendly_government target = SOV }
 			SOV = { add_opinion_modifier = { modifier = ROM_appoint_soviet_friendly_government target = ROOT } }
 		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -2279,6 +2592,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = {  }
 	}
 
 	focus = {
@@ -2297,6 +2611,15 @@ focus_tree = {
 				factor = 0
 				has_war_with = GER
 			}
+			modifier = {
+				factor = 0
+				has_government = neutrality
+				is_in_faction_with = POL
+				OR = {
+					is_in_faction_with = YUG
+					is_in_faction_with = CZE
+				}
+			}			
 		}
 
 		available = {
@@ -2374,6 +2697,7 @@ focus_tree = {
 				active = no
 			}
 		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -2433,8 +2757,9 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = {  }
 	}
-
+	
 	focus = {
 		id = ROM_force_abdication
 		icon = GFX_focus_rom_abdicate
@@ -2467,11 +2792,11 @@ focus_tree = {
 		cancel_if_invalid = yes
 		continue_if_invalid = no
 		available_if_capitulated = yes
-
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
 		completion_reward = {
 			#Removes king carol and makes the most popular party the ruling one
 			if = {
-				limit = { has_country_leader = { name = "Carol II" } }
+				limit = { has_country_leader = { id = 550 } }
 				retire_country_leader = yes
 			}
 			if = {
@@ -2482,46 +2807,41 @@ focus_tree = {
 					ruling_party = democratic
 					elections_allowed = yes
 				}
-				limit = {
-					communism > 0.35
-				}
-				set_politics = {
-					ruling_party = communism
-					elections_allowed = no
-				}
-				limit = {
-					fascism > 0.35
-				}
-				set_politics = {
-					ruling_party = fascism
-					elections_allowed = no
-				}
-			}
-			if = {
-				limit = {
-					has_idea = ROM_constitutional_guarantees
-				}				
 				else = {
 					if = {
 						limit = {
-							has_idea = ROM_securitate
+							communism > 0.35
 						}
-					}
-				}
+						set_politics = {
+							ruling_party = communism
+							elections_allowed = no
+						}
+
+						else = {
+							limit = {
+								fascism > 0.35
+							}
+							set_politics = {
+								ruling_party = fascism
+								elections_allowed = no
+							}
+						}
+					}					
+				}				
 			}
+
 			swap_ideas = {
 				add_idea = ROM_figurehead_king_michael
 				remove_idea = ROM_king_carol_ii_hedonist
 			}
 			remove_ideas = ROM_the_sentinel_of_the_motherland
-			#add_political_power = -120
 			add_timed_idea = { idea = ROM_king_carol_emptied_accounts days = 360 }
 			hidden_effect = {
 				news_event = { id = news.323 days = 1 }
 			}
 		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
 	}
-
 	focus = {
 		id = ROM_appoint_allied_friendly_government
 		icon = GFX_goal_ROM_appoint_allied_friendly_government
@@ -2591,6 +2911,7 @@ focus_tree = {
 			add_opinion_modifier = { modifier = ROM_appoint_allied_friendly_government target = ENG }
 			ENG = { add_opinion_modifier = { modifier = ROM_appoint_allied_friendly_government target = ROOT } }
 		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
@@ -2640,6 +2961,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -2697,6 +3019,7 @@ focus_tree = {
 				remove_idea = ROM_king_carol_ii_hedonist
 			}
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	############################
@@ -2784,6 +3107,7 @@ focus_tree = {
 				set_state_flag = ROM_expand_the_air_force_AB_2
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -2811,7 +3135,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_ideas = ROM_acquire_licenses
@@ -2853,6 +3177,7 @@ focus_tree = {
 				category = cat_operational_integrity
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -2890,6 +3215,7 @@ focus_tree = {
 				category = battlefield_support_tree
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -2916,7 +3242,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -2926,6 +3252,7 @@ focus_tree = {
 				category = tactical_bomber
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3034,7 +3361,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_ideas = ROM_local_development
@@ -3076,6 +3403,7 @@ focus_tree = {
 				category = strategic_destruction_tree
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3102,7 +3430,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3112,6 +3440,7 @@ focus_tree = {
 				category = cas_bomber
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3138,7 +3467,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			#Give generic fighter bonus if fighter_2 already researched
@@ -3164,6 +3493,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3191,7 +3521,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3201,6 +3531,7 @@ focus_tree = {
 				category = cat_strategic_bomber
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3227,7 +3558,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3237,6 +3568,7 @@ focus_tree = {
 				category = cat_strategic_bomber
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3263,7 +3595,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3273,6 +3605,7 @@ focus_tree = {
 				category = nuclear
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	############################
@@ -3332,7 +3665,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_ideas = ROM_army_war_college
@@ -3376,7 +3709,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3386,6 +3719,7 @@ focus_tree = {
 				category = infantry_weapons
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {		
@@ -3454,6 +3788,7 @@ focus_tree = {
 				category = mountaineers_tech
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -3480,7 +3815,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3490,6 +3825,7 @@ focus_tree = {
 				category = artillery
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3517,7 +3853,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3527,6 +3863,7 @@ focus_tree = {
 				category = cat_anti_tank
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -3651,6 +3988,7 @@ focus_tree = {
 				}
 			}			
 		}
+		search_filters = { FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -3678,11 +4016,12 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_ideas = ROM_reserve_divisions
 		}
+		search_filters = { FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -3839,6 +4178,7 @@ focus_tree = {
 				}
 			}			
 		}
+		search_filters = { FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -3865,7 +4205,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_ideas = ROM_acquire_modern_tanks
@@ -3898,7 +4238,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			custom_effect_tooltip = available_designer
@@ -3930,7 +4270,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -3941,6 +4281,7 @@ focus_tree = {
 				category = cat_heavy_armor
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	############################
@@ -3969,7 +4310,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		complete_tooltip = {
 			navy_experience = 25
@@ -4005,6 +4346,7 @@ focus_tree = {
 				set_state_flag = ROM_expand_the_galati_shipyards_AB
 			}
 		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 
 	focus = {
@@ -4032,7 +4374,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			custom_effect_tooltip = available_designer
@@ -4064,7 +4406,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_ideas = ROM_coastal_defense_ships
@@ -4074,6 +4416,7 @@ focus_tree = {
 				set_technology = { coastal_defense_ships = 1 } 
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -4100,7 +4443,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -4109,7 +4452,19 @@ focus_tree = {
 				uses = 1
 				category = dd_tech
 			}
+			if = {
+                limit = {
+                    has_dlc = "Man the Guns"
+                }
+                add_tech_bonus = {
+                    name = SPR_navy_modernization
+                    bonus = 1
+                    uses = 1
+                    category = asw_tech
+                }
+            }			
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -4136,7 +4491,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			swap_ideas = {
@@ -4170,7 +4525,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -4179,7 +4534,21 @@ focus_tree = {
 				uses = 1
 				category = ss_tech
 			}
+			if = {
+				limit = {
+					has_dlc = "Man the Guns"
+				}
+				add_tech_bonus = {
+					name = SPR_navy_modernization
+					bonus = 1
+					uses = 1
+					category = torpedo_equipment
+					technology = basic_submarine_snorkel
+					technology = improved_submarine_snorkel					
+				}
+			}			
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -4207,7 +4576,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {			
 			custom_effect_tooltip = available_designer
@@ -4239,7 +4608,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -4250,7 +4619,28 @@ focus_tree = {
 				category = bb_tech
 				category = bc_tech
 			}
+			if = {
+                limit = {
+                    has_dlc = "Man the Guns"
+                }
+                add_tech_bonus = {
+                    name = SPR_navy_modernization
+                    bonus = 1
+                    uses = 1
+                    category = naval_gunnery_tech
+                    category = naval_shell_tech
+                }
+                add_tech_bonus = {
+                    name = SPR_navy_modernization
+                    bonus = 1
+                    uses = 1
+                    category = naval_armor_tech
+                    category = damage_control_tech
+
+                }
+            }			
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -4277,7 +4667,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -4287,6 +4677,7 @@ focus_tree = {
 				category = naval_bomber
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
@@ -4313,7 +4704,7 @@ focus_tree = {
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
-		available_if_capitulated = no
+		available_if_capitulated = yes
 
 		completion_reward = {
 			add_tech_bonus = {
@@ -4324,5 +4715,6 @@ focus_tree = {
 				category = marine_tech
 			}
 		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 }
