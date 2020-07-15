@@ -294,6 +294,17 @@ NOperatives = {
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_OWN_COUNTRY_FOR_XP = 3,			-- An integer on how likely an operative operating in his own country is to get selected for the xp reward on enemy operative capture
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
 
+},
+
+NCountry = {
+	FEMALE_UNIT_LEADER_BASE_CHANCE = { 
+		-- applies as a factor to female unit leader randomization
+		-- the values needs to be zero if you don't actually have random portraits
+		0.0, -- navy leaders
+		0.0, -- army leaders
+		0.6, -- operatives
+	},
+
 },	
 }
 
