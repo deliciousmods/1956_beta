@@ -16,6 +16,22 @@ country_event = {#ADEN HANDOVER
         name = india.1.a
      }
 }
+country_event = {#ADEN HANDOVER
+    id = india.118
+	title = india.118.t
+	desc = india.118.desc
+    fire_only_once = yes
+
+    is_triggered_only = yes
+
+    option = {
+        name = india.118.a
+		set_variable = {
+			exvar = num_days 
+		}
+		add_political_power = var:exvar
+     }
+}
 
 ### E L E C T I O N  E V E N T S ###
 
@@ -32,11 +48,27 @@ country_event = {#Election Notification
 	}
 	
     option = {#Let them play in their Ballpit
+        name = india.intro.c
+		trigger = {
+			NOT = {
+				focus_progress = {
+					focus = RAJ_Reinforce_the_Government_of_India_Act
+					progress > 0
+				}
+			}
+		}
+		set_country_flag = chose_underground
+    }
+    option = {#Let them play in their Ballpit
         name = india.intro.a
 		trigger = {
 			NOT = {
 				focus_progress = {
 					focus = RAJ_Provincial_Elections
+					progress > 0
+				}
+				focus_progress = {
+					focus = RAJ_Underground_Activity
 					progress > 0
 				}
 			}
@@ -60,6 +92,10 @@ country_event = {#Election Notification
 			NOT = {
 				focus_progress = {
 					focus = RAJ_Linlithgows_Reign
+					progress > 0
+				}
+				focus_progress = {
+					focus = RAJ_Underground_Activity
 					progress > 0
 				}
 			}
@@ -93,6 +129,13 @@ country_event = {#PROVINCIAL ELECTIONS
 			set_variable = {
 				var = neutral_control
 				value = 0
+			}
+			set_variable = {
+				var = mission_timeout_election
+				value = 500
+			}
+			subtract_from_variable = {
+				mission_timeout_election = num_days
 			}
 			every_owned_state = {
 				limit = {
@@ -165,17 +208,13 @@ country_event = {#PROVINCIAL ELECTIONS
 }
 country_event = {#ELECTION ENEMY ACTION
     id = india.3
-	hidden = yes
+	hidden = no
     is_triggered_only = yes
 	immediate = {
 		if = { 
 			limit = {
 				tag = RAJ
 				has_country_flag = election_enabled
-			}
-			country_event = { 
-				id = india.3
-				days = 40
 			}
 			random_owned_state = {
 				limit = { 
@@ -197,13 +236,13 @@ country_event = {#ELECTION ENEMY ACTION
 					has_country_flag = INC_support
 				}
 				random_list = {
-					66 = {#UP Action
+					50 = {#UP Action
 						RAJ = { 
 							set_country_flag = upa_operation
 							activate_mission = upa_enemy_operation
 						}
 					}	
-					34 = {#IFB Action
+					50 = {#IFB Action
 						RAJ = {
 							set_country_flag = ifb_operation
 							activate_mission = ifb_enemy_operation
@@ -235,18 +274,251 @@ country_event = {#ELECTION ENEMY ACTION
 					has_country_flag = IFB_support
 				}
 				random_list = {
-					34 = {#INC Action
+					50 = {#INC Action
 						RAJ = { 
 							set_country_flag = inc_operation
 							activate_mission = inc_enemy_operation
 						}
 					}	
-					66 = {#UPA Action
+					50 = {#UPA Action
 						RAJ = {
 							set_country_flag = upa_operation
 							activate_mission = upa_enemy_operation
 						}
 					}
+				}
+			}
+		}
+	}
+}
+country_event = {#ELECTION RESULTS
+    id = india.4
+	title = india.4.t
+	desc = india.4.desc
+    fire_only_once = yes
+
+    is_triggered_only = yes
+
+    option = {	#INC Win
+        name = india.4.a
+		trigger = {
+			NOT = {
+				check_variable = {
+					inc_control < upa_control
+				}
+				check_variable = {
+					inc_control < ifb_control
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = upa_support
+				}
+				check_variable = {
+					upa_control < inc_control
+				}
+				check_variable = {
+					upa_control < ifb_control
+				}
+			}	
+			if = {
+				limit = {
+					has_country_flag = ifb_support
+				}
+				check_variable = {
+					ifb_control < upa_control
+				}
+				check_variable = {
+					ifb_control < inc_control
+				}
+			}	
+		}
+		set_country_flag = INC_victory
+		if = {
+			NOT = {
+				has_country_flag = inc_support
+			}
+			raj_lost_election_consequences = yes
+		}
+		raj_calculate_popularity_post_election = yes
+	}
+    option = {	#UP Win
+        name = india.4.b
+		trigger = {
+			NOT = {
+				check_variable = {
+					upa_control < inc_control
+				}
+				check_variable = {
+					upa_control < ifb_control
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = inc_support
+				}
+				check_variable = {
+					inc_control < upa_control
+				}
+				check_variable = {
+					inc_control < ifb_control
+				}
+			}	
+			if = {
+				limit = {
+					has_country_flag = ifb_support
+				}
+				check_variable = {
+					ifb_control < upa_control
+				}
+				check_variable = {
+					ifb_control < inc_control
+				}
+			}	
+		}
+		
+		set_country_flag = UP_victory
+		if = {
+			NOT = {
+				has_country_flag = upa_support
+			}
+			raj_lost_election_consequences = yes
+		}
+		raj_calculate_popularity_post_election = yes
+	}
+    option = {	#ILP Win
+        name = india.4.c
+		trigger = {
+			NOT = {
+				check_variable = {
+					ifb_control < upa_control
+				}
+				check_variable = {
+					ifb_control < inc_control
+				}
+			}
+			NOT = {
+				check_variable = {
+					upa_control < inc_control
+				}
+				check_variable = {
+					upa_control < ifb_control
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = inc_support
+				}
+				check_variable = {
+					inc_control < upa_control
+				}
+				check_variable = {
+					inc_control < ifb_control
+				}
+			}	
+			if = {
+				limit = {
+					has_country_flag = upa_support
+				}
+				check_variable = {
+					upa_control < inc_control
+				}
+				check_variable = {
+					upa_control < ifb_control
+				}
+			}
+		}
+		
+		set_country_flag = ILP_victory
+		if = {
+			NOT = {
+				has_country_flag = ifb_support
+			}
+			raj_lost_election_consequences = yes
+		}
+		raj_calculate_popularity_post_election = yes
+	}
+}
+news_event = {
+	id = india.5
+	title = india.5.t
+	desc = india.5.d
+	picture = GFX_news_event_india_protests
+	
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = india.5.a
+		trigger = {
+			OR = {
+				AND = {
+					TAG = ENG
+					OR = {
+						has_completed_focus = ENG_revisit_colonial_policy
+						has_completed_focus = ENG_concessions_to_the_trade_unions
+					}
+				}
+				has_government = democratic
+			}
+		}
+	}
+	option = {
+		name = india.5.b
+		trigger = { 
+			TAG = ENG
+			NOT = {
+				OR = {
+					has_completed_focus = ENG_revisit_colonial_policy
+					has_completed_focus = ENG_concessions_to_the_trade_unions
+				}
+				has_government = communism
+				has_government = democratic
+			}
+		}
+	}
+	option = {
+		name = india.5.c
+		trigger = { 
+			has_government = communism
+			RAJ = {
+				has_country_flag = ILP_victory
+			}
+		}
+	option = {
+		name = india.5.e
+		trigger = { 
+			tag = RAJ
+		}
+	}
+	option = {
+		name = india.5.f
+		trigger = { 
+			NOT = {
+				tag = RAJ
+				has_government = communism
+				RAJ = {
+					has_country_flag = ILP_victory
+				}
+				TAG = ENG
+				NOT = {
+					OR = {
+						has_completed_focus = ENG_revisit_colonial_policy
+						has_completed_focus = ENG_concessions_to_the_trade_unions
+					}
+					has_government = communism
+					has_government = democratic
+				}
+				OR = {
+					AND = {
+						TAG = ENG
+						OR = {
+							has_completed_focus = ENG_revisit_colonial_policy
+							has_completed_focus = ENG_concessions_to_the_trade_unions
+						}
+					}
+					has_government = democratic
 				}
 			}
 		}
@@ -399,7 +671,7 @@ country_event = {#Independent Labour Party secures international support
         name = india.302.b
 		every_country = {
 			limit = {
-				has_government = communist
+				has_government = communism
 				NOT = {
 					has_war_with = SOV
 				}	
