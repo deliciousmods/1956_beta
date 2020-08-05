@@ -48,7 +48,296 @@ political_actions = {
 		
 	}
 }
+operations = {
+	RAJ_port_of_yanoan = {
+		allowed = {
+			tag = RAJ
+		}
+		visible = {
+			has_completed_focus = RAJ_The_Remaining_Ports
+		}
+		available = {
+			has_completed_focus = RAJ_The_Remaining_Ports
+			NOT = { has_country_flag = raj_port_operation }
+			any_country = {
+				owns_state = 320
+				controls_state = 320
+				NOT = { 
+					has_war_with = RAJ
+				}
+				
+			}
+			
+			320 = {
+				any_neighbor_state = {
+					is_controlled_by = RAJ
+				}
+			}
+		}
+		cost = 50
+		highlight_state_targets = {
+			state = 320
+		}
+		ai_will_do = {
+			factor = 100
+		}
+		fire_only_once = yes
+		days_remove = 90
+		complete_effect = {
+			set_country_flag = raj_port_operation
+			random_country = {
+				limit = {
+					owns_state = 320
+					controls_state = 320
+					NOT = { 
+						has_war_with = RAJ
+					}
+				}
+				country_event = {
+					id = india.403
+					days = 5
+				}
+				
+			}
+		}
+		remove_effect = {
+			clr_country_flag = raj_port_operation
+			hidden_effect = { 
+				transfer_state = 320 
+				320 = {
+					set_state_name = "Karaikal"
+				}
+			}
+			random_country = {
+				limit = {
+					owns_state = 320
+					controls_state = 320
+					NOT = { 
+						has_war_with = RAJ
+					}
+				}
+				country_event = {
+					id = india.404
+					hours = 24
+				}
+				
+			}
+		}
+	}	
+	RAJ_port_of_goa = {
+		icon = border_war
+		allowed = {
+			tag = RAJ
+		}
 
+		available = {
+			has_completed_focus = RAJ_The_Remaining_Ports
+			NOT = { has_country_flag = raj_port_operation }
+			NOT = {
+				has_war_with = POR
+				is_in_faction_with = POR
+			}
+			321 = {
+				is_controlled_by = POR
+				any_neighbor_state = {
+					is_controlled_by = RAJ
+				}
+			}
+		}
+
+		visible = {
+			has_completed_focus = RAJ_The_Remaining_Ports
+		}
+
+		highlight_state_targets = {
+			state = 452
+			state = 321
+		}
+		
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 100
+		}
+		cost = 50
+		days_remove = 90
+		war_with_on_remove = POR
+		complete_effect = {
+			set_country_flag = raj_port_operation
+			425 = {
+				save_event_target_as = RAJ_POR_attacker_state
+				set_state_flag = border_incident_active
+			}
+			321 = {
+				save_event_target_as = RAJ_POR_defender_state
+				set_state_flag = border_incident_active
+			}
+			POR = {
+				country_event = { id = india.400 days = 0 }
+				activate_targeted_decision = { target = RAJ decision = POR_border_incident_notification }
+			}
+			
+		}
+		remove_effect = {
+			activate_targeted_decision = { target = POR decision = RAJ_border_incident_forgotten }
+			activate_targeted_decision = { target = POR decision = RAJ_escalate_incident_to_border_conflict_POR }
+		}
+	}
+	POR_border_incident_notification = {
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			#var:ROOT.defender_state_vs_@FROM = {
+			#	has_ROOT_at_least_1_div_in_current_state_scope = yes
+			#}
+			hidden_trigger = { always = no }
+		}
+
+		highlight_state_targets = {
+			state = 452
+			state = 321
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 90
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			effect_tooltip = {
+				start_border_war = {
+					change_state_after_war = yes
+					attacker = {
+						state = 425
+						num_provinces = 4
+					}
+					
+					defender = {
+						state = 321
+						num_provinces = 4
+					}
+				}
+			}
+		}
+	}
+	RAJ_border_incident_forgotten = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			#var:ROOT.defender_state_vs_@FROM = {
+			#	has_ROOT_at_least_1_div_in_current_state_scope = yes
+			#}
+			hidden_trigger = { always = no }
+		}
+
+		highlight_state_targets = {
+			state = 452
+			state = 321
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			remove_targeted_decision = { target = POR decision = RAJ_escalate_incident_to_border_conflict_POR }
+			add_political_power = -100
+			add_war_support = -0.1 #Shameful Display
+			hidden_effect = {
+				POR = {
+					452 = {
+						clr_state_flag = border_incident_active
+					}
+					321 = {
+						clr_state_flag = border_incident_active
+					}
+				}
+			}
+		}
+	}
+	RAJ_escalate_incident_to_border_conflict_POR = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			425 = {
+				OR = {
+					is_fully_controlled_by = ROOT
+					CONTROLLER = {
+						is_subject_of = ROOT
+					}
+					CONTROLLER = {
+						is_in_faction_with = ROOT
+					}
+				}
+			}
+			divisions_in_border_state = {
+				state = 425
+				border_state = 321
+				size > 0
+			}
+		}
+
+		highlight_state_targets = {
+			state = 425
+			state = 321
+		}
+
+		ai_will_do = {
+			base = 10
+			modifier = { 
+				has_war = no
+				factor = 10
+			}
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			remove_targeted_decision = { target = POR decision = RAJ_border_incident_forgotten }
+			set_country_flag = RAJ_POR_border_war
+			start_border_war = {
+				change_state_after_war = no
+				attacker = {
+					state = 425
+					num_provinces = 4
+					on_win = india.401
+					on_lose = india.402
+				}
+				
+				defender = {
+					state = 321
+					num_provinces = 4
+					on_win = india.401
+					on_lose = india.402
+				}
+			}
+		}
+	}
+}
 south_asian_liberation = {
 	increase_influence_in_sri_lanka = {
 		cost = 150
