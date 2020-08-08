@@ -8,17 +8,18 @@ political_actions = {
 			tag = RAJ
 		}	
 		fire_only_once = yes
-		cost = 25
+		cost = 10
 		available = {
 			custom_trigger_tooltip = {
 				tooltip = "George Orwell returned from Spain"
 				date > 1937.07.01
 			}	
+			has_country_flag = not_internationalists	#Orwell angery at stinky stalin
 		}
 		complete_effect = {
 			add_popularity = {
 				ideology = communism
-				popularity = 0.05
+				popularity = 0.02
 			}	
 			set_country_flag = orwell_spoke
 		}	
@@ -38,7 +39,11 @@ political_actions = {
 		available = {
 			ENG = {
 				NOT = { has_government = communism }
+				hidden_trigger = {
+					RAJ = { is_ai = no }#Stops AI stealing Orwell from the Brits
+				}
 			}
+			has_country_flag = not_internationalists
 		}
 		complete_effect = {
 			set_country_flag = orwell_government
@@ -50,6 +55,7 @@ political_actions = {
 }
 operations = {
 	RAJ_port_of_yanoan = {
+		icon = generic_independence
 		allowed = {
 			tag = RAJ
 		}
@@ -133,14 +139,16 @@ operations = {
 		available = {
 			has_completed_focus = RAJ_The_Remaining_Ports
 			NOT = { has_country_flag = raj_port_operation }
-			NOT = {
-				has_war_with = POR
-				is_in_faction_with = POR
-			}
-			321 = {
-				is_controlled_by = POR
-				any_neighbor_state = {
-					is_controlled_by = RAJ
+			any_country = {
+				NOT = {
+					has_war_with = RAJ
+					is_in_faction_with = RAJ
+				}
+				321 = {
+					is_controlled_by = PREV
+					any_neighbor_state = {
+						is_controlled_by = RAJ
+					}
 				}
 			}
 		}
@@ -160,29 +168,48 @@ operations = {
 		}
 		cost = 50
 		days_remove = 90
-		war_with_on_remove = POR
+		war_with_on_remove = var:goacontroller
 		complete_effect = {
 			set_country_flag = raj_port_operation
+			random_country = {
+				limit = {
+					NOT = {
+						has_war_with = RAJ
+						is_in_faction_with = RAJ
+					}
+					321 = {
+						is_controlled_by = PREV
+						any_neighbor_state = {
+							is_controlled_by = RAJ
+						}
+					}
+				}
+				RAJ = {
+					set_variable = {
+						goacontroller = PREV
+					}
+				}
+			}
 			425 = {
-				save_event_target_as = RAJ_POR_attacker_state
+				save_event_target_as = RAJ_GOA_attacker_state
 				set_state_flag = border_incident_active
 			}
 			321 = {
-				save_event_target_as = RAJ_POR_defender_state
+				save_event_target_as = RAJ_GOA_defender_state
 				set_state_flag = border_incident_active
 			}
-			POR = {
+			var:goacontroller = {
 				country_event = { id = india.400 days = 0 }
-				activate_targeted_decision = { target = RAJ decision = POR_border_incident_notification }
+				activate_targeted_decision = { target = RAJ decision = GOA_border_incident_notification }
 			}
 			
 		}
 		remove_effect = {
-			activate_targeted_decision = { target = POR decision = RAJ_border_incident_forgotten }
-			activate_targeted_decision = { target = POR decision = RAJ_escalate_incident_to_border_conflict_POR }
+			activate_targeted_decision = { target = var:goacontroller decision = RAJ_border_incident_forgotten }
+			activate_targeted_decision = { target = var:goacontroller decision = RAJ_escalate_incident_to_border_conflict_GOA }
 		}
 	}
-	POR_border_incident_notification = {
+	GOA_border_incident_notification = {
 		icon = border_war
 
 		allowed = { always = no } #Activated from effect
@@ -261,11 +288,11 @@ operations = {
 		is_good = no
 		
 		timeout_effect = {
-			remove_targeted_decision = { target = POR decision = RAJ_escalate_incident_to_border_conflict_POR }
+			remove_targeted_decision = { target = var:goacontroller decision = RAJ_escalate_incident_to_border_conflict_GOA }
 			add_political_power = -100
 			add_war_support = -0.1 #Shameful Display
 			hidden_effect = {
-				POR = {
+				var:goacontroller = {
 					452 = {
 						clr_state_flag = border_incident_active
 					}
@@ -276,7 +303,7 @@ operations = {
 			}
 		}
 	}
-	RAJ_escalate_incident_to_border_conflict_POR = {
+	RAJ_escalate_incident_to_border_conflict_GOA = {
 
 		icon = border_war
 
@@ -317,8 +344,8 @@ operations = {
 		fire_only_once = yes #Reactivation handled in effect
 
 		complete_effect = {
-			remove_targeted_decision = { target = POR decision = RAJ_border_incident_forgotten }
-			set_country_flag = RAJ_POR_border_war
+			remove_targeted_decision = { target = var:goacontroller decision = RAJ_border_incident_forgotten }
+			set_country_flag = RAJ_GOA_border_war
 			start_border_war = {
 				change_state_after_war = no
 				attacker = {
@@ -647,7 +674,7 @@ south_asian_liberation = {
 ilp_concessions = {
 	internationalist_demands = {
 		icon = eng_trade_unions_support
-		available = {
+		visible = {
 			has_country_flag = not_national_communists
 			has_country_flag = not_trotskyists
 		}
@@ -680,7 +707,7 @@ ilp_concessions = {
 	}
 	national_communists_demands = {
 		icon = eng_trade_unions_support
-		available = {
+		visible = {
 			has_country_flag = not_internationalists
 			has_country_flag = not_trotskyists
 		}
@@ -777,7 +804,7 @@ ilp_concessions = {
 	}
 	trotskyists_demands = {
 		icon = eng_trade_unions_support
-		available = {
+		visible = {
 			has_country_flag = not_internationalists
 			has_country_flag = not_national_communists
 		}
