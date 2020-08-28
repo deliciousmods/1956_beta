@@ -150,6 +150,48 @@ political_actions = {
 	}
 }
 operations = {
+	RAJ_Join_the_Saur_Revolution = {
+		icon = generic_form_nation
+		allowed = {
+			tag = RAJ
+		}
+		visible = {
+			any_country = {
+				original_tag = AFG
+				has_civil_war = yes
+				has_government = communism
+			}
+		}
+		available = {
+			has_stability > 0.05
+		}
+		cost = 100
+		highlight_state_targets = {
+			state = 415
+		}
+		ai_will_do = {
+			factor = 100
+		}
+		days_remove = 90
+		war_with_on_remove = AFG
+		remove_effect = {
+			add_stability = -0.05
+			random_country = {
+				limit = {
+					original_tag = AFG
+					has_civil_war = yes
+					has_government = communism
+				}
+				RAJ = {
+					add_to_war = { 
+						targeted_alliance = PREV
+						enemy = AFG
+						hostility_reason = asked_to_join
+					}
+				}
+			}
+		}
+	}
 	RAJ_port_of_yanoan = {
 		icon = generic_independence
 		allowed = {
@@ -162,7 +204,10 @@ operations = {
 			}
 		}
 		available = {
-			has_completed_focus = RAJ_The_Remaining_Ports
+			OR = {
+				has_completed_focus = RAJ_The_Remaining_Ports
+				has_completed_focus = RAJ_Take_back_the_Ports
+			}
 			NOT = { has_country_flag = raj_port_operation }
 			any_country = {
 				owns_state = 320
@@ -202,6 +247,7 @@ operations = {
 					id = india.403
 					days = 5
 				}
+				RAJ = { set_variable = { frind = PREV } }
 				
 			}
 		}
@@ -213,14 +259,7 @@ operations = {
 					set_state_name = "Karaikal"
 				}
 			}
-			random_country = {
-				limit = {
-					owns_state = 320
-					controls_state = 320
-					NOT = { 
-						has_war_with = RAJ
-					}
-				}
+			var:frind = {
 				country_event = {
 					id = india.404
 					hours = 24
@@ -236,7 +275,10 @@ operations = {
 		}
 
 		available = {
-			has_completed_focus = RAJ_The_Remaining_Ports
+			OR = {
+				has_completed_focus = RAJ_The_Remaining_Ports
+				has_completed_focus = RAJ_Take_back_the_Ports
+			}
 			NOT = { has_country_flag = raj_port_operation }
 			any_country = {
 				NOT = {
@@ -771,14 +813,15 @@ south_asian_liberation = {
 #set_country_flag = not_national_communists
 #set_country_flag = not_trade_unionist
 #set_country_flag = not_women_liberationists
-#set_country_flag = not_trotskyists
 
 ilp_concessions = {
 	internationalist_demands = {
 		icon = eng_trade_unions_support
 		visible = {
 			has_country_flag = not_national_communists
-			has_country_flag = not_trotskyists
+		}
+		ai_will_do = {
+			factor = 150
 		}
 		cost = 50
 		complete_effect = {
@@ -811,7 +854,9 @@ ilp_concessions = {
 		icon = eng_trade_unions_support
 		visible = {
 			has_country_flag = not_internationalists
-			has_country_flag = not_trotskyists
+		}
+		ai_will_do = {
+			factor = 200
 		}
 		cost = 50
 		complete_effect = {
@@ -846,6 +891,9 @@ ilp_concessions = {
 			
 		}
 		cost = 50
+		ai_will_do = {
+			factor = 50
+		}
 		complete_effect = {
 			custom_effect_tooltip = "We will promise to give considerable power to the trade unions after the Election."
 			clr_country_flag = not_trade_unionist
@@ -877,6 +925,9 @@ ilp_concessions = {
 		available = {
 			
 		}
+		ai_will_do = {
+			factor = 75
+		}
 		cost = 50
 		complete_effect = {
 			custom_effect_tooltip = "We will promise to give total equality to women after the Election."
@@ -904,60 +955,185 @@ ilp_concessions = {
 			}	
 		}
 	}
-	trotskyists_demands = {
-		icon = eng_trade_unions_support
-		visible = {
-			has_country_flag = not_internationalists
-			has_country_flag = not_national_communists
-		}
-		cost = 50
-		complete_effect = {
-			custom_effect_tooltip = "We will promise to follow the trotskyist doctrine after the Election."
-			clr_country_flag = not_trotskyists
-			if = {
-				limit = {
-					has_country_flag = election_enabled
-				}
-				random_owned_state = {
-					limit = {
-						NOT = {
-							has_state_flag = princely_state
-							state = 424
-							state = 431
-							state = 445
-						}
-						is_owned_by = RAJ
-						is_core_of = RAJ
-					}
-					add_to_variable = {
-						ifb = 2
-					}
-					custom_effect_tooltip = raj_ifb_2
-				}
-			}	
-		}
-	}
 }
 princely_state_independence = {
+	princely_state_policing_action = {
+
+		icon = border_war
+		available = {
+			OR = {
+				has_completed_focus = RAJ_The_Ones_Who_Got_Away
+				has_completed_focus = RAJ_No_Compromises
+				has_completed_focus = RAJ_Concessions_to_Princes
+			}
+			NOT = { 
+				custom_trigger_tooltip = {
+					tooltip = operation_or_cooldown
+					has_country_flag = {
+						flag = operation_or_cooldown
+						days < 44#A month after
+					}
+				}
+			}
+			has_manpower > 10000 #worst case scenario
+			has_equipment = {
+				infantry_equipment > 4999
+			}
+			has_stability > 0.03
+		}
+		target_array = controlled_states
+		state_target = yes
+		visible = {
+			FROM = {
+				has_state_flag = princely_state_independence
+			}
+		}
+		target_trigger = {
+			FROM = {
+				is_owned_by = RAJ
+				is_core_of = RAJ
+			}
+		}
+		days_remove = 14
+		
+		fire_only_once = no
+
+		cost = 50
+
+		modifier = {
+			
+		}
+
+		complete_effect = {
+			set_country_flag = operation_or_cooldown
+			FROM = {
+				set_demilitarized_zone = no
+				RAJ = {
+					set_variable = {
+						current_prince_state = PREV
+					}
+				}
+			}
+		}
+
+		remove_effect = {
+			FROM = {
+				random_list = {
+							
+					15 = {	#Extremely Successful 
+						RAJ = {
+							country_event = india.411
+							effect_tooltip = {
+								add_manpower = -30
+								add_equipment_to_stockpile = {
+									type = infantry_equipment
+									amount = -15
+									producer = RAJ
+								}
+								add_stability = 0.01
+							}
+							custom_effect_tooltip = backslashn
+						}
+					}
+					35 = {	#Successful 
+						RAJ = {
+							country_event = india.412
+							effect_tooltip = {
+								add_manpower = -500
+								add_equipment_to_stockpile = {
+									type = infantry_equipment
+									amount = -250
+									producer = RAJ
+								}
+							}
+							custom_effect_tooltip = backslashn
+						}
+					}
+					35 = {	#Terrible 
+						RAJ = {
+							country_event = india.413
+							effect_tooltip = {
+								add_manpower = -2500
+								add_equipment_to_stockpile = {
+									type = infantry_equipment
+									amount = -1250
+									producer = RAJ
+								}
+								add_stability = -0.01
+							}
+							custom_effect_tooltip = backslashn
+						}
+					}
+					15 = {	#Catastrophic 
+						RAJ = {
+							country_event = india.414
+							effect_tooltip = {
+								add_manpower = -10000
+								add_equipment_to_stockpile = {
+									type = infantry_equipment
+									amount = -5000
+									producer = RAJ
+								}
+								add_stability = -0.03
+							}
+							custom_effect_tooltip = backslashn
+						}
+					}
+				}
+			}
+		}
+	}
 	demand_oaths_of_loyalty = {
 		icon = generic_nationalism
 		cost = 50
+		available = {
+			NOT = {
+				has_country_flag = concession_running
+			}
+		}
+		ai_will_do = {
+			factor = 0
+			modifier = {
+				add = 500
+				any_owned_state = {
+					prince_state_enable = yes
+					check_variable = {
+						voting_chance > 84
+					}
+				}
+			}
+		}
+		visible = {
+			NOT = { has_country_flag = idk_go_away }
+			NOT = { has_completed_focus = RAJ_No_Compromises }
+		}
+		fire_only_once = no
 		days_remove = 7
+		complete_effect = {
+			set_country_flag = concession_running
+		}
 		remove_effect = {
 			country_event = {
 				id = india.501
 				hours = 7
 			}
+			set_country_flag = idk_go_away
 		}
 	}
 	concession_industrial = {
-		icon = generic
+		icon = generic_industry
 		fire_only_once = no
 		cost = 0
 		available = {
 			NOT = {
 				has_country_flag = concession_running
 			}
+		}
+		visible = {
+			NOT = { has_country_flag = concession_disable }
+		}
+		ai_will_do = {
+			factor = 200
 		}
 		modifier = {
 			consumer_goods_factor = 0.05
@@ -1005,9 +1181,15 @@ princely_state_independence = {
 		}
 	}
 	concession_political = {
-		icon = generic
+		icon = eng_trade_unions_support
 		fire_only_once = no
 		cost = 0
+		visible = {
+			NOT = { has_country_flag = concession_disable }
+		}
+		ai_will_do = {
+			factor = 200
+		}
 		available = {
 			OR = {
 				political_power_daily > 1
@@ -1063,17 +1245,22 @@ princely_state_independence = {
 		}
 	}
 	concession_military = {
-		icon = generic
+		icon = generic_operation
 		fire_only_once = no
 		cost = 0
 		available = {
-			has_manpower > 2000
 			NOT = {
 				has_country_flag = concession_running
 			}
 		}
+		ai_will_do = {
+			factor = 200
+		}
+		visible = {
+			NOT = { has_country_flag = concession_disable }
+		}
 		modifier = {
-			weekly_manpower = -1000
+			industrial_capacity_factory = -0.15
 		}
 		days_remove = 14
 		days_re_enable = 14
@@ -1120,9 +1307,12 @@ princely_state_independence = {
 }
 post_election_struggle = {
 	appeal_for_international_support = {
-		icon = generic
+		icon = civil_support
 		fire_only_once = yes
 		cost = 100
+		ai_will_do = {
+			factor = 20
+		}
 		targets = {
 			var:ENG.RAJBACKER
 		}
@@ -1187,6 +1377,9 @@ post_election_struggle = {
 		icon = generic
 		fire_only_once = yes
 		cost = 50
+		ai_will_do = {
+			factor = 25
+		}
 		complete_effect = {
 			add_to_variable = {
 				ind_influence_daily = 0.15
@@ -1200,8 +1393,11 @@ post_election_struggle = {
 	
 	hinder_pak_influence = {
 		icon = generic
+		ai_will_do = {
+			factor = 75
+		}
 		fire_only_once = yes
-		cost = 150
+		cost = 75
 		complete_effect = {
 			add_to_variable = {
 				pak_influence_daily = -0.05
@@ -1211,9 +1407,12 @@ post_election_struggle = {
 	}
 	
 	concede_to_capitalists = {
-		icon = generic
+		icon = generic_industry
 		fire_only_once = yes
 		cost = 25
+		ai_will_do = {
+			factor = 35
+		}
 		available = {
 			NOT = {
 				has_country_flag = ILP_victory
@@ -1240,9 +1439,19 @@ post_election_struggle = {
 		icon = generic
 		fire_only_once = yes
 		cost = 25
+		ai_will_do = {
+			factor = 25
+			modifier = {
+				factor = 2
+				has_stability > 0.5
+			}
+		}
 		available = {
 			NOT = { 
 				has_country_flag = UP_victory
+			}
+			NOT = {
+				has_completed_focus = RAJ_Expell_the_Socialists
 			}
 		}
 		complete_effect = {
@@ -1262,6 +1471,9 @@ post_election_struggle = {
 		icon = generic
 		fire_only_once = yes
 		cost = 25
+		ai_will_do = {
+			factor = 50
+		}
 		available = {
 			has_country_flag = ILP_victory
 		}
@@ -1284,6 +1496,9 @@ post_election_struggle = {
 		available = {
 			has_country_flag = UP_victory
 		}
+		ai_will_do = {
+			factor = 50
+		}
 		complete_effect = {
 			add_to_variable = {
 				ind_influence_daily = 0.05
@@ -1299,11 +1514,20 @@ post_election_struggle = {
 			custom_trigger_tooltip = {
 				tooltip = declare_independence_100_influence
 				check_variable = { 
-					ind_influence > 99
+					ind_influence > 99.99
 				}
 			}
 		}
 		cost = 0
+		ai_will_do = {
+			factor = 200
+			modifier = {
+				factor = 0.5
+				check_variable = {
+					ind_influence < 120
+				}
+			}
+		}
 		complete_effect = {
 			set_country_flag = independence_granted
 			set_variable = {
@@ -1314,8 +1538,11 @@ post_election_struggle = {
 			}
 			if = {
 				limit = {
-					check_variable = {
-						indcalc < 2
+					OR = {
+						has_country_flag = AIML_UP_COALITION
+						check_variable = {
+							indcalc < 2
+						}
 					}
 				}
 				every_owned_state = {
@@ -1328,6 +1555,11 @@ post_election_struggle = {
 				}
 				PAK = { 
 					inherit_technology = RAJ
+					load_oob = PAK_Scripted
+				}
+				ENG = {
+					give_guarantee = PAK
+					give_guarantee = RAJ
 				}
 			}
 			if = {
@@ -1345,6 +1577,17 @@ post_election_struggle = {
 				BRM = {
 					inherit_technology = RAJ
 				}
+				ENG = {
+					give_guarantee = BRM
+				}
+			}
+			if = {
+				limit = {
+					owns_state = 659
+				}
+				ENG = {
+					transfer_state = 659
+				}
 			}
 			if = {
 				limit = {
@@ -1356,6 +1599,7 @@ post_election_struggle = {
 						autonomy_state = autonomy_free
 					}
 				}
+				leave_faction = yes
 				else = {
 					ENG = {
 						if = {
@@ -1371,34 +1615,127 @@ post_election_struggle = {
 									target = RAJ
 									autonomy_state = autonomy_free
 								}
+								RAJ = { 
+									drop_cosmetic_tag = yes 
+									add_ai_strategy = {
+										type = alliance
+										id = ENG
+										value = 200
+									}
+								}
+								RAJ = { set_cosmetic_tag = RAJ_Dominion }
 								add_to_faction = RAJ
-								RAJ = {
-									set_cosmetic_tag = RAJ_UK
+								add_ai_strategy = {
+									type = alliance
+									id = RAJ
+									value = 200
 								}
 							}
-						}
-					}
-					if = {
-						limit = {
-							has_country_flag = AIML_UP_FIGHT
 						}
 						if = {
 							limit = {
-								has_dlc = "Together for Victory"
+								country_exists = PAK
 							}
-							set_autonomy = {
-								target = PAK
-								autonomy_state = autonomy_dominion
+							PAK = {
+								set_politics = {
+									ruling_party = democratic
+									elections_allowed = yes
+								}
+								add_popularity = {
+									ideology = democratic
+									popularity = 52
+								}
+								create_country_leader = {
+									name = "Muhammad Ali Jinnah"
+									
+									picture = "gfx/leaders/PAK/PAK_Muhammad_Ali_Jinnah.dds"
+									expire = "1960.1.1"
+									ideology = conservatism
+									traits = {
+								
+									}
+								}
+								retire_ideology_leader = neutrality	#To prevent Jinnah-Jinnah Civil Wars
+								hidden_effect = {
+									complete_national_focus = PAK_Birth_of_a_Nation
+									complete_national_focus = PAK_General_Election
+									complete_national_focus = PAK_Multipartism
+								}
 							}
-							else = {
+							if = {
+								limit = {
+									has_dlc = "Together for Victory"
+								}
 								set_autonomy = {
 									target = PAK
-									autonomy_state = autonomy_free
+									autonomy_state = autonomy_dominion
 								}
-								add_to_faction = PAK
+								PAK = { 
+									set_cosmetic_tag = PAK_Dominion
+								}
+								else = {
+									set_autonomy = {
+										target = PAK
+										autonomy_state = autonomy_free
+									}
+									add_to_faction = PAK
+									add_ai_strategy = {
+										type = alliance
+										id = PAK
+										value = 200
+									}
+									PAK = { 
+										set_cosmetic_tag = PAK_Dominion
+										add_ai_strategy = {
+											type = alliance
+											id = ENG
+											value = 200
+										}
+									}
+									give_guarantee = PAK
+								}
+							}
+						}
+						if = {
+							limit = {
+								country_exists = BRM
+							}
+							if = {
+								limit = {
+									has_dlc = "Together for Victory"
+								}
+								set_autonomy = {
+									target = BRM
+									autonomy_state = autonomy_dominion
+								}
+								BRM = { 
+									set_cosmetic_tag = BRM_Dominion
+								}
+								else = {
+									set_autonomy = {
+										target = BRM
+										autonomy_state = autonomy_free
+									}
+									add_to_faction = BRM
+									add_ai_strategy = {
+										type = alliance
+										id = BRM
+										value = 200
+									}
+									BRM = { 
+										set_cosmetic_tag = PAK_Dominion
+										add_ai_strategy = {
+											type = alliance
+											id = ENG
+											value = 200
+										}
+									}
+									give_guarantee = BRM
+								}
 							}
 						}
 					}
+					
 				}
 			}
 			retire_country_leader = yes
@@ -1410,6 +1747,8 @@ post_election_struggle = {
 					ruling_party = communism
 					elections_allowed = yes
 				}
+				
+				drop_cosmetic_tag = yes
 				create_country_leader = {
 					name = "Bhimrao Ramji Ambedkar"
 					desc = "POLITICS_AMBEDKAR_DESC"
@@ -1429,6 +1768,8 @@ post_election_struggle = {
 					ruling_party = democratic
 					elections_allowed = yes
 				}
+				
+				drop_cosmetic_tag = yes
 				create_country_leader = {
 					name = "Jawaharlal Nehru"
 					desc = "POLITICS_NEHRU_DESC"
@@ -1459,7 +1800,6 @@ post_election_struggle = {
 					}
 				}
 			}
-			drop_cosmetic_tag = yes
 		}
 	}
 }
