@@ -10,7 +10,7 @@ focus_tree = {
 		factor = 0
 
 		modifier = {
-			add = 0
+			add = 10
 			tag = KOR
 		}
 	}
@@ -445,18 +445,17 @@ focus_tree = {
 	focus = {
 		id = KOR_hanjin_heavy_industries
 		icon = GFX_goal_generic_construction
-		prerequisite = {focus = KOR_rise_of_the_chaebols } 
-		relative_position_id = KOR_rise_of_the_chaebols		
+	
 
-		x = -6
-		y = 1
+		x = 50
+		y = 0
 		cost = 10
 		ai_will_do = {
 			factor = 1
 		}
 
 		available_if_capitulated = yes
-
+		mutually_exclusive = { focus = KOR_peoples_fleet }
 		completion_reward = {
 			navy_experience = 25
 			if = {
@@ -557,11 +556,52 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 	focus = {
+		id = KOR_peoples_fleet
+		icon = GFX_goal_generic_construction
+	
+		relative_position_id = KOR_hanjin_heavy_industries
+		x = -2
+		y = 0
+		cost = 10
+		ai_will_do = {
+			factor = 1
+		}
+		mutually_exclusive = { focus = KOR_hanjin_heavy_industries }
+
+		available_if_capitulated = yes
+
+		completion_reward = {
+			navy_experience = 25
+	
+			random_owned_controlled_state = {
+				prioritize = { 527 }
+				limit = {
+					is_coastal = yes
+					free_building_slots = {
+						building = dockyard
+						size > 2
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = dockyard
+					level = 2
+					instant_build = yes
+				}
+			}
+			set_country_flag = naval_effort_built
+			
+			
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}	
+	focus = {
 		id = KOR_national_admiralty
 		icon = GFX_sca_focus_admirality
-		prerequisite = { focus = KOR_hanjin_heavy_industries  }
+		prerequisite = { focus = KOR_hanjin_heavy_industries focus = KOR_peoples_fleet }
 		relative_position_id = KOR_hanjin_heavy_industries
-		x = -4
+		x = -3
 		y = 1
 
 		cost = 10
@@ -591,10 +631,10 @@ focus_tree = {
 	}
 	focus = {
 		id = KOR_destroyer_focus
-		prerequisite = { focus = KOR_hanjin_heavy_industries  }
+		prerequisite = { focus = KOR_hanjin_heavy_industries focus = KOR_peoples_fleet }
 		relative_position_id = KOR_hanjin_heavy_industries
 		icon = GFX_focus_generic_destroyer
-		x = -2
+		x = -1
 		y = 1
 		cost = 10
 		ai_will_do = {
@@ -615,10 +655,10 @@ focus_tree = {
 	}	
 	focus = {
 		id = KOR_cruiser_focus
-		prerequisite = { focus = KOR_hanjin_heavy_industries  }
+		prerequisite = { focus = KOR_hanjin_heavy_industries focus = KOR_peoples_fleet }
 		relative_position_id = KOR_hanjin_heavy_industries
 		icon = GFX_focus_generic_cruiser2
-		x = 0
+		x = 1
 		y = 1
 
 		cost = 10
@@ -1670,7 +1710,179 @@ focus_tree = {
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}	
+	focus = {
+		id = KOR_nationalism_focus
+		icon = GFX_goal_support_fascism #icon = GFX_goal_tripartite_pact
+		prerequisite = { focus = KOR_amnesty_for_ex_japanese_army_officers }
+		
 
+		available = {
+			NOT = {
+				OR = {
+					has_completed_focus = KOR_apply_democratic_program
+					has_completed_focus = KOR_embrace_peoples_tutelage
+				}
+				
+			}
+		}
+		
+		x = 0
+		y = 1
+		relative_position_id = KOR_amnesty_for_ex_japanese_army_officers
+		
+		cost = 10
+
+		available_if_capitulated = yes
+
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 2
+				is_historical_focus_on = no
+			}
+			modifier = {
+				factor = 10
+				OVERLORD = {
+					has_government = fascism
+				}
+			}			
+			modifier = {
+				factor = 0
+				AND = {
+					is_historical_focus_on = yes
+					NOT = { has_government = fascism }
+				}
+			}
+			modifier = {
+				factor = 11
+				AND = {
+					is_historical_focus_on = yes
+					original_tag = PAR	
+				}
+			}
+		}
+
+		completion_reward = {
+			if = {
+				limit = {
+						AND = {
+							original_tag = PAR
+							is_historical_focus_on = yes
+						}
+					}
+					ROOT = { #bad guy but not a 'bad guy'
+						add_ai_strategy = {
+							type = befriend
+							id = GER
+							value = -999
+						}
+						add_ai_strategy = {
+							type = befriend
+							id = ITA
+							value = -999
+						}
+						add_ai_strategy = {
+							type = befriend
+							id = JAP
+							value = -999
+						}
+						add_ai_strategy = {
+							type = befriend
+							id = USA
+							value = 125
+						}
+						add_ai_strategy = {
+							type = befriend
+							id = ENG
+							value = 10
+						}
+					}
+				}
+		# As AI uses ideological politicians this is useless
+		#	add_popularity = {
+		#		ideology = fascism
+		#		popularity = 0.04
+		#	}
+			add_timed_idea = { idea = nationalism days = 1395 }
+		}
+	}
+	
+	
+	focus = {
+		id = KOR_militarism
+		icon = GFX_goal_extensive_conscription_fascism
+		prerequisite = { focus = nationalism_focus }
+		
+		x = 0
+		y = 2
+		relative_position_id = nationalism_focus
+
+		cost = 10
+
+		available_if_capitulated = yes
+
+		available = {
+			has_government = fascism
+		}
+		
+		completion_reward = {
+			army_experience = 25
+			add_war_support = 0.05
+		
+			if = {
+				limit = { has_idea = neutrality_idea }
+				remove_ideas = neutrality_idea
+			}			
+			add_ideas = GEN_militarism_I
+		}
+		search_filters = {  FOCUS_FILTER_MANPOWER FOCUS_FILTER_WAR_SUPPORT }
+	}
+	
+	
+	focus = {
+		id = KOR_youth_units
+		icon = GFX_focus_generic_military_academy
+		prerequisite = { focus = nationalism_focus focus = internationalism_focus }
+		
+		x = 1
+		y = 1
+		relative_position_id = nationalism_focus
+		
+		cost = 10
+
+		available_if_capitulated = yes
+
+		available = {
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+		}
+		
+		completion_reward = {
+			add_political_power = 25
+		
+			if = {
+				limit = {
+					has_government = fascism
+				}
+				ROOT = {
+					add_ideas = GEN_Organise_Youth_Fas_I
+				}
+			}
+			
+			if = {
+				limit = {
+					has_government = communism
+				}
+				ROOT = {
+					add_ideas = GEN_Organise_Youth_Com_I
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
+	}
 	focus = {
 		id = KOR_peoples_committee_of_korea
 		icon = GFX_focus_generic_soviet_politics
