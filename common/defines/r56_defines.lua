@@ -5,7 +5,7 @@ NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_HEIGHT = 8196
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_WIDTH = 41
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_HEIGHT = 24000
 -- Focuses
-NDefines.NFocus.MAX_SAVED_FOCUS_PROGRESS = 15
+NDefines.NFocus.MAX_SAVED_FOCUS_PROGRESS = 14
 
 -- Country balance
 NDefines.NCountry.SPECIAL_FORCES_CAP_BASE = 0.1
@@ -40,12 +40,13 @@ NDefines.NMilitary.COMMANDER_LEVEL_UP_STAT_WEIGHTS = {5, 5, 3, 4}
 NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances to gain a personality trait for new generals
 	0.80, --50% for first trait
 	0.40, --15% for second trait after that
-	0.05
+	0.05,
+	0.01,
 }
 
 -- Technology
 NDefines.NTechnology.BASE_TECH_COST = 80
-NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 5 -- Base year ahead penalty
+NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 4.5 -- Base year ahead penalty
 NDefines.NTechnology.BASE_RESEARCH_POINTS_SAVED = 50.0
 
 -- Air Combat
@@ -75,6 +76,7 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
 		0.0, -- TRAINING
 		0.0, -- NAVAL_MINES_PLANTING
 		0.0, -- NAVAL_MINES_SWEEPING
+		0.0, -- MISSION_RECON
     }
 
 -- Politics
@@ -272,4 +274,38 @@ NAI = {
 		'nuclear_reactor',
 
 	},
+NOperatives = {
+	OPERATIVE_MISSION_DETECTION_CHANCE_FACTOR = {
+		-- Factor multiplied to the detection chance of an agent on mission before the offsets
+		0.0, -- NoMission
+		1.0, -- BuildIntelNetwork
+		1.0, -- QuietIntelNetwork
+		1.0, -- CounterIntelligence
+		0.0, -- RootOutResistance
+		2.0, -- BoostIdeology
+		0.1, -- ControlTrade
+		0.1, -- DiplomaticPressure
+		2.0, -- Propaganda
+	},
+	
+	COUNTER_INTELLIGENCE_FOREIGN_AGENT_FACTOR = 1.1,			-- Multiplier to the counter intelligence provided by foreign (ally) operatives
+
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_XP_GAIN = 100,					-- Xp gain when an enemy operative is captured in the country the operative is assigned to counter intelligence to. Apply to a single randomly selected operative
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_OWN_COUNTRY_FOR_XP = 3,			-- An integer on how likely an operative operating in his own country is to get selected for the xp reward on enemy operative capture
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
+
+},
+
+NCountry = {
+	FEMALE_UNIT_LEADER_BASE_CHANCE = { 
+		-- applies as a factor to female unit leader randomization
+		-- the values needs to be zero if you don't actually have random portraits
+		0.0, -- navy leaders
+		0.0, -- army leaders
+		0.6, -- operatives
+	},
+
+},	
 }
+
+
