@@ -55,10 +55,10 @@ NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
 NDefines.NAir.AIR_WING_XP_TRAINING_MISSION_GAIN_DAILY = 4.5
 NDefines.NAir.AIR_WING_COUNTRY_XP_FROM_TRAINING_FACTOR = 0.01
 NDefines.NAir.AIR_WING_XP_LOSS_WHEN_KILLED = 200
-NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 200 -- Max stats
-NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 200
-NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 200
-NDefines.NAir.AIR_WING_MAX_STATS_SPEED = 1500 -- Used to balance the damage done while bombing.
+NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 1000 -- Max stats was 200
+NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 1000 -- was 200
+NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 1000 -- was 200
+NDefines.NAir.AIR_WING_MAX_STATS_SPEED = 9999 -- Used to balance the damage done while bombing. was 1500
 NDefines.NAir.AIR_WING_XP_LOSS_REDUCTION_OVER_FRIENDLY_TERRITORY_FACTOR = 0.7
 NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Conversion scale for planes to air supply #original was 0.05
 
