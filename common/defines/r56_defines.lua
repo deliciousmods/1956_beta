@@ -33,20 +33,20 @@ NDefines.NMilitary.FIELD_EXPERIENCE_MAX_PER_DAY = 12
 NDefines.NMilitary.ENCIRCLED_DISBAND_MANPOWER_FACTOR = 0.1
 NDefines.NMilitary.PLAYER_ORDER_PLANNING_DECAY = 0.005
 NDefines.NMilitary.DISBAND_MANPOWER_LOSS = 0.0
-NDefines.NMilitary.PLAN_SPREAD_ATTACK_WEIGHT = 4 --AI should concentrate forces more, a bit experimental
+NDefines.NMilitary.PLAN_SPREAD_ATTACK_WEIGHT = 4.1 --AI should concentrate forces more, a bit experimental. Increased from 4.0 to combat issues with AI death stacks - SpicyAlfredo
 
 NDefines.NMilitary.FIELD_MARSHAL_XP_RATIO = 0.7
 NDefines.NMilitary.COMMANDER_LEVEL_UP_STAT_WEIGHTS = {5, 5, 3, 4}
 NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances to gain a personality trait for new generals
 	0.80, --50% for first trait
 	0.40, --15% for second trait after that
-	0.05,
+	0.05, 
 	0.01,
 }
 
 -- Technology
 NDefines.NTechnology.BASE_TECH_COST = 80
-NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 4.5 -- Base year ahead penalty
+NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 4.4 -- Base year ahead penalty
 NDefines.NTechnology.BASE_RESEARCH_POINTS_SAVED = 50.0
 
 -- Air Combat
@@ -55,10 +55,10 @@ NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
 NDefines.NAir.AIR_WING_XP_TRAINING_MISSION_GAIN_DAILY = 4.5
 NDefines.NAir.AIR_WING_COUNTRY_XP_FROM_TRAINING_FACTOR = 0.01
 NDefines.NAir.AIR_WING_XP_LOSS_WHEN_KILLED = 200
-NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 200 -- Max stats
-NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 200
-NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 200
-NDefines.NAir.AIR_WING_MAX_STATS_SPEED = 1500 -- Used to balance the damage done while bombing.
+NDefines.NAir.AIR_WING_MAX_STATS_ATTACK = 1000 -- Max stats was 200
+NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 1000 -- was 200
+NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 1000 -- was 200
+NDefines.NAir.AIR_WING_MAX_STATS_SPEED = 9999 -- Used to balance the damage done while bombing. was 1500
 NDefines.NAir.AIR_WING_XP_LOSS_REDUCTION_OVER_FRIENDLY_TERRITORY_FACTOR = 0.7
 NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Conversion scale for planes to air supply #original was 0.05
 
@@ -148,7 +148,7 @@ NAI = {
 	ORG_UNIT_NORMAL = 0.7,						-- Organization % for unit to be considered normal
 	STR_UNIT_NORMAL = 0.7,						-- Strength (equipment) % for unit to be considered normal
 
-	MAX_ALLOWED_NAVAL_DANGER = 50,				-- AI will ignore naval paths that has danger value of above this threshold while assigning units
+	MAX_ALLOWED_NAVAL_DANGER = 51,				-- AI will ignore naval paths that has danger value of above this threshold while assigning units
 	
 	FASCISTS_ALLY_DEMOCRACIES = -150,
 	FASCISTS_ALLY_COMMUNISTS = -150,
@@ -157,9 +157,9 @@ NAI = {
 	COMMUNISTS_ALLY_DEMOCRACIES = -75,
 	
 	DESPERATE_AI_WEAK_UNIT_STR_LIMIT = 0.1,					-- ai will increase number of units assigned to break from desperate situations when units are start falling lower than this str limit
-	DESPERATE_AI_MIN_ORG_BEFORE_ATTACK = 0.9,					-- ai will wait for this much org to attack an enemy prov in desperate situations
+	DESPERATE_AI_MIN_ORG_BEFORE_ATTACK = 0.85,					-- ai will wait for this much org to attack an enemy prov in desperate situations
 	DESPERATE_AI_MIN_ORG_BEFORE_MOVE = 0.25,					-- ai will wait for this much org to move in desperate situations
-	DESPERATE_ATTACK_WITHOUT_ORG_WHEN_NO_ORG_GAIN = 180,		-- if ai can't regain enough org to attack in this many hours, it will go truly desperate and attack anyway (still has to wait for move org)
+	DESPERATE_ATTACK_WITHOUT_ORG_WHEN_NO_ORG_GAIN = 175,		-- if ai can't regain enough org to attack in this many hours, it will go truly desperate and attack anyway (still has to wait for move org)
 
 
 
@@ -170,11 +170,11 @@ NAI = {
 		1.0, -- breakthrough
 		1.0, -- hardness
 		1.3, -- soft_attack #was 1.2 should build better divs.
-		0.0, -- hard_attack
+		0.01, -- hard_attack #was 0. Experiment so AI base vaules anti-tank and tanks more - SpicyAlfrdo
 		0.0, -- recon
 		0.0, -- entrenchment
 		0.0, -- initiative
-		0.0, -- casualty_trickleback
+		0.0, -- casualty_trickleback 
 		-1.0, -- supply_consumption_factor
 		-0.25, -- supply_consumption
 		0.0, -- suppression
@@ -184,7 +184,7 @@ NAI = {
 		0.0, -- fuel_capacity
 		-- Navy Values
 		0.0, -- surface_detection
-		0.0, -- sub_detection
+		0.01, -- sub_detection Experimental nudge for the ai to not build DD's that let Subs massacre them - SpicyAlfrdo
 		0.0, -- surface_visibility
 		0.0, -- sub_visibility
 		0.0, -- lg attack
@@ -208,7 +208,7 @@ NAI = {
 		0.0, -- air_attack
 		0.0, -- air_agility
 		0.0, -- air_bombing
-		0.0, -- air_superiority
+		0.01, -- air_superiority #ai nudge for the most important air stat bar none - Spicyalfredo
 		0.0, -- naval_strike_attack
 		0.0, -- naval_strike_targetting
 		0.0, -- air_ground_attack
@@ -255,7 +255,7 @@ NAI = {
 	ALLY_SUPPLY_RATIO_FOR_UNIT_PRODUCTION = 0.00,		-- supply ratio of ally supply chunks will be added to our own supply chunks (since we will fight around allies as well) modified by produce_unit_for_ally_supply_chunks strat
 	
 
-	INVASION_DISTANCE_RANDOMNESS = 250,					-- This higher the value, the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
+	INVASION_DISTANCE_RANDOMNESS = 245,					-- This higher the value, the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
 	
 
 	XP_RATIO_REQUIRED_TO_RESEARCH_WITH_XP = 1.5,		-- AI will at least need this amount of xp compared to cost of a tech to reserch it with XP #BASE WAS 2.0	
@@ -266,9 +266,9 @@ NAI = {
 
 	BUILDING_TARGETS_BUILDING_PRIORITIES = {				-- buildings in order of pirority when considering building targets strategies. First has the greatest priority, omitted has the lowest. NOTE: not all buildings are supported by building targets strategies.
 		'industrial_complex',
-		'synthetic_refinery',
 		'infrastructure',
 		'arms_factory',
+		'synthetic_refinery',
 		'air_base',
 		'radar_station',
 		'nuclear_reactor',
