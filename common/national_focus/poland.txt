@@ -1435,10 +1435,20 @@ focus_tree = {
 		cost = 10
 
 		ai_will_do = {
-			factor = 10
+			factor = 10.1
 			modifier = {
 				factor = 0
 				is_historical_focus_on = yes
+			}
+			modifier = {
+				factor = 0
+				DNZ = {
+					is_ai = no
+				}
+			}
+			modifier = {
+				add = 11
+				is_historical_focus_on = no
 			}
 		}
 
@@ -2319,7 +2329,7 @@ focus_tree = {
 				}
 				add_building_construction = {
 					type = industrial_complex
-					level = 3
+					level = 2
 					instant_build = yes
 				}
 			}
@@ -2335,7 +2345,7 @@ focus_tree = {
 						include_locked = yes
 					}
 				}
-				add_extra_state_shared_building_slots = 3
+				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = infrastructure
 					level = 1
@@ -2343,7 +2353,7 @@ focus_tree = {
 				}
 				add_building_construction = {
 					type = industrial_complex
-					level = 3
+					level = 2
 					instant_build = yes
 				}
 				set_state_flag = POL_Invest_In_The_Warsaw_Industrial_District_1
@@ -4965,7 +4975,7 @@ focus_tree = {
 	
 	focus = {
 		id = POL_Kasprzycki_Gamelin_Convention
-		icon = GFX_focus_AST_never_gallipoli
+		icon = GFX_POL_alliance
 		#prerequisite = { focus = POL_The_Polish_Socialist_Party focus = POL_The_Castle focus = POL_The_Sanation_Right focus = POL_The_Endecja_Movement focus = POL_The_Front_Morges }
 		#mutually_exclusive = { focus = POL_Polish_Revanchism focus = POL_Pressure_Czechoslovakia focus = POL_Silesia_Or_War }
 		available = {
@@ -5016,7 +5026,7 @@ focus_tree = {
 
 		x = 46
 		y = 6
-		cost = 5
+		cost = 1
 
 		ai_will_do = {
 			factor = 10
@@ -5030,35 +5040,30 @@ focus_tree = {
 
 		completion_reward = {
 			if = {
-				limit = { FRA = { is_faction_leader = yes } }
-				FRA = { country_event = poland.126 }
+				limit = {
+					has_defensive_war = no
+				}
+				set_global_flag = POL_gamelin_convention
+				custom_effect_tooltip = POL_gamelin_convention_tooltip
 			}
 			if = {
 				limit = {
-					ENG = {
-						is_faction_leader = yes
-						is_in_faction_with = FRA
-					}
+					has_defensive_war = yes
 				}
-				ENG = { country_event = poland.126 }
-			}
-			if = {
-				limit = {
-					OR = {
-						AND = {
-							FRA = { is_faction_leader = no }
-							ENG = { is_faction_leader = no }
-						}
-						ENG = {
-							is_faction_leader = yes
-							NOT = { is_in_faction_with = FRA }
-						}
-					}
-				}
-				effect_tooltip = {
+				if = {
+					limit = { FRA = { is_faction_leader = yes } }
 					FRA = { country_event = poland.126 }
 				}
-			}
+				if = {
+					limit = {
+						ENG = {
+							is_faction_leader = yes
+							is_in_faction_with = FRA
+						}
+					}
+					ENG = { country_event = poland.126 }
+				}			
+			}			
 		}
 	}
 	
@@ -5767,6 +5772,8 @@ focus_tree = {
 		ai_will_do = {
 			factor = 10
 		}
+		
+		dynamic = yes
 
 		available_if_capitulated = no
 		
@@ -7313,13 +7320,24 @@ focus_tree = {
 			NOT = {
 				has_completed_focus = POL_The_Endecja_Movement
 			}
-			NOT = { is_in_faction_with = BUL }
+			NOT = { 
+				is_in_faction_with = BUL 
+				BUL = {
+					is_puppet = no
+					NOT = {
+						has_government = democratic
+					}
+				}
+			}
 			ROM = {
 	 			AND = {
 	 				exists = yes
 	 				is_subject = no
 	 				NOT = { has_war_with = POL }
-	 			}
+				}
+				NOT = {
+					has_government = communism
+				} 
 	 		}
 	 	}
 		
@@ -7341,7 +7359,13 @@ focus_tree = {
 				custom_effect_tooltip = POL_Romania_Invite_Tooltip
 			}
 			if = {
-				limit = { POL = { has_country_flag = POL_Intermarium_Faction_Selected } }
+				limit = { 
+					POL = { has_country_flag = POL_Intermarium_Faction_Selected } 
+					ROM = {
+						is_faction_leader = no
+						is_ai = no
+					}
+				}
 				ROM = { 
 					country_event = poland.13
 				}
@@ -7352,6 +7376,7 @@ focus_tree = {
 					country_event = poland.16
 				}
 			}
+
 		}
 	}
 	
@@ -7883,6 +7908,105 @@ focus_tree = {
 					custom_effect_tooltip = POL_invite_to_faction_tooltip
 				}
 			}
+			if = {
+				limit = {
+					EST = {
+						has_war = no
+						is_faction_leader = yes
+						is_ai = yes
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}				
+				}
+				every_country = {
+					limit = {
+						OR = {
+							tag = ROOT
+							is_in_faction_with = ROOT
+						}
+					}
+
+					EST = {
+						add_to_faction = PREV
+					}
+					
+				}
+				hidden_effect = {
+					save_event_target_as = alliance_inviter
+					EST = { save_event_target_as = alliance_applicant }					
+					set_country_flag = alliance_inviter@ROOT
+					EST = { set_country_flag = alliance_applicant@ROOT }
+					news_event = { id = r56i.event.16 hours = 12 }
+				}								
+			}
+			if = {
+				limit = {
+					LAT = {
+						has_war = no
+						is_faction_leader = yes
+						is_ai = yes
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}				
+				}
+				every_country = {
+					limit = {
+						OR = {
+							tag = ROOT
+							is_in_faction_with = ROOT
+						}
+					}
+
+					LAT = {
+						add_to_faction = PREV
+					}
+					
+				}
+				hidden_effect = {
+					save_event_target_as = alliance_inviter
+					LAT = { save_event_target_as = alliance_applicant }					
+					set_country_flag = alliance_inviter@ROOT
+					LAT = { set_country_flag = alliance_applicant@ROOT }
+					news_event = { id = r56i.event.16 hours = 12 }
+				}								
+			}
+			if = {
+				limit = {
+					LIT = {
+						has_war = no
+						is_faction_leader = yes
+						is_ai = yes
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}				
+				}
+				every_country = {
+					limit = {
+						OR = {
+							tag = ROOT
+							is_in_faction_with = ROOT
+						}
+					}
+
+					LIT = {
+						add_to_faction = PREV
+					}
+					
+				}
+				hidden_effect = {
+					save_event_target_as = alliance_inviter
+					LIT = { save_event_target_as = alliance_applicant }					
+					set_country_flag = alliance_inviter@ROOT
+					LIT = { set_country_flag = alliance_applicant@ROOT }
+					news_event = { id = r56i.event.16 hours = 12 }
+				}								
+			}						
 		}
 	}
 	
