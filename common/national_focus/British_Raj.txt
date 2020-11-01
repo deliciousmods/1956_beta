@@ -10,6 +10,7 @@ focus_tree = {
 			tag = RAJ
 		}
 	}
+	continuous_focus_position = { x = 60 y = 1850 }
 	default = no
 	focus = {
 		search_filters = { FOCUS_FILTER_POLITICAL }
@@ -412,7 +413,7 @@ focus_tree = {
 	}
 	focus = {
 		id = RAJ_Azads_Support
-		icon = GFX_goal_unknown
+		icon = GFX_focus_generic_diplomatic_treaty
 		cost = 7.00
 		prerequisite = {
 			focus = RAJ_Prepare_the_Lucknow_Session
@@ -573,8 +574,8 @@ focus_tree = {
 
 	}
 	focus = {
-		id = RAJ_Pillais_Influence
-		icon = GFX_focus_generic_great_peasant_strike
+		id = RAJ_Pillais_Influence 
+		icon = GFX_focus_spr_masters_of_our_own_fate
 		search_filters = { FOCUS_FILTER_RAJ_PROVINCIAL_ELECTIONS }
 		cost = 7.00
 		prerequisite = {
@@ -601,7 +602,7 @@ focus_tree = {
 	}
 	focus = {
 		id = RAJ_Danges_Influence
-		icon = GFX_goal_unknown
+		icon = GFX_focus_generic_great_peasant_strike
 		cost = 7.00
 		search_filters = { FOCUS_FILTER_RAJ_PROVINCIAL_ELECTIONS }
 		prerequisite = {
@@ -1127,6 +1128,10 @@ focus_tree = {
 						}
 					}
 				}
+			}
+			swap_ideas = {
+				remove_idea = RAJ_Caste_Debuff_3
+				add_idea = RAJ_Caste_Debuff_2
 			}
 		}
 
@@ -1768,7 +1773,7 @@ focus_tree = {
 		id = RAJ_The_Ceylon_Emergency
 		search_filters = { FOCUS_FILTER_POLITICAL }
 		available = {
-			has_country_flag = independence_granted
+			is_subject = no
 			SRL = {
 				custom_trigger_tooltip = {
 					tooltip = ilp_sri_pol_trigger_50
@@ -1809,7 +1814,7 @@ focus_tree = {
 		cost = 5.00
 		ai_will_do = { factor = 1 }
 		available = {
-			has_country_flag = independence_granted
+			is_subject = no
 			NEP = {
 				custom_trigger_tooltip = {
 					tooltip = ilp_nep_pol_trigger_50
@@ -1844,7 +1849,7 @@ focus_tree = {
 		id = RAJ_The_Bhutanese_Revolt
 		search_filters = { FOCUS_FILTER_POLITICAL }
 		available = {
-			has_country_flag = independence_granted
+			is_subject = no
 			BHU = {
 				custom_trigger_tooltip = {
 					tooltip = ilp_bhu_pol_trigger_50
@@ -2407,7 +2412,10 @@ focus_tree = {
 		y = 5
 		relative_position_id = RAJ_Democracy_and_Socialism
 		completion_reward = {
-			
+			swap_ideas = {
+				remove_idea = RAJ_Caste_Debuff_3
+				add_idea = RAJ_Caste_Debuff_2
+			}
 		}
 
 	}
@@ -2704,9 +2712,6 @@ focus_tree = {
 				is_subject_of = ENG
 			}
 		}
-		bypass = {
-			is_in_faction_with = ENG
-		}
 		available = {
 			OR = {
 				is_in_faction = no
@@ -2733,7 +2738,20 @@ focus_tree = {
 		y = 4
 		relative_position_id = RAJ_Integrate_the_Princely_States
 		completion_reward = {
-			ENG = { country_event = generic.2 }
+			if = {
+				limit = { is_in_faction = no }
+				ENG = { country_event = generic.2 }
+			}
+			remove_opinion_modifier = {
+				target = ENG
+				modifier = RAJ_mistreatment
+			}
+			ENG = {
+				remove_opinion_modifier = {
+					target = RAJ
+					modifier = RAJ_disloyal
+				}
+			}
 		}
 
 	}
@@ -2749,6 +2767,15 @@ focus_tree = {
 		available = {
 			is_in_faction = no
 			is_subject = no
+			custom_trigger_tooltip = {
+				tooltip = "Enough countries want to participate"
+				OR = {
+					any_country = {
+						has_country_flag = attending_delhi_conference
+					}
+					has_global_flag = delhi_conference_empty
+				}
+			}
 		}
 		prerequisite = {
 			focus = RAJ_Encourage_Independent_Newspapers
@@ -2757,35 +2784,66 @@ focus_tree = {
 			focus = RAJ_Outwards_to_the_World
 			focus = RAJ_No_Resentments
 		}
-		x = -2
-		y = 4
-		relative_position_id = RAJ_Integrate_the_Princely_States
-		completion_reward = {
+		select_effect = {
+			set_global_flag = delhi_conference_empty
 			every_country = {
 				limit = {
 					is_in_faction = no
 					is_subject = no
 					has_war = no
-					has_added_tension_amount < 5
-					capital_scope = {
-						NOT = {
-							is_on_continent = europe
+					OR = {
+						AND = {#Founding members
+							tag = EGY
+							has_government = communism
 						}
-					}
-					RAJ = {
-						has_opinion = {
-							target = PREV
-							value > 0
+						AND = {
+							tag = YUG
+							has_government = communism
 						}
-					}
-					NOT = {
-						has_government = fascism
-						any_other_country = {
-							is_justifying_wargoal_against = PREV
+						AND = {
+							tag = INS
+							has_government = fascism
+						}
+						AND = {
+							tag = GHA
+							has_government = communism
+						}
+						AND = {
+							has_added_tension_amount < 5
+							capital_scope = {
+								NOT = {
+									is_on_continent = europe
+								}
+							}
+							RAJ = {
+								has_opinion = {
+									target = PREV
+									value > -20
+								}
+							}
+							NOT = {
+								has_government = fascism
+								any_other_country = {
+									is_justifying_wargoal_against = PREV
+									PREV = {
+										is_justifying_wargoal_against = PREV
+									}
+								}
+							}
 						}
 					}
 				}
+				country_event = {
+					id = india.424
+					days = 10
+				}
 			}
+		}
+		x = -2
+		y = 4
+		relative_position_id = RAJ_Integrate_the_Princely_States
+		completion_reward = {
+			
 		}
 
 	}
@@ -2797,6 +2855,21 @@ focus_tree = {
 		ai_will_do = { factor = 1 }
 		prerequisite = {
 			focus = RAJ_No_Resentments
+			focus = RAJ_Outwards_to_the_World
+		}
+		x = 0
+		y = 5
+		relative_position_id = RAJ_Integrate_the_Princely_States
+
+	}
+	focus = {
+		id = RAJ_Something_Something_Bootlicker
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_INDUSTRY }
+		icon = GFX_focus_RAJ_clamp_down_on_corruption
+		cost = 7.00
+		ai_will_do = { factor = 1 }
+		prerequisite = {
+			focus = RAJ_No_Resentments
 		}
 		x = 2
 		y = 5
@@ -2804,7 +2877,7 @@ focus_tree = {
 
 	}
 	focus = {
-		id = RAJ_Our_Brothers_To_The_South
+		id = RAJ_Bring_Democracy_to_South_Asia
 		search_filters = { FOCUS_FILTER_POLITICAL }
 		icon = GFX_goal_cuba_law_of_sugar_coordination
 		cost = 7.00
@@ -2845,21 +2918,24 @@ focus_tree = {
 					hours = 48
 				}
 			}
+			every_country = {
+				limit = {
+					OR = {
+						tag = AFG
+						tag = NEP
+						tag = BHU
+						tag = TIB
+						tag = PAK
+						tag = BRM
+						tag = BAN
+					}
+				}
+				add_timed_idea = {
+					idea = democratic_influence
+					days = 365
+				}
+			}
 		}	
-		relative_position_id = RAJ_Integrate_the_Princely_States
-
-	}
-	focus = {
-		id = RAJ_Pressure_the_British_about_Ceylon
-		search_filters = { FOCUS_FILTER_POLITICAL }
-		icon = GFX_goal_generic_foreign_diplomacy
-		cost = 7.00
-		ai_will_do = { factor = 1 }
-		prerequisite = {
-			focus = RAJ_Emphasise_Anti_Colonialist_Sentiment
-		}
-		x = -5
-		y = 6
 		relative_position_id = RAJ_Integrate_the_Princely_States
 
 	}
@@ -2874,20 +2950,6 @@ focus_tree = {
 		}
 		x = -2
 		y = 5
-		relative_position_id = RAJ_Integrate_the_Princely_States
-
-	}
-	focus = {
-		id = RAJ_Expand_its_Competences
-		search_filters = { FOCUS_FILTER_POLITICAL }
-		icon = GFX_goal_fire_paper_peoples
-		cost = 7.00
-		ai_will_do = { factor = 1 }
-		prerequisite = {
-			focus = RAJ_Ratify_the_Unaligned_Movement
-		}
-		x = -2
-		y = 6
 		relative_position_id = RAJ_Integrate_the_Princely_States
 
 	}
@@ -2946,53 +3008,6 @@ focus_tree = {
 		completion_reward = {
 			custom_effect_tooltip = available_political_advisor
 			show_ideas_tooltip = RAJ_mahatma_mohandas_gandhi
-		}
-
-	}
-	focus = {
-		id = RAJ_Mutual_Security
-		search_filters = { FOCUS_FILTER_POLITICAL }
-		icon = GFX_Goal_USA_Desegregated_military
-		cost = 7.00
-		ai_will_do = { factor = 1 }
-		prerequisite = {
-			focus = RAJ_Mutual_Investments
-		}
-		x = 2
-		y = 6
-		relative_position_id = RAJ_Integrate_the_Princely_States
-
-	}
-	focus = {
-		id = RAJ_The_Remains_of_South_Asia
-		search_filters = { FOCUS_FILTER_POLITICAL }
-		icon = GFX_goal_free_trade
-		cost = 7.00
-		ai_will_do = { factor = 1 }
-		prerequisite = {
-			focus = RAJ_Our_Brothers_To_The_South
-		}
-		x = 5
-		y = 6
-		relative_position_id = RAJ_Integrate_the_Princely_States
-		completion_reward = {
-			every_country = {
-				limit = {
-					OR = {
-						tag = AFG
-						tag = NEP
-						tag = BHU
-						tag = TIB
-						tag = PAK
-						tag = BRM
-						tag = BAN
-					}
-				}
-				add_timed_idea = {
-					idea = democratic_influence
-					days = 365
-				}
-			}
 		}
 
 	}
@@ -4224,25 +4239,13 @@ focus_tree = {
 		relative_position_id = RAJ_Assemble_our_Cabinet
 		completion_reward = {
 			439 = {
-				add_extra_state_shared_building_slots = 3
-				add_building_construction = {
-					type = infrastructure
-					level = 2
-				}
+				add_extra_state_shared_building_slots = 4
 			}
 			429 = {
-				add_extra_state_shared_building_slots = 3
-				add_building_construction = {
-					type = infrastructure
-					level = 2
-				}
+				add_extra_state_shared_building_slots = 4
 			}
 			430 = {
-				add_extra_state_shared_building_slots = 3
-				add_building_construction = {
-					type = infrastructure
-					level = 1
-				}
+				add_extra_state_shared_building_slots = 4
 			}
 		}
 
