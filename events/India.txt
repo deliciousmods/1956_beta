@@ -17,7 +17,10 @@ country_event = {#Linlithgow takes office
 	fire_only_once = yes
 
 	is_triggered_only = yes
-
+	trigger = {
+		is_subject = yes
+		has_government = neutrality
+	}
 	option = {
 	    name = r56_raj.1.a
 		ai_chance = {
@@ -989,6 +992,12 @@ country_event = {#ELECTION RESULTS
 	immediate = {
 		set_country_flag = raj_election_over
 		hidden_effect = {
+			if = {
+				limit = {
+					is_subject = no
+				}
+				declare_independence_political = yes
+			}
 			438 = {
 				set_state_name = "Lucknow"
 			}
@@ -1026,7 +1035,7 @@ country_event = {#ELECTION RESULTS
 				random_list = {
 					30 = {	#AIML is incompetent
 						set_variable = {
-							pak_influence_daily = 0.005
+							pak_influence_daily = 0.002
 						}
 					}
 					70 = {	#AIML is historical
@@ -1200,6 +1209,7 @@ country_event = {#ELECTION RESULTS
 			limit = {
 				NOT = {
 					has_country_flag = not_women_liberationists
+					is_subject = no
 				}
 			}
 			add_ideas = r56i_laws_gender_equality 
@@ -1906,6 +1916,7 @@ country_event = {#INC moves to secure rural Hindus
 			}
 			custom_effect_tooltip = raj_inc_2
 		}
+		raj_calculate_election = yes
     }
     option = {	#Fight them
         name = india.300.b
@@ -1928,6 +1939,7 @@ country_event = {#INC moves to secure rural Hindus
 			}
 			custom_effect_tooltip = raj_inc_1
 		}
+		raj_calculate_election = yes
     }
 }
 country_event = {#Unionist Party secures industrial support
@@ -1958,6 +1970,7 @@ country_event = {#Unionist Party secures industrial support
 			}
 			custom_effect_tooltip = raj_upa_2
 		}
+		raj_calculate_election = yes
     }
     option = {	#Privatise Industry
         name = india.301.b
@@ -1993,6 +2006,7 @@ country_event = {#Unionist Party secures industrial support
 			}
 			custom_effect_tooltip = raj_upa_1
 		}
+		raj_calculate_election = yes
     }
     option = {	#Privatise Industry
         name = india.301.c
@@ -2026,6 +2040,7 @@ country_event = {#Unionist Party secures industrial support
 			}
 			custom_effect_tooltip = raj_upa_1
 		}
+		raj_calculate_election = yes
     }
 }
 country_event = {#Independent Labour Party secures international support
@@ -2056,6 +2071,7 @@ country_event = {#Independent Labour Party secures international support
 			}
 			custom_effect_tooltip = raj_ifb_2
 		}
+		raj_calculate_election = yes
     }
     option = {	#Hinder them
         name = india.302.b
@@ -2093,6 +2109,7 @@ country_event = {#Independent Labour Party secures international support
 			}
 			custom_effect_tooltip = raj_ifb_1
 		}
+		raj_calculate_election = yes
     }
 }
 #Por notification
@@ -3109,8 +3126,13 @@ country_event = {	#Proclamation at the Delhi Conference
 
 	option = {
 		name = india.425.a
-		set_country_flag = attending_delhi_conference
-		clr_global_flag = delhi_conference_empty
+		RAJ = {
+			add_to_array = {
+				array = NAM_Members
+				value = PREV
+				index = 0
+			}
+		}
 	}
 
 	option = {
@@ -3125,6 +3147,388 @@ country_event = {	#Proclamation at the Delhi Conference
 
 }
 
+country_event = {	#Warning signs of an incoming famine
+	id = india.440
+	title = india.440.t
+	desc = india.440.desc
+	picture = GFX_event_picture_RAJ_Government_Formation
+
+	trigger = {
+		tag = RAJ
+		has_civil_war = no
+		NOT = { has_country_flag = RAJ_famine_manual_trigger }
+		date > 1940.1.1
+	}
+	fire_only_once = yes
+	immediate = {
+		set_country_flag = RAJ_famine_started
+	}
+	mean_time_to_happen = {
+		days = 750
+		modifier = {
+			factor = 0.3
+			has_war = yes
+		}
+		modifier = {
+			factor = 0.8
+			is_subject_of = ENG
+		}
+	}
+
+	option = {	#Ask the USSR for help
+		name = india.440.a
+		trigger = {
+			SOV = {
+				OR = {
+					has_government = democratic
+					has_government = communism
+				}
+				exists = yes
+				NOT = { has_war_with = RAJ }
+			}
+		}
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 5
+				has_completed_focus = RAJ_Soviet_Assistance
+			}
+			modifier = {
+				factor = 10
+				has_government = communism
+				SOV = { has_government = communism }
+			}
+		}
+		if = {
+			limit = {
+				is_subject = yes
+				has_completed_focus = RAJ_Provincial_Elections
+			}
+			custom_effect_tooltip = raj_3progressindependence
+		}
+		SOV = {
+			country_event = {
+				id = india.441
+				days = 2
+			}
+		}
+
+	}
+
+	option = {	#Ask the US for help
+		name = india.440.b
+		trigger = {
+			USA = {
+				exists = yes
+				NOT = { has_war_with = RAJ }
+			}
+		}
+		ai_chance = {
+			factor = 15
+			modifier = {
+				factor = 5
+				has_completed_focus = RAJ_India_United_under_Britain
+			}
+			modifier = {
+				factor = 10
+				is_in_faction_with = USA
+			}
+		}
+		USA = {
+			country_event = {
+				id = india.441
+				days = 2
+			}
+		}
+	}
+
+	option = {	#Ask the UK for help
+		name = india.440.c
+		trigger = {
+			ENG = {
+				NOT = {
+					has_government = fascism
+				}
+				exists = yes
+				NOT = { has_war_with = RAJ }
+			}
+		}
+		ai_chance = {
+			factor = 0
+			modifier = {
+				add = 20
+				is_in_faction_with = ENG
+			}
+		}
+		if = {
+			limit = {
+				is_subject = yes
+				has_completed_focus = RAJ_Provincial_Elections
+			}
+			custom_effect_tooltip = raj3progressindependence
+		}
+		ENG = {
+			country_event = {
+				id = india.441
+				days = 2
+			}
+		}
+	}
+
+	option = {	#We'll get through it ourselves
+		name = india.440.d
+		ai_chance = {
+			factor = 0
+		}
+		swap_ideas = {
+			remove_idea = RAJ_agrarian_economy
+			add_idea = RAJ_agrarian_economy_famine
+		}
+	}
+
+}
+country_event = {	#Warning signs of an incoming famine
+	id = india.441
+	title = india.441.t
+	desc = {
+		text = india.441.desc
+		trigger = {
+			OR = {
+				tag = USA
+				tag = ENG
+			}
+		}
+	}
+	desc = {
+		text = india.441.sov.desc
+		trigger = {
+			tag = SOV
+		}
+	}
+	picture = GFX_event_picture_RAJ_Government_Formation
+
+	is_triggered_only = yes
+
+	option = {	#Lets supply what the Brits wont
+		name = india.441.a
+		trigger = {
+			tag = SOV
+		}
+		ai_chance = {
+			base = 10
+			modifier = {
+				factor = 3
+				RAJ = {
+					has_completed_focus = RAJ_Soviet_Assistance
+				}
+			}
+			modifier = {
+				factor = 5
+				RAJ = { has_government = communism }
+				has_government = communism
+			}
+		}
+		add_offsite_building = {
+			type = industrial_complex
+			level = 2
+		}
+		add_offsite_building = { 
+			type = industrial_complex 
+			level = 2
+		}
+		add_timed_idea = {
+			idea = RAJ_agricultural_shipments
+			days = 90
+		}
+		RAJ = {
+			effect_tooltip = {
+				add_opinion_modifier = {
+					target = FROM
+					modifier = granted_food_aid
+				}
+			}
+			country_event = {
+				id = india.443
+				days = 2
+			}
+			if = {
+				limit = {
+					is_subject = yes
+					has_completed_focus = RAJ_Provincial_Elections
+				}
+				custom_effect_tooltip = raj3progressindependence
+				add_to_variable = {
+					ind_influence_daily = 0.3
+				}
+			}
+		}
+		
+	}
+	option = {	#Of course!
+		name = india.441.b
+		trigger = {
+			tag = USA
+		}
+		ai_chance = {
+			factor = 20
+			modifier = {
+				factor = 0.5
+				has_idea = undisturbed_isolation
+			}
+			modifier = {
+				factor = 2
+				RAJ = { has_government = democratic }
+				has_government = democratic 
+			}
+		}
+		add_offsite_building = {
+			type = industrial_complex
+			level = 2
+		}
+		add_timed_idea = {
+			idea = RAJ_agricultural_shipments
+			days = 90
+		}
+		RAJ = {
+			country_event = {
+				id = india.443
+				days = 2
+			}
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.05
+			}
+			effect_tooltip = {
+				add_opinion_modifier = {
+					target = FROM
+					modifier = granted_food_aid
+				}
+			}
+		}
+		
+	}
+	option = {	#Anything for the Jewel
+		name = india.441.c
+		trigger = {
+			tag = ENG
+		}
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 2
+				is_in_faction_with = RAJ
+			}
+			modifier = {
+				factor = 0.3
+				has_country_leader = {
+					name = "Winston Churchill"
+					ruling_only = yes
+				}
+			}
+		}
+		add_offsite_building = {
+			type = industrial_complex
+			level = 2
+		}
+		add_timed_idea = {
+			idea = RAJ_agricultural_shipments
+			days = 90
+		}
+		RAJ = {
+			country_event = {
+				id = india.443
+				days = 2
+			}
+			effect_tooltip = {
+				add_opinion_modifier = {
+					target = FROM
+					modifier = granted_food_aid
+				}
+			}
+			if = {
+				limit = {
+					is_subject = yes
+					has_completed_focus = RAJ_Provincial_Elections
+				}
+				
+				custom_effect_tooltip = raj_3progressindependence
+				add_to_variable = {
+					ind_influence_daily = -0.3
+				}
+			}
+		}
+		
+	}
+	option = {	#Deny
+		name = india.441.d
+		ai_chance = {
+			factor = 10
+		}
+		RAJ = {
+			country_event = {
+				id = india.443
+				days = 2
+			}
+			effect_tooltip = {
+				add_opinion_modifier = {
+					target = FROM
+					modifier = denied_food_aid 
+				}
+				RAJ = {
+					add_ideas = RAJ_agrarian_economy_famine
+				}
+			}
+		}
+	}
+}
+country_event = {#got accepted
+	id = india.442
+	title = india.442.t
+	desc = india.442.desc
+	picture = GFX_report_event_picture_RAJ_Viceroys_Mansion
+
+	is_triggered_only = yes
+
+	option = {
+		name = india.442.a
+		add_opinion_modifier = {
+			target = FROM
+			modifier = granted_food_aid
+		}
+	}
+}
+country_event = {#got denied
+	id = india.443
+	title = india.443.t
+	desc = india.443.desc
+	picture = GFX_report_event_picture_RAJ_Viceroys_Mansion
+
+	is_triggered_only = yes
+
+	option = {
+		name = india.443.a
+		add_opinion_modifier = {
+			target = FROM
+			modifier = denied_food_aid
+		}
+		swap_ideas = {
+			remove_idea = RAJ_agrarian_economy	
+			add_idea = RAJ_agrarian_economy_famine
+		}
+	}
+}
+country_event = {#Imperial Conference
+	id = india.444
+	title = india.444.t
+	desc = india.444.desc
+	picture = GFX_report_event_picture_RAJ_Imperial_Conference
+
+	is_triggered_only = yes
+
+	option = {
+		name = india.444.a
+	}
+}
 ###########################################
 ###########################################
 ###										###
