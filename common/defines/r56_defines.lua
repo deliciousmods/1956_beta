@@ -295,7 +295,11 @@ NOperatives = {
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
 
 },
-
+NResistance = {
+		
+	GARRISON_MANPOWER_LOST_BY_ATTACK = 0.005, 	--WAS 0.018 Ratio of manpower lost by garrison at each attack on garrison (this number will be reduced by the hardness of garrison template)
+		
+},
 NCountry = {
 	FEMALE_UNIT_LEADER_BASE_CHANCE = { 
 		-- applies as a factor to female unit leader randomization
