@@ -443,6 +443,17 @@
 			}
 		}
 		completion_reward = {
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				add_tech_bonus = {
+					name = scout_plane
+					bonus = 1.0
+					uses = 1
+					category = cat_scout_plane
+				}				
+			}					
 			random_owned_controlled_state = {
 				limit = {
 					free_building_slots = {
@@ -1189,7 +1200,7 @@
 				}
 			}
 		}
-		search_filters = { FOCUS_FILTER_INDUSTRY }
+		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_OIL}
 	}
 	focus = {
 		id = FRA_develop_indochine
@@ -1329,7 +1340,7 @@
 				}
 			}
 		}
-		search_filters = { FOCUS_FILTER_INDUSTRY }
+		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_TUNGSTEN}
 	}
 	focus = {
 		id = FRA_vienot_agreement
@@ -2380,7 +2391,7 @@
 	}
 	focus = {
 		id = FRA_france_undividable
-		icon = GFX_focus_chi_reach_out_to_france
+		icon = GFX_goal_france_shield
 		x = 1
 		y = 1
 		prerequisite = {
@@ -2472,7 +2483,7 @@
 	}
 	focus = {
 		id = FRA_encourage_immigration
-		icon = GFX_goal_indochina_plan_mandel
+		icon = GFX_goal_generic_housing
 		x = -1
 		y = 1
 		offset = {
@@ -2870,6 +2881,7 @@
 				ideology = marxism
 				traits = {
 					POL_labor_advocate
+					r56_trait_opposed_to_fascism
 				}
 			}
 			FRA_right_wing_riot_effect = yes
@@ -2920,7 +2932,7 @@
 	}
 	focus = {
 		id = FRA_syndicalist_revolution
-		icon = GFX_goal_mexico_empower_the_unions
+		icon = GFX_goal_generic_left_militia
 		cost = 10
 		prerequisite = {
 			focus = FRA_work_with_the_cgt
@@ -3973,6 +3985,7 @@
 				ideology = fascism_ideology
 				traits = {
 					army_connections
+					r56_trait_opposed_to_communism
 				}
 			}
 			add_timed_idea = { idea = reign_of_terror days = 730 }
@@ -4569,6 +4582,7 @@
 						ideology = absolute_monarchism
 						traits = {
 							disgraced_monarch
+							r56_trait_opposed_to_communism
 						}
 					}
 				}
@@ -4581,6 +4595,7 @@
 						ideology = absolute_monarchism
 						traits = {
 							the_legitimist
+							r56_trait_opposed_to_communism
 						}
 					}
 				}
@@ -4597,6 +4612,7 @@
 					expire = "1965.1.1"
 					ideology = absolute_monarchism
 					traits = {
+						r56_trait_opposed_to_communism
 					}
 				}
 				set_politics = { ruling_party = neutrality }
@@ -4606,7 +4622,7 @@
 	}
 	focus = {
 		id = FRA_side_with_the_orleanists
-		icon = GFX_focus_focus_fra_orleans_restoration
+		icon = GFX_goal_FRA_jean3
 		cost = 10
 		prerequisite = {
 			focus = FRA_papal_rehabilitation
@@ -4655,6 +4671,7 @@
 					ideology = absolute_monarchism
 					traits = {
 						duke_of_orleans
+						r56_trait_opposed_to_communism
 					}
 				}
 			}
@@ -4667,6 +4684,8 @@
 					ideology = absolute_monarchism
 					traits = {
 						count_of_paris
+						r56_trait_opposed_to_communism
+
 					}
 				}
 			}
@@ -4730,6 +4749,9 @@
 				picture = "r56_portrait_France_Napoleon_VI.dds"
 				expire = "1965.1.1"
 				ideology = absolute_monarchism
+				traits = {
+					r56_trait_opposed_to_communism
+				}
 			}
 			set_party_name = {
 				ideology = neutrality
@@ -5136,6 +5158,7 @@
 			}
 			set_rule = { can_send_volunteers = yes }
 		}
+		search_filters = { FOCUS_FILTER_SPA_CIVIL_WAR FOCUS_FILTER_MANPOWER }
 	}
 	focus = {
 		id = FRA_intervene_in_the_spanish_civil_war
@@ -5232,6 +5255,7 @@
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_SPA_CIVIL_WAR FOCUS_FILTER_MANPOWER }
 	}
 	focus = {
 		id = FRA_secure_the_crown_of_spain
@@ -5494,7 +5518,37 @@
 			set_rule = {
 				can_create_factions = yes
 			}
-			create_faction = FRA_anti_german_front
+			if = {
+				limit = {
+					ROM = {
+						is_in_faction_with = POL
+						OR = {
+							has_government = neutrality
+							has_government = democratic
+						}
+					}
+					OR = {
+						ROM = {
+							is_faction_leader = yes
+						}
+						POL = {
+							is_faction_leader = yes
+						}						
+					}
+				}
+				ROM = {
+					FACTION_LEADER = {
+						country_event = {
+							id = generic.2
+							hours = 2
+						}						
+					}
+				}
+			}
+			else = {
+				create_faction = FRA_chantilly_accord
+			}
+			
 			add_opinion_modifier = {
 				target = GER
 				modifier = FRA_anti_german_front
@@ -5552,7 +5606,13 @@
 			is_in_faction = yes
 			is_subject = no
 			NOT = {
-				has_war_with = ITA
+				OR = {
+					has_war_with = ITA
+					any_other_country = {
+						is_in_faction_with = ROOT
+						has_war_with = ITA
+					}
+				}
 			}
 			ITA = {
 				is_in_faction = no
@@ -6456,6 +6516,42 @@
 			}
 			if = {
 				limit = {
+					NAV = {
+						exists = yes
+					}
+				}
+				create_wargoal = {
+					target = NAV
+					type = annex_everything
+					expire = 0
+				}
+			}
+			if = {
+				limit = {
+					CAT = {
+						exists = yes
+					}
+				}
+				create_wargoal = {
+					target = CAT
+					type = annex_everything
+					expire = 0
+				}
+			}
+			if = {
+				limit = {
+					GLC = {
+						exists = yes
+					}
+				}
+				create_wargoal = {
+					target = GLC
+					type = annex_everything
+					expire = 0
+				}
+			}									
+			if = {
+				limit = {
 					SPA = {
 						exists = yes
 					}
@@ -6877,7 +6973,16 @@
 				uses = 1
 				category = para_tech
 				category = mountaineers_tech
+				category = r56_desert_infantry_tech
+				category = r56_jaeger_infantry_tech
+				category = r56_jungle_infantry_tech				
 			}
+			add_tech_bonus = {
+                name = special_forces_bonus
+                bonus = 1.0
+                uses = 1
+                category = r56_special_forces_training_tech 
+            }			
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -7362,6 +7467,12 @@
 				uses = 1
 				category = para_tech
 			}
+			add_tech_bonus = {
+                name = special_forces_bonus
+                bonus = 1.0
+                uses = 1
+                category = r56_special_forces_training_tech 
+            }			
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -7670,7 +7781,7 @@
 	}
 	focus = {
 		id = FRA_foreign_guest_workers
-		icon = GFX_goal_indochina_plan_mandel
+		icon = GFX_tblra_union_agreement
 		x = -1
 		y = 1
 		prerequisite = {
@@ -8041,7 +8152,7 @@
 	}
 	focus = {
 		id = FRA_fascist_threat
-		icon = GFX_goal_generic_major_war
+		icon = GFX_focus_focus_fra_fascist_threat
 		cost = 10
 		prerequisite = {
 			focus = FRA_humanite_unie
@@ -8066,6 +8177,10 @@
 		available_if_capitulated = no
 		ai_will_do = {
 			factor = 1
+			modifier = {
+				has_war_with = ENG
+				factor = 0
+			}
 		}
 		will_lead_to_war_with = GER
 		will_lead_to_war_with = PRE
@@ -8125,6 +8240,13 @@
 		available_if_capitulated = no
 		ai_will_do = {
 			factor = 1
+			modifier = {
+				OR = {
+					has_war_with = GER
+					has_defensive_war = yes
+				}
+				factor = 0
+			}
 		}
 		will_lead_to_war_with = ENG
 		completion_reward = {
@@ -8340,6 +8462,7 @@
 			unlock_decision_category_tooltip = FRA_spanish_intervention_category
 			set_country_flag = FRA_non_intervention
 		}
+		search_filters = { FOCUS_FILTER_SPA_CIVIL_WAR }
 	}
 
 
@@ -8650,7 +8773,7 @@
 		cancel_if_invalid = yes
 		continue_if_invalid = no
 		available_if_capitulated = yes
-		search_filters = { FOCUS_FILTER_ANNEXATION }
+		search_filters = { FOCUS_FILTER_ANNEXATION FOCUS_FILTER_RUBBER }
 		completion_reward = {
 			if = {
 				limit = {
