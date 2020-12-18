@@ -12,36 +12,36 @@ country_event = {
 	
 	is_triggered_only = yes
 
-	option = {
-		name = occupied_countries.1.a
-
-		if = {
-			limit = {
-				has_core_occupation_modifier = {
-					occupied_country_tag = FROM.FROM
-					modifier = compliance_80
-				}
-				NOT = {
-					any_country_with_original_tag = { #copy of is_available_to_collaboration_government but from from scope because of events
-						original_tag_to_check = FROM.FROM
-						is_puppet_of = PREV # if already created one do not create another
-						has_autonomy_state = autonomy_collaboration_government
-					}
-				}
-			}
-			set_temp_variable = { country_to_initiate = FROM.FROM }
-			instantiate_collaboration_government = yes
-		}
-		
-		ai_chance = {
-			base = 0
-		}
-	}
+	#option = {
+	#	name = occupied_countries.1.a
+	#	unlock_decision_tooltip = instantiate_collaboration
+	##	if = {
+	##		limit = {
+	##			has_core_occupation_modifier = {
+	##				occupied_country_tag = FROM.FROM
+	##				modifier = compliance_80
+	##			}
+	##			NOT = {
+	##				any_country_with_original_tag = { #copy of is_available_to_collaboration_government but from from scope because of events
+	##					original_tag_to_check = FROM.FROM
+	##					is_puppet_of = PREV # if already created one do not create another
+	##					has_autonomy_state = autonomy_collaboration_government
+	##				}
+	##			}
+	##		}
+	##		set_temp_variable = { country_to_initiate = FROM.FROM }
+	##		instantiate_collaboration_government = yes
+	##	}
+	#	
+	#	ai_chance = {
+	#		base = 0
+	#	}
+	#}
 
 	option = {
 		name = occupied_countries.1.b
 		# do nothing
-		
+		unlock_decision_tooltip = instantiate_collaboration
 		ai_chance = {
 			base = 100
 		}
@@ -70,6 +70,7 @@ country_event = {
 				set_temp_variable = { occupier_country = THIS }
 				set_temp_variable = { occupied_country = FROM }
 				set_temp_variable = { new_occupied_country = FROM }
+				FROM = { save_event_target_as = new_controller }	
 				
 				if = { #warsaw achievement
 					limit = {
@@ -226,8 +227,20 @@ country_event = {
 						}
 					}
 					
-					# change government if necesarry
+					# change government if necessary , RT56 also check for autonomy
 					var:new_occupied_country = {
+						if = {
+							limit = {
+								is_puppet = yes
+								OVERLORD = {
+									has_capitulated = yes
+								}
+							}
+							set_autonomy = {
+								target = var:new_occupied_country
+								autonomy_state = autonomy_free
+							}						
+						}
 						if = {
 							# check if our current ideology is OK
 							limit = { 
@@ -315,7 +328,23 @@ country_event = {
 						}						
 					}
 				}
-				
+
+			############## R56 CHECK AUTONOMY
+				if = {
+					limit = {
+						var:new_occupied_country = {
+							is_puppet = yes
+							OVERLORD = {
+								has_capitulated = yes
+							}
+						}
+
+					}
+					set_autonomy = {
+						target = var:new_occupied_country
+						autonomy_state = autonomy_free
+					}						
+				}				
 				
 				clear_temp_array = checked_neighbours
 				every_controlled_state = {
@@ -397,7 +426,7 @@ country_event = {
 					}
 				}
 			
-				# create war if necesarry
+				# create war if necessary
 				if = {
 					limit = { NOT = { has_war_with = new_occupied_country } }
 					declare_war_on = { target = new_occupied_country type = annex_everything }
