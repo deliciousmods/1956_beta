@@ -1,3 +1,4 @@
+
 NDefines.NGraphics.COUNTRY_FLAG_TEX_MAX_SIZE = 2048
 NDefines.NGraphics.COUNTRY_FLAG_SMALL_TEX_MAX_SIZE = 512
 NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_WIDTH = 10
@@ -295,7 +296,17 @@ NOperatives = {
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
 
 },
-
+NResistance = {
+		
+	GARRISON_MANPOWER_LOST_BY_ATTACK = 0.005, 	--WAS 0.018 Ratio of manpower lost by garrison at each attack on garrison (this number will be reduced by the hardness of garrison template)
+		
+},
+NDiplomacy = {
+	LICENSE_ACCEPTANCE_PUPPET_BASE = 20,			-- Acceptance modifier for puppets requesting production licenses.
+	LICENSE_ACCEPTANCE_TECH_DIFFERENCE = 2, 		-- Acceptance modifier for each year of technology difference.
+	LICENSE_ACCEPTANCE_TECH_DIFFERENCE_BASE = 20,    -- Acceptance base for tech difference
+	LICENSE_ACCEPTANCE_SAME_FACTION = 30,			-- Acceptance modifier for being in the same faction
+},
 NCountry = {
 	FEMALE_UNIT_LEADER_BASE_CHANCE = { 
 		-- applies as a factor to female unit leader randomization
