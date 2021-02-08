@@ -399,6 +399,7 @@ political_actions = {
 			tag = CAN
 			
 		}	
+		days_re_enable = 120
 		fire_only_once = yes
 		available = {
 			compare_autonomy_progress_ratio > 0.98
@@ -410,6 +411,7 @@ political_actions = {
 			NOT = {
 				has_country_flag = has_declared_independence
 			}
+			is_puppet = yes
 		}
 		cost = 25	
 		complete_effect = {
@@ -479,7 +481,7 @@ political_actions = {
 		fire_only_once = yes
 
 		available = {
-				has_war_support > 0.30
+			has_war_support > 0.30
 		}
 
 		visible = {
@@ -489,12 +491,15 @@ political_actions = {
 		cost = 25
 		custom_cost_text = r56_deploy_heavy_aa_capital_cost
 		custom_cost_trigger = {
-			command_power > 25
+			command_power > 24
 		}
 
 		days_remove = 90
 
 		remove_effect = {
+			hidden_effect = {
+				add_command_power = -25
+			}
 			#order of effects matter, don't change - SpicyAlfredo
 			custom_effect_tooltip = r56_militia_tt
 			hidden_effect = {
@@ -580,6 +585,9 @@ political_actions = {
 			}			
 		}		
 		complete_effect = {
+			hidden_effect = {
+				add_command_power = -25
+			}
 			if = {
 				limit = {
 					has_equipment = {
@@ -606,6 +614,135 @@ political_actions = {
 	}		
 }
 economy_decisions = {
+	seize_machine_toolings_in_state = {
+
+		icon = generic_factory
+		fire_only_once = yes #ideally shouldn't be there but flags seemed ineffective for some reasons
+
+ 		allowed = {
+			always = yes
+		}
+		state_target = yes
+		target_array = controlled_states
+		on_map_mode = map_only
+		target_trigger = {
+			FROM = {
+				NOT = {
+					OR = {
+						is_owned_by = ROOT
+						is_core_of = ROOT
+						is_claimed_by = ROOT
+						is_border_conflict = yes
+						has_state_flag = machine_tooling_looted
+					}
+					
+				}
+				AND = {
+					is_controlled_by = ROOT
+					
+					owner = {
+						has_war_with = ROOT
+					}
+				}
+				non_damaged_building_level = {
+					building = arms_factory
+					level > 0
+				}
+				OR = {
+					has_state_category = city
+					has_state_category = large_city
+					has_state_category = metropolis
+					has_state_category = megalopolis					
+				}
+
+				resistance < 50
+			}
+		}
+        available = {
+        	OR = {
+        		has_idea = war_economy
+        		has_idea = tot_economic_mobilisation
+			}
+			NOT = {
+				has_government = democratic
+			}
+         	      	
+		}
+		visible = {
+			NOT = {
+				has_government = democratic
+			}
+        	any_owned_state = {
+        		is_fully_controlled_by = ROOT
+        		is_core_of = ROOT
+				free_building_slots = {
+				    building = arms_factory
+				    size > 1
+				    include_locked = no
+				}
+				NOT = {
+					has_state_flag = machine_tooling_beneficiary
+				}        		
+        	}
+		}
+
+		cost = 75
+##		# + command power?
+		days_remove = 120
+#
+		remove_effect = {
+
+			FROM = {	
+				set_state_flag = machine_tooling_looted		
+				remove_building = {
+					type = arms_factory
+					level = 1
+				}
+				add_compliance = -5
+				add_resistance = 5
+				add_dynamic_modifier = { modifier = looting_resistance days = 365 }
+				#add_state_modifier = looting_resistance			
+			}
+			random_owned_controlled_state = {
+				limit = {
+					is_fully_controlled_by = ROOT
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = no
+					}
+					is_in_home_area = yes
+					is_core_of = ROOT				
+				}
+
+				add_building_construction = {
+				    type = arms_factory
+				    level = 1
+				    instant_build = yes
+				}
+				set_state_flag = machine_tooling_beneficiary					
+			}			
+		}
+	}
+
+#	raise_militias = {
+#
+#		icon = generic_infantry
+#        allowed = {  
+#        }
+#        available = {
+#            has_civil_war = yes
+#        }
+#        visible = {
+#            has_civil_war = yes
+#        }
+#        ai_will_do = {
+#			factor = 1
+#		}
+#		complete_effect = {        
+#        	load_oob = generic_civil_war_volunteers
+#        }
+#	}	
 	r56_coordinate_land_equipment_manufacturers = {
 
 		icon = generic_industry
@@ -692,121 +829,7 @@ economy_decisions = {
 	}	
 }
 war_measures = {
-	#cause crahes at the moment
-#	seize_machine_toolings_in_state = {
-#
-#		icon = generic_air
-#
-#		allowed = {
-#			always = yes
-#		}
-#
-#		target_trigger = {
-#			ROOT = {
-#				has_war_with = FROM
-#			}
-#        	any_state = {
-#        		is_owned_by = FROM
-#        		NOT = {
-#        			OR = {
-#        				is_core_of = ROOT
-#        				is_claimed_by = ROOT
-#        			}
-#        			has_state_flag = machine_tooling_looted
-#        		}
-#        		is_controlled_by = ROOT
-#        		is_in_home_area = yes
-#        	}			
-#		}
-#
-#        available = {
-#        	OR = {
-#        		has_idea = war_economy
-#        		has_idea = tot_economic_mobilisation
-#        	}
-#        	any_state = {
-#        		is_owned_by = FROM
-#        		NOT = {
-#        			OR = {
-#        				is_core_of = ROOT
-#        				is_claimed_by = ROOT
-#        				is_border_conflict = yes
-#        			}
-#        			has_state_flag = machine_tooling_looted
-#        		}
-#        		is_controlled_by = ROOT
-#        		is_in_home_area = yes
-#        	}
-#       	       	
-#        	any_owned_state = {
-#        		is_fully_controlled_by = ROOT
-#        		is_core_of = ROOT
-#				free_building_slots = {
-#				    building = arms_factory
-#				    size > 1
-#				    include_locked = no
-#				}
-#				is_in_home_area = yes
-#				NOT = {
-#					has_state_flag = machine_tooling_beneficiary
-#				}        		
-#        	}         	      	
-#		}
-#
-#		cost = 60 
-#		# + command power?
-#		days_remove = 120
-#
-#		remove_effect = {
-#
-#			random_state = {
-#				limit = {
-#					arms_factory > 0				
-#				}			
-#				add_building_construction = {
-#				    type = arms_factory
-#				    level = -1
-#				    instant_build = yes
-#				}
-#				set_state_flag = machine_tooling_looted			
-#			}
-#			random_owned_controlled_state = {
-#				limit = {
-#					free_building_slots = {
-#						building = arms_factory
-#						size > 1
-#						include_locked = no
-#					}				
-#				}
-#
-#				add_building_construction = {
-#				    type = arms_factory
-#				    level = 1
-#				    instant_build = yes
-#				}
-#				set_state_flag = machine_tooling_beneficiary					
-#			}			
-#		}
-#	}
 
-#	raise_militias = {
-#
-#		icon = generic_infantry
-#        allowed = {  
-#        }
-#        available = {
-#            has_civil_war = yes
-#        }
-#        visible = {
-#            has_civil_war = yes
-#        }
-#        ai_will_do = {
-#			factor = 1
-#		}
-#		complete_effect = {        
-#        	load_oob = generic_civil_war_volunteers
-#        }
-#	}
 
 	r56_collect_civilian_aluminium_utensils = {
 	

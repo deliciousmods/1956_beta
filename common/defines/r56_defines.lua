@@ -1,9 +1,13 @@
+
 NDefines.NGraphics.COUNTRY_FLAG_TEX_MAX_SIZE = 2048
 NDefines.NGraphics.COUNTRY_FLAG_SMALL_TEX_MAX_SIZE = 512
 NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_WIDTH = 10
 NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_HEIGHT = 8196
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_WIDTH = 41
 NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_HEIGHT = 24000
+NDefines.NGraphics.VICTORY_POINT_MAP_ICON_AFTER = {0, 20} -- After this amount of VP the map icon becomes bigger dot.
+NDefines.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {200, 500, 750} -- At what camera distance the VP name text disappears.
+NDefines.NGraphics.VICTORY_POINTS_DISTANCE_CUTOFF = {300, 750, 1000} -- At what distance VPs are hidden
 -- Focuses
 NDefines.NFocus.MAX_SAVED_FOCUS_PROGRESS = 14
 
@@ -14,13 +18,13 @@ NDefines.NCountry.BASE_RESEARCH_SLOTS = 3
 
 -- Military
 NDefines.NMilitary.DEPLOY_TRAINING_MAX_LEVEL = 5
-NDefines.NMilitary.UNIT_EXP_LEVELS = {0.02,	0.04, 0.06,	0.08, 0.1, 0.14, 0.18, 0.22, 0.26, 0.3, 0.39, 0.48, 0.57, 0.66, 0.75, 0.78, 0.81, 0.84, 0.87, 0.9}
+NDefines.NMilitary.UNIT_EXP_LEVELS = {0.02, 0.04, 0.06,	0.08, 0.1, 0.14, 0.18, 0.22, 0.26, 0.3, 0.39, 0.48, 0.57, 0.66, 0.75, 0.78, 0.81, 0.84, 0.87, 0.9}
 NDefines.NMilitary.ARMY_EXP_BASE_LEVEL = 5
 NDefines.NMilitary.TRAINING_MAX_LEVEL = 10
 NDefines.NMilitary.MAX_ARMY_EXPERIENCE = 1000 -- Max army experience a country can store
 NDefines.NMilitary.MAX_NAVY_EXPERIENCE = 1000 -- Max navy experience a country can store
 NDefines.NMilitary.MAX_AIR_EXPERIENCE = 1000  -- Max air experience a country can store
-NDefines.NMilitary.EXPERIENCE_COMBAT_FACTOR = 0.05
+NDefines.NMilitary.EXPERIENCE_COMBAT_FACTOR = 0.03
 NDefines.NMilitary.FIELD_MARSHAL_DIVISIONS_CAP = 32
 NDefines.NMilitary.RECON_SKILL_IMPACT = 6
 NDefines.NMilitary.BASE_DIVISION_BRIGADE_GROUP_COST = 8 -- Base cost to unlock a regiment slot,
@@ -115,6 +119,7 @@ NAI = {
 	DIPLOMACY_FACTION_SAME_IDEOLOGY_MAJOR = 15, -- AI bonus acceptance when being asked about faction is a major of the same ideology
 	DIPLOMACY_FACTION_NEUTRALITY_PENALTY = 50,	-- Neutral nations have a separate penalty, not wanting to get involved at all, rather than caring much about the difference in ideology
 	DIPLOMACY_FACTION_GLOBAL_TENSION_FACTOR = 0.2,-- How much the AI takes global tension into account when considering faction actions
+	TENSION_DECAY = 0.15,							-- Each months tension decays this much. Base was 0.1
 	DIPLOMACY_FACTION_WAR_RELUCTANCE = -50,		-- Penalty to desire to enter a faction with a country that we are not fighting wars together with.
 	DIPLOMACY_FACTION_TAKE_OVER_RELUCTANCE_VERSUS_HUMAN = 2.0,	-- Multiplier penalty for how much stronger than a human faction member an AI country must be to choose to assume faction leadership.
 	DIPLOMACY_SCARED_MINOR_EXTRA_RELUCTANCE = -50, -- extra reluctance to join stuff as scared minor
@@ -295,7 +300,17 @@ NOperatives = {
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
 
 },
-
+NResistance = {
+		
+	GARRISON_MANPOWER_LOST_BY_ATTACK = 0.005, 	--WAS 0.018 Ratio of manpower lost by garrison at each attack on garrison (this number will be reduced by the hardness of garrison template)
+		
+},
+NDiplomacy = {
+	LICENSE_ACCEPTANCE_PUPPET_BASE = 20,			-- Acceptance modifier for puppets requesting production licenses.
+	LICENSE_ACCEPTANCE_TECH_DIFFERENCE = 2, 		-- Acceptance modifier for each year of technology difference.
+	LICENSE_ACCEPTANCE_TECH_DIFFERENCE_BASE = 20,    -- Acceptance base for tech difference
+	LICENSE_ACCEPTANCE_SAME_FACTION = 30,			-- Acceptance modifier for being in the same faction
+},
 NCountry = {
 	FEMALE_UNIT_LEADER_BASE_CHANCE = { 
 		-- applies as a factor to female unit leader randomization
