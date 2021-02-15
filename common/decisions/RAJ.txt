@@ -4101,7 +4101,7 @@ post_election_struggle = {
 	
 	organize_large_scale_strikes = {
 		icon = generic
-		fire_only_once = no
+		fire_only_once = yes
 		cost = 10
 		ai_will_do = {
 			factor = 150
@@ -4109,7 +4109,6 @@ post_election_struggle = {
 		available = {
 			has_country_flag = ILP_victory
 		}
-		days_remove = 100
 		complete_effect = {
 			log = "[GetDateText]: [Root.GetName]: Decision organize_large_scale_strikes"
 			add_to_variable = {
@@ -4121,12 +4120,6 @@ post_election_struggle = {
 				days = 100
 			}
 		}
-		remove_effect = {
-			add_to_variable = {
-				ind_influence_daily = -0.05
-			}
-			custom_effect_tooltip = ind_05
-		}	
 	}
 	
 	grant_concessions_to_the_british = {
@@ -4182,12 +4175,13 @@ post_election_struggle = {
 					ind_influence > 99.99
 				}
 			}
+			has_capitulated = no
 		}
 		cost = 0
 		ai_will_do = {
-			factor = 200
+			factor = 100
 			modifier = {
-				factor = 0.5
+				factor = 0.1
 				check_variable = {
 					ind_influence < 120
 				}
@@ -4196,7 +4190,7 @@ post_election_struggle = {
 		complete_effect = {
 			log = "[GetDateText]: [Root.GetName]: Decision declare_independence"
 			custom_effect_tooltip = english_departure
-			#hidden_effect = {
+			hidden_effect = {
 				set_temp_variable = {
 					neutrality_support = party_popularity@neutrality
 				}
@@ -4207,7 +4201,10 @@ post_election_struggle = {
 					limit = {
 						surrender_progress < 0.25
 					}
-					every_enemy_country = {
+					every_other_country = {
+						limit = {
+							has_war_with = RAJ
+						}
 						white_peace = RAJ
 					}
 				}
@@ -4260,8 +4257,29 @@ post_election_struggle = {
 								NOT = { state = 441 }
 							}
 						}
-						PAK = { 
-							transfer_state = PREV 
+						if = {
+							limit = {
+								NOT = { 
+									is_controlled_by = RAJ
+								}
+							}
+							PAK = {
+								set_state_owner = PREV
+							}
+							random_country = {
+								limit = {
+									controls_state = PREV
+								}
+								PAK = {
+									set_variable = { pak_war_enemy = PREV }
+								}
+							}
+							set_global_flag = PAK_STATES_OCCUPIED
+						}
+						else = {
+							PAK = { 
+								transfer_state = PREV 
+							}
 						}
 						remove_core_of = RAJ
 
@@ -4306,8 +4324,29 @@ post_election_struggle = {
 						limit = {
 							is_core_of = BRM
 						}
-						BRM = { 
-							transfer_state = PREV 
+						if = {
+							limit = {
+								NOT = { 
+									is_controlled_by = RAJ
+								}
+							}
+							random_country = {
+								limit = {
+									controls_state = PREV
+								}
+								BRM = {
+									set_variable = { brm_war_enemy = PREV }
+								}
+							}
+							BRM = {
+								set_state_owner = PREV
+							}
+							set_global_flag = BRM_STATES_OCCUPIED
+						}
+						else = {
+							BRM = { 
+								transfer_state = PREV 
+							}
 						}
 					}
 					BRM = {
@@ -4315,6 +4354,28 @@ post_election_struggle = {
 					}
 					ENG = {
 						give_guarantee = BRM
+					}
+				}
+				if = {
+					limit = {
+						has_global_flag = PAK_STATES_OCCUPIED
+					}
+					var:pak.pak_war_enemy = {
+						declare_war_on = {
+							target = PAK
+							type = annex_everything
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_global_flag = BRM_STATES_OCCUPIED
+					}
+					var:brm.brm_war_enemy = {
+						declare_war_on = {
+							target = BRM
+							type = annex_everything
+						}
 					}
 				}
 				if = {
@@ -4349,7 +4410,10 @@ post_election_struggle = {
 								target = BHU
 							}
 							BHU = {
-								every_enemy_country = {
+								every_other_country = {
+									limit = {
+										has_war_with = BHU
+									}
 									white_peace = PREV
 								}
 							}
@@ -4368,7 +4432,10 @@ post_election_struggle = {
 								target = NEP
 							}
 							NEP = {
-								every_enemy_country = {
+								every_other_country = {
+									limit = {
+										has_war_with = NEP
+									}
 									white_peace = PREV
 								}
 							}
@@ -4436,12 +4503,12 @@ post_election_struggle = {
 									value = 200
 								}
 							}
-							add_to_faction = RAJ
 							add_ai_strategy = {
 								type = alliance
 								id = RAJ
 								value = 200
 							}
+							add_to_faction = RAJ
 						}
 						if = {
 							limit = {
@@ -4470,6 +4537,16 @@ post_election_struggle = {
 								complete_national_focus = PAK_Birth_of_a_Nation
 								complete_national_focus = PAK_General_Election
 								complete_national_focus = PAK_Multipartism
+								set_party_name = {
+									ideology = democratic 
+									name = "ML"
+									long_name = "Muslim League"
+								}
+								set_party_name = {
+									ideology = neutrality 
+									name = "MA"
+									long_name = "Military Administration"
+								}
 							}
 							if = {
 								limit = {
@@ -4482,27 +4559,27 @@ post_election_struggle = {
 								PAK = { 
 									set_cosmetic_tag = PAK_Dominion
 								}
-								else = {
-									set_autonomy = {
-										target = PAK
-										autonomy_state = autonomy_free
-									}
-									add_to_faction = PAK
+							}
+							else = {
+								set_autonomy = {
+									target = PAK
+									autonomy_state = autonomy_free
+								}
+								add_to_faction = PAK
+								add_ai_strategy = {
+									type = alliance
+									id = PAK
+									value = 200
+								}
+								PAK = { 
+									set_cosmetic_tag = PAK_Dominion
 									add_ai_strategy = {
 										type = alliance
-										id = PAK
+										id = ENG
 										value = 200
 									}
-									PAK = { 
-										set_cosmetic_tag = PAK_Dominion
-										add_ai_strategy = {
-											type = alliance
-											id = ENG
-											value = 200
-										}
-									}
-									give_guarantee = PAK
 								}
+								give_guarantee = PAK
 							}
 						}
 						if = {
@@ -4520,27 +4597,27 @@ post_election_struggle = {
 								BRM = { 
 									set_cosmetic_tag = BRM_Dominion
 								}
-								else = {
-									set_autonomy = {
-										target = BRM
-										autonomy_state = autonomy_free
-									}
-									add_to_faction = BRM
+							}
+							else = {
+								set_autonomy = {
+									target = BRM
+									autonomy_state = autonomy_free
+								}
+								add_to_faction = BRM
+								add_ai_strategy = {
+									type = alliance
+									id = BRM
+									value = 200
+								}
+								BRM = { 
+									set_cosmetic_tag = BRM_Dominion
 									add_ai_strategy = {
 										type = alliance
-										id = BRM
+										id = ENG
 										value = 200
 									}
-									BRM = { 
-										set_cosmetic_tag = BRM_Dominion
-										add_ai_strategy = {
-											type = alliance
-											id = ENG
-											value = 200
-										}
-									}
-									give_guarantee = BRM
 								}
+								give_guarantee = BRM
 							}
 						}
 					}
@@ -4550,7 +4627,7 @@ post_election_struggle = {
 					ideology = neutrality
 					popularity = var:neutrality_support
 				}
-			#}
+			}
 		}
 	}
 }
