@@ -6491,8 +6491,8 @@ country_event = {
 			add_state_core = 62
 			add_state_core = 64
 			add_state_core = 65
-			add_state_core = 66
-			add_state_core = 67
+			#add_state_core = 66
+			#add_state_core = 67
 		}
 		POL = {
 			if = {
@@ -6592,6 +6592,7 @@ country_event = {
 
 	option ={
 		name = germany.121.a
+		set_global_flag = r56_yalta_fix_after_check
 		if = {
 			limit = {
 				country_exists = POL
@@ -7433,71 +7434,10 @@ country_event = { #Endsieg
 			has_completed_focus = GER_total_war
 			has_war = yes
 			surrender_progress > 0.25
+			casualties > 1100000
 			NOT = {
 				has_government = democratic
 			}
-			NOT = { #Checks if a front has been broken and Germany wasn't cheesed to 25% surrender progress
-				OR = {
-					AND = { #Cannon Endieg, fallback if below condations didn't trigger
-						has_full_control_of_state = 64
-						has_full_control_of_state = 62
-						has_full_control_of_state = 65
-					}
-					AND = { #Eastern Front breakthough check #1
-						has_full_control_of_state = 763
-						has_full_control_of_state = 5
-						has_full_control_of_state = 85
-					}
-					AND = { #Eastern Front breakthough check #2
-						has_full_control_of_state = 68
-						has_full_control_of_state = 66
-						has_full_control_of_state = 67
-					}
-					AND = { #Eastern Front breakthough check #3
-						has_full_control_of_state = 63
-						has_full_control_of_state = 64
-						has_full_control_of_state = 62
-					}
-					AND = { #Southern Front breakthough check #1
-						has_full_control_of_state = 153
-						has_full_control_of_state = 152
-						has_full_control_of_state = 52
-					}
-					AND = { #Southern Front breakthough check #2
-						has_full_control_of_state = 69
-						has_full_control_of_state = 53
-						has_full_control_of_state = 9
-					}
-					AND = { #Southern Front breakthough check #3
-						has_full_control_of_state = 50
-						has_full_control_of_state = 151
-						has_full_control_of_state = 3
-						has_full_control_of_state = 809
-					}
-					AND = { #Western Front breakthough check #1
-						has_full_control_of_state = 809
-						has_full_control_of_state = 42
-						has_full_control_of_state = 51
-					}
-					AND = { #Western Front breakthough check #2
-						has_full_control_of_state = 809
-						has_full_control_of_state = 828
-						has_full_control_of_state = 807
-						has_full_control_of_state = 57
-					}
-					AND = { #Western Front breakthough check #3
-						has_full_control_of_state = 56
-						has_full_control_of_state = 57
-						has_full_control_of_state = 36
-					}
-					AND = { #Somehow you got broken in the North LMAO
-						has_full_control_of_state = 58
-						has_full_control_of_state = 61
-						has_full_control_of_state = 59
-					}
-				}
-			}
-			
 		}
 		OR = {
 			any_enemy_country = {
@@ -7510,17 +7450,15 @@ country_event = { #Endsieg
 					}
 				}
 			}
-			ROOT = {
-				has_global_flag = had_yalta_conference
-			}
+			has_global_flag = had_yalta_conference
 			GER = { #just incase the above condations don't fire and Germany is losing hard
-				surrender_progress > 0.65
-				has_defensive_war = yes
+				surrender_progress > 0.40
+				casualties > 2000000
 			}
 		}
 	}
 
-	mean_time_to_happen = { days = 7 }
+	mean_time_to_happen = { days = 3 }
 
 	option = { #Final Victory
 		name = r56.ger.1.a
@@ -7568,7 +7506,7 @@ country_event = { #Endsieg
 				limit = {
 					ROOT = {
 							has_full_control_of_state = 64
-							casualties > 1100000
+							casualties > 2100000
 						}
 					}
 					load_oob = r56_GER_endsieg_units_1
@@ -7670,4 +7608,291 @@ country_event = { #Pulled back from endsieg
 			}
 		}
 	}	
-}		
+}
+
+country_event = { #Resolves post Yalta border gore, mostly caused by the Soviets
+	id = r56.ger.3
+	title = r56.ger.3.t
+	desc = r56.ger.3.d
+	picture = GFX_report_event_generic_sign_treaty2
+
+	fire_only_once = yes
+
+	hidden = yes
+
+	trigger = {
+		#Fire when after Yalta has been resolved. 
+		original_tag = SOV
+		SOV = {
+			is_ai = yes
+		}
+		has_global_flag = had_yalta_conference
+		has_global_flag = r56_yalta_fix_after_check
+		AND = {
+			country_exists = SOV
+			country_exists = USA
+		}
+		OR = {
+			country_exists = WGR
+			country_exists = DDR
+		}
+	}
+
+	option = { 
+		name = r56.ger.3.a
+		if = { #Puppets Poland
+			limit = {
+				POL = {
+					OR = {
+						has_capitulated = yes
+						exists = no
+					}
+				}
+			}
+			SOV = {
+				puppet = POL
+			}
+			every_state = { 
+				limit = {
+					is_core_of = POL
+					is_owned_and_controlled_by = SOV
+					NOT = {
+						OR = {
+							is_core_of = SOV
+							is_core_of = UKR
+							is_core_of = LIT
+							is_core_of = BLR
+						}
+					}
+				}
+				POL = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts CZE 
+			limit = {
+				CZE = {
+					is_puppet_of = SOV
+				}
+				SLO = {
+					is_puppet_of = SOV
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = CZE
+					OR = {
+						is_owned_and_controlled_by = SLO
+						is_owned_and_controlled_by = SOV
+					}
+					NOT = {
+						OR = {
+							is_core_of = SOV
+							is_core_of = RUT
+						}
+					}
+				}
+				CZE = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts CZE 
+			limit = {
+				CZE = {
+					is_puppet_of = SOV
+				}
+				HUN = {
+					is_puppet_of = SOV
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = CZE
+					is_owned_and_controlled_by = HUN
+					NOT = {
+						OR = {
+							is_core_of = ROM
+							is_core_of = RUT
+						}
+					}
+				}
+				CZE = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts ROM
+			limit = {
+				ROM = {
+					is_puppet_of = SOV
+				}
+				HUN = {
+					is_puppet_of = SOV
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = ROM
+					is_owned_and_controlled_by = HUN
+				}
+				ROM = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts ROM
+			limit = {
+				ROM = {
+					is_puppet_of = SOV
+				}
+				SZK = {
+					is_puppet_of = SOV
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = ROM
+					is_owned_and_controlled_by = SZK
+				}
+				ROM = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts ROM
+			limit = {
+				ROM = {
+					is_puppet_of = SOV
+				}
+				TRA = {
+					is_puppet_of = SOV
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = ROM
+					is_owned_and_controlled_by = SZK
+				}
+				TRA = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts AUS, must go first
+			limit = {
+				AUS = {
+					has_government = democratic
+					is_ai = yes
+					OR = {
+						is_subject = no
+						is_puppet_of = USA
+						is_puppet_of = ENG
+					}
+				}
+				ITA = {
+					has_government = democratic
+					is_ai = yes
+					OR = {
+						is_subject = no
+						is_puppet_of = USA
+						is_puppet_of = ENG
+					}
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = AUS
+					is_owned_and_controlled_by = ITA
+				}
+				AUS = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts ITA
+			limit = {
+				ITA = {
+					has_government = democratic
+					is_ai = yes
+					OR = {
+						is_subject = no
+						is_puppet_of = USA
+						is_puppet_of = ENG
+					}
+				}
+				AUS = {
+					has_government = democratic
+					is_ai = yes
+					OR = {
+						is_subject = no
+						is_puppet_of = USA
+						is_puppet_of = ENG
+					}
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = ITA
+					is_owned_and_controlled_by = AUS
+				}
+				ITA = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts FRA
+			limit = {
+				FRA = {
+					has_government = democratic
+					is_subject = no
+				}
+				OCC = {
+					has_government = democratic
+					is_ai = yes
+					OR = {
+						is_subject = no
+						is_puppet_of = USA
+						is_puppet_of = ENG
+					}
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = FRA
+					is_owned_and_controlled_by = OCC
+				}
+				FRA = {
+					transfer_state = PREV
+				}
+			}
+		}
+		if = { #adjusts FRA
+			limit = {
+				FRA = {
+					has_government = democratic
+					is_subject = no
+				}
+				BRI = {
+					has_government = democratic
+					is_ai = yes
+					OR = {
+						is_subject = no
+						is_puppet_of = USA
+						is_puppet_of = ENG
+					}
+				}
+			}
+			every_state = { 
+				limit = {
+					is_core_of = FRA
+					is_owned_and_controlled_by = BRI
+				}
+				FRA = {
+					transfer_state = PREV
+				}
+			}
+		}	
+	}
+}
