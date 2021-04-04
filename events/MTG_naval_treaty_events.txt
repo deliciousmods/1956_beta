@@ -1,0 +1,329 @@
+﻿add_namespace = MTG_naval_treaty
+
+# Country invited to join naval treaty
+country_event = {
+	id = MTG_naval_treaty.1
+	title = MTG_naval_treaty.1.t
+	desc = MTG_naval_treaty.1.desc
+	picture = GFX_report_event_usa_heavy_cruiser
+
+	is_triggered_only = yes
+
+	option = { #accept
+		name = MTG_naval_treaty.1.a 
+		ai_chance = {
+			factor = 70
+			modifier = {
+				has_government = democratic
+				factor = 5
+			}
+			modifier = {
+				has_government = fascism
+				factor = 0.25
+			}
+		}
+		add_ideas = MTG_naval_treaty_adherent
+		modify_global_flag = {
+			flag = MTG_naval_treaty_signatories
+			value = 1
+		}
+		every_other_country = {
+			limit = {
+				has_naval_treaty_trigger = yes
+			}
+			country_event = { id = MTG_naval_treaty.2 days = 3 }
+			add_ai_strategy = {
+				type = protect
+				id = PREV
+				value = 100
+			}
+		}
+	}
+	option = { #refuse
+		name = MTG_naval_treaty.1.b 
+		ai_chance = {
+			factor = 30
+		}
+		set_country_flag = MTG_refused_naval_treaty
+		every_other_country = {
+			limit = {
+				has_naval_treaty_trigger = yes
+			}
+			add_opinion_modifier = {
+				target = PREV
+				modifier = refused_naval_treaty
+			}
+			country_event = { id = MTG_naval_treaty.3 days = 3 }
+			add_ai_strategy = {
+				type = contain
+				id = PREV
+				value = 100
+			}
+		}
+	}
+}
+#country accepts naval treaty
+country_event = {
+	id = MTG_naval_treaty.2
+	title = MTG_naval_treaty.2.t
+	desc = MTG_naval_treaty.2.desc
+	picture = GFX_report_event_naval_treaty
+
+	is_triggered_only = yes
+
+	option = { #great
+		name = MTG_naval_treaty.2.a 
+		effect_tooltip = {
+			FROM = {
+				add_ideas = MTG_naval_treaty_adherent
+			}
+		}
+	}
+}
+#country refuses naval treaty
+country_event = {
+	id = MTG_naval_treaty.3
+	title = MTG_naval_treaty.3.t
+	desc = MTG_naval_treaty.3.desc
+	picture = GFX_report_event_usa_heavy_cruiser
+
+	is_triggered_only = yes
+
+	option = { #bad end
+		name = MTG_naval_treaty.3.a 
+	}
+}
+#country is warned about the size of its fleet, can commit to disarmament
+country_event = {
+	id = MTG_naval_treaty.4
+	title = MTG_naval_treaty.4.t
+	desc = MTG_naval_treaty.4.desc
+	picture = GFX_report_event_usa_heavy_cruiser
+
+	is_triggered_only = yes
+
+	option = { #disarmament
+		name = MTG_naval_treaty.4.a 
+		ai_chance = {
+			factor = 70
+		}
+		if = {
+			limit = {
+				NOT = { has_naval_treaty_trigger = yes }
+			}
+			activate_mission = MTG_treaty_reduction_mission
+			FROM = {
+				country_event = { id = MTG_naval_treaty.5 days = 3 }
+			}
+		}
+		else = {
+			activate_mission = MTG_treaty_reduction_signatory_mission
+			FROM = {
+				country_event = { id = MTG_naval_treaty.5 days = 3 }
+			}
+		}
+	}
+	option = {# no deals
+		name = MTG_naval_treaty.4.b 
+		ai_chance = {
+			factor = 30
+			modifier = {
+				has_government = democratic
+				factor = 0
+			}
+		}
+		if = {
+			limit = {
+				has_naval_treaty_trigger = yes
+			}
+			add_stability = -0.1
+			add_political_power = -150
+			remove_naval_treaty_effect = yes
+			every_other_country = {
+				limit = {
+					has_naval_treaty_trigger = yes
+				}
+				country_event = MTG_naval_treaty.7
+			}
+			if = {
+				limit = {
+					has_global_flag = {
+						flag = MTG_naval_treaty_signatories
+						value < 3
+					}
+				}
+				random_other_country = {
+					limit = {
+						has_naval_treaty_trigger = yes
+					}
+					remove_naval_treaty_effect = yes
+				}
+				hidden_effect = { news_event = mtg_news.60 }
+				else = {
+					modify_global_flag = {
+						flag = MTG_naval_treaty_signatories
+						value = -1
+					}
+				}
+			}
+			if = {
+				limit = {
+					not = {
+						any_other_country = {
+							OR = {
+								has_idea = MTG_naval_treaty_cheating_reduced
+								has_idea = MTG_naval_treaty_adherent_reduced
+							}
+						}
+					}
+				}
+				every_other_country = {
+					limit = {
+						OR = {
+							has_idea = MTG_naval_treaty_cheating
+							has_idea = MTG_naval_treaty_adherent
+						}
+					}
+					activate_mission = MTG_escalator_clause_invocation_mission
+					custom_effect_tooltip = MTG_escalator_clause_tt
+				}
+			}
+		}
+		FROM = {
+			country_event = { id = MTG_naval_treaty.6 days = 3 }
+			effect_tooltip = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = PREV
+				}
+			}
+		}	
+	}
+}
+#country accepts disarmament
+country_event = {
+	id = MTG_naval_treaty.5
+	title = MTG_naval_treaty.5.t
+	desc = MTG_naval_treaty.5.desc
+	picture = GFX_report_event_generic_naval_treaty
+
+	is_triggered_only = yes
+
+	option = { #great
+		name = MTG_naval_treaty.5.a 
+		effect_tooltip = {
+			FROM = {
+				activate_mission = MTG_treaty_reduction_mission
+			}
+		}
+	}
+}
+
+#country ignores warning
+country_event = {
+	id = MTG_naval_treaty.6
+	title = MTG_naval_treaty.6.t
+	desc = MTG_naval_treaty.6.desc
+	picture = GFX_report_event_usa_heavy_cruiser
+
+	is_triggered_only = yes
+
+	option = { #to war!
+		name = MTG_naval_treaty.6.a 
+		ai_chance = {
+			factor = 70
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+			modifier = {
+				has_war_support < 0.2
+				factor = 0.25
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = FROM
+		}
+		
+	}
+	option = {# fine
+		name = MTG_naval_treaty.6.b 
+		ai_chance = {
+			factor = 30
+			modifier = {
+				has_completed_focus = ENG_enforce_the_naval_treaties
+				factor = 0
+			}
+		}
+	}
+}
+#country leaves treaty, notification for other countries
+country_event = {
+	id = MTG_naval_treaty.7
+	title = MTG_naval_treaty.7.t
+	desc = MTG_naval_treaty.7.desc
+	picture = GFX_report_event_ast_navy
+
+	is_triggered_only = yes
+
+	option = { #great
+		name = MTG_naval_treaty.7.a 
+		effect_tooltip = {
+			FROM = {
+				remove_naval_treaty_effect = yes
+			}
+		}
+	}
+}
+
+#hidden event to remove treaty if two majors are at war
+country_event = {
+	id = MTG_naval_treaty.10
+	
+	
+	hidden = yes
+	mean_time_to_happen = { days = 2 }
+	fire_only_once = yes
+	trigger = {
+		any_country = {
+			has_naval_treaty_trigger = yes
+			has_war = yes
+			any_enemy_country = {
+				is_major = yes
+				NOT = { tag = event_target:WTT_current_china_leader} #special exception
+			}
+		}
+	}
+	immediate = {
+		every_country = {
+			limit = {
+				has_naval_treaty_trigger = yes
+				has_war = no
+			}
+			country_event = MTG_naval_treaty.11
+		}
+		every_country = {
+			limit = {
+				has_naval_treaty_trigger = yes
+			}
+			remove_naval_treaty_effect = yes
+		}
+	}
+	option = { #great
+	}
+}
+
+#notification event that the naval treaty is null and void due to war being declared
+country_event = {
+	id = MTG_naval_treaty.11
+	title = MTG_naval_treaty.11.t
+	desc = MTG_naval_treaty.11.desc
+	picture = GFX_report_event_ast_navy
+	
+	is_triggered_only = yes
+	
+	option = { #great
+		name = MTG_naval_treaty.11.a 
+	}
+}
