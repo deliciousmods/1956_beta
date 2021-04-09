@@ -292,6 +292,14 @@ NOperatives = {
 		0.1, -- DiplomaticPressure
 		2.0, -- Propaganda
 	},
+
+	BOOST_IDEOLOGY_NATIONAL_COVERAGE_FACTOR = 1.0,				-- used to compute the drift factor as follow: BASE * SUB_NETWORK_NC * BOOST_IDEOLOGY_DEFENSE_FACTOR
+	BOOST_IDEOLOGY_MAX_DRIFT_BY_OPERATIVE = 0.3,				-- the maximum drift an operative can cause, a negative value means no maximum
+	BOOST_IDEOLOGY_DRIFT_STACKING_FACTOR = 0.75,				-- multiplied to the drift of an operative for each operative after the first one, with the greatest drift. So if we have the following drift values [ 0.1, 0.3, 0.2 ], the factor is applied twice for the lowest value and once for the 2nd lowest one as such : [ 0.3, 0.2 * D, 0.1 * D * D ] and then the result is summed up to give the final drift value.
+	BOOST_IDEOLOGY_DEFENSE_FACTOR = 0.2,					-- multiplied to the target's defense to get the amount of drift to remove from each operative's drift
+	BOOST_IDEOLOGY_DAILY_XP_GAIN = 0.274,
+	OPERATIVE_BASE_BOOST_IDEOLOGY = 0.15,
+
 	
 	COUNTER_INTELLIGENCE_FOREIGN_AGENT_FACTOR = 1.1,			-- Multiplier to the counter intelligence provided by foreign (ally) operatives
 
