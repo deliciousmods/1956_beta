@@ -307,7 +307,7 @@ NOperatives = {
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_OWN_COUNTRY_FOR_XP = 3,			-- An integer on how likely an operative operating in his own country is to get selected for the xp reward on enemy operative capture
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
 
-	OPERATION_COMPLETION_XP = 75			-- XP given on completion of a mission. Was 18!
+	OPERATION_COMPLETION_XP = 75,			-- XP given on completion of a mission. Was 18!
 	DIPLOMATIC_PRESSURE_DAILY_XP_GAIN = 0.155, 			-- Daily XP given doing Diplomatic Pressure mission was 0.137
 	COUNTER_INTELLIGENCE_DAILY_XP_GAIN = 0.115, 		-- Daily XP given doing counter intelligence mission was 0.112
 	QUIET_INTEL_NETWORK_DAILY_XP_GAIN = 0.1,  		-- Daily XP given doing quiet intel network mission was 0!
