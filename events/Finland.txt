@@ -293,7 +293,7 @@ country_event = {
 	}
 }
 
-#Surrender when Soviet has taken too much land
+#Surrender when Soviet have taken too much land
 country_event = {
 	id = finland.7
 	title = finland.7.t
@@ -373,7 +373,7 @@ country_event = {
 		white_peace = FIN
 		transfer_state = 146
 		transfer_state = 147
-		FIN = {set_country_flag = winterwarlost}
+		FIN = { set_country_flag = winterwarlost }
 		FIN = { add_ideas = fin_revenge }
 		if = {
 			limit = {
@@ -460,7 +460,7 @@ country_event = {
 	}
 }
 
-#Declare War on the USSR
+#Declare War on the USSR, again
 country_event = {
 		id = finland.11
 		title = finland.11.t
@@ -471,23 +471,44 @@ country_event = {
 	trigger = {
 		tag = FIN
 		FIN = { has_completed_focus = fin_gerequipmentfoc }
-		GER  = { has_offensive_war_with = SOV }
+		GER  = { 
+			has_offensive_war_with = SOV 
+			exists = yes
+		}
 	}
 		
 	option = {
 		name = finland.11.a
-		create_wargoal = {
-			type = take_state_focus
-			target = SOV
-			generator = { 85 }
+		ai_chance = {
+			factor = 80
 		}
-		news_event = fin_news.3
+		if = {
+			limit = {
+				ROOT = {
+					is_in_faction = NO
+				}
+				GER = {
+					is_faction_leader = yes
+				}
+			}
+			GER = {
+				country_event = { id = finland.15 hours = 6 }
+			}
+		}
+		hidden_effect = {
+			#news_event = fin_news.3
+		}
 	}
 	
-		option = {
+	option = {
 		name = finland.11.b
+		ai_chance = {
+			factor = 20
+		}
 		GER = {
-			add_opinion_modifier = { target = FIN modifier = FIN_betrayal }
+			add_opinion_modifier = { 
+				target = FIN modifier = FIN_betrayal 
+			}
 		}
 	}
 }
@@ -503,18 +524,32 @@ country_event = {
 		is_triggered_only = yes
 		
 		#Say Yes
-		option = {
+	option = {
 			name = finland.12.a
-			ai_chance = {
+		ai_chance = {
 			base = 9
+		}
+		effect_tooltip = {
+			SOV = {
+				transfer_state = 722
 			}
-		white_peace = FIN
-		transfer_state = 722
-		FIN = { 
-		country_event= { id = finland.14 } 
-		remove_ideas = fin_revenge
+			if = {
+				limit = {
+					FIN = {
+						is_in_faction_with = GER
+					}
+				}
+				FIN = {
+					leave_faction = yes
+				}
+			}
 		}
+		hidden_effect = {
+			FIN = { 
+				country_event= { id = finland.14 } 
+			}
 		}
+	}
 		
 		#Say No
 		option = {
@@ -540,7 +575,8 @@ country_event = {
 		is_triggered_only = yes
 		
 		option = { 
-			name = finland.13.a }
+			name = finland.13.a 
+		}
 }
 
 #Soviets Say Yes
@@ -553,7 +589,75 @@ country_event = {
 		is_triggered_only = yes
 		
 		option = {
-			name = finland.14.a }
+			name = finland.14.a 
+			if = {
+				limit = {
+					ROOT = {
+						controls_state = 722
+					}
+				}
+				SOV = {
+					transfer_state = 722
+				}
+			}
+			ROOT = {
+				remove_ideas = fin_revenge
+			}
+			every_country = {	
+				if = {
+					limit = { 
+						AND = {
+								has_war_with = FIN
+								is_in_faction_with = SOV
+							}	
+						}
+					white_peace = FIN
+				}
+			}
+			if = {
+				limit = {
+					ENG = {
+						has_government = democratic
+						is_faction_leader = yes
+						has_capitulated = no
+						has_war_with = ROOT
+						has_war_with = GER
+					}
+										
+				}
+				every_country = {	
+					if = {
+						limit = { 
+							AND = {
+									has_war_with = FIN
+									is_in_faction_with = ENG
+								}	
+							}
+						white_peace = FIN
+					}
+				}
+			}
+			if = {
+				limit = {
+					ENG = {
+						has_government = democratic
+						is_faction_leader = yes
+						has_capitulated = no
+						has_war_with = GER
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = ENG
+							has_war_with = ROOT
+						}
+					}					
+				}
+				ENG = {
+					country_event = generic.2
+				}
+			}
+		}
 }
 
 # Finland Wants to join Axis
@@ -582,7 +686,7 @@ country_event = {
 	}
 	
 	option = {
-		name = finland.15.b
+		name = generic.2.f
 		ai_chance = { factor = 0 }
 		FROM = { 
 			add_opinion_modifier = {
@@ -604,9 +708,24 @@ country_event = {
 		is_triggered_only = yes
 		
 		option = {
-			name = finland.16.a }
-
-
+			name = finland.16.a 
+			if = {
+				limit = {
+					GER = {
+						has_offensive_war_with = SOV 
+						has_idea = GER_barbarossa
+					}
+				}
+				ROOT = {
+					add_ai_strategy = {
+						type = declare_war
+						id = SOV
+						value = 500
+					}
+					add_timed_idea = { idea = GER_barbarossa days = 30 } 
+				}
+			}
+		}
 }
 
 #Germany declines
@@ -619,7 +738,8 @@ country_event = {
 		is_triggered_only = yes
 		
 		option = {
-			name = finland.17.a }
+			name = finland.17.a 
+		}
 }
 
 #X country NDA Invite
@@ -2402,3 +2522,69 @@ country_event = {
 		}
 
 	}
+
+
+
+	#Surrender when Soviet have taken too much land
+country_event = {
+	id = finland.83
+	title = finland.7.t
+	desc = finland.7.d
+	picture = GFX_report_event_soviet_tanks_snow
+	
+	trigger = {
+		tag = FIN
+		has_offensive_war_with = SOV
+		surrender_progress > 0.20
+		has_civil_war = no
+		has_country_flag = winterwarlost
+		has_completed_focus = fin_gerequipmentfoc
+		SOV = {
+			has_war_with = GER
+		}
+	}
+
+	mean_time_to_happen = { days = 3 }
+
+	fire_only_once = yes
+
+	#Surrender and offer territory
+	option = {
+		name = finland.7.a
+		ai_chance = {
+			base = 8
+		}
+		SOV = {
+			country_event = { id = finland.12 }
+		}
+		effect_tooltip = {
+			SOV = { 
+				white_peace = {
+					tag = FIN 
+					message = FIN_agree_peace 
+				} 
+			}
+			transfer_state = 722
+			if = {
+				limit = {
+					722 = {
+						is_claimed_by = SOV
+					}
+				}
+				SOV = { remove_state_claim = 722 }
+			}
+		}
+	}
+
+	#Never give up!
+	option = {
+		name = finland.7.b
+		ai_chance = {
+			base = 2
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+	}
+}
