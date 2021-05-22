@@ -1,0 +1,637 @@
+operations = {
+
+	#first border incident
+	POL_Border_War_For_Silesia = {
+		icon = border_war
+		allowed = {
+			original_tag = POL
+		}
+
+		available = {
+			hidden_trigger = {
+				has_dlc = "Waking the Tiger"
+			}
+			GER = { has_civil_war = yes }
+			NOT = { has_war_with = GER }
+			NOT = {	is_in_faction_with = GER }
+			87 = {
+				controller = { original_tag = POL }
+			}
+			67 = {
+				controller = { 
+					original_tag = GER
+					has_army_manpower = { size < 300001 }
+				}
+			}
+		}
+
+		visible = {
+			OR = {
+				has_completed_focus = POL_Polish_Revanchism
+				has_completed_focus = POL_The_Endecja_Movement
+			}
+			GER = { has_civil_war = yes }
+			is_subject = no
+			87 = {
+				controller = { original_tag = POL }
+			}
+		}
+
+		highlight_states = {
+			AND = {
+				state = 87
+				state = 67
+			}
+		}
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 600
+			modifier = {
+				factor = 0
+				OR = {
+					has_war_with = SOV
+					has_war_with = CZE
+					has_war_with = HUN
+					has_war_with = ROM
+				}
+			}
+		}
+		cost = 15
+		days_remove = 30
+		war_with_on_remove = D01
+		complete_effect = {
+			87 = {
+				save_event_target_as = POL_GER_attacker_silesia
+				set_state_flag = border_incident_active
+			}
+			67 = {
+				save_event_target_as = POL_GER_defender_silesia
+				set_state_flag = border_incident_active
+			}
+			67 = {
+				controller = {
+					set_country_flag = POL_Border_War_For_Silesia
+					country_event = { id = poland_border_conflict.1 days = 1 }
+					activate_targeted_decision = { target = POL decision = POL_border_conflict_warning_GER }
+				}
+			}
+			hidden_effect = {
+				if = {
+					limit = { NOT = { has_global_flag = POL_Is_Intervening_in_German_Civil_War } }
+					GER = { news_event = { id = poland.164 } }
+				}
+			}
+			set_global_flag = POL_Is_Intervening_in_German_Civil_War
+		}
+		remove_effect = {
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				POL = {
+					activate_targeted_decision = { target = PREV decision = POL_border_incident_forgotten }
+					activate_targeted_decision = { target = PREV decision = POL_escalate_incident_to_border_conflict_GER }
+				}
+			}
+		}
+	}
+
+	#Mission for defender warning that a conflict with FROM is coming
+	POL_border_conflict_warning_GER = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		war_with_target_on_timeout = yes
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			custom_effect_tooltip = escalation_possible_tooltip_for_defender
+			custom_effect_tooltip = effects_if_border_conflict_is_lost
+			effect_tooltip = {
+				POL = {
+					transfer_state = 67
+				}
+			}
+			hidden_effect = {
+				remove_targeted_decision = { target = POL decision = POL_border_conflict_warning_GER }
+				if = {
+					limit = { 67 = { has_border_war = no } }
+					activate_targeted_decision = { target = POL decision = POL_border_conflict_escalation_warning_GER }
+				}
+			}
+		}
+	}
+	
+	#Mission for defender warning FROM can escalate to war at any point is coming
+	POL_border_conflict_escalation_warning_GER = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			#var:ROOT.defender_state_vs_@FROM = {
+			#	has_ROOT_at_least_1_div_in_current_state_scope = yes
+			#}
+			hidden_trigger = { always = no }
+		}
+		
+		visible = {
+			67 = { has_border_war = no }
+		}
+
+		highlight_states = {
+			AND = {
+				state = 87
+				state = 67
+			}
+		}
+
+		war_with_target_on_timeout = yes
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+
+		timeout_effect = {
+			custom_effect_tooltip = from_cannot_escalate
+			custom_effect_tooltip = effects_if_border_conflict_is_lost
+			effect_tooltip = {
+				POL = {
+					transfer_state = 67
+				}
+			}
+		}
+	}
+
+	#Mission for attacker to escalate or incident is forgotten
+	POL_border_incident_forgotten = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			#var:ROOT.defender_state_vs_@FROM = {
+			#	has_ROOT_at_least_1_div_in_current_state_scope = yes
+			#}
+			hidden_trigger = { always = no }
+		}
+
+		highlight_states = {
+			AND = {
+				state = 87
+				state = 67
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				POL = {
+					remove_targeted_decision = { target = PREV decision = POL_escalate_incident_to_border_conflict_GER }
+				}
+			}
+			add_political_power = -100
+			add_war_support = -0.1 #Shameful Display
+			hidden_effect = {
+				random_country =  {
+					limit = { 
+						original_tag = GER
+						has_country_flag = POL_Border_War_For_Silesia
+					}
+					remove_targeted_decision = { target = POL decision = POL_border_conflict_escalation_warning_GER }
+					87 = {
+						clr_state_flag = border_incident_active
+					}
+					67 = {
+						clr_state_flag = border_incident_active
+					}
+				}
+			}
+		}
+	}
+
+	#Decision to escalate incident on border with GER to border conflict
+	POL_escalate_incident_to_border_conflict_GER = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			87 = {
+				OR = {
+					is_fully_controlled_by = ROOT
+					CONTROLLER = {
+						is_subject_of = ROOT
+					}
+					CONTROLLER = {
+						is_in_faction_with = ROOT
+					}
+				}
+			}
+			divisions_in_border_state = {
+				state = 87
+				border_state = 67
+				size > 0
+			}
+		}
+
+		highlight_states = {
+			AND = {
+				state = 87
+				state = 67			
+			}
+		}
+
+		ai_will_do = {
+			base = 10
+			modifier = { 
+				has_war = no
+				factor = 10
+			}
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				POL = {
+					remove_targeted_decision = { target = PREV decision = POL_border_incident_forgotten }
+				}
+			}
+			start_border_war = {
+				change_state_after_war = no
+				attacker = {
+					state = 87
+					num_provinces = 4
+					on_win = poland_border_conflict.2
+					on_lose = poland_border_conflict.3
+					on_cancel = poland_border_conflict.4
+				}
+				
+				defender = {
+					state = 67
+					num_provinces = 4
+					on_win = poland_border_conflict.3
+					on_lose = poland_border_conflict.2
+					on_cancel = poland_border_conflict.4
+				}
+			}
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				activate_targeted_decision = { target = POL decision = POL_border_conflict_escalate_conflict }
+				activate_targeted_decision = { target = POL decision = POL_border_conflict_time_until_cancelled }
+			}
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				POL = {
+					activate_targeted_decision = { target = PREV decision = POL_border_conflict_escalate_conflict }
+					activate_targeted_decision = { target = PREV decision = POL_border_conflict_time_until_cancelled }
+				}
+			}
+		}
+	}
+	
+	#Mission for attacker to win border war against FROM in X days
+	POL_border_conflict_time_until_cancelled = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			87 = { has_border_war = no }
+			67 = { has_border_war = no }
+		}
+		
+		highlight_states = {
+			AND = {
+				state = 67
+				state = 87
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 90
+		is_good = no
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+
+		}
+
+		timeout_effect = {
+			cancel_border_war = {
+				defender = 67
+				attacker = 87
+			}
+			hidden_effect = {
+				random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+					POL = {
+						remove_targeted_decision = { target = PREV decision = POL_border_conflict_escalate_conflict }
+					}
+				}
+				random_country =  {
+					limit = {
+						original_tag = GER
+						has_country_flag = POL_Border_War_For_Silesia
+					}
+					remove_targeted_decision = { target = POL decision = POL_border_conflict_escalate_conflict }
+				}
+			}
+		}
+	}
+
+	#Decision to escalate conflict further
+	POL_border_conflict_escalate_conflict = {
+
+		icon = decision_generic_ignite_civil_war
+
+		allowed = { always = no } #Activated from effect
+
+		visible = {
+			has_border_war_with = FROM
+		}
+
+		highlight_states = {
+			AND = {
+				state = 87
+				state = 67
+			}
+		}
+
+		cost = 200
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				set_border_war_data = {
+					attacker = 87
+					defender = 67
+					defender_modifier = 0.15
+					combat_width = 100
+				}
+			}
+			else = {
+				set_border_war_data = {
+					attacker = 87
+					defender = 67
+					attacker_modifier = 0.15
+					combat_width = 100
+				}
+			}
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				set_country_flag = {
+					flag = WTT_border_conflict_escalate_to_war_cooldown_@ROOT
+					days = 60
+					value = 1
+				}
+				remove_targeted_decision = { target = POL decision = POL_border_conflict_escalate_conflict }
+				hidden_effect = {
+					remove_targeted_decision = { target = POL decision = POL_border_conflict_escalation_warning_GER }
+				}
+			}
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				POL = {
+					remove_targeted_decision = { target = PREV decision = POL_border_conflict_escalate_conflict }
+				}
+			}
+			set_country_flag = {
+				flag = WTT_border_conflict_escalate_to_war_cooldown_@GER
+				days = 60
+				value = 1
+			}
+			custom_effect_tooltip = in_60_days
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				activate_targeted_decision = { target = POL decision = POL_border_conflict_escalate_to_war }
+			}
+		}
+	}
+
+	#Decision to escalate conflict further
+	POL_border_conflict_escalate_to_war = {
+
+		icon = decision_generic_ignite_civil_war
+
+		allowed = { always = no } #Activated from effect
+
+		visible = {
+			#NOT = { has_country_flag = WTT_border_conflict_escalate_to_war_cooldown_@FROM }
+			has_country_flag = POL_Border_War_For_Silesia
+		}
+
+		highlight_states = {
+			AND = {
+				state = 67
+				state = 87
+			}
+		}
+
+		cost = 150
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_remove = 15
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		war_with_target_on_remove = yes
+
+		complete_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				67 = { save_event_target_as = their_state }
+				87 = { save_event_target_as = our_state }
+			}
+			else = {
+				87 = { save_event_target_as = our_state }
+				67 = { save_event_target_as = their_state }
+			}
+			random_country =  {
+				limit = { 
+					original_tag = GER
+					has_country_flag = POL_Border_War_For_Silesia
+				}
+				country_event = { id = poland_border_conflict.5 }
+		 	}
+			hidden_effect = {
+				random_country =  {
+					limit = { 
+						original_tag = GER
+						has_country_flag = POL_Border_War_For_Silesia
+					}
+					POL = { remove_targeted_decision = { target = PREV decision = POL_border_conflict_escalate_to_war } }
+					
+					POL = { remove_targeted_decision = { target = PREV decision = Prussia_POL_Border_War_For_prussia } }
+					POL = { remove_targeted_decision = { target = PREV decision = Prussia_POL_border_incident_forgotten } }
+					POL = { remove_targeted_decision = { target = PREV decision = Prussia_POL_escalate_incident_to_border_conflict_GER } }
+					POL = { remove_targeted_decision = { target = PREV decision = Prussia_POL_border_conflict_time_until_cancelled } }
+					POL = { remove_targeted_decision = { target = PREV decision = Prussia_POL_border_conflict_escalate_conflict } }
+				}
+			}
+			hidden_effect = {
+				random_country =  {
+					limit = { 
+						original_tag = GER
+						has_country_flag = POL_Border_War_For_Silesia
+					}
+					remove_targeted_decision = { target = POL decision = Prussia_POL_border_conflict_warning_GER }
+					remove_targeted_decision = { target = POL decision = Prussia_POL_border_conflict_escalation_warning_GER }
+					remove_targeted_decision = { target = POL decision = Prussia_POL_border_conflict_time_until_cancelled }
+					remove_targeted_decision = { target = POL decision = Prussia_POL_border_conflict_escalate_conflict }
+					remove_targeted_decision = { target = POL decision = Prussia_POL_border_conflict_escalate_to_war }
+				}
+			}
+		}
+
+		remove_effect = {
+			cancel_border_war = {
+				dont_fire_events = yes
+				defender = 67
+				attacker = 87
+			}
+			declare_war_on = { target = POL type = annex_everything }
+			87 = {
+				clr_state_flag = border_incident_active
+			}
+			67 = {
+				clr_state_flag = border_incident_active
+			}
+		}
+	}
+
+	#Decision to back down from conflict
+	POL_border_conflict_back_out_of_conflict = {
+
+		allowed = { always = no } #Activated from effect
+
+		visible = {
+			has_border_war_with = FROM
+		}
+
+		highlight_states = {
+			OR = {
+				state = 87
+				state = 67
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				finalize_border_war = {
+					attacker_win = yes
+					attacker = 87
+					defender = 67
+				}
+			}
+			else = {
+				finalize_border_war = {
+					attacker = 87
+					defender = 67
+					defender_win = yes
+				}
+			}
+		}
+	}
+}

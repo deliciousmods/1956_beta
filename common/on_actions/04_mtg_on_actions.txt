@@ -1,0 +1,2733 @@
+on_actions = {
+	on_new_term_election = {
+		random_events = {
+			100 = mexico.18 # 1940 Mexican election
+		}
+	}
+	#Root is exile
+	#From is new host
+	#FromFrom is old host
+	on_host_changed_from_capitulation = {
+		effect = {
+			#Transfer exile leaders to new host
+			From.From = {
+				every_army_leader = {
+					limit = { is_exiled_leader_from = Root }
+					set_nationality = Root.From
+				}
+			}
+		}
+	}
+
+	#Root is exile
+	#From is old host
+	on_exile_government_reinstated = {
+		effect = {
+			From = {
+				every_army_leader = {
+					limit = { is_exiled_leader_from = Root }
+					set_nationality = Root
+				}
+			}
+			Root = {
+				every_army_leader = {
+					limit = { is_exiled_leader_from = Root }
+					remove_unit_leader_trait = exiled_leader
+					remove_exile_tag = yes
+				}
+			}
+		}
+	}
+
+	on_unit_leader_created = {
+		effect = {
+			if = {
+				limit = { is_exiled_leader = yes }
+				From.From = { save_event_target_as = exile_nation }
+				add_unit_leader_trait = exiled_leader
+				random_list = {
+					50 = {
+						add_random_trait = {
+							old_guard
+							brilliant_strategist
+							inflexible_strategist
+							war_hero
+							trait_cautious
+							trait_reckless
+							media_personality
+							harsh_leader
+							infantry_officer
+							cavalry_officer
+							armor_officer
+						}
+						add_random_trait = {
+							air_force_ties
+							artillerist
+							caring_leader
+							meticulous
+							decided_planner
+						}
+					}
+					50 = {
+						random_list = {
+							50 = {
+								add_random_trait = {
+									air_force_ties
+									artillerist
+									caring_leader
+									meticulous
+									decided_planner
+								}
+							}
+							50 = {
+								add_random_trait = {
+									old_guard
+									brilliant_strategist
+									inflexible_strategist
+									war_hero
+									trait_cautious
+									trait_reckless
+									media_personality
+									harsh_leader
+									infantry_officer
+									cavalry_officer
+									armor_officer
+								}
+							}
+						}
+					}
+				}
+
+				add_random_trait = {
+					organizer
+					panzer_leader
+					cavalry_leader
+					trait_engineer
+					infantry_leader
+					naval_invader						
+					commando
+					skilled_staffer
+					trickster					
+				}
+
+				unit_leader_event = { id = mtg_exile_leader_added.1 }
+			}
+		}
+	}
+
+	#ROOT is winner #FROM gets annexed - This will also fire on_annex
+	on_civil_war_end = {
+		effect = {
+			#End of British Fascist Civil War
+			if = {
+				limit = {
+					original_tag = ENG
+					has_government = fascism
+					has_completed_focus = ENG_organize_the_blackshirts
+				}
+				set_country_flag = { flag = won_british_civil_war value = 1 days = 365 }
+				country_event = { id = mtg_britain.34 }
+			}
+			#End of British Fascist Civil War - Democrats won
+			if = {
+				limit = {
+					original_tag = ENG
+					has_government = democratic
+					FROM = {
+						has_government = fascism
+						has_completed_focus = ENG_organize_the_blackshirts
+					}
+				}
+				delete_unit_template_and_units = { division_template = "Loyalist Brigade" }
+				load_focus_tree = { tree = british_focus keep_completed = no }
+				unlock_national_focus = ENG_steady_as_she_goes
+				unlock_national_focus = limited_rearmament_focus
+				unlock_national_focus = shadow_scheme_focus
+				unlock_national_focus = uk_industrial_focus
+				unlock_national_focus = royal_ordinance_focus
+				if = {
+					limit = {
+						amount_research_slots > 4
+					}
+					unlock_national_focus = uk_extra_tech_slot
+				}
+			}
+			# Give back ENG focus tree to Communist ENG if they win a civil war.
+			if = {
+				limit = {
+					original_tag = ENG
+					has_government = communism
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = ENG
+						has_government = communism
+					}
+				}
+				load_focus_tree = { tree = british_focus keep_completed = yes }
+			}
+			# Give back MEX focus tree to rebel MEX if they win a civil war.
+			if = {
+				limit = {
+					has_dlc = "Man the Guns"
+					has_global_flag = mex_mtg_focus_tree
+					original_tag = MEX
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = MEX
+					}
+				}
+				load_focus_tree = { tree = mexico_focus_tree keep_completed = yes }
+			}
+			# Give back USA focus tree to CSA if they win a civil war.
+			if = {
+				limit = {
+					original_tag = USA
+					has_government = democratic
+					FROM = {
+						original_tag = USA
+						OR = {
+							has_government = neutrality
+							has_government = fascism
+						}
+					}
+				}
+				drop_cosmetic_tag = yes # we are done here
+				set_country_flag = democratic_usa_won_civil_war
+			}
+			#End of British Communist Civil War
+			if = {
+				limit = {
+					original_tag = ENG
+					has_government = democratic
+					has_completed_focus = ENG_concessions_to_the_trade_unions
+				}
+				country_event = { id = mtg_britain.56 }
+			}
+			#End of Imperialist Loyalist civil war
+			if = {
+				limit = {
+					OR = {
+						original_tag = CAN
+						original_tag = SAF
+						original_tag = AST
+						original_tag = NZL
+					}
+					has_government = neutrality
+					ENG = { has_completed_focus = ENG_appeal_to_imperial_loyalists }
+					NOT = { is_subject_of = ENG }
+				}
+				ENG = { country_event = { id = mtg_britain.113 hours = 6 } }
+			}
+			if = {
+				limit = {
+					has_template = "Silver Legion"
+				}
+				delete_unit_template_and_units = { division_template = "Silver Legion" }
+			}
+			# Cleaning up anti-exploiter divisions
+			delete_unit_template_and_units = { division_template = "Anti-Exploit Punitive Brigade" }
+		}
+	}
+
+	#ROOT is winner #FROM gets annexed - This fires just before FROM gets annexed, meaning the country and everything it owns still exists. It will also fire on_annex and on_civil_war_end
+	on_civil_war_end_before_annexation = {
+		effect = {
+			#End of British Fascist Civil War - moving the fleet back to the Fascists because they won
+			if = {
+				limit = {
+					original_tag = ENG
+					has_government = fascism
+					has_completed_focus = ENG_organize_the_blackshirts
+				}
+				random_other_country = {
+					limit = {
+						original_tag = ENG
+						has_government = democratic
+					}
+					transfer_navy = { target = ENG }
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id = 983
+								has_id = 984
+								has_id = 985
+								has_id = 986
+								has_id = 987
+								has_id = 988
+								has_id = 989
+								has_id = 990
+								has_id = 991
+								has_id = 992
+							}
+						}
+						set_nationality = ENG
+					}
+				}
+			}
+		}
+	}
+
+	#FROM is war target
+	on_declare_war = {
+		effect = {
+			# In case of HOL being declared war on and still having Shell-shocked Spectator of the Great War, remove the spirit
+			if = {
+				limit = {
+					FROM = {
+						original_tag = HOL
+						OR = {
+							has_idea = HOL_shell_shocked_spectator_1
+							has_idea = HOL_shell_shocked_spectator_2
+							has_idea = HOL_shell_shocked_spectator_3
+							has_idea = HOL_shell_shocked_spectator_4
+							has_idea = HOL_shell_shocked_spectator_5
+						}
+					}
+				}
+				FROM = {
+					hidden_effect = {
+						remove_ideas = HOL_shell_shocked_spectator_1
+						remove_ideas = HOL_shell_shocked_spectator_2
+						remove_ideas = HOL_shell_shocked_spectator_3
+						remove_ideas = HOL_shell_shocked_spectator_4
+						remove_ideas = HOL_shell_shocked_spectator_5
+					}
+				}
+			}
+			# In case of HOL being declared war on and still having Aloof Neutrality, remove the spirit
+			if = {
+				limit = {
+					FROM = {
+						original_tag = HOL
+						has_idea = HOL_aloof_neutrality
+					}
+				}
+				FROM = {
+					hidden_effect = {
+						remove_ideas = HOL_aloof_neutrality
+					}
+				}
+			}
+			# In case of HOL being declared war on and having taken the "Share intelligence" decision, they get a temporary buff to defense and attack
+			if = {
+				limit = {
+					tag = FRA
+					NOT = { is_in_faction_with = ENG }
+					FROM = { has_country_flag = secret_staff_talks_british_intelligence }
+				}
+				hidden_effect = {
+					FROM = { add_timed_idea = { idea = HOL_shared_intelligence_eng_fra days = 180 } }
+				}
+			}
+			if = {
+				limit = {
+					tag = GER
+					NOT = { is_in_faction_with = ENG }
+					FROM = { has_country_flag = secret_staff_talks_british_intelligence }
+				}
+				hidden_effect = {
+					FROM = { add_timed_idea = { idea = HOL_shared_intelligence_eng_ger days = 180 } }
+				}
+			}
+			if = {
+				limit = {
+					tag = ENG
+					NOT = { is_in_faction_with = FRA }
+					FROM = { has_country_flag = secret_staff_talks_french_intelligence }
+				}
+				hidden_effect = {
+					FROM = { add_timed_idea = { idea = HOL_shared_intelligence_fra_eng days = 180 } }
+				}
+			}
+			if = {
+				limit = {
+					tag = GER
+					NOT = { is_in_faction_with = FRA }
+					FROM = { has_country_flag = secret_staff_talks_french_intelligence }
+				}
+				hidden_effect = {
+					FROM = { add_timed_idea = { idea = HOL_shared_intelligence_fra_ger days = 180 } }
+				}
+			}
+			if = {
+				limit = {
+					tag = FRA
+					NOT = { is_in_faction_with = GER }
+					FROM = { has_country_flag = secret_staff_talks_german_intelligence }
+				}
+				hidden_effect = {
+					FROM = { add_timed_idea = { idea = HOL_shared_intelligence_ger_fra days = 180 } }
+				}
+			}
+			if = {
+				limit = {
+					tag = ENG
+					NOT = { is_in_faction_with = GER }
+					FROM = { has_country_flag = secret_staff_talks_german_intelligence }
+				}
+				hidden_effect = {
+					FROM = { add_timed_idea = { idea = HOL_shared_intelligence_ger_eng days = 180 } }
+				}
+			}
+			# In case of GER/ENG/FRA going to war they get a minor buff if they shared intelligence
+			if = {
+				limit = {
+					tag = FRA
+					NOT = { is_in_faction_with = HOL }
+					FROM = { has_country_flag = secret_staff_talks_dutch_intelligence }
+				}
+				hidden_effect = { FROM = { add_timed_idea = { idea = HOL_shared_intelligence_hol_fra days = 180 } } }
+			}
+			if = {
+				limit = {
+					FROM = { tag = FRA }
+					FROM = { NOT = { is_in_faction_with = HOL } }
+					has_country_flag = secret_staff_talks_french_intelligence
+				}
+				hidden_effect = { add_timed_idea = { idea = HOL_shared_intelligence_hol_fra days = 180 } }
+			}
+			if = {
+				limit = {
+					tag = ENG
+					NOT = { is_in_faction_with = HOL }
+					FROM = { has_country_flag = secret_staff_talks_dutch_intelligence }
+				}
+				hidden_effect = { FROM = { add_timed_idea = { idea = HOL_shared_intelligence_hol_eng days = 180 } } }
+			}
+			if = {
+				limit = {
+					FROM = { tag = ENG }
+					FROM = { NOT = { is_in_faction_with = HOL } }
+					has_country_flag = secret_staff_talks_french_intelligence
+				}
+				hidden_effect = { add_timed_idea = { idea = HOL_shared_intelligence_hol_eng days = 180 } }
+			}
+			if = {
+				limit = {
+					tag = GER
+					NOT = { is_in_faction_with = HOL }
+					FROM = { has_country_flag = secret_staff_talks_dutch_intelligence }
+				}
+				hidden_effect = { FROM = { add_timed_idea = { idea = HOL_shared_intelligence_hol_ger days = 180 } } }
+			}
+			if = {
+				limit = {
+					FROM = { tag = GER }
+					FROM = { NOT = { is_in_faction_with = HOL } }
+					has_country_flag = secret_staff_talks_french_intelligence
+				}
+				hidden_effect = { add_timed_idea = { idea = HOL_shared_intelligence_hol_ger days = 180 } }
+			}
+			# In case of HOL being declared war on and having taken the "draw up shared staff plan" decision, they get a temporary buff to core defense and max entrenchment
+			if = {
+				limit = {
+					OR = {
+						tag = FRA
+						tag = GER
+					}
+					NOT = { is_in_faction_with = ENG }
+					FROM = { has_country_flag = secret_staff_talks_british_staff_plan }
+				}
+				hidden_effect = { FROM = { add_timed_idea = { idea = HOL_staff_plan_eng days = 180 } } }
+			}
+			if = {
+				limit = {
+					OR = {
+						tag = ENG
+						tag = GER
+					}
+					NOT = { is_in_faction_with = FRA }
+					FROM = { has_country_flag = secret_staff_talks_french_staff_plan }
+				}
+				hidden_effect = { FROM = { add_timed_idea = { idea = HOL_staff_plan_fra days = 180 } } }
+			}
+			if = {
+				limit = {
+					OR = {
+						tag = FRA
+						tag = ENG
+					}
+					NOT = { is_in_faction_with = GER }
+					FROM = { has_country_flag = secret_staff_talks_german_staff_plan }
+				}
+				hidden_effect = { FROM = { add_timed_idea = { idea = HOL_staff_plan_ger days = 180 } } }
+			}
+			# In case of Turkish civil war with field marshal Ataturk out on the field
+			if = {
+        	    limit = { 
+        	        original_tag = TUR
+        	        has_civil_war = yes
+        	        FROM = {
+        	            original_tag = TUR
+        	            has_civil_war = yes
+        	        }
+        	    }
+        	    hidden_effect = { 
+        	        if = { 
+        	            limit = {
+        	            	FROM = { has_government = neutrality } 
+        	            }
+        	            every_unit_leader = {
+        	                limit = { 
+        	                    has_id = 59
+        	                }
+        	                set_nationality = FROM
+        	            }
+        	        }
+        	    }
+        	}
+		}
+	}	
+
+	on_government_exiled = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = HOL
+					has_country_flag = HOL_prepared_evacuation_of_gold_reserves_flag
+				}
+				country_event = { id = mtg_netherlands.63 days = 1 }
+			}
+		}
+	}
+
+	#ROOT = nation being puppeted, FROM = overlord
+	on_puppet = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = SOV
+					has_government = communism
+					OR = {
+						has_country_leader = { name = "Joseph Stalin" }
+						has_country_leader = { name = "Kliment Voroshilov" }
+					}
+					is_puppet_of = MEX
+					MEX = {
+						OR = {
+							has_country_leader = { ruling_only = yes name = "Hernán Laborde" }
+							has_country_leader = { ruling_only = yes name = "Leon Trotsky" }
+							has_country_leader = { ruling_only = yes name = "Valentín Campa" }
+						}
+					}
+				}
+				SOV = { #TODO william check if works as intended or recreate Trotsky independently, also remove Trotsky from Mexico? What about puppet relationship? Look for another Soviet Trotskyist?
+					country_event = soviet.28
+				}
+			}
+			if = {
+				limit = {
+					original_tag = MEX
+					has_government = communism
+					OR = {
+						has_country_leader = { ruling_only = yes name = "Hernán Laborde" }
+						has_country_leader = { ruling_only = yes name = "Leon Trotsky" }
+						has_country_leader = { ruling_only = yes name = "Valentín Campa" }
+					}	
+					is_puppet_of = SOV
+					SOV = {
+						OR = {
+							has_country_leader = { name = "Joseph Stalin" } #change to subideology stalinism when supported
+							has_country_leader = { name = "Kliment Voroshilov" }
+						}
+					}
+				}
+				MEX = { 
+					create_country_leader = {
+						name = "Dionisio Encina"
+						desc = "POLITICS_DIONISIO_ENCINA_DESC"
+						picture = "GFX_portrait_mex_dionisio_encina"
+						expire = "1965.1.1"
+						ideology = stalinism
+						traits = {
+							staunch_stalinist
+						}
+					}				
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = ENG
+						NOT = { has_government = communism }
+					}
+					has_completed_focus = MEX_focus_nationalize_the_oil_fields
+				}
+				set_cosmetic_tag = ENG_MEX_dominion
+			}	
+		}
+	}
+
+	on_startup = {
+		effect = {
+			#Mexican oil concessions
+			if = {
+				limit = {
+					has_dlc = "Man the Guns"
+				}
+				MEX = {
+					give_resource_rights = { receiver = ENG state = 476 }
+					give_resource_rights = { receiver = ENG state = 477 }
+					give_resource_rights = { receiver = USA state = 479 }
+					give_resource_rights = { receiver = USA state = 480 }
+				}
+			}
+			# Game Rules - Decolonization
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = americas_colonization_status
+						option = AMERICAS_DECOLONIZED
+					}
+				}
+				696 = { add_core_of = CAN }
+				299 = { add_core_of = GYA }
+				720 = { add_core_of = GYA }
+				270 = { add_core_of = GYA }
+				ENG = {
+					release = BLZ
+					release = BAH
+					release = GYA
+					release = JAM
+					release = TRI
+					release = BAS
+					release = CAN
+				}
+				HOL = {
+					release = CRC
+					release = SUR
+				}
+				730 = { add_core_of = CAN }
+				FRA = {
+					release = GDL
+					release = CAY
+					release = CAN
+				}
+				USA = {
+					delete_unit = { state = 686 }
+					release = PUE
+				}
+				PAN = {
+					transfer_state = 685
+				}
+				ENG = {
+					set_autonomy = { target = CAN autonomy_state = autonomy_free }
+				}
+				CAN = {
+					abandon_colony_tag = yes
+					transfer_state = 332
+					transfer_state = 331
+				}
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = africa_colonization_status
+						option = AFRICA_DECOLONIZED
+					}
+				}
+				713 = { add_core_of = MAD }
+				FRA = {
+					delete_unit = { state = 272 }
+					delete_unit = { state = 539 }
+					delete_unit = { state = 543 }
+					delete_unit = { state = 461 }
+					delete_unit = { state = 458 }
+					delete_unit = { state = 459 }
+					release = MOR
+					release = ALG
+					release = TUN
+					release = DJI
+					release = MAD
+					release = GAB
+					release = RCG
+					release = CMR
+					release = CAR
+					release = CHA
+					release = DAH
+					release = TOG
+					release = IVO
+					release = VOL
+					release = MLI
+					release = GNA
+					release = SEN
+					release = NGR
+					release = MRT
+				}
+				ITA = {
+					release = LBA
+					release = ERI
+					release = SOM
+					transfer_units_fraction = {
+						target = SOM
+						size = 1
+					}
+				}
+				SOM = {
+					transfer_state = 269
+					transfer_units_fraction = {
+						target = ITA
+						size = 1
+					}
+				}
+				707 = { add_core_of = MAD }
+				709 = { add_core_of = MAD }
+				703 = { add_core_of = SAF }
+				704 = { add_core_of = SAF }
+				ENG = {
+					delete_unit = { state = 447 }
+					delete_unit = { state = 446 }
+					delete_unit = { state = 453 }
+					delete_unit = { state = 551 }
+					delete_unit = { state = 547 }
+					delete_unit = { state = 546 }
+					delete_unit = { state = 558 }
+					delete_unit = { state = 274 }
+					release = EGY
+					release = SUD
+					release = UGA
+					release = TZN
+					release = ZAM
+					release = MLW
+					release = KEN
+					release = ZIM
+					release = BOT
+					release = NGA
+					release = GHA
+					release = SIE
+					release = GAM
+					release = MAD
+					release = SAF
+				}
+				BEL = {
+					delete_unit = { state = 295 }
+					release = RWA
+					release = BRD
+					release = COG
+				}
+				SAF = {
+					release = NMB
+				}
+				702 = { add_core_of = GNB }
+				POR = {
+					delete_unit = { state = 540 }
+					delete_unit = { state = 544 }
+					release = MZB
+					release = ANG
+					release = GNB
+				}
+				SPR = {
+					delete_unit = { state = 290 }
+					release = WES
+					release = EQG
+					release = MRT
+				}
+				ITA = {
+					white_peace = {
+						tag = ETH
+					}
+				}
+				MOR = {
+					transfer_state = 290
+					transfer_state = 783
+				}
+				ENG = {
+					set_autonomy = { target = SAF autonomy_state = autonomy_free }
+				}
+				#SAF = {
+				#	retire_country_leader = yes
+				#}
+				# Mohammed Menziane is from Morocco after all. Also could send him to Al Andalus in EU4 mode
+				if = { 
+					limit = {
+						NOT = {
+
+							OR = {
+								
+								has_game_rule = {
+									rule = spr_fragmentation_status
+									option = SPR_EU4
+								}
+								has_game_rule = {
+									rule = spr_fragmentation_status
+									option = SPR_EU4_ANDALUSIA
+								}																
+							}
+
+						}
+					}					
+					SPR = {
+						every_unit_leader = {
+							limit = {
+								has_id =  1109
+							}
+							set_nationality = MOR
+						}
+					}					
+				}			
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = oceania_colonization_status
+						option = OCEANIA_DECOLONIZED
+					}
+				}
+				ENG = {
+					release = FIJ
+				}
+				USA = {
+					delete_unit = { state = 629 }
+					delete_unit = { state = 630 }
+					delete_unit = { state = 631 }
+					delete_unit = { state = 632 }
+					delete_unit = { state = 638 }
+					delete_unit = { state = 642 }
+					delete_unit = { state = 727 }
+					release = HAW
+					release = GUM
+				}
+				JAP = {
+					delete_unit = { state = 684 }
+					delete_unit = { state = 633 }
+					delete_unit = { state = 647 }
+					delete_unit = { state = 646 }
+					delete_unit = { state = 648 }
+					delete_unit = { state = 645 }
+					release = GUM
+					release = FSM
+				}
+				FRA = {
+					release = TAH
+				}
+				AST = {
+					release = PNG
+					release = SOL
+				}
+				NZL = {
+					release = SAM
+				}
+				ENG = {
+					set_autonomy = { target = AST autonomy_state = autonomy_free }
+					set_autonomy = { target = NZL autonomy_state = autonomy_free }
+				}
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = oceania_colonization_status
+						option = OCEANIA_UNITED
+					}
+				}
+				284 = { 
+					add_core_of = HAW
+				}
+				629 = {
+					add_core_of = HAW
+				}
+				630 = {
+					add_core_of = HAW
+				}
+				631 = {
+					add_core_of = HAW
+				}
+				632 = {
+					add_core_of = HAW
+				}
+				633 = {
+					add_core_of = HAW
+				}
+				634 = {
+					add_core_of = HAW
+				}
+				635 = {
+					add_core_of = HAW
+				}
+				636 = {
+					add_core_of = HAW
+				}
+				638 = {
+					add_core_of = HAW
+				}
+				639 = {
+					add_core_of = HAW
+				}
+				641 = {
+					add_core_of = HAW
+				}
+				642 = {
+					add_core_of = HAW
+				}
+				643 = {
+					add_core_of = HAW
+				}
+				646 = {
+					add_core_of = HAW
+				}
+				647 = {
+					add_core_of = HAW
+				}
+				648 = { 
+					add_core_of = HAW 
+				}
+				684 = {
+					add_core_of = HAW
+				}
+				723 = {
+					add_core_of = HAW
+				}
+				725 = {
+					add_core_of = HAW
+				}
+				726 = {
+					add_core_of = HAW
+				}
+				727 = {
+					add_core_of = HAW
+				}
+				734 = {
+					add_core_of = HAW
+				}
+				645 = {
+					add_core_of = HAW
+				} #Iwo Jima
+				ENG = {
+					release = HAW
+					set_autonomy = { target = AST autonomy_state = autonomy_free }
+				}
+				USA = {
+					delete_unit = { state = 629 }
+					delete_unit = { state = 630 }
+					delete_unit = { state = 631 }
+					delete_unit = { state = 632 }
+					delete_unit = { state = 638 }
+					delete_unit = { state = 642 }
+					delete_unit = { state = 727 }
+					release = HAW
+				}
+				JAP = {
+					delete_unit = { state = 684 }
+					delete_unit = { state = 633 }
+					delete_unit = { state = 647 }
+					delete_unit = { state = 646 }
+					delete_unit = { state = 648 }
+					delete_unit = { state = 645 }
+					release = HAW
+				}
+				FRA = {
+					release = HAW
+				}
+				AST = {
+					release = HAW
+					release = PNG
+				}
+				HAW = {
+					change_tag_from = NZL
+				}
+				set_global_flag = form_polynesia_flag
+				
+				524 = { add_core_of = HAW } #Taiwan
+				
+				284 = { 
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				629 = {
+					add_extra_state_shared_building_slots = 4
+					add_building_construction = {
+						type = industrial_complex
+						level = 3
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				631 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				633 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				634 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				635 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				636 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = dockyard
+						level = 1
+						instant_build = yes
+					}
+				}
+				638 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				639 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				641 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = dockyard
+						level = 1
+						instant_build = yes
+					}
+				}
+				642 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = dockyard
+						level = 1
+						instant_build = yes
+					}
+				}
+				643 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				646 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = dockyard
+						level = 1
+						instant_build = yes
+					}
+				}
+				647 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = dockyard
+						level = 1
+						instant_build = yes
+					}
+				}
+				684 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				723 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				725 = {
+					add_extra_state_shared_building_slots = 1
+				}
+				726 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				727 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				734 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				645 = {
+					add_extra_state_shared_building_slots = 2
+					add_building_construction = {
+						type = dockyard
+						level = 1
+						instant_build = yes
+					}
+				} #Iwo Jima
+				
+				HAW = {
+					set_cosmetic_tag = united_polynesia
+					country_event = tfv_new_zealand.8
+				}
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = asia_colonization_status
+						option = ASIA_DECOLONIZED
+					}
+				}
+				710 = { add_core_of = MLD }
+				711 = { add_core_of = MAL }
+				712 = { add_core_of = MAL }
+				733 = { add_core_of = MAL }
+				ENG = {
+					delete_unit = { state = 454 }
+					delete_unit = { state = 659 }
+					delete_unit = { state = 422 }
+					delete_unit = { state = 326 }
+					delete_unit = { state = 336 }
+					release = MLD
+					release = MAL
+					release = SRL
+					release = QAT
+					release = KUW
+					release = UAE
+					release = PAL
+					release = JOR
+				}
+				ENG = {
+					set_autonomy = { target = RAJ autonomy_state = autonomy_free }
+					#set_autonomy = { target = AST autonomy_state = autonomy_free }
+					#set_autonomy = { target = NZL autonomy_state = autonomy_free }
+					set_autonomy = { target = MAL autonomy_state = autonomy_free }
+					set_autonomy = { target = OMA autonomy_state = autonomy_free }
+					set_autonomy = { target = NEP autonomy_state = autonomy_free }
+					set_autonomy = { target = BHU autonomy_state = autonomy_free }
+				}
+				NEP = {
+					leave_faction = yes
+				}
+				BHU = {
+					leave_faction = yes
+				}
+				RAJ = {
+					set_global_flag = RAJ_GAINED_INDEPENDENCE
+					release = BRM
+					release = BAN
+					release = PAK
+					abandon_colony_tag = yes
+					retire_country_leader = yes
+					retire_country_leader = yes
+					every_unit_leader = {
+						set_nationality = ENG
+					}					
+					set_party_name = {
+						ideology = neutrality
+						name = "UP"
+						long_name = "Unionist Party"
+					}
+					create_country_leader = {
+						name = "Sir Sikander Hayat Khan"
+						desc = "POLITICS_KHAN_DESC"
+						picture = "r56_portrait_RAJ_Sir_Sikander_Hayat_Khan.dds"
+						expire = "1965.1.1"
+						ideology = oligarchism
+						traits = {
+							
+						}
+					}
+					leave_faction = yes
+					create_corps_commander = {
+
+						skill = 3
+						attack_skill = 2
+						defense_skill = 3
+						planning_skill = 3
+						logistics_skill = 2
+						traits = {
+							
+						}
+					}
+					create_corps_commander = {
+
+						skill = 2
+						attack_skill = 2
+						defense_skill = 2
+						planning_skill = 1
+						logistics_skill = 2
+						traits = {
+							
+						}
+					}
+					create_corps_commander = {
+						skill = 2
+						attack_skill = 3
+						defense_skill = 1
+						planning_skill = 2
+						logistics_skill = 1
+						traits = {
+							
+						}
+					}
+				}
+				AST = {
+					release = PNG
+				}
+
+				MAL = {
+					abandon_colony_tag = yes
+					retire_country_leader = yes					
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1111
+								has_id =  1112
+								has_id =  1121
+								has_id =  1122
+								
+							}
+						}
+						set_nationality = ENG
+					}
+					create_corps_commander = {
+
+						skill = 2
+						attack_skill = 2
+						defense_skill = 2
+						planning_skill = 1
+						logistics_skill = 2
+						traits = {
+							
+						}
+					}
+					create_corps_commander = {
+						skill = 1
+						attack_skill = 1
+						defense_skill = 1
+						planning_skill = 1
+						logistics_skill = 1
+						traits = {
+							
+						}
+					}
+				}
+				HOL = {
+					set_autonomy = { target = INS autonomy_state = autonomy_free }
+				}
+				MAL = {
+					transfer_state = 721
+				}
+				INS = {
+					abandon_colony_tag = yes
+					retire_country_leader = yes
+					every_unit_leader = {
+						set_nationality = HOL
+					}
+					create_corps_commander = {
+
+						skill = 2
+						attack_skill = 2
+						defense_skill = 2
+						planning_skill = 1
+						logistics_skill = 2
+						traits = {
+							
+						}
+					}
+					create_corps_commander = {
+						skill = 1
+						attack_skill = 1
+						defense_skill = 1
+						planning_skill = 1
+						logistics_skill = 1
+						traits = {
+							
+						}
+					}
+					create_corps_commander = {
+						skill = 1
+						attack_skill = 1
+						defense_skill = 1
+						planning_skill = 1
+						logistics_skill = 1
+						traits = {
+							
+						}
+					}
+				}
+				USA = {
+					delete_unit = { state = 327 }
+					set_autonomy = { target = PHI autonomy_state = autonomy_free }
+				}
+				FRI = {
+					release = VIN
+					release = CAM
+					release = LAO
+				}
+				FRA = {
+					delete_unit = { state = 553 }
+					delete_unit = { state = 741 }
+					delete_unit = { state = 286 }
+					delete_unit = { state = 671 }
+					delete_unit = { state = 851 }
+					delete_unit = { state = 852 }
+					delete_unit = { state = 853 }
+					delete_unit = { state = 854 }
+					delete_unit = { state = 855 }
+					release = VIN
+					release = CAM
+					release = LAO
+					release = LEB
+					release = SYR
+				}
+				SYR = {
+					load_oob = SYR_1936
+				}
+				554 = {
+					add_extra_state_shared_building_slots = 2
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}				
+				LEB = {
+					load_oob = LEB_1936
+				}				
+				YEM = {
+					transfer_state = 659
+				}
+				RAJ = {
+					transfer_state = 321
+					transfer_state = 320
+				}
+				728 = { add_core_of = GXC }
+				729 = { add_core_of = GXC }
+				326 = { add_core_of = GXC }
+				GXC = {
+					transfer_state = 728
+					transfer_state = 729
+					transfer_state = 326
+				}
+				JAP = {
+					set_autonomy = { target = MAN autonomy_state = autonomy_free }
+					set_autonomy = { target = MEN autonomy_state = autonomy_free }
+					release = KOR
+					transfer_units_fraction = {
+						target = KOR
+						size = 1
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_global_flag = korean_exiled_government_generals
+							}
+						}
+						set_global_flag = korean_exiled_government_generals
+						KOR = {
+							create_field_marshal = {
+								name = "Ji Cheong-cheon"
+								portrait_path = "gfx/leaders/Asia/Portrait_Asia_Generic_land_3.dds"
+								traits = { defensive_doctrine guerilla_fighter }
+								skill = 2
+								attack_skill = 2
+								defense_skill = 2
+								planning_skill = 1
+								logistics_skill = 2
+							}
+							create_corps_commander = {
+								name = "Lee Beom-seok"
+								portrait_path = "gfx/leaders/Asia/Portrait_Asia_Generic_land_1.dds"
+								traits = { expert_delegator }
+								skill = 2
+								attack_skill = 1
+								defense_skill = 2
+								planning_skill = 1
+								logistics_skill = 3
+							}				
+						}				
+					}					
+				}
+				MAN = {
+					transfer_state = 745
+				}
+				CHI = {
+					transfer_state = 609
+					transfer_state = 524
+				}
+				KOR = {
+					transfer_units_fraction = {
+						target = JAP
+						size = 1
+					}
+				}
+			}
+			# Game Rules - Fragmentation
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = eng_fragmentation_status
+						option = ENG_FRAGMENTED
+					}
+				}
+				ENG = {
+					delete_unit = { state = 116 }
+					release = SCO
+					release = WLS
+					release = NIR
+					release = MLT
+					release = CYP
+					set_cosmetic_tag = ENG_england
+					add_state_claim = 122
+					add_state_claim = 121
+					add_state_claim = 133
+					add_state_claim = 136
+					add_state_claim = 120
+					add_state_claim = 841
+					add_state_claim = 119
+					transfer_units_fraction = {
+						target = SCO
+						size = 0.1
+					}
+					transfer_units_fraction = {
+						target = WLS
+						size = 0.05
+					}
+					transfer_units_fraction = {
+						target = NIR
+						size = 0.03
+					}					
+					transfer_units_fraction = {
+						target = MLT
+						size = 0.01
+					}												
+				}
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = eng_fragmentation_status
+						option = ENG_FRAGMENTED_IRE_UNITED
+					}
+				}
+				ENG = {
+					#delete_unit = { state = 116 }
+					release = SCO
+					release = WLS
+					IRE = { transfer_state = 119 }
+					release = MLT
+					release = CYP
+					set_cosmetic_tag = ENG_england
+					set_global_flag = ENG_became_england
+					add_state_claim = 122
+					add_state_claim = 121
+					add_state_claim = 133
+					add_state_claim = 136
+					add_state_claim = 120
+					add_state_claim = 841
+					add_state_claim = 119
+					transfer_units_fraction = {
+						target = SCO
+						size = 0.15
+					}
+					transfer_units_fraction = {
+						target = WLS
+						size = 0.05
+					}
+					transfer_units_fraction = {
+						target = MLT
+						size = 0.01
+					}											
+				}
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = eng_fragmentation_status
+						option = ENG_FRAGMENTED_CELTIC_UNION
+					}
+				}
+				SCO = {
+					every_unit_leader = {
+						set_unit_leader_flag = scottish
+					}
+				}
+				ENG = {
+				#	delete_unit = { state = 116 }
+					release = SCO
+					release = WLS
+
+					release = MLT
+					release = CYP
+					set_cosmetic_tag = ENG_england
+					set_global_flag = ENG_became_england
+					add_state_claim = 122
+					add_state_claim = 121
+					add_state_claim = 133
+					add_state_claim = 136
+					add_state_claim = 120
+					add_state_claim = 841
+					#add_state_claim = 119
+					transfer_units_fraction = {
+						target = SCO
+						size = 0.33
+					}											
+				}
+				SCO = {
+					every_unit_leader = {
+						limit = {
+							NOT = {
+								has_unit_leader_flag = scottish
+							}
+						}
+						set_nationality = ENG
+					}
+				}
+				SCO = { 
+					transfer_state = 119
+					transfer_state = 14
+					annex_country = {
+						target = IRE
+						transfer_troops = yes
+					}
+					annex_country = {
+						target = WLS
+						transfer_troops = yes
+					}
+					activate_decision = form_celtic_union	
+					remove_ideas = {
+						generic_recent_political_unification
+						generic_recent_army_unification
+						generic_recent_economic_unification
+					}
+					change_tag_from = IRE
+					set_rule = {
+						can_create_factions = yes
+					}															 
+				}
+				IRE = {
+					every_unit_leader = {
+						set_nationality = SCO
+					}
+				}
+				BRI = {
+					every_unit_leader = {
+						set_nationality = SCO
+					}
+				}
+				WLS = {
+					every_unit_leader = {
+						set_nationality = SCO
+					}
+				}											
+			}
+			
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = spr_fragmentation_status
+						option = SPR_EU4_ANDALUSIA
+					}
+				}
+				set_global_flag = XVth_century_aragon_flag
+				173 = { add_core_of = ADU }
+				118 = { add_core_of = ADU }
+				167 = { add_core_of = CAT }
+				177 = { add_core_of = CAT }
+				794 = { add_core_of = CAT }
+				166 = { add_core_of = CAT }
+				114 = { add_core_of = CAT }
+				115 = { add_core_of = CAT }
+				116 = { add_core_of = CAT }
+				792 = { remove_core_of = NAV }
+				SPR = {
+					delete_unit = { state = 177 }
+					release = CAT
+					release = NAV
+					release = GLC
+					release = ADU
+					set_cosmetic_tag = SPR_castille
+					set_politics = {
+						ruling_party = neutrality
+						elections_allowed = yes
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+					transfer_units_fraction = {
+						target = CAT
+						size = 0.2
+					}
+					transfer_units_fraction = {
+						target = GLC
+						size = 0.025
+					}
+					transfer_units_fraction = {
+						target = NAV
+						size = 0.025
+					}
+					transfer_units_fraction = {
+						target = ADU
+						size = 0.1
+					}
+				}
+				118 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				173 = {
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}				
+				ADU = {
+					173 = {
+						add_dynamic_modifier = { modifier = islamists_placated }
+					}
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+				}
+				GLC = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}
+				NAV = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}
+				CAT = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}																	 
+				SPR = {
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}				
+				SPA = {
+					set_cosmetic_tag = SPR_nationalist_castille
+				}
+				SPB = {
+					set_cosmetic_tag = SPR_carlist_castille
+				}
+				SPC = {
+					set_cosmetic_tag = SPR_anarchist_castille
+				}
+				SPD = {
+					set_cosmetic_tag = SPR_republican_castille
+				}
+				ENG = {
+					delete_unit = { state = 118 }
+					release = ADU
+					release = CAT
+				}
+				ITA = {
+					release = CAT
+				}
+				CAT = {
+					load_oob = "CAT_ARAGON_1936"
+					if = {
+						limit = { has_dlc = "Man the Guns" }
+							load_oob = "CAT_ARAGON_1936_naval_mtg"
+						else = {
+							load_oob = "CAT_ARAGON_1936_naval_legacy"
+						}
+					}
+					set_politics = {
+						ruling_party = neutrality
+						elections_allowed = no
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+					set_cosmetic_tag = CAT_aragon
+				}
+				NAV = {
+					load_oob = "NAV_1936"
+					set_politics = {
+						ruling_party = neutrality
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+				}
+				GLC = {
+					set_politics = {
+						ruling_party = neutrality
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+				}
+				ADU = {
+					set_country_flag = country_formed_andalusia_flag
+				}
+				set_global_flag = form_andalusia_flag
+				792 = { add_core_of = NAV }
+				165 = { add_core_of = ADU }
+				171 = { add_core_of = ADU }
+				792 = { add_core_of = ADU }
+				172 = { add_core_of = ADU }
+				790 = { add_core_of = ADU }
+				789 = { add_core_of = ADU }
+				41 = { add_core_of = ADU }
+				169 = { add_core_of = ADU }
+				168 = { add_core_of = ADU }
+				167 = { add_core_of = ADU }
+				794 = { add_core_of = ADU }
+				793 = { add_core_of = ADU }
+				791 = { add_core_of = ADU }
+				788 = { add_core_of = ADU }
+				178 = { add_core_of = ADU }
+				177 = { add_core_of = ADU }
+				176 = { add_core_of = ADU }
+				175 = { add_core_of = ADU }
+				174 = { add_core_of = ADU }
+				170 = { add_core_of = ADU }
+				166 = { add_core_of = ADU }
+				112 = { add_core_of = ADU }
+				179 = { add_core_of = ADU }
+				180 = { add_core_of = ADU }
+				181 = { add_core_of = ADU }
+				697 = { add_core_of = ADU }
+				698 = { add_core_of = ADU }
+				795 = { add_core_of = ADU }
+				173 = { add_core_of = ADU }
+				118 = { add_core_of = ADU }
+				
+				165 = { add_core_of = SPR }
+				167 = { add_core_of = SPR }
+				177 = { add_core_of = SPR }
+				171 = { add_core_of = SPR }
+				172 = { add_core_of = SPR }
+				173 = { add_core_of = SPR }
+				794 = { add_core_of = SPR }
+				166 = { add_core_of = SPR }
+				
+				#Italy should keep their cores on the Med. Islands
+				114 = { add_core_of = ITA }
+				115 = { add_core_of = ITA }
+				
+				#Kingdom of Naples
+				117 = { add_core_of = CAT }
+				156 = { add_core_of = CAT }
+				ADU = {
+					change_tag_from = SPR
+				}				
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = spr_fragmentation_status
+						option = SPR_EU4
+					}
+				}
+				set_global_flag = XVth_century_aragon_flag
+				173 = { add_core_of = ADU }
+				118 = { add_core_of = ADU }
+				167 = { add_core_of = CAT }
+				177 = { add_core_of = CAT }
+				794 = { add_core_of = CAT }
+				166 = { add_core_of = CAT }
+				114 = { add_core_of = CAT }
+				115 = { add_core_of = CAT }
+				116 = { add_core_of = CAT }
+				792 = { remove_core_of = NAV }
+				SPR = {
+					delete_unit = { state = 177 }
+					release = CAT
+					release = NAV
+					release = GLC
+					release = ADU
+					set_cosmetic_tag = SPR_castille
+					set_politics = {
+						ruling_party = neutrality
+						elections_allowed = yes
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+					transfer_units_fraction = {
+						target = CAT
+						size = 0.2
+					}
+					transfer_units_fraction = {
+						target = GLC
+						size = 0.025
+					}
+					transfer_units_fraction = {
+						target = NAV
+						size = 0.025
+					}
+					transfer_units_fraction = {
+						target = ADU
+						size = 0.1
+					}
+				}
+				ADU = {
+					173 = {
+						add_dynamic_modifier = { modifier = islamists_placated }
+					}
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+				}
+				GLC = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}
+				NAV = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}
+				CAT = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id =  1102
+								has_id =  1103
+								has_id =  1104
+								has_id =  1105
+								has_id =  1106
+								has_id =  1107
+								has_id =  1108
+								has_id =  1110
+								has_id =  1111
+								has_id =  1112
+								has_id =  1113
+								has_id =  1114
+								has_id =  1115
+								has_id =  1116
+								has_id =  1117
+								has_id =  1118								
+							}
+
+						}						
+						set_nationality = SPR
+					}
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}																	 
+				SPR = {
+					every_unit_leader = {
+						limit = {
+							has_id =  1109
+						}
+						set_nationality = ADU
+					}					
+				}				
+				SPA = {
+					set_cosmetic_tag = SPR_nationalist_castille
+				}
+				SPB = {
+					set_cosmetic_tag = SPR_carlist_castille
+				}
+				SPC = {
+					set_cosmetic_tag = SPR_anarchist_castille
+				}
+				SPD = {
+					set_cosmetic_tag = SPR_republican_castille
+				}
+				ENG = {
+					delete_unit = { state = 118 }
+					release = ADU
+					release = CAT
+				}
+				ITA = {
+					release = CAT
+				}
+				CAT = {
+					load_oob = "CAT_ARAGON_1936"
+					if = {
+						limit = { has_dlc = "Man the Guns" }
+							load_oob = "CAT_ARAGON_1936_naval_mtg"
+						else = {
+							load_oob = "CAT_ARAGON_1936_naval_legacy"
+						}
+					}
+					set_politics = {
+						ruling_party = neutrality
+						elections_allowed = no
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+					set_cosmetic_tag = CAT_aragon
+				}
+				NAV = {
+					load_oob = "NAV_1936"
+					set_politics = {
+						ruling_party = neutrality
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+				}
+				GLC = {
+					set_politics = {
+						ruling_party = neutrality
+					}
+					set_political_party = {
+						ideology = neutrality
+						popularity = 85
+					}
+				}
+				ADU = {
+					set_country_flag = country_formed_andalusia_flag
+				}
+				set_global_flag = form_andalusia_flag
+				792 = { add_core_of = NAV }
+				165 = { add_core_of = ADU }
+				171 = { add_core_of = ADU }
+				792 = { add_core_of = ADU }
+				172 = { add_core_of = ADU }
+				790 = { add_core_of = ADU }
+				789 = { add_core_of = ADU }
+				41 = { add_core_of = ADU }
+				169 = { add_core_of = ADU }
+				168 = { add_core_of = ADU }
+				167 = { add_core_of = ADU }
+				794 = { add_core_of = ADU }
+				793 = { add_core_of = ADU }
+				791 = { add_core_of = ADU }
+				788 = { add_core_of = ADU }
+				178 = { add_core_of = ADU }
+				177 = { add_core_of = ADU }
+				176 = { add_core_of = ADU }
+				175 = { add_core_of = ADU }
+				174 = { add_core_of = ADU }
+				170 = { add_core_of = ADU }
+				166 = { add_core_of = ADU }
+				112 = { add_core_of = ADU }
+				179 = { add_core_of = ADU }
+				180 = { add_core_of = ADU }
+				181 = { add_core_of = ADU }
+				697 = { add_core_of = ADU }
+				698 = { add_core_of = ADU }
+				795 = { add_core_of = ADU }
+				173 = { add_core_of = ADU }
+				118 = { add_core_of = ADU }
+				
+				165 = { add_core_of = SPR }
+				167 = { add_core_of = SPR }
+				177 = { add_core_of = SPR }
+				171 = { add_core_of = SPR }
+				172 = { add_core_of = SPR }
+				173 = { add_core_of = SPR }
+				794 = { add_core_of = SPR }
+				166 = { add_core_of = SPR }
+				
+				#Italy should keep their cores on the Med. Islands
+				114 = { add_core_of = ITA }
+				115 = { add_core_of = ITA }
+				
+				#Kingdom of Naples
+				117 = { add_core_of = CAT }
+				156 = { add_core_of = CAT }
+			}			
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = spr_fragmentation_status
+						option = SPR_FRAGMENTED
+					}
+				}
+				SPR = {
+					release = CAT
+					release = NAV
+					release = GLC
+				}
+				165 = { add_core_of = SPR }
+				171 = { add_core_of = SPR }
+				172 = { add_core_of = SPR }
+				792 = { add_core_of = SPR }
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = yug_fragmentation_status
+						option = YUG_FRAGMENTED
+					}
+				}
+				YUG = {
+					every_unit_leader = {
+						set_nationality = SER
+					}
+				}
+				FAK = {
+					annex_country = {
+					    target = YUG
+					    transfer_troops = no
+					}
+					release = SLV
+					transfer_units_fraction = {
+						target = MAC
+						size = 0.1
+					}					
+					release = BOS
+					transfer_units_fraction = {
+						target = BOS
+						size = 0.2
+					}					
+					release = MAC
+					transfer_units_fraction = {
+						target = MAC
+						size = 0.1
+					}					
+					release = SER
+					transfer_units_fraction = {
+						target = SER
+						size = 0.4
+					}
+					release = CRO
+					transfer_units_fraction = {
+						target = CRO
+						size = 0.2
+					}					
+					release = MNT
+				}
+				SER = {
+					change_tag_from = YUG
+				}
+			}
+
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = yug_fragmentation_status
+						option = YUG_FRAGMENTED_SERBIA
+					}
+				}
+				YUG = {
+					every_unit_leader = {
+						set_nationality = SER
+					}
+					transfer_units_fraction = {
+						target = SER
+						size = 0.5
+					}
+					transfer_units_fraction = {
+						target = COR
+						size = 0.001
+					}
+					release = SLV
+					transfer_units_fraction = {
+						target = MAC
+						size = 0.1
+					}					
+					release = BOS
+					transfer_units_fraction = {
+						target = BOS
+						size = 0.2
+					}					
+					release = MAC
+					transfer_units_fraction = {
+						target = MAC
+						size = 0.1
+					}					
+					release = SER
+					transfer_units_fraction = {
+						target = SER
+						size = 0.4
+					}
+					release = CRO
+					transfer_units_fraction = {
+						target = CRO
+						size = 0.2
+					}					
+					release = MNT
+				}
+				SER = {
+					change_tag_from = YUG
+				}
+			}
+
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = yug_fragmentation_status
+						option = YUG_FRAGMENTED_CROATIA
+					}
+				}
+				YUG = {
+					every_unit_leader = {
+						set_nationality = SER
+					}
+				}
+				FAK = {
+					annex_country = {
+					    target = YUG
+					    transfer_troops = no
+					}
+					release = SLV
+					transfer_units_fraction = {
+						target = MAC
+						size = 0.1
+					}					
+					release = BOS
+					transfer_units_fraction = {
+						target = BOS
+						size = 0.2
+					}					
+					release = MAC
+					transfer_units_fraction = {
+						target = MAC
+						size = 0.1
+					}					
+					release = SER
+					transfer_units_fraction = {
+						target = SER
+						size = 0.4
+					}
+					release = CRO
+					transfer_units_fraction = {
+						target = CRO
+						size = 0.2
+					}					
+					release = MNT
+				}
+				CRO = {
+					change_tag_from = YUG
+				}
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = sov_fragmentation_status
+						option = SOV_FRAGMENTED
+					}
+				}
+				SOV = {
+					release = UKR
+					release = BLR
+					release = GEO
+					release = AZR
+					release = ARM
+					release = UZB
+					release = TAJ
+					release = KYR
+					release = KAZ
+					release = TMS
+					release = CRI
+					release = TTS
+					release = GUK
+					release = BUR
+					release = KAR
+					transfer_units_fraction = {
+						target = UKR
+						size = 0.11
+					}
+					transfer_units_fraction = {
+						target = BLR
+						size = 0.02
+					}
+					transfer_units_fraction = {
+						target = GEO
+						size = 0.002
+					}
+					transfer_units_fraction = {
+						target = AZR
+						size = 0.002
+					}
+					transfer_units_fraction = {
+						target = ARM
+						size = 0.002
+					}
+					transfer_units_fraction = {
+						target = UZB
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = TAJ
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = KYR
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = KAZ
+						size = 0.003
+					}
+					transfer_units_fraction = {
+						target = TMS
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = TTS
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = GUK
+						size = 0.002
+					}
+					transfer_units_fraction = {
+						target = BUR
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = KAR
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = CRI
+						size = 0.001
+					}
+					retire_country_leader = yes
+					remove_unit_leader = 405
+					create_country_leader = {
+						name = "Kliment Voroshilov"
+						desc = "POLITICS_KLIMENT_VOROSHILOV_DESC"
+						picture = "Portrait_Soviet_Kliment_Voroshilov.dds"
+						expire = "1965.1.1"
+						ideology = stalinism
+					}
+					
+					set_global_flag = game_rule_SOV_fragmented
+                    set_cosmetic_tag = SOV_russia
+					set_global_flag = SOV_became_russia
+					every_state = {
+						limit = {
+							OR = {
+								is_core_of = UKR
+								is_core_of = BLR
+								is_core_of = GEO
+								is_core_of = AZR
+								is_core_of = ARM
+								is_core_of = UZB
+								is_core_of = TAJ
+								is_core_of = KYR
+								is_core_of = KAZ
+								is_core_of = TMS
+								is_core_of = CRI
+								is_core_of = BUR
+								is_core_of = TTS
+								is_core_of = DON
+								is_core_of = GUK
+							}	
+						}
+						add_claim_by = SOV
+					}
+				}
+				if = {
+					limit = {
+						AND = {
+							has_dlc = "La Resistance"
+							has_dlc = "Battle for the Bosporus"
+						}					
+					}
+					UZB = { #all turkestan nationalities because of panturkism
+						create_operative_leader = {
+							name = "Ruzi Nazar"
+							GFX = "GFX_portrait_tur_ruzi_nazar"
+							traits = { operative_tough operative_commando }
+							bypass_recruitment = no
+							available_to_spy_master = yes
+							female = no
+							nationalities = { SOV UZB TMS TAJ KYR KAZ }
+						}
+						set_country_flag = recruited_ruzi_nazar
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = raj_fragmentation_status
+						option = RAJ_FRAGMENTED
+					}
+				}
+				RAJ = {
+					release = BAN
+					release = PAK
+					release = BRM
+					transfer_units_fraction = {
+						target = BRM
+						size = 0.005
+					}
+					transfer_units_fraction = {
+						target = BAN
+						size = 0.001
+					}
+					transfer_units_fraction = {
+						target = PAK
+						size = 0.05
+					}
+				}
+			}
+		}
+	}
+
+	# ROOT is capitulated country, FROM is winner
+	on_capitulation = {
+		effect = {
+			if = { # Reducing the Crisisjaren idea to level 1 when capitulated (in case player didn't manage to finish the mainland industrial focuses), but still needs Liberation to remove it fully
+				limit = {
+					original_tag = HOL
+					has_idea = HOL_de_crisisjaren_4
+				}
+				swap_ideas = {
+					remove_idea = HOL_de_crisisjaren_4
+					add_idea = HOL_de_crisisjaren_1
+				}
+			}
+			if = {
+				limit = {
+					original_tag = HOL
+					has_idea = HOL_de_crisisjaren_3
+				}
+				swap_ideas = {
+					remove_idea = HOL_de_crisisjaren_3
+					add_idea = HOL_de_crisisjaren_1
+				}
+			}
+			if = {
+				limit = {
+					original_tag = HOL
+					has_idea = HOL_de_crisisjaren_2
+				}
+				swap_ideas = {
+					remove_idea = HOL_de_crisisjaren_2
+					add_idea = HOL_de_crisisjaren_1
+				}
+			}
+			if = { # Only possible if Abandon the Gold Standard hasn't been taken yet, this can be taken later so should be reduced to level 2 rather than 1
+				limit = {
+					original_tag = HOL
+					has_idea = HOL_de_crisisjaren_5
+				}
+				swap_ideas = {
+					remove_idea = HOL_de_crisisjaren_5
+					add_idea = HOL_de_crisisjaren_2
+				}
+			}
+			if = {
+				limit = {
+					tag = GER
+					FROM = {
+						tag = HOL
+						has_completed_focus = HOL_wilhelminism
+					}
+				}
+				HOL = { country_event = { id = mtg_netherlands.76 } }
+			}
+		}
+	}
+
+	#ROOT is winner #FROM is loser
+	on_peaceconference_ended = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = GER
+					FROM = { original_tag = HOL }
+				}
+				remove_ideas = HOL_german_defectors_2
+			}
+			# USA 'civil war' ends
+			if = {
+				limit = {
+					tag = CSA
+					FROM = { original_tag = USA }
+				}
+				load_focus_tree = { tree = usa_focus keep_completed = no }
+				unlock_national_focus = USA_reestablish_the_gold_standard
+				complete_national_focus = USA_america_first
+				unlock_national_focus = USA_ally_with_the_silver_shirts
+				unlock_national_focus = USA_invite_foreign_support
+			}
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							FROM = { original_tag = PAK }
+							ROOT = { original_tag = RAJ }
+						}
+						AND = {
+							FROM = { original_tag = RAJ }
+							ROOT = { original_tag = PAK }
+						}
+					}
+				}
+				FROM = {
+					delete_unit_template_and_units = {
+						division_template = "Pakistani Liberation Army"
+					}
+					delete_unit_template_and_units = {
+						division_template = "Hindu Militia"
+					}
+				}
+				ROOT = {
+					delete_unit_template_and_units = {
+						division_template = "Pakistani Liberation Army"
+					}
+					delete_unit_template_and_units = {
+						division_template = "Hindu Militia"
+					}
+				}
+			}
+		}
+	}
+
+	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
+	on_state_control_changed = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = HOL
+					has_completed_focus = HOL_wilhelminism
+					FROM = {
+						original_tag = GER
+						has_government = fascism
+						has_civil_war = no
+					}
+					FROM.FROM = {
+						is_core_of = GER
+					}
+				}
+				FROM.FROM = { 
+					set_state_flag = HOL_german_states_kaiser
+				}
+				country_event = { id = mtg_netherlands.73 }
+			}
+			if = {
+				limit = {
+					FROM.FROM = {
+						OR = {
+							state = 7
+							state = 35
+							state = 36
+						}
+					}
+				}
+				FROM = {
+					set_country_flag = HOL_lost_starting_state
+				}
+			}
+		}
+	}
+
+	on_nuke_drop = {
+		effect = {			
+			if = {
+				limit = {
+					tag = USA
+					FROM = {
+						state = 16
+					}
+				}
+				set_country_flag = achievement_team_america
+			}
+			if = {
+				limit = {
+					FROM.FROM = { is_core_of = HOL }
+				}
+				FROM = {
+					set_country_flag = HOL_lost_starting_state
+				}
+			}
+		}
+	}
+
+	# FROM is the sinker, ROOT is the owner of the ship being sunk
+	on_pride_of_the_fleet_sunk = {
+		effect = {
+			if = {
+				limit = {
+					tag = ENG
+				}
+				FROM = { set_country_flag = achievements_pride_and_extreme_prejudice }
+			}
+		}
+	}
+
+	on_leave_faction = {
+		effect = {
+			if = {
+				limit = { 
+					original_tag = HOL
+					has_country_flag = HOL_joined_germany_flag
+				}
+				FROM = {
+					create_wargoal = {
+						type = take_state_focus
+						target = ROOT
+						generator = { 7 }
+					}
+				}
+			}
+		}
+	}
+
+	# ROOT is the new faction leader FROM is the old faction leader
+	on_assume_faction_leadership = {
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						OR = {
+							tag = GER
+							tag = ENG
+							tag = SOV
+						}
+					}
+					NOT = {
+						OR = {
+							tag = USA
+							tag = ENG
+							tag = GER
+							tag = ITA
+							tag = FRA
+							tag = SOV
+							tag = JAP
+							tag = CHI
+						}
+					}
+				}
+				set_country_flag = assuming_direct_control_achievement_flag
+			}
+		}
+	}
+}

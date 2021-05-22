@@ -1,0 +1,398 @@
+### operations are sorted by order of 
+### 1) no. of required operatives
+### 2) required network strength
+### eg. 1/70 comes before 2/40
+
+#generic.18 event to wound a leader
+operation_targeted_attack_officers = { ### 15 3/35
+	icon = GFX_operations_boost_resistance
+	map_icon = GFX_operations_boost_resistance_map
+	name = operation_targeted_attack_officers
+	desc = operation_targeted_attack_officers_desc
+	priority = 15
+	
+	days = 90
+	network_strength = 50
+	operatives = 2
+
+	visible = {
+		num_of_operatives > 1
+		network_national_coverage = {
+			target = FROM
+			value > 0
+		}
+		FROM = {
+			has_war_with = ROOT
+		}
+
+		has_operation_token = {
+			tag = FROM
+			token = token_resistance_contacts
+		}
+
+	}
+	
+
+	required_tokens = { token_resistance_contacts}
+	equipment = {
+		support_equipment = 25
+		infantry_equipment = 300
+		civilian_factories = {
+			amount = 1
+			days = 60
+		}
+	}
+	risk_chance = 0.2
+	experience = 2
+	outcome_extra_chance = 0.25
+	outcome_modifiers = { target_sabotage_factor operation_outcome }
+	risk_modifiers = { target_sabotage_risk operation_risk }
+	cost_modifiers = { target_sabotage_cost operation_cost }
+	outcome_execute = {
+		FROM = {
+			add_manpower = -10
+			random_army_leader = {
+				limit = {
+					NOT = {
+						has_trait = wounded
+					}
+					is_assigned = yes
+				}
+				add_timed_unit_leader_trait = {
+					trait = wounded
+					days = 90
+				}
+				unit_leader_event = { id = r56_spying_event.7 }				
+			}		
+
+		}
+		ROOT = {
+			country_event = {
+				id = lar_operative_event.7
+			}			
+			remove_operation_token = {
+				tag = FROM
+				token = token_resistance_contacts
+			}
+			
+			
+
+		}
+	}
+	outcome_extra_execute = { # SCOPE_OPERATION
+		
+		FROM = {
+			add_manpower = -90
+			random_army_leader = {
+				limit = {
+					NOT = {
+						has_trait = wounded
+					}
+				}
+				add_timed_unit_leader_trait = {
+					trait = wounded
+					days = 50
+				}
+				unit_leader_event = { id = generic.18 }				
+			}
+		}
+	}
+	outcome_potential = {
+		custom_effect_tooltip = operation_outcome_officers_assassinated_tt
+		custom_effect_tooltip = operation_outcome_consumes_token_tt
+	}
+	phases = { #infiltration
+		infiltration_border = { base = 25 }
+		infiltration_submarine = { 
+			base = 25 
+			modifier = {
+				OR = {
+					ROOT = {
+						OR = {
+							NOT = {
+								any_controlled_state = {
+									is_coastal = yes
+								} 
+							}
+							NOT = {
+								OR = {
+									has_tech = early_submarine
+									has_tech = early_ship_hull_submarine
+								}
+							}
+						}
+
+	
+					}				
+					FROM = {
+						NOT = {
+							any_controlled_state = {
+								is_coastal = yes
+							} 
+						}
+					}
+				}
+				factor = 0
+			}		
+		}
+		infiltration_paradrop = { 
+			base = 25 
+			modifier = {
+				ROOT = { 
+					has_equipment = {
+						transport_plane_equipment < 1
+					}
+				}
+				factor = 0.1 #less likely if we have no transports
+			}
+		}
+	}
+	phases = {
+		targeted_attack_theater = { base = 33 }
+		targeted_bomb_officers_mess = { base = 34 }
+		targeted_assassinate_division_commander = { base = 33 }
+	}
+	phases = { #exfiltration
+		exfiltration_air_pickup = { 
+			base = 15 
+			modifier = {
+				ROOT = { 
+					has_equipment = {
+						transport_plane_equipment < 1
+					}
+				}
+				factor = 0.1 #less likely if we have no transports
+			}
+		}
+		exfiltration_border = { base = 30 }
+		exfiltration_go_to_ground = { base = 30 }
+		exfiltration_submarine_pickup = { base = 25 }
+	}
+}
+
+operation_targeted_plant_false_new_order_intel = { ### 15 3/35
+	icon = GFX_operations_plant_false_new_order_intel
+	map_icon = GFX_operations_fake_intel_map
+	name = operation_targeted_plant_false_new_order_intel
+	desc = operation_targeted_plant_false_new_order_intel_desc
+	priority = 15
+	
+	days = 90
+	network_strength = 50
+	operatives = 2
+	cost_modifiers = { operation_infiltrate_cost operation_cost }
+	visible = {
+		num_of_operatives > 1
+		network_national_coverage = {
+			target = FROM
+			value > 0
+		}
+		NOT = {
+			has_global_flag = USA_new_order_map_operation_attempted
+		}
+		OR = {
+			original_tag = ENG
+			is_in_faction_with = ENG
+			AND = {
+				original_tag = CAN
+				is_faction_leader = yes
+			}
+		}
+		NOT = {
+			OR = {
+				original_tag = USA
+				has_country_leader = { ruling_only = no name = "Franklin Delano Roosevelt" }
+			}
+			
+		}		
+		USA = {
+			NOT = {
+				OR = {
+					is_in_faction_with = GER
+					has_war_with = GER
+				}				
+			}
+		}
+		ROOT = {
+			has_war_with = GER
+		}
+		GER = {
+			has_government = fascism
+		}		
+		FROM = {
+			NOT = {
+				has_war_with = ROOT
+			}
+			NOT = {
+				has_war_with = GER
+			}			
+			original_tag = USA
+			has_government = democratic
+		}
+
+		has_operation_token = {
+			tag = FROM
+			token = token_civilian
+		}
+
+	}
+	
+
+	required_tokens = { token_civilian}
+	equipment = {
+		civilian_factories = {
+			amount = 2
+			days = 60
+		}
+	}
+	risk_chance = 0.2
+	experience = 2
+	outcome_extra_chance = 0.25
+	risk_modifiers = { operation_steal_tech_risk operation_risk }
+	outcome_modifiers = { operation_steal_tech_outcome operation_outcome }
+	cost_modifiers = { operation_cost }
+	outcome_execute = {
+		set_global_flag = USA_new_order_map_operation_attempted
+		FROM = {
+			country_event = {
+				id = r56_spying_event.10
+			}		
+
+		}
+		ROOT = {
+			country_event = {
+				id = lar_operative_event.7
+			}			
+			
+			remove_operation_token = {
+				tag = FROM
+				token = token_civilian
+			}
+		}
+	}
+	outcome_extra_execute = { # SCOPE_OPERATION
+		if = {
+			limit = {
+				ROOT = {
+					is_in_faction_with = ENG
+					NOT = {
+						tag = ENG
+					}
+				}	
+			}
+			FROM = {
+				add_political_power = 25
+				add_war_support = 0.03
+				add_opinion_modifier = {
+					target = ENG
+					modifier = medium_increase
+				}
+							
+			}			
+		}
+		if = {
+			limit = {
+				ROOT = {
+					is_faction_leader = yes
+				}
+			}
+			FROM = {
+				add_political_power = 25
+				add_war_support = 0.03
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = medium_increase
+				}
+							
+			}			
+		}		
+		
+	}
+	outcome_potential = {
+		custom_effect_tooltip = operation_outcome_new_order_map_planted_tt
+		custom_effect_tooltip = operation_outcome_consumes_token_tt
+	}
+	phases = { #infiltration
+		infiltration_border = { base = 25 }
+		infiltration_submarine = { 
+			base = 10 
+			modifier = {
+				OR = {
+					ROOT = {
+						OR = {
+							NOT = {
+								any_controlled_state = {
+									is_coastal = yes
+								} 
+							}
+							NOT = {
+								OR = {
+									has_tech = early_submarine
+									has_tech = early_ship_hull_submarine
+								}
+							}
+						}
+
+	
+					}				
+					FROM = {
+						NOT = {
+							any_controlled_state = {
+								is_coastal = yes
+							} 
+						}
+					}
+				}
+				factor = 0
+			}		
+		}
+		infiltration_paradrop = { 
+			base = 10
+			modifier = {
+				ROOT = { 
+					has_equipment = {
+						transport_plane_equipment < 1
+					}
+				}
+				factor = 0.1 #less likely if we have no transports
+			}
+		}
+		infiltration_diplomatic = {
+			base = 30
+			modifier = {
+				factor = 20
+				ROOT = { has_war = no }
+				FROM = {
+					has_war = no
+				}
+			}
+			modifier = {
+				FROM = {
+					has_war_with = ROOT
+				}
+				factor = 0
+			}
+		}		
+	}
+	phases = { #
+		fake_intel_deliberate_leaks = { base = 10 }
+		fake_intel_utilize_double_agents = { base = 10 }	
+		fake_intel_plant_evidence = { base = 50 }
+	}	
+	phases = { #exfiltration
+		exfiltration_air_pickup = { 
+			base = 15 
+			modifier = {
+				ROOT = { 
+					has_equipment = {
+						transport_plane_equipment < 1
+					}
+				}
+				factor = 0.1 #less likely if we have no transports
+			}
+		}
+		exfiltration_border = { base = 30 }
+		exfiltration_go_to_ground = { base = 30 }
+		exfiltration_submarine_pickup = { base = 25 }
+	}
+}

@@ -1,0 +1,1137 @@
+
+mal_trade_decisions = {
+	mal_trade_start = {
+		icon = generic_construction
+		available = {
+			has_war = no
+		}
+		
+		visible = {
+			tag = MAL
+			has_completed_focus = MAL_seek_investors
+			
+		}
+
+		modifier = {}
+		cost = 25
+		days_remove = 21
+		fire_only_once = yes
+
+		fixed_random_seed = no
+		ai_will_do = {
+			factor = 29
+		}
+
+		complete_effect = {
+			
+		}
+		remove_effect = {
+			random_owned_state = {	
+				limit ={
+					industrial_complex > 0
+				}			
+				remove_building = {
+				    type = industrial_complex
+				    level = 1
+				}
+			}
+			random_owned_state = {	
+				limit ={
+					industrial_complex > 0
+				}			
+				remove_building = {
+				    type = industrial_complex
+				    level = 1
+				}
+			}
+
+			add_offsite_building = { type = industrial_complex level = 2 }
+			set_variable = { var = mal_trade_factory_total value = 2 }	
+		}
+	}
+
+	mal_trade_internal = {
+		icon = hol_attract_foreign_investors
+		available = {
+			has_war = no
+			
+		}
+		visible = {}
+
+		modifier = {
+			civilian_factory_use = 2
+		}
+		days_remove = 30
+		days_re_enable = 70
+
+		ai_will_do = {
+			factor = 50
+		}
+
+		complete_effect = {}
+		remove_effect = {
+			add_timed_idea = {
+				idea = mal_internal_investments_idea
+				days = 50
+			}
+			if = { 
+				limit = {
+					check_variable = { var = mal_internal_investment value = 2 compare = not_equals }
+					check_variable = { var = mal_internal_investment value = 5 compare = not_equals }
+					check_variable = { var = mal_internal_investment value = 9 compare = less_than }
+				}
+				custom_effect_tooltip = mal_internal_investment_tt
+			}
+			if = {
+				limit = {
+					check_variable = { var = mal_internal_investment value = 2 compare = equals }
+				}
+				add_offsite_building = { type = industrial_complex level = 1 } 
+				add_to_variable = { var = mal_trade_factory_total value = 1 }
+			}
+			if = {
+				limit = {
+					check_variable = { var = mal_internal_investment value = 5 compare = equals }
+				}
+				add_offsite_building = { type = industrial_complex level = 1 }
+				add_to_variable = { var = mal_trade_factory_total value = 1 } 
+			}
+			if = {
+				limit = {
+					check_variable = { var = mal_internal_investment value = 9 compare = equals }
+				}
+				add_offsite_building = { type = industrial_complex level = 1 } 
+				add_to_variable = { var = mal_trade_factory_total value = 1 }
+				set_variable = { var = mal_internal_investment value = 1 }
+			}
+			if = {
+				limit = {
+					OR = {
+						NOT = { check_variable = { var = mal_internal_investment value = 1 compare = greater_than_or_equals } }
+						check_variable = { var = mal_internal_investment value = 10 compare = greater_than_or_equals } 
+					}
+				}
+				set_variable = { var = mal_internal_investment value = 0 }
+			}
+			add_to_variable = { var = mal_internal_investment value = 1 }
+		}
+	}
+	mal_trade_external_on = {
+		icon = hol_exchange_intelligence_data
+		available = {
+			has_war = no
+			num_of_available_civilian_factories > 2      
+		}
+		visible = {
+			tag = MAL
+			has_completed_focus = MAL_seek_investors
+			NOT = { has_country_flag = mal_external_investment_allowed } 
+		
+		}
+		
+
+		modifier = {}
+		days_remove = 3
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			set_country_flag = mal_external_investment_allowed
+		}
+		remove_effect = {}
+	}
+	mal_trade_external_off = {
+		icon = hol_exchange_intelligence_data
+		available = {
+			    
+		}
+		visible = {
+			tag = MAL
+			has_completed_focus = MAL_seek_investors
+			has_country_flag = mal_external_investment_allowed  
+		
+		}
+		
+
+		modifier = {}
+		days_remove = 3
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			clr_country_flag = mal_external_investment_allowed
+		}
+		remove_effect = {}
+	}
+	mal_trade_external = {
+		icon = mal_trade_profit
+		available = {
+			custom_trigger_tooltip = {
+    			tooltip = mal_invest_tooltip	
+				OR = {
+					is_major = yes
+					tag = USA
+					tag = FRA
+					tag = HOL
+					tag = ITA
+				}
+				has_war = no
+				has_opinion = {
+				    target = MAL
+				    value > 0
+				}
+			}		       
+		}
+		visible = {
+			NOT = {
+				has_country_flag = mal_investor
+				original_tag = MAL
+			}
+		}
+		targets = { MAL }
+		target_trigger = {
+               FROM = {
+               		original_tag = MAL
+               }
+          }
+
+		modifier = {}
+		days_remove = 3
+		days_re_enable = 1
+		ai_will_do = {
+			factor = 200
+		}
+
+		complete_effect = {
+			if = {
+				limit = {
+					NOT = {
+						FROM = {
+							has_active_mission = mal_trade_external_mission
+						}
+					}
+				}
+				set_country_flag = mal_investor		
+
+				FROM = {
+					set_variable = { investors = 1 }
+					set_variable = { current_industry = num_of_available_civilian_factories }
+					add_to_variable = { current_industry = 1 }
+					activate_mission = mal_trade_external_mission
+				}
+			}
+			else = {
+				FROM = {
+					add_to_variable = { investors = 1} 
+					if = {
+						limit = {
+							check_variable = {
+								investors > 2
+							}
+							check_variable = {
+								current_industry < 2
+							}
+						}
+						add_to_variable = { current_industry = 1 }
+					}
+					else_if = {
+						limit = {
+							check_variable = {
+								investors > 4
+							}
+							check_variable = {
+								current_industry < 3
+							}
+						}
+						add_to_variable = { current_industry = 1 }
+					}
+					else_if = {
+						limit = {
+							check_variable = {
+								investors > 6
+							}
+							check_variable = {
+								current_industry < 4
+							}
+						}
+						add_to_variable = { current_industry = 1 }
+					}
+				}
+			}
+		}
+		remove_effect = {}
+	}
+	mal_trade_external_mission = {
+		icon = mal_trade_profit
+		available = { 
+			custom_trigger_tooltip = {
+    			tooltip = mal_investors_tooltip	
+
+				ROOT = { 
+					check_variable = {
+					    var = current_industry
+					    value = num_of_available_civilian_factories
+					    compare = less_than_or_equals
+					}
+				}				
+			}
+		}
+		
+		activation = {                          
+            always = no                     
+        }
+        is_good = yes
+		visible = {
+			original_tag = MAL
+		}
+	
+		days_mission_timeout = 180
+		days_remove = 90 
+
+
+		cancel_trigger = {}
+
+		modifier = {}
+		timeout_effect = {
+			if = {
+				limit = { check_variable = { var = investors value = 3 compare = less_than_or_equals }
+				}
+				every_country = {
+					limit = { 
+						has_country_flag = mal_investor	
+					}	
+					add_timed_idea = {
+						idea = mal_bad_investment_idea
+						days = 60
+					}
+					clr_country_flag = mal_investor
+				}
+				add_timed_idea = {
+					idea = mal_unsuccessful_financial_year_idea
+					days = 180
+				}
+			}
+			if = {
+				limit = { 
+					check_variable = { var = investors value = 6 compare = less_than_or_equals }
+					check_variable = { var = investors value = 4 compare = greater_than_or_equals }
+				}
+				every_country = {
+					limit = { 
+						has_country_flag = mal_investor	
+					}	
+					add_timed_idea = {
+						idea = mal_bad_investment_idea_2
+						days = 60
+					}
+					clr_country_flag = mal_investor
+				}
+				add_timed_idea = {
+					idea = mal_unsuccessful_financial_year_idea_2
+					days = 180
+				}
+			}
+			if = {
+				limit = { 
+					check_variable = { var = investors value = 7 compare = greater_than_or_equals }
+				}
+				every_country = {
+					limit = { 
+						has_country_flag = mal_investor	
+					}	
+					add_timed_idea = {
+						idea = mal_bad_investment_idea_3
+						days = 120
+					}
+					clr_country_flag = mal_investor
+				}
+				add_timed_idea = {
+					idea = mal_unsuccessful_financial_year_idea_3
+					days = 180
+				}
+			}
+			clear_variable = investors
+			clear_variable = current_industry
+		}
+		complete_effect = {
+			if = {
+				limit = { check_variable = { var = investors value = 3 compare = less_than_or_equals }
+				}
+				every_country = {
+					limit = { 
+						has_country_flag = mal_investor	
+					}	
+					add_timed_idea = {
+						idea = mal_good_investment_idea
+						days = 120
+					}
+					clr_country_flag = mal_investor
+				}
+				add_timed_idea = {
+					idea = mal_successful_financial_year_idea
+					days = 180
+				}
+			}
+			if = {
+				limit = { 
+					check_variable = { var = investors value = 6 compare = less_than_or_equals }
+					check_variable = { var = investors value = 4 compare = greater_than_or_equals }
+				}
+				every_country = {
+					limit = { 
+						has_country_flag = mal_investor	
+					}	
+					add_timed_idea = {
+						idea = mal_good_investment_idea_2
+						days = 120
+					}
+					clr_country_flag = mal_investor
+				}
+				add_timed_idea = {
+					idea = mal_successful_financial_year_idea_2
+					days = 180
+				}
+			}
+			if = {
+				limit = { 
+					check_variable = { var = investors value = 7 compare = greater_than_or_equals }
+				}
+				every_country = {
+					limit = { 
+						has_country_flag = mal_investor	
+					}	
+					add_timed_idea = {
+						idea = mal_good_investment_idea_3
+						days = 120
+					}
+					clr_country_flag = mal_investor
+				}
+				add_timed_idea = {
+					idea = mal_successful_financial_year_idea_3
+					days = 180
+				}
+			}		
+			clear_variable = investors
+			clear_variable = current_industry		
+		}
+	}
+	mal_trade_usa = {
+		icon = hol_attract_foreign_investors
+		available = {
+			has_war = no
+			custom_trigger_tooltip = {
+			    tooltip = mal_available_factories_tooltip_2
+			   	check_variable = { var = mal_trade_factory_total value = 2 compare = greater_than_or_equals }
+			}
+		}
+		targets = { USA }
+		target_trigger = {
+			FROM = {
+				tag = USA
+			}
+		}
+		visible = {
+			original_tag = MAL
+			USA = {
+				has_war = no
+				is_subject = no
+			}
+				
+			#has_country_flag = mal_trade_usa_allowed
+			check_variable = { var = mal_trade_mission_number value = 4 compare = less_than_or_equals }	
+		}
+
+		modifier = {}
+		cost = 50
+		days_remove = 21
+		days_re_enable = 100
+
+		fixed_random_seed = no
+		ai_will_do = {
+			factor = 29
+		}
+
+		complete_effect = {
+			add_to_variable = { var = mal_trade_mission_number value = 1 }
+			add_offsite_building = { type = industrial_complex level = -2 } 
+			subtract_from_variable = { var = mal_trade_factory_total value = 2 }
+			
+		}
+		remove_effect = {
+			add_offsite_building = { type = industrial_complex level = 6 } 
+			add_to_variable = { var = mal_trade_factory_total value = 6 }
+			set_country_flag = mal_usa_flag
+			activate_mission = mal_trade_usa_mission
+		}
+	}
+	mal_trade_usa_mission = {
+		icon = mal_trade_profits
+		available = { 
+			always = no
+		}
+		
+		activation = {
+			has_country_flag = mal_usa_flag
+		}
+		visible = {
+
+		}
+		
+		days_mission_timeout = 65 
+		days_remove = 3 
+		is_good = yes
+		cancel_trigger = {
+		}
+
+		modifier = {}
+		timeout_effect = {
+
+			add_offsite_building = { type = industrial_complex level = -4 }
+			subtract_from_variable = { var = mal_trade_factory_total value = 4 }
+			
+			clr_country_flag = mal_usa_flag
+
+			subtract_from_variable = { var = mal_trade_mission_number value = 1 }
+			add_to_variable = { var = mal_trade_mission_total value = 1 }
+		}
+	}
+	mal_trade_france = {
+		icon = hol_attract_foreign_investors
+		available = {
+			has_war = no
+			custom_trigger_tooltip = {
+			    tooltip = mal_available_factories_tooltip_2
+			   	check_variable = { var = mal_trade_factory_total value = 2 compare = greater_than_or_equals }
+			}
+		}
+		targets = { FRA }
+		target_trigger = {
+			FROM = {
+				tag = FRA
+			}
+		}
+		visible = {
+			original_tag = MAL
+			FRA = {
+				has_war = no
+				is_subject = no
+			}
+			
+			check_variable = { var = mal_trade_mission_number value = 4 compare = less_than_or_equals }	
+		}
+
+		modifier = {}
+		cost = 30
+		days_remove = 21
+		days_re_enable = 100
+
+		fixed_random_seed = no
+		ai_will_do = {
+			factor = 29
+		}
+
+		complete_effect = {
+			add_to_variable = { var = mal_trade_mission_number value = 1 }
+			add_offsite_building = { type = industrial_complex level = -2 } 
+			subtract_from_variable = { var = mal_trade_factory_total value = 2 }
+
+		}
+		remove_effect = {
+			add_offsite_building = { type = industrial_complex level = 5 } 
+			add_to_variable = { var = mal_trade_factory_total value = 5 }
+			set_country_flag = mal_france_flag
+			activate_mission = mal_trade_france_mission
+		}
+	}
+	mal_trade_france_mission = {
+		icon = mal_trade_profits
+		available = { 
+			always = no
+		}
+		activation = {
+			has_country_flag = mal_france_flag
+		}
+		visible = {
+
+		}
+		
+		days_mission_timeout = 65 
+		days_remove = 3 
+		is_good = yes
+		cancel_trigger = {
+		}
+
+		modifier = {}
+		timeout_effect = {
+
+			add_offsite_building = { type = industrial_complex level = -3 }
+			subtract_from_variable = { var = mal_trade_factory_total value = 3 }
+			
+			clr_country_flag = mal_france_flag
+
+			subtract_from_variable = { var = mal_trade_mission_number value = 1 }
+			add_to_variable = { var = mal_trade_mission_total value = 1 }
+		}
+	}
+	
+	mal_trade_italy = {
+		icon = hol_attract_foreign_investors
+		available = {
+			has_war = no
+			custom_trigger_tooltip = {
+			    tooltip = mal_available_factories_tooltip_1
+			   	check_variable = { var = mal_trade_factory_total value = 1 compare = greater_than_or_equals }
+			}
+		}
+		targets = { ITA }
+		target_trigger = {
+			FROM = {
+				tag = ITA
+			}
+		}
+		visible = {
+			original_tag = MAL
+			OR = {
+				has_country_flag = mal_trade_italy_allowed
+				check_variable = { var = mal_trade_mission_total value = 4 compare = greater_than_or_equals }	
+
+			}
+
+			ITA = {
+				has_war = no
+				is_subject = no
+			}
+			check_variable = { var = mal_trade_mission_number value = 4 compare = less_than_or_equals }	
+		}
+
+		modifier = {}
+		cost = 20
+		days_remove = 21
+		days_re_enable = 100
+
+		fixed_random_seed = no
+		ai_will_do = {
+			factor = 29
+		}
+
+		complete_effect = {
+			add_to_variable = { var = mal_trade_mission_number value = 1 }
+			add_offsite_building = { type = industrial_complex level = -1 } 
+			subtract_from_variable = { var = mal_trade_factory_total value = 1 }
+		
+		}
+		remove_effect = {
+			add_offsite_building = { type = industrial_complex level = 3 }
+			add_to_variable = { var = mal_trade_factory_total value = 3 } 
+
+			set_country_flag = mal_italy_flag
+			activate_mission = mal_trade_italy_mission
+		}
+	}
+	mal_trade_italy_mission = {
+		icon = mal_trade_profits
+		available = { 
+			always = no
+		}
+		activation = {
+			has_country_flag = mal_italy_flag
+		}
+		visible = {
+
+		}
+		
+		days_mission_timeout = 65 
+		days_remove = 3 
+		is_good = yes
+		cancel_trigger = {
+		}
+
+		modifier = {}
+		timeout_effect = {
+
+			add_offsite_building = { type = industrial_complex level = -2 }
+			subtract_from_variable = { var = mal_trade_factory_total value = 2 }
+			
+			clr_country_flag = mal_italy_flag
+
+			subtract_from_variable = { var = mal_trade_mission_number value = 1 }
+			add_to_variable = { var = mal_trade_mission_total value = 1 }
+		}
+	}
+	mal_trade_holland = {
+		icon = hol_attract_foreign_investors
+		available = {
+			has_war = no
+			custom_trigger_tooltip = {
+			    tooltip = mal_available_factories_tooltip_1
+			   	check_variable = { var = mal_trade_factory_total value = 1 compare = greater_than_or_equals }
+			}
+		}
+		targets = { HOL }
+		target_trigger = {
+			FROM = {
+				tag = HOL
+			}
+		}
+		visible = {
+			original_tag = MAL
+			has_country_flag = mal_trade_holland_allowed
+			HOL = {
+				has_war = no
+				is_subject = no
+			}
+			check_variable = { var = mal_trade_mission_number value = 4 compare = less_than_or_equals }	
+		}
+
+		modifier = {}
+		cost = 20
+		days_remove = 21
+		days_re_enable = 100
+
+		fixed_random_seed = no
+		ai_will_do = {
+			factor = 29
+		}
+
+		complete_effect = {
+			add_to_variable = { var = mal_trade_mission_number value = 1 }
+			add_offsite_building = { type = industrial_complex level = -1 } 
+			subtract_from_variable = { var = mal_trade_factory_total value = 1 }
+		}
+		remove_effect = {
+			add_offsite_building = { type = industrial_complex level = 3 } 
+			add_to_variable = { var = mal_trade_factory_total value = 3 } 
+
+			set_country_flag = mal_holland_flag
+			activate_mission = mal_trade_holland_mission
+		}
+	}
+	mal_trade_holland_mission = {
+		icon = mal_trade_profits
+		available = { 
+			always = no
+		}
+		activation = {
+			has_country_flag = mal_holland_flag
+		}
+		visible = {
+
+		}
+		
+		days_mission_timeout = 65 
+		days_remove = 3 
+		is_good = yes
+		cancel_trigger = {
+		}
+
+		modifier = {}
+		timeout_effect = {
+
+			add_offsite_building = { type = industrial_complex level = -2 }
+			subtract_from_variable = { var = mal_trade_factory_total value = 2 }
+			
+			clr_country_flag = mal_holland_flag
+
+			subtract_from_variable = { var = mal_trade_mission_number value = 1 }
+			add_to_variable = { var = mal_trade_mission_total value = 1 }
+		}
+	}	
+}
+
+mal_mining_decisions = {
+
+    MAL_tungsten_mining_decline_1 = {
+
+        icon = tungsten
+
+        allowed = {
+            
+        }
+
+		highlight_state_targets = {
+			state = 833
+		}
+
+        #Fail trigger
+        available = {
+            833 = {
+				OR = {
+					has_state_flag = tungsten_mine_depleted
+					has_state_flag = tungsten_mine_reduction_1
+				}
+				
+			}
+        }
+
+        days_mission_timeout = 365
+
+        fire_only_once = yes
+
+        is_good = no
+
+        activation = {
+            controls_state = 833
+        }
+
+        #Success
+        timeout_effect = {
+            833 = { 
+				set_state_flag = tungsten_mine_reduction_1
+				save_event_target_as = state 
+				add_resource = {
+					type = tungsten
+					amount = -77
+				}				 
+			}            
+			country_event = malaysia.26
+			activate_mission = MAL_tungsten_mining_decline_2            
+        }
+        #Fail
+        complete_effect = {
+        #    833 = { 
+		#		set_state_flag = tungsten_mine_reduction_1
+		#		save_event_target_as = state 
+		#		add_resource = {
+		#			type = tungsten
+		#			amount = -100
+		#		}				 
+		#	}            
+		#	country_event = malaysia.26
+		#	activate_mission = MAL_tungsten_mining_decline_2
+        }
+	}
+    MAL_tungsten_mining_decline_2 = {
+
+        icon = tungsten
+
+        allowed = {
+            
+        }
+
+		highlight_state_targets = {
+			state = 833
+		}
+
+        #Fail trigger
+        available = {
+            833 = {
+				OR = {
+					has_state_flag = tungsten_mine_depleted
+					has_state_flag = tungsten_mine_reduction_2
+				}
+				
+			}
+        }
+
+        days_mission_timeout = 365
+
+        fire_only_once = yes
+
+        is_good = no
+
+        activation = {
+            833 = {
+				has_state_flag = tungsten_mine_reduction_1	
+			}
+			controls_state = 833
+        }
+
+        #Success
+        timeout_effect = {
+			833 = { 
+				set_state_flag = tungsten_mine_reduction_2
+				save_event_target_as = state 
+				add_resource = {
+					type = tungsten
+					amount = -77
+				}				 
+			}            
+			country_event = malaysia.26
+			activate_mission = MAL_tungsten_mining_decline_3            
+        }
+        #Fail
+        complete_effect = {
+        #    833 = { 
+		#		set_state_flag = tungsten_mine_reduction_2
+		#		save_event_target_as = state 
+		#		add_resource = {
+		#			type = tungsten
+		#			amount = -100
+		#		}				 
+		#	}            
+		#	country_event = malaysia.26
+		#	activate_mission = MAL_tungsten_mining_decline_3
+        }
+    }	
+	MAL_tungsten_mining_decline_3 = {
+
+        icon = tungsten
+
+		highlight_state_targets = {
+			state = 833
+		}
+
+        allowed = {
+            
+        }
+
+        #Fail trigger
+        available = {
+            833 = {
+				OR = {
+					has_state_flag = tungsten_mine_depleted
+					has_state_flag = tungsten_mine_reduction_3
+				}
+				
+			}
+        }
+
+        days_mission_timeout = 365
+
+        fire_only_once = yes
+
+        is_good = no
+
+        activation = {
+            833 = {
+				has_state_flag = tungsten_mine_reduction_2	
+			}
+			controls_state = 833
+        }
+
+        #Success
+        timeout_effect = {
+            833 = { 
+				set_state_flag = tungsten_mine_reduction_3
+				save_event_target_as = state 
+				add_resource = {
+					type = tungsten
+					amount = -77
+				}				 
+			}            
+			country_event = malaysia.26
+			activate_mission = MAL_tungsten_mining_decline_4            
+        }
+        #Fail
+        complete_effect = {
+        #    833 = { 
+		#		set_state_flag = tungsten_mine_reduction_3
+		#		save_event_target_as = state 
+		#		add_resource = {
+		#			type = tungsten
+		#			amount = -100
+		#		}				 
+		#	}            
+		#	country_event = malaysia.26
+		#	activate_mission = MAL_tungsten_mining_decline_4
+        }
+	}
+	MAL_tungsten_mining_decline_4 = {
+
+        icon = tungsten
+
+		highlight_state_targets = {
+			state = 833
+		}
+
+        allowed = {
+            
+        }
+
+        #Fail trigger
+        available = {
+
+        }
+
+        days_mission_timeout = 365
+
+        fire_only_once = yes
+
+        is_good = no
+
+        activation = {
+            833 = {
+				has_state_flag = tungsten_mine_reduction_3	
+			}
+			controls_state = 833
+        }
+
+        #Success
+        timeout_effect = {
+            833 = { 
+				set_state_flag = tungsten_mine_depleted
+				save_event_target_as = state 
+				add_resource = {
+					type = tungsten
+					amount = -65
+				}				 
+			}
+			activate_mission = MAL_tungsten_mining_decline_5            
+                   
+        }
+        #Fail
+        complete_effect = {
+        #    833 = { 
+		#		set_state_flag = tungsten_mine_depleted
+		#		save_event_target_as = state 
+		#		add_resource = {
+		#			type = tungsten
+		#			amount = -90
+		#		}				 
+		#	}            
+        #    country_event = malaysia.26
+        }
+	}
+	MAL_tungsten_mining_decline_5 = {
+
+        icon = tungsten
+
+		highlight_state_targets = {
+			state = 833
+		}
+
+        allowed = {
+            
+        }
+
+        #Fail trigger
+        available = {
+
+        }
+
+        days_mission_timeout = 365
+
+        fire_only_once = yes
+
+        is_good = no
+
+        activation = {
+            833 = {
+				has_state_flag = tungsten_mine_depleted	
+			}
+			controls_state = 833
+        }
+
+        #Success
+        timeout_effect = {
+            833 = { 
+				set_state_flag = tungsten_mine_depleted2
+				save_event_target_as = state 
+				add_resource = {
+					type = tungsten
+					amount = -40
+				}				 
+			}            
+            country_event = malaysia.26            
+        }
+        #Fail
+        complete_effect = {
+        #    833 = { 
+		#		set_state_flag = tungsten_mine_depleted
+		#		save_event_target_as = state 
+		#		add_resource = {
+		#			type = tungsten
+		#			amount = -90
+		#		}				 
+		#	}            
+        #    country_event = malaysia.26
+        }
+	}	
+	MAL_restrain_tungsten_extraction = {
+
+		icon = eng_propaganda_campaigns
+
+		allowed = {
+		
+		}
+
+		highlight_state_targets = {
+			state = 833
+		}
+
+		available = {
+			NOT = {
+				833 = {
+					has_state_flag = tungsten_mine_depleted
+				}
+			}
+		}
+
+		cost = 50
+
+		fire_only_once = no
+
+		days_re_enable = 365
+
+		ai_will_do = {
+			base = 10
+		}
+
+		days_remove = 90
+
+		modifier = {
+			
+		}
+
+		visible = {
+			controls_state = 833
+			OR = {
+				has_active_mission = MAL_tungsten_mining_decline_2
+				has_active_mission = MAL_tungsten_mining_decline_3
+				has_active_mission = MAL_tungsten_mining_decline_4
+			}
+			
+		}
+
+		complete_effect = {
+			if = {
+				limit = {
+					has_active_mission = MAL_tungsten_mining_decline_2
+				}
+				add_days_mission_timeout = {
+					mission = MAL_tungsten_mining_decline_2
+					days = 90
+				}					
+			}
+			if = {
+				limit = {
+					has_active_mission = MAL_tungsten_mining_decline_3
+				}
+				add_days_mission_timeout = {
+					mission = MAL_tungsten_mining_decline_3
+					days = 90
+				}					
+			}
+			if = {
+				limit = {
+					has_active_mission = MAL_tungsten_mining_decline_4
+				}
+				add_days_mission_timeout = {
+					mission = MAL_tungsten_mining_decline_4
+					days = 90
+				}					
+			}
+			833 = {
+				add_resource = {
+					type = tungsten
+					amount = -35
+				}
+			}												
+		}
+
+		remove_effect = {
+			833 = {
+				add_resource = {
+					type = tungsten
+					amount = 35
+				}
+			}
+
+		}
+
+	}		
+}

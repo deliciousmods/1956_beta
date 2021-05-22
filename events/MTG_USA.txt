@@ -1,0 +1,4628 @@
+﻿###########################
+# USA Events
+###########################
+
+add_namespace = mtg_usa_civil_war_fascists
+
+#initial event for the fascist uprising
+country_event = {
+	id = mtg_usa_civil_war_fascists.1
+	title = mtg_usa_civil_war_fascists.1.t
+	desc = mtg_usa_civil_war_fascists.1.desc
+	picture = GFX_report_event_gathering_protest
+
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mtg_usa_civil_war_fascists_1
+	}
+
+	
+	option = { # back down, for now
+		name = mtg_usa_civil_war_fascists.1.a
+		ai_chance = {
+			factor = 80
+		}
+		add_stability = -0.1
+		
+	}
+	option = { # Aggressive response
+		name = mtg_usa_civil_war_fascists.1.b
+		ai_chance = {
+			factor = 20
+		}
+		custom_effect_tooltip = mtg_usa_civil_war_warning_tt
+		add_political_power = -120
+		USA_congress_small_opposition = yes 
+		country_event = { id = mtg_usa_civil_war_fascists.2 days = 90  }
+	}
+}
+#
+##second event for the fascist uprising
+country_event = {
+	id = mtg_usa_civil_war_fascists.2
+	title = mtg_usa_civil_war_fascists.2.t
+	desc = mtg_usa_civil_war_fascists.2.desc
+	picture = GFX_report_event_generic_riot
+
+	fire_only_once = yes
+	is_triggered_only = yes
+	trigger = {
+		not = {
+			has_country_flag = mtg_usa_civil_war_fascists_2
+		}
+	}
+	option = { # welp
+		name = mtg_usa_civil_war_fascists.2.a
+		add_stability = -0.2	
+		set_country_flag = mtg_usa_civil_war_fascists_2
+		custom_effect_tooltip = fascists_uprising_tt
+		hidden_effect = {
+			country_event = { id = mtg_usa_civil_war_fascists.20 days = 200 }
+			country_event = { id = mtg_usa_civil_war_fascists.3 days = 15 }
+			if = {
+				limit = {
+					OR = {
+						has_completed_focus = USA_union_representation_act
+						has_completed_focus = USA_democratic_socialism
+					}
+				}
+				country_event = { id = mtg_usa_civil_war_fascists.4 days = 15 }
+			}
+		}
+	}
+}
+
+##dispatcher event - general
+country_event = {
+	id = mtg_usa_civil_war_fascists.3
+
+	is_triggered_only = yes
+	hidden = yes
+	trigger = {
+		has_war = no
+	}
+	immediate = {
+		random_list = {
+			25 = { country_event = { id = mtg_usa_civil_war_fascists.10 days = 5 random_days = 6 } } #armory raided
+			10 = { country_event = { id = mtg_usa_civil_war_fascists.11 days = 5 random_days = 6 } } #state refuses to transfer funds
+			#10 = { #general resigns
+			#	random_unit_leader = {
+			#		unit_leader_event = { id = mtg_usa_civil_war_fascists.12 } #days = 5 random_days = 6 } 
+			#	}
+			#} 
+			35 = { country_event = { id = mtg_usa_civil_war_fascists.13 days = 5 random_days = 6 } } #governor mobilizes national guard
+			20 = { country_event = { id = mtg_usa_civil_war_fascists.14 days = 5 random_days = 6 } } #soldiers desert
+		}
+	}
+}
+#
+##dispatcher event - industry
+country_event = {
+	id = mtg_usa_civil_war_fascists.4
+
+	is_triggered_only = yes
+	hidden = yes
+	trigger = {
+		has_war = no
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				not = {
+					has_country_flag = mucwf4
+				}
+			}
+			set_country_flag = mucwf4
+		}
+		random_list = {
+			67 = { country_event = mtg_usa_civil_war_fascists.15 } #industrialist moves factroy - military
+			33 = { country_event = mtg_usa_civil_war_fascists.16 } #industrialist moves factroy - civilian
+		}
+	}
+}
+#
+##armory raided
+country_event = {
+	id = mtg_usa_civil_war_fascists.10
+	title = mtg_usa_civil_war_fascists.10.t
+	desc = mtg_usa_civil_war_fascists.10.desc
+	picture = GFX_report_event_french_resistance_01
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.10.a
+		if = {
+			limit = {
+				has_equipment = {
+					infantry_equipment > 999
+				}
+			}
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = -1000
+			}
+		}
+		else = {
+			add_stability = -0.05
+		}
+		add_to_variable = { var = usa_fascists_arms_stockpile value = 1000 }
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_fascists.3
+				days = 15
+				random_days = 5
+			}
+		}
+	}
+}
+#
+##state refuses to pay
+country_event = {
+	id = mtg_usa_civil_war_fascists.11
+	title = mtg_usa_civil_war_fascists.11.t
+	desc = mtg_usa_civil_war_fascists.11.desc
+	picture = GFX_report_event_communist_leader
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.11.a
+		add_timed_idea = { idea = USA_state_funds_refused days = 30 }
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_fascists.3
+				days = 15
+				random_days = 5
+			}
+		}
+		add_to_variable = { var = usa_fascists_funds value = 1}
+	}
+}
+#
+##general resigns
+unit_leader_event = {
+	id = mtg_usa_civil_war_fascists.12
+	title = mtg_usa_civil_war_fascists.12.t
+	desc = mtg_usa_civil_war_fascists.12.desc
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.12.a
+		hidden_effect = {
+			USA = {
+				country_event = {
+					id = mtg_usa_civil_war_fascists.3
+					days = 15
+					random_days = 5
+				}
+			}
+		}
+	}
+}
+#
+##governor mobilizes national guard
+country_event = {
+	id = mtg_usa_civil_war_fascists.13
+	title = mtg_usa_civil_war_fascists.13.t
+	desc = mtg_usa_civil_war_fascists.13.desc
+	picture = GFX_report_event_soldiers_marching
+
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			random_owned_state = {
+				limit = {
+					is_core_of = ROOT
+					is_csa_state = yes
+					not = { has_state_flag = ng_mobilized }
+				}
+				set_state_flag = ng_mobilized
+				save_event_target_as = usa_ng_mobilized
+			}
+		}
+	}
+
+	option = {
+		name = mtg_usa_civil_war_fascists.13.a
+		event_target:usa_ng_mobilized = {
+			custom_effect_tooltip = citizen_militia_tt
+		}
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_fascists.3
+				days = 15
+				random_days = 5
+			}
+		}
+	}
+}
+#
+##soldiers desert
+country_event = {
+	id = mtg_usa_civil_war_fascists.14
+	title = mtg_usa_civil_war_fascists.14.t
+	desc = mtg_usa_civil_war_fascists.14.desc
+	picture = GFX_report_event_desertion_poster
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.14.a
+		if = {
+			limit = {
+				has_manpower > 9999
+			}
+			add_manpower = -10000
+		}
+		else = {
+			add_stability = -0.05
+		}
+		add_to_variable = { var = usa_fascists_recruits value = 10000 }
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_fascists.3
+				days = 15
+				random_days = 5
+			}
+		}
+	}
+}
+#
+##industrialist moves factory
+country_event = {
+	id = mtg_usa_civil_war_fascists.15
+	title = mtg_usa_civil_war_fascists.15.t
+	desc = mtg_usa_civil_war_fascists.15.desc
+	picture = GFX_report_event_generic_lend_lease
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.15.a
+		random_owned_state = {
+			limit = {
+				not = { is_csa_state = yes }
+				arms_factory > 0
+			}
+			remove_building = {
+				type = arms_factory
+				level = 1
+			}
+		}
+		random_owned_state = {
+			limit = {
+				is_csa_state = yes
+				free_building_slots = {
+					building = arms_factory
+					size > 0
+					include_locked = yes
+				}
+			}
+			add_extra_state_shared_building_slots = 1
+			add_building_construction = {
+				type = arms_factory
+				level = 1
+				instant_build = yes
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_fascists.4
+				days = 15
+				random_days = 5
+			}
+		}
+	}
+}
+##industrialist moves factory
+country_event = {
+	id = mtg_usa_civil_war_fascists.16
+	title = mtg_usa_civil_war_fascists.16.t
+	desc = mtg_usa_civil_war_fascists.16.desc
+	picture = GFX_report_event_generic_factory
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.16.a
+		random_owned_state = {
+			limit = {
+				not = { is_csa_state = yes }
+				industrial_complex > 0
+			}
+			remove_building = {
+				type = industrial_complex
+				level = 1
+			}
+		}
+		random_owned_state = {
+			limit = {
+				is_csa_state = yes
+				free_building_slots = {
+					building = industrial_complex
+					size > 0
+					include_locked = yes
+				}
+			}
+			add_extra_state_shared_building_slots = 1
+			add_building_construction = {
+				type = industrial_complex
+				level = 1
+				instant_build = yes
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_fascists.4
+				days = 20
+				random_days = 5
+			}
+		}
+	}
+}
+#
+##fascist uprising - first state secedes from the union
+country_event = {
+	id = mtg_usa_civil_war_fascists.20
+	title = mtg_usa_civil_war_fascists.20.t
+	desc = mtg_usa_civil_war_fascists.20.desc
+	picture = GFX_report_event_fascists_posing
+
+	is_triggered_only = yes
+	immediate = {
+		hidden_effect = {
+			set_global_flag = second_acw
+			CSA = { inherit_technology = ROOT }
+
+			random_owned_state = {
+				limit = {
+					is_csa_state = yes
+				}
+				CSA = {
+					transfer_state = PREV
+					add_state_core = PREV
+				}
+				save_event_target_as = CSAcapital
+				USA = { 
+					retire_ideology_leader = neutrality
+					remove_state_core = PREV 
+					add_state_claim = PREV
+					USA_congress_remove_state = yes
+				}
+			}
+			country_event = { id = mtg_usa_civil_war_fascists.21 days = 3 }
+			if = {
+				limit = {
+					not = {
+						has_completed_focus = USA_guarantee_the_american_dream
+					}
+				}
+				country_event = mtg_usa_civil_war_fascists.22 #forms neutral bloc
+			}	
+		}
+	}
+	option = {
+		name = mtg_usa_civil_war_fascists.20.a
+		effect_tooltip = {
+			event_target:CSAcapital = {
+				CSA = {
+					transfer_state = PREV
+					add_state_core = PREV
+				}
+				USA = { 
+					remove_state_core = PREV 
+					add_state_claim = PREV
+					USA_congress_remove_state = yes
+				}
+			}
+		}
+	}
+}
+##fascist uprising - confederacy forms
+country_event = {
+	id = mtg_usa_civil_war_fascists.21
+	title = mtg_usa_civil_war_fascists.21.t
+	desc = mtg_usa_civil_war_fascists.21.desc
+	picture = GFX_report_event_generic_battle
+
+	is_triggered_only = yes
+	immediate = {
+		hidden_effect = {
+			every_owned_state = {
+				limit = {
+					is_csa_state = yes
+				}
+				CSA = {
+					transfer_state = PREV
+					add_state_core = PREV
+				}
+				USA = { 
+					retire_ideology_leader = neutrality
+					remove_state_core = PREV 
+					add_state_claim = PREV
+					USA_congress_remove_state = yes
+				}
+			}
+		}
+		hidden_effect = {
+			news_event = { id = mtg_news.1 days = 3 }
+			set_global_flag = USA_civil_war_fired
+			USA_naval_mutinies_effect = yes
+			set_global_flag = second_acw
+			CSA = {
+				load_oob = "CSA_fascist_uprising"
+				#set_cosmetic_tag = USA_CSA				
+				set_war_support = 0.7
+				set_stability = 0.6
+				add_ideas = rt56_deo_vindice
+				add_political_power = 650
+				add_ideas = { 
+					limited_conscription
+					partial_economic_mobilisation 
+				}
+				retire_ideology_leader = democratic
+				retire_ideology_leader = neutrality
+				create_country_leader = {
+					name = "J. Edgar Hoover"
+					desc = "POLITICS_GETULIO_VARGAS_DESC"
+					picture = "gfx/leaders/USA/r56_portrait_John_Edgar_Hoovercivilian.dds"
+					expire = "1965.1.1"
+					ideology = despotism
+					traits = {
+						prince_of_terror
+						r56_trait_opposed_to_communism
+					}
+				}
+				add_manpower = USA.usa_fascists_recruits
+				add_timed_idea = { idea = CSA_spirit_of_rebellion days = 360 }
+				add_manpower = 175000
+				add_offsite_building = { type = industrial_complex level = USA.usa_fascists_funds }
+				add_offsite_building = { type = arms_factory level = 5 }
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = 27500
+				}
+				add_equipment_to_stockpile = {
+					type = support_equipment
+					amount = 750
+				}
+				add_equipment_to_stockpile = {
+					type = artillery_equipment
+					amount = 250
+				}
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = USA.usa_fascists_arms_stockpile
+				}
+				declare_war_on = { target = USA type = annex_everything }
+				add_ai_strategy = {
+					type = added_military_to_civilian_factory_ratio
+					value = 50
+				}
+				if = {
+					limit = {
+						any_owned_state = {
+							has_state_flag = ng_mobilized
+						}
+					}
+					division_template = {
+						name = "National Guard"
+						priority = 2
+						division_names_group = CSA_INF_01
+						regiments = {
+							infantry = { x = 0 y = 0 }
+							infantry = { x = 0 y = 1 }
+							infantry = { x = 0 y = 2 }
+							
+							infantry = { x = 1 y = 0 }
+							infantry = { x = 1 y = 1 }
+							infantry = { x = 1 y = 2 }
+							
+							infantry = { x = 2 y = 0 }
+							artillery_brigade = { x = 2 y = 1 }
+							artillery_brigade = { x = 2 y = 2 }
+						}
+					}
+				}
+				if = {
+					limit = {
+						366 = { has_state_flag = ng_mobilized }
+					}
+					366 = {
+						create_unit = {
+							division = "name = \"Florida National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						365 = { has_state_flag = ng_mobilized }
+					}
+					365 = {
+						create_unit = {
+							division = "name = \"Georgia National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						367 = { has_state_flag = ng_mobilized }
+					}
+					367 = {
+						create_unit = {
+							division = "name = \"Alabama National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						370 = { has_state_flag = ng_mobilized }
+					}
+					370 = {
+						create_unit = {
+							division = "name = \"Mississippi National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						362 = { has_state_flag = ng_mobilized }
+					}
+					362 = {
+						create_unit = {
+							division = "name = \"Virginia National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						363 = { has_state_flag = ng_mobilized }
+					}
+					363 = {
+						create_unit = {
+							division = "name = \"North Carolina National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						364 = { has_state_flag = ng_mobilized }
+					}
+					364 = {
+						create_unit = {
+							division = "name = \"South Carolina National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						371 = { has_state_flag = ng_mobilized }
+					}
+					371 = {
+						create_unit = {
+							division = "name = \"Louisiana National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						375 = { has_state_flag = ng_mobilized }
+					}
+					375 = {
+						create_unit = {
+							division = "name = \"Texas National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				if = {
+					limit = {
+						372 = { has_state_flag = ng_mobilized }
+					}
+					372 = {
+						create_unit = {
+							division = "name = \"Arkansas National Guard\" division_template = \"National Guard\" start_experience_factor = 0.7" 
+							owner = CSA
+						}
+					}
+				}
+				every_other_country = {
+					limit = {
+						OR = {
+							has_government = fascism
+							has_completed_focus = ENG_organize_the_blackshirts
+							has_completed_focus = FRA_far_right_leagues
+							has_completed_focus = FRA_action_francaise
+							#has_completed_focus = FRA_right_wing_rhetoric
+							#has_completed_focus = FRA_utilize_the_leagues
+						}
+						is_major = yes
+						has_war = no
+					}
+					add_ai_strategy = {
+						type = support
+						id = CSA
+						value = 400
+					}
+					add_ai_strategy = {
+						type = protect
+						id = CSA
+						value = 400
+					}
+					add_ai_strategy = {
+						type = send_volunteers_desire
+						id = CSA
+						value = 400
+					}
+				}
+				every_other_country = {
+					limit = {
+						has_government = democratic
+						not = {
+							OR = {
+								has_completed_focus = ENG_organize_the_blackshirts
+								has_completed_focus = FRA_far_right_leagues
+								has_completed_focus = FRA_action_francaise
+								#has_completed_focus = FRA_right_wing_rhetoric
+								#has_completed_focus = FRA_utilize_the_leagues
+							}
+						}
+						is_major = yes
+					}
+					add_ai_strategy = {
+						type = alliance 
+						id = CSA
+						value =-200
+					}
+					if = {
+						limit = {
+							USA = { not = { has_government = communism } }
+						}
+						add_ai_strategy = {
+							type = support
+							id = USA
+							value = 100
+						}
+					}
+				}
+				every_other_country = {
+					limit = {
+						has_government = communism
+						is_major = yes
+						has_war = no
+					}
+					add_ai_strategy = {
+						type = support
+						id = USA
+						value = 400
+					}
+					add_ai_strategy = {
+						type = send_volunteers_desire
+						id = USA
+						value = 400
+					}
+				}
+			}
+		}
+	}
+		
+	option = {
+		name = mtg_usa_civil_war_fascists.21.a
+		USA = {
+			every_unit_leader = {
+				limit = {
+					has_unit_leader_flag = retired
+				}
+				retire = no
+				set_nationality = CSA
+			}
+		}
+	}
+}
+
+##fascist uprising - neutral bloc forms
+country_event = {
+	id = mtg_usa_civil_war_fascists.22
+	title = mtg_usa_civil_war_fascists.22.t
+	desc = mtg_usa_civil_war_fascists.22.desc
+	picture = GFX_report_event_generic_rally_3
+
+	is_triggered_only = yes
+	immediate = {
+		hidden_effect = {
+			every_owned_state = {
+				limit = {
+					OR = {
+						state = 393
+						state = 396
+						state = 394
+						state = 392
+						state = 395
+						state = 391
+					}
+				}
+				USB = {
+					transfer_state = PREV
+					add_state_core = PREV
+				}
+				CSA = {
+					add_state_core = PREV
+				}
+				USA = {
+					USA_congress_remove_state = yes
+					
+				}
+			}		
+		}
+		hidden_effect = {
+			USB = {
+				set_stability = 1.0
+				set_war_support = 1.0
+				load_oob = "USB_defense_force"
+				country_event = { id = mtg_usa_civil_war_fascists.230 days = 5 }
+				
+			}
+		}
+	}
+	option = {
+		name = mtg_usa_civil_war_fascists.22.a #can't even deal with this right now
+		ai_chance = {
+			factor = 1
+		}
+		USA = {
+			give_guarantee = USB
+		}
+		CSA = {
+			give_guarantee = USB
+		}
+	}
+	option = {
+		name = mtg_usa_civil_war_fascists.22.b #traitors all
+		ai_chance = {
+			factor = 0
+		}
+		add_stability = -0.1
+		add_war_support = -0.1
+		every_owned_state = {
+			limit = {
+				OR = {
+					state = 369 # two more states join CSA because you are a meanie!
+					state = 373
+				}
+			}
+			CSA = {
+				transfer_state = PREV
+				add_state_core = PREV
+			}
+			USA = {
+				USA_congress_remove_state = yes
+			}
+		}
+		hidden_effect = {
+			CSA = {
+				annex_country = { target = USB transfer_troops = yes }
+				add_offsite_building = { type = arms_factory level = 3 }
+				add_manpower = 80000
+			}
+		}
+	}
+}
+# neutrals rejoin after war is over
+country_event = {
+	id = mtg_usa_civil_war_fascists.23
+	title = mtg_usa_civil_war_fascists.23.t
+	desc = mtg_usa_civil_war_fascists.23.desc
+	picture = GFX_report_event_pla_in_beijing
+
+	fire_only_once = yes
+	trigger = {
+		original_tag = USA
+		OR = {
+			AND = {
+				country_exists = USB
+				not = {
+					country_exists = CSA
+				}
+				not = {
+					has_war_with = USB
+				}
+			}
+			is_in_faction_with = USB
+		}
+	}
+
+	option = {
+		name = mtg_usa_civil_war_fascists.23.a 
+		annex_country = { target = USB } #all your peripherals are belong to us
+		every_owned_state = {
+			limit = {
+				is_core_of = USB
+			}
+			remove_core_of = USB
+			USA = {
+				add_state_core = PREV
+				USA_congress_add_state = yes
+			}
+		}
+	}
+}
+
+#hidden trigger event that moves the civil war along if communist support over 30%
+country_event = {
+	id = mtg_usa_civil_war_fascists.32
+	title = mtg_usa_civil_war_fascists.201.t
+	desc = mtg_usa_civil_war_fascists.201.desc
+	hidden = yes
+	trigger = {
+		original_tag = USA
+		communism > 0.3
+		has_country_flag = mtg_usa_civil_war_fascists_1
+		not = { has_country_flag = mtg_usa_civil_war_fascists_2 }
+	}
+	mean_time_to_happen = { days = 20 }
+	fire_only_once = yes
+	immediate = {
+		country_event = mtg_usa_civil_war_fascists.2
+	}
+	option = {
+		name = OK
+	}
+}
+
+#hidden trigger event to allow arms purchases in ACW
+country_event = {
+	id = mtg_usa_civil_war_fascists.230
+	hidden = yes
+	is_triggered_only = yes
+	fire_only_once = yes
+	immediate = {
+		USA_civil_war_order_weapons_get_factories = yes
+	}
+}
+
+#CSA volunteers come forward when taking over US state
+state_event = {
+	id = mtg_usa_civil_war_fascists.201
+	title = mtg_usa_civil_war_fascists.201.t
+	desc = mtg_usa_civil_war_fascists.201.desc
+	picture = GFX_report_event_spain_civil_war_volunteers_01
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.201.a #form separate units
+		ai_chance = {
+			factor = 75
+		}
+		if = {
+			limit = {
+				CSA = {
+					not = {
+						has_country_flag = USA_civil_war_volunteers
+					}
+				}
+			}
+			CSA = {
+				division_template = {
+					name = "Local Volunteers"
+					priority = 0
+					is_locked = yes
+					division_names_group = CSA_INF_01
+					regiments = {
+						infantry = { x = 0 y = 0 }
+						infantry = { x = 0 y = 1 }
+						infantry = { x = 0 y = 2 }
+						
+						infantry = { x = 1 y = 0 }
+						infantry = { x = 1 y = 1 }
+						infantry = { x = 1 y = 2 }
+					}
+				}
+				set_country_flag = USA_civil_war_volunteers
+			}
+		}
+		event_target:CSA_liberated_state = {
+			create_unit = {
+				division = "name = \"1. Local Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+				owner = CSA
+			}
+			create_unit = {
+				division = "name = \"2. Local Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+				owner = CSA
+			}
+		}
+	}
+	option = {
+		name = mtg_usa_civil_war_fascists.201.b #integrate them into the army
+		ai_chance = {
+			factor = 25
+			modifier = {
+				CSA = { has_manpower < 100000 }
+				factor = 3
+			}
+		}
+		CSA = {
+			add_manpower = 10000
+			add_equipment_to_stockpile = { type = infantry_equipment amount = 5000 }
+		}
+	}
+}
+
+#USA volunteers come forward when taking over US state
+state_event = {
+	id = mtg_usa_civil_war_fascists.202
+	title = mtg_usa_civil_war_fascists.202.t
+	desc = mtg_usa_civil_war_fascists.202.desc
+	picture = GFX_report_event_spain_civil_war_volunteers_02
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.201.a #form separate units
+		ai_chance = {
+			factor = 75
+		}
+		if = {
+			limit = {
+				USA = {
+					not = {
+						has_country_flag = USA_civil_war_volunteers
+					}
+				}
+			}
+			USA = {
+				division_template = {
+					name = "Local Volunteers"
+					priority = 0
+					is_locked = yes
+					division_names_group = USA_INF_01
+					regiments = {
+						infantry = { x = 0 y = 0 }
+						infantry = { x = 0 y = 1 }
+						infantry = { x = 0 y = 2 }
+						
+						infantry = { x = 1 y = 0 }
+						infantry = { x = 1 y = 1 }
+						infantry = { x = 1 y = 2 }
+					}
+				}
+				set_country_flag = USA_civil_war_volunteers
+			}
+		}
+		event_target:USA_liberated_state = {
+			create_unit = {
+				division = "name = \"1. Local Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+				owner = USA
+			}
+			create_unit = {
+				division = "name = \"2. Local Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+				owner = USA
+			}
+		}
+	}
+	option = {
+		name = mtg_usa_civil_war_fascists.201.b #integrate them into the army
+		ai_chance = {
+			factor = 25
+			modifier = {
+				USA = { has_manpower < 100000 }
+				factor = 3
+			}
+		}
+		USA = {
+			add_manpower = 10000
+			add_equipment_to_stockpile = { type = infantry_equipment amount = 5000 }
+		}
+	}
+}
+country_event = {
+	id = mtg_usa_civil_war_fascists.203
+	title = mtg_usa_civil_war_fascists.203.t
+	desc = mtg_usa_civil_war_fascists.203.desc
+	picture = GFX_report_event_saf_coup
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.203.a
+		USA_congress_remove_state = yes 
+	}
+		
+}
+
+#hidden trigger event that shows the civil war is over
+country_event = {
+	id = mtg_usa_civil_war_fascists.331
+	hidden = yes
+	trigger = {
+		has_global_flag = USA_civil_war_fired
+		original_tag = USA
+		not = { has_war_with = CSA }
+	}
+	mean_time_to_happen = { days = 20 }
+	fire_only_once = yes
+	immediate = {
+		news_event = { id = mtg_news.6 days = 3 random_days = 5 }
+		if = {
+			limit = {
+				has_country_flag = USA_civil_war_volunteers
+			}
+			delete_unit_template_and_units = { division_template = "Local Volunteers" }
+		}
+	}
+	option = {}
+}
+
+###  ### #   #  ##   ##  ###   ##  ###  ##     #  # ###  ###  ###  ## ### #  #  ##  
+#  # #   ## ## #  # #  # #  # #  #  #  #       #  # #  # #  #  #  #    #  ## # #    
+#  # ##  # # # #  # #    ###  ####  #   #      #  # ###  ###   #   #   #  # ## # ## 
+#  # #   #   # #  # #  # #  # #  #  #    #     #  # #    #  #  #    #  #  #  # #  # 
+###  ### #   #  ##   ##  #  # #  #  #  ##       ##  #    #  # ### ##  ### #  #  ##  
+
+
+add_namespace = mtg_usa_civil_war_democrats
+
+#initial event for the democrat uprising
+country_event = {
+	id = mtg_usa_civil_war_democrats.1
+	title = mtg_usa_civil_war_democrats.1.t
+	desc = mtg_usa_civil_war_democrats.1.desc
+	picture = GFX_report_event_worker_protests
+
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mtg_usa_civil_war_democrats_1
+	}
+
+	
+	option = { # back down, for now
+		name = mtg_usa_civil_war_democrats.1.a
+		ai_chance = {
+			factor = 80
+		}
+		add_stability = -0.1
+		add_war_support = -0.1	
+	}
+}
+
+#second event for the democrat uprising
+country_event = {
+	id = mtg_usa_civil_war_democrats.2
+	title = mtg_usa_civil_war_democrats.2.t
+	desc = mtg_usa_civil_war_democrats.2.desc
+	picture = GFX_report_event_worker_protests
+
+	fire_only_once = yes
+	is_triggered_only = yes
+	trigger = {
+		not = {
+			has_country_flag = mtg_usa_civil_war_democrats_2
+		}
+	}
+	immediate = {
+		set_country_flag = mtg_usa_civil_war_democrats_2
+		hidden_effect = {	
+			if = {
+				limit = {
+					NOT = {
+						has_completed_focus = USA_voter_registration_act
+						has_completed_focus = USA_ally_with_the_silver_shirts
+					}
+				}
+				country_event = { id = mtg_usa_civil_war_democrats.20 days = 280 }
+			}
+			else = {
+				country_event = { id = mtg_usa_civil_war_democrats.20 days = 180 }	
+			}
+		}
+		hidden_effect = {
+			country_event = { id = mtg_usa_civil_war_democrats.3 days = 15 random_days = 6 }
+			if = {
+				limit = {
+					has_completed_focus = USA_national_prosperity_program
+				}
+				country_event = { id = mtg_usa_civil_war_democrats.4 days = 15 random_days = 12 }
+			}
+		}
+	}
+
+	
+	option = { #
+		name = mtg_usa_civil_war_democrats.2.a
+		ai_chance = {
+			factor = 80
+		}
+		add_stability = -0.1
+		add_war_support = -0.1	
+	}
+}
+#hidden dispatch event - general
+country_event = {
+	id = mtg_usa_civil_war_democrats.3
+
+	hidden = yes
+	is_triggered_only = yes
+	trigger = {
+		has_war = no
+	}
+	immediate = {
+		random_list = {
+			35 = { country_event = mtg_usa_civil_war_democrats.10 } #armory raided
+			#15 = { 
+			#	random_army_leader = {
+			#		set_unit_leader_flag = retired
+			#		retire = yes
+			#		unit_leader_event = { id = mtg_usa_civil_war_democrats.12 }#general resigns
+			#	}
+			#}
+			35 = { country_event = mtg_usa_civil_war_democrats.13 } #soldiers desert
+			15 = { country_event = mtg_usa_civil_war_democrats.14 } #workers on strike
+		}	
+	}
+}
+
+#hidden dispatch event - industrial
+country_event = {
+	id = mtg_usa_civil_war_democrats.4
+
+	hidden = yes
+	is_triggered_only = yes
+	trigger = {
+		has_war = no
+	}
+	immediate = {
+		random_list = {
+			55 = { country_event = mtg_usa_civil_war_democrats.15 } #military factory
+			45 = { country_event = mtg_usa_civil_war_democrats.16 } #civilian factory
+		}	
+	}
+}
+
+##armory raided
+country_event = {
+	id = mtg_usa_civil_war_democrats.10
+	title = mtg_usa_civil_war_fascists.10.t
+	desc = mtg_usa_civil_war_democrats.10.desc
+	picture = GFX_report_event_french_resistance_01
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.10.a
+		if = {
+			limit = {
+				has_equipment = {
+					infantry_equipment > 999
+				}
+			}
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = -1000
+			}
+		}
+		else = {
+			add_stability = -0.05
+		}
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_democrats.3
+				days = 15
+				random_days = 5
+			}
+			country_event = { id = mtg_usa_civil_war_democrats.11 days = 14 }
+		}
+	}
+}
+##citizen militia forms
+country_event = {
+	id = mtg_usa_civil_war_democrats.11
+	title = mtg_usa_civil_war_democrats.11.t
+	desc = mtg_usa_civil_war_democrats.11.desc
+	picture = GFX_report_event_french_resistance_02
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_democrats.11.a
+		random_owned_state = {
+			limit = {
+				not = { is_csa_state = yes }
+				is_core_of = ROOT
+				is_controlled_by = ROOT
+				not = {
+					has_state_flag = citizen_militia
+				}
+			}
+			set_state_flag = citizen_militia 
+			custom_effect_tooltip = citizen_militia_tt
+		}
+	}
+}
+
+##general resigns
+unit_leader_event = {
+	id = mtg_usa_civil_war_democrats.12
+	title = mtg_usa_civil_war_fascists.12.t
+	desc = mtg_usa_civil_war_fascists.12.desc
+	picture = GFX_report_event_germany_politician_handshake
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.12.a
+		
+		hidden_effect = {
+			ROOT = { 
+				country_event = {
+					id = mtg_usa_civil_war_democrats.3
+					days = 15
+					random_days = 5
+				}
+			}
+		}
+	}
+}
+
+##soldiers desert
+country_event = {
+	id = mtg_usa_civil_war_democrats.13
+	title = mtg_usa_civil_war_fascists.14.t
+	desc = mtg_usa_civil_war_fascists.14.desc
+	picture = GFX_report_event_desertion_poster
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_fascists.14.a
+		if = {
+			limit = {
+				has_manpower > 9999
+			}
+			add_manpower = -10000
+		}
+		else = {
+			add_stability = -0.05
+		}
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_democrats.3
+				days = 15
+				random_days = 5
+			}
+		}
+	}
+}
+
+##workers on strike
+country_event = {
+	id = mtg_usa_civil_war_democrats.14
+	title = mtg_usa_civil_war_democrats.14.t
+	desc = mtg_usa_civil_war_democrats.14.desc
+	picture = GFX_report_event_generic_strike
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_democrats.14.a
+		add_timed_idea = { idea = strikes_1 days = 30 }
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_democrats.3
+				days = 15
+				random_days = 5
+			}
+		}
+	}
+}
+##industrialist moves factory
+country_event = {
+	id = mtg_usa_civil_war_democrats.15
+	title = mtg_usa_civil_war_democrats.15.t
+	desc = mtg_usa_civil_war_democrats.15.desc
+	picture = GFX_report_event_generic_lend_lease
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_democrats.15.a
+		random_owned_state = {
+			limit = {
+				not = { is_csa_state = yes }
+				is_controlled_by = ROOT
+				arms_factory > 0
+			}
+			remove_building = {
+				type = arms_factory
+				level = 1
+			}
+		}
+		random_owned_state = {
+			limit = {
+				is_csa_state = yes
+				is_controlled_by = ROOT
+				free_building_slots = {
+					building = arms_factory
+					size > 0
+					include_locked = yes
+				}
+			}
+			add_extra_state_shared_building_slots = 1
+			add_building_construction = {
+				type = arms_factory
+				level = 1
+				instant_build = yes
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_democrats.4
+				days = 15
+				random_days = 3
+			}
+		}
+	}
+}
+##industrialist moves factory
+country_event = {
+	id = mtg_usa_civil_war_democrats.16
+	title = mtg_usa_civil_war_democrats.16.t
+	desc = mtg_usa_civil_war_democrats.16.desc
+	picture = GFX_report_event_generic_factory
+
+	is_triggered_only = yes
+
+	option = {
+		name = mtg_usa_civil_war_democrats.16.a
+		random_owned_state = {
+			limit = {
+				not = { is_csa_state = yes }
+				is_controlled_by = ROOT
+				industrial_complex > 0
+			}
+			remove_building = {
+				type = industrial_complex
+				level = 1
+			}
+		}
+		random_owned_state = {
+			limit = {
+				is_csa_state = yes
+				is_controlled_by = ROOT
+				free_building_slots = {
+					building = industrial_complex
+					size > 0
+					include_locked = yes
+				}
+			}
+			add_extra_state_shared_building_slots = 1
+			add_building_construction = {
+				type = industrial_complex
+				level = 1
+				instant_build = yes
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mtg_usa_civil_war_democrats.4
+				days = 15
+				random_days = 3
+			}
+		}
+	}
+}
+##first state seceedes
+country_event = {
+	id = mtg_usa_civil_war_democrats.20
+	title = mtg_usa_civil_war_democrats.20.t
+	desc = mtg_usa_civil_war_democrats.20.desc
+	picture = GFX_report_event_ger_civil_war
+	immediate = {
+		hidden_effect = {
+			USA_set_president_effect = yes
+			retire_ideology_leader = democratic
+			set_temp_variable = { fascism_support = party_popularity@fascism }
+			multiply_temp_variable = { fascism_support = 100 }
+			set_temp_variable = { neutrality_support = 100 }
+			subtract_from_temp_variable = { neutrality_support = fascism_support }
+			start_civil_war = {
+				ruling_party = neutrality
+				ideology = democratic
+				size = 0.7
+				capital = 357
+				states = { 357 685 }
+			}
+			division_template = {
+				name = "Local Volunteers"
+				priority = 0
+				division_names_group = USA_INF_01
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+					
+					infantry = { x = 1 y = 0 }
+					infantry = { x = 1 y = 1 }
+					infantry = { x = 1 y = 2 }
+				}
+			}
+			set_popularities = {
+				neutrality = neutrality_support
+				fascism = fascism_support
+			}
+			country_event = { id = mtg_usa_civil_war_democrats.40 days = 20 }
+			set_global_flag = USA_civil_war_fired_democrats
+
+			#set_cosmetic_tag = USA_CSA
+			set_global_flag = second_acw
+			if = {
+
+				limit = {
+					has_unit_leader = 6298
+				}
+				remove_unit_leader = 6298
+			}
+			if = {
+				limit = {
+					has_unit_leader = 6299
+				}
+				remove_unit_leader = 6299 #I'm getting to old for this shit
+			}
+			random_other_country = {
+				limit = {
+					original_tag = USA
+					has_government = democratic
+				}
+				add_stability = 0.20
+				add_war_support = 0.05
+				add_ideas = rt56_sons_of_liberty 
+				set_capital = 357
+				save_global_event_target_as = USA_civil_war_democrats
+				set_cosmetic_tag = USA_REBEL
+				set_country_flag = r56_USA_democratic_rebel_check
+				hidden_effect = {
+					create_country_leader = {
+						name = "Franklin Delano Roosevelt"
+						desc = "POLITICS_FRANKLIN_DELANO_ROOSEVELT_DESC"
+						picture = "gfx/leaders/USA/r56_portrait_USA_Franklin_Roosevelt.dds"
+						expire = "1947.1.1"
+						ideology = liberalism
+						traits = {
+							liberal_grandee
+							figurehead_president
+							dislikes_germany
+						}
+					}
+					create_corps_commander = {
+						name = "Benjamin O. Davis"
+						picture = "r56_portrait_USA_Benjamin_O_Davis.dds"
+						traits = { career_officer old_guard cavalry_officer } 
+						skill = 3
+						attack_skill = 2
+						defense_skill = 1
+						planning_skill = 4
+						logistics_skill = 3
+					}
+					civil_war_anti_exploiter_punitive_action = yes
+					load_focus_tree = { tree = usa_focus keep_completed = no }
+					unlock_national_focus = USA_continue_the_new_deal
+					unlock_national_focus = USA_neutrality_act
+					set_variable = { var = senators_support value = 64 }
+					set_variable = { var = senators_total value = 96 }
+					set_variable = { var = representatives_support value = 288 }
+					set_variable = { var = representatives_total value = 435 }
+					set_variable = { var = quorum_low value = 39 }
+					set_variable = { var = quorum_medium value = 49 }
+					set_variable = { var = quorum_high value = 58 }
+				}
+				every_unit_leader = {
+					limit = {
+						has_id = 57
+					}
+					set_nationality = USA
+				}
+			}
+			if = {
+				limit = {
+					has_completed_focus = USA_recruit_the_free_corps
+				}
+				set_country_flag = USA_free_corps_raised
+				division_template = {
+					name = "Free Corps"
+						priority = 1
+						division_names_group = USA_INF_01
+						regiments = {
+						infantry = { x = 0 y = 0 }
+						infantry = { x = 0 y = 1 }
+						infantry = { x = 0 y = 2 }
+	
+						infantry = { x = 1 y = 0 }
+						infantry = { x = 1 y = 1 }
+						infantry = { x = 1 y = 2 }
+	
+						infantry = { x = 2 y = 0 }
+						infantry = { x = 2 y = 1 }
+						infantry = { x = 2 y = 2 }
+					}
+				}
+				366 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Florida\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Florida\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Florida\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				365 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Georgia\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Georgia\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Georgia\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				367 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Alabama\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Alabama\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Alabama\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				370 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Mississippi\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Mississippi\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Mississippi\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				362 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Virginia\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Virginia\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Virginia\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				363 = {
+					create_unit = {
+						division = "name = \"I/Free Corps North Carolina\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps North Carolina\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps North Carolina\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				364 = {
+					create_unit = {
+						division = "name = \"I/Free Corps South Carolina\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps South Carolina\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps South Carolina\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				371 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Louisiana\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Louisiana\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Louisiana\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				375 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Texas\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Texas\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Texas\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				372 = {
+					create_unit = {
+						division = "name = \"I/Free Corps Arkansas\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"II/Free Corps Arkansas\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+					create_unit = {
+						division = "name = \"III/Free Corps Arkansas\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+						owner = ROOT
+					}
+				}
+				if = {
+					limit = {
+						has_country_flag = MTG_work_with_the_bund
+					}
+					373 = {
+						create_unit = {
+							division = "name = \"I/Freikorps Missouri\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"II/Freikorps Missouri\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"III/Freikorps Missouri\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+					}
+					394 = {
+						create_unit = {
+							division = "name = \"I/Freikorps Wisconsin\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"II/Freikorps Wisconsin\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"III/Freikorps Wisconsin\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+					}
+					395 = {
+						create_unit = {
+							division = "name = \"I/Freikorps Illinois\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"II/Freikorps Illinois\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"III/Freikorps Illinois\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+					}
+					261 = {
+						create_unit = {
+							division = "name = \"I/Freikorps Ohio\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"II/Freikorps Ohio\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"III/Freikorps Ohio\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+					}
+					396 = {
+						create_unit = {
+							division = "name = \"I/Freikorps Indiana\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"II/Freikorps Indiana\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"III/Freikorps Indiana\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+					}
+					393 = {
+						create_unit = {
+							division = "name = \"I/Freikorps Michigan\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"II/Freikorps Michigan\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+						create_unit = {
+							division = "name = \"III/Freikorps Michigan\" division_template = \"Free Corps\" start_experience_factor = 0.5" 
+							owner = ROOT
+						}
+					}
+				}
+			}
+			every_other_country = {
+				limit = {
+					has_government = communism
+				}
+				add_ai_strategy = {
+					type = support
+					id = USA
+					value = -200
+				}
+				add_ai_strategy = {
+					type = send_volunteers_desire
+					id = USA
+					value = -200
+				}
+			}
+			every_other_country = {
+				limit = {
+					has_government = fascism
+				}
+				add_ai_strategy = {
+					type = support
+					id = USA
+					value = 201
+				}
+				add_ai_strategy = {
+					type = send_volunteers_desire
+					id = USA
+					value = 201
+				}
+			}
+			country_event = { id = mtg_usa_civil_war_democrats.21 days = 3}
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = smuggled_weapons
+			}
+			if = {
+				limit = {
+					has_completed_focus = USA_work_with_the_bund
+				}
+				country_event = mtg_usa_civil_war_democrats.22
+				every_owned_state = {
+					limit = {
+						OR = {
+							state = 373
+							state = 394
+							state = 395
+							state = 261
+							state = 396
+							state = 393
+						}
+					}
+					set_state_flag = bund_midwest
+				}
+			}
+			USA_foreign_support_training_effect = yes
+			USA_foreign_support_pilots_effect = yes
+		}
+	
+	}
+	is_triggered_only = yes
+	fire_only_once = yes
+	option = {
+		name = mtg_usa_civil_war_democrats.20.a
+		effect_tooltip = {
+			start_civil_war = {
+				ruling_party = neutrality
+				ideology = democratic
+				size = 0.7
+				capital = 357
+				states = { 357 685 }
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = USA_work_with_the_bund
+			}
+			create_corps_commander = {
+				name = "Fritz Kuhn"
+				GFX = GFX_portrait_ger_fritz_kuhn
+				skill = 2
+				attack_skill = 3
+				defense_skill = 2
+				planning_skill = 1
+				logistics_skill = 1
+				traits = { politically_connected }
+			}
+		}
+		
+		hidden_effect = {
+			news_event = { id = mtg_news.2 days = 3 }
+			random_other_country = {
+				limit = {
+					original_tag = USA
+					has_government = democratic
+				}
+				every_unit_leader = {
+					limit = {
+						has_id = 57
+					}
+					set_nationality = USA
+				}
+			}
+		}
+	}
+}
+
+##west coast seceeds
+country_event = {
+	id = mtg_usa_civil_war_democrats.21
+	title = mtg_usa_civil_war_democrats.21.t
+	desc = mtg_usa_civil_war_democrats.21.desc
+	picture = GFX_report_event_generic_rally2
+
+	is_triggered_only = yes
+	immediate = {
+		hidden_effect = {
+			every_owned_state = {
+				limit = {
+					OR = {
+						state = 385
+						state = 386
+						state = 378
+					}
+				}
+				event_target:USA_civil_war_democrats = {
+					transfer_state = PREV
+				}
+			}
+			event_target:USA_civil_war_democrats = {
+				division_template = {
+					name = "Local Volunteers"
+					priority = 0
+					division_names_group = USA_INF_01
+					regiments = {
+						infantry = { x = 0 y = 0 }
+						infantry = { x = 0 y = 1 }
+						infantry = { x = 0 y = 2 }
+						
+						infantry = { x = 1 y = 0 }
+						infantry = { x = 1 y = 1 }
+						infantry = { x = 1 y = 2 }
+					}
+				}
+				385 = {
+					create_unit = {
+						division = "name = \"Oregon Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Oregon Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Oregon Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Oregon Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+				386 = {
+					create_unit = {
+						division = "name = \"Washington Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Washington Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Washington Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Washington Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+				378 = {
+					create_unit = {
+						division = "name = \"California Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"California Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"California Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"California Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = mtg_usa_civil_war_democrats.21.a
+		add_stability = -0.05
+		effect_tooltip = {
+			every_owned_state = {
+				limit = {
+					OR = {
+						state = 385
+						state = 386
+						state = 378
+					}
+				}
+				event_target:USA_civil_war_democrats = {
+					transfer_state = PREV
+				}
+			}
+		}
+		country_event = { id = mtg_usa_civil_war_democrats.23 days = 3}
+	}
+}
+
+##midwestern bloc declares for loyalists
+country_event = {
+	id = mtg_usa_civil_war_democrats.22
+	title = mtg_usa_civil_war_democrats.22.t
+	desc = mtg_usa_civil_war_democrats.22.desc
+	picture = GFX_report_event_generic_sign_treaty3
+
+	is_triggered_only = yes
+	fire_only_once = yes
+	option = {
+		name = mtg_usa_civil_war_democrats.22.a
+		add_stability = 0.05
+	}	
+}
+
+##east coast seceeds
+country_event = {
+	id = mtg_usa_civil_war_democrats.23
+	title = mtg_usa_civil_war_democrats.23.t
+	desc = mtg_usa_civil_war_democrats.23.desc
+	picture = GFX_report_event_generic_rally2
+
+	is_triggered_only = yes
+	immediate = {
+		hidden_effect = {
+			every_owned_state = {
+				limit = {
+					OR = {
+						state = 358
+						state = 360
+						state = 359
+						state = 361
+					}
+				}
+				event_target:USA_civil_war_democrats = {
+					transfer_state = PREV
+				}
+			}
+			country_event = mtg_usa_civil_war_democrats.24
+		}
+	}
+	option = {
+		name = mtg_usa_civil_war_democrats.23.a
+		add_stability = -0.05
+		
+	}
+}
+
+#hidden dispatcher event to split remaining states
+country_event = {
+	id = mtg_usa_civil_war_democrats.24
+
+	is_triggered_only = yes
+	hidden = yes
+	immediate = {
+		#north west
+		random_list = {
+			70 = { country_event = { id = mtg_usa_civil_war_democrats.25 days = 6 random_days = 5 } }
+			30 = { country_event = { id = mtg_usa_civil_war_democrats.26 days = 6 random_days = 5 } }
+		}
+		#south west
+		random_list = {
+			70 = { country_event = { id = mtg_usa_civil_war_democrats.27 days = 6 random_days = 5 } }
+			30 = { country_event = { id = mtg_usa_civil_war_democrats.28 days = 6 random_days = 5 } }
+		}
+		#west midwest
+		random_list = {
+			70 = { country_event = { id = mtg_usa_civil_war_democrats.29 days = 6 random_days = 5 } }
+			30 = { country_event = { id = mtg_usa_civil_war_democrats.30 days = 6 random_days = 5 } }
+		}
+		if = {
+			limit = {
+				not = {
+					any_owned_state = {
+						has_state_flag = bund_midwest
+					}
+				}
+			}
+			#east midwest
+			random_list = {
+				70 = { country_event = { id = mtg_usa_civil_war_democrats.31 days = 3 } }
+				30 = { country_event = { id = mtg_usa_civil_war_democrats.22 days = 3 } }
+			}
+		}
+		country_event = { id = mtg_usa_civil_war_democrats.999 days = 15 }
+	}
+}
+
+##north west seceeds
+country_event = {
+	id = mtg_usa_civil_war_democrats.25
+	title = mtg_usa_civil_war_democrats.25.t
+	desc = mtg_usa_civil_war_democrats.25.desc
+	picture = GFX_report_event_generic_rally2
+
+	is_triggered_only = yes
+	
+	option = {
+		name = mtg_usa_civil_war_democrats.25.a
+		add_stability = -0.05
+		every_owned_state = {
+			limit = {
+				OR = {
+					state = 388
+					state = 387
+					state = 381
+				}
+			}
+			event_target:USA_civil_war_democrats = {
+				transfer_state = PREV
+			}
+		}
+		hidden_effect = {
+			event_target:USA_civil_war_democrats = {
+				387 = {
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+			}
+		}
+	}
+}
+##north western bloc declares for loyalists
+country_event = {
+	id = mtg_usa_civil_war_democrats.26
+	title = mtg_usa_civil_war_democrats.26.t
+	desc = mtg_usa_civil_war_democrats.26.desc
+	picture = GFX_report_event_generic_sign_treaty3
+
+	is_triggered_only = yes
+	fire_only_once = yes
+	option = {
+		name = mtg_usa_civil_war_democrats.26.a
+		add_stability = 0.05
+		hidden_effect = {
+			ROOT = {
+				387 = {
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Idaho Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+			}
+		}
+	}	
+}
+##south west seceeds
+country_event = {
+	id = mtg_usa_civil_war_democrats.27
+	title = mtg_usa_civil_war_democrats.27.t
+	desc = mtg_usa_civil_war_democrats.27.desc
+	picture = GFX_report_event_generic_rally2
+
+	is_triggered_only = yes
+	
+	option = {
+		name = mtg_usa_civil_war_democrats.27.a
+		add_stability = -0.05
+		every_owned_state = {
+			limit = {
+				OR = {
+					state = 379
+					state = 377
+					state = 380
+					state = 376
+					state = 382
+				}
+			}
+			event_target:USA_civil_war_democrats = {
+				transfer_state = PREV
+			}
+		}
+		hidden_effect = {
+			event_target:USA_civil_war_democrats = {
+				380 = {
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+			}
+		}
+	}
+}
+##south western bloc declares for loyalists
+country_event = {
+	id = mtg_usa_civil_war_democrats.28
+	title = mtg_usa_civil_war_democrats.28.t
+	desc = mtg_usa_civil_war_democrats.28.desc
+	picture = GFX_report_event_generic_sign_treaty3
+
+	is_triggered_only = yes
+	fire_only_once = yes
+	option = {
+		name = mtg_usa_civil_war_democrats.28.a
+		add_stability = 0.05
+		hidden_effect = {
+			ROOT = {
+				380 = {
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Utah Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+			}
+		}
+	}	
+}
+## west midwest seceeds
+country_event = {
+	id = mtg_usa_civil_war_democrats.29
+	title = mtg_usa_civil_war_democrats.29.t
+	desc = mtg_usa_civil_war_democrats.29.desc
+	picture = GFX_report_event_generic_rally2
+
+	is_triggered_only = yes
+	
+	option = {
+		name = mtg_usa_civil_war_democrats.29.a
+		add_stability = -0.05
+		every_owned_state = {
+			limit = {
+				OR = {
+					state = 389
+					state = 390
+					state = 384
+					state = 391
+					state = 392
+				}
+			}
+			event_target:USA_civil_war_democrats = {
+				transfer_state = PREV
+			}
+		}
+		hidden_effect = {
+			event_target:USA_civil_war_democrats = {
+				384 = {
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+			}
+		}
+	}
+}
+##west midwestern bloc declares for loyalists
+country_event = {
+	id = mtg_usa_civil_war_democrats.30
+	title = mtg_usa_civil_war_democrats.30.t
+	desc = mtg_usa_civil_war_democrats.30.desc
+	picture = GFX_report_event_generic_sign_treaty3
+
+	is_triggered_only = yes
+	fire_only_once = yes
+	option = {
+		name = mtg_usa_civil_war_democrats.30.a
+		add_stability = 0.05
+		hidden_effect = {
+			ROOT = {
+				384 = {
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Nebraska Volunteers\" division_template = \"Local Volunteers\" start_experience_factor = 0" 
+						owner = PREV
+					}
+				}
+			}
+		}
+	}
+}
+## east midwest seceeds
+country_event = {
+	id = mtg_usa_civil_war_democrats.31
+	title = mtg_usa_civil_war_democrats.31.t
+	desc = mtg_usa_civil_war_democrats.31.desc
+	picture = GFX_report_event_generic_rally2
+
+	is_triggered_only = yes
+	
+	option = {
+		name = mtg_usa_civil_war_democrats.31.a
+		add_stability = -0.05
+		every_owned_state = {
+			limit = {
+				OR = {
+					state = 373
+					state = 394
+					state = 395
+					state = 261
+					state = 396
+					state = 393
+				}
+			}
+			event_target:USA_civil_war_democrats = {
+				transfer_state = PREV
+			}
+		}
+	}
+}
+
+# hidden trigger event to move the civil war along if fascist support is > 30%
+country_event = {
+	id = mtg_usa_civil_war_democrats.32
+	hidden = yes
+	title = test_state.1.t
+	desc = test_state.1.d
+	
+	trigger = { 
+		original_tag = USA
+		has_country_flag = mtg_usa_civil_war_democrats_1
+		fascism > 0.3
+		not = { has_country_flag = mtg_usa_civil_war_democrats_2 }
+	}
+	mean_time_to_happen = { days = 20 }
+	fire_only_once = yes
+	immediate = {
+		country_event = mtg_usa_civil_war_democrats.2
+		
+	}
+	option = {
+		name = OK
+	}
+}
+#McArthur Offers Leadership
+country_event = {
+	id = mtg_usa_civil_war_democrats.40
+	title = mtg_usa_civil_war_democrats.40.t
+	desc = mtg_usa_civil_war_democrats.40.desc
+	picture = GFX_report_event_generic_rally2
+
+	is_triggered_only = yes
+	#accept
+	option = {
+		ai_chance = {
+			factor = 100
+		}
+		name = mtg_usa_civil_war_democrats.40.a
+		retire_ideology_leader = neutrality
+
+		create_corps_commander = {
+			name = "J. Edgar Hoover"
+			picture = "r56_portrait_John_Edgar_Hoovergeneral.dds"
+			skill = 1
+			attack_skill = 1
+			defense_skill = 1
+			planning_skill = 1
+			logistics_skill = 1
+			traits = { politically_connected media_personality harsh_leader }
+		}
+		custom_effect_tooltip = available_chief_of_army
+		show_ideas_tooltip = rt56_j_edgar_hoover_mil
+
+		create_country_leader = {
+			name = "Douglas MacArthur"
+			desc = "POLITICS_DOUGLAS_MACARTHUR_DESC"
+			picture = "Portrait_USA_Douglas_MacArthur.dds"
+			expire = "1965.1.1"
+			ideology = despotism
+			traits = {
+				american_caesar
+			}
+		}
+
+		hidden_effect = { #to make sure he doesn't disappear when country flips fascist
+			set_country_flag = r56_j_edgar_hoover_given_army_command #Unlocks Advisor 
+			create_country_leader = {
+				name = "Douglas MacArthur"
+				desc = "POLITICS_DOUGLAS_MACARTHUR_DESC"
+				picture = "Portrait_USA_Douglas_MacArthur.dds"
+				expire = "1965.1.1"
+				ideology = rexism
+				traits = {
+					american_caesar
+				}
+			}
+		}
+		random_unit_leader = {
+			limit = {
+				has_id = 57
+			}
+			retire = yes
+		}
+	}
+	#no thanks
+	option = {
+		ai_chance = {
+			factor = 0
+		}
+		name = mtg_usa_civil_war_democrats.40.b
+		
+	}
+}
+#Fascist Leadership challenge to McArthur
+country_event = {
+	id = mtg_usa_civil_war_democrats.41
+	title = mtg_usa_civil_war_democrats.41.t
+	desc = mtg_usa_civil_war_democrats.41.desc
+	picture = GFX_report_event_generic_rally2
+
+	trigger = {
+		original_tag = USA
+		has_government = fascism
+		has_civil_war = no
+		has_global_flag = USA_civil_war_fired_democrats
+		has_country_leader = { ruling_only = yes name = "Douglas MacArthur" }
+	}
+	mean_time_to_happen = { days = 20 }
+	fire_only_once = yes
+	#accept
+	option = {
+		name = mtg_usa_civil_war_democrats.41.a
+		ai_chance = {
+			factor = 70
+			modifier = {
+				has_war = yes
+				factor = 0.5
+			}
+		}
+		retire_country_leader = yes
+	}
+	#no thanks
+	option = {
+		ai_chance = {
+			factor = 30
+			modifier = {
+				has_global_flag = MTG_flag_955
+				factor = 0
+			}
+		}
+		name = mtg_usa_civil_war_democrats.41.b
+	}
+	option = {
+		trigger = {
+			has_global_flag = MTG_flag_955
+		}
+		ai_chance = {
+			factor = 30
+		}
+		name = mtg_usa_civil_war_democrats.41.c
+		create_country_leader = {
+			name = "Adam Hilt"
+			desc = "POLITICS_DOUGLAS_MACARTHUR_DESC"
+			picture = GFX_portrait_USA_mr_hilt
+			expire = "1965.1.1"
+			ideology = nazism
+			traits = {
+				great_architect
+			}
+		}
+	}
+	option = {
+		trigger = {
+			has_completed_focus = USA_send_lindbergh_to_germany
+		}
+		ai_chance = {
+			factor = 30
+		}
+		name = mtg_usa_civil_war_democrats.41.d
+		create_country_leader = {
+			name = "Charles Lindbergh"
+			desc = "POLITICS_DOUGLAS_MACARTHUR_DESC"
+			picture = GFX_portrait_USA_charles_lindbergh
+			expire = "1965.1.1"
+			ideology = fascism_ideology
+			traits = {
+				famous_aviator
+			}
+		}
+	}
+}
+
+##spawn citizen militias
+country_event = {
+	id = mtg_usa_civil_war_democrats.999
+	hidden = yes
+	is_triggered_only = yes
+	fire_only_once = yes
+	immediate = {
+		event_target:USA_civil_war_democrats = {
+			division_template = {
+				name = "Citizen Militia"
+				priority = 0
+				is_locked = yes
+				division_names_group = USA_INF_01
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+					
+					infantry = { x = 1 y = 0 }
+					infantry = { x = 1 y = 1 }
+					infantry = { x = 1 y = 2 }
+				}
+			}
+			every_owned_state = {
+				limit = {
+					is_controlled_by = event_target:USA_civil_war_democrats
+					has_state_flag = citizen_militia
+				}
+				state_event = { id =  mtg_usa_civil_war_democrats.1000 trigger_for = controller }
+			}
+		}
+		set_country_flag = citizen_militia_spawned
+	}
+}
+##spawn citizen militias
+state_event = {
+	id = mtg_usa_civil_war_democrats.1000
+	hidden = yes
+	is_triggered_only = yes
+	immediate = {
+		create_unit = {
+			division = "name = \"1. Citizen Militia\" division_template = \"Citizen Militia\" start_experience_factor = 0" 
+			owner = PREV
+		}
+		create_unit = {
+			division = "name = \"2. Citizen Militia\" division_template = \"Citizen Militia\" start_experience_factor = 0" 
+			owner = PREV
+		}
+		create_unit = {
+			division = "name = \"3. Citizen Militia\" division_template = \"Citizen Militia\" start_experience_factor = 0" 
+			owner = PREV
+		}
+	}
+}
+add_namespace = mtg_usa_canadian_corridor
+
+ ##   ##  #  #  ##  ###  ###  ##  #  #      ##   ##  ###  ###  ### ###   ##  ###  
+#  # #  # ## # #  # #  #  #  #  # ## #     #  # #  # #  # #  #  #  #  # #  # #  # 
+#    #### # ## #### #  #  #  #### # ##     #    #  # ###  ###   #  #  # #  # ###  
+#  # #  # #  # #  # #  #  #  #  # #  #     #  # #  # #  # #  #  #  #  # #  # #  # 
+ ##  #  # #  # #  # ###  ### #  # #  #      ##   ##  #  # #  # ### ###   ##  #  # 
+
+
+##intial event for Canada
+country_event = {
+	id = mtg_usa_canadian_corridor.1
+	title = mtg_usa_canadian_corridor.1.t
+	desc = mtg_usa_canadian_corridor.1.desc
+	picture = GFX_report_event_canada_patriation
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_canadian_corridor.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+		}
+		add_stability = -0.05
+		FROM = {
+			country_event = mtg_usa_canadian_corridor.2
+		}
+		effect_tooltip = {
+			FROM = {
+				transfer_state = 740
+				transfer_state = 473
+				transfer_state = 739
+				transfer_state = 471
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_canadian_corridor.1.b
+		ai_chance = {
+			factor = 70
+		}
+		add_war_support = 0.05
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		FROM = {
+			country_event = mtg_usa_canadian_corridor.3
+		}
+
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = take_state
+					target = CAN
+					generator = { 740 473 739 471 }
+				}
+			}
+		}
+	}
+}
+
+##Canada agrees!
+country_event = {
+	id = mtg_usa_canadian_corridor.2
+	title = mtg_usa_canadian_corridor.2.t
+	desc = mtg_usa_canadian_corridor.2.desc
+	picture = GFX_report_event_canada_treaty
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_canadian_corridor.2.a
+		transfer_state = 740
+		transfer_state = 473
+		transfer_state = 739
+		transfer_state = 471
+	}
+}
+
+##Canada refuses
+country_event = {
+	id = mtg_usa_canadian_corridor.3
+	title = mtg_usa_canadian_corridor.3.t
+	desc = mtg_usa_canadian_corridor.3.desc
+	picture = GFX_report_event_canadian_artillery
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_canadian_corridor.3.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = take_state
+			target = CAN
+			generator = { 740 473 739 471 }
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_canadian_corridor.3.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+add_namespace = mtg_usa_southern_threat
+
+ ##  ##  #  # ### #  # ### ###  #  #     ### #  # ###  ###  ##  ### 
+#   #  # #  #  #  #  # #   #  # ## #      #  #  # #  # #   #  #  #  
+ #  #  # #  #  #  #### ##  ###  # ##      #  #### ###  ##  ####  #  
+  # #  # #  #  #  #  # #   #  # #  #      #  #  # #  # #   #  #  #  
+##   ##   ##   #  #  # ### #  # #  #      #  #  # #  # ### #  #  #  
+
+
+##intial event for Mexico
+country_event = {
+	id = mtg_usa_southern_threat.1
+	title = mtg_usa_southern_threat.1.t
+	desc = mtg_usa_southern_threat.1.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_southern_threat.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+		}
+		add_stability = -0.05
+		FROM = {
+			country_event = mtg_usa_southern_threat.2
+		}
+		effect_tooltip = {
+			FROM = {
+				puppet = MEX
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_southern_threat.1.b
+		ai_chance = {
+			factor = 70
+		}
+		add_war_support = 0.05
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		FROM = {
+			country_event = mtg_usa_southern_threat.3
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = MEX
+				}
+			}
+		}
+	}
+}
+
+##Mexico agrees!
+country_event = {
+	id = mtg_usa_southern_threat.2
+	title = mtg_usa_southern_threat.2.t
+	desc = mtg_usa_southern_threat.2.desc
+	picture = GFX_report_event_tanks_mexico_city
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_southern_threat.2.a
+		puppet = FROM
+	}
+}
+
+##Mexico refuses
+country_event = {
+	id = mtg_usa_southern_threat.3
+	title = mtg_usa_southern_threat.3.t
+	desc = mtg_usa_southern_threat.3.desc
+	picture = GFX_report_event_soldiers_marching
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_southern_threat.3.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = MEX
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_southern_threat.3.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+add_namespace = mtg_usa_north_american_dominion
+
+#  #  ##  ###  ### #  #      ##  #   # ### ###  ###  ##   ##  #  #     ###   ##  #   # ### #  # ###  ##  #  # 
+## # #  # #  #  #  #  #     #  # ## ## #   #  #  #  #  # #  # ## #     #  # #  # ## ##  #  ## #  #  #  # ## # 
+# ## #  # ###   #  ####     #### # # # ##  ###   #  #    #### # ##     #  # #  # # # #  #  # ##  #  #  # # ## 
+#  # #  # #  #  #  #  #     #  # #   # #   #  #  #  #  # #  # #  #     #  # #  # #   #  #  #  #  #  #  # #  # 
+#  #  ##  #  #  #  #  #     #  # #   # ### #  # ###  ##  #  # #  #     ###   ##  #   # ### #  # ###  ##  #  # 
+
+
+##US demands subjugation
+country_event = {
+	id = mtg_usa_north_american_dominion.1
+	title = mtg_usa_north_american_dominion.1.t
+	desc = mtg_usa_north_american_dominion.1.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_north_american_dominion.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+		}
+		FROM = {
+			country_event = mtg_usa_north_american_dominion.2
+		}
+		effect_tooltip = {
+			FROM = {
+				puppet = ROOT
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_southern_threat.1.b
+		ai_chance = {
+			factor = 70
+		}
+		FROM = {
+			country_event = mtg_usa_north_american_dominion.3
+		}
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = ROOT
+				}
+			}
+		}
+	}
+}
+##Country agrees!
+country_event = {
+	id = mtg_usa_north_american_dominion.2
+	title = mtg_usa_north_american_dominion.2.t
+	desc = mtg_usa_north_american_dominion.2.desc
+	picture = GFX_report_event_generic_sign_treaty3
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_north_american_dominion.2.a
+		puppet = FROM
+	}
+}
+
+##Country refuses
+country_event = {
+	id = mtg_usa_north_american_dominion.3
+	title = mtg_usa_north_american_dominion.3.t
+	desc = mtg_usa_north_american_dominion.3.desc
+	picture = GFX_report_event_british_inspect_troops
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_north_american_dominion.3.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = FROM
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_north_american_dominion.3.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+
+add_namespace = mtg_usa_strategic_interests
+
+ ## ### ###   ##  ###  ##  ###  ##      ### #  # ### ### ###  ###  ## ###  ## 
+#    #  #  # #  #  #  #     #  #  #      #  ## #  #  #   #  # #   #    #  #   
+ #   #  ###  ####  #  # ##  #  #         #  # ##  #  ##  ###  ##   #   #   #  
+  #  #  #  # #  #  #  #  #  #  #  #      #  #  #  #  #   #  # #     #  #    # 
+##   #  #  # #  #  #   ##  ###  ##      ### #  #  #  ### #  # ### ##   #  ##  
+
+
+##US demands colonies
+country_event = {
+	id = mtg_usa_strategic_interests.1
+	title = mtg_usa_strategic_interests.1.t
+	desc = mtg_usa_strategic_interests.1.desc
+	picture = GFX_report_event_generic_conference
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_strategic_interests.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+			modifier = {
+				has_war = yes
+				factor = 2
+			}
+		}
+		FROM = {
+			country_event = { id = mtg_usa_strategic_interests.2 days = 3 random_days = 1}
+		}
+		effect_tooltip = {
+			FROM = {
+				if = {
+					limit = {
+						has_full_control_of_state = 118
+					}
+					transfer_state = 118
+				}
+				if = {
+					limit = {
+						has_full_control_of_state = 326
+					}
+					transfer_state = 326
+				}
+			}
+			if = {
+				limit = {
+					336 = {
+						OWNER = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				336 = {
+					OWNER = {
+						USA = {
+							puppet = PREV
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_full_control_of_state = 336
+				}
+				USA = {
+					transfer_state = 336
+				}
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_strategic_interests.1.b
+		ai_chance = {
+			factor = 70
+		}
+		FROM = {
+			country_event = mtg_usa_strategic_interests.3
+		}
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = ROOT
+				}
+			}
+		}
+	}
+}
+##Country agrees!
+country_event = {
+	id = mtg_usa_strategic_interests.2
+	title = mtg_usa_strategic_interests.2.t
+	desc = mtg_usa_strategic_interests.2.desc
+	picture = GFX_report_event_generic_military_parade
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_strategic_interests.2.a
+		if = {
+			limit = {
+				FROM = { has_full_control_of_state = 118 }
+			}
+			transfer_state = 118
+		}
+		if = {
+			limit = {
+				FROM = { has_full_control_of_state = 326 }
+			}
+			transfer_state = 326
+		}
+		if = {
+			limit = {
+				336 = {
+					CONTROLLER = {
+						is_subject_of = FROM
+					}
+				}
+			}
+			336 = {
+				CONTROLLER = {
+					USA = {
+						puppet = PREV
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				FROM = { has_full_control_of_state = 336 }
+			}
+			USA = {
+				transfer_state = 336
+			}
+		}
+	}
+}
+
+##Country refuses
+country_event = {
+	id = mtg_usa_strategic_interests.3
+	title = mtg_usa_strategic_interests.3.t
+	desc = mtg_usa_strategic_interests.3.desc
+	picture = GFX_report_event_british_artillery
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_strategic_interests.3.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = FROM
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_strategic_interests.3.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+
+add_namespace = mtg_usa_pacific_pacification
+
+###   ##   ##  ### ### ###  ##      ###   ##   ##  ### ### ###  ##   ##  ### ###  ##  #  # 
+#  # #  # #  #  #  #    #  #  #     #  # #  # #  #  #  #    #  #  # #  #  #   #  #  # ## # 
+###  #### #     #  ##   #  #        ###  #### #     #  ##   #  #    ####  #   #  #  # # ## 
+#    #  # #  #  #  #    #  #  #     #    #  # #  #  #  #    #  #  # #  #  #   #  #  # #  # 
+#    #  #  ##  ### #   ###  ##      #    #  #  ##  ### #   ###  ##  #  #  #  ###  ##  #  # 
+
+
+##US demands colonies - to AST/NZL if independent, otherwise to britain
+country_event = {
+	id = mtg_usa_pacific_pacification.1
+	title = mtg_usa_pacific_pacification.1.t
+	desc = {
+		text = mtg_usa_pacific_pacification.1.desc_a 
+		trigger = {
+			OR = {
+				AST = { is_subject = yes }
+				NZL = { is_subject = yes }
+			}
+			NOT = {
+				OR = {
+					original_tag = AST
+					original_tag = NZL
+				}
+			}
+		}
+	}
+	desc = {
+		text = mtg_usa_pacific_pacification.1.desc_b 
+		trigger = {
+			OR = {
+				AST = { is_subject = no }
+				NZL = { is_subject = no }
+			}
+			OR = {
+				original_tag = AST
+				original_tag = NZL
+			}
+		}
+	}
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_pacific_pacification.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+			modifier = {
+				has_war = yes
+				factor = 2
+			}
+		}
+		FROM = {
+			country_event = mtg_usa_pacific_pacification.2
+		}
+		effect_tooltip = {
+			FROM = {
+				puppet = AST
+				puppet = NZL
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_pacific_pacification.1.b
+		ai_chance = {
+			factor = 70
+		}
+		FROM = {
+			country_event = mtg_usa_pacific_pacification.3
+		}
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = ROOT
+				}
+			}
+		}
+	}
+}
+##Country agrees!
+country_event = {
+	id = mtg_usa_pacific_pacification.2
+	title = mtg_usa_pacific_pacification.2.t
+	desc = mtg_usa_pacific_pacification.2.desc
+	picture = GFX_report_event_ast_planning
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_pacific_pacification.2.a
+		if = {
+			limit = {
+				AST = {
+					is_subject = yes
+				}
+			}
+			puppet = AST
+		}
+		if = {
+			limit = {
+				NZL = {
+					is_subject = yes
+				}
+			}
+			puppet = NZL
+		}
+		if = {
+			limit = {
+				FROM = {
+					OR = {
+						original_tag = AST
+						original_tag = NZL
+					}
+				}
+			}
+			puppet = FROM
+		}
+	}
+}
+
+##Country refuses
+country_event = {
+	id = mtg_usa_pacific_pacification.3
+	title = mtg_usa_pacific_pacification.3.t
+	desc = mtg_usa_pacific_pacification.3.desc
+	picture = GFX_report_event_ast_troops_landing
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_pacific_pacification.3.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = FROM
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_pacific_pacification.3.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+
+ ## ###  ##  #  # ###  ###      ##   ## ###  ##  
+#   #   #  # #  # #  # #       #  # #    #  #  # 
+ #  ##  #    #  # ###  ##      ####  #   #  #### 
+  # #   #  # #  # #  # #       #  #   #  #  #  # 
+##  ###  ##   ##  #  # ###     #  # ##  ### #  # 
+
+
+add_namespace = mtg_usa_secure_asia
+##puppet demand for Siam
+##intial event for Siam
+country_event = {
+	id = mtg_usa_secure_asia.1
+	title = mtg_usa_secure_asia.1.t
+	desc = mtg_usa_secure_asia.1.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_secure_asia.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+		}
+		add_stability = -0.05
+		FROM = {
+			country_event = mtg_usa_secure_asia.2
+		}
+		effect_tooltip = {
+			FROM = {
+				puppet = PREV
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_secure_asia.1.b
+		ai_chance = {
+			factor = 70
+		}
+		add_war_support = 0.05
+		FROM = {
+			country_event = mtg_usa_secure_asia.3
+		}
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = PREV
+				}
+			}
+		}
+	}
+}
+
+##Siam agrees!
+country_event = {
+	id = mtg_usa_secure_asia.2
+	title = mtg_usa_secure_asia.2.t
+	desc = mtg_usa_secure_asia.2.desc
+	picture = GFX_report_event_japanese_soldiers_03
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_secure_asia.2.a
+		puppet = FROM
+	}
+}
+
+##Siam refuses
+country_event = {
+	id = mtg_usa_secure_asia.3
+	title = mtg_usa_secure_asia.3.t
+	desc = mtg_usa_secure_asia.3.desc
+	picture = GFX_report_event_chinese_soldiers_01
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_secure_asia.3.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = FROM
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_secure_asia.3.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+
+##transfer demand for DEI
+##intial event for DEI
+country_event = {
+	id = mtg_usa_secure_asia.4
+	title = mtg_usa_secure_asia.4.t
+	desc = mtg_usa_secure_asia.4.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_secure_asia.4.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+		}
+		add_stability = -0.05
+		FROM = {
+			country_event = mtg_usa_secure_asia.5
+		}
+		effect_tooltip = {
+			FROM = {
+				puppet = INS
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_secure_asia.4.b
+		ai_chance = {
+			factor = 70
+		}
+		add_war_support = 0.05
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		FROM = {
+			country_event = mtg_usa_secure_asia.6
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = INS
+				}
+			}
+		}
+	}
+}
+
+##DEI agrees!
+country_event = {
+	id = mtg_usa_secure_asia.5
+	title = mtg_usa_secure_asia.5.t
+	desc = mtg_usa_secure_asia.5.desc
+	picture = GFX_report_event_indonesia_handover
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_secure_asia.5.a
+		puppet = INS
+	}
+}
+
+##DEI refuses
+country_event = {
+	id = mtg_usa_secure_asia.6
+	title = mtg_usa_secure_asia.6.t
+	desc = mtg_usa_secure_asia.6.desc
+	picture = GFX_report_event_dutch_soldiers_indonesia
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_secure_asia.6.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = INS
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_secure_asia.6.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+
+##transfer demand for French indochina
+##intial event for France
+country_event = {
+	id = mtg_usa_secure_asia.7
+	title = mtg_usa_secure_asia.7.t
+	desc = mtg_usa_secure_asia.7.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_secure_asia.7.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+		}
+		add_stability = -0.05
+		FROM = {
+			country_event = mtg_usa_secure_asia.8
+		}
+		effect_tooltip = {
+			FROM = {
+				transfer_state = 671
+				transfer_state = 670
+				transfer_state = 286
+				transfer_state = 741
+				transfer_state = 851
+				transfer_state = 852
+				transfer_state = 853
+				transfer_state = 854
+				transfer_state = 855
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_secure_asia.7.b
+		ai_chance = {
+			factor = 70
+		}
+		add_war_support = 0.05
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		FROM = {
+			country_event = mtg_usa_secure_asia.9
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = PREV
+				}
+			}
+		}
+	}
+}
+
+##FRA agrees!
+country_event = {
+	id = mtg_usa_secure_asia.8
+	title = mtg_usa_secure_asia.8.t
+	desc = mtg_usa_secure_asia.8.desc
+	picture = GFX_report_event_generic_conference
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_secure_asia.8.a
+			transfer_state = 671
+			transfer_state = 670
+			transfer_state = 286
+			transfer_state = 741
+			transfer_state = 851
+			transfer_state = 852
+			transfer_state = 853
+			transfer_state = 854
+			transfer_state = 855
+	}
+}
+
+##FRA refuses
+country_event = {
+	id = mtg_usa_secure_asia.9
+	title = mtg_usa_secure_asia.9.t
+	desc = mtg_usa_secure_asia.9.desc
+	picture = GFX_report_event_degaulle_inspect_troops
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_secure_asia.9.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = FRA
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_secure_asia.9.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+
+add_namespace = mtg_usa_protect_south_america
+
+###  ###   ##  ### ###  ##  ###      ##  ##  #  # ### #  #      ##  #   # ### ###  ###  ##   ##  
+#  # #  # #  #  #  #   #  #  #      #   #  # #  #  #  #  #     #  # ## ## #   #  #  #  #  # #  # 
+###  ###  #  #  #  ##  #     #       #  #  # #  #  #  ####     #### # # # ##  ###   #  #    #### 
+#    #  # #  #  #  #   #  #  #        # #  # #  #  #  #  #     #  # #   # #   #  #  #  #  # #  # 
+#    #  #  ##   #  ###  ##   #      ##   ##   ##   #  #  #     #  # #   # ### #  # ###  ##  #  # 
+
+
+##intial event 
+country_event = {
+	id = mtg_usa_protect_south_america.1
+	title = mtg_usa_protect_south_america.1.t
+	desc = mtg_usa_protect_south_america.1.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_protect_south_america.1.a
+		ai_chance = {
+			factor = 30
+			modifier = {
+				is_in_faction = no
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				factor = 3
+			}
+		}
+		add_stability = -0.05
+		FROM = {
+			country_event = mtg_usa_protect_south_america.2
+		}
+		effect_tooltip = {
+			FROM = {
+				puppet = ROOT
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_protect_south_america.1.b
+		ai_chance = {
+			factor = 70
+			modifier = {
+				factor = 2
+				not = { has_government = FROM }
+			}
+			modifier = {
+				FROM = {
+					has_war = yes
+				}
+				factor = 2
+			}
+			modifier = {
+				has_global_flag = mtg_usa_north_american_dominion_refused_faction
+				factor = 10
+			}
+		}
+		add_war_support = 0.05
+		FROM = {
+			country_event = mtg_usa_protect_south_america.3
+		}
+		set_country_flag = north_american_dominion_refused
+		if = {
+			limit = {
+				not = { has_global_flag = mtg_usa_north_american_dominion_refused_faction }
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_form_defensive_alliance_north_american_dominion show_effect_tooltip = yes}
+		}
+		else_if = {
+			limit = {
+				is_in_faction = no
+			}
+			unlock_decision_tooltip = { decision = USA_join_defensive_alliance_north_american_dominion show_effect_tooltip = yes}	
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = ROOT
+				}
+			}
+		}
+	}
+}
+
+##Country agrees!
+country_event = {
+	id = mtg_usa_protect_south_america.2
+	title = mtg_usa_protect_south_america.2.t
+	desc = mtg_usa_protect_south_america.2.desc
+	picture = GFX_report_event_generic_sign_treaty1
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_protect_south_america.2.a
+		puppet = FROM
+	}
+}
+
+##Country refuses
+country_event = {
+	id = mtg_usa_protect_south_america.3
+	title = mtg_usa_protect_south_america.3.t
+	desc = mtg_usa_protect_south_america.3.desc
+	picture = GFX_report_event_lithuania_army
+
+	is_triggered_only = yes
+	option = { #war!
+		name = mtg_usa_protect_south_america.3.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_war = yes
+				factor = 0
+			}
+		}
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = FROM
+		}
+	}
+	option = { #no war!
+		name = mtg_usa_protect_south_america.3.b
+		ai_chance = {
+			factor = 10
+		}
+		add_war_support = -0.1
+	}
+}
+
+add_namespace = mtg_usa_foreign_support
+
+###  ##  ###  ### ###  ##  #  #      ## #  # ###  ###   ##  ###  ### 
+#   #  # #  # #    #  #    ## #     #   #  # #  # #  # #  # #  #  #  
+##  #  # ###  ##   #  # ## # ##      #  #  # ###  ###  #  # ###   #  
+#   #  # #  # #    #  #  # #  #       # #  # #    #    #  # #  #  #  
+#    ##  #  # ### ###  ##  #  #     ##   ##  #    #     ##  #  #  #  
+
+
+##event for FROM, USA wants donations
+country_event = {
+	id = mtg_usa_foreign_support.1
+	title = mtg_usa_foreign_support.1.t
+	desc = mtg_usa_foreign_support.1.desc
+	picture = GFX_report_event_german_politician_speech
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.1.a
+		ai_chance = {
+			factor = 70
+			
+		}
+		add_political_power = 25
+		set_country_flag = USA_foreign_support_donations_approved
+		FROM = {
+			country_event = mtg_usa_foreign_support.2
+		}
+		effect_tooltip = {
+			FROM = {
+				add_offsite_building = { type = industrial_complex level = 1 }
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_foreign_support.1.b
+		ai_chance = {
+			factor = 30
+		}
+		add_political_power = -25
+		FROM = {
+			country_event = mtg_usa_foreign_support.3
+		}
+	}
+}
+#event for US, donations approved
+country_event = {
+	id = mtg_usa_foreign_support.2
+	title = mtg_usa_foreign_support.2.t
+	desc = mtg_usa_foreign_support.2.desc
+	picture = GFX_report_event_hitler_handshake
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.2.a
+		ai_chance = {
+			factor = 70
+		}
+		add_offsite_building = { type = industrial_complex level = 1 }	
+	}
+}
+#event for US, donations refused
+country_event = {
+	id = mtg_usa_foreign_support.3
+	title = mtg_usa_foreign_support.3.t
+	desc = mtg_usa_foreign_support.3.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.3.a
+		ai_chance = {
+			factor = 70
+		}
+	}
+}
+
+##event for FROM, USA wants to smuggle in weapons
+country_event = {
+	id = mtg_usa_foreign_support.4
+	title = mtg_usa_foreign_support.4.t
+	desc = mtg_usa_foreign_support.4.desc
+	picture = GFX_report_event_generic_lend_lease
+
+	is_triggered_only = yes
+	option = { #agree to send some rifles
+		name = mtg_usa_foreign_support.4.a
+		ai_chance = {
+			factor = 50
+			
+		}
+		add_political_power = 25
+		FROM = {
+			country_event = mtg_usa_foreign_support.5
+		}
+		effect_tooltip = {
+			FROM = {
+				add_equipment_to_stockpile = { 
+					type = infantry_equipment
+					amount = 1000
+				}
+			}
+		}
+	}
+	option = { #agree to send artillery
+		name = mtg_usa_foreign_support.4.b
+		ai_chance = {
+			factor = 20	
+		}
+		add_political_power = 25
+		FROM = {
+			country_event = mtg_usa_foreign_support.7
+		}
+		effect_tooltip = {
+			FROM = {
+				add_equipment_to_stockpile = { 
+					type = artillery_equipment
+					amount = 50
+				}
+			}
+		}
+	}
+	option = { #agree to send tanks
+		name = mtg_usa_foreign_support.4.b
+		ai_chance = {
+			factor = 10	
+		}
+		trigger = {
+			has_tech = basic_light_tank
+		}
+		add_political_power = 25
+		FROM = {
+			country_event = mtg_usa_foreign_support.8
+		}
+		effect_tooltip = {
+			FROM = {
+				add_equipment_to_stockpile = { 
+					type = light_tank_equipment
+					amount = 50
+				}
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_foreign_support.4.d
+		ai_chance = {
+			factor = 20
+		}
+		add_political_power = -25
+		FROM = {
+			country_event = mtg_usa_foreign_support.6
+		}
+	}
+}
+#event for US, weapons approved
+country_event = {
+	id = mtg_usa_foreign_support.5
+	title = mtg_usa_foreign_support.5.t
+	desc = mtg_usa_foreign_support.5.desc
+	picture = GFX_report_event_generic_rifles
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.5.a
+		ai_chance = {
+			factor = 70
+		}
+		add_to_variable = { var = smuggled_weapons value = 1000 }
+	}
+}
+#event for US, weapons refused
+country_event = {
+	id = mtg_usa_foreign_support.6
+	title = mtg_usa_foreign_support.6.t
+	desc = mtg_usa_foreign_support.6.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.6.a
+		ai_chance = {
+			factor = 70
+		}
+	}
+}
+#event for US, artillery approved
+country_event = {
+	id = mtg_usa_foreign_support.7
+	title = mtg_usa_foreign_support.7.t
+	desc = mtg_usa_foreign_support.7.desc
+	picture = GFX_report_event_british_artillery
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.7.a
+		ai_chance = {
+			factor = 70
+		}
+		add_to_variable = { var = smuggled_artillery value = 50 }
+	}
+}
+#event for US, tanks approved
+country_event = {
+	id = mtg_usa_foreign_support.8
+	title = mtg_usa_foreign_support.8.t
+	desc = mtg_usa_foreign_support.8.desc
+	picture = GFX_report_event_polish_tanks_02
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.8.a
+		ai_chance = {
+			factor = 70
+		}
+		add_to_variable = { var = smuggled_tanks value = 50 }
+	}
+}
+
+##event for FROM, USA wants to build training camps
+country_event = {
+	id = mtg_usa_foreign_support.9
+	title = mtg_usa_foreign_support.9.t
+	desc = mtg_usa_foreign_support.9.desc
+	picture = GFX_report_event_aid_pact
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.9.a
+		ai_chance = {
+			factor = 70
+			
+		}
+		add_political_power = 25
+		set_country_flag = USA_training_camps_approved
+		FROM = {
+			country_event = mtg_usa_foreign_support.10
+		}
+		effect_tooltip = {
+			FROM = {
+				army_experience = 10
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_foreign_support.9.b
+		ai_chance = {
+			factor = 30
+		}
+		add_political_power = -25
+		FROM = {
+			country_event = mtg_usa_foreign_support.11
+		}
+	}
+}
+#event for US, training camps approved
+country_event = {
+	id = mtg_usa_foreign_support.10
+	title = mtg_usa_foreign_support.10.t
+	desc = mtg_usa_foreign_support.10.desc
+	picture = GFX_report_event_chinese_army_training
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.10.a
+		ai_chance = {
+			factor = 70
+		}
+		set_country_flag = us_training_@FROM	
+		FROM = {
+			add_ai_strategy = {
+   				type = send_volunteers_desire
+   				id = PREV
+   				value = 200
+   			}
+   			add_ai_strategy = {
+   				type = support
+   				id = PREV
+   				value = 200
+   			}
+		}
+	}
+}
+#event for US, training camps refused
+country_event = {
+	id = mtg_usa_foreign_support.11
+	title = mtg_usa_foreign_support.11.t
+	desc = mtg_usa_foreign_support.11.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.11.a
+		ai_chance = {
+			factor = 70
+		}
+	}
+}
+
+##event for FROM, USA wants to train pilots
+country_event = {
+	id = mtg_usa_foreign_support.12
+	title = mtg_usa_foreign_support.12.t
+	desc = mtg_usa_foreign_support.12.desc
+	picture = GFX_report_event_hitler_handshake
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.12.a
+		ai_chance = {
+			factor = 70
+			
+		}
+		add_political_power = 25
+		set_country_flag = us_pilot_training_approved
+		FROM = {
+			country_event = mtg_usa_foreign_support.13
+		}
+		effect_tooltip = {
+			FROM = {
+				custom_effect_tooltip = us_pilot_training_tt
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_foreign_support.12.b
+		ai_chance = {
+			factor = 30
+		}
+		add_political_power = -25
+		FROM = {
+			country_event = mtg_usa_foreign_support.14
+		}
+	}
+}
+#event for US, pilot training approved
+country_event = {
+	id = mtg_usa_foreign_support.13
+	title = mtg_usa_foreign_support.13.t
+	desc = mtg_usa_foreign_support.13.desc
+	picture = GFX_report_event_china_flying_tigers
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.13.a
+		ai_chance = {
+			factor = 70
+		}
+		custom_effect_tooltip = us_pilot_training_tt	
+		FROM = {
+			add_ai_strategy = {
+   				type = send_volunteers_desire
+   				id = PREV
+   				value = 200
+   			}
+   			add_ai_strategy = {
+   				type = support
+   				id = PREV
+   				value = 200
+   			}
+		}
+	}
+}
+#event for US, pilot training refused
+country_event = {
+	id = mtg_usa_foreign_support.14
+	title = mtg_usa_foreign_support.14.t
+	desc = mtg_usa_foreign_support.14.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.14.a
+		ai_chance = {
+			factor = 70
+		}
+	}
+}
+
+##event for FROM, USA wants to fund shipyards
+country_event = {
+	id = mtg_usa_foreign_support.15
+	title = mtg_usa_foreign_support.15.t
+	desc = mtg_usa_foreign_support.15.desc
+	picture = GFX_report_event_destroyers
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.15.a
+		ai_chance = {
+			factor = 70
+			
+		}
+		add_political_power = 25
+		FROM = {
+			country_event = mtg_usa_foreign_support.16
+		}
+		effect_tooltip = {
+			FROM = {
+				add_offsite_building = { type = dockyard level = 1}
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_foreign_support.15.b
+		ai_chance = {
+			factor = 30
+		}
+		add_political_power = -25
+		FROM = {
+			country_event = mtg_usa_foreign_support.17
+		}
+	}
+}
+#event for US, shipyards approved
+country_event = {
+	id = mtg_usa_foreign_support.16
+	title = mtg_usa_foreign_support.16.t
+	desc = mtg_usa_foreign_support.16.desc
+	picture = GFX_report_event_ast_navy
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.16.a
+		ai_chance = {
+			factor = 70
+		}
+		add_offsite_building = { type = dockyard level = 1 }
+	}
+}
+#event for US, shipyards refused
+country_event = {
+	id = mtg_usa_foreign_support.17
+	title = mtg_usa_foreign_support.17.t
+	desc = mtg_usa_foreign_support.17.desc
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_foreign_support.17.a
+		ai_chance = {
+			factor = 70
+		}
+	}
+}
+add_namespace = mtg_usa_diplomatic_protest
+#US protests recent diplomatic move
+country_event = {
+	id = mtg_usa_diplomatic_protest.1
+	title = mtg_usa_diplomatic_protest.1.t
+	desc = mtg_usa_diplomatic_protest.1.desc
+	picture = GFX_report_event_FDR_speech
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_diplomatic_protest.1.a
+		ai_chance = {
+			factor = 70
+		}
+	}
+}
+
+#US demands handover of american holdings
+country_event = {
+	id = mtg_usa_diplomatic_protest.2
+	title = mtg_usa_diplomatic_protest.2.t
+	desc = mtg_usa_diplomatic_protest.2.desc
+	picture = GFX_report_event_generic_usa_treaty
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_diplomatic_protest.2.a
+		ai_chance = {
+			factor = 30
+		}
+		FROM = {
+			country_event = mtg_usa_diplomatic_protest.3
+		}
+		effect_tooltip = {
+			every_owned_state = {
+				limit = {
+					OR = {
+						is_on_continent = north_america
+						is_on_continent = south_america
+					}
+				}
+				FROM = {
+					transfer_state = PREV
+				}
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_diplomatic_protest.2.b
+		ai_chance = {
+			factor = 70
+		}
+		FROM = {
+			country_event = mtg_usa_diplomatic_protest.4
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = topple_government
+					target = PREV
+				}
+			}
+		}
+	}
+}
+#US demands handover of american holdings - agree
+country_event = {
+	id = mtg_usa_diplomatic_protest.3
+	title = mtg_usa_diplomatic_protest.3.t
+	desc = mtg_usa_diplomatic_protest.3.desc
+	picture = GFX_report_event_generic_conference
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_diplomatic_protest.3.a
+		ai_chance = {
+			factor = 30
+		}
+		FROM = {
+			every_owned_state = {
+				limit = {
+					OR = {
+						is_on_continent = north_america
+						is_on_continent = south_america
+					}
+				}
+				ROOT = {
+					transfer_state = PREV
+				}
+			}
+		}
+	}
+}
+#US demands handover of american holdings - refuse
+country_event = {
+	id = mtg_usa_diplomatic_protest.4
+	title = mtg_usa_diplomatic_protest.4.t
+	desc = mtg_usa_diplomatic_protest.4.desc
+	picture = GFX_report_event_swedish_soldier
+
+	is_triggered_only = yes
+	option = { #agree
+		name = mtg_usa_diplomatic_protest.4.a
+		ai_chance = {
+			factor = 70
+		}
+		FROM = {
+			ROOT = {
+				create_wargoal = {
+					type = topple_government
+					target = FROM
+					
+				}
+			}
+		}
+	}
+	option = { #refuse
+		name = mtg_usa_diplomatic_protest.4.b
+		ai_chance = {
+			factor = 30
+		}
+		FROM = { set_country_flag = USA_monroe_backed_down } #to prevent US from demanding the same thing over and over again
+	}
+}
+###########################
+#  Panay Incident events
+###########################
+
+add_namespace = panay_incident
+
+#Hidden event to trigger synchronised Panay events for USA and ENG
+country_event = {
+	id = panay_incident.1
+
+	hidden = yes
+
+	trigger = {
+  		tag = CHI
+ 		has_war_with = JAP
+ 		# This next bit is to make sure that event only fires if JAP has conquered a fair bit of CHI first, so 
+ 		# Panay incident doesn't fire if it's an arm-wrestle on the JAP/CHI border.
+ 		OR = {
+ 			AND = { #JAP has made headway in the north
+ 				608 = { is_controlled_by = JAP } #Beijing
+				614 = { is_controlled_by = JAP } #Hebei
+				597 = { is_controlled_by = JAP } #Shandong
+				598 = { is_controlled_by = JAP } #Jiangsu
+				}
+			OR = { #JAP has captured key coastal states in the south
+				597 = { is_controlled_by = JAP } #Shanghai
+				592 = { is_controlled_by = JAP } #Guangzhou
+			}
+		}
+		NOT = { #Should only fire if JAP and USA/ENG aren't at war, and CHI and USA/ENG aren't at war.
+			OR = {
+				JAP = { has_war_with = USA }
+				JAP = { has_war_with = ENG }
+				CHI = { has_war_with = USA }
+				CHI = { has_war_with = ENG }
+			}
+			USA = { has_war_with = ENG }
+		}
+	}
+
+	mean_time_to_happen = { days = 30 }
+
+	fire_only_once = yes
+
+	immediate = {
+		hidden_effect = {
+			USA = {
+				country_event = { id = panay_incident.2 days = 1 }
+			}
+			news_event = { id = news.334 }
+		}
+	}
+	option = {}
+}
+
+#Panay Incident - USA notification
+country_event = {
+	id = panay_incident.2
+	title = panay_incident.2.t
+	desc = { #Low war support text
+		text = panay_incident.2.d
+		trigger = {
+			USA = { has_war_support < 0.5 }
+		}
+	}
+
+	desc = { #High war support text
+		text = panay_incident.2.e
+		trigger = {
+			USA = { has_war_support > 0.49 }
+		}
+	}
+
+	picture = GFX_report_event_panay_incident
+
+	is_triggered_only = yes
+
+	option = { #Pull forces out of China - low war support
+		name = panay_incident.2.a
+		custom_effect_tooltip = panay_incident.2.a.tt
+		trigger = { has_war_support < 0.4 }
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				USA_is_on_historical_plan_trigger = yes
+			}
+		}
+		add_war_support = -0.05
+		add_stability = 0.05
+		if = {
+			limit = {
+				has_completed_focus = USA_neutrality_act
+			}
+			add_political_power = 50
+		}
+		add_opinion_modifier = { target = JAP modifier = panay_inc_opinion_modifier }
+		hidden_effect = { JAP = { country_event = { id = panay_incident.6 days = 2 } } } #Info event for Japan
+	}
+	option = { #Pull forces out of China - medium or above war support
+		name = panay_incident.2.a
+		custom_effect_tooltip = panay_incident.2.e.tt
+		trigger = { has_war_support > 0.39 }
+		ai_chance = {
+			factor = 2
+			modifier = {
+				factor = 0
+				USA_is_on_historical_plan_trigger = yes
+			}
+		}
+		add_war_support = -0.05
+		add_opinion_modifier = { target = JAP modifier = panay_inc_opinion_modifier }
+		hidden_effect = { JAP = { country_event = { id = panay_incident.6 days = 2 } } } #Info event for Japan
+	}
+	option = { #Demand compensation
+		name = panay_incident.2.b
+		custom_effect_tooltip = panay_incident.2.b.tt
+		ai_chance = { factor = 85 }
+		add_war_support = 0.05
+		set_country_flag = { flag = USA_panay_window days = 90 value = 1 }
+		hidden_effect = { JAP = { country_event = { id = panay_incident.3 days = 2 } } } #Delay added so events are spaced out - historically it took months to get JAP to agree to compensation, but that'd be a bit hard to follow in-game, so timelines compressed.
+		add_opinion_modifier = { target = JAP modifier = panay_inc_opinion_modifier }
+	}
+	option = { #War
+		name = panay_incident.2.c
+		custom_effect_tooltip = panay_incident.2.c.tt
+		ai_chance = {
+			factor = 5
+			modifier = {
+				factor = 0
+				USA_is_on_historical_plan_trigger = yes
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = USA_neutrality_act
+			}
+			add_war_support = -0.1
+			add_stability = -0.3
+		}
+		add_opinion_modifier = { target = JAP modifier = panay_inc_opinion_modifier }
+		create_wargoal = {
+				target = JAP
+				type = topple_government
+			}
+		add_state_claim = 633
+		add_state_claim = 684
+		add_state_claim = 645
+		add_state_claim = 646
+		add_state_claim = 647
+		add_state_claim = 648
+		hidden_effect = { news_event = { id = news.335 } } #Triggers news event for war between JAP and USA
+	}
+}
+
+#Panay Incident - JAP gets demand for compensation
+country_event = {
+	id = panay_incident.3
+	title = panay_incident.3.t
+	desc = panay_incident.3.d
+	picture = GFX_report_event_us_panay_demands
+
+	is_triggered_only = yes
+
+	option = { #Pay compensation
+		name = panay_incident.3.a
+		ai_chance = { factor = 70 }
+		add_political_power = -100
+		hidden_effect = { USA = { country_event = { id = panay_incident.4 days = 2 } } } #Delay added to space things out
+	}
+	option = { #We shall never bw down to the western Imperialists!
+		name = panay_incident.3.b
+		custom_effect_tooltip = panay_incident.3.b.tt
+		ai_chance = {
+			factor = 30
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+		add_political_power = 100
+		hidden_effect = { USA = { country_event = { id = panay_incident.5 days = 2 } } } #Delay added here and in earlier event so rest of the world doesn't get Panay Incident one day and War the next, unless US is particularly gung-ho in response to initial event.
+	}
+}
+
+#Panay Incident - USA receives JAP compensation
+country_event = {
+	id = panay_incident.4
+	title = panay_incident.4.t
+	desc = panay_incident.4.d
+	picture = GFX_report_event_generic_sign_treaty1
+
+	is_triggered_only = yes
+
+	option = {
+		name = panay_incident.4.a
+		add_political_power = 100
+	}
+}
+
+#Panay Incident - USA receives JAP refusal
+country_event = {
+	id = panay_incident.5
+	title = panay_incident.5.t
+	desc = panay_incident.5.d
+	picture = GFX_report_event_japanese_reply
+
+	is_triggered_only = yes
+
+	option = {
+		name = panay_incident.5.a
+		ai_chance = { factor = 60 }
+		add_political_power = -10
+		add_war_support = -0.02
+		add_stability = 0.05
+	}
+	option = {
+		name = panay_incident.5.b
+		ai_chance = {
+			factor = 40
+		}
+		if = {
+			limit = {
+				not = {
+					has_completed_focus = USA_limited_intervention
+				}
+			}
+			add_war_support = -0.05
+			add_stability = -0.1
+		}
+		if = {
+			limit = {
+
+			}
+		}
+		create_wargoal = {
+				target = JAP
+				type = topple_government
+			}
+		add_state_claim = 633
+		add_state_claim = 684
+		add_state_claim = 645
+		add_state_claim = 646
+		add_state_claim = 647
+		add_state_claim = 648
+		hidden_effect = { news_event = { id = news.335 } } #Triggers news event for war between JAP and USA
+	}
+}
+
+#Event for Japan if USA withdraws forces.
+country_event = {
+	id = panay_incident.6
+	title = panay_incident.6.t
+	desc = panay_incident.6.d
+	picture = GFX_report_event_oahu_withdraws
+
+	is_triggered_only = yes
+
+	option = {
+		name = panay_incident.6.a
+		add_political_power = 100
+	}
+}

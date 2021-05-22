@@ -1,0 +1,634 @@
+﻿###########################
+# Yugoslavian Events
+###########################
+
+add_namespace = yugoslavia
+
+# Britain to Back Coup in Yugoslavia
+country_event = {
+	id = yugoslavia.1
+	title = yugoslavia.1.t
+	desc = yugoslavia.1.d
+	picture = GFX_report_event_yugoslavian_king_peter
+
+	fire_only_once = yes
+	
+	trigger = {
+		tag = ENG
+		NOT = {
+			has_dlc = "Death or Dishonor"
+		}
+		YUG = {
+			OR = {
+				is_in_faction_with = GER
+				gives_military_access_to = GER
+			}
+		}
+		HUN = { owns_state = 76 }
+		GER = {
+			OR = {
+				AND = { is_in_faction_with = ITA is_in_faction_with = HUN }
+				AND = { is_in_faction_with = ITA is_in_faction_with = BUL }
+				AND = { is_in_faction_with = HUN is_in_faction_with = BUL }
+			}
+		}
+		ENG = { NOT = { is_in_faction_with = GER } }
+	}
+
+	immediate = {
+		hidden_effect = { remove_ideas = anti_german_military }
+	}
+
+	mean_time_to_happen = {
+		days = 14
+	}
+	
+	option = {
+		name = yugoslavia.1.a
+		add_political_power = -50
+		YUG = {
+			country_event = { id = yugoslavia.2 }
+		}
+	}
+
+	option = {
+		name = yugoslavia.1.b
+		ai_chance = { factor = 0 }
+		YUG = { remove_opinion_modifier = { target = ENG modifier = balkan_strategy_good } }
+	}
+}
+
+# Yugoslavian Coup
+country_event = {
+	id = yugoslavia.2
+	title = yugoslavia.2.t
+	desc = yugoslavia.2.d
+	picture = GFX_report_event_yugoslavian_king_peter
+
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = { remove_ideas = anti_german_military }
+	}
+
+	option = {
+		name = yugoslavia.2.a
+		#retire_country_leader = yes
+		#create_country_leader = {
+		#	name = "Peter II"
+		#	desc = "POLITICS_PETER_II_DESC"
+		#	picture = "Portrait_Yugoslavia_Peter_II.dds"
+		#	expire = "1965.1.1"
+		#	ideology = absolute_monarchism
+		#	traits = {
+		#		#
+		#	}
+		#}
+		create_country_leader = {
+			name = "Dušan Simović"
+			desc = "POLITICS_PRINCE_PAUL_DESC"
+			picture = "gfx/leaders/YUG/r56_portrait_YUG_Dusan_Simovic.dds"
+			expire = "1965.1.1"
+			ideology = despotism
+			traits = {
+				army_connections
+				r56_trait_opposed_to_communism
+			}
+		}
+		add_ideas = YUG_peter_II
+		if = {
+			limit = {
+				has_idea = YUG_prince_paul
+			}
+			remove_ideas = YUG_prince_paul
+		}
+		
+		set_politics = { ruling_party = neutrality elections_allowed = yes }
+		add_popularity = { ideology = neutrality popularity = 0.5 }
+		set_party_name = { ideology = neutrality long_name = YUG_neutrality_party_2 name = YUG_neutrality_party_2 }
+		
+		add_timed_idea = { idea = anti_nazi_coup days = 730 }
+		add_opinion_modifier = { target = GER modifier = anti_german_coup }
+		diplomatic_relation = {
+			country = GER
+			relation = non_aggression_pact
+			active = no
+		}
+		if = {
+			limit = { is_in_faction_with = GER }
+			GER = { remove_from_faction = YUG }
+		}
+		if = {
+			limit = { gives_military_access_to = GER }
+			GER = {
+				diplomatic_relation = {
+					country = YUG
+					relation = military_access
+					active = no
+				}
+			}
+		}
+		news_event = { hours = 6 id = news.150 }
+	}
+
+	option = {
+		name = yugoslavia.2.b
+		ai_chance = { factor = 0 }
+		start_civil_war = {
+			ideology = democratic
+			size = 0.4
+		}
+	}
+}
+
+
+
+# Yugoslavia (British and (possibly) French Support)
+country_event = {
+	id = yugoslavia.3
+	title = yugoslavia.3.t
+	desc = {
+		text = yugoslavia.3.d 
+		trigger = {
+			NOT = { has_global_flag = FRA_abandoned_yugoslavia }
+		}
+	}
+	desc = {
+		text = yugoslavia.3.d_FRA_abandoned_yugoslavia
+		trigger = {
+			has_global_flag = FRA_abandoned_yugoslavia
+		}
+	}
+	picture = GFX_report_event_chamberlain_announce
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = yugoslavia.3.a
+		effect_tooltip = {
+			GER = {
+				create_wargoal = {
+					type = take_state_focus
+					target = YUG
+					generator = { 102 819 820 }
+				}
+			}
+		}
+	}
+}
+
+# Yugoslavia (French Support)
+country_event = {
+	id = yugoslavia.4
+	title = yugoslavia.3.t
+	desc = yugoslavia.4.d
+	picture = GFX_report_event_chamberlain_announce
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = yugoslavia.4.a
+		effect_tooltip = {
+			GER = {
+				create_wargoal = {
+					type = take_state_focus
+					target = YUG
+					generator = { 102 819 820 }
+				}
+			}
+		}
+	}
+}
+
+# Yugoslavia (Abandoned)
+country_event = {
+	id = yugoslavia.5
+	title = yugoslavia.5.t
+	desc = yugoslavia.5.d
+	picture = GFX_report_event_hitler_croatia_handshake
+	
+	is_triggered_only = yes
+	
+	option = { # Surrender Slovenia
+		name = yugoslavia.5.a
+		ai_chance = {
+			factor = 90
+			modifier = { # Decrease chance YUG resists if AUS isn't taken first
+				AUS = { exists = yes }
+				factor = 0.5
+			}
+			modifier = { # If they stand a chance to hold the line they will fight
+				factor = 0.1
+				strength_ratio = {
+					tag = GER
+					ratio > 0.70
+				}
+			}
+			modifier = { #decrease if in faction
+				factor = 0.5
+				is_in_faction = yes
+			}
+			modifier = { # Increase it again if other bordering nations are in Axis
+				any_neighbor_country = {
+					NOT = { tag = GER }
+					is_in_faction_with = GER
+				}
+				factor = 2.0
+			}
+		}
+		GER = { country_event = germany.94 } #Germany gets Slovenia
+	}
+	option = { # Refuse anyway
+		name = yugoslavia.5.b
+		ai_chance = { factor = 10 }
+		GER = {
+			country_event = germany.95 #Germany gains wargoal
+			effect_tooltip = {
+				create_wargoal = {
+					type = take_state_focus
+					target = YUG
+					generator = { 102 819 820 }
+				}
+			}
+		}
+	}
+}
+
+
+# Yugoslavia (Italian Support)
+country_event = {
+	id = yugoslavia.6
+	title = yugoslavia.3.t
+	desc = yugoslavia.6.d
+	picture = GFX_report_event_fascists_posing
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = yugoslavia.6.a
+		effect_tooltip = {
+			GER = {
+				create_wargoal = {
+					type = take_state_focus
+					target = YUG
+					generator = { 102 819 820 }
+				}
+			}
+		}
+	}
+}
+
+# Fate of Yugoslavia
+country_event = {
+	id = yugoslavia.7
+	title = germany.98.t
+	desc = {
+		text = yugoslavia.7.d
+	}
+	picture = GFX_report_event_german_inspect_troops
+	
+	is_triggered_only = yes
+	
+	#Nope
+	option = {
+		name = yugoslavia.7.a
+		ai_chance = { 
+			factor = 5
+		}
+
+		GER = { country_event = { id = germany.111 days = 1 } 
+			effect_tooltip = {
+				create_wargoal = {
+					type = annex_everything
+					target = YUG
+				}
+			}
+		}
+	}
+
+	#Alrighty
+	option = {
+		name = yugoslavia.7.b
+		ai_chance = { 
+			factor = 10
+			modifier = {
+				factor = 0
+				is_puppet = yes
+			}
+			modifier = {
+				factor = 0
+				any_other_country = {
+					is_major = yes
+					OR = {
+						has_guaranteed = YUG
+						is_in_faction_with = YUG
+					}
+				}
+			}
+		}
+		custom_effect_tooltip = GAME_OVER_TT
+		GER = {
+
+			add_political_power = -75		
+			add_named_threat = { threat = 5 name = GER_fate_of_yugoslavia }
+			annex_country = { target = YUG transfer_troops = no }
+
+			hidden_effect = {
+				set_global_flag = GER_fate_of_yugoslavia_annex_YUG
+				news_event = { hours = 6 id = news.169 }
+			}
+		}
+	}
+}
+
+# Fate of Yugoslavia
+country_event = {
+	id = yugoslavia.8
+	title = germany.98.t
+	desc = {
+		text = yugoslavia.8.d
+	}
+	picture = GFX_report_event_german_inspect_troops
+	
+	is_triggered_only = yes
+	
+	#Fuck that
+	option = {
+		name = yugoslavia.8.a
+		ai_chance = { 
+			factor = 10
+		}
+
+		GER = { country_event = { id = germany.111 days = 1 } 
+			effect_tooltip = {
+				create_wargoal = {
+					type = annex_everything
+					target = YUG
+				}
+			}
+		}
+	}
+
+	#Sure thing
+	option = {
+		name = yugoslavia.8.b
+
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				any_other_country = {
+					is_major = yes
+					OR = {
+						has_guaranteed = YUG
+						is_in_faction_with = YUG
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				is_puppet = yes
+			} 
+		}
+
+		trigger = { 
+			YUG = { 
+				OR = { 
+					owns_state = 103
+					owns_state = 821
+					owns_state = 104
+					owns_state = 804
+					owns_state = 824
+					owns_state = 825
+					owns_state = 109
+					owns_state = 821
+					owns_state = 815
+				} 
+			} 
+		}
+
+		GER = {		
+			add_political_power = -25
+			add_named_threat = { threat = 3 name = GER_fate_of_yugoslavia }
+			
+			CRO = {
+				if = {
+					limit = { YUG = { owns_state = 103 } }
+					transfer_state = 103
+				}
+				if = {
+					limit = { YUG = { owns_state = 821 } }
+					transfer_state = 821
+				}
+				if = {
+					limit = { YUG = { owns_state = 104 } }
+					transfer_state = 104
+				}
+				if = {
+					limit = { YUG = { owns_state = 804 } }
+					transfer_state = 804
+				}
+				if = {
+					limit = { YUG = { owns_state = 824 } }
+					transfer_state = 824
+				}
+				if = {
+					limit = { YUG = { owns_state = 825 } }
+					transfer_state = 825
+				}
+				if = {
+					limit = { YUG = { owns_state = 109 } }
+					transfer_state = 109
+				}
+				if = {
+					limit = { YUG = { owns_state = 822 } }
+					transfer_state = 822
+				}
+				if = {
+					limit = { YUG = { owns_state = 815 } }
+					transfer_state = 815
+				}
+				804 = {
+					start_resistance = yes
+					set_compliance = 80
+					set_resistance = 2
+					set_garrison_strength = 0.8
+				}
+				104 = {
+					start_resistance = yes
+					set_compliance = 30
+					set_resistance = 2
+					set_garrison_strength = 0.8
+				}
+				825 = {
+					start_resistance = yes
+					set_compliance = 30
+					set_resistance = 2
+					set_garrison_strength = 0.8
+				}
+				824 = {
+					start_resistance = yes
+					set_compliance = 50
+					set_resistance = 2
+					set_garrison_strength = 0.8
+				}								
+			}
+			puppet = CRO
+			annex_country = { target = YUG transfer_troops = no }
+
+			hidden_effect = {
+				set_global_flag = GER_fate_of_yugoslavia_puppet_CRO_annex_YUG
+				news_event = { hours = 6 id = news.169 }
+			}
+		}
+	}
+}
+
+# Fate of Yugoslavia
+country_event = {
+	id = yugoslavia.9
+	title = germany.98.t
+	desc = {
+		text = yugoslavia.9.d
+	}
+	picture = GFX_report_event_german_inspect_troops
+	
+	is_triggered_only = yes
+	
+	#No way
+	option = {
+		name = yugoslavia.9.a
+		ai_chance = { factor = 2 }
+
+		GER = { country_event = { id = germany.111 days = 1 } 
+			effect_tooltip = {
+				create_wargoal = {
+					type = annex_everything
+					target = YUG
+				}
+			}
+		}
+	}
+
+	#Seems fair
+	option = {
+		name = yugoslavia.9.b
+		ai_chance = { 
+			factor = 10
+			modifier = {
+				factor = 0
+				any_other_country = {
+					is_major = yes
+					OR = {
+						has_guaranteed = YUG
+						is_in_faction_with = YUG
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				is_puppet = yes
+			} 
+		}
+
+		GER = {
+
+			add_named_threat = { threat = 2 name = GER_fate_of_yugoslavia }
+			
+			CRO = {
+				if = {
+					limit = { YUG = { owns_state = 103 } }
+					transfer_state = 103
+				}
+				if = {
+					limit = { YUG = { owns_state = 821 } }
+					transfer_state = 821
+				}
+				if = {
+					limit = { YUG = { owns_state = 104 } }
+					transfer_state = 104
+					104 = {
+						start_resistance = yes
+						set_compliance = 30
+						set_resistance = 2
+						set_garrison_strength = 0.8
+					}					
+				}
+				if = {
+					limit = { YUG = { owns_state = 804 } }
+					transfer_state = 804
+					804 = {
+						start_resistance = yes
+						set_compliance = 90
+						set_resistance = 1
+						set_garrison_strength = 0.8
+					}					
+				}
+				if = {
+					limit = { YUG = { owns_state = 824 } }
+					transfer_state = 824
+					824 = {
+						start_resistance = yes
+						set_compliance = 50
+						set_resistance = 2
+						set_garrison_strength = 0.8
+					}						
+				}
+				if = {
+					limit = { YUG = { owns_state = 825 } }
+					transfer_state = 825
+
+					825 = {
+						start_resistance = yes
+						set_compliance = 50
+						set_resistance = 2
+						set_garrison_strength = 0.8
+					}					
+				}
+				if = {
+					limit = { YUG = { owns_state = 109 } }
+					transfer_state = 109
+				}
+				if = {
+					limit = { YUG = { owns_state = 822 } }
+					transfer_state = 822
+				}
+				if = {
+					limit = { YUG = { owns_state = 815 } }
+					transfer_state = 815
+				}
+			}
+			puppet = CRO
+			effect_tooltip = {
+				puppet = YUG
+			}
+			hidden_effect = {
+				SER = {
+					if = {
+						limit = {
+							has_intelligence_agency = no
+							YUG = {
+								has_intelligence_agency = yes
+							}							
+						}
+						create_intelligence_agency = yes						
+					}
+					annex_country = { target = YUG transfer_troops = no }
+					if = {
+						limit = {
+							YUG = { is_ai = no }
+						}
+						change_tag_from = YUG
+					}
+				}
+				puppet = SER
+			}
+
+			hidden_effect = {
+				set_global_flag = GER_fate_of_yugoslavia_puppet_CRO_YUG
+				news_event = { hours = 6 id = news.169 }
+			}
+		}
+	}
+}
+

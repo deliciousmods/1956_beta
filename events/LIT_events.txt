@@ -1,0 +1,281 @@
+﻿############################
+# Lithuanian Events
+###########################
+#country_event = { # communists win
+#	id = LIT_event.1
+#	title = LIT_event.1.t
+#	desc = LIT_event.1.d
+#	picture = GFX_report_event_election_vote
+#
+#	fire_only_once = yes
+#
+#  trigger = {
+#    date > 1936.6.10
+#    has_completed_focus = LIT_alliance_with_far_left
+#  }
+#
+#	option = {
+#		name = LIT_event.1.a
+#    add_popularity = { ideology = communism popularity = 0.1 }
+#		set_politics = { ruling_party = communism }
+#  }
+#}
+#
+#country_event = { # democratics win
+#	id = LIT_event.2
+#	title = LIT_event.2.t
+#	desc = LIT_event.2.d
+#	picture = GFX_report_event_election_vote
+#
+#	fire_only_once = yes
+#
+#  trigger = {
+#    date > 1936.6.10
+#    has_completed_focus = LIT_strengthen_the_coalition
+#  }
+#
+#	option = {
+#		name = LIT_event.2.a
+#    add_popularity = { ideology = democratic popularity = 0.1 }
+#		set_politics = { ruling_party = democratic }
+#  }
+#	option = {
+#		name = LIT_event.2.a
+#    add_popularity = { ideology = democratic popularity = 0.1 }
+#		set_politics = { ruling_party = democratic }
+#  }
+#}
+
+#Event for FRA/ITA to accept or reject Portuguese proposal to purchase ships
+add_namespace = lithuania_purchase_ships
+country_event = {
+	id = lithuania_purchase_ships.1       
+	title = lithuania_purchase_ships.1.t      
+	desc = lithuania_purchase_ships.1.desc    
+	picture = GFX_report_event_sailors_in_working_rig
+
+	is_triggered_only = yes
+
+	option = { #Accept
+		name = lithuania_purchase_ships.1.a
+
+		ai_chance = {
+			base = 99
+			modifier = {
+				factor = 0
+				OR = {
+					has_opinion = { target = LIT value < 0 }
+					has_civil_war = yes
+					has_capitulated = yes
+					has_war = yes
+					AND = {
+						tag = FRA
+						NOT = { owns_state = 16 } #Owns Paris
+					}
+					AND = {
+						tag = ITA
+						NOT = { owns_state = 2 } #Owns Rome
+					}
+				}
+			}
+		}
+
+		custom_effect_tooltip = lar_portugal_purchase_ships.1.a_tt.  
+		LIT = {
+			country_event = { id = lithuania_purchase_ships.2 hours = 8 random_hours = 4 }
+		}
+	}
+	option = { #Reject
+		name = lithuania_purchase_ships.1.b
+
+		ai_chance = {
+			base = 1
+		}
+
+		LIT = {
+			country_event = { id = lithuania_purchase_ships.3 hours = 8 random_hours = 4 }
+			if = {
+				limit = { 
+					ROOT = { tag = FRA }
+				}
+				set_country_flag = {
+					flag = LIT_french_ships_purchase_rejected_flag
+					value = 1
+					days = 180
+				}
+			}
+			else_if = {
+				limit = { 
+					ROOT = { tag = ITA }
+				}
+				set_country_flag = {
+					flag = LIT_italian_ships_purchase_rejected_flag
+					value = 1
+					days = 180
+				}
+			}
+		}
+	}
+}
+
+# Event for LIT to choose the type of ships to be purchased
+country_event = {
+	id = lithuania_purchase_ships.2
+	title = lithuania_purchase_ships.2.t
+	desc = lithuania_purchase_ships.2.desc
+	picture = GFX_report_event_sailors_in_working_rig
+
+	is_triggered_only = yes
+
+	option = { # 3 Submarines - 1 Year
+		name = lithuania_purchase_ships.2.a
+		ai_chance = {
+			base = 34
+		}
+
+		FROM = {
+			add_offsite_building = {
+				type = industrial_complex
+				level = 1
+			}
+			add_opinion_modifier = {
+				target = POR
+				modifier = POR_bought_ships
+			}
+		}
+		if = {
+			limit = { FROM = { tag = FRA } }
+			add_opinion_modifier = {
+				target = FRA
+				modifier = POR_sold_ships
+			}
+			add_opinion_modifier = {
+				target = FRA
+				modifier = POR_ships_trade
+			}
+			set_country_flag = LIT_purchase_british_submarines_flag  
+		}
+		else_if = {
+			limit = { FROM = { tag = ITA } }
+			add_opinion_modifier = {
+				target = ITA
+				modifier = POR_sold_ships
+			}
+			add_opinion_modifier = {
+				target = ITA
+				modifier = POR_ships_trade
+			}
+			activate_decision = LIT_italian_submarines_construction_progress  
+			set_country_flag = LIT_purchase_italian_submarines_flag       
+		}
+	}
+	option = { # 2 Destroyers - 2 Years
+		name = lithuania_purchase_ships.2.b
+		ai_chance = {
+			base = 33
+		}
+		
+		FROM = {
+			add_offsite_building = {
+				type = industrial_complex
+				level = 1
+			}
+			add_opinion_modifier = {
+				target = POR
+				modifier = POR_bought_ships
+			}
+		}
+		if = {
+			limit = { FROM = { tag = FRA } }
+			add_opinion_modifier = {
+				target = FRA
+				modifier = POR_sold_ships
+			}
+			add_opinion_modifier = {
+				target = FRA
+				modifier = POR_ships_trade
+			}
+			activate_decision = LIT_british_destroyers_construction_progress 
+			set_country_flag = LIT_purchase_british_destroyers_flag 
+		}
+		else_if = {
+			limit = { FROM = { tag = ITA } }
+			add_opinion_modifier = {
+				target = ITA
+				modifier = POR_sold_ships
+			}
+			add_opinion_modifier = {
+				target = ITA
+				modifier = POR_ships_trade
+			}
+			activate_decision = LIT_italian_destroyers_construction_progress 
+			set_country_flag = LIT_purchase_italian_destroyers_flag 
+		}
+	}
+}
+
+# Event for LIT when ships purchase has been rejected
+country_event = {
+	id = lithuania_purchase_ships.3
+	title = lithuania_purchase_ships.3.t
+	desc = lithuania_purchase_ships.3.desc
+	picture = GFX_report_event_generic_sign_treaty2
+
+	is_triggered_only = yes
+
+	option = {
+		name = lithuania_purchase_ships.3.a
+		clr_country_flag = LIT_ships_purchase_in_progress_flag
+	}
+}
+
+# Event for LIT when submarines purchased are ready
+country_event = {
+	id = lithuania_purchase_ships.4
+	title = lithuania_purchase_ships.4.t
+	desc = lithuania_purchase_ships.4.desc
+	picture = GFX_report_event_ast_navy
+
+	is_triggered_only = yes
+
+	option = {
+		name = lithuania_purchase_ships.4.a  
+		custom_effect_tooltip = lar_portugal_purchase_ships.4.a_tt 
+	}
+}
+add_namespace = LIT_event
+# Event for LIT when destroyers purchased are ready
+country_event = {
+	id = lithuania_purchase_ships.5
+	title = lithuania_purchase_ships.5.t
+	desc = lithuania_purchase_ships.5.desc
+	picture = GFX_report_event_ast_navy
+
+	is_triggered_only = yes
+
+	option = {
+		name = lithuania_purchase_ships.5.a 
+		custom_effect_tooltip = lar_portugal_purchase_ships.5.a_tt 
+	}
+}
+
+news_event = { # USSR gives Vilnius
+	id = LIT_event.2
+	title = LIT_event.2.t
+	desc = LIT_event.2.desc
+	picture = GFX_news_event_vilnius
+
+	fire_only_once = yes
+	is_triggered_only = yes
+
+
+	option = {
+		name = LIT_event.2.a
+		add_stability = 0.05
+		add_opinion_modifier = {
+			target = SOV
+			modifier = medium_increase
+		}
+		
+	}
+}
