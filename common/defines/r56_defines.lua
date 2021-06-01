@@ -284,7 +284,7 @@ NOperatives = {
 		-- Factor multiplied to the detection chance of an agent on mission before the offsets
 		0.0, -- NoMission
 		1.0, -- BuildIntelNetwork
-		1.0, -- QuietIntelNetwork
+		0.95, -- QuietIntelNetwork
 		1.0, -- CounterIntelligence
 		0.0, -- RootOutResistance
 		2.0, -- BoostIdeology
@@ -292,12 +292,27 @@ NOperatives = {
 		0.1, -- DiplomaticPressure
 		2.0, -- Propaganda
 	},
+
+	BOOST_IDEOLOGY_NATIONAL_COVERAGE_FACTOR = 1.0,				-- used to compute the drift factor as follow: BASE * SUB_NETWORK_NC * BOOST_IDEOLOGY_DEFENSE_FACTOR
+	BOOST_IDEOLOGY_MAX_DRIFT_BY_OPERATIVE = 0.3,				-- the maximum drift an operative can cause, a negative value means no maximum
+	BOOST_IDEOLOGY_DRIFT_STACKING_FACTOR = 0.75,				-- multiplied to the drift of an operative for each operative after the first one, with the greatest drift. So if we have the following drift values [ 0.1, 0.3, 0.2 ], the factor is applied twice for the lowest value and once for the 2nd lowest one as such : [ 0.3, 0.2 * D, 0.1 * D * D ] and then the result is summed up to give the final drift value.
+	BOOST_IDEOLOGY_DEFENSE_FACTOR = 0.2,					-- multiplied to the target's defense to get the amount of drift to remove from each operative's drift
+	BOOST_IDEOLOGY_DAILY_XP_GAIN = 0.275,
+	OPERATIVE_BASE_BOOST_IDEOLOGY = 0.15,
+
 	
 	COUNTER_INTELLIGENCE_FOREIGN_AGENT_FACTOR = 1.1,			-- Multiplier to the counter intelligence provided by foreign (ally) operatives
 
-	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_XP_GAIN = 100,					-- Xp gain when an enemy operative is captured in the country the operative is assigned to counter intelligence to. Apply to a single randomly selected operative
+	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_XP_GAIN = 125,					-- Xp gain when an enemy operative is captured in the country the operative is assigned to counter intelligence to. Apply to a single randomly selected operative
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_OWN_COUNTRY_FOR_XP = 3,			-- An integer on how likely an operative operating in his own country is to get selected for the xp reward on enemy operative capture
 	ON_CAPTURE_COUNTERINTELLIGENCE_OPERATIVE_WEIGHT_DIFFERENT_COUNTRY_FOR_XP = 1,		-- same for an operative assigned to counter intelligence in a different country than his own
+
+	OPERATION_COMPLETION_XP = 75,			-- XP given on completion of a mission. Was 18!
+	DIPLOMATIC_PRESSURE_DAILY_XP_GAIN = 0.155, 			-- Daily XP given doing Diplomatic Pressure mission was 0.137
+	COUNTER_INTELLIGENCE_DAILY_XP_GAIN = 0.115, 		-- Daily XP given doing counter intelligence mission was 0.112
+	QUIET_INTEL_NETWORK_DAILY_XP_GAIN = 0.1,  		-- Daily XP given doing quiet intel network mission was 0!
+	BUILD_INTEL_NETWORK_DAILY_XP_GAIN = 1.25,  		-- was 1.0
+
 
 },
 NResistance = {
