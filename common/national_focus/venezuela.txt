@@ -74,8 +74,7 @@ focus_tree = {
             factor = 10
         }
         completion_reward = { 
-            country_event = { hours = 12 id = venezuela.16 }                 
-
+            country_event = { hours = 12 id = venezuela.16 }
         }    
     }
     focus = {
@@ -106,7 +105,15 @@ focus_tree = {
         x = 50
         y = 4
         cost = 5
-        available_if_capitulated = yes
+        available_if_capitulated = no
+        available = {
+            GER = {
+                exists = yes
+                NOT = {
+                    has_war_with = VEN
+                }
+            }
+        }
         prerequisite = {
             focus = VEN_german_relations
         }
@@ -130,16 +137,19 @@ focus_tree = {
         available_if_capitulated = yes
         available = {
             GER = {
+                exists = yes
                 OR = {
                     has_government = fascism
                     has_government = neutrality
+                }
+                NOT = {
+                    has_war_with = VEN
                 }
             }
         }
         prerequisite = {
             focus = VEN_german_relations
         }
-        search_filters = {FOCUS_FILTER_POLITICAL}
         ai_will_do = {
             factor = 10
         }
@@ -147,8 +157,8 @@ focus_tree = {
             GER = {
                 country_event = { hours = 12 id = venezuela.11 }
             }
-
-        }    
+        }   
+        search_filters = {FOCUS_FILTER_POLITICAL} 
     }
     focus = {
         id = VEN_miraflores_concessions
@@ -501,7 +511,6 @@ focus_tree = {
 					type = coastal_bunker
 					level = 2
 					instant_build = yes
-                    costal = yes
 					province = 1944
                 }
             }
@@ -510,14 +519,12 @@ focus_tree = {
 					type = coastal_bunker
 					level = 2
 					instant_build = yes
-                    costal = yes
 					province = 8133
                 }
                 add_building_construction = {
 					type = coastal_bunker
 					level = 2
 					instant_build = yes
-                    costal = yes
 					province = 10912
                 }
             }
@@ -710,14 +717,12 @@ focus_tree = {
         cost = 7.2
         available_if_capitulated = yes
         available = {
-					is_puppet = no
-					has_army_manpower = { size > 75000 } 		
-				}
+			is_puppet = no
+			has_army_manpower = { size > 75000 } 		
+		}
         bypass = {
-					OR = {
-						VEN = { owns_state = 695 }
-					}
-				}
+			VEN = { owns_state = 695 }
+		}
         prerequisite = {
             focus = VEN_gran_colombia
             focus = VEN_push_north
@@ -780,12 +785,14 @@ focus_tree = {
         x = 44
         y = 8
         cost = 10
-        available_if_capitulated = yes
+        available_if_capitulated = no
         available = { 
 			is_puppet = no
-			COL = { controls_state = 486 }
-			COL = { controls_state = 493 }
-			COL = { controls_state = 306 }
+            COL = {
+                controls_state = 486
+                controls_state = 493
+                controls_state = 306
+            }
 		}
         bypass = {
             COL = {
@@ -799,27 +806,40 @@ focus_tree = {
         ai_will_do = {
             factor = 10
         }
-        completion_reward = { 
-            COL = {
-                country_event = { hours = 12 id = venezuela.5 }
+        completion_reward = {
+            if = {
+                limit = {
+                    COL = {
+                        is_subject = yes
+                        NOT = { is_subject_of = ROOT }
+                    }
+                }
+                create_wargoal = {
+                    type = annex_everything
+                    target = COL
+                    expire = 0
+                    generator = { 486 493 306 }
+                }
+            }
+            else = {
+                COL = {
+                    country_event = { hours = 12 id = venezuela.5 }
+                }
             }
         }    
     }
+
     focus = {
         id = VEN_attack_equador
         icon = GFX_goal_generic_territory_or_war
         x = 42
         y = 9
         cost = 7.2
-        available_if_capitulated = yes
+
         prerequisite = {
             focus = VEN_annex_colombia
         }
-        bypass = {
-            has_full_control_of_state = 305
-            has_full_control_of_state = 490
-        }
-        search_filters = {FOCUS_FILTER_ANNEXATION}
+
         ai_will_do = {
             factor = 10
             modifier = {
@@ -827,31 +847,63 @@ focus_tree = {
                 factor = 0
             }
         }
+
+        available_if_capitulated = no
+        available = {
+			is_subject = no
+			305 = { OWNER = { NOT = { is_in_faction_with = ROOT } } }
+			490 = { OWNER = { NOT = { is_in_faction_with = ROOT } } }
+        }
+        
+        bypass = {
+            has_full_control_of_state = 305
+            has_full_control_of_state = 490
+        }
+        
         completion_reward = { 
             add_state_claim = 305
             add_state_claim = 490
-            create_wargoal = {
-                type = take_state_focus
-                target = ECU
-                expire = 0
-                generator = { 305 490 }
-            }
-        }    
+            if = {
+				limit = {
+					any_other_country = {
+						owns_state = 305
+					}
+				}
+				305 = {
+					OWNER = {
+						ROOT = {
+							create_wargoal = {
+								target = PREV
+								expire = 0
+								type = take_state_focus
+								generator = { 305 }
+							}
+						}
+					}
+				}
+			}
+        } 
+        search_filters = {FOCUS_FILTER_ANNEXATION}   
     }
+
     focus = {
         id = VEN_attack_peru
         icon = GFX_goal_attack_peru
         x = 44
         y = 9
         cost = 7.2
-        available_if_capitulated = yes
+        available_if_capitulated = no
+        available = {
+			is_subject = no
+			491 = { OWNER = { NOT = { is_in_faction_with = ROOT } } }
+        }
         prerequisite = {
             focus = VEN_annex_colombia
         }
         bypass = {
             has_full_control_of_state = 491
         }
-        search_filters = {FOCUS_FILTER_ANNEXATION}
+        
         ai_will_do = {
             factor = 10
             modifier = {
@@ -861,13 +913,27 @@ focus_tree = {
         }
         completion_reward = { 
             add_state_claim = 491
-            create_wargoal = {
-                type = take_state_focus
-                target = PRU
-                expire = 0
-                generator = { 491 }
-            }
-        }    
+            if = {
+				limit = {
+					any_other_country = {
+						owns_state = 491
+					}
+				}
+				491 = {
+					OWNER = {
+						ROOT = {
+							create_wargoal = {
+								target = PREV
+								expire = 0
+								type = take_state_focus
+								generator = { 491 }
+							}
+						}
+					}
+				}
+			}
+        } 
+        search_filters = {FOCUS_FILTER_ANNEXATION}  
     }
     focus = {
         id = VEN_demand_guyana
@@ -875,14 +941,19 @@ focus_tree = {
         x = 46
         y = 9
         cost = 7.2
-        available_if_capitulated = yes
         prerequisite = {
             focus = VEN_annex_colombia
         }
-        bypass = {
-            has_full_control_of_state = 315
+
+        available_if_capitulated = no
+        available = {
+			is_subject = no
+			687 = { OWNER = { NOT = { is_in_faction_with = ROOT } } }
         }
-        search_filters = {FOCUS_FILTER_ANNEXATION}
+        
+        bypass = {
+            has_full_control_of_state = 687
+        }
         ai_will_do = {
             factor = 10
             modifier = {
@@ -890,15 +961,16 @@ focus_tree = {
                 factor = 0
             }
         }
+
         completion_reward = { 
             add_state_claim = 687
             687 = {
                 OWNER = {
                     country_event = { id = venezuela.8 hours = 12 }
                 }
-            }
-            
-        }    
+            }  
+        }   
+        search_filters = {FOCUS_FILTER_ANNEXATION} 
     }
     focus = {
         id = VEN_strike_panama
@@ -906,7 +978,7 @@ focus_tree = {
         x = 44
         y = 10
         cost = 10
-        available_if_capitulated = yes
+        available_if_capitulated = no
         prerequisite = {
             focus = VEN_attack_equador
         }
@@ -1120,7 +1192,10 @@ focus_tree = {
         x = 52
         y = 9
         cost = 7.2
-        available_if_capitulated = yes
+        available_if_capitulated = no
+        available = {
+            is_puppet = no
+        }
         prerequisite = {
             focus = VEN_push_north
         }
@@ -1138,7 +1213,6 @@ focus_tree = {
                     country_event = { id = venezuela.24 hours = 12 }
                 }
             }
-
         }    
     }
     focus = {
@@ -1147,7 +1221,10 @@ focus_tree = {
         x = 50
         y = 9
         cost = 7.2
-        available_if_capitulated = yes
+        available_if_capitulated = no
+        available = {
+            is_puppet = no
+        }
         prerequisite = {
             focus = VEN_prepare_amphibious_landings
         }
@@ -1165,25 +1242,24 @@ focus_tree = {
         completion_reward = { 
             add_state_claim = 315
             if = {
-                    limit = {
-                        NOT = {
-                            owns_state = 315
-                        }
+                limit = {
+                    NOT = {
+                        owns_state = 315
                     }
-                    315 = {
-                        OWNER = {
-                            ROOT = {
-                                create_wargoal = {
-                                    target = PREV
-                                    expire = 0
-                                    type = take_state_focus
-                                    generator = { 315 }
-                                }
+                }
+                315 = {
+                    OWNER = {
+                        ROOT = {
+                            create_wargoal = {
+                                target = PREV
+                                expire = 0
+                                type = take_state_focus
+                                generator = { 315 }
                             }
                         }
                     }
                 }
-
+            }
         }    
     }
     focus = {
@@ -1192,7 +1268,10 @@ focus_tree = {
         x = 54
         y = 9
         cost = 7.2
-        available_if_capitulated = yes
+        available_if_capitulated = no
+        available = {
+            is_puppet = no
+        }
         prerequisite = {
             focus = VEN_prepare_amphibious_landings
         }
@@ -1212,43 +1291,43 @@ focus_tree = {
             add_state_claim = 318
             add_state_claim = 319
             if = {
-                    limit = {
-                        NOT = {
-                            owns_state = 319
-                        }
+                limit = {
+                    NOT = {
+                        owns_state = 319
                     }
-                    319 = {
-                        OWNER = {
-                            ROOT = {
-                                create_wargoal = {
-                                    target = PREV
-                                    expire = 0
-                                    type = take_state_focus
-                                    generator = { 319 }
-                                }
+                }
+                319 = {
+                    OWNER = {
+                        ROOT = {
+                            create_wargoal = {
+                                target = PREV
+                                expire = 0
+                                type = take_state_focus
+                                generator = { 319 }
                             }
                         }
                     }
                 }
-                if = {
-                    limit = {
-                        NOT = {
-                            owns_state = 318
-                        }
+            }
+            if = {
+                limit = {
+                    NOT = {
+                        owns_state = 318
                     }
-                    318 = {
-                        OWNER = {
-                            ROOT = {
-                                create_wargoal = {
-                                    target = PREV
-                                    expire = 0
-                                    type = take_state_focus
-                                    generator = { 318 }
-                                }
+                }
+                318 = {
+                    OWNER = {
+                        ROOT = {
+                            create_wargoal = {
+                                target = PREV
+                                expire = 0
+                                type = take_state_focus
+                                generator = { 318 }
                             }
                         }
                     }
                 }
+            }
         }    
     }
     focus = {
@@ -1281,7 +1360,6 @@ focus_tree = {
             add_state_core = 319
             add_state_core = 318
             add_state_core = 315
-
         }    
     }
     focus = {
@@ -1291,7 +1369,7 @@ focus_tree = {
         y = 11
         cost = 10
         available_if_capitulated = yes
-        available = {
+        available = { 
             has_full_control_of_state = 315
             has_full_control_of_state = 318
             has_full_control_of_state = 319
@@ -1369,7 +1447,15 @@ focus_tree = {
         x = 47
         y = 11
         cost = 5
-        available_if_capitulated = yes
+        available_if_capitulated = no
+        available = {
+            is_subject = no
+            BRA = {
+                NOT = {
+                    is_in_faction_with = VEN
+                }
+            }
+        }
         prerequisite = {
             focus = VEN_strike_panama
             focus = VEN_intergrate_caribbean
@@ -1400,7 +1486,15 @@ focus_tree = {
         x = 49
         y = 11
         cost = 5
-        available_if_capitulated = yes
+        available_if_capitulated = no
+        available = {
+            is_subject = no
+            USA = {
+                NOT = {
+                    is_in_faction_with = VEN
+                }
+            }
+        }
         prerequisite = {
             focus = VEN_strike_panama
             focus = VEN_intergrate_caribbean
@@ -1422,7 +1516,6 @@ focus_tree = {
 				target = USA
 				expire = 0
 			}
-
         }    
     }
 
@@ -1859,7 +1952,7 @@ focus_tree = {
             factor = 10
         }
         mutually_exclusive = {
-            focus = VEN_increase_oil_workforce
+            focus = VEN_military_colleges
         }
         prerequisite = {
             focus = VEN_suspend_elections
@@ -2397,7 +2490,9 @@ focus_tree = {
         y = 0
         cost = 5
         available_if_capitulated = yes
-        search_filters = {FOCUS_FILTER_MANPOWER}
+        available = {
+            has_war = no
+        }
         ai_will_do = {
             factor = 10
         }
@@ -2405,7 +2500,6 @@ focus_tree = {
             division_template = {
                 name = "Guardia Civil"
                 priority = 0
-
                 regiments = {
                     infantry = { x = 0 y = 0 }
                     infantry = { x = 0 y = 1 }
@@ -2424,10 +2518,9 @@ focus_tree = {
                     division = "name = \"División Maracaibo\" division_template = \"Guardia Civil\" start_experience_factor = 0.1 start_equipment_factor = 0.75 force_equipment_variants = { infantry_equipment_0 = { owner = VEN } }" 
                     owner = VEN
                 }
-            } 
-            
-              
-        }    
+            }    
+        }
+        search_filters = {FOCUS_FILTER_MANPOWER}    
     }
     focus = {
         id = VEN_modernize_army
@@ -3008,6 +3101,15 @@ focus_tree = {
         }
         completion_reward = { 
             random_controlled_state = {
+                limit = {
+                    is_core_of = ROOT
+					dockyard > 0
+					free_building_slots = {
+						building = dockyard
+						size > 0
+						include_locked = yes
+					}
+				}
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = dockyard
@@ -3015,9 +3117,7 @@ focus_tree = {
 				    instant_build = yes
 			    }
             }
-            add_ideas = COL_submarines_focus
-            
-              
+            add_ideas = COL_submarines_focus     
         }    
     }
     focus = {
