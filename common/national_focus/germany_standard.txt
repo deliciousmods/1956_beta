@@ -2869,7 +2869,12 @@ focus_tree = {
 			add_named_threat = { threat = 2 name = GER_anti_comitern_pact }
 			every_other_country = {
 				limit = {
-					NOT = { tag = GER }
+					NOT = { 
+						OR = {
+							original_tag = GER
+							original_tag = SOV
+						}
+					}
 					NOT = { has_war_with = GER }
 					NOT = { is_in_faction_with = SOV }
 					is_subject = no
@@ -3601,6 +3606,20 @@ focus_tree = {
 					has_war_with = ROOT
 				}
 			}
+			WLL = {
+				OR = {
+					exists = no
+					is_in_faction_with = GER
+					has_war_with = ROOT
+				}
+			}
+			VLA = {
+				OR = {
+					exists = no
+					is_in_faction_with = GER
+					has_war_with = ROOT
+				}
+			}
 		}
 
 		historical_ai = {
@@ -3617,6 +3636,8 @@ focus_tree = {
 		will_lead_to_war_with = HOL
 		will_lead_to_war_with = LUX
 		will_lead_to_war_with = FRA
+		will_lead_to_war_with = VLA
+		will_lead_to_war_with = WLL
 		x = -1
 		y = 2
 		relative_position_id = GER_danzig_or_war_vanilla
@@ -3688,6 +3709,32 @@ focus_tree = {
 					target = LUX
 					expire = 0
 					generator = { 8 }
+				}			
+			}
+			if = {
+				limit = {
+					country_exists = VLA
+					NOT = { VLA = { is_in_faction_with = GER } }
+					NOT = { has_war_with = VLA }
+				}
+				create_wargoal = {
+					type = take_state_focus
+					target = VLA
+					expire = 0
+					generator = { 6 }
+				}			
+			}
+			if = {
+				limit = {
+					country_exists = WLL
+					NOT = { WLL = { is_in_faction_with = GER } }
+					NOT = { has_war_with = WLL }
+				}
+				create_wargoal = {
+					type = take_state_focus
+					target = WLL
+					expire = 0
+					generator = { 34 }
 				}			
 			}
 			add_tech_bonus = {
@@ -4158,6 +4205,7 @@ focus_tree = {
 				HUN = { has_capitulated = yes }
 				ROM = { has_capitulated = yes }
 				HUN = { is_subject_of = ROM } #just rude
+				has_war_with = ROM
 			}
 		}
 		completion_reward = {
@@ -5437,8 +5485,13 @@ focus_tree = {
 		}
 		bypass = {
 			OR = {
-				NOT = {
-					YUG = { owns_state = 102 }
+				AND = {
+					NOT = {
+						YUG = { owns_state = 102 }
+					}
+					NOT = {
+						SLV = { owns_state = 102 }
+					}
 				}
 				has_war_with = YUG
 				is_in_faction_with = YUG
@@ -5498,11 +5551,25 @@ focus_tree = {
 				AND = {
 					country_exists = YUG
 					NOT = { has_war_with = YUG }
-					owns_state = 102
+					OR = { 
+						owns_state = 102
+						SLV = {
+							exists = yes
+							is_puppet_of = GER
+							owns_state = 102
+						}	
+					}
 				}
 				AND = {
 					NOT = { country_exists = YUG }
-					owns_state = 102
+					OR = { 
+						owns_state = 102
+						SLV = {
+							exists = yes
+							is_puppet_of = GER
+							owns_state = 102
+						}	
+					}
 					owns_state = 45
 					owns_state = 106
 					owns_state = 103
@@ -5724,12 +5791,13 @@ focus_tree = {
 		icon = GFX_goal_generic_forceful_treaty
 		available = {
 			is_puppet = no
-			GRE = { 
-				has_war = no 
-				owns_state = 731
-				owns_state = 186
-				owns_state = 185
-				owns_state = 47 
+			GRE = {
+				has_war = no
+				owns_state = 47 #prevent use if bordergore mini puppet with only any of these states also necessary for followups
+				OR = {
+					owns_state = 184
+					owns_state = 182
+				}
 			}
 		}
 		x = 0
@@ -5739,7 +5807,47 @@ focus_tree = {
 		ai_will_do = {
 			factor = 10
 		}
-
+		bypass = {
+			any_neighbor_country = { #so war is allowed anytime, but demanding becoming a puppet needs bordering
+				tag = GRE
+			}
+			OR = {
+				NOT = { GRE = { owns_state = 182 } }
+				ITA = {
+					OR = {
+						exists = no
+						has_completed_focus = ITA_revive_the_stresa_front
+						has_completed_focus = ITA_militarize_the_rome_protocols
+						AND = {
+							is_puppet = yes
+							NOT = {
+								OR = {
+									is_in_faction_with = GER
+									is_puppet_of = GER
+								}
+							}
+						}
+					}
+				}
+			}
+			OR = {
+				NOT = { GRE = { owns_state = 184 } }
+				BUL = {
+					OR = { 
+						exists = no
+						AND = {
+							is_puppet = yes
+							NOT = {
+								OR = {
+									is_in_faction_with = GER
+									is_puppet_of = GER
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		#bypass = {
 		#	OR = {
 		#		GRE = {
@@ -5800,18 +5908,24 @@ focus_tree = {
 				limit = {
 					GRE = {
 						OR = {
-							owns_state = 185
-							owns_state = 186
-							owns_state = 47
+							owns_state = 182
+							owns_state = 187
 						} 
 					}
 					ITA = {
-						NOT = { has_war_with = GRE }
-						country_exists = ITA
-						has_completed_focus = ITA_invade_greece
+						exists = yes
 						OR = {
 							is_in_faction_with = GER
 							is_in_faction = no							
+						}
+						NOT = {
+							has_completed_focus = ITA_revive_the_stresa_front
+							has_completed_focus = ITA_militarize_the_rome_protocols
+						}
+						OR = {
+							is_puppet = no
+							is_in_faction_with = GER
+							is_puppet_of = GER
 						}
 					}
 				}
@@ -5822,43 +5936,20 @@ focus_tree = {
 				limit = {
 					GRE = { owns_state = 184 }
 					BUL = {
-						NOT = { has_war_with = GRE }
-						country_exists = BUL
+						exists = yes
 						OR = {
 							is_in_faction_with = GER
 							is_in_faction = no							
+						}
+						OR = {
+							is_puppet = no
+							is_in_faction_with = GER
+							is_puppet_of = GER
 						}
 					}
 				}
 				set_global_flag = GER_second_ljubljana_award_BUL_event
 				country_event = { id = germany.100 }
-			}
-			if = {
-				limit = {
-					any_neighbor_country = {
-						tag = GRE
-					}
-					OR = {
-						NOT = { country_exists = ITA }
-						AND = {
-							ITA = {
-								NOT = { is_in_faction_with = GER }
-								is_in_faction = yes
-							}
-						}
-					}
-					OR = {
-						NOT = { country_exists = BUL }
-						AND = {
-							BUL = {
-								NOT = { is_in_faction_with = GER }
-								is_in_faction = yes
-							}
-						}
-					}
-				}
-				set_global_flag = GER_second_ljubljana_award_GER_event
-				country_event = { id = germany.101 }
 			}
 			custom_effect_tooltip = GER_second_ljubljana_award_tt
 		}
@@ -5878,10 +5969,8 @@ focus_tree = {
 
 			}
 			NOT = { 
-				OR = {
-					is_in_faction_with = GRE
-					has_war_with = ROOT 
-				}
+				is_in_faction_with = GRE
+				has_war_with = GRE 
 			}
 		}
 		x = 2
@@ -7502,6 +7591,14 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_ANNEXATION }
 		completion_reward = {
 			POL = { country_event = { id = wtt_germany.14 } }
+			hidden_effect = {
+				every_unit_leader = {
+					limit = {
+						has_id = 19 #Johannes Blaskowitz
+					}
+					remove_unit_leader_trait = unpopular #Should be less controversial if Germany is being good
+				}
+			}
 		}
 	}
 
@@ -7962,6 +8059,12 @@ focus_tree = {
 			add_stability = 0.05
 			hidden_effect = {
 				set_cosmetic_tag = GER_german_monarchy
+				every_unit_leader = {
+					limit = {
+						has_id = 19 #Johannes Blaskowitz
+					}
+					remove_unit_leader_trait = unpopular #Should be less controversial if Germany is being good
+				}
 			}
 		}
 	}
@@ -8238,6 +8341,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
 	focus = {
@@ -8301,6 +8405,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
 	focus = {
@@ -8512,6 +8617,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
 	focus = {
@@ -8723,6 +8829,7 @@ focus_tree = {
 				}
 			}
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
 	focus = {
@@ -8850,6 +8957,7 @@ focus_tree = {
 				}	
 			}
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
 	focus = {
@@ -8933,6 +9041,7 @@ focus_tree = {
 				}	
 			}
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
 	focus = {
@@ -9016,6 +9125,7 @@ focus_tree = {
 				}	
 			}
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
 	focus = {

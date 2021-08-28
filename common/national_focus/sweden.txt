@@ -327,7 +327,6 @@ focus_tree = {
 	
 	focus = {
 		id = SWE_production_effort_I
-		id = SWE_production_effort_I
 		icon = GFX_goal_generic_construct_mil_factory
 		prerequisite = { focus = SWE_industry_research }
 		prerequisite = { focus = SWE_saltsjobad }
@@ -1852,8 +1851,8 @@ focus_tree = {
 		id = SWE_a_new_deluge
 		icon = GFX_goal_GER_war_with_poland
 
-		prerequisite = { focus = SWE_nationalism_focus }
-		x = -3
+		prerequisite = { focus = SWE_denmark_war_goal }
+		x = -2
 		y = 3
 		relative_position_id = SWE_denmark_war_goal
 
@@ -2223,8 +2222,29 @@ focus_tree = {
 		prerequisite = { focus = SWE_osterbotten focus = SWE_norway_war_goal focus = SWE_denmark_war_goal }
 		mutually_exclusive = { focus = SWE_found_own_empire focus = SWE_ally_with_the_low_countries focus = SWE_march_alongside_the_british_blackshirts }
 		available = {
+			has_capitulated = no
 			is_puppet = no
-			country_exists = GER
+			
+			OR = {
+				GER = {
+					NOT = { has_war_with = ROOT }
+					OR = {
+						has_government = fascism
+						has_government = neutrality
+					}
+					has_capitulated = no
+					is_faction_leader = yes
+				}
+				any_other_country = {
+					is_major = yes
+					OR = {
+						has_government = fascism
+						has_government = neutrality
+					}
+					is_faction_leader = yes
+					NOT = { has_war_with = ROOT }
+				}
+			}
 		}
 		relative_position_id = SWE_norway_war_goal
 		x = 3
@@ -2268,6 +2288,7 @@ focus_tree = {
 				}
 			}			
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 	
 	focus = {
@@ -2347,7 +2368,7 @@ focus_tree = {
                 country_event = { id = generic.2 days = 1 }
 			}
         }
-            search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+        search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
     }
 
 	focus = {
@@ -2460,7 +2481,7 @@ focus_tree = {
 			}									
 
         }
-            search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+        search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
     }
 
 	focus = {
@@ -2539,11 +2560,13 @@ focus_tree = {
 			}															
 		}
 	}
-
 	focus = {
 		id = SWE_legacy_of_great_northern_war
 		available = {
+			is_puppet = no
+			r56_script_i_am_sane = yes
 			OR = {
+				is_faction_leader = yes
 				is_in_faction_with = ENG
 				is_in_faction_with = HOL
 				is_in_faction_with = BEL
@@ -2551,25 +2574,57 @@ focus_tree = {
 				is_in_faction_with = VLA
 				is_in_faction_with = WLL
 			}
-			
+			if = {
+				limit = {
+					NOT = {
+						owns_state = 62
+					}
+				}
+				62 = {
+					OWNER = {
+						NOT = {
+							OR = {
+								has_war_with = ROOT
+								is_in_faction_with = ROOT
+							}
+						}
+					}
+				}						
+			}
 		}
 
+
 		bypass = {
+			owns_state = 62
 		}
-		prerequisite = { focus = SWE_march_alongside_the_british_blackshirts focus = SWE_ally_with_the_low_countries }
+		prerequisite = { focus = SWE_march_alongside_the_british_blackshirts focus = SWE_ally_with_the_low_countries focus = SWE_found_own_empire }
 		icon = GFX_focus_ger_accept_british_naval_dominance
 		x = 0
 		y = 1
 
 		relative_position_id = SWE_march_alongside_the_british_blackshirts
 		cost = 10
-		search_filters = {FOCUS_FILTER_RESEARCH}
+		search_filters = {FOCUS_FILTER_ANNEXATION}
 		completion_reward = {
 			62 = { add_claim_by = SWE }
-			create_wargoal = {
-				type = annex_everything
-				target = GER
-				expire = 0
+			if = {
+				limit = {
+					NOT = {
+						owns_state = 62
+					}
+				}			
+				62 = {
+					OWNER = {
+						ROOT = {
+							create_wargoal = {
+								target = PREV
+								expire = 0
+								type = take_state_focus
+								generator = { 62 }
+							}
+						}
+					}
+				}
 			}													
 		}
 	}
@@ -2590,7 +2645,21 @@ focus_tree = {
 		}
 
 		allow_branch = {
-			#has_dlc = "La Resistance"
+			OR = {
+				has_game_rule = {
+					rule = ger_fragmentation_status
+					option = DEFAULT
+				}
+				has_game_rule = {
+					rule = ger_fragmentation_status
+					option = GER_FRAGMENTED
+				}
+				has_game_rule = {
+					rule = ger_fragmentation_status
+					option = GER_DECENTRALIZED
+				}								
+			}
+
 		}
 
 		available = {
@@ -2766,6 +2835,7 @@ focus_tree = {
 				}
 			}						
 		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}	
 	focus = {
 		id = SWE_estonia_war_goal
@@ -2847,9 +2917,6 @@ focus_tree = {
 	focus = {
 		id = SWE_fortify_new_frontier
 		prerequisite = { focus = SWE_estonia_war_goal }
-		available = {
-			191 = { is_owned_and_controlled_by = SWE }
-		}
 		icon = GFX_focus_ger_bulwark_against_bolshevism
 		x = 0
 		y = 1
@@ -2857,6 +2924,7 @@ focus_tree = {
 		cost = 10
 
 		available = {
+			191 = { is_owned_and_controlled_by = SWE }
 			has_government = fascism
 		}
 		available_if_capitulated = yes
@@ -2986,7 +3054,8 @@ focus_tree = {
 					country_event = generic.5
 				}
 			}
-		}	
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }	
 	}
 
 	focus = {
@@ -3071,7 +3140,6 @@ focus_tree = {
 		bypass = {
 			has_war_with = SOV
 		}
-		available_if_capitulated = no
 		ai_will_do = {
 			factor = 1
 		}
