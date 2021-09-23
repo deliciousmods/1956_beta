@@ -222,6 +222,7 @@ country_event = {
 			target = SOV
 			modifier = MON_forced_aid
 		}
+		set_country_flag = mon_1935_defence_soviet_yes_assistance
 	}
 }
 
@@ -450,3 +451,937 @@ country_event = {
 }
 
 
+#1935 talks results: delegation detained!
+country_event = {
+	id = mongol.14
+	title = mongol.14.t
+	desc = mongol.14.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	#Where are our leaders?!
+	option = {
+		name = mongol.14.a
+		add_manpower = -3
+		add_stability = -0.01
+	}
+}
+
+
+
+
+
+
+#########################       RAIDS        #############################
+
+#ignore the Mongolian raid?
+country_event = {
+	id = mongol.19
+	title = mongol.19.t
+	desc = mongol.19.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	#Send an order to hold the positions no matter the cost!
+	option = {
+		ai_chance = { base = 100 }
+		name = mongol.19.a
+	}
+
+	#We have other matters on our hands then those bandits.
+	option = {
+		ai_chance = { 
+			base = 20
+			modifier = {	#Our army is very small, we cannot risk to spend it
+				add = 90
+				has_war = yes
+				has_army_size = { size < 10 } 
+			}
+			modifier = {	#we have other matters on our hands rn
+				factor = 3
+				has_war = yes
+			}
+		}
+		name = mongol.19.b
+		set_country_flag = MON_raid_ignored
+	}
+}
+
+#small raid -       success Mongolian part
+country_event = {
+	id = mongol.20
+	title = mongol.20.t
+	desc = mongol.20.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+		}
+		if = {
+			limit = {
+				FROM.FROM = {
+					NOT = {
+						has_country_flag = MON_raid_ignored
+					}
+				}
+			}
+			FROM.FROM.FROM = {	#just because they will get it removed in event chain
+				clr_state_flag = border_incident_active
+				save_event_target_as = their_state
+			}
+			FROM = {
+				clr_state_flag = border_incident_active
+			}
+		}
+		FROM.FROM = { 
+			save_event_target_as = their_country
+			if = {
+				limit = {
+					has_country_flag = MON_raid_ignored
+				}
+				clr_country_flag = MON_raid_ignored
+			}
+		}
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+	
+	#Bring in the tropheys and study them!
+	option = {
+		name = mongol.20.a
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = 150
+			producer = FROM.FROM
+		}
+		add_tech_bonus = {
+			name = infantry_weapons_bonus
+			bonus = 0.33
+			uses = 1
+			category = infantry_weapons
+		}
+	}
+}
+
+#small raid -       failed Mongolian part
+country_event = {
+	id = mongol.21
+	title = mongol.21.t
+	desc = mongol.21.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#We shall be better prepared next time!
+	option = {
+		name = mongol.21.a
+		add_war_support =  -0.03
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = -100
+			producer = ROOT
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_idea = MON_demotivated_army
+				}
+			}
+			add_timed_idea = {
+				idea = MON_demotivated_army
+				days = 30
+			}
+		}
+		else = {
+			modify_timed_idea = {
+				idea = MON_demotivated_army
+				days = 45
+			}
+		}
+	}
+}
+
+#small raid -       stalemate Mongolian part
+country_event = {
+	id = mongol.22
+	title = mongol.22.t
+	desc = mongol.22.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#Very well. Our troops have learned a valuable lesson.
+	option = {
+		name = mongol.22.a
+		army_experience = 10
+	}
+}
+
+#small raid -       success defender part
+country_event = {
+	id = mongol.23
+	title = mongol.23.t
+	desc = mongol.23.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#A victory for our people!
+	option = {
+		name = mongol.23.a
+		add_war_support =  0.02
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = 100
+			producer = FROM.FROM
+		}
+	}
+}
+
+#small raid -       failed defender part
+country_event = {
+	id = mongol.24
+	title = mongol.24.t
+	desc = mongol.24.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#We have lost few valuable assets!
+	option = {
+		name = mongol.24.a
+		add_war_support =  -0.02
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = -150
+			producer = ROOT
+		}
+		add_timed_idea = {
+			idea = MON_anti_raiding_defense
+			days = 45
+		}
+	}
+}
+
+#small raid -       stalemate defender part
+country_event = {
+	id = mongol.25
+	title = mongol.25.t
+	desc = mongol.25.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#Very well. Our troops have learned a valuable lesson.
+	option = {
+		name = mongol.25.a
+		army_experience = 15
+	}
+}
+
+
+##medium-raids outcomes
+
+#Medium raid successfull -       success Mongolian part
+country_event = {
+	id = mongol.26
+	title = mongol.26.t
+	desc = mongol.26.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+		}
+		if = {
+			limit = {
+				FROM.FROM = {
+					NOT = {
+						has_country_flag = MON_raid_ignored
+					}
+				}
+			}
+			FROM.FROM.FROM = {	#just because they will get it removed in event chain
+				clr_state_flag = border_incident_active
+				save_event_target_as = their_state
+			}
+			FROM = {
+				clr_state_flag = border_incident_active
+			}
+		}
+		FROM.FROM = { 
+			save_event_target_as = their_country
+			if = {
+				limit = {
+					has_country_flag = MON_raid_ignored
+				}
+				clr_country_flag = MON_raid_ignored
+			}
+		}
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+	
+	#More equipment to use! Wonderful!
+	option = {
+		name = mongol.26.a
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = 400
+			producer = FROM.FROM
+		}
+		add_equipment_to_stockpile = {
+			type = support_equipment
+			amount = 100
+			producer = FROM.FROM
+		}
+		add_equipment_to_stockpile = {
+			type = artillery_equipment
+			amount = 100
+			producer = FROM.FROM
+		}
+	}
+
+	#Very well. Use them for testing.
+	option = {
+		name = mongol.26.b
+		add_tech_bonus = {
+			name = infantry_weapons_bonus
+			bonus = 0.5
+			uses = 1
+			category = infantry_weapons
+		}
+		add_tech_bonus = {
+			name = infantry_weapons_bonus
+			bonus = 0.5
+			uses = 1
+			category = infantry_weapons
+		}
+		add_tech_bonus = {
+			name = infantry_artillery_bonus
+			bonus = 1
+			uses = 1
+			category = artillery
+		}
+	}
+}
+
+#Medium raid repelled       failed Mongolian part
+country_event = {
+	id = mongol.27
+	title = mongol.27.t
+	desc = mongol.27.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#Many mothers will miss their sons today...
+	option = {
+		name = mongol.27.a
+		add_war_support =  -0.10
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = -800
+			producer = FROM
+		}
+		add_equipment_to_stockpile = {
+			type = support_equipment
+			amount = -50
+			producer = FROM
+		}
+		add_manpower = -300
+		if = {
+			limit = {
+				NOT = {
+					has_idea = MON_deprived_army
+				}
+			}
+			add_timed_idea = {
+				idea = MON_deprived_army
+				days = 120
+			}
+		}
+		else = {
+			modify_timed_idea = {
+				idea = MON_deprived_army
+				days = 90
+			}
+		}
+	}
+}
+
+#Raiding party adavance delayed -       stalemate Mongolian part
+country_event = {
+	id = mongol.28
+	title = mongol.28.t
+	desc = mongol.28.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#Good. Improve the squadrons
+	option = {
+		name = mongol.28.a
+		army_experience = 40
+	}
+
+	#Good. Another lesson to learn.
+	option = {
+		name = mongol.28.b
+		add_tech_bonus = {
+			name = land_doc_bonus
+			bonus = 0.5
+			uses = 1
+			category = land_doctrine
+		}
+	}
+}
+
+#Medium raid destroyed
+country_event = {
+	id = mongol.29
+	title = mongol.29.t
+	desc = mongol.29.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#We are proud of our milita and military!
+	option = {
+		name = mongol.29.a
+		add_war_support =  0.05
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = 800
+			producer = FROM.FROM
+		}
+		add_equipment_to_stockpile = {
+			type = support_equipment
+			amount = 50
+			producer = FROM.FROM
+		}
+	}
+}
+
+#Mongolian divisions raided our borders			failed defender part
+country_event = {
+	id = mongol.30
+	title = mongol.30.t
+	desc = mongol.30.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM.FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#We will have much to rebuild from now on
+	option = {
+		name = mongol.30.a
+		add_stability =  -0.03
+		add_war_support = 0.05
+		add_equipment_to_stockpile = { 
+			type = infantry_equipment amount = -400
+			producer = ROOT
+		}
+		add_equipment_to_stockpile = {
+			type = support_equipment
+			amount = -100
+			producer = ROOT
+		}
+		add_equipment_to_stockpile = {
+			type = artillery_equipment
+			amount = -100
+			producer = ROOT
+		}
+		add_timed_idea = {
+			idea = MON_anti_raiding_defense
+			days = 180
+		}
+	}
+}
+
+#small raid -       stalemate defender part
+country_event = {
+	id = mongol.31
+	title = mongol.31.t
+	desc = mongol.31.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	immediate = {
+		save_event_target_as = our_country
+		FROM = {
+			save_event_target_as = our_state
+			clr_state_flag = border_incident_active
+		}
+		FROM.FROM = { save_event_target_as = their_country }
+		FROM.FROM.FROM = {
+			save_event_target_as = their_state
+			clr_state_flag = border_incident_active
+		}
+		clear_variable = attacker_state_vs_@FROM
+		clear_variable = defender_state_vs_@FROM
+		remove_targeted_decision = { target = event_target:their_country decision = MON_small_raid_cancelled }
+	}
+
+	#We are always ready to repell their advances!
+	option = {
+		name = mongol.31.a
+		army_experience = 50
+	}
+
+	#Great! Learn from the enemy.
+	option = {
+		name = mongol.31.b
+		add_tech_bonus = {
+			name = land_doc_bonus
+			bonus = 0.5
+			uses = 1
+			category = land_doctrine
+		}
+	}
+}
+
+
+#####################POLITICAL EVENTS############################
+
+#Dealing with Genden
+country_event = {
+	id = mongol.35
+	title = mongol.35.t
+	desc = mongol.35.d
+	picture = GFX_report_event_ANZAC_day
+
+	is_triggered_only = yes
+
+	#Allow him to remain in office as foreign minister.
+	option = {
+		name = mongol.35.a
+		MON_soviet_low_influece_increase_effect = yes
+		custom_effect_tooltip = available_political_advisor
+		show_ideas_tooltip = MON_peljidiin_genden_advisor
+		add_war_support = 0.05
+		set_country_flag = MON_genden_allowed_in_office_flag
+	}
+
+	#Force him into premature retirement.
+	option = {
+		name = mongol.35.b
+		add_stability = 0.05
+		MON_soviet_medium_influece_increase_effect = yes
+	}
+
+	#Such behaviour cannot be tolerated, arrest, or even better, assassinate him!
+	option = {
+		name = mongol.35.c
+		add_stability = -0.1
+		add_popularity = {
+			ideology = communism
+			popularity = -0.10
+		}
+		custom_effect_tooltip = MON_kill_genden_for_future_leftist_takeover
+		set_country_flag = MON_kill_genden_for_future_leftist_takeover
+	}
+}
+
+#Death of Gelegdorjiin Demid
+country_event = {
+	id = mongol.36
+	title = mongol.36.t
+	desc = mongol.36.d
+	picture = GFX_report_event_ANZAC_day
+
+	trigger = {
+		original_tag = MON
+		focus_progress = {
+			focus = MON_invite_frinovsky
+			progress > 0.5
+		}
+	}
+
+	mean_time_to_happen = {
+		days = 7
+	}
+
+	#He will be missed
+	option = {
+		name = mongol.36.a
+		custom_effect_tooltip = remove_theorist
+		show_ideas_tooltip = MON_gelegdorjiin_demid
+		set_country_flag = MON_demid_killed
+		add_manpower = -1
+		remove_unit_leader = 7001 #gelegdorjiin demid, field marshal
+		MON_soviet_low_influece_increase_effect = yes
+		hidden_effect = {
+			if = {
+				limit = {
+					has_idea = MON_gelegdorjiin_demid
+				}
+				remove_ideas = MON_gelegdorjiin_demid
+			}
+			country_event = {
+				id = mongol.37 days = 7
+			}
+		}
+	}
+}
+
+#Bat-Ochiryn Eldev-Ochir raises his concern
+country_event = {
+	id = mongol.37
+	title = mongol.37.t
+	desc = mongol.37.d
+	picture = GFX_report_event_ANZAC_day
+
+	is_triggered_only = yes
+
+	#Choibalsan is too dangerous, let us prepare an insurrection
+	option = {
+		name = mongol.37.a
+		if = {
+			limit = {
+				has_idea = MON_khorloogiin_choibalsan_advisor
+			}
+			remove_ideas = MON_khorloogiin_choibalsan_advisor
+		}
+		activate_mission = MON_choibalsan_plot
+	}
+
+	#Assure him everything is fine
+	option = {
+		name = mongol.37.b
+		add_political_power = -25
+	}
+}
+
+#Leftists Seize Power!
+country_event = {
+	id = mongol.38
+	title = mongol.38.t
+	desc = mongol.38.d
+	picture = GFX_report_event_ANZAC_day
+
+	is_triggered_only = yes
+	
+	#It is for the greater good
+	option = {
+		name = mongol.38.a
+		add_stability = -0.2
+		retire_country_leader = yes
+		create_country_leader = {
+			name = "Bat-Ochiryn Eldev-Ochir"
+			desc = "POLITICS_BAT_OCHIRYN_ELDEV_OCHIR_DESC"
+			picture = "gfx/leaders/MON/r56_portrait_MON_Bat_Ochiryn_Eldev_Ochir.dds"
+			expire = "1965.1.1"
+			ideology = marxism
+			traits = {
+				staunch_atheist
+			}
+		}
+	}
+}
+
+#Choibalsan Launches a Coup!
+country_event = {
+	id = mongol.39
+	title = mongol.39.t
+	desc = mongol.39.d
+	picture = GFX_report_event_ANZAC_day
+
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = MON_choibalsan_revolted
+		hidden_effect = {
+			if = {
+				limit = {
+					OR = {
+						has_government = democratic
+						has_government = fascism
+						has_government = neutrality
+					}
+				}
+				start_civil_war = {
+					ideology = communism
+					size = 0.4
+					states = { 848 850 }
+				}
+			}
+			if = {
+				limit = {
+					has_government = communism
+				}
+				start_civil_war = {
+					ideology = neutrality
+					size = 0.4
+					states = { 848 850 }
+				}
+			}
+			if = {
+				limit = {
+					has_completed_focus = MON_arm_civil_militia
+				}
+				division_template = {
+					name = "Irgenii Tsereg"	#Civil militia in Mongolian transliteration
+					priority = 0
+					regiments = {
+						militia = { x = 0 y = 0 }
+						militia = { x = 0 y = 1 }
+						militia = { x = 0 y = 2 }
+						militia = { x = 1 y = 0 }
+						militia = { x = 1 y = 1 }
+					}
+				}
+				330 = {
+					create_unit = {
+						division = "name = \"1. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+					create_unit = {
+						division = "name = \"2. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+					create_unit = {
+						division = "name = \"3. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+					create_unit = {
+						division = "name = \"4. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+				}
+				849 = {
+					create_unit = {
+						division = "name = \"5. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+				}
+			}
+			random_other_country = {
+				limit = {
+					original_tag = MON
+					has_war_with = ROOT
+				}
+				drop_cosmetic_tag = yes
+				save_event_target_as = mongolian_choibalsan_rebeller
+				ROOT = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id = 7778 # Choibalsan himself
+								has_id = 7780 # Jamsrang Tseren
+							}
+						}
+						set_nationality = event_target:mongolian_choibalsan_rebeller
+					}
+				}
+				create_country_leader = {
+					name = "Khorloogiin Choibalsan"
+					desc = "POLITICS_Khorloogiin_choibalsan_DESC"
+					picture = "gfx/leaders/MON/r56_portrait_MON_Khorloogiin_Choibalsan.dds"
+					expire = "1965.1.1"
+					ideology = centrism
+					traits = {
+						stalin_of_mongolia
+					}
+				}
+				create_country_leader = {
+					name = "Khorloogiin Choibalsan"
+					desc = "POLITICS_Khorloogiin_choibalsan_DESC"
+					picture = "gfx/leaders/MON/r56_portrait_MON_Khorloogiin_Choibalsan.dds"
+					expire = "1965.1.1"
+					ideology = marxism
+					traits = {
+						stalin_of_mongolia
+					}
+				}
+				division_template = {
+					name = "Irgenii Tsereg"	#Civil militia in Mongolian transliteration
+					priority = 0
+					regiments = {
+						militia = { x = 0 y = 0 }
+						militia = { x = 0 y = 1 }
+						militia = { x = 0 y = 2 }
+						militia = { x = 1 y = 0 }
+						militia = { x = 1 y = 1 }
+					}
+				}
+				850 = {
+					create_unit = {
+						division = "name = \"6. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+				}
+				848 = {
+					create_unit = {
+						division = "name = \"7. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+					create_unit = {
+						division = "name = \"8. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.1 start_equipment_factor = 0.8 force_equipment_variants = { infantry_equipment_0 = { owner = MON } }" 
+						owner = MON
+					}
+				}
+			}
+		}
+	}
+	#To arms!
+	option = {
+		name = mongol.39.a
+		add_stability = -0.1
+		retire_country_leader = yes
+		create_country_leader = {
+			name = "Bat-Ochiryn Eldev-Ochir"
+			desc = "POLITICS_BAT_OCHIRYN_ELDEV_OCHIR_DESC"
+			picture = "gfx/leaders/MON/r56_portrait_MON_Bat_Ochiryn_Eldev_Ochir.dds"
+			expire = "1965.1.1"
+			ideology = marxism
+			traits = {
+				staunch_atheist
+			}
+		}
+	}
+}

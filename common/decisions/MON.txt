@@ -435,7 +435,7 @@ propaganda_efforts = {
 		allowed = {
 			OR = {
 				original_tag = MON
-				original_tag = TUV
+				original_tag = TAN
 				original_tag = MEN
 				original_tag = BUR
 			}
@@ -813,7 +813,7 @@ MON_1935_state_visit_to_moscow_category = {
 
 		custom_cost_text = r56_10_command_power_cost
 		custom_cost_trigger = {
-			command_power > 9
+			command_power > 10
 		}
 		available = { 
 			is_in_faction_with = SOV
@@ -1012,6 +1012,604 @@ MON_on_the_crossroads_of_the_world_category = {
 					10 = {
 						set_country_flag = { flag = MON_crossroads_of_the_world_ai_timer_flag value = 1 days = 50 }
 					}
+				}
+			}
+		}
+	}
+}
+
+
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+MON_raids_operations_category = {
+	MON_commit_small_raid = {
+		icon = border_war		
+
+		available = {
+			FROM = {
+				any_owned_state = {
+					is_controlled_by = FROM
+					any_neighbor_state = {
+						is_fully_controlled_by = ROOT
+						set_temp_variable = { var:attacker_state_temp = id }
+						has_ROOT_at_least_1_div_in_current_state_scope = yes
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+					}
+					NOT = { has_state_flag = border_incident_active }
+					set_temp_variable = { var:defender_state_temp = id }
+				}
+			}
+			NOT = { has_non_aggression_pact_with = FROM }
+		}
+
+		visible = {
+			FROM = { exists = yes }
+			NOT = { has_war_with = FROM }
+			#FROM = { has_not_initiated_border_incident_with_ROOT = yes }	#may be a viable option for future
+			FROM = {
+				NOT = {
+					is_subject_of = ROOT
+				}
+				NOT = {
+					is_in_faction_with = ROOT
+				}
+			}
+			NOT = {
+				is_subject_of = FROM
+			}
+
+			NOT = { has_border_war_with = FROM }
+			FROM = {
+				any_owned_state = {
+					is_controlled_by = FROM
+					hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+					any_neighbor_state = {
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						is_fully_controlled_by = ROOT
+						has_ROOT_at_least_1_div_in_current_state_scope = yes
+					}
+				}
+			}
+		}
+
+		target_root_trigger = {
+			original_tag = MON
+			OR = {
+				has_country_flag = mon_1935_defence_soviet_yes_assistance
+				has_country_flag = mon_1935_defence_soviet_yes_self_reliance
+			}
+		}
+		target_array = neighbors
+
+		target_trigger = {
+			FROM = { 
+				OR = {
+					original_tag = JAP
+					original_tag = MAN
+					original_tag = MEN
+					is_literally_china = yes
+				}
+				NOT = { has_government = MON }
+			}
+		}
+		allowed = {
+			original_tag = MON
+		}
+
+		highlight_states = {
+			OR = {
+				state = FROM.defender_state_vs_@ROOT
+				AND = {
+					is_owned_and_controlled_by = FROM
+					hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+					any_neighbor_state = {
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						has_ROOT_at_least_1_div_in_current_state_scope = yes
+						is_fully_controlled_by = ROOT
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			base = 10
+		}
+
+		custom_cost_text = r56_10_command_power_cost
+		custom_cost_trigger = {
+			command_power > 10
+		}
+
+		fire_only_once = no
+
+		days_remove = 4
+		days_re_enable = 21
+
+		war_with_target_on_remove = no
+
+		complete_effect = {
+			hidden_effect = {
+				add_command_power = -10
+				FROM = {
+					random_owned_controlled_state = {
+						limit = {
+							hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+							any_neighbor_state = {
+								hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+								has_ROOT_at_least_1_div_in_current_state_scope = yes
+								is_fully_controlled_by = ROOT
+							}
+						}
+						save_event_target_as = defender_state
+						set_variable = { FROM.defender_state_vs_@ROOT = id }
+						set_temp_variable = { defender_state_temp = id }
+						set_state_flag = border_incident_active
+					}
+				}
+				random_state = {
+					limit = {
+						is_fully_controlled_by = ROOT
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						has_ROOT_at_least_1_div_in_current_state_scope = yes
+						any_neighbor_state = {
+							state = var:FROM.defender_state_vs_@ROOT
+						}
+					}
+					save_event_target_as = attacker_state
+					set_variable = { FROM.attacker_state_vs_@ROOT = id }
+					set_temp_variable = { attacker_state_temp = id }
+					set_state_flag = border_incident_active
+				}
+			}
+			custom_effect_tooltip = MON_border_clashes_small_raid_21
+			FROM = {
+				country_event = { id = mongol.19 hours = 6 }		
+			}
+		}
+		remove_effect = {
+			hidden_effect = {
+				var:FROM.defender_state_vs_@ROOT = {
+					save_event_target_as = defender_state 
+				}
+				var:FROM.attacker_state_vs_@ROOT = {
+					save_event_target_as = attacker_state 
+				}
+				FROM = {
+					random_owned_controlled_state = {
+						limit = {
+							hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+							any_neighbor_state = {
+								is_fully_controlled_by = ROOT
+								has_ROOT_at_least_1_div_in_current_state_scope = yes
+								hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+							}
+						}
+						set_temp_variable = { defender_state_temp = id }
+					}
+				}
+				random_state = {
+					limit = {
+						is_fully_controlled_by = ROOT
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						has_ROOT_at_least_1_div_in_current_state_scope = yes
+						any_neighbor_state = {
+							state = var:FROM.defender_state_vs_@ROOT
+						}
+					}
+					set_temp_variable = { attacker_state_temp = id }
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						has_country_flag = MON_raid_ignored
+					}
+				}
+				ROOT = {
+					country_event = { id = mongol.20 }
+				}
+				FROM = {
+					var:attacker_state_vs_@ROOT = {
+						clr_state_flag = border_incident_active
+					}
+					var:defender_state_vs_@ROOT = {
+						clr_state_flag = border_incident_active
+					}
+					clear_variable = attacker_state_vs_@ROOT
+					clear_variable = defender_state_vs_@ROOT
+				}
+			}
+			else = {
+				custom_effect_tooltip = MON_border_clashes_small_raid_warning
+				start_border_war = {
+					change_state_after_war = no
+					combat_width = 20
+					minimum_duration_in_days = 2
+					attacker = {
+						state = var:FROM.attacker_state_vs_@ROOT
+						num_provinces = 1
+						on_win = mongol.20
+						on_lose = mongol.21
+						on_cancel = mongol.22
+					}
+					
+					defender = {
+						state = var:FROM.defender_state_vs_@ROOT
+						num_provinces = 1
+						on_win = mongol.23
+						on_lose = mongol.24
+						on_cancel = mongol.25
+					}
+				}
+				activate_targeted_decision = { target = FROM decision = MON_small_raid_cancelled }
+				FROM = {
+					activate_targeted_decision = { target = ROOT decision = MON_small_raid_cancelled }
+				}
+			}
+		}
+	}
+
+	#Mission for Mongolia to finish the raid in 7 days
+	MON_small_raid_cancelled = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			var:FROM.defender_state_vs_@ROOT = { has_border_war = no }
+			var:FROM.attacker_state_vs_@ROOT = { has_border_war = no }
+		}
+		
+		highlight_state_targets = {
+			state = var:defender_state_temp
+			state = var:FROM.defender_state_vs_@ROOT
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		days_mission_timeout = 7
+		is_good = no
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		timeout_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				cancel_border_war = {
+					defender = var:defender_state_vs_@FROM
+					attacker = var:attacker_state_vs_@FROM
+				}
+			}
+			else = {
+				cancel_border_war = {
+					defender = var:FROM.defender_state_vs_@ROOT
+					attacker = var:FROM.attacker_state_vs_@ROOT
+				}
+			}
+		}
+	}
+
+	#Big raids
+	MON_commit_big_raid = {
+		icon = civil_war		
+
+		available = {
+			FROM = {
+				any_owned_state = {
+					is_controlled_by = FROM
+					any_neighbor_state = {
+						is_fully_controlled_by = ROOT
+						set_temp_variable = { var:attacker_state_temp = id }
+						has_ROOT_at_least_3_div_in_current_state_scope = yes
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+					}
+					NOT = { has_state_flag = border_incident_active }
+					set_temp_variable = { var:defender_state_temp = id }
+				}
+			}
+			NOT = { has_non_aggression_pact_with = FROM }
+		}
+
+		visible = {
+			FROM = { exists = yes }
+			NOT = { has_war_with = FROM }
+			#FROM = { has_not_initiated_border_incident_with_ROOT = yes }	#may be a viable option for future
+			FROM = {
+				NOT = {
+					is_subject_of = ROOT
+				}
+				NOT = {
+					is_in_faction_with = ROOT
+				}
+			}
+			NOT = {
+				is_subject_of = FROM
+			}
+
+			NOT = { has_border_war_with = FROM }
+			FROM = {
+				any_owned_state = {
+					is_controlled_by = FROM
+					hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+					any_neighbor_state = {
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						is_fully_controlled_by = ROOT
+						has_ROOT_at_least_3_div_in_current_state_scope = yes
+					}
+				}
+			}
+		}
+
+		target_root_trigger = {
+			original_tag = MON
+			OR = {
+				has_country_flag = mon_1935_defence_soviet_yes_assistance
+				has_country_flag = mon_1935_defence_soviet_yes_self_reliance
+			}
+		}
+		target_array = neighbors
+
+		target_trigger = {
+			FROM = { 
+				OR = {
+					original_tag = JAP
+					original_tag = MAN
+					original_tag = MEN
+					is_literally_china = yes
+				}
+				NOT = { has_government = MON }
+			}
+		}
+		allowed = {
+			original_tag = MON
+		}
+
+		highlight_states = {
+			OR = {
+				state = FROM.defender_state_vs_@ROOT
+				AND = {
+					is_owned_and_controlled_by = FROM
+					hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+					any_neighbor_state = {
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						has_ROOT_at_least_3_div_in_current_state_scope = yes
+						is_fully_controlled_by = ROOT
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			base = 10
+		}
+
+		custom_cost_text = r56_25_command_power_cost
+		custom_cost_trigger = {
+			command_power > 25
+		}
+
+		fire_only_once = no
+
+		days_remove = 14
+		days_re_enable = 90
+
+		war_with_target_on_remove = no
+
+		complete_effect = {
+			hidden_effect = {
+				add_command_power = -25
+				FROM = {
+					random_owned_controlled_state = {
+						limit = {
+							hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+							any_neighbor_state = {
+								hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+								has_ROOT_at_least_3_div_in_current_state_scope = yes
+								is_fully_controlled_by = ROOT
+							}
+						}
+						save_event_target_as = defender_state
+						set_variable = { FROM.defender_state_vs_@ROOT = id }
+						set_temp_variable = { defender_state_temp = id }
+						set_state_flag = border_incident_active
+					}
+				}
+				random_state = {
+					limit = {
+						is_fully_controlled_by = ROOT
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						has_ROOT_at_least_3_div_in_current_state_scope = yes
+						any_neighbor_state = {
+							state = var:FROM.defender_state_vs_@ROOT
+						}
+					}
+					save_event_target_as = attacker_state
+					set_variable = { FROM.attacker_state_vs_@ROOT = id }
+					set_temp_variable = { attacker_state_temp = id }
+					set_state_flag = border_incident_active
+				}
+			}
+			custom_effect_tooltip = MON_border_clashes_big_raid_120
+			FROM = {
+				country_event = { id = mongol.19 hours = 6 }		
+			}
+		}
+		remove_effect = {
+			hidden_effect = {
+				var:FROM.defender_state_vs_@ROOT = {
+					save_event_target_as = defender_state 
+				}
+				var:FROM.attacker_state_vs_@ROOT = {
+					save_event_target_as = attacker_state 
+				}
+				FROM = {
+					random_owned_controlled_state = {
+						limit = {
+							hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+							any_neighbor_state = {
+								is_fully_controlled_by = ROOT
+								has_ROOT_at_least_3_div_in_current_state_scope = yes
+								hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+							}
+						}
+						set_temp_variable = { defender_state_temp = id }
+					}
+				}
+				random_state = {
+					limit = {
+						is_fully_controlled_by = ROOT
+						hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+						has_ROOT_at_least_3_div_in_current_state_scope = yes
+						any_neighbor_state = {
+							state = var:FROM.defender_state_vs_@ROOT
+						}
+					}
+					set_temp_variable = { attacker_state_temp = id }
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						has_country_flag = MON_raid_ignored
+					}
+				}
+				ROOT = {
+					country_event = { id = mongol.20 }
+				}
+				FROM = {
+					var:attacker_state_vs_@ROOT = {
+						clr_state_flag = border_incident_active
+					}
+					var:defender_state_vs_@ROOT = {
+						clr_state_flag = border_incident_active
+					}
+					clear_variable = attacker_state_vs_@ROOT
+					clear_variable = defender_state_vs_@ROOT
+				}
+			}
+			else = {
+				custom_effect_tooltip = MON_border_clashes_big_raid_warning
+				start_border_war = {
+					change_state_after_war = no
+					combat_width = 60
+					minimum_duration_in_days = 7
+					attacker = {
+						state = var:FROM.attacker_state_vs_@ROOT
+						num_provinces = 2
+						on_win = mongol.26
+						on_lose = mongol.27
+						on_cancel = mongol.28
+					}
+					
+					defender = {
+						state = var:FROM.defender_state_vs_@ROOT
+						num_provinces = 2
+						on_win = mongol.29
+						on_lose = mongol.30
+						on_cancel = mongol.31
+					}
+				}
+				activate_targeted_decision = { target = FROM decision = MON_big_raid_cancelled }
+				FROM = {
+					activate_targeted_decision = { target = ROOT decision = MON_big_raid_cancelled }
+				}
+			}
+		}
+	}
+
+	#Mission for Mongolia to finish the raid in 30 days
+	MON_big_raid_cancelled = {
+
+		icon = civil_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			var:FROM.defender_state_vs_@ROOT = { has_border_war = no }
+			var:FROM.attacker_state_vs_@ROOT = { has_border_war = no }
+		}
+		
+		highlight_state_targets = {
+			state = var:defender_state_temp
+			state = var:FROM.defender_state_vs_@ROOT
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		days_mission_timeout = 30
+		is_good = no
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		timeout_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				cancel_border_war = {
+					defender = var:defender_state_vs_@FROM
+					attacker = var:attacker_state_vs_@FROM
+				}
+			}
+			else = {
+				cancel_border_war = {
+					defender = var:FROM.defender_state_vs_@ROOT
+					attacker = var:FROM.attacker_state_vs_@ROOT
+				}
+			}
+		}
+	}
+}
+
+MON_power_struggle = {
+	MON_choibalsan_plot = {
+
+		icon = GFX_decision_generic_special_project
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		priority = 10
+
+		days_mission_timeout = 90
+
+		fire_only_once = yes
+
+		activation = {
+			NOT = {
+				has_idea = MON_khorloogiin_choibalsan_advisor
+			}
+		}
+
+		visible = {
+			NOT = {
+				has_idea = MON_khorloogiin_choibalsan_advisor
+			}
+			NOT = {
+				has_completed_focus = MON_seize_the_power
+			}
+			NOT = {
+				has_country_flag = mon_choibalsan_revolted
+			}
+		}
+
+		cancel_if_not_visible = yes
+
+		is_good = no
+
+		timeout_effect = {
+			MON = {
+				country_event = {
+					id = mongol.39
+					days = 2
 				}
 			}
 		}
