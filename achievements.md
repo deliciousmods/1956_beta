@@ -1,7 +1,7 @@
 # R56 Achievement Documentation
 
 ## GFX
-The icons you wish to use for the achievement should be stored in: `gfx\interface\achievements`<br>
+Achievement Icons size is 64x64. The icons you wish to use for the achievement should be stored in: `gfx\interface\achievements`<br>
 and the reference to the icons defined in `interface/r56_achievements.gfx` under the Achievement Icons section<br>
 Make sure that it follows the same naming conventions as the rest.<br>
 
