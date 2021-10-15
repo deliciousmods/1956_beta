@@ -15,10 +15,16 @@ country_event = {
 	
 	option = { # Breaking point!
 		name = china.1.a
-		ai_chance = { factor = 85 }
+		ai_chance = { 
+			factor = 85
+			modifier = {
+				add = -15
+				is_historical_focus_on = no
+			}
+		}
 		effect_tooltip = {
 			JAP = {
-				add_stability = 0.05
+				add_war_support = 0.05
 				country_event = { id = japan.1 }
 			}
 		}
@@ -28,18 +34,14 @@ country_event = {
 	}
 	option = { # Make more concessions
 		name = china.1.b
-		ai_chance = { factor = 15 }
-		effect_tooltip = {
-			if = {
-				limit = {
-					MEN = {
-						is_puppet_of = JAP
-					}
-				}
-				MEN = {
-					transfer_state = 611
-				}
+		ai_chance = { 
+			factor = 15
+			modifier = {
+				add = -14
+				is_historical_focus_on = yes
 			}
+		}
+		effect_tooltip = {
 			JAP = {
 				if = {
 					limit = {
@@ -52,15 +54,14 @@ country_event = {
 					else = {
 						transfer_state = 608
 						transfer_state = 614
+						transfer_state = 597
+						transfer_state = 743
 						if = {
 							limit = {
-								MEN = {
-									NOT = {
-										is_puppet_of = JAP
-									}
-								}
+								MEN = { is_subject_of = CHI }
+								611 = { is_controlled_by = MEN }	
 							}
-							else = {
+							JAP = { 
 								transfer_state = 611
 							}
 						}
@@ -802,7 +803,7 @@ country_event = {
 
 	option = {
 		ai_chance = { 
-				factor = 95
+			factor = 90
 		}
 		name = china.101.b
 		CHI = { 
@@ -814,6 +815,20 @@ country_event = {
 			enemy = JAP
 		}
 		add_ideas = KMT_united_front
+		#Nothing
+	}
+
+	option = {
+		ai_chance = { 
+			factor = 5
+			modifier = {
+				factor = 50
+				ROOT = {
+					has_completed_focus = CHI_opposition
+				}
+			}
+		}
+		name = china.101.c
 		#Nothing
 	}
 }
@@ -977,17 +992,8 @@ country_event = {
 			country_event = china.106
 			add_to_faction = ROOT
 		}
-		if = {
-			limit = {
-				CHI = {
-					NOT = {
-							has_country_flag = mao_is_greatest
-					}
-				}
-			}
-			PRC = { add_opinion_modifier = { target = CHI modifier = unstable_alliance } }
-			CHI = { add_opinion_modifier = { target = PRC modifier = unstable_alliance } }			
-		}
+		PRC = { add_opinion_modifier = { target = CHI modifier = unstable_alliance } }
+		CHI = { add_opinion_modifier = { target = PRC modifier = unstable_alliance } }	
 		add_to_war = {
 			targeted_alliance = CHI
 			enemy = JAP
@@ -1020,11 +1026,9 @@ country_event = {
 					tag = PGR
 				}
 				NOT = {
-					OR = {
-						has_war_together_with = JAP
-						is_in_faction_with = JAP
-						is_puppet_of = JAP
-					}
+					has_war_together_with = JAP
+					is_in_faction_with = JAP
+					is_puppet_of = JAP
 				}
 				has_war_with = ROOT
 			}
@@ -1078,12 +1082,16 @@ country_event = {
 					load_oob = "PRC_SOV_reinforcements"
 				}
 			}
-				CHI = {
+			CHI = {
 				create_corps_commander = {
 					name = "Yan Xishan"
 					portrait_path = "gfx/leaders/Asia/Portrait_Asia_Generic_warlord2.dds"
-					traits = { desert_fox trait_mountaineer }
-					skill = 2
+					traits = { offensive_doctrine }
+					skill = 3
+					attack_skill = 4
+					defense_skill = 2
+					planning_skill = 2
+					logistics_skill = 2
 				}
 				set_country_flag = shx_sumitted
 			}
@@ -1233,8 +1241,15 @@ country_event = {
 			add_equipment_to_stockpile = { type = infantry_equipment_1 amount = 6000 producer = SOV }
 			load_oob = "PRC_SOV_reinforcements_2"
 			set_global_flag = PRC_restart_CHI_war
-			drop_cosmetic_tag = yes
-			set_cosmetic_tag = GCDcivilwar			 
+			if = {
+				limit = {
+					NOT = {
+						has_completed_focus = PRC_found_our_nation
+					}
+				}
+				drop_cosmetic_tag = yes
+				set_cosmetic_tag = GCDcivilwar
+			}		 
 		}
 	}
 }
@@ -1399,11 +1414,7 @@ country_event = {
 
 	trigger = {
 		NOT = {
-			OR = {
-				has_country_flag = mao_is_greatest
-				has_country_flag = kmt_ptp_flag
-				has_country_flag = kmt_land_problem_xed
-			}
+			has_country_flag = kmt_land_problem_xed
 		}
 		original_tag = CHI
 		has_government = neutrality
@@ -1419,10 +1430,6 @@ country_event = {
 		modifier = {
 			factor = 0.5
 			communism > 0.5
-		}
-		modifier = {
-			factor = 2
-			has_country_flag = kmt_into_mao_flag
 		}
 	}
 
@@ -1483,64 +1490,7 @@ country_event = {
 
 	fire_only_once = yes
 
-	trigger = {
-		OR = {
-			original_tag = PRC
-			original_tag = YUN
-			original_tag = XSM
-			original_tag = SHX
-			original_tag = SIK
-			original_tag = GXC
-		}
-		has_focus_tree = china_communist_focus
-		
-		has_war = no
-		OR = {
-			AND = {
-				OR = {
-					has_global_flag = PRC_restart_CHI_war
-					CHI = {
-						OR = {
-							is_puppet_of = JAP
-							is_in_faction_with = JAP
-						}
-					}
-				}
-				CHI = {
-					exists = yes
-				}
-			}
-			CHI = {
-				exists = no
-			}
-		}
-		OR = {
-			608 = {
-				owner = {
-					OR = {
-						has_war_with = ROOT
-						tag = ROOT
-					}
-				}
-			}
-			613 = {
-				owner = {
-					OR = {
-						has_war_with = ROOT
-						tag = ROOT
-					}
-				}
-			}
-		}
-		OR = {
-			controls_state = 608 #Beijing
-			controls_state = 613 #Nanjing
-		}
-	}
-
-	mean_time_to_happen = {
-		days = 10
-	}
+	is_triggered_only = yes
 
 	#Move to Beijing
 	option = {
