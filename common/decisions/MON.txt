@@ -893,7 +893,7 @@ MON_on_the_crossroads_of_the_world_category = {
 
 		days_remove = 10
 
-		cost = 10
+		cost = 50
 
 		fire_only_once = no
 
@@ -1562,6 +1562,589 @@ MON_raids_operations_category = {
 				cancel_border_war = {
 					defender = var:FROM.defender_state_vs_@ROOT
 					attacker = var:FROM.attacker_state_vs_@ROOT
+				}
+			}
+		}
+	}
+
+	MON_request_soviet_infantry = {
+
+		icon = generic_prepare_civil_war
+
+		allowed = {
+			tag = MON
+		}
+
+		available = {
+			#has_completed_focus = MON_tackle_the_eastern_threat
+			SOV = {
+				exists = yes
+			}
+			is_in_faction_with = MON
+		}
+
+		cost = 25
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 100
+		}
+
+		complete_effect = {
+			country_event = { id = mongol.66 hours = 12 }
+		}
+	}
+
+	MON_request_soviet_tanks = {
+
+		icon = generic_military 
+
+		allowed = {
+			tag = MON
+		}
+
+		available = {
+			#has_completed_focus = MON_tackle_the_eastern_threat
+			SOV = {
+				exists = yes
+			}
+			is_in_faction_with = MON
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 50
+		}
+
+		complete_effect = {
+			country_event = { id = mongol.67 hours = 12 }
+		}
+	}
+
+	#Khalkin Gol
+	MON_khalkin_gol = {
+		icon = border_war
+		allowed = {
+			original_tag = MON
+		}
+
+		available = {
+			#has_completed_focus = MON_tackle_the_eastern_threat
+			NOT = {
+				has_war_with = JAP
+				is_in_faction_with = JAP
+			}
+			849 = {
+				custom_trigger_tooltip = {
+					tooltip = MON_border_conflict_active
+					hidden_trigger = { NOT = { has_state_flag = border_incident_active } }
+
+				}
+				any_neighbor_state = {
+					OR = {
+						is_controlled_by = JAP
+						controller = {
+							is_subject_of = JAP
+						}
+					}
+				}
+			}
+		}
+
+		visible = {
+			#has_completed_focus = MON_affirm_rearmament_program
+		}
+
+		highlight_state_targets = {
+			state = 849
+			state = 761
+		}
+		
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				is_historical_focus_on = yes
+				date < 1939.4.1
+				factor = 0
+			}
+		}
+		cost = 50
+		days_remove = 30
+		war_with_on_remove = JAP
+		complete_effect = {
+			849 = {
+				save_event_target_as = MON_JAP_attacker_state
+				set_state_flag = border_incident_active
+			}
+			761 = {
+				save_event_target_as = MON_JAP_defender_state
+				set_state_flag = border_incident_active
+			}
+			761 = {
+				controller = {
+					country_event = { id = mongol.60 days = 1 }
+				}
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						is_in_faction_with = SOV
+					}
+					MON = {
+						country_event = { id = mongol.65 days = 3 }
+					}
+				}
+			}
+		}
+		remove_effect = {
+			activate_targeted_decision = { target = MON decision = MON_khalkin_gol_forgotten }
+			activate_targeted_decision = { target = MON decision = MON_escalate_incident_to_border_conflict_with_JAP }
+		}
+	}
+
+	#Mission for defender warning that a conflict with FROM is coming
+	MON_khalkin_gol_warning_DEFENDER = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		war_with_target_on_timeout = yes
+		ai_will_do = {
+			base = 0
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			custom_effect_tooltip = escalation_possible_tooltip_for_defender
+			custom_effect_tooltip = effects_if_border_conflict_is_lost
+			effect_tooltip = {
+				MON = {
+					add_political_power = 120
+					add_tech_bonus = {
+						name = sov_jap_border_conflict_won
+						uses = 2
+						category = land_doctrine
+						bonus = 1.0
+					}
+					add_tech_bonus = {
+						name = sov_jap_border_conflict_won
+						uses = 2
+						category = armor
+						bonus = 1.0
+					}
+				}
+			}
+			hidden_effect = {
+				remove_targeted_decision = { target = ROOT decision = MON_khalkin_gol_warning_DEFENDER }
+				activate_targeted_decision = { target = ROOT decision = MON_border_conflict_escalation_warning_JAP }
+			}
+		}
+	}
+
+	#Mission for defender warning FROM can escalate to war at any point is coming
+	MON_border_conflict_escalation_warning_JAP = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			#var:ROOT.defender_state_vs_@FROM = {
+			#	has_ROOT_at_least_1_div_in_current_state_scope = yes
+			#}
+			hidden_trigger = { always = no }
+		}
+
+		war_with_target_on_timeout = yes
+		ai_will_do = {
+			base = 0
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+
+		timeout_effect = {
+			custom_effect_tooltip = from_cannot_escalate
+			custom_effect_tooltip = effects_if_border_conflict_is_lost
+			effect_tooltip = {
+				MON = {
+					add_political_power = 120
+					add_tech_bonus = {
+						name = sov_jap_border_conflict_won
+						category = land_doctrine
+						bonus = 2.0
+					}
+					add_tech_bonus = {
+						name = sov_jap_border_conflict_won
+						category = armor
+						bonus = 2.0
+					}
+				}
+			}
+		}		
+	}
+	#Mission for attacker to escalate or incident is forgotten
+	MON_khalkin_gol_forgotten = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			#var:ROOT.defender_state_vs_@FROM = {
+			#	has_ROOT_at_least_1_div_in_current_state_scope = yes
+			#}
+			hidden_trigger = { always = no }
+		}
+
+		highlight_state_targets = {
+			state = 849
+			state = 761
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			remove_targeted_decision = { target = SOV decision = MON_escalate_incident_to_border_conflict_with_JAP }
+			add_popularity = {
+				ideology = communism
+				popularity = -0.1
+			}
+			add_war_support = -0.15 #Shameful Display
+			hidden_effect = {
+				849 = {
+					controller = {
+						remove_targeted_decision = { target = ROOT decision = MON_border_conflict_escalation_warning_JAP }
+					}
+				}
+				MON = {
+					849 = {
+						clr_state_flag = border_incident_active
+					}
+					761 = {
+						clr_state_flag = border_incident_active
+					}
+				}
+			}
+		}
+	}
+
+	#Decision to escalate incident on border with JAP/puppet to border conflict
+	MON_escalate_incident_to_border_conflict_with_JAP = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			849 = {
+				OR = {
+					is_fully_controlled_by = ROOT
+					CONTROLLER = {
+						is_subject_of = ROOT
+					}
+					CONTROLLER = {
+						is_in_faction_with = ROOT
+					}
+				}
+			}
+			divisions_in_border_state = {
+				state = 849
+				border_state = 761
+				size > 0
+			}
+		}
+
+		highlight_state_targets = {
+			state = 849
+			state = 761	
+		}
+
+		ai_will_do = {
+			base = 10
+			modifier = { 
+				has_war = no
+				factor = 10
+			}
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			remove_targeted_decision = { target = ROOT decision = MON_khalkin_gol_forgotten }
+			start_border_war = {
+				change_state_after_war = no
+				attacker = {
+					state = 849
+					num_provinces = 3
+					on_win = mongol.61
+					on_lose = mongol.62
+					on_cancel = mongol.63
+				}
+				
+				defender = {
+					state = 761
+					num_provinces = 4
+					on_win = mongol.62
+					on_lose = mongol.61
+					on_cancel = mongol.63
+				}
+			}
+			MON = {
+				activate_targeted_decision = { target = ROOT decision = MON_border_conflict_escalate_conflict }
+				activate_targeted_decision = { target = ROOT decision = MON_border_conflict_time_until_cancelled }
+			}
+			761 = {
+				controller = {
+					activate_targeted_decision = { target = ROOT decision = MON_border_conflict_escalate_conflict }
+					activate_targeted_decision = { target = ROOT decision = MON_border_conflict_time_until_cancelled }
+				}
+			}
+		}
+	}
+	#Mission for attacker to win border war against FROM in X days
+	MON_border_conflict_time_until_cancelled = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			849 = { has_border_war = no }
+			761 = { has_border_war = no }
+		}
+		
+		highlight_state_targets = {
+			state = 849
+			state = 761
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		days_mission_timeout = 90
+		is_good = no
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+
+		}
+
+		timeout_effect = {
+			cancel_border_war = {
+				defender = 849
+				attacker = 761
+			}
+			hidden_effect = {
+				remove_targeted_decision = { target = MON decision = MON_border_conflict_escalate_conflict }
+				remove_targeted_decision = { target = JAP decision = MON_border_conflict_escalate_conflict }
+			}
+		}
+	}
+
+	#Decision to escalate conflict further
+	MON_border_conflict_escalate_conflict = {
+
+		icon = decision_generic_ignite_civil_war
+
+		allowed = { always = no } #Activated from effect
+
+		visible = {
+			has_border_war_with = FROM
+		}
+
+		highlight_state_targets = {
+			state = 849
+			state = 761
+		}
+
+		cost = 50
+
+		ai_will_do = {
+			base = 0
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				set_border_war_data = {
+					attacker = 849
+					defender = 761
+					defender_modifier = 0.15
+					combat_width = 100
+				}
+			}
+			else = {
+				set_border_war_data = {
+					attacker = 849
+					defender = 761
+					attacker_modifier = 0.25
+					combat_width = 100
+				}
+			}
+			761 = {
+				controller = {
+					set_country_flag = {
+						flag = MON_khalkin_gol_escalate_to_war_cooldown_@ROOT
+						days = 60
+						value = 1
+					}
+					remove_targeted_decision = { target = JAP decision = JAP_border_conflict_escalate_conflict }
+				}
+			}
+			set_country_flag = {
+				flag = MON_khalkin_gol_escalate_to_war_cooldown_@SOV
+				days = 60
+				value = 1
+			}
+			custom_effect_tooltip = in_60_days
+			activate_targeted_decision = { target = ROOT decision = MON_khalkin_gol_escalate_to_war }
+		}
+	}
+
+	#Decision to escalate conflict further
+	MON_khalkin_gol_escalate_to_war = {
+
+		icon = decision_generic_ignite_civil_war
+
+		allowed = { always = no } #Activated from effect
+
+		visible = {
+			NOT = { has_country_flag = MON_khalkin_gol_escalate_to_war_cooldown_@FROM }
+			has_border_war_with = FROM
+		}
+
+		highlight_state_targets = {
+			state = 849
+			state = 761
+		}
+
+		cost = 100
+
+		ai_will_do = {
+			base = 0
+		}
+
+		days_remove = 15
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		war_with_target_on_remove = yes
+
+		complete_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				849 = { save_event_target_as = their_state }
+				761 = { save_event_target_as = our_state }
+			}
+			else = {
+				761 = { save_event_target_as = our_state }
+				849 = { save_event_target_as = their_state }
+			}
+			761 = {
+				controller = {
+					country_event = { id = mongol.64 }
+					hidden_effect = {
+						remove_targeted_decision = { target = JAP decision = JAP_border_conflict_escalate_to_war }
+					}
+				}
+			}
+		}
+
+		remove_effect = {
+			cancel_border_war = {
+				dont_fire_events = yes
+				defender = 761
+				attacker = 849
+			}
+			declare_war_on = { target = FROM type = annex_everything }
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				849 = {
+					clr_state_flag = border_incident_active
+				}
+				761 = {
+					clr_state_flag = border_incident_active
+				}
+				
+			}
+			else = {
+				FROM = {
+					761 = {
+						clr_state_flag = border_incident_active
+					}
+					849 = {
+						clr_state_flag = border_incident_active
+					}
+				}
+			}
+		}
+	}
+
+	#Decision to back down from conflict
+	MON_border_conflict_back_out_of_conflict = {
+
+		allowed = { always = no } #Activated from effect
+
+		visible = {
+			has_border_war_with = FROM
+		}
+
+		highlight_state_targets = {
+			state = 849
+			state = 761
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			if = {
+				limit = { is_border_conflict_defender_vs_FROM = yes }
+				finalize_border_war = {
+					attacker_win = yes
+					attacker = 849
+					defender = 761
+				}
+			}
+			else = {
+				finalize_border_war = {
+					attacker = 849
+					defender = 761
+					defender_win = yes
 				}
 			}
 		}
