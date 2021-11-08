@@ -6865,6 +6865,9 @@ country_event = {
 
 	trigger = {
 		#A democratic or althistory faction leader whose faction holds at least one German core state while SOV holds another can get this.
+		NOT = {
+			has_global_flag = had_yalta_conference
+		}		
 		has_war_with = GER
 		GER = {
 			surrender_progress > 0.44
@@ -6970,9 +6973,6 @@ country_event = {
 				array = GER.core_states
 				var:v = { controller = { is_in_faction_with = SOV } }
 			}
-		}
-		NOT = {
-			has_global_flag = had_yalta_conference
 		}
 		NOT = {
 			any_of = {
@@ -7193,7 +7193,7 @@ country_event = {
 						AND = {
 							is_in_faction_with = GER
 							has_war_together_with = GER
-						}
+	 					}
 					}
 				}
 			}
@@ -7317,6 +7317,7 @@ country_event = {
 
 	option = {
 		name = germany.118.a
+		custom_effect_tooltip = r56_yalta_occupation_tt
 		hidden_effect = {
 			if = {
 				limit = {
@@ -7366,31 +7367,31 @@ country_event = {
 				add_state_core = 763
 				add_state_core = 73
 			}
-			WGR = {
-				add_state_core = 42
-				add_state_core = 50
-				add_state_core = 51
-				add_state_core = 52
-				add_state_core = 53
-				add_state_core = 54
-				add_state_core = 55
-				add_state_core = 56
-				add_state_core = 57
-				add_state_core = 58
-				add_state_core = 59
-				add_state_core = 807
-				add_state_core = 808
-				add_state_core = 809
-			}
-			DDR = {
-				add_state_core = 60
-				add_state_core = 61
-				add_state_core = 62
-				add_state_core = 64
-				add_state_core = 65
-				#add_state_core = 66
-				#add_state_core = 67
-			}
+			#WGR = {
+			#	add_state_core = 42
+			#	add_state_core = 50
+			#	add_state_core = 51
+			#	add_state_core = 52
+			#	add_state_core = 53
+			#	add_state_core = 54
+			#	add_state_core = 55
+			#	add_state_core = 56
+			#	add_state_core = 57
+			#	add_state_core = 58
+			#	add_state_core = 59
+			#	add_state_core = 807
+			#	add_state_core = 808
+			#	add_state_core = 809
+			#}
+			#DDR = {
+			#	add_state_core = 60
+			#	add_state_core = 61
+			#	add_state_core = 62
+			#	add_state_core = 64
+			#	add_state_core = 65
+			#	#add_state_core = 66
+			#	#add_state_core = 67
+			#}
 			POL = {
 				if = {
 					limit = {
@@ -7416,6 +7417,8 @@ country_event = {
 		ai_chance = {
 			factor = 0
 		}
+		set_global_flag = r56_unlocked_fate_of_germany_decisions #unlock decisions that allow DDR/WGR formation
+		custom_effect_tooltip = r56_yalta_decisions_available_2_tt
 	}
 }
 
@@ -10164,7 +10167,9 @@ country_event = { #Post yalta fixing by marijn211
 
 	option = {
 		name = soviet.106.a
-		#Maybe fire a (news) event especially since it takes 3 days to fully set everything
+		news_event = {
+			id = news.339
+		}
 		USA = {
 			annex_country = {
 				target = AUS
@@ -10373,12 +10378,58 @@ country_event = { #Post yalta fixing by marijn211
 				YUG = { transfer_state = 163 }
 			}
 		}
-		if = { #remove Italian claims, especially Albania, which quite often lead to WW3
+		if = {
 			limit = {
 				has_global_flag = r56_ITA_in_yalta
 			}
-			every_state = {
+			if = {
+				limit = {
+					ITA = {
+						has_autonomy_state = autonomy_supervised_state
+					}
+				}
+				set_autonomy = { #disable silly nations making a guided gov of Italy, which is really never removed by AI
+					target = ITA
+					autonomy_state = autonomy_free
+				} 
+				set_politics = { #this is kind of historical, but shouldnt happen every time
+					ruling_party = neutrality
+					elections_allowed = yes
+					last_election = "1941.04.02" #to get the monarchist referendum in 1946 as historical
+					election_frequency = 60
+				}
+			}
+			set_popularities = { #election data based
+				democratic = 66
+				neutrality = 4
+				fascism = 5
+				communism = 25
+			}
+			every_state = { #remove Italian claims that lead to WW3
 				remove_claim_by = ITA
+			}
+		}
+		if = {
+			limit = {
+				has_global_flag = r56_ALB_in_yalta
+				ALB = {
+					has_autonomy_state = autonomy_supervised_state
+				}
+			}
+			set_autonomy = { #disable silly nations making a guided gov of Albania, which is really never removed by AI
+				target = ALB
+				autonomy_state = autonomy_free
+			}
+			ALB = { #should be decently historical
+				set_politics = {
+					ruling_party = communism
+				}
+				set_popularities = {
+					democratic = 9
+					neutrality = 4
+					fascism = 2
+					communism = 85
+				}
 			}
 		}
 		every_state = { #prevent premature German formation
@@ -10458,6 +10509,38 @@ country_event = { #Post yalta fixing by marijn211
 				}
 			}
 		}
-		set_global_flag = r56_occupation_yalta_happened #if everything is finished, unlock decisions
+		set_global_flag = r56_unlocked_fate_of_germany_decisions #unlock decisions that allow DDR/WGR formation
+	}
+}
+
+country_event = { #Checks for post yalta fixing
+	id = r56.ger.6
+	title = soviet.106.t
+	desc = soviet.106.d
+	picture = GFX_report_event_spanish_emigres
+
+	fire_only_once = no
+	
+	hidden = yes
+	
+	trigger = {
+		has_global_flag = had_yalta_conference
+		GER = {
+			surrender_progress > 0.7 #dont capitulate yet k thanks
+			has_capitulated = no #for later participation checks so it doesnt repeat ig
+		}
+	}
+
+	option = {
+		if = {
+			limit = {
+				NOT = {
+					USA = { #kinda should get a check if they did anything
+						has_war_with = GER
+					}
+				}
+			}
+			set_global_flag = r56_USA_not_in_yalta
+		}
 	}
 }
