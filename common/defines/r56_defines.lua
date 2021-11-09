@@ -51,7 +51,7 @@ NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances
 -- Technology
 NDefines.NTechnology.BASE_TECH_COST = 80
 NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 4.4 -- Base year ahead penalty
-NDefines.NTechnology.BASE_RESEARCH_POINTS_SAVED = 50.0
+NDefines.NTechnology.BASE_RESEARCH_POINTS_SAVED = 56.0 --#base game 30 changed to 50 and then why not 56?
 
 -- Air Combat
 NDefines.NAir.AIR_WING_XP_LEVELS = {20, 40, 60, 80, 100, 140, 180, 220, 260, 300, 390, 480, 570, 660, 750, 780, 810, 840, 870, 900}
