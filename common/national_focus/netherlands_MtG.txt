@@ -335,7 +335,7 @@ focus_tree = {
 			}
 		}
 		prerequisite = { focus = HOL_obtain_foreign_colonial_investments }
-		icon = GFX_goal_HOL_east_indies
+		icon = GFX_dutch_east_indies
 		x = 3
 		y = 1
 		relative_position_id = HOL_obtain_foreign_colonial_investments
@@ -752,6 +752,15 @@ focus_tree = {
 		cost = 10
 
 		available_if_capitulated = yes
+		
+		ai_will_do = {
+			factor = 1
+			
+			modifier = {
+				has_completed_focus = HOL_cave_to_the_germans
+				factor = 0
+			}
+		}
 
 		completion_reward = {
 			add_timed_idea = {
@@ -1180,46 +1189,6 @@ focus_tree = {
 			HOL_de_crisisjaren_level_down = yes
 		}
 		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_MANPOWER FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_MILITARY_EQUIPMENT }
-	}
-	focus = {
-		id = HOL_the_new_ideal_MTG
-		icon = GFX_goal_HOL_the_new_ideal
-		prerequisite = {focus = HOL_liberation}
-		relative_position_id = HOL_liberation
-		x = 0
-		y = 1
-		cost = 2.5
-
-		available_if_capitulated = no
-
-		available = {
-			has_war_with = GER
-			GER = {
-				surrender_progress > 0.4
-			}
-			has_capitulated = no
-			has_defensive_war = yes
-			is_puppet = no
-			has_army_manpower = { size > 150000 }
-			OR = {
-				has_government = democratic
-				has_government = neutrality
-			}
-		}
-
-		ai_will_do = {
-			factor = 2
-		}
-
-		bypass = {
-		}
-
-        completion_reward = {
-			56 = { add_claim_by = HOL }
-			57 = { add_claim_by = HOL }
-			51 = { add_claim_by = HOL }
-			807 = { add_claim_by = HOL }
-        }
 	}
 
  ##  ###   ##  #  # ###   ##  #  #     ### #  # ###      ##   ##  #   ###       ## ###  ##  #  # ###   ##  ###  ###
@@ -3413,7 +3382,7 @@ focus_tree = {
 				set_party_name = { ideology = democratic long_name = HOL_CHU_party_long name = HOL_CHU_party }
 				create_country_leader = {
 					name = "Dirk Jan de Geer"
-					desc = "POLITICS_DIRK_JAN_DE_GEER_DESC"
+					desc = " "
 					picture = "Portrait_Netherlands_Dirk_Jan_de_Geer.dds"
 					expire = "1965.1.1"
 					ideology = conservatism
@@ -3510,7 +3479,15 @@ focus_tree = {
 				}
 			}
 			add_ideas = free_trade
-			add_timed_idea = { idea = HOL_caved_to_the_germans days = 1095 }
+			if = {
+				limit = {
+					NOT = {
+						GER = { has_government = democratic }
+					}
+					ENG = { has_government = democratic }
+				}
+				add_timed_idea = { idea = HOL_caved_to_the_germans days = 1095 }
+			}
 			GER = {
 				add_opinion_modifier = { target = HOL modifier = HOL_caved_to_the_germans_ger }
 				add_opinion_modifier = { target = HOL modifier = HOL_caved_to_the_germans_ger_trade }
@@ -3656,7 +3633,15 @@ focus_tree = {
 				}
 			}
 			add_ideas = limited_exports
-			add_timed_idea = { idea = HOL_caved_to_the_british days = 1095 }
+			if = {
+				limit = {
+					NOT = {
+						ENG = { has_government = fascism }
+					}
+					GER = { has_government = fascism }
+				}
+				add_timed_idea = { idea = HOL_caved_to_the_british days = 1095 }
+			}
 			GER = {
 				add_opinion_modifier = { target = HOL modifier = HOL_caved_to_the_british_ger }
 				add_opinion_modifier = { target = HOL modifier = HOL_caved_to_the_british_ger_trade }
@@ -3683,7 +3668,38 @@ focus_tree = {
 
 	focus = {
 		id = HOL_volk_en_vaderland
-		prerequisite = { focus = HOL_cave_to_the_germans }
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = HOL_fascist_tt
+				OR = {
+					AND = {
+						has_completed_focus = HOL_maintain_trade_neutrality
+						GER = { NOT = { has_government = fascism } }
+						GER = { has_civil_war = no }
+						ENG = { NOT = { has_completed_focus = ENG_visit_germany } } #no DLC req, no civil war
+						ENG = { NOT = { has_completed_focus = ENG_organize_the_blackshirts } } #DLC req, no civil war
+					}
+					AND = {
+						has_completed_focus = HOL_cave_to_the_british
+						OR = {
+							ENG = { has_completed_focus = ENG_visit_germany } #no DLC req, no civil war
+							ENG = { has_completed_focus = ENG_organize_the_blackshirts } #DLC req, no civil war
+						}
+					}
+					AND = {
+						has_completed_focus = HOL_cave_to_the_germans
+						NOT = {
+							GER = { has_civil_war = yes }
+							GER = { has_completed_focus = GER_kill_hitler }
+							GER = { has_completed_focus = GER_oppose_hitler }
+							GER = { has_completed_focus = GER_rally_the_monarchists }
+						}
+					}
+				}
+			}
+		}
+		# prerequisite = { focus = HOL_cave_to_the_germans }
+		mutually_exclusive = { focus = HOL_oranje_boven focus = HOL_unity_through_democracy focus = HOL_legacy_of_the_de_zeven_provincien_mutiny }
 		icon = GFX_goal_HOL_NSB
 		x = -3
 		y = 1
@@ -4295,13 +4311,13 @@ focus_tree = {
 				limit = {
 					BEL = { exists = no }
 					OR = {
-						VLA = { exists = yes }
+						FLA = { exists = yes }
 						WLL = { exists = yes }
 					}
 				}
 				create_wargoal = {
 				    type = annex_everything
-				    target = VLA
+				    target = FLA
 				    expire = 0
 				}
 				create_wargoal = {
@@ -4440,8 +4456,34 @@ focus_tree = {
 
  	focus = {
 		id = HOL_legacy_of_the_de_zeven_provincien_mutiny
-		prerequisite = { focus = HOL_maintain_trade_neutrality }
-		mutually_exclusive = { focus = HOL_oranje_boven }
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = HOL_communist_tt
+				OR = {
+					AND = {
+						has_completed_focus = HOL_maintain_trade_neutrality
+						NOT = {
+							ENG = { has_completed_focus = ENG_concessions_to_the_trade_unions }
+							ENG = { has_completed_focus = ENG_opposition_to_the_national_government }
+							GER = { has_completed_focus = GER_repeal_reichstag_fire_decree } #r56 tree, no civil war
+						}
+					}
+					AND = {
+						has_completed_focus = HOL_cave_to_the_british
+						OR = {
+							ENG = { has_completed_focus = ENG_concessions_to_the_trade_unions }
+							ENG = { has_completed_focus = ENG_opposition_to_the_national_government }
+						}
+					}
+					AND = {
+						has_completed_focus = HOL_cave_to_the_germans
+						GER = { has_completed_focus = GER_repeal_reichstag_fire_decree } #r56 tree, no civil war
+					}
+				}
+			}
+		}
+		# prerequisite = { focus = HOL_maintain_trade_neutrality }
+		mutually_exclusive = { focus = HOL_oranje_boven focus = HOL_unity_through_democracy focus = HOL_volk_en_vaderland }
 		icon = GFX_focus_hol_legacy_of_the_de_zeven_provincien_mutiny
 		x = -2
 		y = 1
@@ -5273,7 +5315,7 @@ focus_tree = {
 			}
 		}
 
-		available_if_capitulated = no
+		
 
 		completion_reward = {
 			if = {
@@ -5329,9 +5371,31 @@ focus_tree = {
 		id = HOL_oranje_boven
 		available = {
 			NOT = { has_completed_focus = HOL_curtail_colonial_autonomy }
+			custom_trigger_tooltip = {
+				tooltip = HOL_monarchist_tt
+				OR = {
+					AND = {
+						has_completed_focus = HOL_maintain_trade_neutrality
+						NOT = { ENG = { has_completed_focus = ENG_the_kings_party } }
+						NOT = { GER = { has_completed_focus = GER_revive_the_kaiserreich } }
+						NOT = { GER = { has_completed_focus = GER_consolidate_new_reich } } #civil war check should be unnecessary due to the loser not being able to complete these anyway; victory required
+					}
+					AND = {
+						has_completed_focus = HOL_cave_to_the_british
+						ENG = { has_completed_focus = ENG_the_kings_party } #requires DLC, no civil war risk
+					}
+					AND = {
+						has_completed_focus = HOL_cave_to_the_germans
+						OR = {
+							GER = { has_completed_focus = GER_revive_the_kaiserreich } #DLC tree, civil war has to be over
+							GER = { has_completed_focus = GER_consolidate_new_reich } #r56 tree, civil war has to be over
+						}
+					}
+				}
+			}
 		}
-		prerequisite = { focus = HOL_maintain_trade_neutrality }
-		mutually_exclusive = { focus = HOL_legacy_of_the_de_zeven_provincien_mutiny }
+		# prerequisite = { focus = HOL_maintain_trade_neutrality }
+		mutually_exclusive = { focus = HOL_volk_en_vaderland focus = HOL_unity_through_democracy focus = HOL_legacy_of_the_de_zeven_provincien_mutiny }
 		icon = GFX_focus_hol_oranje_boven
 		x = 2
 		y = 1
@@ -5393,7 +5457,7 @@ focus_tree = {
 				retire_country_leader = yes
 				create_country_leader = {
 					name = "Pieter Sjoerds Gerbrandy"
-					desc = "POLITICS_PIETER_SJOERDS_GERBRANDY_DESC"
+					desc = " "
 					picture = "portrait_hol_pieter_sjoerds_gerbrandy.dds"
 					expire = "1965.1.1"
 					ideology = conservatism
@@ -5433,7 +5497,7 @@ focus_tree = {
 			remove_ideas = HOL_wilhelmina
 			create_country_leader = {
 				name = "Wilhelmina"
-				desc = "POLITICS_WILHELMINA_DESC"
+				desc = " "
 				picture = "portrait_hol_wilhelmina.dds"
 				expire = "1965.1.1"
 				ideology = centrism
@@ -5554,10 +5618,10 @@ focus_tree = {
 			}
 			if = {
 				limit = {
-					VLA = { exists = yes }
+					FLA = { exists = yes }
 					WLL = { exists = yes }
 				}
-				VLA = {
+				FLA = {
 					is_in_faction_with = ROOT
 					has_war_together_with = ROOT
 				}
@@ -5569,7 +5633,7 @@ focus_tree = {
 			OR = {
 				BEL = { exists = yes }
 				AND = {
-					VLA = { exists = yes }
+					FLA = { exists = yes }
 					WLL = { exists = yes }
 				}
 			}
@@ -5584,7 +5648,7 @@ focus_tree = {
 					OR = {
 						BEL = { has_capitulated = yes }
 						AND = {
-							VLA = { has_capitulated = yes }
+							FLA = { has_capitulated = yes }
 							WLL = { has_capitulated = yes }
 						}
 					}
@@ -5596,7 +5660,7 @@ focus_tree = {
 					OR = {
 						BEL = { has_capitulated = yes }
 						AND = {
-							VLA = { has_capitulated = yes }
+							FLA = { has_capitulated = yes }
 							WLL = { has_capitulated = yes }
 						}
 					}
@@ -5609,7 +5673,7 @@ focus_tree = {
 						AND = {
 							custom_trigger_tooltip = {
 								tooltip = HOL_revive_the_buffer_state_proposal_tt3
-								check_variable = { HOL.legitimacy > VLA.legitimacy }
+								check_variable = { HOL.legitimacy > FLA.legitimacy }
 							}
 							custom_trigger_tooltip = {
 								tooltip = HOL_revive_the_buffer_state_proposal_tt4
@@ -5667,7 +5731,7 @@ focus_tree = {
 			has_full_control_of_state = 34
 			has_full_control_of_state = 8
 		}
-		cancel_if_invalid = yes
+		
 		prerequisite = { focus = HOL_revive_the_buffer_state_proposal }
 		icon = GFX_goal_generic_construct_civilian
 		x = 0
@@ -5675,7 +5739,7 @@ focus_tree = {
 		relative_position_id = HOL_revive_the_buffer_state_proposal
 		cost = 10
 
-		available_if_capitulated = no
+		
 
 		completion_reward = {
 			6 = {
@@ -5875,10 +5939,8 @@ focus_tree = {
 				limit = {
 					NOT = { has_war_with = GER }
 					NOT = {
-						OR = {
-							has_completed_focus = GER_revive_the_kaiserreich
-							has_completed_focus = GER_rally_the_monarchists
-						}
+						has_completed_focus = GER_revive_the_kaiserreich
+						has_completed_focus = GER_rally_the_monarchists
 					}
 				}
 				effect_tooltip = {
@@ -5913,7 +5975,27 @@ focus_tree = {
 
 	focus = {
 		id = HOL_unity_through_democracy
-		prerequisite = { focus = HOL_cave_to_the_british }
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = HOL_democratic_tt
+				OR = {
+					has_completed_focus = HOL_maintain_trade_neutrality
+					AND = {
+						has_completed_focus = HOL_cave_to_the_british
+						ENG = { has_completed_focus = ENG_steady_as_she_goes }
+					}
+					AND = {
+						has_completed_focus = HOL_cave_to_the_germans
+						OR = {
+							GER = { has_completed_focus = GER_reestablish_free_elections } #DLC tree, civil war has to be over
+							GER = { has_completed_focus = GER_establish_bundesrepublik } #r56 tree, no civil war
+						}
+					}
+				}
+			}
+		}
+		# prerequisite = { focus = HOL_cave_to_the_british }
+		mutually_exclusive = { focus = HOL_oranje_boven focus = HOL_volk_en_vaderland focus = HOL_legacy_of_the_de_zeven_provincien_mutiny }
 		icon = GFX_goal_support_democracy
 		x = 3
 		y = 1
@@ -6239,6 +6321,47 @@ focus_tree = {
 	}
 
 	focus = {
+		id = HOL_the_new_ideal_MTG
+		icon = GFX_goal_HOL_the_new_ideal
+		prerequisite = { focus = HOL_foundations_for_a_european_union focus = HOL_request_allied_favors }
+		relative_position_id = HOL_american_west_indies_protectorate
+		x = 1
+		y = 2
+		cost = 2.5
+
+		
+
+		available = {
+			has_war_with = GER
+			GER = {
+				surrender_progress > 0.25
+			}
+			has_capitulated = no
+			has_defensive_war = yes
+			is_puppet = no
+			has_army_manpower = { size > 150000 }
+			OR = {
+				has_government = democratic
+				has_government = neutrality
+			}
+		}
+
+		ai_will_do = {
+			factor = 2
+		}
+
+		bypass = {
+		}
+
+        completion_reward = {
+			add_state_claim = 56
+			add_state_claim = 57
+			add_state_claim = 51
+			add_state_claim = 807
+        }
+	}
+
+	focus = {
 		id = HOL_combined_chiefs_of_staff_representation
 		available = {
 			is_in_faction_with = ENG
@@ -6335,11 +6458,11 @@ focus_tree = {
 			has_full_control_of_state = 309
 			has_full_control_of_state = 695
 		}
-		prerequisite = { focus = HOL_american_west_indies_protectorate }
+		prerequisite = { focus = HOL_allied_technological_developments }
 		icon = GFX_goal_generic_construct_military
 		x = 1
-		y = 2
-		relative_position_id = HOL_american_west_indies_protectorate
+		y = 1
+		relative_position_id = HOL_allied_technological_developments
 		cost = 10
 
 		available_if_capitulated = yes
@@ -6382,8 +6505,8 @@ focus_tree = {
 		}
 		prerequisite = { focus = HOL_unity_through_democracy }
 		mutually_exclusive = { focus = HOL_go_with_britain }
-		icon = GFX_goal_HOL_diplomacy
-		x = 2
+		icon = GFX_goal_generic_befriend_netherlands
+		x = 3
 		y = 1
 		relative_position_id = HOL_unity_through_democracy
 		cost = 10
@@ -6422,8 +6545,8 @@ focus_tree = {
 				AND = {
 					WLL = { is_in_faction = no }
 					WLL = { exists = yes }
-					VLA = { is_in_faction = no }
-					VLA = { exists = yes }
+					FLA = { is_in_faction = no }
+					FLA = { exists = yes }
 				}
 			}
 
@@ -6432,7 +6555,7 @@ focus_tree = {
 		bypass = {
 			BEL = { exists = no }
 			WLL = { exists = no }
-			VLA = { exists = no }
+			FLA = { exists = no }
 			LUX = { exists = no }
 		}
 		prerequisite = { focus = HOL_lead_the_minor_democracies }
@@ -6450,8 +6573,8 @@ focus_tree = {
 			BEL = {
 				custom_effect_tooltip = HOL_form_the_benelux_bel_tt
 			}
-			VLA = {
-				custom_effect_tooltip = HOL_form_the_benelux_vla_tt
+			FLA = {
+				custom_effect_tooltip = HOL_form_the_benelux_fla_tt
 			}
 			WLL = {
 				custom_effect_tooltip = HOL_form_the_benelux_wll_tt
@@ -6461,7 +6584,7 @@ focus_tree = {
 			}
 			hidden_effect = {
 				BEL = { country_event = { id = generic.5 hours = 6 } }
-				VLA = { country_event = { id = generic.5 hours = 6 } }
+				FLA = { country_event = { id = generic.5 hours = 6 } }
 				WLL = { country_event = { id = generic.5 hours = 6 } }
 				LUX = { country_event = { id = generic.5 hours = 6 } }
 			}
