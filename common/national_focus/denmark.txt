@@ -76,6 +76,8 @@ focus_tree = {
 				elections_allowed = no
 			}
 
+			add_stability = -0.15
+
 			set_country_flag = political_violence_resolved	#Replace with new system
 
 			add_ideas = DEN_consoldiating_society
@@ -247,10 +249,8 @@ focus_tree = {
 		relative_position_id = DEN_Galvanise_the_German_Minority
 
 		completion_reward = {
-			custom_effect_tooltip = den_significantly_strengthen_fascists_tt
-			add_to_variable = {
-				fasc_odds = 3
-			}
+			custom_effect_tooltip = den_perm_strengthen_fascists_tt
+			set_country_flag = den_bolster_sa
 		}
 	}
 	
@@ -313,6 +313,13 @@ focus_tree = {
 		completion_reward = {
 			add_political_power = 75
 			add_stability = -0.05	#Either this or faster gridlock timer
+			add_state_core = 58
+			GER = {
+				add_opinion_modifier = {
+					target = DEN
+					modifier = ger_claimed_schleswig
+				}
+			}
 			custom_effect_tooltip = den_schleswig_claim_tt 
 		}
 	}
@@ -1747,6 +1754,17 @@ focus_tree = {
 		icon = GFX_goal_generic_soviet_assistance
 		cost = 10
 		ai_will_do = { factor = 3 }
+		available = {
+			any_country = {
+				is_faction_leader = yes
+				has_government = communism
+				OR = {
+					has_country_leader_ideology = stalinism	#Other stalinist nations
+					tag = SOV
+				}
+				NOT = { has_war_with = RAJ }
+			}
+		}
 		prerequisite = {
 			focus = DEN_DKP_Takeover
 		}
@@ -1759,7 +1777,62 @@ focus_tree = {
 		x = -3
 		y = 1
 		relative_position_id = DEN_DKP_Takeover
-
+		completion_reward = {
+			if = {
+				limit = {
+					SOV = { 
+						is_faction_leader = yes
+						NOT = { has_war_with = RAJ }
+						has_government = communism
+					}
+				}
+				if = {
+					limit = {
+						is_in_faction = yes
+						NOT = { is_in_faction_with = SOV }
+					}
+					leave_faction = yes
+					SOV = {
+						country_event = {
+							id = generic.2
+							hours = 12
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						is_in_faction = no
+					}
+					SOV = {
+						country_event = {
+							id = generic.2
+							hours = 12
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					any_country = {
+						is_faction_leader = yes
+						has_government = communism
+						has_country_leader_ideology = stalinism	#Other stalinist nations
+						NOT = { has_war_with = RAJ }
+					}
+				}
+				random_country = {
+					limit = {
+						is_faction_leader = yes
+						has_government = communism
+						NOT = { has_war_with = RAJ }
+					}
+					country_event = {
+						id = generic.2
+						hours = 12
+					}
+				}
+			}
+		}
 	}
 	focus = {
 		id = DEN_Icelandic_path_to_Socialism
@@ -1787,6 +1860,53 @@ focus_tree = {
 		x = -4
 		y = 4
 		relative_position_id = DEN_DKP_Takeover
+		completion_reward = {								#TODO TEST
+			hidden_effect = {
+				every_other_country = {
+					limit = {
+						exists = yes
+						NOT = {
+							has_government = communism
+							has_war_with = DEN
+							has_war_with = SOV
+							is_in_faction_with = DEN
+							is_in_faction_with = SOV
+						}
+						OR = {
+							tag = NOR
+							tag = SWE
+							tag = FIN
+							tag = KAR
+							tag = AHV
+							tag = SMI
+						}
+					}
+					set_country_flag = den_scandinavia_plan_target
+					DEN = {
+						add_to_array = { den_scandinavia_plan_targets = PREV }
+					}
+				}
+			}
+			effect_tooltip = {
+				for_each_scope_loop = {
+					array = den_scandinavia_plan_targets
+					DEN = {
+						declare_war_on = {
+							target = PREV
+							type = annex_everything
+						}
+					}
+					SOV = {
+						add_to_war = { 
+							targeted_alliance = DEN
+							enemy = PREV
+							hostility_reason = asked_to_join
+						}
+					}
+				}
+				custom_effect_tooltip = needs_approval
+			}
+		}
 
 	}
 	focus = {
@@ -1803,6 +1923,52 @@ focus_tree = {
 		x = -5
 		y = 1
 		relative_position_id = DEN_DKP_Takeover
+		completion_reward = {
+			set_rule = {
+				can_create_factions = yes
+			}
+			if = {
+				limit = {
+					is_in_faction = yes
+				}
+				leave_faction = yes
+			}
+			if = {
+				limit = {
+					any_other_country = {
+                        NOT = {
+							original_tag = SOV
+                        }
+						OR = {	#To avoid joining regional/isolated factions
+							NOT = {
+								capital_scope = {
+									is_on_continent = north_america
+									is_on_continent = south_america
+									is_on_continent = africa
+								}
+							}
+							original_tag = BRA
+							original_tag = USA
+							original_tag = MEX
+							original_tag = SAF
+							original_tag = EGY
+							original_tag = ALG
+						}
+                        is_faction_leader = yes
+                        has_government = communism
+                        NOT = {
+                            has_war_with = ROOT
+                        }
+                    }
+				}
+				r56_other_faction_invite_communism_NOT_SOV = yes
+			}
+			else = {
+				create_faction = "Nordic Worker's Front"
+			}
+			add_opinion_modifier = { target = SOV modifier = hostile_status }
+            SOV = { add_opinion_modifier = { target = DEN modifier = hostile_status } }
+		}
 
 	}
 	focus = {
@@ -1816,6 +1982,28 @@ focus_tree = {
 		x = 2
 		y = 2
 		relative_position_id = DEN_DKP_Takeover
+		completion_reward = {
+			add_relation_modifier = {
+				target = NOR
+				modifier = DEN_Pan_Scandinavianism  
+			}	
+			add_relation_modifier = {
+				target = SWE
+				modifier = DEN_Pan_Scandinavianism  
+			}	
+			add_relation_modifier = {
+				target = NOR
+				modifier = DEN_Pan_Scandinavianism  
+			}	
+			add_relation_modifier = {
+				target = ICE
+				modifier = DEN_Pan_Scandinavianism  
+			}	
+			add_relation_modifier = {
+				target = FIN
+				modifier = DEN_Pan_Scandinavianism  
+			}	
+		}
 
 	}
 	focus = {
@@ -1829,6 +2017,25 @@ focus_tree = {
 		x = -6
 		y = 2
 		relative_position_id = DEN_DKP_Takeover
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					is_neighbor_of = DEN
+					OR = {
+						has_government = fascism
+						has_government = neutrality
+					}
+				}
+				add_opinion_modifier = {
+					target = DEN
+					modifier = den_socialist_volunteers 
+				}
+			}
+			add_timed_idea = {
+				idea = den_international_volunteers_idea
+				days = 400
+			}
+		}
 
 	}
 	focus = {
@@ -1842,6 +2049,9 @@ focus_tree = {
 		x = -6
 		y = 4
 		relative_position_id = DEN_DKP_Takeover
+		completion_reward = {
+			add_ideas = den_international_theorists_idea
+		}
 
 	}
 	focus = {
@@ -1855,6 +2065,9 @@ focus_tree = {
 		x = -5
 		y = 3
 		relative_position_id = DEN_DKP_Takeover
+		completion_reward = {
+			add_ideas = den_an_army_of_peoples_idea
+		}
 
 	}
 	focus = {
@@ -1899,12 +2112,48 @@ focus_tree = {
 		icon = GFX_focus_attack_germany
 		cost = 10
 		ai_will_do = { factor = 1 }
+		available = {
+			any_other_country = {
+				limit = {
+					has_government = fascism
+					OR = {
+						is_faction_leader = yes
+						is_major = yes
+					}
+					NOT = {
+						is_in_faction_with = DEN
+						has_non_aggression_pact_with = DEN
+					}
+				}
+			}
+		}
 		prerequisite = {
 			focus = DEN_Scandinavian_Plan
 		}
 		x = -5
 		y = 5
 		relative_position_id = DEN_DKP_Takeover
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					has_government = fascism
+					OR = {
+						is_faction_leader = yes
+						is_major = yes
+					}
+					NOT = {
+						is_in_faction_with = DEN
+						has_non_aggression_pact_with = DEN
+					}
+				}
+				DEN = {
+					create_wargoal = {
+						type = puppet_wargoal_focus
+						target = PREV
+					}
+				}
+			}
+		}
 
 	}
 	focus = {
@@ -1966,7 +2215,7 @@ focus_tree = {
 	focus = {
 		id = DEN_Crackdown_on_Political_Violence
 		icon = GFX_goal_unknown
-		cost = 10
+		cost = 5
 		ai_will_do = { factor = 1 }
 		prerequisite = {
 			focus = DEN_Public_Investments
@@ -1975,6 +2224,10 @@ focus_tree = {
 		x = 3
 		y = 2
 		relative_position_id = DEN_Social_Democratic_Majority
+		completion_reward = {
+			set_country_flag = political_violence_resolved
+			custom_effect_tooltip = den_disable_political_violence_tt
+		}
 
 	}
 	focus = {
