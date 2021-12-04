@@ -1,4 +1,6 @@
 
+NDefines.NGame.END_DATE = "1956.1.1.1" -- we are called r56 for a reason!
+
 NDefines.NGraphics.COUNTRY_FLAG_TEX_MAX_SIZE = 2048
 NDefines.NGraphics.COUNTRY_FLAG_SMALL_TEX_MAX_SIZE = 512
 NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_WIDTH = 10
