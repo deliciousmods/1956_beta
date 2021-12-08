@@ -20,6 +20,7 @@ shared_focus = GEN_Naval_Effort
 shared_focus = GEN_Industrial_Start
 shared_focus = GEN_Industrial_Boom
 shared_focus = ABC_establish_a_general_staff
+shared_focus = USC_UNIFIED_central_american_unification
 
 	continuous_focus_position = { x = 50 y = 1100 }
 
@@ -113,7 +114,7 @@ focus = {
 								tag = USA
 								tag = PAN
 								tag = ELS
-								tag = GUT
+								tag = GUA
 							}
 						}
 						news_event = { 
@@ -332,7 +333,7 @@ focus = {
 	}
 	completion_reward = {
 		add_tech_bonus = {
-			name = hospital_bonus
+			name = hospital_company_tech_bonus_name
 			bonus = 1
 			uses = 1
 			category = hospital_tech
@@ -403,9 +404,24 @@ focus = {
 	id = NIC_the_strength_of_moscow
 	icon = GFX_goal_generic_soviet_assistance
 	available = {
-		SOV = {
-			has_war_with = GER
+		OR = {
+			SOV = {
+				NOT = { has_war_with = ROOT }
+				has_government = communism
+				has_capitulated = no
+				is_faction_leader = yes
+				has_war_with = GER
+			}
+			any_other_country = {
+				is_major = yes
+				has_government = communism
+				is_faction_leader = yes
+				NOT = { has_war_with = ROOT }
+			}
 		}
+		is_subject = no
+		is_in_faction = no
+		has_government = communism
 	}
 	bypass = {
 		is_in_faction_with = SOV
@@ -423,9 +439,39 @@ focus = {
 			factor = 0
 		}
 	}
+
+	
 	completion_reward = {
-		SOV = { country_event = nicaragua.2 }
+		if = {
+			limit = {
+				SOV = {
+					has_government = communism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+				NOT = {
+					any_other_country = {
+						is_in_faction_with = SOV
+						has_war_with = ROOT
+					}
+				}
+			}
+			SOV = {
+				country_event = generic.2
+			}
+		}
+		else = {
+			get_best_alliance_match_communism_effect = yes
+			var:best_leader = {
+				country_event = generic.2
+			}
+		}
 	}
+	search_filters = { FOCUS_FILTER_ALLIANCE }	
+    #completion_reward = {
+    #	SOV = { country_event = nicaragua.2 }
+    #}
 }
 
 focus = {
@@ -547,7 +593,10 @@ focus = {
 		}
 	}
 	bypass = {
-		is_in_faction_with = USA
+		OR = {
+			is_in_faction_with = USA
+			is_in_faction_with = ENG
+		}
 	}
 	x = 0
 	y = 1
@@ -558,14 +607,76 @@ focus = {
 	ai_will_do = {
 		factor = 0.1
 		modifier = {
-			date > 1941.11.1
-			factor = 10
+			AND = {
+				date > 1941.12.7
+				USA = {
+					has_war = yes
+				}
+			}
+			GER = {
+				has_government = fascism
+				has_war = yes
+			}
+			ROOT = {
+				NOT = {
+					has_government = fascism
+				}
+			}
+			add = 10
 		}
 	}
 	
 	completion_reward = {
-		USA = { country_event = nicaragua.6 }
+		if = {
+			limit = {
+				USA = {
+					is_in_faction_with = ENG
+				}
+				ENG = {
+					has_government = democratic
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			ENG = {
+				country_event = generic.2
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = 200
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				ENG = {
+					is_in_faction_with = USA
+				}
+				USA = {
+					has_government = democratic
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			USA = {
+				 country_event = nicaragua.6
+				 add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = 200
+				}
+			}
+		}
+		else = {
+			get_best_alliance_match_democratic_effect = yes
+			var:best_leader = {
+					country_event = generic.2
+			}
+		}
 	}
+	search_filters = { FOCUS_FILTER_ALLIANCE }
 }
 
 focus = {
@@ -608,6 +719,7 @@ focus = {
 		}
 	
 	}
+	search_filters = { FOCUS_FILTER_MILITARY_EQUIPMENT FOCUS_FILTER_POLITICAL }
 }
 
 focus = {
@@ -766,7 +878,7 @@ focus = {
 
 			create_country_leader = {
 				name = "Anastasio Somoza García"
-				desc = "POLITICS_ANASTASIO_SOMOZA_GARCIA_DESC"
+				desc = " "
 				picture = "GFX_portrait_nicaragua_portrait_anastasio_somoza_garcia"
 				expire = "1965.1.1"
 				ideology = fascism_ideology
@@ -935,6 +1047,7 @@ focus = {
 					}
 				}
 	}
+	search_filters = { FOCUS_FILTER_ALLIANCE }
 }
 
 focus = {

@@ -6,7 +6,7 @@ political_actions = {
 		icon = generic_research
 
 		allowed = {
-			always = no
+			always = yes
 		}
 
 		available = {
@@ -64,7 +64,7 @@ political_actions = {
 
 	improved_worker_conditions = {
 
-		icon = generic_industry
+		icon = hol_exchange_intelligence_data
 
 		available = {
 			has_stability < 1.0
@@ -104,6 +104,7 @@ political_actions = {
 			modifier = {
 				add = 1
 				has_stability < 0.6
+				has_political_power > 155 #Spend on other things first
 			}
 			modifier = {
 				factor = 0
@@ -244,39 +245,111 @@ economy_decisions = {
 					}
 				}
 			}
-			if = {
-				limit = {
-					FRA = { has_completed_focus = FRA_extend_the_maginot_line }
-				}
-				18 = {
-					set_building_level = {
-						type = bunker
-						level = 2
-						province = {
-							all_provinces = yes
-							level > 2
+			FRA = {
+				if = {
+					limit = {
+						has_completed_focus = FRA_extend_the_maginot_line
+					}
+					18 = {
+						set_building_level = {
+							type = bunker
+							level = 2
+							province = {
+								all_provinces = yes
+								level > 2
+							}
+						}
+					}
+					29 = {
+						set_building_level = {
+							type = bunker
+							level = 2
+							province = {
+								all_provinces = yes
+								level > 2
+							}
 						}
 					}
 				}
-				29 = {
-					set_building_level = {
-						type = bunker
-						level = 2
-						province = {
-							all_provinces = yes
-							level > 2
-						}
+				if = {
+					limit = {
+						has_idea = FRA_protected_by_the_maginot_line
 					}
+					remove_ideas = FRA_protected_by_the_maginot_line
 				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_protected_by_the_maginot_line
-				}
-				remove_ideas = FRA_protected_by_the_maginot_line
 			}
 		}
-	}		
+	}
+	restructure_supply_system = { #one time boost to get a few cheap supply hubs
+
+		icon = supplies
+
+		visible = { 
+			OR = {
+				is_major = no
+				AND = {
+					is_faction_leader = yes
+					num_of_factories < 51 #would be a minor if it wasn't for faction leader status
+				}
+			}
+		}
+		fire_only_once = yes
+
+		days_remove = 120
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				num_of_factories < 30
+				factor = 0
+			}
+		}
+
+		modifier = {
+			production_speed_supply_node_factor = 3
+		}
+
+		complete_effect = {
+			set_variable = { node_goal = num_of_supply_nodes }
+			add_to_variable = { node_goal = 3 } #maximum 3 additional nodes
+		}
+
+		cancel_trigger = {
+			
+			 check_variable = { node_goal < num_of_supply_nodes } #if the number of supply nodes exceeds the old number by +3, immediately cancel
+		}
+	}
+	seize_some_trains_woo = { #repeating train seize
+
+		icon = railroads
+
+		visible = { 
+			num_of_factories < 60
+		}
+		
+		available = {
+			has_equipment = { train_equipment < 101 }
+			has_tech = basic_train
+		}
+		
+		days_remove = 180
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				has_stability < 0.56
+				factor = 0
+			}
+		}
+
+		complete_effect = {
+			add_equipment_to_stockpile = {
+				type = train_equipment
+				amount = 15
+			}
+			add_stability = -0.05
+		}
+	}				
 }
 
 propaganda_efforts = {
@@ -459,11 +532,9 @@ propaganda_efforts = {
 		}
 
 		complete_effect = {
-			log = "[GetDateText]: [Root.GetName]: Decision war_propaganda_against_warmonger"
-			set_country_flag = war_propaganda_campaign_running
+			set_country_flag = { flag = war_propaganda_campaign_running value = 1 days = 90 } #TODO_Manu: This is a nasty fix so that the flag gets eventually removed if the target is annexed. days = days_remove
 		}
 		remove_effect = {
-			log = "[GetDateText]: [Root.GetName]: Decision remove war_propaganda_against_warmonger"
 			clr_country_flag = war_propaganda_campaign_running
 		}
 
@@ -1063,7 +1134,8 @@ operations = {
 				}
 				set_country_flag = blew_up_suez
 				set_global_flag = SUEZ_CANAL_BLOCKED
-				country_event = { id = wtt_news.40 hours = 6}
+				news_event = { id = wtt_news.40 hours = 6 }
+				#country_event = { id = wtt_news.40 hours = 6}
 			}
 			effect_tooltip = {
 				if = {
@@ -1189,11 +1261,13 @@ operations = {
 					OR = {
 						has_full_control_of_state = 685
 						has_full_control_of_state = 304
+						has_full_control_of_state = 864
 					}
 				}
 				set_country_flag = blew_up_panama
 				set_global_flag = PANAMA_CANAL_BLOCKED
-				country_event = { id = wtt_news.41 hours = 6}
+				news_event = { id = wtt_news.41 hours = 6 }
+				#country_event = { id = wtt_news.41 hours = 6}
 			}
 			effect_tooltip = {
 				if = {
@@ -1270,7 +1344,8 @@ special_projects = {
 				}
 				set_country_flag = rebuilt_suez
 				clr_global_flag = SUEZ_CANAL_BLOCKED
-				country_event = { id = wtt_news.42 hours = 6}
+				news_event = { id = wtt_news.42 hours = 6 }
+				#country_event = { id = wtt_news.42 hours = 6}
 			}
 		}
 
@@ -1319,7 +1394,10 @@ special_projects = {
 			has_full_control_of_state = 685
 			NOT = {
 				any_enemy_country = {
-					controls_state = 304
+					OR = {
+						controls_state = 304
+						controls_state = 864
+					}
 				}
 			}
 			num_of_civilian_factories > 25
@@ -1345,13 +1423,17 @@ special_projects = {
 					has_full_control_of_state = 685
 					NOT = {
 						any_enemy_country = {
-							controls_state = 304
+							OR = {
+								controls_state = 304
+								controls_state = 864
+							}
 						}
 					}
 				}
 				set_country_flag = rebuilt_panama
 				clr_global_flag = PANAMA_CANAL_BLOCKED
-				country_event = { id = wtt_news.43 hours = 6 }
+				news_event = { id = wtt_news.43 hours = 6 }	#news event, not a country one!
+				#country_event = { id = wtt_news.43 hours = 6 }
 			}
 		}
 		ai_will_do = {
@@ -1543,7 +1625,7 @@ war_measures = {
 
     war_bonds = {
 
-    	icon = generic_industry
+    	icon = hol_attract_foreign_investors
 
     	allowed = {
             always = yes
@@ -1716,7 +1798,7 @@ foreign_politics = {
 			}
 		}
 		ai_will_do = {
-			factor = 1
+			factor = 0.1
 		}
 	}
 }
@@ -1761,7 +1843,6 @@ economy_decisions = {
 			random_owned_state = {
 				limit = {
 					is_fully_controlled_by = ROOT
-					is_owned_by = ROOT
             		free_building_slots = {
 						building = industrial_complex
 						size > 1
@@ -1826,7 +1907,7 @@ economy_decisions = {
 							include_locked = yes
 						}
 						NOT = { has_state_flag = war_building_slot_flag }
-						infrastructure > 8
+						infrastructure > 4
 					}
 				}
 				random_owned_state = {
@@ -1838,7 +1919,7 @@ economy_decisions = {
 							include_locked = yes
 						}
 						NOT = { has_state_flag = war_building_slot_flag }
-						infrastructure > 8
+						infrastructure > 4
 					}
 					add_extra_state_shared_building_slots = 1
 					set_state_flag = war_building_slot_flag
@@ -1854,7 +1935,7 @@ economy_decisions = {
 							include_locked = yes
 						}
 						NOT = { has_state_flag = war_building_slot_flag }
-						infrastructure > 5
+						infrastructure > 2
 					}
 				}
 				random_owned_state = {
@@ -1866,7 +1947,7 @@ economy_decisions = {
 							include_locked = yes
 						}
 						NOT = { has_state_flag = war_building_slot_flag }
-						infrastructure > 5
+						infrastructure > 2
 					}
 					add_extra_state_shared_building_slots = 1
 					set_state_flag = war_building_slot_flag
@@ -1882,7 +1963,7 @@ economy_decisions = {
 							include_locked = yes
 						}
 						NOT = { has_state_flag = war_building_slot_flag }
-						infrastructure > 8
+						infrastructure > 4
 					}
 					add_extra_state_shared_building_slots = 1
 					set_state_flag = war_building_slot_flag
@@ -1897,7 +1978,7 @@ economy_decisions = {
 			}
 			modifier = {
 				any_owned_state = {
-					infrastructure > 5
+					infrastructure > 3
 					free_building_slots = { building = industrial_complex size > 0 include_locked = no }
 				}
 				factor = 0
@@ -1998,10 +2079,6 @@ foreign_support = {
 		fire_only_once = no
 
 		cost = 0
-
-		modifier = {
-
-		}
 
 		ai_will_do = {
 			factor = 1
@@ -2169,10 +2246,6 @@ foreign_support = {
 		fire_only_once = no
 
 		cost = 0
-
-		modifier = {
-
-		}
 
 		ai_will_do = {
 			factor = 1
@@ -2345,10 +2418,6 @@ foreign_support = {
 		fire_only_once = no
 
 		cost = 0
-
-		modifier = {
-
-		}
 
 		ai_will_do = {
 			factor = 1
@@ -2529,10 +2598,6 @@ foreign_support = {
 
 		cost = 0
 
-		modifier = {
-
-		}
-
 		ai_will_do = {
 			factor = 1
 			modifier = {
@@ -2685,9 +2750,6 @@ foreign_support = {
 
  		cost = 0
 
- 		modifier = {
-
- 		}
 
  		ai_will_do = {
  			factor = 1
@@ -2827,9 +2889,6 @@ foreign_support = {
 
  		cost = 0
 
- 		modifier = {
-
- 		}
 
  		ai_will_do = {
  			factor = 1
@@ -2984,10 +3043,6 @@ foreign_support = {
 		fire_only_once = no
 
 		cost = 0
-
-		modifier = {
-
-		}
 
 		ai_will_do = {
 			factor = 1

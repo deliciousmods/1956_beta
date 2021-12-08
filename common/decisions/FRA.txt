@@ -18,7 +18,20 @@ political_actions = {
 				controls_state = 4
 				4 = {
 					OWNER = {
-						is_puppet_of = FRA
+						OR = {
+							is_puppet_of = FRA
+							is_in_faction_with = FRA
+							AND = {
+								tag = GER
+								has_global_flag = FRA_GER_sphere_of_influence_agreement
+								NOT = {
+									has_war_with = GER
+								}
+								has_non_aggression_pact_with = GER
+							}
+							
+						}
+						
 					}
 				}
 			}
@@ -35,12 +48,105 @@ political_actions = {
 		}
 
 		remove_effect = {
+			if = {
+				limit = {
+					AND = {
+						has_global_flag = FRA_GER_sphere_of_influence_agreement_resistance
+						NOT = {
+							has_war_with = GER
+						}
+						has_non_aggression_pact_with = GER
+						GER = {
+							owns_state = 4
+						}
+					}					
+				}
+				add_opinion_modifier = { target = GER modifier = huge_increase }
+			}
 			add_stability = 0.03
 			set_global_flag = napoleon_ii_repatriated
 		}
 		complete_effect = {
 		}
 	}
+	FRA_assimilate_wallonia = {
+
+		icon = generic_nationalism
+
+		cost = 25
+		fire_only_once = yes
+
+		days_remove = 30
+
+		allowed = {
+			original_tag = FRA
+		}
+
+		available = {
+
+			34 = {
+				is_owned_by = ROOT
+				compliance > 50
+			}
+
+
+		}
+
+		visible = {
+			has_government = neutrality
+			OR = {
+				has_completed_focus = FRA_our_natural_borders
+				has_completed_focus = FRA_split_belgium
+			}
+			
+		}
+
+		remove_effect = {
+			34 = {
+				add_core_of = ROOT
+			}
+		}
+		complete_effect = {
+		}
+	}	
+	FRA_divide_catalogne_into_departments = {
+
+		icon = generic_nationalism
+
+		cost = 25
+		fire_only_once = yes
+
+		days_remove = 30
+
+		allowed = {
+			original_tag = FRA
+		}
+
+		available = {
+
+			165 = {
+				is_owned_by = ROOT
+				is_controlled_by = ROOT
+				compliance > 15
+			}
+
+
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = FRA_secure_catalonia	
+		}
+
+		remove_effect = {
+			165 = {
+				add_compliance = 15
+				remove_dynamic_modifier = { modifier = autonomous_state }
+			}
+		}
+		complete_effect = {
+		}
+	}		
 	FRA_reestablish_the_government_in_paris = {
 
 		icon = generic_nationalism
@@ -70,7 +176,7 @@ political_actions = {
 
 		remove_effect = {
 			add_stability = 0.03
-			set_capital = 16
+			set_capital = { state = 16 }
 		}
 		complete_effect = {
 		}
@@ -276,6 +382,7 @@ FRA_vichy_france = {
 					state = 459
 					state = 460
 					state = 513
+					state = 860
 				}
 				is_core_of = FRA
 				is_controlled_by = FRA #Free France has taken back some territory on the mainland
@@ -363,7 +470,7 @@ category_test_decisions = {
 					}
 					add_core_of = PREV
 				}
-				set_capital = 26
+				set_capital = { state = 26 }
 				set_politics = {
 					ruling_party = fascism
 					elections_allowed = no
@@ -382,7 +489,7 @@ category_test_decisions = {
 					expire = "1965.1.1"
 					ideology = fascism_ideology
 					traits = {
-
+						popular_figurehead2
 					}
 				}
 				add_ideas = FRA_occupation_costs_4
@@ -513,18 +620,23 @@ FRA_weapons_purchases_category = {
 		remove_effect = {
 			if = {
 				limit = {
-					USA = {
-						has_tech = basic_light_tank
-						NOT = {
+					USA = { 
+						OR = {
+							has_tech = basic_light_tank 
+							has_tech = basic_light_tank_chassis
+						}
+						NOT = { 
 							OR = {
-								has_tech = basic_medium_tank
+								has_tech = basic_medium_tank 
 								has_tech = improved_medium_tank #needed because basic can be bypassed
+								has_tech = basic_medium_tank_chassis
+								has_tech = improved_medium_tank_chassis
 							}
 						}
 					}
 				}
 				add_equipment_to_stockpile = {
-					type = light_tank_equipment
+					type = light_tank_chassis
 					amount = 50
 				}
 			}
@@ -534,11 +646,13 @@ FRA_weapons_purchases_category = {
 						OR = {
 							has_tech = basic_medium_tank
 							has_tech = improved_medium_tank #needed because basic can be bypassed
+							has_tech = basic_medium_tank_chassis
+							has_tech = improved_medium_tank_chassis
 						}
 					}
 				}
 				add_equipment_to_stockpile = {
-					type = medium_tank_equipment
+					type = medium_tank_chassis
 					amount = 50
 				}
 			}
@@ -692,7 +806,7 @@ FRA_spanish_intervention_category = {
 		complete_effect = {
 			set_country_flag = FRA_non_military_aid_allowed
 			clr_country_flag = FRA_non_intervention
-			unlock_decision_tooltip = { decision = FRA_send_non_military_aid_to_FROM show_effect_tooltip = yes }
+			custom_effect_tooltip = FRA_non_military_aid_tt
 			unlock_decision_tooltip = FRA_ban_non_military_aid
 		}
 
@@ -890,7 +1004,7 @@ FRA_spanish_intervention_category = {
 			set_country_flag = FRA_volunteer_work_allowed
 			clr_country_flag = FRA_non_intervention
 			unlock_decision_tooltip = FRA_ban_volunteer_work
-			every_country = {
+			every_other_country = {
 				limit = {
 					OR = {
 						tag = SPA
@@ -1514,6 +1628,7 @@ FRA_intervention_in_overseas_territories = {
 								state = 462
 								state = 459
 								state = 513
+								state = 860
 								state = 460
 								state = 458
 								state = 665
@@ -2264,6 +2379,7 @@ FRA_intervention_in_overseas_territories = {
 								state = 778
 								state = 781
 								state = 776
+								state = 777 	#Togo too
 							}
 						}
 						add_compliance = 5
@@ -2316,6 +2432,7 @@ FRA_intervention_in_overseas_territories = {
 						state = 778
 						state = 781
 						state = 776
+						state = 777 	#Togo too
 				}
 				any_neighbor_state = {
 					CONTROLLER = {
@@ -2342,6 +2459,7 @@ FRA_intervention_in_overseas_territories = {
 						state = 778
 						state = 781
 						state = 776
+						state = 777 	#Togo too
 					}
 					not = { is_controlled_by = ROOT }
 					any_neighbor_state = {
@@ -2659,6 +2777,7 @@ FRA_decolonization = {
 			462 = { is_controlled_by = ROOT }
 			459 = { is_controlled_by = ROOT }
 			513 = { is_controlled_by = ROOT }
+			860 = { is_controlled_by = ROOT }
 			460 = { is_controlled_by = ROOT }
 			458 = { is_controlled_by = ROOT }
 			665 = { is_controlled_by = ROOT }
@@ -2782,7 +2901,7 @@ FRA_decolonization = {
 	}
 }
 
-# Economic reforms to decrease inflation
+# Economic reforms to decrease deflation
 FRA_economic_reforms = {
 	FRA_devaluation = {
 
@@ -2805,55 +2924,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 
@@ -2873,55 +2992,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -2940,55 +3059,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -3007,55 +3126,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -3080,55 +3199,55 @@ FRA_economic_reforms = {
 		visible = {
 			has_government = democratic
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -3520,6 +3639,7 @@ FRA_nationalisation = {
 				set_country_flag = { flag = FRA_nationalize_aircraft_2 value = 1 }
 				set_country_flag = { flag = dewoitine_nat value = 1 }
 				set_country_flag = { flag = potez_nat value = 1 }
+				set_country_flag = { flag = fouga_nat value = 1 }
 				set_country_flag = { flag = levasseur_nat value = 1 }
 				set_country_flag = { flag = loire_nat value = 1 }
 				set_country_flag = { flag = brest_nat value = 1 }
