@@ -288,7 +288,7 @@ focus_tree = {
 		}
 
 		available = {
-			SOV = { is_faction_leader = yes }
+			SOV_comintern_joinable = yes 
 			is_puppet = no
 			is_in_faction = no
 			NOT = { has_war_with = SOV }
@@ -734,7 +734,7 @@ focus_tree = {
 								target = PREV
 								expire = 0
 								type = take_state_focus
-								generator = { 192 198 }
+								generator = { 192 198 834 }
 							}
 						}
 					}
@@ -1369,7 +1369,12 @@ focus_tree = {
 			factor = 20
 		}
 
-		
+		available = {
+			NOT = {
+				has_completed_focus = ROM_preserve_greater_romania
+			}
+		}
+
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 		complete_tooltip = {
 			random_state = {
@@ -1562,7 +1567,7 @@ focus_tree = {
 				set_state_flag = ROM_danubian_transport_network_Inf_3
 			}
 			random_owned_controlled_state = {
-				prioritize = { 818 }
+				prioritize = { 883 }
 				limit = {
 					free_building_slots = {
 						building = infrastructure
@@ -2181,73 +2186,6 @@ focus_tree = {
 		}
 	}
 	focus = {
-		id = ROM_puppet_bulgaria
-		icon = GFX_goal_ROM_puppet_bulgaria
-		prerequisite = { focus = ROM_balkans_dominance }
-		x = -2
-		y = 1
-		relative_position_id = ROM_balkans_dominance
-		will_lead_to_war_with = BUL
-		cost = 10
-
-		ai_will_do = {
-			factor = 5
-		}
-
-		available = {
-			is_subject = no
-			has_civil_war = no
-			BUL = {
-				exists = yes
-				NOT = { has_war_with = ROM }
-				NOT = {
-					is_puppet = yes
-				}
-			}
-			strength_ratio = { tag = BUL ratio > 1.5 }
-			if = {
-				limit = {
-					is_ai = no
-				}
-				has_army_manpower = { size > 400000 }
-			}
-			if = {
-				limit = {
-					is_ai = yes
-				}
-				has_army_manpower = { size > 320000 }
-			}			
-			
-		}
-
-		bypass = {
-			BUL = {
-				OR = {
-					is_puppet_of = ROM
-					exists = no 
-					AND = {
-						has_war_with = ROM
-						has_capitulated = yes
-						ROM = {
-							controls_state = 48
-							controls_state = 212
-							controls_state = 211
-						}
-					}
-				}
-			}
-		}
-
-		
-		
-		
-
-		completion_reward = {
-			BUL = { country_event = DOD_romania.40 }
-		}
-	}
-
-	focus = {
 		id = ROM_align_hungary
 		icon = GFX_goal_generic_political_pressure
 		prerequisite = { focus = ROM_balkans_dominance }
@@ -2284,6 +2222,9 @@ focus_tree = {
 				}
 				has_army_manpower = { size > 320000 }
 			}
+			NOT = {
+				has_completed_focus = ROM_preserve_greater_romania
+			}			
 		}
 
 		bypass = {
@@ -2294,8 +2235,73 @@ focus_tree = {
 				}
 			}
 		}
+
+
+
+		cancel_if_invalid = yes
+		continue_if_invalid = no
+		available_if_capitulated = no
+
 		completion_reward = {
 			HUN = { country_event = DOD_romania.50 }
+		}
+	}
+
+	focus = {
+		id = ROM_puppet_bulgaria
+		icon = GFX_goal_ROM_puppet_bulgaria
+		prerequisite = { focus = ROM_balkans_dominance }
+		x = -2
+		y = 1
+		relative_position_id = ROM_balkans_dominance
+		will_lead_to_war_with = BUL
+		cost = 10
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			is_subject = no
+			BUL = {
+				exists = yes
+				NOT = { has_war_with = ROM }
+			}
+			strength_ratio = { tag = BUL ratio > 1.5 }
+			if = {
+				limit = {
+					is_ai = no
+				}
+				has_army_manpower = { size > 400000 }
+			}
+			if = {
+				limit = {
+					is_ai = yes
+				}
+				has_army_manpower = { size > 320000 }
+			}
+		}
+
+		bypass = {
+			BUL = {
+				OR = {
+					is_puppet_of = ROM
+					exists = no 
+					AND = {
+						has_war_with = ROM
+						has_capitulated = yes
+						ROM = {
+							controls_state = 48
+							controls_state = 212
+							controls_state = 211
+						}
+					}
+				}
+			}
+		}
+
+		completion_reward = {
+			BUL = { country_event = DOD_romania.40 }
 		}
 	}
 
@@ -2345,10 +2351,6 @@ focus_tree = {
 				}
 			}
 		}
-
-		
-		
-		
 
 		completion_reward = {
 			create_wargoal = {
@@ -2404,7 +2406,14 @@ focus_tree = {
 		completion_reward = {
 			#Only split if YUG is not at war
 			if = {
-				limit = { YUG = { has_war = yes } }
+				limit = {
+					YUG = {
+						OR = {
+							has_war = yes
+							is_subject = yes
+						}
+					}
+				}
 				create_wargoal = {
 					type = annex_everything
 					target = YUG
@@ -2650,6 +2659,13 @@ focus_tree = {
 				popularity = 65
 			}
 			remove_ideas = neutrality_idea
+			hidden_effect = {
+				country_event = {
+					id = DOD_romania.163
+					days = 5
+					random_days = 10
+				}
+			}
 		}		
 	}
 
@@ -3003,6 +3019,20 @@ focus_tree = {
 						target = ROM
 						modifier = BFTB_balkan_pact_ally
 					}
+					if = {
+						limit = {
+							NOT = {	is_in_faction_with = TUR }
+							TUR = { is_faction_leader = no }
+						}
+						hidden_effect = {
+							ROOT = {
+								remove_opinion_modifier = {
+									target = PREV
+									modifier = BFTB_balkan_pact_ally
+								}
+							}
+						}
+					}
 				}
 			}
 			hidden_effect = { 
@@ -3021,7 +3051,7 @@ focus_tree = {
 					}
 					remove_opinion_modifier = {
 						target = HUN
-						modifier = BFTB_incongruous_neighbors
+						modifier = BFTB_balkan_pact_enemy
 					}
 					add_opinion_modifier = {
 						target = BUL
@@ -3243,13 +3273,27 @@ focus_tree = {
 						TUR = { is_faction_leader = yes }
 					}
 				}
-				every_country = {
+				every_other_country = {
 					limit = {
 						has_opinion_modifier = BFTB_balkan_pact_ally
 					}
 					remove_opinion_modifier = {
 						target = ROM
 						modifier = BFTB_balkan_pact_ally
+					}
+					if = {
+						limit = {
+							is_in_faction_with = TUR
+							TUR = { is_faction_leader = no }
+						}
+						hidden_effect = {
+							ROOT = {
+								remove_opinion_modifier = {
+									target = PREV
+									modifier = BFTB_balkan_pact_ally
+								}
+							}
+						}
 					}
 				}
 			}
@@ -3269,7 +3313,7 @@ focus_tree = {
 					}
 					remove_opinion_modifier = {
 						target = HUN
-						modifier = BFTB_incongruous_neighbors
+						modifier = BFTB_balkan_pact_enemy
 					}
 					add_opinion_modifier = {
 						target = BUL
@@ -3383,16 +3427,20 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			create_country_leader = {
-				name = "Ion Antonescu"
-				desc = "POLITICS_ION_ANTONESCU_DESC"
-				picture = "Portrait_Romania_Ion_Antonescu.dds"
-				expire = "1965.1.1"
-				ideology = fascism_ideology
-				traits = {
-					dictator
-					r56_trait_opposed_to_communism
+			
+			ROM_ion_antonescu = { #Making Antonescu into a Country leader and removing him from his other roles. 
+				add_country_leader_role = {
+					country_leader = {
+						expire = "1965.1.1"
+						ideology = fascism_ideology
+						traits = {
+							prince_of_terror
+						}
+					}
+					promote_leader = yes
 				}
+				remove_advisor_role = { slot = army_chief }
+				remove_unit_leader_role = yes
 			}
 
 			set_party_name = { 
@@ -3838,10 +3886,11 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		completion_reward = {
-			if = {
-				limit = { NOT = {has_idea = ROM_mihail_sturdza} }
-				add_ideas = ROM_mihail_sturdza  #to turn Romania fascist
-			}			
+		#	if = {
+		#		limit = { NOT = {has_idea = ROM_mihail_sturdza} }
+		#		add_ideas = ROM_mihail_sturdza  #to turn Romania fascist
+		#	}			
+			add_timed_idea = { idea = nationalism days = 1095 }
 			#add_popularity = { ideology = fascism popularity = 0.05 }
 			add_stability = -0.1
 			add_tech_bonus = {
@@ -3883,7 +3932,7 @@ focus_tree = {
 				ideology = neutrality
 				size = 0.5
 				
-				states = { 78 766 80 76 77 46 818 84 79 }
+				states = { 78 766 80 76 77 46 883 84 79 }
 				keep_unit_leaders = {
 					5627 5629 5630 5634 5637 5639
 				}				
@@ -3915,9 +3964,135 @@ focus_tree = {
 				set_stability = 0.9
 				set_war_support = 0.8
 				load_oob = ROM_civil_war_monarchist
+				#Transfer guarantees
+				if = {
+					limit = {
+						ROM = {
+							has_guaranteed = YUG
+						}
+					}
+					diplomatic_relation = {
+						country = YUG
+						relation = guarantee
+						active = yes
+					}				
+				}
+				if = {
+					limit = {
+						ROM = {
+							has_guaranteed = CZE
+						}
+					}
+					diplomatic_relation = {
+						country = CZE
+						relation = guarantee
+						active = yes
+					}				
+				}
+				if = {
+					limit = {
+						ROM = {
+							has_guaranteed = GRE
+						}
+					}
+					diplomatic_relation = {
+						country = GRE
+						relation = guarantee
+						active = yes
+					}				
+				}
+				if = {
+					limit = {
+						ROM = {
+							has_guaranteed = TUR
+						}
+					}
+					diplomatic_relation = {
+						country = TUR
+						relation = guarantee
+						active = yes
+					}				
+				}
+				if = {
+					limit = {
+						ROM = {
+							is_guaranteed_by = CZE
+						}
+					}
+					CZE = {
+						diplomatic_relation = {
+							country = PREV
+							relation = guarantee
+							active = yes
+						}
+						diplomatic_relation = {
+							country = ROM
+							relation = guarantee
+							active = no
+						}
+					}
+				}
+				if = {
+					limit = {
+						ROM = {
+							is_guaranteed_by = FRA
+						}
+					}
+					FRA = {
+						diplomatic_relation = {
+							country = PREV
+							relation = guarantee
+							active = yes
+						}
+						diplomatic_relation = {
+							country = ROM
+							relation = guarantee
+							active = no
+						}
+					}
+				}
+				if = {
+					limit = {
+						ROM = {
+							is_guaranteed_by = POL
+						}
+					}
+					POL = {
+						diplomatic_relation = {
+							country = PREV
+							relation = guarantee
+							active = yes
+						}
+						diplomatic_relation = {
+							country = ROM
+							relation = guarantee
+							active = no
+						}
+					}
+				}
 			}
 			hidden_effect = {
 				news_event = { id = r56.news_event.23 days = 1 }
+				diplomatic_relation = {
+					country = YUG
+					relation = guarantee
+					active = no
+				}
+				diplomatic_relation = {
+					country = CZE
+					relation = guarantee
+					active = no
+				}
+				diplomatic_relation = {
+					country = GRE
+					relation = guarantee
+					active = no
+				}
+				diplomatic_relation = {
+					country = TUR
+					relation = guarantee
+					active = no
+				}
 			}
 			set_global_flag = cordeanu_civil_war								
 		}
@@ -3935,10 +4110,17 @@ focus_tree = {
 
 		ai_will_do = {
 			factor = 50
+			modifier = {
+				factor = 0
+				has_completed_focus = ROM_institute_royal_dictatorship #GOGA LOST CIVIL WAR
+			}
 		}
 
 		available = {
 			has_government = fascism
+			NOT = {
+				has_completed_focus = ROM_institute_royal_dictatorship
+			}
 		}
 
 
@@ -3967,6 +4149,9 @@ focus_tree = {
 
 		available = {
 			has_government = fascism
+			NOT = {
+				has_completed_focus = ROM_institute_royal_dictatorship
+			}			
 		}
 
 
@@ -3999,6 +4184,11 @@ focus_tree = {
 			factor = 20
 		}
 
+		available = {
+			NOT = {
+				has_completed_focus = ROM_institute_royal_dictatorship
+			}
+		}
 		completion_reward = {
 			add_ideas = ROM_iron_guard
 			add_tech_bonus = {
@@ -4032,6 +4222,10 @@ focus_tree = {
 
 		ai_will_do = {
 			factor = 20
+			modifier = {
+				factor = 0
+				has_completed_focus = ROM_institute_royal_dictatorship #GOGA LOST CIVIL WAR
+			}
 		}
 
 		available = {
@@ -4068,6 +4262,10 @@ focus_tree = {
 		
 		available = {
 			has_government = fascism
+
+			NOT = {
+				has_completed_focus = ROM_institute_royal_dictatorship
+			}
 		}
 		
 
@@ -4105,6 +4303,9 @@ focus_tree = {
 				fascism > 0.8
 			}
 			has_idea = ROM_mihail_sturdza
+			NOT = {
+				has_completed_focus = ROM_institute_royal_dictatorship
+			}			
 			
 		}
 		
@@ -4137,7 +4338,11 @@ focus_tree = {
 			factor = 50
 		}
 
-
+		available = {
+			NOT = {
+				has_completed_focus = ROM_institute_royal_dictatorship
+			}
+		}
 
 
 
@@ -4341,9 +4546,9 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		completion_reward = {
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = ROM_ground_support
-				bonus = 1.0
+				cost_reduction = 0.25
 				uses = 2
 				category = battlefield_support_tree
 			}
@@ -4501,9 +4706,9 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		completion_reward = {
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = ROM_air_superiority
-				bonus = 1.0
+				cost_reduction = 0.25
 				uses = 2
 				category = 	battlefield_support_tree
 				category = operational_integrity_tree
@@ -4733,9 +4938,9 @@ focus_tree = {
 					logistics_skill = 2
 				}
 			}
-            add_tech_bonus = {
-                name = land_doc_bonus
-                bonus = 0.75
+			add_doctrine_cost_reduction = {
+				name = land_doc_bonus
+				cost_reduction = 0.25
                 uses = 1
                 category = land_doctrine
             }			
@@ -5076,7 +5281,10 @@ focus_tree = {
 			hidden_effect = {
 				if = {
 					limit = {
-						has_tech = basic_medium_tank
+						OR = {
+							has_tech = basic_medium_tank
+							has_tech = basic_medium_tank_chassis
+						}
 						has_tech = tech_recon
 					}
 					division_template = {
@@ -5105,7 +5313,10 @@ focus_tree = {
 					else = {
 						if = {
 							limit = {
-								has_tech = basic_medium_tank
+								OR = {
+									has_tech = basic_medium_tank
+									has_tech = basic_medium_tank_chassis
+								}
 							}
 							division_template = {
 								name = "Divizia de Blindate"
