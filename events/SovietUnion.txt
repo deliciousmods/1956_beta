@@ -182,32 +182,59 @@ country_event = {
 	
 	option = {
 		name = soviet.4.a
-		SOV = { 
-			transfer_state = 78
-			transfer_state = 80
-			transfer_state = 766
+		if = {
+			limit = {
+				controls_state = 78	#Bessarabia
+			}
+			SOV = { 
+				transfer_state = 78
+			}
+			hidden_effect = {
+				set_province_name = { id = 3707 name = "Kishinev"} #russification of names
+				78 = { add_compliance = 20 }
+				news_event = { id = news.199 }	#MAIN EVENT to prevent news event spam
+			}
+		}
+		if = {
+			limit = {
+				controls_state = 80	#Bucovina
+			}
+			SOV = { 
+				transfer_state = 80
+			}
+			hidden_effect = {
+				UKR = { #if those territories were claimed, perhaps one should core them too?
+					remove_state_claim = 80
+					add_state_core = 80
+				}
+				766 = { add_compliance = 20 }
+			}
+		}
+		if = {
+			limit = {
+				controls_state = 766	#Southern Bessarabia
+			}
+			SOV = { 
+				transfer_state = 766
+			}
+			hidden_effect = {
+				set_province_name = { id = 6727 name = "Bilhorod-Dnistrovskyi"} #russification of names
+				UKR = { #if those territories were claimed, perhaps one should core them too?
+					remove_state_claim = 766
+					add_state_core = 766
+				}
+				766 = { add_compliance = 20 }
+			}
 		}
 		hidden_effect = {
-			set_province_name = { id = 6727 name = "Bilhorod-Dnistrovskyi"} #russification of names
-			set_province_name = { id = 3707 name = "Kishinev"}
-			UKR = { #if those territories were claimed, perhaps one should core them too?
-				remove_state_claim = 80
-				remove_state_claim = 766
-				add_state_core = 80
-				add_state_core = 766
-			}
-			78 = { add_compliance = 15 } # add some compliance with new order
-			80 = { add_compliance = 15 }
-			766 = { add_compliance = 15 }
 			SOV = {
 				country_event = { id = news.10 days = 1 }
 			}
-			news_event = { id = news.199 }
 		}
 	}
 }
 
-# Romania refuses to surrender Bessarabia
+# Bessarabian controller (one of three states) refuses to surrender Bessarabia
 country_event = {
 	id = soviet.5
 	title = soviet.5.t
@@ -218,14 +245,21 @@ country_event = {
 	
 	option = {
 		name = soviet.5.a
-		create_wargoal = {
-			type = take_state
-			target = ROM
-			generator = { 78 }
+		ROOT = {
+			create_wargoal = {
+				target = FROM
+				type = take_state_focus
+				expire = 0
+			}
 		}
-		hidden_effect = {
-			SOV = {
-				country_event = { id = news.11 days = 1 }
+		hidden_effect = {	#Only triggers once since otherwise strange
+			if = {
+				limit = {
+					FROM = {
+						controls_state = 78
+					}
+				}
+				news_event = { id = news.11 days = 1 }
 			}
 		}
 	}
@@ -242,7 +276,15 @@ country_event = {
 	
 	option = {
 		name = soviet.6.a
-		annex_country = { target = EST }
+		annex_country = { target = FROM }
+		hidden_effect = {	#some people would comply with changes
+			every_state = {
+				limit = {
+					is_core_of = FROM
+				}
+				add_compliance = 15
+			}
+		}
 	}
 }
 
@@ -260,7 +302,7 @@ country_event = {
 		create_wargoal = {
 			type = annex_everything
 			target = EST
-		}		
+		}
 	}
 }
 
@@ -275,7 +317,15 @@ country_event = {
 	
 	option = {
 		name = soviet.8.a
-		annex_country = { target = LAT }
+		annex_country = { target = FROM }
+		hidden_effect = {	#some people would comply with changes
+			every_state = {
+				limit = {
+					is_core_of = FROM
+				}
+				add_compliance = 15
+			}
+		}
 	}
 }
 
@@ -308,7 +358,15 @@ country_event = {
 	
 	option = {
 		name = soviet.10.a
-		annex_country = { target = LIT }
+		annex_country = { target = FROM }
+		hidden_effect = {	#some people would comply with changes
+			every_state = {
+				limit = {
+					is_core_of = FROM
+				}
+				add_compliance = 15
+			}
+		}
 	}
 }
 
@@ -341,29 +399,40 @@ country_event = {
 	
 	option = {
 		name = soviet.12.a
-		SOV = { 
-			transfer_state = 146
-		}
 		if = {
+			limit = {
+				146 = {
+					is_claimed_by = SOV
+					is_owned_by = FROM
+				}
+			}
+			SOV = { transfer_state = 146 }	
+		}
+		if = {	#transfer extra claims in case those are present
 			limit = {
 				147 = {
 					is_claimed_by = SOV
-					is_owned_by = FIN
+					is_owned_by = FROM
 				}
 			}
 			SOV = { transfer_state = 147 }	
 		}
-
 		if = {
 			limit = {
 				722 = {
 					is_claimed_by = SOV
-					is_owned_by = FIN
+					is_owned_by = FROM
 				}
 			}
 			SOV = { transfer_state = 722 }	
 		}
 		hidden_effect = {
+			every_state = {	#some collaboration is still present
+				limit = {
+					is_core_of = FROM
+				}
+				add_compliance = 10
+			}
 			SOV = {
 				country_event = { id = news.13 days = 1 }
 			}
@@ -382,10 +451,17 @@ country_event = {
 	
 	option = {
 		name = soviet.13.a
-		create_wargoal = {
-			type = take_state
-			target = FIN
-			generator = { 146 }
+		every_other_country = {
+			limit = {
+				controls_state = 146
+			}
+			ROOT = {
+				create_wargoal = {
+					target = PREV
+					type = take_state_focus
+					expire = 0
+				}
+			}
 		}				
 		hidden_effect = {
 			SOV = {
@@ -1266,219 +1342,6 @@ country_event = {
 	option = {
 		name = soviet.100.a
 		remove_ideas = comintern_influence
-	}
-}
-
-# Demand Bessarabia
-country_event = {
-	id = soviet.30
-	title = soviet.30.t
-	desc = soviet.30.d
-	picture = GFX_report_event_stalin_propaganda
-
-	is_triggered_only = yes
-	
-	trigger = {
-		always = no
-		tag = SOV
-		FROM = {
-			OR =  {
-				tag = ROM
-				tag = MOL
-			}
-			 
-		}
-		NOT = { has_country_flag = bessarabia_demand }
-		78 = {
-			is_claimed_by = SOV
-			OR = {
-				is_owned_by = ROM
-				is_owned_by = MOL
-			}
-			
-		}
-	}
-	
-	immediate = { set_country_flag = bessarabia_demand } 
-		
-	option = {
-		name = soviet.30.a
-		if = {
-			limit = {
-				ROM = {
-					is_subject = no
-					owns_state = 78
-				}
-			}
-			ROM = { country_event = { days = 2 id = romania.1 } }
-		}
-		if = {
-			limit = {
-				ROM = {
-					is_subject = yes
-					owns_state = 78
-				}
-			}
-			ROM = {
-				OVERLORD = { country_event = { days = 2 id = romania.1 } }
-			}
-			
-		}
-		if = {
-			limit = {
-				MOL = {
-					is_subject = no
-					owns_state = 78
-				}
-			}
-			MOL = { country_event = { days = 2 id = romania.1 } }
-		}
-		if = {
-			limit = {
-				MOL = {
-					is_subject = yes
-					owns_state = 78
-				}
-			}
-			MOL = {
-				OVERLORD = { country_event = { days = 2 id = romania.1 } }
-			}
-			
-		}				
-	}
-	option = {
-		name = soviet.30.b
-		ai_chance = { factor = 0 }
-		#
-	}
-}
-
-# Demand Karjala
-country_event = {
-	id = soviet.31
-	title = soviet.31.t
-	desc = soviet.31.d
-	picture = GFX_report_event_stalin_propaganda
-
-	is_triggered_only = yes
-	
-	trigger = {
-		always = no
-		tag = SOV
-		FROM = { tag = FIN }
-		NOT = { has_country_flag = karjala_demand }
-		146 = {
-			is_claimed_by = SOV
-			is_owned_by = FIN
-		}
-	}
-	
-	immediate = { set_country_flag = karjala_demand } 
-		
-	option = {
-		name = soviet.31.a
-		FIN = { country_event = { days = 2 id = finland.1 } }
-	}
-	option = {
-		name = soviet.31.b
-		ai_chance = { factor = 0 }
-		#
-	}
-}
-
-# Oppress Estonia
-country_event = {
-	id = soviet.32
-	title = soviet.32.t
-	desc = soviet.32.d
-	picture = GFX_report_event_soviet_in_riga
-
-	is_triggered_only = yes
-	
-	trigger = {
-		always = no
-		tag = SOV
-		FROM = {
-			tag = EST
-			any_owned_state = { is_claimed_by = SOV }
-		}
-		NOT = { has_country_flag = estonia_demand }
-	}
-	
-	immediate = { set_country_flag = estonia_demand } 
-		
-	option = {
-		name = soviet.32.a
-		EST = { country_event = { days = 2 id = baltic.1 } }
-	}
-	option = {
-		name = soviet.32.b
-		ai_chance = { factor = 0 }
-		#
-	}
-}
-
-# Oppress Latvia
-country_event = {
-	id = soviet.33
-	title = soviet.33.t
-	desc = soviet.33.d
-	picture = GFX_report_event_soviet_in_riga
-
-	is_triggered_only = yes
-	
-	trigger = {
-		always = no
-		tag = SOV
-		FROM = {
-			tag = LAT
-			any_owned_state = { is_claimed_by = SOV }
-		}
-		NOT = { has_country_flag = latvia_demand }
-	}
-	
-	immediate = { set_country_flag = latvia_demand } 
-		
-	option = {
-		name = soviet.33.a
-		LAT = { country_event = { days = 2 id = baltic.2 } }
-	}
-	option = {
-		name = soviet.33.b
-		ai_chance = { factor = 0 }
-		#
-	}
-}
-
-# Oppress Lithuania 
-country_event = {
-	id = soviet.34
-	title = soviet.34.t
-	desc = soviet.34.d
-	picture = GFX_report_event_soviet_in_riga
-
-	is_triggered_only = yes
-	
-	trigger = {
-		always = no
-		tag = SOV
-		FROM = {
-			tag = LIT
-			any_owned_state = { is_claimed_by = SOV }
-		}
-		NOT = { has_country_flag = lithuania_demand }
-	}
-	
-	immediate = { set_country_flag = lithuania_demand } 
-		
-	option = {
-		name = soviet.34.a
-		LIT = { country_event = { days = 2 id = baltic.3 } }
-	}
-	option = {
-		name = soviet.34.b
-		ai_chance = { factor = 0 }
-		#
 	}
 }
 
