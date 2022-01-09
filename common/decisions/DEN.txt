@@ -610,7 +610,8 @@ DEN_political_landscape = {
 			NOT = { has_global_flag = scw_over }
 		}
 		complete_effect = {
-			add_manpower = -500			
+			add_manpower = -500	
+			set_rule = { can_send_volunteers = yes }		
 		}
 		remove_effect = {
 			set_country_flag = den_scw_volunteers_sent
@@ -633,6 +634,42 @@ DEN_political_landscape = {
 			custom_effect_tooltip = den_scw_volunteering_tt
 		}
 		days_remove = 45
+	}
+	den_support_the_spanish_nationalists = {
+		cost = 50
+		icon = generic_military
+		available = {
+			SPR_scw_in_progress = yes
+			has_manpower > 500
+			any_country = {
+				original_tag = SPR
+				has_war = yes
+				OR = {
+					has_government = fascism
+					has_government = neutrality
+				}
+			}
+			has_government = fascism
+		}
+		remove_trigger = {
+			has_global_flag = scw_over
+		}
+		complete_effect = {
+			add_manpower = -500
+			set_rule = { can_send_volunteers = yes }
+			add_timed_idea = {
+				idea = r56_CHL_spanish_civil_war_involvement
+				days = 730
+			}
+		}
+		modifier = {
+			experience_gain_army = 0.002
+		}
+		fire_only_once = yes
+		visible = {
+			has_completed_focus = DEN_Galvanise_the_German_Minority
+			NOT = { has_global_flag = scw_over }
+		}
 	}
 }
 
@@ -1293,10 +1330,53 @@ DEN_political_violence = {
 
 }
 economy_decisions = {
+	den_targeted_land_reform = {
+		icon = generic_industry
+		cost = 35
+		ai_will_do = {
+			factor = 5
+		}
+		available = {
+			FROM = {
+				OR = {
+					is_core_of = DEN
+					compliance > 40
+				}
+			}
+		}
+		allowed = {
+			tag = DEN
+		}
+		modifier = {
+			political_power_cost = 0.25
+		}
+		fire_only_once = yes
+		state_target = yes
+		target_array = controlled_states
+		visible = {
+			FROM = {
+				OR = {
+					is_core_of = DEN
+					compliance > 30
+				}
+			}
+			has_country_flag = den_land_reform_dec
+		}
+		days_remove = 30
+		on_map_mode = map_and_decisions_view
+		remove_effect = {
+			FROM = {
+				add_extra_state_shared_building_slots = 1
+			}
+		}
+	}
 	den_devalued_krone = {
 		icon = ger_mefo_bills
 		activation = {
 			always = no
+		}
+		allowed = {
+			tag = DEN
 		}
 		available = {
 			OR = {
@@ -1308,7 +1388,7 @@ economy_decisions = {
 		}
 		priority = 50
 		is_good = no
-		days_mission_timeout = 365
+		days_mission_timeout = 500
 		complete_effect = {
 			add_political_power = 15
 		}
@@ -1361,6 +1441,20 @@ den_kpd_contacts = {
 				set_state_flag = den_kpd_established
 			}
 			GER = {
+				custom_effect_tooltip = den_kpd_chapter_per
+				hidden_effect = {
+					DEN = {
+						randomize_temp_variable = {
+							var = den_kpd_ch_calc
+							distribution = uniform
+							min = 0
+							max = 3
+						}
+						add_to_variable = {
+							DEN_KPD_Strength = den_kpd_ch_calc
+						}
+					}
+				}
 				add_popularity = {
 					ideology = communism
 					popularity = 0.025
@@ -1432,6 +1526,7 @@ den_kpd_contacts = {
 		}
 		icon = GFX_decision_railroads
 		available = {
+			has_war_with = GER
 			FROM = {
 				OR = {
 					any_neighbor_state = {
@@ -1546,6 +1641,134 @@ den_kpd_contacts = {
 			}
 		}
 	}
+	
+	den_german_propaganda_campaigns = {
+		ai_will_do = {
+			factor = 20
+		}
+		icon = propaganda
+		available = {
+			FROM = {
+				any_neighbor_state = {
+					has_state_flag = den_kpd_established
+				}			
+			}
+		}
+		state_target = yes
+		visible = {
+			FROM = {
+				is_core_of = GER
+				is_controlled_by = GER
+				NOT = {
+					has_state_flag = den_kpd_established
+				}
+				any_neighbor_state = {
+					has_state_flag = den_kpd_established
+				}
+			}
+		}
+		on_map_mode = map_only
+		days_remove = 25
+
+		fire_only_once = yes
+
+		cost = 50
+		
+		target_array = GER.core_states
+		
+		modifier = {
+			political_power_cost = 1
+		}
+		remove_effect = {
+			GER = {
+				custom_effect_tooltip = den_kpd_chapter_per
+				hidden_effect = {
+					DEN = {
+						randomize_temp_variable = {
+							var = den_kpd_ch_calc
+							distribution = uniform
+							min = 0
+							max = 3
+						}
+						add_to_variable = {
+							DEN_KPD_Strength = den_kpd_ch_calc
+						}
+					}
+				}
+				add_popularity = {
+					ideology = communism
+					popularity = 0.025
+				}
+			}
+		}
+	}
+
+	den_the_second_german_revolution = {
+		ai_will_do = {
+			factor = 20
+		}
+		icon = propaganda
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = "More than 20% KPD Strength"
+				check_variable = {
+					DEN_KPD_Strength > 20
+				}
+			}
+		}
+		visible = {
+			always = yes
+		}
+		on_map_mode = map_and_decisions_view
+		days_remove = 70
+
+		fire_only_once = yes
+
+		cost = 50
+		
+		highlight_states = {
+			state = 64
+		}
+		
+		modifier = {
+			political_power_cost = 1
+		}
+		complete_effect = {
+			#ger gets event
+		}
+
+		remove_effect = {
+			GER = {
+				random_owned_state = {
+					limit = {
+						has_state_flag = den_kpd_established
+						NOT = {
+							state = 763
+						}
+					}
+					prioritize = {
+						56 58
+					}
+					GER = {
+						set_variable = {
+							ger_revolution_origin = PREV
+						}
+					}
+				}
+				start_civil_war = {
+					ruling_party = GER
+					ideology = communism
+					size = 0.2
+					only_own_territory = no
+					capital = GER.ger_revolution_origin
+					keep_political_leader = no
+					keep_political_party_members = no
+				}
+			}
+		}
+
+	}
+
 }
 #For now unfitting
 #DEN_communist_organisation = {
