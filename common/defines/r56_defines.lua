@@ -78,11 +78,12 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
 		0.0, -- INTERCEPTION
 		0.0, -- STRATEGIC_BOMBER
 		0.0, -- NAVAL_BOMBER
-		0.0, -- DROP_NUKE
+		0.1, -- DROP_NUKE
 		0.0, -- PARADROP
 		0.0, -- NAVAL_KAMIKAZE
 		0.0, -- PORT_STRIKE
-		0.01, -- AIR_SUPPLY
+		0.0, -- ATTACK_LOGISTICS
+		0.1, -- AIR_SUPPLY
 		0.0, -- TRAINING
 		0.0, -- NAVAL_MINES_PLANTING
 		0.0, -- NAVAL_MINES_SWEEPING
@@ -90,7 +91,9 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
     }
 
 -- Politics
-NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 0
+NDefines.NPolitics.ARMY_LEADER_MAX_COST = 75				-- max cost BEFORE modifiers
+NDefines.NPolitics.NAVY_LEADER_MAX_COST = 75		
+NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 1
 
 NMilitary = {
 
