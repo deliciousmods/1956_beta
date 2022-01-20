@@ -1,4 +1,6 @@
 
+NDefines.NGame.END_DATE = "1956.1.1.1" -- we are called r56 for a reason!
+
 NDefines.NGraphics.COUNTRY_FLAG_TEX_MAX_SIZE = 2048
 NDefines.NGraphics.COUNTRY_FLAG_SMALL_TEX_MAX_SIZE = 512
 NDefines.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_WIDTH = 10
@@ -8,6 +10,10 @@ NDefines.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_HEIGHT = 24000
 NDefines.NGraphics.VICTORY_POINT_MAP_ICON_AFTER = {0, 20} -- After this amount of VP the map icon becomes bigger dot.
 NDefines.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {200, 500, 750} -- At what camera distance the VP name text disappears.
 NDefines.NGraphics.VICTORY_POINTS_DISTANCE_CUTOFF = {300, 750, 1000} -- At what distance VPs are hidden
+NDefines.NGraphics.RAILWAY_MAP_ARROW_COLOR_DEFAULT = { 0, 128, 0, 1.0 } -- green, default railway maparrow color
+NDefines.NGraphics.RAILWAY_MAP_ARROW_THIN_LEVEL_THRESHOLD = 1 -- Railway level 1 uses thin map arrow in supply map mode
+NDefines.NGraphics.RAILWAY_MAP_ARROW_MEDIUM_LEVEL_THRESHOLD = 5 -- Railway level 2-3 uses medium map arrow in supply map mode
+NDefines.NGraphics.RAILWAY_MAP_ARROW_THICK_LEVEL_THRESHOLD = 9 -- Railway level 4-5 uses thick map arrow in supply map mode
 -- Focuses
 NDefines.NFocus.MAX_SAVED_FOCUS_PROGRESS = 14
 
@@ -76,7 +82,8 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
 		0.0, -- PARADROP
 		0.0, -- NAVAL_KAMIKAZE
 		0.0, -- PORT_STRIKE
-		0.01, -- AIR_SUPPLY
+		0.0, -- ATTACK_LOGISTICS
+		0.1, -- AIR_SUPPLY
 		0.0, -- TRAINING
 		0.0, -- NAVAL_MINES_PLANTING
 		0.0, -- NAVAL_MINES_SWEEPING
@@ -84,7 +91,9 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
     }
 
 -- Politics
-NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 0
+NDefines.NPolitics.ARMY_LEADER_MAX_COST = 75				-- max cost BEFORE modifiers
+NDefines.NPolitics.NAVY_LEADER_MAX_COST = 75		
+NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 1
 
 NMilitary = {
 
