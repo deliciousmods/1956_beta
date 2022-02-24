@@ -6733,7 +6733,7 @@ MON_greater_mongolia = {
 				}
 				NOT = {
 					is_owned_by = ROOT
-					is_controoled_by = ROOT
+					is_controlled_by = ROOT
 				}
 			}
 		}
@@ -6744,11 +6744,11 @@ MON_greater_mongolia = {
 		}
 
 		visible = {
-			#FROM = {
-			#	CONTROLLER = {
-			#		has_country_flag = MON_supported_during_ul_conference
-			#	}
-			#}
+			FROM = {
+				CONTROLLER = {
+					has_country_flag = MON_supported_during_ul_conference
+				}
+			}
 		}
 		
 		available = {
@@ -7803,6 +7803,303 @@ MON_central_asian_diplomacy = {
 		}
 		ai_will_do = {
 			base = 10
+		}
+	}
+
+	MON_join_demo_from_factionname = {
+
+		icon = hol_exchange_intelligence_data
+
+		allowed = {
+			original_tag = MON
+		}
+
+		available = {
+			has_capitulated = no
+			is_subject = no
+			is_in_faction = no
+			NOT = {
+				has_idea = ROOT_diplomatic_effort
+			}
+		}
+
+		visible = {
+			is_subject = no
+			has_completed_focus = JAP_seek_alliances
+		}
+
+		target_trigger = {
+			FROM = {
+				is_faction_leader = yes
+				is_subject = no
+				has_capitulated = no
+				NOT = {
+					has_war_with = ROOT
+				}
+				has_government = ROOT
+			}
+		}
+
+		fire_only_once = yes
+		cost = 50
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				ROOT = {
+					has_government = democratic
+				}
+				factor = 10
+			}
+		}
+
+		days_remove = 45
+
+		complete_effect = {
+			add_ideas = ROOT_diplomatic_effort
+		}
+
+		remove_effect = {
+			remove_ideas = ROOT_diplomatic_effort
+			if = {
+				limit = {
+					FROM = {
+						is_faction_leader = yes
+					}
+				}
+				FROM = {
+					country_event = generic.2
+				}								
+			}	
+		}
+	}
+
+	MON_liberate_country = {
+
+		icon = generic_civil_support
+
+		target_non_existing = yes
+
+		target_trigger = {
+			FROM = {
+				NOT = {
+					original_tag = CHI
+					original_tag = PRC
+				}
+				any_state = {
+					OR = {
+						region = 149
+						region = 148
+						region = 152
+						region = 147
+						region = 151
+						region = 14
+						region = 136
+						region = 145
+						region = 146
+						region = 144
+						region = 200
+						region = 162
+						region = 143
+					}
+					is_core_of = FROM
+					is_controlled_by = ROOT
+				}
+			}
+		}
+
+		days_remove = 1 #60
+
+		fire_only_once = yes
+
+		available = {
+			FROM = {
+				any_state = {
+					#compliance > 30
+					OR = {
+						is_fully_controlled_by = ROOT
+						NOT = {
+							is_core_of = FROM
+							custom_trigger_tooltip = {
+								tooltip = state_is_in_central_asia_greater_steppe_siberia_tt
+								AND = {
+									region = 149
+									region = 148
+									region = 152
+									region = 147
+									region = 151
+									region = 14
+									region = 136
+									region = 145
+									region = 146
+									region = 144
+									region = 200
+									region = 162
+									region = 143
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		modifier = {
+			political_power_gain = -0.2
+		}
+
+		remove_effect = {
+			if = {
+				limit = {
+					FROM = {
+						NOT = { has_government = ROOT }
+					}
+				}
+				release = FROM 
+				every_controlled_state = {
+					limit = {
+						is_core_of = FROM
+					}
+					FROM = {
+						transfer_state = PREV
+					}
+				}
+				FROM = {
+					set_politics = {
+						ruling_party = democratic
+					}
+					hidden_effect = {
+						add_popularity = {
+							ideology = democratic
+							popularity = 0.5
+						}
+					}
+				}
+				every_country = {
+					limit = {
+						has_war_together_with = ROOT
+					}
+					FROM = {
+						give_military_access = PREV
+					}
+				}
+				if = {
+					limit = {
+						has_dlc = "Death or Dishonor"
+					}
+					set_autonomy = {
+						target = FROM
+						autonomy_state = autonomy_dominion
+					}
+				}
+				else = {
+					puppet = FROM
+				}
+			}
+			else_if = {
+				limit = {
+					country_exists = FROM
+					NOT = { has_government = ROOT }
+				}
+				hidden_effect = {
+					every_controlled_state = {
+						limit = {
+							is_core_of = FROM
+						}
+						FROM = {
+							set_state_controller = PREV
+						}
+					}
+				}
+				FROM = {
+					start_civil_war = { ideology = democratic size = 1 }
+				}
+				random_country = {
+					limit= {
+						original_tag = FROM
+						has_government = democratic
+					}
+					save_event_target_as = MON_friend_in_needs@FROM
+				}
+				FROM = {
+					every_controlled_state = {
+						limit = {
+							is_core_of = FROM
+						}
+						event_target:MON_friend_in_needs@FROM = {
+							set_state_controller = PREV
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_dlc = "Death or Dishonor"
+					}
+					ROOT = {
+						set_autonomy = {
+							target = event_target:MON_friend_in_needs@FROM
+							autonomy_state = autonomy_dominion
+						}
+
+					}
+				}
+				else = {
+					ROOT = {
+						puppet = event_target:MON_friend_in_needs@FROM
+					}
+				}
+			}
+			event_target:MON_friend_in_needs@FROM = {
+				add_timed_idea = {
+					idea = MON_supporting_our_liberator_idea
+					days = 730
+				}
+			}
+			event_target:MON_friend_in_needs@FROM = {
+				division_template = {
+					name = "Irgenii Tsereg"
+					priority = 2
+					division_names_group = MON_INF_01
+					regiments = {
+						militia = { x = 0 y = 0 }
+						militia = { x = 0 y = 1 }
+						militia = { x = 0 y = 2 }
+		
+						militia = { x = 1 y = 0 }
+						militia = { x = 1 y = 1 }
+					}
+				}
+			}
+			custom_effect_tooltip = CHI_raises_five_miltiia_divisions_tt
+			hidden_effect = {
+				event_target:MON_friend_in_needs@FROM = {
+					random_controlled_state = {
+						create_unit = {
+							division = "name = \"1. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.51" 
+							owner = event_target:MON_friend_in_needs@FROM
+						}
+						create_unit = {
+							division = "name = \"2. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.42" 
+							owner = event_target:MON_friend_in_needs@FROM
+						}
+						create_unit = {
+							division = "name = \"3. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.63" 
+							owner = event_target:MON_friend_in_needs@FROM
+						}
+						create_unit = {
+							division = "name = \"4. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.63" 
+							owner = event_target:MON_friend_in_needs@FROM
+						}
+						create_unit = {
+							division = "name = \"5. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.63" 
+							owner = event_target:MON_friend_in_needs@FROM
+						}
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 100	#hey, we are good guys!
 		}
 	}
 }
