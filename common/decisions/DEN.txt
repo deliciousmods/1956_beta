@@ -824,6 +824,7 @@ DEN_political_integration = {	#TODO: use targets so the decisions arent horrendo
 		cost = 100
 		icon = generic_form_nation
 		available = {
+			has_country_flag = DEN_SCA_formed
 			has_cosmetic_tag = SCA
 			controls_state = 111
 			controls_state = 145
@@ -895,7 +896,6 @@ DEN_political_integration = {	#TODO: use targets so the decisions arent horrendo
 			58 = {
 				is_fully_controlled_by = DEN
 				compliance > 70
-				is_owned_by = DEN
 			}
 		}
 		ai_will_do = {
@@ -1053,6 +1053,11 @@ DEN_political_violence = {
 		}
 		available = {
 			always = no
+			hidden_trigger = {
+				NOT = {
+					has_government = democratic
+				}
+			}
 		}
 		remove_trigger = {
 			hidden_trigger = {
@@ -1066,29 +1071,34 @@ DEN_political_violence = {
 		is_good = no
 		days_mission_timeout = var:den_vio_days
 		timeout_effect = {
-			den_calculate_violence_odds = yes
-			random_list = {
-				var:com_odds = {	#communists win
-					if = {
-						limit = {
-							has_completed_focus = DEN_Popular_Front_against_Fascism
+			if = {
+				limit = {
+					has_government = democratic
+				}
+				den_calculate_violence_odds = yes
+				random_list = {
+					var:com_odds = {	#communists win
+						if = {
+							limit = {
+								has_completed_focus = DEN_Popular_Front_against_Fascism
+							}
+							country_event = denmark.53
 						}
-						country_event = denmark.53
+						else = {
+							country_event = denmark.50
+						}
 					}
-					else = {
-						country_event = denmark.50
+					var:stale_odds = {	#stalemate
+						country_event = denmark.52
+					}
+					var:fasc_odds = {	#fascists win
+						country_event = denmark.51
 					}
 				}
-				var:stale_odds = {	#stalemate
-					country_event = denmark.52
+				den_generate_violence_name = yes
+				set_variable = {
+					political_violence_consequence = -0.05
 				}
-				var:fasc_odds = {	#fascists win
-					country_event = denmark.51
-				}
-			}
-			den_generate_violence_name = yes
-			set_variable = {
-				political_violence_consequence = -0.05
 			}
 		}
 	}
@@ -1932,6 +1942,20 @@ den_kpd_contacts = {
 			political_power_cost = 0.5
 		}
 		remove_effect = {
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = den_kpd_init
+					}
+				}
+				GER = {
+					country_event = {
+						id = denmark.7
+						days = 8
+					}
+				}
+			}
+			set_country_flag = den_kpd_init
 			FROM = {
 				set_state_flag = den_kpd_established
 			}
@@ -1965,6 +1989,12 @@ den_kpd_contacts = {
 		}
 		icon = revolt
 		available = {
+			custom_trigger_tooltip = {
+				tooltip = "More than 10% KPD Strength"
+				check_variable = {
+					DEN_KPD_Strength > 10
+				}
+			}
 			has_war_with = GER
 		}
 		on_map_mode = map_and_decisions_view
@@ -1990,16 +2020,65 @@ den_kpd_contacts = {
 			political_power_cost = 0.5
 			industrial_capacity_factory = -0.3
 		}
-
+		complete_effect = {
+			DEN = {
+				custom_effect_tooltip = den_kpd_minus5
+				add_to_variable = {
+					DEN_KPD_Strength = -5
+				}
+			}
+		}
 		remove_effect = {
 			FROM = {
 				set_state_flag = den_kpd_sabotage
 				random_list = {
 					30 = {
 						#Sabotage Military Industry
+						damage_building = {
+							type = infrastructure
+							damage = 1
+						}
+						damage_building = {
+							type = arms_factory
+							damage = 2
+						}
+						hidden_effect = {
+							DEN = {
+								set_variable = {
+									den_ger_current_sabotage_state = FROM
+								}
+							}
+							GER = {
+								country_event = {
+									id = denmark.8
+									hours = 0
+								}
+							}
+						}
 					}
 					40 = {
 						#Sabotage Civilian Industry
+						damage_building = {
+							type = infrastructure
+							damage = 1
+						}
+						damage_building = {
+							type = industrial_complex
+							damage = 2
+						}
+						hidden_effect = {
+							DEN = {
+								set_variable = {
+									den_ger_current_sabotage_state = FROM
+								}
+							}
+							GER = {
+								country_event = {
+									id = denmark.8
+									hours = 0
+								}
+							}
+						}
 					}
 					30 = {
 						#Sabotage Failed
@@ -2034,6 +2113,12 @@ den_kpd_contacts = {
 		}
 		state_target = yes
 		visible = {
+			custom_trigger_tooltip = {
+				tooltip = "More than 10% KPD Strength"
+				check_variable = {
+					DEN_KPD_Strength > 10
+				}
+			}
 			FROM = {
 				is_controlled_by = GER
 				is_core_of = GER
@@ -2062,10 +2147,35 @@ den_kpd_contacts = {
 			political_power_cost = 0.5
 		}
 
+		complete_effect = {
+			DEN = {
+				custom_effect_tooltip = den_kpd_minus5
+				add_to_variable = {
+					DEN_KPD_Strength = -5
+				}
+			}
+		}
 		remove_effect = {
 			FROM = {
 				set_state_flag = den_kpd_front_sabotage
-				custom_effect_tooltip = "damage" # state modifier
+				add_dynamic_modifier = {
+					modifier = r56_den_sabotaged_frontlines
+					days = 90
+					target = FROM
+				}
+				hidden_effect = {
+					DEN = {
+						set_variable = {
+							den_ger_current_sabotage_state = FROM
+						}
+					}
+					GER = {
+						country_event = {
+							id = denmark.8
+							hours = 0
+						}
+					}
+				}
 			}
 		}
 	}
@@ -2075,6 +2185,12 @@ den_kpd_contacts = {
 		}
 		icon = attache
 		available = {
+			custom_trigger_tooltip = {
+				tooltip = "More than 10% KPD Strength"
+				check_variable = {
+					DEN_KPD_Strength > 10
+				}
+			}
 			has_war_with = GER
 			FROM = {
 				has_state_flag = den_kpd_established				
@@ -2104,6 +2220,14 @@ den_kpd_contacts = {
 			political_power_cost = 0.5
 		}
 
+		complete_effect = {
+			DEN = {
+				custom_effect_tooltip = den_kpd_minus5
+				add_to_variable = {
+					DEN_KPD_Strength = -5
+				}
+			}
+		}
 		remove_effect = {
 			FROM = {
 				set_state_flag = den_kpd_partisan
@@ -2211,6 +2335,7 @@ den_kpd_contacts = {
 		}
 		icon = SOV_the_stalin_constitution
 		available = {
+			has_defensive_war_with = GER
 			custom_trigger_tooltip = {
 				tooltip = "More than 20% KPD Strength"
 				check_variable = {
@@ -2220,15 +2345,23 @@ den_kpd_contacts = {
 		}
 		priority = 100
 		visible = {
-			always = yes
+			GER = {
+				has_civil_war = no
+			}
 		}
-		days_remove = 70
+		days_remove = 90
 
 		fire_only_once = yes
 
 		cost = 200
 		complete_effect = {
 			#ger gets event
+			GER = {
+				country_event = {
+					id = denmark.9
+					hours = 0
+				}
+			}
 		}
 
 		remove_effect = {
