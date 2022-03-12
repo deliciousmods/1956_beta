@@ -6121,6 +6121,7 @@ MON_greater_mongolia = {
 		}
 
 		visible = {
+			has_completed_focus = MON_dream_of_greater_mongolia
 			FROM = { exists = yes }
 			NOT = { has_war_with = FROM }
 			#FROM = { has_not_initiated_border_incident_with_ROOT = yes }	#may be a viable option for future
@@ -7659,14 +7660,6 @@ MON_central_asian_diplomacy = {
 
 		ai_will_do = {
 			factor = 2
-			modifier = {
-				GER = {
-					NOT = {
-						has_government = fascism
-					}
-				}
-				factor = 4
-			}
 		}
 
 		days_remove = 30
@@ -7747,6 +7740,10 @@ MON_central_asian_diplomacy = {
 		cost = 15
 		days_remove = 14
 		on_map_mode = map_only
+
+		ai_will_do = {
+			base = 10
+		}
 		
 		modifier = {
 			command_power_gain = -0.5
@@ -7775,9 +7772,6 @@ MON_central_asian_diplomacy = {
 					set_state_flag = MON_infiltration_level_1
 				}
 			}
-		}
-		ai_will_do = {
-			base = 10
 		}
 	}
 
@@ -7849,17 +7843,105 @@ MON_central_asian_diplomacy = {
 		}
 	}
 
+	MON_prepare_invasion_of_nation_in_asia = {
+		
+		icon = generic_spy 	
+		target_trigger = {
+			FROM = {
+				is_subject = no
+				is_major = no #not against majors, limited intervention
+				NOT = { has_war_with = ROOT }
+				NOT = { is_in_faction_with = ROOT }
+				OR = {
+					AND = {
+						MON = {has_completed_focus = MON_strike_against_communist_menace } 
+						has_government = communism
+					}
+					AND = {
+						MON = {has_completed_focus = MON_bulwark_against_fascist_threat } 
+						has_government = fascism
+					}
+				}
+				any_owned_state = {
+					is_on_continent = asia
+				}
+			}
+		}
+		available = {
+			NOT = {
+				has_country_flag = ROOT_prepairing_invasion
+			}
+		}
+
+		visible = {
+			is_subject = no
+		}
+
+		fire_only_once = no
+		cost = 25
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		days_remove = 30
+
+		complete_effect = {
+			FROM = { 
+				country_event = mongol_democratic.6 hours = 6
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = -100
+				}
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = large_decrease
+				}
+			}
+			set_country_flag = ROOT_prepairing_invasion
+		}
+
+		modifier = {
+			political_power_gain = -0.25
+			command_power_gain = -0.2
+		}
+
+		remove_effect = {
+			if = {	#cancel NAP to prevent memes
+				limit = {
+					FROM = { has_non_aggression_pact_with = ROOT }
+				}
+				diplomatic_relation = {
+					country = FROM
+					relation = non_aggression_pact
+					active = no
+				}
+			}
+			clr_country_flag = ROOT_prepairing_invasion
+			ROOT = {
+				create_wargoal = {
+					target = FROM
+					type = topple_government
+					expire = 0
+				}
+			}
+		}
+	}
+	
 	MON_liberate_country = {
 
 		icon = generic_civil_support
 
 		target_non_existing = yes
+		#target_array = occupied_countries
 
 		target_trigger = {
 			FROM = {
 				NOT = {
 					original_tag = CHI
 					original_tag = PRC
+					original_tag = SOV
 				}
 				any_state = {
 					OR = {
@@ -7883,34 +7965,36 @@ MON_central_asian_diplomacy = {
 			}
 		}
 
-		days_remove = 1 #60
+		days_remove = 60
 
 		fire_only_once = yes
 
 		available = {
+			has_completed_focus = MON_forge_asian_self_determination
 			FROM = {
-				any_state = {
-					#compliance > 30
+				all_state = {
+					compliance > 30
 					OR = {
 						is_fully_controlled_by = ROOT
 						NOT = {
 							is_core_of = FROM
 							custom_trigger_tooltip = {
-								tooltip = state_is_in_central_asia_greater_steppe_siberia_tt
+								tooltip = state_in_indochina_malaysia_indonesia_raj_tt
 								AND = {
-									region = 149
-									region = 148
-									region = 152
-									region = 147
-									region = 151
-									region = 14
-									region = 136
-									region = 145
-									region = 146
-									region = 144
-									region = 200
-									region = 162
-									region = 143
+									region = 190
+									region = 153
+									region = 31
+									region = 141
+									region = 189
+									region = 142
+									region = 188
+									region = 187
+									region = 158
+									region = 159
+									region = 93
+									region = 167
+									region = 160
+									state = 323
 								}
 							}
 						}
@@ -7918,119 +8002,61 @@ MON_central_asian_diplomacy = {
 				}
 			}
 		}
+
+		ai_will_do = {
+			factor = 100	#hey, we are good guys!
+		}
 		
 		modifier = {
 			political_power_gain = -0.2
 		}
 
 		remove_effect = {
-			if = {
+			release = FROM
+			every_controlled_state = {
 				limit = {
-					FROM = {
-						NOT = { has_government = ROOT }
-					}
-				}
-				release = FROM 
-				every_controlled_state = {
-					limit = {
-						is_core_of = FROM
-					}
-					FROM = {
-						transfer_state = PREV
-					}
+					is_core_of = FROM
 				}
 				FROM = {
-					set_politics = {
-						ruling_party = democratic
-					}
-					hidden_effect = {
-						add_popularity = {
-							ideology = democratic
-							popularity = 0.5
-						}
-					}
-				}
-				every_country = {
-					limit = {
-						has_war_together_with = ROOT
-					}
-					FROM = {
-						give_military_access = PREV
-					}
-				}
-				if = {
-					limit = {
-						has_dlc = "Death or Dishonor"
-					}
-					set_autonomy = {
-						target = FROM
-						autonomy_state = autonomy_dominion
-					}
-				}
-				else = {
-					puppet = FROM
+					transfer_state = PREV
 				}
 			}
-			else_if = {
-				limit = {
-					country_exists = FROM
-					NOT = { has_government = ROOT }
+			FROM = {
+				set_politics = {
+					ruling_party = democratic
 				}
 				hidden_effect = {
-					every_controlled_state = {
-						limit = {
-							is_core_of = FROM
-						}
-						FROM = {
-							set_state_controller = PREV
-						}
-					}
-				}
-				FROM = {
-					start_civil_war = { ideology = democratic size = 1 }
-				}
-				random_country = {
-					limit= {
-						original_tag = FROM
-						has_government = democratic
-					}
-					save_event_target_as = MON_friend_in_needs@FROM
-				}
-				FROM = {
-					every_controlled_state = {
-						limit = {
-							is_core_of = FROM
-						}
-						event_target:MON_friend_in_needs@FROM = {
-							set_state_controller = PREV
-						}
-					}
-				}
-				if = {
-					limit = {
-						has_dlc = "Death or Dishonor"
-					}
-					ROOT = {
-						set_autonomy = {
-							target = event_target:MON_friend_in_needs@FROM
-							autonomy_state = autonomy_dominion
-						}
-
-					}
-				}
-				else = {
-					ROOT = {
-						puppet = event_target:MON_friend_in_needs@FROM
+					add_popularity = {
+						ideology = democratic
+						popularity = 0.5
 					}
 				}
 			}
-			event_target:MON_friend_in_needs@FROM = {
-				add_timed_idea = {
+			every_country = {
+				limit = {
+					has_war_together_with = ROOT
+				}
+				FROM = {
+					give_military_access = PREV
+				}
+			}
+			if = {
+				limit = {
+					has_dlc = "Death or Dishonor"
+				}
+				set_autonomy = {
+					target = FROM
+					autonomy_state = autonomy_protectorate #autonomy_dominion - as an alternative
+				}
+			}
+			else = {
+				puppet = FROM
+			}
+			FROM = {
+				add_timed_idea ={
 					idea = MON_supporting_our_liberator_idea
-					days = 730
+					days = 365
 				}
-			}
-			event_target:MON_friend_in_needs@FROM = {
 				division_template = {
 					name = "Irgenii Tsereg"
 					priority = 2
@@ -8047,7 +8073,7 @@ MON_central_asian_diplomacy = {
 			}
 			custom_effect_tooltip = CHI_raises_five_miltiia_divisions_tt
 			hidden_effect = {
-				event_target:MON_friend_in_needs@FROM = {
+				FROM = {
 					random_controlled_state = {
 						create_unit = {
 							division = "name = \"1. Irgenii Tsereg\" division_template = \"Irgenii Tsereg\" start_experience_factor = 0.51" 
@@ -8072,9 +8098,6 @@ MON_central_asian_diplomacy = {
 					}
 				}
 			}
-		}
-		ai_will_do = {
-			factor = 100	#hey, we are good guys!
 		}
 	}
 }
