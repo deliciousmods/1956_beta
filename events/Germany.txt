@@ -70,7 +70,7 @@ country_event = {
 				ROOT = {
 					create_operative_leader = {
 						name = "Albrecht von Auenrode"
-						portrait_path = gfx/leaders/Europe/portrait_europe_generic_operative_male_16.dds 
+						gfx = GFX_portrait_europe_generic_operative_m_16
 						traits = { operative_infiltrator operative_master_interrogator }
 						bypass_recruitment = no
 						available_to_spy_master = yes
@@ -376,12 +376,19 @@ country_event = {
 	
 	option = {
 		name = germany.12.a	#neat
-		every_other_country = {
+		if = {
 			limit = {
-				NOT = { tag = GER }
-				has_government = fascism 
+				SOV = {
+					has_government = communism
+				}
 			}
-			add_opinion_modifier = { target = GER modifier = MR_pact_fascists }
+			every_other_country = {
+				limit = {
+					NOT = { tag = GER }
+					has_government = fascism 
+				}
+				add_opinion_modifier = { target = GER modifier = MR_pact_fascists }
+			}
 		}
 		diplomatic_relation = { country = SOV relation = non_aggression_pact }
 		add_opinion_modifier = { target = SOV modifier = MR_pact }# pact
@@ -746,6 +753,56 @@ country_event = {
 			}
 		}
 		name = germany.14.a
+		if = { #MR Pact if ally has taken some of Poland
+			limit = {
+				GER = { is_faction_leader = yes }
+				any_allied_country = {
+					NOT = { is_subject_of = GER }
+					NOT = { tag = SOU }
+					OR = {
+						controls_state = 96
+						controls_state = 95
+						controls_state = 94
+						controls_state = 93
+						controls_state = 91
+						controls_state = 97
+						controls_state = 89
+						controls_state = 784
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_in_faction_with = ROOT
+					NOT = { is_subject_of = GER }
+					NOT = { tag = SOU }
+					OR = {
+						controls_state = 96
+						controls_state = 95
+						controls_state = 94
+						controls_state = 93
+						controls_state = 91
+						controls_state = 97
+						controls_state = 89
+						controls_state = 784
+					}
+				}
+				if = {
+					limit = {
+						is_subject = yes
+					}
+					OVERLORD = { country_event = germany.1002 }
+				}
+				else = {
+					country_event = { id = germany.1002 hours = 3 }
+				}
+			}
+		}
+		else = { #MR Pact as normal
+			MR_pact_transfer_state_effect = yes
+			SOU = { country_event = { id = germany.15 hours = 3 } }
+		}
+
 		if = {
 			limit = {
 				96 = {
@@ -1198,7 +1255,487 @@ country_event = {
 		}
 	}
 }
+#Event for allies signing MR pact
+country_event = {
+	id = germany.1002
+	title = germany.1002.t
+	desc = germany.1002.desc
+	picture = GFX_report_event_molotov_signing_pact
 
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			set_country_flag = responded_to_MR_allied_pact
+			every_other_country = {
+				limit = {
+					is_subject_of = ROOT
+				}
+				set_country_flag = responded_to_MR_allied_pact
+			}
+		}
+	}
+
+	option = { #Agree to honor the pact
+		name = germany.14.a
+		ai_chance = {
+			base = 100 #ai should always say yes if Germany said yes
+		}
+		effect_tooltip = {
+			MR_pact_transfer_state_effect = yes
+		}
+		hidden_effect = { #Keep going around all of Germany's allies who own parts of Poland until they have all made a decision
+			if = {
+				limit = {
+					any_allied_country = {
+						NOT = { is_subject_of = ROOT }
+						NOT = { has_country_flag = responded_to_MR_allied_pact }
+						OR = {
+							controls_state = 96
+							controls_state = 95
+							controls_state = 94
+							controls_state = 93
+							controls_state = 91
+							controls_state = 97
+							controls_state = 89
+							controls_state = 784
+						}
+					}
+				}
+				random_country = {
+					limit = {
+						is_in_faction_with = ROOT
+						NOT = { is_subject_of = ROOT }
+						NOT = { has_country_flag = responded_to_MR_allied_pact }
+						OR = {
+							controls_state = 96
+							controls_state = 95
+							controls_state = 94
+							controls_state = 93
+							controls_state = 91
+							controls_state = 97
+							controls_state = 89
+							controls_state = 784
+						}
+					}
+					if = {
+						limit = {
+							is_subject = yes
+						}
+						OVERLORD = { country_event = germany.1002 }
+					}
+					else = {
+						country_event = germany.1002
+					}
+				}
+			}
+			else = { #No more allies left to ask, actually do the MR pact
+				MR_pact_transfer_faction_state_effect = yes
+				SOU = { country_event = germany.15 }
+			}
+		}
+	}
+	option = {
+		name = germany.1002.b
+		ai_chance = {
+			base = 0 #AI should never refuse
+		}
+		every_country = {
+			limit = {
+				NOT = { tag = ROOT }
+				is_in_faction_with = ROOT
+			}
+			country_event = germany.1003
+		}
+		SOU = { country_event = germany.16 }
+		clr_global_flag = sov_yes_pact
+		GER = {
+			diplomatic_relation = {
+				country = SOV
+				relation = non_aggression_pact
+				active = no
+			}
+		}
+		SOU = {
+			if = {
+				limit = {
+					NOT = { owns_state = 146 }
+				}
+				add_state_claim = 146 #KARELIA (FIN)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 147 }
+				}
+				add_state_claim = 147 #SALLA (FIN)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 722 }
+				}
+				add_state_claim = 722 #PETSAMO (FIN)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 13 }
+				}
+				add_state_claim = 13 #PÄRNU (EST)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 191 }
+				}
+				add_state_claim = 191 #TARTU (EST)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 811 }
+				}
+				add_state_claim = 811 #SAAREMAA (EST)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 813 }
+				}
+				add_state_claim = 813 #VIRUMAA (EST)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 812 }
+				}
+				add_state_claim = 812 #TALLIN (EST)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 12 }
+				}
+				add_state_claim = 12 #VIDZEME (LAT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 190 }
+				}
+				add_state_claim = 190 #KURZEME (LAT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 808 }
+				}
+				add_state_claim = 808 #RIGA (LAT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 809 }
+				}
+				add_state_claim = 809 #ZEMGALE (LAT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 810 }
+				}
+				add_state_claim = 810 #LATGALE (LAT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 11 }
+				}
+				add_state_claim = 11 #KAUNAS (LIT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 784 }
+				}
+				add_state_claim = 784 #WILNO (LIT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 189 }
+				}
+				add_state_claim = 189 #ZEMAITIJA (LIT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 814 }
+				}
+				add_state_claim = 814 #SUDUVA (LIT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 815 }
+				}
+				add_state_claim = 815 #AUKSTAITIJA (LIT)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 89 }
+				}
+				add_state_claim = 89 #STANISLAWOW (POL)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 91 }
+				}
+				add_state_claim = 91 #LWOW (POL)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 93 }
+				}
+				add_state_claim = 93 #WOLYN (POL)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 94 }
+				}
+				add_state_claim = 94 #POLESIE (POL)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 95 }
+				}
+				add_state_claim = 95 #NOWOGRODEK (POL)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 96 }
+				}
+				add_state_claim = 96 #WILEJKA (POL)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 97 }
+				}
+				add_state_claim = 97 #BIALYSTOK (POL)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 78 }
+				}
+				add_state_claim = 78 #BESSARABIA (ROM)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 80 }
+				}
+				add_state_claim = 80 #BUCOVINA (ROM)
+			}
+			if = {
+				limit = {
+					NOT = { owns_state = 766 }
+				}
+				add_state_claim = 766 #SOUTHERN BESSARABIA (ROM)
+			}
+			effect_tooltip = {
+				create_wargoal = {
+					type = annex_everything
+					target = GER
+				}
+			}
+		}
+	}
+}
+
+#Event telling Germany their ally broke the pact
+country_event = {
+	id = germany.1003
+	title = germany.1003.t
+	desc = germany.1003.desc
+	picture = GFX_report_event_molotov_signing_pact
+
+	is_triggered_only = yes
+
+	option = {
+		name = germany.1003.a
+		ai_chance = {
+			base = 1
+		}
+		effect_tooltip = {
+			GER = {
+				diplomatic_relation = {
+					country = SOV
+					relation = non_aggression_pact
+					active = no
+				}
+			}
+			SOU = {
+				if = {
+					limit = {
+						NOT = { owns_state = 146 }
+					}
+					add_state_claim = 146 #KARELIA (FIN)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 147 }
+					}
+					add_state_claim = 147 #SALLA (FIN)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 722 }
+					}
+					add_state_claim = 722 #PETSAMO (FIN)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 13 }
+					}
+					add_state_claim = 13 #PÄRNU (EST)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 191 }
+					}
+					add_state_claim = 191 #TARTU (EST)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 811 }
+					}
+					add_state_claim = 811 #SAAREMAA (EST)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 813 }
+					}
+					add_state_claim = 813 #VIRUMAA (EST)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 812 }
+					}
+					add_state_claim = 812 #TALLIN (EST)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 12 }
+					}
+					add_state_claim = 12 #VIDZEME (LAT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 190 }
+					}
+					add_state_claim = 190 #KURZEME (LAT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 808 }
+					}
+					add_state_claim = 808 #RIGA (LAT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 809 }
+					}
+					add_state_claim = 809 #ZEMGALE (LAT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 810 }
+					}
+					add_state_claim = 810 #LATGALE (LAT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 11 }
+					}
+					add_state_claim = 11 #KAUNAS (LIT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 784 }
+					}
+					add_state_claim = 784 #WILNO (LIT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 189 }
+					}
+					add_state_claim = 189 #ZEMAITIJA (LIT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 814 }
+					}
+					add_state_claim = 814 #SUDUVA (LIT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 815 }
+					}
+					add_state_claim = 815 #AUKSTAITIJA (LIT)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 89 }
+					}
+					add_state_claim = 89 #STANISLAWOW (POL)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 91 }
+					}
+					add_state_claim = 91 #LWOW (POL)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 93 }
+					}
+					add_state_claim = 93 #WOLYN (POL)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 94 }
+					}
+					add_state_claim = 94 #POLESIE (POL)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 95 }
+					}
+					add_state_claim = 95 #NOWOGRODEK (POL)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 96 }
+					}
+					add_state_claim = 96 #WILEJKA (POL)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 97 }
+					}
+					add_state_claim = 97 #BIALYSTOK (POL)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 78 }
+					}
+					add_state_claim = 78 #BESSARABIA (ROM)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 80 }
+					}
+					add_state_claim = 80 #BUCOVINA (ROM)
+				}
+				if = {
+					limit = {
+						NOT = { owns_state = 766 }
+					}
+					add_state_claim = 766 #SOUTHERN BESSARABIA (ROM)
+				}
+				effect_tooltip = {
+					create_wargoal = {
+						type = annex_everything
+						target = GER
+					}
+				}
+			}
+		}
+	}
+}
 # Germany honors MR Pact (Soviets)
 country_event = {
 	id = germany.15
@@ -3080,7 +3617,7 @@ country_event = {
 				} 
 				country_exists = HUN
 			}
-			hidden_effect = { GER = { country_event = germany.1002 } }
+			hidden_effect = { GER = { country_event = germany.1002 } } # germany.1002
 		}
 
 		custom_effect_tooltip = r56_GER_first_vienna_award_II_tt
@@ -3173,11 +3710,11 @@ country_event = {
 		}
 		if = {
 			limit = { NOT = { HUN = { controls_state = 664 } } }
-			hidden_effect = { GER = { country_event = germany.1002 } }
+			hidden_effect = { GER = { country_event = r56.ger.15 } }
 		}
 
 		hidden_effect = {
-			country_event = { hours = 6 id = news.62 }
+			news_event = { hours = 6 id = news.62 }
 		}
 
 		custom_effect_tooltip = r56_GER_first_vienna_award_II_tt
@@ -3374,7 +3911,7 @@ country_event = {
 			annex_country = { target = CZE }
 		}
 		hidden_effect = {
-			country_event = { hours = 6 id = news.62 }
+			news_event = { hours = 6 id = news.62 }
 		}
 	}
 }
@@ -3988,13 +4525,14 @@ country_event = {
 		# Himmler becomes the new Fascist leader of Germany
 		kill_country_leader = yes
 		add_stability = 0.05
-		create_country_leader = {
-			name = "Heinrich Himmler"
-			desc = "POLITICS_HEINRICH_HIMMLER_DESC"
-			picture = "Portrait_Germany_Heinrich_Himmler.dds"
-			expire = "1965.1.1"
-			ideology = nazism
-			traits = {
+		GER_heinrich_himmler = {
+			add_country_leader_role = {
+				promote_leader = yes
+				country_leader = {
+					ideology = nazism
+					expire = "1965.1.1.1"
+					traits = {}
+				}
 			}
 		}
 		hidden_effect = {
@@ -4006,16 +4544,16 @@ country_event = {
 		# Göring becomes the new Fascist leader of Germany
 		kill_country_leader = yes
 		add_stability = 0.1
-		create_country_leader = {
-			name = "Hermann Göring"
-			desc = "POLITICS_HERMANN_GORING_DESC"
-			picture = "Portrait_Germany_Hermann_Goring.dds"
-			expire = "1965.1.1"
-			ideology = nazism
-			traits = {
-				famous_aviator
+		GER_hermann_goring = {
+			add_country_leader_role = {
+				promote_leader = yes
+				country_leader = {
+					ideology = nazism
+					expire = "1965.1.1.1"
+					traits = {famous_aviator}
+				}
 			}
-		}
+		}		
 		hidden_effect = {
 			news_event = { hours = 6 id = news.29 }
 		}
@@ -4426,16 +4964,74 @@ country_event = {
 	option = {
 		name = germany.76.a	#bah
 		# REVISIT Balance research bonus
-		add_tech_bonus = {
-			name = GER_soviet_treaty
-			ahead_reduction = 2
-			technology = basic_medium_tank
+		if = {
+			limit = {
+				NOT = {
+					has_dlc = "No Step Back"
+				}
+			}
+			add_tech_bonus = {
+				name = med_armor_bonus
+				ahead_reduction = 1
+				category = cat_medium_armor
+			}
+			add_tech_bonus = {
+				name = armor_bonus
+				bonus = 1.0
+				uses = 2
+				category = armor
+			}
 		}
-		add_tech_bonus = {
-			name = GER_soviet_treaty
-			bonus = 1.0
-			uses = 2
-			category = armor
+		else = { #NO STEP BACK EFFECTS
+			add_tech_bonus = {
+				name = armor_bonus
+				bonus = 1.0
+				uses = 2
+				category = armor
+			}
+			if = {
+				limit = {
+					has_tech = basic_medium_tank_chassis
+				}
+				create_equipment_variant = {
+					name = "Panzer III Ausf. A"
+					type = medium_tank_chassis_1
+					parent_version = 0
+					modules = {
+						main_armament_slot = tank_high_velocity_cannon
+						turret_type_slot = tank_medium_three_man_tank_turret
+						suspension_type_slot = tank_bogie_suspension
+						armor_type_slot = tank_welded_armor
+						engine_type_slot = tank_gasoline_engine
+						special_type_slot_1 = tank_radio_1
+						special_type_slot_2 = smoke_launchers
+					}
+					upgrades = {
+						tank_nsb_engine_upgrade = 6
+						tank_nsb_armor_upgrade = 3
+					}
+					icon = "GFX_GER_basic_medium_tank_medium"
+				}
+				create_equipment_variant = {
+					name = "Panzer IV Ausf. A"
+					type = medium_tank_chassis_1
+					parent_version = 1
+					modules = {
+						main_armament_slot = tank_close_support_gun
+						turret_type_slot = tank_medium_three_man_tank_turret
+						suspension_type_slot = tank_bogie_suspension
+						armor_type_slot = tank_welded_armor
+						engine_type_slot = tank_gasoline_engine
+						special_type_slot_1 = tank_radio_1
+						special_type_slot_2 = smoke_launchers
+					}
+					upgrades = {
+						tank_nsb_engine_upgrade = 6
+						tank_nsb_armor_upgrade = 2
+					}
+					icon = "GFX_GER_basic_medium_tank_medium"
+				}
+			}
 		}
 		SOV = {
 			add_opinion_modifier = { target = GER modifier = sov_ger_treaty }
@@ -8464,105 +9060,6 @@ country_event = {
 	}
 }
 
-country_event = { #Give Hungary Southern Slovakia?
-	id = germany.1002
-	title = germany.1002.t
-	desc = germany.1002.d
-	picture = GFX_report_event_german_politician_speech
-
-	is_triggered_only = yes
-
-	option = { #Yes
-		name = germany.1002.a
-		trigger = {
-			OR = {
-				country_exists = HUN
-				AND = {
-					country_exists = AUS
-					has_cosmetic_tag = HUN_EMPIRE
-				}
-			}
-		}		
-		ai_chance = {
-			factor = 80
-			modifier = {
-				factor = 0
-				NOT = {
-					
-				}				
-			}			
-		}
-		if = {
-			limit = {
-				country_exists = HUN
-			}
-			HUN = {
-				country_event = {
-					id = germany.51
-				}
-			}			
-		}
-		if = {
-			limit = {
-				AUS = {
-					has_cosmetic_tag = HUN_EMPIRE
-				}
-				NOT = {
-					country_exists = HUN
-				}
-			}
-			AUS = {
-				country_event = {
-					id = germany.51
-				}
-			}			
-		}
-		add_opinion_modifier = {
-			target = GER modifier = GER_first_vienna_award_GER
-		}
-		hidden_effect = {
-			set_global_flag = GER_first_vienna_award
-		}
-	}
-
-	option = { #No (Annexed)
-		name = germany.1002.b
-
-		trigger = {
-			GER = { owns_state = 664 }
-		}
-
-		ai_chance = {
-			factor = 20
-			modifier = {
-				factor = 0
-				is_historical_focus_on = yes
-				HUN = {
-					exists = yes
-				}				
-			}
-		}
-	}
-
-	option = { #No (Slovakia)
-		name = germany.1002.c
-
-		trigger = {
-			SLO = {
-			 	owns_state = 664
-				is_puppet_of = GER
-			}
-		}
-
-		ai_chance = {
-			factor = 20
-			modifier = {
-				factor = 0
-				is_historical_focus_on = yes
-			}
-		}
-	}
-}
 
 add_namespace = r56.ger
 
@@ -8577,11 +9074,11 @@ country_event = { #Endsieg
 	trigger = {
 		original_tag = GER
 		has_civil_war = no
-		date > 1939.1.1 #You don't get a bailout for being dumb early 
-		GER = {
-			has_completed_focus = GER_total_war
+		date > 1939.9.9 #You don't get a bailout for being dumb early 
+		ROOT = {
+			#has_completed_focus = GER_total_war
 			has_war = yes
-			surrender_progress > 0.21
+			surrender_progress > 0.19
 			casualties > 499999 #cheese prevention 
 			NOT = {
 				has_government = democratic
@@ -8600,7 +9097,7 @@ country_event = { #Endsieg
 				}
 				has_global_flag = had_yalta_conference
 				AND = { #just incase the above stuff doesn't cause a fire and Germany is losing hard
-					surrender_progress > 0.35
+					surrender_progress > 0.32
 					casualties > 1100000 
 				}
 			}
@@ -8642,7 +9139,7 @@ country_event = { #Endsieg
 					producer = GER
 				}
 				add_equipment_to_stockpile = {
-					type = medium_tank_equipment
+					type = medium_tank_chassis
 					amount = 10
 					producer = GER
 				}
@@ -8692,7 +9189,7 @@ country_event = { #Endsieg
 				limit = {
 					ROOT = {
 						has_full_control_of_state = 60
-						casualties > 2100000
+						casualties > 2000000
 					}
 				}
 				load_oob = r56_GER_endsieg_units_1
@@ -8759,7 +9256,7 @@ country_event = { #Pulled back from endsieg
 
 	trigger = {
 		original_tag = GER
-		GER = {
+		ROOT = {
 			has_war = yes
 			has_capitulated = no
 			surrender_progress < 0.01
@@ -10261,7 +10758,7 @@ country_event = { #Historical post yalta fixing by marijn211
 				always = no #DISABLING MEASURE, WIP
 			}
 			news_event = {
-				id = news.339
+				id = r56.news_event.30
 			}
 			USA = {
 				annex_country = {
@@ -10496,7 +10993,7 @@ country_event = { #Historical post yalta fixing by marijn211
 			limit = {
 				has_global_flag = r56_POL_in_yalta
 				country_exists = BLR
-				NOT {
+				NOT = {
 					206 = { #Minsk
 						is_owned_by = BLR
 					}				
@@ -10589,8 +11086,15 @@ country_event = { #Historical post yalta fixing by marijn211
 				}
 				if = {
 					limit = {
-						has_autonomy_state = autonomy_free #if actually puppeted
-						NOT = { #Allied leader is not democratic or non-aligned
+						NOT = {
+							OR = {
+								is_puppet = yes
+								is_subject = yes
+								has_autonomy_state = autonomy_supervised_state
+							}
+						}
+						
+						NOT = { #Allied leader is democratic or non-aligned
 							has_global_flag = r56_yalta_origin_is_communism
 							has_global_flag = r56_yalta_origin_is_fascism
 						}
@@ -10711,6 +11215,299 @@ country_event = { #Historical post yalta fixing by marijn211
 					}
 					transfer_state = 89
 				}
+			}
+		}
+	}
+}
+
+country_event = { # United front against fascism with France
+	id = r56.ger.6
+	title = r56.ger.6.t
+	desc = r56.ger.6.d
+	picture = GFX_report_event_generic_sign_treaty2
+		
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+		
+	option = { # Accept
+		name = r56.ger.6.a
+		ai_chance = {
+			base = 60
+			modifier = {
+                add = 10
+				has_opinion = {
+					target = GER
+					value > 30
+				}	
+			}
+			modifier = {
+                add = 30
+				has_government = communism	
+			}
+		}
+		GER = { country_event = { id = r56.ger.10 hours = 6 } }
+	}
+		
+	option = { # Refuse
+		name = r56.ger.6.b
+		ai_chance = {
+			base = 40
+			modifier = {
+                add = 10
+				has_opinion = {
+					target = GER
+					value < 11
+				}	
+			}
+			modifier = {
+                add = 30
+				has_government = fascism
+			}
+		}
+		GER = { country_event = { id = r56.ger.11 hours = 6 } }	
+	}
+}
+	
+country_event = { # Pressure Austria
+	id = r56.ger.7
+	title = r56.ger.7.t
+	desc = r56.ger.7.d
+	picture = GFX_report_event_generic_sign_treaty1
+		
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+		
+	option = { # Accept
+		name = r56.ger.7.a
+		ai_chance = {
+			base = 10
+			modifier = {
+                add = 10
+				has_opinion = {
+					target = GER
+					value > 50
+				}	
+			}
+			modifier = {
+                add = 10
+				communism > 0.25	
+			}
+			modifier = {
+                add = 10
+				has_stability < 0.50	
+			}
+		}
+		effect_tooltip = {
+			GER = {
+				annex_country = { target = AUS transfer_troops = yes }
+			}
+		}
+		custom_effect_tooltip = GAME_OVER_TT
+		GER = { country_event = { id = r56_germany_austrian_ultimatum.2 hours = 6 } }
+	}
+		
+	option = { # Refuse
+		name = r56.ger.7.b
+		ai_chance = {
+			base = 10
+			modifier = {
+                add = 10
+				has_army_manpower = {
+					size > 200000
+				}
+			}
+			modifier = {
+                add = 25
+				is_in_faction = yes	
+			}
+		}
+		add_war_support = 0.1
+		GER = { country_event = { id = r56_germany_austrian_ultimatum.3 hours = 6 } }
+	}
+}
+	
+country_event = {
+	id = r56.ger.8
+	title = r56.ger.8.t
+	desc = r56.ger.8.d
+	picture = GFX_report_event_hitler_handshake
+		
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+		
+	option = {
+		name = r56.ger.8.a
+		ai_chance = {
+			base = 90
+		}
+		annex_country = { target = AUS transfer_troops = yes }
+	}
+}
+	
+country_event = {
+	id = r56.ger.9
+	title = r56.ger.9.t
+	desc = r56.ger.9.d
+	picture = GFX_report_event_albanian_partisans
+		
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+		
+	#Then it's war
+	option = {
+		name = r56.ger.9.a
+		ai_chance = {
+				base = 90
+		}
+		declare_war_on = {
+			target = FROM
+			type = puppet_wargoal_focus
+		}
+	}
+}
+
+country_event = { 
+	id = r56.ger.10
+	title = r56.ger.10.t
+	desc = r56.ger.10.d
+	picture = GFX_report_event_generic_sign_treaty2
+		
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+		
+	option = {
+		name = r56.ger.10.a
+		ai_chance = {
+			base = 60
+		}
+		give_guarantee = FRA
+		FRA = {
+			give_guarantee = GER
+		}
+		diplomatic_relation = {
+			country = FRA
+			relation = non_aggression_pact
+			active = yes
+		}
+	}
+
+}
+
+country_event = { 
+	id = r56.ger.11
+	title = r56.ger.11.t
+	desc = r56.ger.11.d
+	picture = GFX_report_event_generic_sign_treaty2
+		
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+		
+	option = {
+		name = r56.ger.11.a
+	}
+}
+
+country_event = { #Give Hungary Southern Slovakia?
+	id = r56.ger.15
+	title = r56.ger.15.t
+	desc = r56.ger.15.d
+	picture = GFX_report_event_german_politician_speech
+
+	is_triggered_only = yes
+
+	option = { #Yes
+		name = r56.ger.15.a
+		trigger = {
+			OR = {
+				country_exists = HUN
+				AND = {
+					country_exists = AUS
+					has_cosmetic_tag = HUN_EMPIRE
+				}
+			}
+		}		
+		ai_chance = {
+			factor = 80
+			modifier = {
+				factor = 0
+				NOT = {
+					
+				}				
+			}			
+		}
+		if = {
+			limit = {
+				country_exists = HUN
+			}
+			HUN = {
+				country_event = {
+					id = germany.51
+				}
+			}			
+		}
+		if = {
+			limit = {
+				AUS = {
+					has_cosmetic_tag = HUN_EMPIRE
+				}
+				NOT = {
+					country_exists = HUN
+				}
+			}
+			AUS = {
+				country_event = {
+					id = germany.51
+				}
+			}			
+		}
+		add_opinion_modifier = {
+			target = GER modifier = GER_first_vienna_award_GER
+		}
+		hidden_effect = {
+			set_global_flag = GER_first_vienna_award
+		}
+	}
+
+	option = { #No (Annexed)
+		name = r56.ger.15.b
+
+		trigger = {
+			GER = { owns_state = 664 }
+		}
+
+		ai_chance = {
+			factor = 20
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				HUN = {
+					exists = yes
+				}				
+			}
+		}
+	}
+
+	option = { #No (Slovakia)
+		name = r56.ger.15.c
+
+		trigger = {
+			SLO = {
+			 	owns_state = 664
+				is_puppet_of = GER
+			}
+		}
+
+		ai_chance = {
+			factor = 20
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
 			}
 		}
 	}
