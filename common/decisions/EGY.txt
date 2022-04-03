@@ -60,73 +60,6 @@ EGY_debug = {
 
 EGY_counter_rebels_in_sudan_category = {
 
-	EGY_sudanese_uprising_timer = {
-
-		icon = GFX_decision_revolt
-
-		priority = 3
-
-		days_mission_timeout = 30
-
-		available = {
-			has_civil_war = no
-			SUD = { 
-				exists = yes
-			}
-		}
-
-		visible = {
-			original_tag = EGY
-			SUD = { 
-				exists = no
-			}
-			OR = {
-				has_civil_war = yes
-				NOT = {
-					is_subject_of = ENG
-				}
-			}
-			any_state = {
-				is_core_of = SUD
-				is_controlled_by = ROOT
-			}
-		}
-
-		activation = {
-			has_country_flag = EGY_sudan_rebellion_soon
-		}
-
-		fire_only_once = yes
-
-		cancel_if_not_visible = yes
-
-		is_good = no
-		
-		timeout_effect = {
-			set_country_flag = EGY_sudan_rebelled
-			clr_country_flag = EGY_sudan_rebellion_soon
-			country_event = { id = egypt.22 hours = 1 } 
-			release = SUD
-			SUD = {
-				hidden_effect = {
-					load_oob = SUD_rebellion
-					inherit_technology = EGY
-				}
-				every_other_country = {
-					limit = {
-						original_tag = EGY
-						has_civil_war = yes
-					}
-					declare_war_on = {
-						target = PREV
-						type = annex_everything
-					}
-					add_civil_war_target = PREV
-				}
-			}
-			add_civil_war_target = SUD
-		}
-	}
 	EGY_atbara_degree = {
 
 		icon = GFX_decision_oppression
@@ -140,7 +73,7 @@ EGY_counter_rebels_in_sudan_category = {
 		available = {
 			controls_state = 551
 			divisions_in_state = {
-				size > 4
+				size > 3
 				state = 551
 			}
 		}
@@ -148,11 +81,8 @@ EGY_counter_rebels_in_sudan_category = {
 		visible = {
 			original_tag = EGY
 			controls_state = 551
-			OR = {
-				551 = {
-					resistance > 40
-				}
-				has_country_flag = EGY_sudan_rebellion_soon
+			551 = {
+				resistance > 40
 			}
 		}
 
@@ -164,19 +94,139 @@ EGY_counter_rebels_in_sudan_category = {
 		
 		complete_effect = {
 			add_stability = -0.03
-			if = {
-				limit = {
-					has_country_flag = EGY_sudan_rebellion_soon
-				}
-				add_days_mission_timeout = {
-					mission = EGY_sudanese_uprising_timer
-					days = 20
-				}
+			add_days_mission_timeout = {
+				mission = EGY_sudanese_agitation
+				days = 20
 			}
 			551 = {
 				add_resistance = -25
-				add_compliance = -10
+				add_compliance = -5
 			}
+		}
+	}
+	EGY_sudanese_agitation = {
+
+		icon = generic_ignite_civil_war
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		priority = 12
+
+		days_mission_timeout = 1
+	
+		fire_only_once = no
+
+		activation = {
+			NOT = {
+				has_war_with = SUD
+			}
+			OR = {
+				original_tag = EGY
+				has_country_flag = EGY_sudanese_activity_feedback_loop
+			}
+		}
+
+		visible = {
+			original_tag = EGY
+			NOT = {
+				has_war_with = SUD
+			}
+			any_controlled_state = {
+				AND = {
+					is_core_of = SUD
+					has_state_flag = EGY_sudanese_separatism_flag
+				}
+			}
+		}
+
+		cancel_if_not_visible = yes
+
+		is_good = no
+
+		timeout_effect = {
+			set_country_flag = EGY_sudanese_activity_feedback_loop
+			if = {
+				limit = {
+					551 = {
+						OR = {
+							has_dynamic_modifier = {
+								modifier = EGY_mild_sudanese_separatism
+							}
+							has_dynamic_modifier = {
+								modifier = EGY_moderate_sudanese_separatism
+							}
+						}
+					}
+				}
+				551 = {
+					EGY_raise_sudanese_serparatists = yes
+				}
+			}
+			if = {
+				limit = {
+					549 = {
+						OR = {
+							has_dynamic_modifier = {
+								modifier = EGY_mild_sudanese_separatism
+							}
+							has_dynamic_modifier = {
+								modifier = EGY_moderate_sudanese_separatism
+							}
+						}
+					}
+				}
+				549 = {
+					EGY_raise_sudanese_serparatists = yes
+				}
+			}
+			if = {
+				limit = {
+					903 = {
+						OR = {
+							has_dynamic_modifier = {
+								modifier = EGY_mild_sudanese_separatism
+							}
+							has_dynamic_modifier = {
+								modifier = EGY_moderate_sudanese_separatism
+							}
+						}
+					}
+				}
+				903 = {
+					EGY_raise_sudanese_serparatists = yes
+				}
+			}
+			if = {
+				limit = {
+					every_owned_state = {
+						limit = {
+							is_core_of = SUD
+							NOT = {
+								has_state_flag = SUD_impassible_state
+							}
+						}
+						has_dynamic_modifier = {
+							modifier = EGY_fierce_sudanese_separatism
+						}
+					}
+				}
+				country_event = { id = egypt.22 } 
+				release = SUD
+				SUD = {
+					hidden_effect = {
+						load_oob = SUD_rebellion
+						inherit_technology = EGY
+					}
+				}
+				declare_war_on = {
+					target = SUD
+					type = annex_everything
+				}
+				add_civil_war_target = SUD
+			}
+			activate_mission = EGY_sudanese_agitation
 		}
 	}
 	EGY_supress_sudanese_separatists_in_khartoum = {
@@ -201,24 +251,11 @@ EGY_counter_rebels_in_sudan_category = {
 		custom_cost_text = EGY_decision_cost_command_power
 
 		visible = {
-			AND = {
-				controls_state = 551
-				NOT = {
-					551 = {
-						is_core_of = EGY
-						compliance < 90 # testing number
-						resistance > 30
-					}
-				}
-			}
+			controls_state = 551
 		}
 
 		ai_will_do = {
 			factor = 5
-			modifier = {
-				factor = 10
-				has_stability > 50
-			}
 			modifier = {
 				has_manpower < 30000
 				has_war = yes
@@ -240,184 +277,16 @@ EGY_counter_rebels_in_sudan_category = {
 	
 		complete_effect = {
 			add_command_power = -15 
-			random_list = {
-				55 = {
-					modifier = {
-						factor = 0.25
-						551 = { resistance > 30 }
-					}
-					modifier = {
-						add = 5
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 1
-						}
-					}
-					modifier = {
-						add = 10
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 2
-						}
-					}
-					modifier = {
-						add = 15
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 3
-						}
-					}
-					modifier = {
-						add = 25
-						has_country_flag = {
-						flag = EGY_failed_against_sudanese_separatists
-							value = 4
-						}
-					}
-					modifier = {
-						add = 100
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value > 4
-						}
-					}
-					country_event = { id = bftb_turkey.110 days = 1 }
-					effect_tooltip = {
-						551 = { 
-							add_compliance = 5
-							add_resistance = -10
-						}
-					}
-					hidden_effect = { 
-						if = {
-							limit = {
-								has_country_flag = EGY_failed_against_sudanese_separatists
-							}
-							clr_country_flag = EGY_failed_against_sudanese_separatists
-						}
-					}
-				}
-				45 = {
-					modifier = {
-						factor = 1.2
-						551 = { compliance > 30 }
-					}
-					country_event = { id = bftb_turkey.111 days = 1 }
-					effect_tooltip = {
-						add_stability = -0.05
-						551 = { 
-							add_compliance = -3
-							add_resistance = 5
-						}
-					}
-					hidden_effect = {
-						set_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 1
-						}
-						if = {
-							limit = {
-								NOT = { has_country_flag = EGY_failed_against_sudanese_separatists }
-							}
-							set_country_flag = {
-								flag = EGY_failed_against_sudanese_separatists
-								value = 1
-							}
-						}
-						else_if = {
-							limit = {
-								has_country_flag = EGY_failed_against_sudanese_separatists
-							}
-							modify_country_flag = {
-								flag = TUR_failed_against_kurd_rebels_flag
-								value = 1
-							}
-						}
-					}
-				}
+			add_resistance = -5
+			add_compliance = 3
+			551 = {
+				EGY_lower_sudanese_serparatists = yes
 			}
 			set_country_flag = {
 				flag = EGY_counterd_sudanese_separatists_recently
 				value = 1
 				days = 30
 			}
-		}
-	}
-	r56_EGY_sudanese_separatists_activity = {
-
-		icon = generic_ignite_civil_war
-
-		available = {
-			hidden_trigger = { always = no }
-		}
-
-		priority = 12
-
-		days_mission_timeout = 1
-	
-		fire_only_once = no
-
-		activation = {
-			OR = {
-				original_tag = EGY
-				has_country_flag = EGY_sudanese_activity_feedback_loop
-			}
-		}
-
-		visible = {
-			# not have cf
-			original_tag = EGY
-			any_controlled_state = {
-				OR = {
-					has_dynamic_modifier = {
-						modifier = EGY_low_sudanese_separatism
-					}
-					has_dynamic_modifier = {
-						modifier = EGY_sudanese_separatism
-					}
-					has_dynamic_modifier = {
-						modifier = EGY_fierce_sudanese_separatism 
-					}
-				}
-			}
-		}
-
-		cancel_if_not_visible = yes
-
-		is_good = no
-
-
-
-		timeout_effect = {
-			set_country_flag = EGY_sudanese_activity_feedback_loop
-			if = {
-				limit = {
-					551 = {
-						OR = {
-							has_dynamic_modifier = {
-								modifier = EGY_low_sudanese_separatism
-							}
-							has_dynamic_modifier = {
-								modifier = EGY_sudanese_separatism
-							}
-						}
-					}
-				}
-				551 = {
-					r56_EGY_raise_sudanese_serparatists = yes
-				}
-			}
-			if = {
-				limit = {
-					all_controlled_state = {
-						has_dynamic_modifier = {
-							modifier = EGY_fierce_sudanese_separatism 
-						}
-					}
-				}
-				#CF here
-			}
-			activate_mission = r56_EGY_sudanese_separatists_activity
 		}
 	}	
 	EGY_supress_sudanese_separatists_in_darfur = {
@@ -442,24 +311,11 @@ EGY_counter_rebels_in_sudan_category = {
 		custom_cost_text = EGY_decision_cost_command_power
 	
 		visible = {
-			AND = {
-				controls_state = 549
-				NOT = {
-					549 = {
-						is_core_of = EGY
-						compliance < 90 # testing number
-						resistance > 30
-					}
-				}
-			}
+			controls_state = 549
 		}
 
 		ai_will_do = {
 			factor = 5
-			modifier = {
-				factor = 10
-				has_stability > 50
-			}
 			modifier = {
 				has_manpower < 30000
 				has_war = yes
@@ -480,102 +336,11 @@ EGY_counter_rebels_in_sudan_category = {
 		}
 	
 		complete_effect = {
-			add_command_power = -15 
-			random_list = {
-				55 = {
-					modifier = {
-						factor = 0.25
-						549 = { resistance > 30 }
-					}
-					modifier = {
-						add = 5
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 1
-						}
-					}
-					modifier = {
-						add = 10
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 2
-						}
-					}
-					modifier = {
-						add = 15
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 3
-						}
-					}
-					modifier = {
-						add = 25
-						has_country_flag = {
-						flag = EGY_failed_against_sudanese_separatists
-							value = 4
-						}
-					}
-					modifier = {
-						add = 100
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value > 4
-						}
-					}
-					country_event = { id = bftb_turkey.110 days = 1 }
-					effect_tooltip = {
-						549 = { 
-							add_compliance = 5
-							add_resistance = -10
-						}
-					}
-					hidden_effect = { 
-						if = {
-							limit = {
-								has_country_flag = EGY_failed_against_sudanese_separatists
-							}
-							clr_country_flag = EGY_failed_against_sudanese_separatists
-						}
-					}
-				}
-				45 = {
-					modifier = {
-						factor = 1.2
-						549 = { compliance > 30 }
-					}
-					country_event = { id = bftb_turkey.111 days = 1 }
-					effect_tooltip = {
-						add_stability = -0.05
-						549 = { 
-							add_compliance = -3
-							add_resistance = 5
-						}
-					}
-					hidden_effect = {
-						set_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 1
-						}
-						if = {
-							limit = {
-								NOT = { has_country_flag = EGY_failed_against_sudanese_separatists }
-							}
-							set_country_flag = {
-								flag = EGY_failed_against_sudanese_separatists
-								value = 1
-							}
-						}
-						else_if = {
-							limit = {
-								has_country_flag = EGY_failed_against_sudanese_separatists
-							}
-							modify_country_flag = {
-								flag = EGY_failed_against_sudanese_separatists
-								value = 1
-							}
-						}
-					}
-				}
+			add_command_power = -15
+			add_resistance = -5
+			add_compliance = 3
+			549 = {
+				EGY_lower_sudanese_serparatists = yes
 			}
 			set_country_flag = {
 				flag = EGY_counterd_sudanese_separatists_recently
@@ -606,24 +371,11 @@ EGY_counter_rebels_in_sudan_category = {
 		custom_cost_text = EGY_decision_cost_command_power
 	
 		visible = {
-			AND = {
-				controls_state = 903
-				NOT = {
-					903 = {
-						is_core_of = EGY
-						compliance < 90 # testing number
-						resistance > 30
-					}
-				}
-			}
+			controls_state = 903
 		}
 
 		ai_will_do = {
 			factor = 5
-			modifier = {
-				factor = 10
-				has_stability > 50
-			}
 			modifier = {
 				has_manpower < 30000
 				has_war = yes
@@ -645,101 +397,10 @@ EGY_counter_rebels_in_sudan_category = {
 	
 		complete_effect = {
 			add_command_power = -15 
-			random_list = {
-				55 = {
-					modifier = {
-						factor = 0.25
-						903 = { resistance > 30 }
-					}
-					modifier = {
-						add = 5
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 1
-						}
-					}
-					modifier = {
-						add = 10
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 2
-						}
-					}
-					modifier = {
-						add = 15
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 3
-						}
-					}
-					modifier = {
-						add = 25
-						has_country_flag = {
-						flag = EGY_failed_against_sudanese_separatists
-							value = 4
-						}
-					}
-					modifier = {
-						add = 100
-						has_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value > 4
-						}
-					}
-					country_event = { id = bftb_turkey.110 days = 1 }
-					effect_tooltip = {
-						903 = { 
-							add_compliance = 5
-							add_resistance = -10
-						}
-					}
-					hidden_effect = { 
-						if = {
-							limit = {
-								has_country_flag = EGY_failed_against_sudanese_separatists
-							}
-							clr_country_flag = EGY_failed_against_sudanese_separatists
-						}
-					}
-				}
-				45 = {
-					modifier = {
-						factor = 1.2
-						903 = { compliance > 30 }
-					}
-					country_event = { id = bftb_turkey.111 days = 1 }
-					effect_tooltip = {
-						add_stability = -0.05
-						903 = { 
-							add_compliance = -3
-							add_resistance = 5
-						}
-					}
-					hidden_effect = {
-						set_country_flag = {
-							flag = EGY_failed_against_sudanese_separatists
-							value = 1
-						}
-						if = {
-							limit = {
-								NOT = { has_country_flag = EGY_failed_against_sudanese_separatists }
-							}
-							set_country_flag = {
-								flag = EGY_failed_against_sudanese_separatists
-								value = 1
-							}
-						}
-						else_if = {
-							limit = {
-								has_country_flag = EGY_failed_against_sudanese_separatists
-							}
-							modify_country_flag = {
-								flag = EGY_failed_against_sudanese_separatists
-								value = 1
-							}
-						}
-					}
-				}
+			add_resistance = -5
+			add_compliance = 3
+			903 = {
+				EGY_lower_sudanese_serparatists = yes
 			}
 			set_country_flag = {
 				flag = EGY_counterd_sudanese_separatists_recently
@@ -802,14 +463,14 @@ EGY_counter_rebels_in_sudan_category = {
 			if = {
                 limit = {
                     551 = {
-                        has_state_flag = EGY_sudanese_separatism_flag
+                        has_state_flag = EGY_moderate_sudanese_separatism_flag
                     }
                 }
                 551 = {
                     remove_dynamic_modifier = {
-                        modifier = EGY_sudanese_separatism
+                        modifier = EGY_moderate_sudanese_separatism
                     }
-                    clr_state_flag = EGY_sudanese_separatism_flag
+                    clr_state_flag = EGY_moderate_sudanese_separatism_flag
                 }
             }
 			hidden_effect = {
@@ -880,14 +541,14 @@ EGY_counter_rebels_in_sudan_category = {
 			if = {
                 limit = {
                     549 = {
-                        has_state_flag = EGY_sudanese_separatism_flag
+                        has_state_flag = EGY_moderate_sudanese_separatism_flag
                     }
                 }
                 549 = {
                     remove_dynamic_modifier = {
-                        modifier = EGY_sudanese_separatism
+                        modifier = EGY_moderate_sudanese_separatism
                     }
-                    clr_state_flag = EGY_sudanese_separatism_flag
+                    clr_state_flag = EGY_moderate_sudanese_separatism_flag
                 }
             }
 			hidden_effect = {
@@ -958,14 +619,14 @@ EGY_counter_rebels_in_sudan_category = {
 			if = {
                 limit = {
                     903 = {
-                        has_state_flag = EGY_sudanese_separatism_flag
+                        has_state_flag = EGY_moderate_sudanese_separatism_flag
                     }
                 }
                 903 = {
                     remove_dynamic_modifier = {
-                        modifier = EGY_sudanese_separatism
+                        modifier = EGY_moderate_sudanese_separatism
                     }
-                    clr_state_flag = EGY_sudanese_separatism_flag
+                    clr_state_flag = EGY_moderate_sudanese_separatism_flag
                 }
             }
 		}
@@ -1092,7 +753,9 @@ EGY_1936_anglo_egyptian_conference = {
 					original_tag = EGY
 				}
 				set_country_flag = EGY_1936_anglo_egyptian_conference_extended
-				EGY_british_treaty_influence_medium_increase_effect = yes
+				ENG = {
+					EGY_british_treaty_influence_medium_increase_effect = yes
+				}
 				#add_to_variable = { var = EGY_british_treaty_influence value = EGY_treaty_influence_medium_increase }
 				ENG = {
 					set_country_flag = EGY_1936_anglo_egyptian_conference_extended
@@ -1103,7 +766,9 @@ EGY_1936_anglo_egyptian_conference = {
 					original_tag = ENG
 				}
 				set_country_flag = EGY_1936_anglo_egyptian_conference_extended
-				EGY_egyptian_treaty_influence_medium_decrease_effect = yes
+				EGY = {
+					EGY_egyptian_treaty_influence_medium_decrease_effect = yes
+				}
 				#add_to_variable = { var = EGY_egyptian_treaty_influence value = EGY_treaty_influence_medium_increase }
 				EGY = {
 					set_country_flag = EGY_1936_anglo_egyptian_conference_extended
