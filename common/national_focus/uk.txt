@@ -8022,18 +8022,43 @@ focus_tree = {
 		prerequisite = { focus = ENG_kickstart_the_war_industry }
 		available = { 
 			is_subject = no
-			OR = {
-				country_exists = IRQ
-				country_exists = PER
-				country_exists = HOL
-				country_exists = VEN
+			if = {
+				limit = { #resource rights
+					has_dlc = "Man the Guns"
+				}
+				count_triggers = {
+					amount = 2
+					any_country={
+						has_war_with = ENG
+						is_major = yes
+					}
+					IRQ = {
+						has_war_with = ENG
+					}
+					PER = {
+						OR = {
+							has_war_with = ENG
+							has_completed_focus = PER_nationalize_the_means_of_production
+							has_completed_focus = PER_nationalize_aioc
+						}
+					}
+					SAU = {
+						OR = {
+							has_war_with = ENG
+							has_completed_focus = SAU_invite_brabag
+							has_completed_focus = SAU_2_Invite_Soviets
+							has_completed_focus = SAU_concessions_to_standard_oil
+						}
+					}
+				}
+			}
+			else={
+				any_country={
+					has_war_with = ENG
+					is_major = yes
+				}
 			}
 		}
-
-		will_lead_to_war_with = IRQ
-		will_lead_to_war_with = PER
-		will_lead_to_war_with = HOL
-		will_lead_to_war_with = VEN
 
 		continue_if_invalid = yes
 
@@ -8046,40 +8071,95 @@ focus_tree = {
 			factor = 1
 		}	
 		completion_reward = {
-			create_wargoal = {
-				target = IRQ
-				type = puppet_wargoal_focus
-				expire = 0
-			}
-			create_wargoal = {
-				target = PER
-				type = puppet_wargoal_focus
-				expire = 0
-			}
 			if = {
-				limit = {
-					695 = { is_owned_by = HOL }
+				limit = { #resource rights
+					has_dlc = "Man the Guns"
+				}
+				if = {
+					limit = {
+						SAU = {
+							OR = {
+								has_completed_focus = SAU_invite_brabag
+								has_completed_focus = SAU_2_Invite_Soviets
+								has_completed_focus = SAU_concessions_to_standard_oil
+							}
+							NOT = {
+								is_in_faction_with = ENG
+							}
+						}
+					}
+					create_wargoal = {
+						target = SAU
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+				if = {
+					limit = {
+						PER = {
+							OR = {
+								has_completed_focus = PER_nationalize_the_means_of_production
+								has_completed_focus = PER_nationalize_aioc
+							}
+							NOT = {
+								is_in_faction_with = ENG
+							}
+						}
+					}
+					create_wargoal = {
+						target = PER
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+				if = {
+					limit = {
+						OR = {
+							IRQ = { #can we trust them to keep giving oil
+								OR = {
+									has_government = fascism
+									has_government = communism
+								}
+								NOT = {
+									is_in_faction_with = ENG
+								}
+							}
+							AND = { #cant reach PER to take their oil
+								NOT = {
+									is_in_faction_with = RAJ
+									is_in_faction_with = PAK
+									is_in_faction_with = PER
+									is_in_faction_with = IRQ
+								}
+								has_wargoal_against = PER
+							}
+						}
+					}
+					create_wargoal = {
+						target = IRQ
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+				#possibly later add decisions to threaten states in the Americas/the Netherlands into giving oil rights, could use ships_in_area to threaten naval action/invasion
+			}
+			else = {
+				create_wargoal = {
+					target = IRQ
+					type = puppet_wargoal_focus
+					expire = 0
 				}
 				create_wargoal = {
-					target = HOL
-					type = take_state_focus
-					generator = { 695 }
+					target = PER
+					type = puppet_wargoal_focus
+					expire = 0
+				}
+				create_wargoal = {
+					target = SAU
+					type = puppet_wargoal_focus
 					expire = 0
 				}
 			}
-			else_if = {
-				limit = {
-					695 = { is_owned_by = CRC }
-				}
-				create_wargoal = {
-					target = CRC
-					type = take_state_focus
-					generator = { 695 }
-					expire = 0
-				}
-			}
-			add_state_claim = 489
-			add_state_claim = 307
 		}
 		search_filters = { FOCUS_FILTER_ANNEXATION FOCUS_FILTER_OIL}
 	}
@@ -8297,7 +8377,7 @@ focus_tree = {
 						is_on_continent = europe
 					}
 					NOT = { is_in_faction_with = ROOT }
-					has_added_tension_amount > 0.1
+					has_added_tension_amount > 10
 					num_of_factories > 50
 				}
 				ENG = {
