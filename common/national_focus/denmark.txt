@@ -355,6 +355,10 @@ focus_tree = {
 		relative_position_id = DEN_Galvanise_the_German_Minority
 
 		completion_reward = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
 			add_timed_idea = {
 				idea = den_sa_recruitment
 				days = 250
@@ -1248,7 +1252,9 @@ focus_tree = {
 		available = {
 			den_cancel_intro_trigger = yes
 		}
-		bypass = { }
+		bypass = {
+			has_government = communism
+		}
 		available_if_capitulated = no
 		search_filters = { FOCUS_FILTER_POLITICAL }
 		cancel = {
@@ -2945,6 +2951,21 @@ focus_tree = {
 						}
 					}
 				}
+				AND = {
+					SOV = {
+						exists = yes
+						NOT = {
+							is_in_faction_with = DEN
+							has_non_aggression_pact_with = DEN
+						}
+						any_controlled_state = {
+							OR = {
+								is_core_of = EST
+								is_core_of = LAT
+							}
+						}
+					}
+				}
 			}
 		}
 		will_lead_to_war_with = EST
@@ -3012,6 +3033,34 @@ focus_tree = {
 							add_state_claim = PREV
 						}
 					}
+				}
+			}
+			else_if = {
+				limit = {
+					SOV = {
+						exists = yes
+						NOT = {
+							is_in_faction_with = DEN
+							has_non_aggression_pact_with = DEN
+						}
+						any_controlled_state = {
+							OR = {
+								is_core_of = EST
+								is_core_of = LAT
+							}
+						}
+					}
+					EST = {
+						OR = {
+							exists = no
+							is_in_faction_with = DEN
+							has_non_aggression_pact_with = DEN
+						}
+					}
+				}
+				create_wargoal = {
+					type = annex_everything
+					target = SOV
 				}
 			}
 		}
@@ -3946,54 +3995,30 @@ focus_tree = {
 					}
 				}
 				set_country_flag = den_scandinavia_plan_target
-				if = {
-					limit = {
-						has_completed_focus = DEN_Defy_Russia
-					}
-					every_owned_state = {
-						limit = {
-							is_core_of = ROOT
-						}
-						add_claim_by = DEN
-					}
-					DEN = {
-						declare_war_on = {
-							target = PREV
-							type = annex_everything
-						}
-					}
-				}
 				
 			}
 			if = {
 				limit = {
-					NOT = {
-						has_completed_focus = DEN_Alliegence_to_Moscow
-					}
-				}
-				if = {
-					limit = {
-						NOR = {
-							has_country_flag = den_scandinavia_plan_target
-							is_in_faction = no
-						}
-						SWE = {
-							has_country_flag = den_scandinavia_plan_target
-							is_in_faction = no
-						}
-						FIN = {
-							has_country_flag = den_scandinavia_plan_target
-							is_in_faction = no
-						}
+					NOR = {
+						has_country_flag = den_scandinavia_plan_target
+						is_in_faction = no
 					}
 					SWE = {
-						create_faction = "Northern Lights"
-						FIN = {
-							country_event = generic.5
-						}
-						NOR = {
-							country_event = generic.5
-						}
+						has_country_flag = den_scandinavia_plan_target
+						is_in_faction = no
+					}
+					FIN = {
+						has_country_flag = den_scandinavia_plan_target
+						is_in_faction = no
+					}
+				}
+				SWE = {
+					create_faction = "Northern Lights"
+					FIN = {
+						country_event = generic.5
+					}
+					NOR = {
+						country_event = generic.5
 					}
 				}
 			}
@@ -4025,31 +4050,6 @@ focus_tree = {
 								hostility_reason = asked_to_join
 							}
 						}
-						if = {
-							limit = {
-								NOR = {
-									has_country_flag = den_scandinavia_plan_target
-									is_in_faction = no
-								}
-								SWE = {
-									has_country_flag = den_scandinavia_plan_target
-									is_in_faction = no
-								}
-								FIN = {
-									has_country_flag = den_scandinavia_plan_target
-									is_in_faction = no
-								}
-							}
-							SWE = {
-								create_faction = "Northern Lights"
-								FIN = {
-									country_event = generic.5
-								}
-								NOR = {
-									country_event = generic.5
-								}
-							}
-						}
 					}
 				}
 				custom_effect_tooltip = den_sca_plan_needs_approval_tt
@@ -4057,6 +4057,25 @@ focus_tree = {
 					country_event = {
 						id = denmark.71
 						hours = 20
+					}
+				}
+			}
+			else = {
+				every_other_country = {
+					limit = {
+						has_country_flag = den_scandinavia_plan_target
+					}
+					every_owned_state = {
+						limit = {
+							is_core_of = ROOT
+						}
+						add_claim_by = DEN
+					}
+					DEN = {
+						declare_war_on = {
+							target = PREV
+							type = annex_everything
+						}
 					}
 				}
 			}
@@ -4212,8 +4231,18 @@ focus_tree = {
 		icon = 	GFX_goal_communist_brain
 		cost = 10
 		available = {
-			has_stability > 0.7
-			communism > 0.8
+			OR = {
+				AND = {
+					has_stability > 0.8
+					communism > 0.5
+				}
+				AND = {
+					has_stability > 0.5
+					communism > 0.8
+				}
+				has_stability > 0.95
+				communism > 0.95
+			}
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_RESEARCH }
 		ai_will_do = { factor = 5 }
@@ -7046,7 +7075,10 @@ shared_focus = {
 		OR = {
 			has_completed_focus = DEN_Social_Democratic_Majority
 			has_completed_focus = DEN_Conservative_Majority
-			has_completed_focus = DEN_An_Appeal_to_the_Proletariat
+			AND = {
+				has_completed_focus = DEN_An_Appeal_to_the_Proletariat
+				NOT = { has_completed_focus = DEN_King_Christian_Coup }
+			}
 		}
 		NOT = {
 			has_war_with = SOV
@@ -7290,10 +7322,10 @@ shared_focus = {
 			}
 		}
 		set_variable = {
-			civ_factory_production = 0
+			civ_factory_production = 0.1
 		}
 		add_to_variable = {
-			mil_factory_production = -0.1
+			mil_factory_production = 0.1
 		}
 		add_to_variable = {
 			den_military_improved = 1
@@ -7581,7 +7613,7 @@ shared_focus = {
 				type = bunker
 				level = 4
 				instant_build = yes
-				province = 3260
+				province = 332
 			}
 			add_building_construction = {
 				type = bunker
@@ -7773,7 +7805,7 @@ shared_focus = {
 			ship_production = 0.1
 		}
 		set_variable = {
-			refit_cost_factor = 0.3
+			refit_cost_factor = -0.3
 		}
 	}
 
@@ -8444,6 +8476,9 @@ shared_focus = {
 	relative_position_id = DEN_Rearm_the_Royal_Army
 	completion_reward = {
 		add_ideas = den_motorization_of_the_army
+		set_technology = {
+			motorised_infantry = 1
+		}
 	}
 
 }
