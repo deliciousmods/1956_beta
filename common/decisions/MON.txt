@@ -476,10 +476,6 @@ MON_1935_state_visit_to_moscow_category = {
 			tag = MON 
 		}
 
-		visible = {
-			is_in_faction_with = SOV
-		}
-
 		cancel_if_not_visible = yes
 
 		is_good = no
@@ -503,51 +499,13 @@ MON_1935_state_visit_to_moscow_category = {
 		}
 	}
 
-	MON_discuss_the_defence_of_mongolian_state = {
-		icon = generic_prepare_civil_war
-
-		available = {
-			always = yes
-		}
-
-		visible = {
-			has_government = communism 
-			is_in_faction_with = SOV
-			has_country_leader = { 
-				name = "Peljidiin Genden"
-				ruling_only = yes 
-			}
-		}
-		
-		ai_will_do = {
-			factor = 10
-		}
-
-		fire_only_once = yes
-		
-		cancel_if_not_visible = yes
-
-		complete_effect = {
-			set_country_flag = MON_defence_discussion_in_progress
-			unlock_decision_tooltip = MON_propose_mutual_assistance_treaty
-			unlock_decision_tooltip = MON_suggest_mongolian_self_reliance
-		}
-	}
-
 	MON_propose_mutual_assistance_treaty = {
 		icon = hol_attract_foreign_investors
 
 		cost = 5
 		available = {
-			is_in_faction_with = SOV
 			NOT = { has_country_flag = mon_1935_defence_soviet_yes_self_reliance }
 		}
-
-		visible = {
-			is_in_faction_with = SOV
-			has_country_flag = MON_defence_discussion_in_progress
-		}
-
 		
 		ai_will_do = {
 			factor = 10
@@ -569,14 +527,9 @@ MON_1935_state_visit_to_moscow_category = {
 		icon = generic_political_discourse
 
 		cost = 10
-		available = {
-			is_in_faction_with = SOV
-		}
 
-		visible = {
+		available = {
 			has_government = communism 
-			is_in_faction_with = SOV
-			has_country_flag = MON_defence_discussion_in_progress
 			NOT = { has_country_flag = mon_1935_defence_soviet_yes_assistance }
 		}
 
@@ -2620,6 +2573,7 @@ MON_on_the_crossroads_of_the_world_category = {
 					has_war_with = ROOT
 				}
 			}
+			num_of_civilian_factories_available_for_projects > 1
 			if = {
 				limit = {
 					FROM ={
@@ -2788,6 +2742,7 @@ MON_on_the_crossroads_of_the_world_category = {
 					has_war_with = ROOT
 				}
 			}
+			num_of_civilian_factories_available_for_projects > 1
 			if = {
 				limit = {
 					FROM ={
@@ -3110,6 +3065,7 @@ MON_on_the_crossroads_of_the_world_category = {
 					value > 49
 				}
 			}
+			num_of_civilian_factories_available_for_projects > 2
 			has_completed_focus = MON_weapon_prototype_development
 		}
 
@@ -3265,6 +3221,7 @@ MON_on_the_crossroads_of_the_world_category = {
 					value > 49
 				}
 			}
+			num_of_civilian_factories_available_for_projects > 2
 			has_completed_focus = MON_investigate_improvement_opportunities
 		}
 
@@ -3420,6 +3377,7 @@ MON_on_the_crossroads_of_the_world_category = {
 					value > 49
 				}
 			}
+			num_of_civilian_factories_available_for_projects > 2
 			has_completed_focus = MON_acquire_foreign_tank_designs
 		}
 
@@ -3558,6 +3516,7 @@ MON_on_the_crossroads_of_the_world_category = {
 					value > 49
 				}
 			}
+			num_of_civilian_factories_available_for_projects > 2
 			has_completed_focus = MON_foreign_air_equipment_coordination
 		}
 
@@ -3943,6 +3902,233 @@ MON_on_the_crossroads_of_the_world_category = {
 						}
 					}
 					MON_prc_high_influence_decrease_effect = yes
+				}
+			}
+		}
+	}
+
+	#civil war interventions
+	MON_support_the_sov_leader_loyalists = {
+
+		icon = SOV_place_hq_exiles
+
+		cost = 10
+		priority = 8
+
+		visible = {
+			has_completed_focus = MON_assist_the_revolutionary_struggle
+			NOT = {
+				set_global_flag = MON_picked_a_side_in_soviet_civil_war
+			}
+		}
+
+		available = {
+			any_other_country = {
+				original_tag = SOV
+				has_civil_war = yes
+			}
+			NOT = {
+				has_country_flag = MON_pursuing_ties_with_one_scw_side
+			}
+		}
+		target_trigger = {
+			FROM = {
+				original_tag = SOV
+				has_government = ROOT
+				has_civil_war = yes
+				NOT = {	#if they already declined to prevent spam
+					has_country_flag = MON_cannot_support_their_cause
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		days_remove = 14
+
+		modifier = {
+			political_power_gain = -0.05
+		}
+
+		complete_effect = {
+			set_country_flag = MON_pursuing_ties_with_one_scw_side
+		}
+
+		remove_effect = {
+			clr_country_flag = MON_pursuing_ties_with_one_scw_side
+			random_other_country = {
+				limit = {
+					original_tag = SOV
+					has_government = ROOT
+					has_civil_war = yes
+				}
+				country_event = { 
+					id = mongol_foreign_influence.3 
+					hours = 12
+				}
+				# IF THEY ACCEPT
+				custom_effect_tooltip = if_they_accept_tt
+				effect_tooltip = {
+					FROM = {
+						add_political_power = 25
+						add_war_support = 0.02
+						add_popularity = {
+							ideology = communism
+							popularity = 0.03
+						}
+						diplomatic_relation = {
+							country = MON
+							relation = non_aggression_pact
+							active = yes
+						}
+					}
+					set_global_flag = MON_picked_a_side_in_soviet_civil_war
+				}
+				
+				## IF THEY REFUSE
+				custom_effect_tooltip = if_they_refuse_tt
+				effect_tooltip = {
+					FROM = {
+						add_political_power = 10
+					}
+				}
+			}
+		}
+	}
+
+	#civil war interventions
+	MON_allow_volunteeer_work = {
+
+		icon = generic_civil_support
+
+		cost = 25
+		priority = 10
+
+		visible = {
+			has_completed_focus = MON_assist_the_revolutionary_struggle
+			NOT = {
+				has_global_flag = SOV_soviet_civil_war_over
+			}
+		}
+
+		available = {
+			any_other_country = {
+				original_tag = SOV
+				has_civil_war = yes
+				custom_trigger_tooltip = {
+					tooltip = MON_supports_our_cause
+					trigger = {
+						has_country_flag = MON_supports_our_cause
+					}
+				}
+			}
+			has_global_flag = MON_picked_a_side_in_soviet_civil_war
+		}
+
+		ai_will_do = {
+			factor = 100 #we love assisting our allies
+		}
+
+
+		fire_only_once = yes
+
+		days_remove = 21
+
+		modifier = {
+			political_power_gain = -0.01
+			consumer_goods_factor = 0.03
+			weekly_manpower = 500
+		}
+
+		complete_effect = {
+			add_war_support = 0.03
+		}
+
+		remove_effect = {
+			add_ai_strategy = {
+				type = send_volunteers_desire
+				id = ROOT
+				value = 300
+			}
+			set_rule = { can_send_volunteers = yes }
+			add_timed_idea = {
+				idea = MON_volunteers_in_war
+				days = 1460
+			}
+		}
+	}
+
+	MON_reinforce_mutual_assistance_treaty = {
+
+		icon = hol_radio_oranje
+
+		cost = 50
+		priority = 12
+
+		visible = {
+			has_completed_focus = MON_assist_the_revolutionary_struggle
+			NOT = {
+				has_global_flag = SOV_soviet_civil_war_over
+			}
+		}
+
+		available = {
+			any_other_country = {
+				original_tag = SOV
+				has_civil_war = yes
+				custom_trigger_tooltip = {
+					tooltip = MON_supports_our_cause
+					trigger = {
+						has_country_flag = MON_supports_our_cause
+					}
+				}
+			}
+			has_global_flag = MON_picked_a_side_in_soviet_civil_war
+		}
+
+		ai_will_do = {
+			factor = 100 #we love assisting our allies
+		}
+
+
+		fire_only_once = yes
+
+		days_remove = 28
+
+		modifier = {
+			war_support_weekly = 0.005
+		}
+
+		complete_effect = {
+			every_other_country = {
+				limit = {
+					original_tag = SOV
+					has_civil_war = yes
+				}
+				country_event = {
+					id = mongol_foreign_influence.6
+					days = 1
+				}
+			}
+		}
+
+		remove_effect = {
+			random_other_country = {
+				limit = {
+					original_tag = SOV
+					has_civil_war = yes
+					NOT = {
+						has_country_flag = MON_supports_our_cause
+					}
+				}
+				MON = {
+					create_wargoal = {
+						target = PREV
+						type = topple_government
+						expire = 0
+					}
 				}
 			}
 		}

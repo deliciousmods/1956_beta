@@ -5292,7 +5292,7 @@ focus_tree = {
 	focus = {
 		id = MON_true_hero_for_the_people
 		icon = GFX_goal_r56_goal_MON_mongolia_flag
-		x = 2
+		x = 1
 		y = 1
 		relative_position_id = MON_remove_nominal_leadership
 		cost = 5
@@ -5331,7 +5331,12 @@ focus_tree = {
 		cost = 5
 
 		available = {
-			threat > 0.05
+			OR = {
+				threat > 0.05
+				any_neighbor_country = {
+					has_war = yes
+				}
+			}
 		}
 		ai_will_do = {
 			factor = 30	
@@ -5358,7 +5363,12 @@ focus_tree = {
 			factor = 30	
 		}
 		available = {
-			threat > 0.15
+			OR = {
+				threat > 0.15
+				any_neighbor_country = {
+					has_war = yes
+				}
+			}
 		}
 
 		completion_reward = {
@@ -5380,7 +5390,7 @@ focus_tree = {
 		id = MON_tackle_the_eastern_threat
 		icon = GFX_focus_attack_japan
 		prerequisite = { focus = MON_affirm_rearmament_program }
-		x = 0
+		x = -1
 		y = 1
 		relative_position_id = MON_affirm_rearmament_program
 		cost = 7.2
@@ -5397,6 +5407,109 @@ focus_tree = {
 			add_political_power = 50
 			unlock_decision_tooltip = MON_khalkin_gol
 		}
+	}
+
+	focus = {
+		id = MON_assist_the_revolutionary_struggle
+		icon = GFX_goal_ussr_revolt
+		prerequisite = { focus = MON_affirm_rearmament_program }
+		x = 0
+		y = 2
+		relative_position_id = MON_affirm_rearmament_program
+		cost = 5
+
+		ai_will_do = {
+			factor = 30	
+		}
+		available = {
+			has_government = communism
+			any_other_country = {
+				original_tag = SOV
+				has_civil_war = yes
+				has_government = ROOT
+			}
+		}
+
+		bypass = {
+			has_global_flag = SOV_soviet_civil_war_over
+		}
+
+		completion_reward = {
+			add_political_power = 50
+			custom_effect_tooltip = MON_support_the_sov_leader_loyalists_tt
+			unlock_decision_tooltip =MON_allow_volunteeer_work
+			unlock_decision_tooltip =MON_reinforce_mutual_assistance_treaty
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}
+
+	focus = {
+		id = MON_rebuke_1932_mediation_issue
+		icon = GFX_goal_spread_communism
+		prerequisite = { focus = MON_affirm_rearmament_program }
+		x = 1
+		y = 1
+		relative_position_id = MON_affirm_rearmament_program
+		cost = 4
+
+		ai_will_do = {
+			factor = 30	
+		}
+		available = {
+			is_subject = no
+			any_state = {
+				state = 329
+				NOT = {
+					is_controlled_by = ROOT
+				}
+			}
+			OR = {
+				has_global_flag = SOV_soviet_civil_war
+				has_army_manpower = { size > 25000 }
+			}
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = {	
+						state = 329
+					}
+					is_controlled_by = ROOT
+				}
+			}
+		}
+
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					NOT = { original_tag = SOV }	#we are not attacking Soviets!
+					#NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_owned_state = {
+						state = 329
+					}
+				}
+				if = {
+					limit = {
+						has_non_aggression_pact_with = ROOT
+					}
+					diplomatic_relation = {
+						country = PREV
+						relation = non_aggression_pact
+						active = no
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = annex_everything
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 
@@ -5889,6 +6002,10 @@ focus_tree = {
 				is_subject_of = SOV
 			}
 			has_army_manpower = { size > 15000 }
+		}
+
+		bypass = {
+			controls_state = 329
 		}
 
 		ai_will_do = {
@@ -6676,8 +6793,56 @@ focus_tree = {
 				ideology = communism
 				popularity = 0.05
 			}
-			add_ideas = Mon_soviet_advisors_idea
-			MON_soviet_low_influence_increase_effect = yes
+			random_other_country = {
+				limit ={
+					original_tag = SOV
+					NOT = {
+						has_war_with = ROOT
+					}
+				}
+				country_event = {
+					id = mongol_army.4
+					hours = 12
+				}
+			}
+			# IF THEY ACCEPT
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = {
+				add_ideas = Mon_soviet_advisors_idea
+				every_possible_country = {
+					limit = { has_character = SOV_issa_pliyev } 
+					random_character = { 
+						limit = { 
+							is_character = SOV_issa_pliyev 
+						} 
+						set_nationality = ROOT 
+					} 
+				} 
+				MON_soviet_high_influence_increase_effect = yes
+			}
+
+			# IF THEY ACCEPT
+			custom_effect_tooltip = if_they_accept_alt_tt
+			effect_tooltip = {
+				add_ideas = Mon_soviet_crew_idea
+				every_possible_country = {
+					limit = { has_character = SOV_issa_pliyev } 
+					random_character = { 
+						limit = { 
+							is_character = SOV_issa_pliyev 
+						} 
+						set_nationality = ROOT 
+					} 
+				} 
+				MON_soviet_low_influence_increase_effect = yes
+			}
+
+			# IF THEY REFUSE
+			custom_effect_tooltip = if_they_refuse_tt
+			effect_tooltip = {
+				army_experience = 10
+				MON_soviet_medium_influence_decrease_effect = yes
+			}
 		}
 		search_filters = { FOCUS_FILTER_ARMY_XP }
 	}
