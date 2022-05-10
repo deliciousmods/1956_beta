@@ -3965,7 +3965,7 @@ MON_on_the_crossroads_of_the_world_category = {
 		visible = {
 			has_completed_focus = MON_assist_the_revolutionary_struggle
 			NOT = {
-				set_global_flag = MON_picked_a_side_in_soviet_civil_war
+				has_global_flag = MON_picked_a_side_in_soviet_civil_war
 			}
 		}
 
@@ -4079,9 +4079,7 @@ MON_on_the_crossroads_of_the_world_category = {
 				}
 				custom_trigger_tooltip = {
 					tooltip = MON_supports_our_cause
-					trigger = {
-						has_country_flag = MON_supports_our_cause
-					}
+					has_country_flag = MON_supports_our_cause
 				}
 			}
 			has_global_flag = MON_picked_a_side_in_soviet_civil_war
@@ -4148,9 +4146,7 @@ MON_on_the_crossroads_of_the_world_category = {
 				}
 				custom_trigger_tooltip = {
 					tooltip = MON_supports_our_cause
-					trigger = {
-						has_country_flag = MON_supports_our_cause
-					}
+					has_country_flag = MON_supports_our_cause
 				}
 			}
 			has_global_flag = MON_picked_a_side_in_soviet_civil_war
@@ -6317,6 +6313,12 @@ MON_greater_mongolia = {
 			controls_state = 714
 			controls_state = 715
 			controls_state = 873
+			all_state = {
+				OR = {
+					compliance < 25
+					has_state_flag = MON_states_required_for_greater_mongolia_flag
+				}
+			}
 		}
 
 		visible = {
@@ -7502,6 +7504,262 @@ MON_a_puppet_republic = {
 					}
 				}
 				hidden_effect = { news_event = { id = mongol_soviet_puppet.11 days = 1 } }
+			}
+		}
+	}
+}
+
+MON_thousand_year_rivalry = {
+	MON_plea_to_the_mongolia_affairs_commission = {
+		
+		icon = GFX_decision_concessions 	
+
+		state_target = yes
+		target_trigger = {
+			FROM = {
+				is_owned_by = ROOT
+				any_country = {
+					OR = {
+						is_literally_china = yes
+						original_tag = MAN
+						original_tag = MEN
+					}
+					#has_state_claim = FROM
+					FROM = {
+						is_claimed_by = PREV
+					}
+				}
+			}
+		}
+
+		on_map_mode = map_and_decisions_view
+
+		days_remove = 14
+
+		cost = 25
+
+		visible = {
+			FROM = {
+				NOT = {
+					has_state_flag = MON_negotiating_claims_over_this_state
+				}
+			}
+		}
+
+		available = {
+			NOT = {
+				has_country_flag = MON_already_reinforcing_the_territorial_issue_flag
+			}
+		}
+		complete_effect = {
+			set_country_flag = MON_already_reinforcing_the_territorial_issue_flag
+			FROM = {
+				set_state_flag = MON_negotiating_claims_over_this_state
+			}
+		}
+
+		remove_effect = {
+			every_other_country = {
+				limit = {
+					FROM = {
+						is_claimed_by = PREV
+					}
+				}
+				country_event = {
+					id = mongol_democratic.15
+				}
+			}
+		}
+	}
+	MON_provide_political_support = {
+		
+		icon = generic_political_discourse 	
+
+		target_trigger = {
+			FROM = {
+				has_country_flag = MON_chinese_nation_demanded_pp
+			}
+		}
+
+		cost = 100
+
+		complete_effect = {
+			clr_country_flag = MON_already_reinforcing_the_territorial_issue_flag
+			every_other_country = {
+				limit = {
+					has_country_flag = MON_chinese_nation_demanded_pp
+				}
+				add_political_power = 100
+				every_state = {
+					limit = {
+						has_state_flag = MON_negotiating_claims_over_this_state
+					}
+					remove_claim_by = PREV
+					clr_state_flag = MON_negotiating_claims_over_this_state
+				}
+				clr_country_flag = MON_chinese_nation_demanded_pp
+			}
+		}
+	}
+	
+	MON_provide_weaponry = {
+		
+		icon = generic_prepare_civil_war 	
+
+		target_trigger = {
+			FROM = {
+				has_country_flag = MON_chinese_nation_demanded_guns
+			}
+		}
+
+		available = {
+			has_equipment = { infantry_equipment > 1499 }
+		}
+
+		cost = 10
+
+		complete_effect = {
+			clr_country_flag = MON_chinese_nation_demanded_guns
+			MON = {
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = -1500
+				}
+			}
+			every_other_country = {
+				limit = {
+					has_country_flag = MON_chinese_nation_demanded_guns
+				}
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = 1500
+				}
+				every_state = {
+					limit = {
+						has_state_flag = MON_negotiating_claims_over_this_state
+					}
+					remove_claim_by = PREV
+					clr_state_flag = MON_negotiating_claims_over_this_state
+				}
+				clr_country_flag = MON_chinese_nation_demanded_guns
+			}
+		}
+	}
+	
+	MON_relocate_civilian_facility = {
+		
+		icon = generic_factory 	
+
+		target_trigger = {
+			FROM = {
+				has_country_flag = MON_chinese_nation_demanded_industry
+			}
+		}
+
+		available = {
+			any_owned_state = {
+				has_state_flag = MON_negotiating_claims_over_this_state
+				industrial_complex > 0
+			}
+		}
+
+		complete_effect = {
+			random_owned_state = {
+				limit = {
+					has_state_flag = MON_negotiating_claims_over_this_state
+					industrial_complex > 0
+				}
+				remove_building = {
+					type = industrial_complex
+					level = 1
+				}
+			}
+			every_other_country = {
+				limit = {
+					has_country_flag = MON_chinese_nation_demanded_industry
+				}
+				random_owned_state = {
+					limit = {
+						free_building_slots = {
+							building = industrial_complex
+							size > 0
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				every_state = {
+					limit = {
+						has_state_flag = MON_negotiating_claims_over_this_state
+					}
+					remove_claim_by = PREV
+					clr_state_flag = MON_negotiating_claims_over_this_state
+				}
+				clr_country_flag = MON_chinese_nation_demanded_industry
+			}
+		}
+	}
+	
+	MON_relocate_arms_factory = {
+		
+		icon = ger_military_buildup 	
+
+		target_trigger = {
+			FROM = {
+				has_country_flag = MON_chinese_nation_demanded_arms_factory
+			}
+		}
+
+		available = {
+			any_owned_state = {
+				has_state_flag = MON_negotiating_claims_over_this_state
+				arms_factory > 0
+			}
+		}
+
+		complete_effect = {
+			random_owned_state = {
+				limit = {
+					has_state_flag = MON_negotiating_claims_over_this_state
+					industrial_complex > 0
+				}
+				remove_building = {
+					type = arms_factory
+					level = 1
+				}
+			}
+			every_other_country = {
+				limit = {
+					has_country_flag = MON_chinese_nation_demanded_guns
+				}
+				random_owned_state = {
+					limit = {
+						free_building_slots = {
+							building = arms_factory
+							size > 0
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				every_state = {
+					limit = {
+						has_state_flag = MON_negotiating_claims_over_this_state
+					}
+					remove_claim_by = PREV
+					clr_state_flag = MON_negotiating_claims_over_this_state
+				}
+				clr_country_flag = MON_chinese_nation_demanded_arms_factory
 			}
 		}
 	}
