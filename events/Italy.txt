@@ -40,14 +40,11 @@ country_event = {
 		create_wargoal = {
 			type = take_state_focus
 			target = ALB
-			generator = { 44 806 800 }
+			generator = { 44 836 805 }
 		}
 		ITA = {
 			remove_resource_rights = 44
-			remove_resource_rights = 806
-		}
-		ALB = {
-			clr_country_flag = ALB_italian_resource_concessions
+			remove_resource_rights = 836
 		}
 									
 		hidden_effect = {
@@ -90,13 +87,16 @@ country_event = {
 					has_government = fascism #glorious Albania will never yield!
 				}
 			}
+			modifier = {
+				factor = 5
+				is_subject_of = ITA
+			}
 		}
 		ITA = {
 			country_event = { days = 1 id = italy.1 }
 			remove_resource_rights = 44
-			remove_resource_rights = 806
-		}
-		clr_country_flag = ALB_italian_resource_concessions			
+			remove_resource_rights = 836
+		}	
 		custom_effect_tooltip = GAME_OVER_TT
 	}
 	option = { # Resist
@@ -110,7 +110,20 @@ country_event = {
 						is_in_faction_with = ITA
 						ITA = { is_faction_leader = yes }
 					}
-					is_historical_focus_on = yes
+					AND = {
+						any_other_country = {
+							OR = {
+								is_major = yes
+								tag = YUG
+							}
+							NOT = { tag = ITA }
+							OR = {
+								has_guaranteed = ROOT
+								is_in_faction_with = ROOT
+							}
+						}
+						is_historical_focus_on = yes
+					}
 					AND = {
 						is_in_faction = no 
 						NOT = {
@@ -122,20 +135,29 @@ country_event = {
 					}
 				}
 			}
+			modifier = {
+				add = 100
+				is_in_faction = yes
+				NOT = { is_in_faction_with = ITA }
+			}
+			modifier = {
+				add = 100
+				is_subject = yes
+				NOT = { is_subject_of = ITA }
+			}
 		}
 		ITA = {
 			effect_tooltip = {
 				create_wargoal = {
 					type = take_state_focus
 					target = ALB
-					generator = { 44 806 800 }
+					generator = { 44 836 805 }
 				}
 			}
 			country_event = { days = 1 id = italy.2 }
 			remove_resource_rights = 44
-			remove_resource_rights = 806				
+			remove_resource_rights = 836				
 		}
-		clr_country_flag = ALB_italian_resource_concessions
 	}
 }
 
@@ -209,8 +231,9 @@ country_event = {
 			uses = 1
 			technology = tech_mountaineers2
 		}
-		add_tech_bonus = {
-			bonus = 1.0
+		add_doctrine_cost_reduction = {
+			name = naval_doc_bonus
+			cost_reduction = 0.5
 			uses = 2
 			category = naval_doctrine
 		}
@@ -315,7 +338,7 @@ country_event = {
 		ai_chance = { factor = 0 }
 		FRA = {
 			add_opinion_modifier = { target = ITA modifier = ITA_FRA_woo_italy_reject }
-		}
+		}	
 		hidden_effect = {
 			news_event = { hours = 6 id = news.183 }
 		}
@@ -402,9 +425,15 @@ country_event = {
 			}
 		}
 		name = italy.12.a
+		trigger = { NOT = { any_country = { is_in_faction_with = YUG } } } #don't remove Yugoslavia from any non-empty faction
 		ITA = {
-			add_political_power = -100
-			if = { limit = { is_faction_leader = yes }
+			
+			if = { 
+				limit = { 
+					is_faction_leader = yes
+					 
+				}
+				add_political_power = -100
 				add_to_faction = YUG
 				YUG = {
 					add_ai_strategy = {
@@ -413,6 +442,8 @@ country_event = {
 						value = 200
 					}
 				}
+				GER = { country_event = { id = germany.96 hours = 6 } }
+				YUG = { country_event = { id = yugoslavia.6 hours = 6 } }
 			}
 			if = {
 				limit = { 
@@ -420,10 +451,17 @@ country_event = {
 						AND = {
 							is_faction_leader = no
 							is_in_faction = yes
+							NOT = {
+								is_in_faction_with = HUN
+								HUN = {
+									is_faction_leader = yes
+								}								
+							}
 						}
 						is_in_faction = no
 					}
 				}
+				add_political_power = -100
 				create_faction = "Rome Protocols"
 				add_to_faction = YUG
 				YUG = {
@@ -433,10 +471,43 @@ country_event = {
 						value = 200
 					}
 				}
+				GER = { country_event = { id = germany.96 hours = 6 } }
+				YUG = { country_event = { id = yugoslavia.6 hours = 6 } }
 			}
+			if = {
+				limit = { 
+					AND = {
+						is_faction_leader = no
+						is_in_faction = yes
+						is_in_faction_with = HUN
+						HUN = {
+							is_faction_leader = yes
+							OR = {
+								has_government = neutrality
+								has_government = fascism
+							}
+						}								
+					}
+				}
+				add_political_power = -150
+				HUN = {
+					add_to_faction = YUG
+					country_event = { id = r56_hungary.7 }
+				}
+				YUG = {
+					add_ai_strategy = {
+						type = alliance
+						id = "HUN"
+						value = 200
+					}
+					add_ai_strategy = {
+						type = alliance
+						id = "ITA"
+						value = 200
+					}					
+				}
+			}			
 		}
-		GER = { country_event = { id = germany.96 hours = 6 } }
-		YUG = { country_event = { id = yugoslavia.6 hours = 6 } }
 	}
 	option = {
 		ai_chance = {
@@ -459,6 +530,8 @@ country_event = {
 		trigger = {
 			has_completed_focus = ITA_cooperation_with_germany
 			owns_state = 44
+			owns_state = 805
+			owns_state = 836
 		}
 	}
 	desc = { 
@@ -466,6 +539,8 @@ country_event = {
 		trigger = {
 			has_completed_focus = ITA_cooperation_with_germany
 			NOT = { owns_state = 44 }
+			NOT = { owns_state = 805 }
+			NOT = { owns_state = 836 }
 		}
 	}
 	desc = { 
@@ -473,6 +548,8 @@ country_event = {
 		trigger = {
 			NOT = { has_completed_focus = ITA_cooperation_with_germany }
 			owns_state = 44
+			owns_state = 805
+			owns_state = 836
 		}
 	}
  
@@ -484,11 +561,23 @@ country_event = {
 		name = italy.13.a
 		if = {
 			limit = { has_completed_focus = ITA_cooperation_with_germany }
-			ITA = { transfer_state = 103 }
+			ITA = {
+				transfer_state = 103
+				transfer_state = 886
+			}
 		}
 		if = {
-			limit = { owns_state = 44 }
-			ITA = { transfer_state = 105 }
+			limit = {
+				owns_state = 44
+				owns_state = 805
+				owns_state = 836
+			}
+			ITA = {
+				transfer_state = 105
+				transfer_state = 802
+				transfer_state = 878
+				transfer_state = 891
+			}
 		}
 	}
 }
@@ -553,7 +642,7 @@ country_event = {
 		if = {
 			limit = { has_global_flag = ITA_claims_on_france_1 }
 			ITA = { transfer_state = 1 }
-		}
+		}		
 	}
 }
 
@@ -573,3 +662,4 @@ country_event = {
 		transfer_state = 735
 	}
 }
+

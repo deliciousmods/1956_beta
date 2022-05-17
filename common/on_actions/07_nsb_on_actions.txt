@@ -1,0 +1,2208 @@
+on_actions = {
+	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
+	on_state_control_changed = {
+		effect = {
+			if = {
+				limit = {
+					FROM.FROM = {
+						is_core_of = SOV
+					}
+					FROM = {
+						tag = SOV
+					}
+				}
+				SOV = { set_country_flag = achievement_lost_state }
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					FROM.FROM = {
+						is_core_of = GER
+						NOT = { #these two cores are given to germany in the Danzig or War event, but the states are not transfered immediately
+							state = 85
+							state = 807
+							state = 8 #Luxembourg & Alsace
+							state = 28
+						}
+					}
+					has_global_flag = achievement_france_surrender
+					NOT = { tag = SOV }
+					NOT = { tag = GER }#in case Germany recaptures a state
+				}
+				set_global_flag = GER_lost_core_state
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					FROM.FROM = { 
+						state = 742 
+						NOT = { has_state_flag = dushanbe_flag }
+					}
+					OR = {
+						ROOT = { original_tag = TAJ }
+						ROOT = { original_tag = BUK }
+					}
+				}
+				742 = { 
+					set_state_name = SOV_Dushanbe 
+					set_state_flag = dushanbe_flag
+				}
+				set_province_name = {
+					id = 1384
+					name = SOV_Dushanbe
+				}
+			}
+			if = {
+				limit = {
+					FROM.FROM = { state = 85 }
+				}
+				85 = { POL_remove_danzig_effect = yes }
+				if = {
+					limit = {
+						ROOT = {
+							OR = {
+								original_tag = GER
+								original_tag = DNZ
+							}
+						}
+					}
+					85 = {
+						reset_state_name = yes
+					}
+					reset_province_name = 362
+				}
+				if = {
+					limit = { ROOT = { original_tag = POL } }
+					85 = { set_state_name = "Gdańsk" }
+					set_province_name = {
+						id = 362
+						name = "Gdańsk"
+					}
+				}
+			}
+			if = {
+				limit = {
+					divisions_in_state = { state = FROM.FROM size > 0 }
+					FROM.FROM = { 
+						NOT = { has_state_flag = already_sabotaged_flag }
+					}
+					FROM = {
+						original_tag = POL
+						has_completed_focus = POL_sabotage_polish_industry
+					}
+				}
+				FROM.FROM = { 
+					set_state_flag = poland_state_withdrawn
+					state_event = { id = poland.23 trigger_for = controller }
+				}
+			}
+			if = {
+				limit = {
+					FROM.FROM = { state = 119 }
+				}
+				if = {
+					limit = {
+						ROOT = { original_tag = IRE }
+					}
+					set_province_name = {
+						id = 385
+						name = "Derry"
+					}
+				}
+				if = {
+					limit = {
+						ROOT = { original_tag = ENG }
+					}
+					reset_province_name = 385
+				}
+				if = {
+					limit = {
+						ROOT = { original_tag = NIR }
+					}
+					random_list = { #Difficult to say if an independent Northern Ireland would call it Derry or Londonderry, let's let the dice gods decide.
+						1 = {
+							set_province_name = {
+								id = 385
+								name = "Derry"
+							}
+							modifier = {
+								factor = 0
+								is_subject_of = ENG
+							}
+						}
+						1 = {
+							reset_province_name = 385
+							modifier = {
+								factor = 0
+								is_subject_of = IRE
+							}
+						}
+					}
+				}
+			}
+		}
+
+		#SOVIET - If Death to Invaders Propaganda Campaign is active, manage the appropriate state modifier
+		effect = {
+			if = {
+				limit = {
+					has_global_flag = SOV_propaganda_death_to_invaders_active_flag
+					FROM.FROM = { is_core_of = SOV }
+				}
+				if = { #If SOV is new controller, remove state modifier
+					limit = {
+						ROOT = { tag = SOV }
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_invaders_must_die } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_invaders_must_die } }
+				}
+				else_if = { #If SOV lost the state, add state modifier
+					limit = {
+						FROM = { tag = SOV }
+						ROOT = { has_war_with = SOV }
+					}
+					FROM.FROM = { add_dynamic_modifier = { modifier = SOV_invaders_must_die } }
+				}
+			}
+		}
+		
+		#SOVIET - Clean other state modifiers when Soviets lose control over the state
+		effect = {
+			if = {
+				limit = {
+					FROM.FROM = { is_core_of = SOV }
+					ROOT = { NOT = { tag = SOV } }
+				}
+				if = { #SOV_defend_moscow
+					limit = {
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_defend_moscow } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_defend_moscow } }
+				}
+				if = { #SOV_increased_metals_production
+					limit = {
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_increased_metals_production } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_increased_metals_production } }
+				}
+				if = { #SOV_seraya_loshad_battery
+					limit = {
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_seraya_loshad_battery } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_seraya_loshad_battery } }
+				}
+				if = { #SOV_krasnaya_gorka_battery
+					limit = {
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_krasnaya_gorka_battery } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_krasnaya_gorka_battery } }
+				}
+				if = { #SOV_armored_battery_35
+					limit = {
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_armored_battery_35 } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_armored_battery_35 } }
+				}
+				if = { #SOV_factory_worker_militias_raised
+					limit = {
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_factory_worker_militias_raised } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_factory_worker_militias_raised } }
+				}
+				if = { #SOV_civilian_labor_in_defense_mod
+					limit = {
+						FROM.FROM = { has_dynamic_modifier = { modifier = SOV_civilian_labor_in_defense_mod } }
+					}
+					FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_civilian_labor_in_defense_mod } }
+				}
+			}
+		}
+
+		#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
+		#SOVIET CIVIL WAR
+		effect = {
+			if = {
+				limit = {
+					has_global_flag = SOV_soviet_civil_war
+					check_variable = { SOV_civil_war_months > 1 }
+					SOS = { surrender_progress < 0.85 }
+					ROOT = { tag = SOV }
+					FROM = { tag = SOS }
+					FROM.FROM = { 
+						NOT = { has_state_flag = captured_by_opposition_flag }
+						is_core_of = SOV 
+					}
+				}
+				FROM.FROM = { set_state_flag = captured_by_opposition_flag } # Only first capture
+				random_list = {
+					# Army Defections 
+					10 = { 
+						modifier = {
+							factor = 0
+							SOV = { has_country_flag = SOV_defections_army_flag }
+						}
+						modifier = {
+							factor = 2
+							FROM.FROM = { check_variable = { state_strategic_value > 19 } }
+						}
+						SOV = {
+							set_country_flag = SOV_defections_army_flag
+							FROM.FROM = { 
+								set_variable = { SOV.SOV_defections_army_state = THIS.id }
+							}
+							country_event = {
+								id = NSB_soviet_civil_war_common.125
+								hours = 1
+							}
+						}
+					}
+					# Capture Stockpile
+					10 = { 
+						modifier = {
+							factor = 0
+							SOV = { has_country_flag = SOV_stockpiles_flag }
+						}
+						SOV = {
+							set_country_flag = SOV_stockpiles_flag
+							FROM.FROM = { 
+								set_variable = { SOV.SOV_captured_stockpile_state = THIS.id }
+							}
+							country_event = {
+								id = NSB_soviet_civil_war_common.126
+								hours = 1
+							}
+						}
+					}
+					# Navy Defections 
+					10 = { 
+						modifier = {
+							factor = 0
+							SOV = { has_country_flag = SOV_defections_navy_flag }
+						}
+						modifier = {
+							factor = 0
+							check_variable = { SOS.num_ships < 10 } # No point if number of ships too low
+						}
+						modifier = {
+							factor = 0
+							FROM.FROM = { naval_base < 1 } # Only happening when capturing port areas
+						}
+						modifier = {
+							factor = 4
+							FROM.FROM = { naval_base > 4 } # Very likely when capturing major port 
+						}
+						
+						SOV = {
+							set_country_flag = SOV_defections_navy_flag
+							FROM.FROM = { 
+								set_variable = { SOV.SOV_defections_navy_state = THIS.id }
+							}
+							country_event = {
+								id = NSB_soviet_civil_war_common.127
+								hours = 1
+							}
+						}
+
+					}
+					# Civilian Unrest
+					5 = { 
+						modifier = {
+							factor = 0
+							SOV = { has_country_flag = SOV_civilian_unrest_flag }
+						}
+						modifier = {
+							factor = 0
+							check_variable = { SOS.SOV_surrender_modifier < -0.8 } # don't win this way
+						}
+						
+						SOV = {
+							set_country_flag = SOV_civilian_unrest_flag
+							FROM.FROM = { 
+								set_variable = { SOV.SOV_civilian_unrest_state = THIS.id }
+							}
+							country_event = {
+								id = NSB_soviet_civil_war_common.128
+								hours = 1
+							}
+						}
+
+					}	
+
+					# No effect this time
+					20 = {
+						modifier = {
+							factor = 0
+							FROM.FROM = { check_variable = { state_strategic_value > 80 } }
+						}
+						modifier = {
+							factor = 1.5
+							FROM.FROM = { check_variable = { state_strategic_value < 10 } }
+						}
+						modifier = {
+							factor = 2 # Exiles need some more help I guess. 
+							SOV = { SOV_is_exiles = no }
+						}
+
+					}
+
+				}
+			}
+		}
+
+		#GERMANY - If Soviet Imports is active, remove it
+		effect = {
+			if = {
+				limit = {
+					FROM = { tag = GER }
+					FROM.FROM = { has_dynamic_modifier = { modifier = SOV_soviet_imports } }
+				}
+				FROM.FROM = { remove_dynamic_modifier = { modifier = SOV_soviet_imports } }
+			}
+		}
+
+		#SOVIET - Nikolay Kuznetsov becomes an operative (Ukrainian state occupied)
+		effect = { #ROOT is new controller #FROM is old controller #FROM.FROM is state ID
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+					FROM.FROM = {
+						is_core_of = UKR
+						NOT = { is_owned_by = ROOT }
+					}
+					FROM = {
+						original_tag = SOV
+						has_government = communism
+					}
+					ROOT = { has_war_with = SOV }
+				}
+				FROM = {
+					set_variable = { SOV_invader_of_ukraine = ROOT } #Store invader in SOV for loc purposes in the event below
+					country_event = { id = NSB_soviet_great_patriotic_war.01 days = 10 random_days = 30 }
+				}
+			}
+		}
+	}
+	#ROOT is winner #FROM gets annexed - This will also fire on_annex
+	on_civil_war_end = {
+		effect = {
+			#Restore Baltic capitals
+			if = {
+				limit = {
+					original_tag = LAT
+					808 = { is_capital = no }
+					controls_state = 808
+				}
+				set_capital = { state = 808 }
+			}
+			if = {
+				limit = {
+					original_tag = EST
+					812 = { is_capital = no }
+					controls_state = 812
+				}
+				set_capital = { state = 812 }
+			}
+			if = {
+				limit = {
+					original_tag = LIT
+					11 = { is_capital = no }
+					784 = { is_capital = no }
+					OR = {
+						controls_state = 11
+						controls_state = 784
+					}
+				}
+				if = {
+					limit = { controls_state = 784 }
+					set_capital = { state = 784 }
+				}
+				if = {
+					limit = { controls_state = 11 }
+					set_capital = { state = 11 }
+				}
+			}
+			# After Soviet Communist Civil War
+			if = {
+				limit = {
+					original_tag = SOV
+					has_global_flag = SOV_soviet_civil_war
+				}
+				ROOT = { 
+					delete_unit_template_and_units = {
+						division_template = "Opposition Partisan Brigade"
+						disband = no
+					}
+				}
+				IF = { 
+					limit = { SOV_is_left_opposition = yes } 
+					delete_unit_template_and_units = {
+						division_template = "Trotskyist Workers' Militia"
+						disband = no
+					}
+					delete_unit_template_and_units = {
+						division_template = "Trotskyist Peasant Militia"
+						disband = no
+					}
+					delete_unit_template_and_units = {
+						division_template = "International Brigades"
+						disband = no
+					}
+				}
+
+				IF = { 
+					limit = { SOV_is_right_opposition = yes } 
+					delete_unit_template_and_units = {
+						division_template = "Bukharinist Workers' Militia"
+						disband = no
+					}
+					delete_unit_template_and_units = {
+						division_template = "Bukharinist Peasant Militia"
+						disband = no
+					}
+					delete_unit_template_and_units = {
+						division_template = "Japanese Expeditionary Force"
+						disband = no
+					}
+				}
+				IF = { 
+					limit = { SOV_is_exiles = yes } 
+					delete_unit_template_and_units = {
+						division_template = "Ruki"
+						disband = no
+					}
+					
+					delete_unit_template_and_units = {
+						division_template = "Japanese Expeditionary Force"
+						disband = no
+					}
+				}
+				clr_global_flag = SOV_soviet_civil_war
+				set_global_flag = SOV_soviet_civil_war_over
+				IF = {
+					limit = { ROOT = { NOT = { SOV_is_stalinist = yes } } } 
+					SOV = { 
+						country_event = {
+							id = NSB_soviet_civil_war_common.001 
+							days = 1
+							random_hours = 8
+						}
+					} # Trigger the Post Civil War effects
+				}
+			}
+			#Make Danzig demilitarised again
+			if = {
+				limit = {
+					original_tag = POL
+					NOT = {
+						has_completed_focus = POL_ban_the_nazi_party
+					}
+				}
+				85 = {
+					add_core_of = DNZ
+					set_demilitarized_zone = yes
+					add_dynamic_modifier = { modifier =  international_city }
+				}
+				if = {
+					limit = {
+						has_completed_focus = POL_clamp_down_on_danzig
+					}
+					85 = {
+						remove_dynamic_modifier = {
+							modifier = international_city
+						}
+						add_dynamic_modifier = {
+							modifier = international_city_2
+						}
+						force_enable_resistance = { 
+							clear = no
+							occupier = POL
+							occupied = DNZ
+						}
+						start_resistance = DNZ
+						set_resistance = 40
+						set_compliance = 30
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_DLC = "No Step Back"
+					is_baltic_state = yes
+					NOT = { has_completed_focus = BALTIC_purge_of_our_own }
+				}
+				add_ideas = BALTIC_popular_resistance
+			}
+			# Give back POL focus tree to Peasants if they win the civil war.
+			if = {
+				limit = {
+					original_tag = POL
+					has_cosmetic_tag = POL_PEASANT
+					FROM = {
+						original_tag = POL
+					}
+				}
+				delete_unit_template_and_units = {
+					division_template = "Peasant Militia"
+				}
+				if = {
+					limit = { 
+						has_focus_tree = generic_focus
+					}
+					load_focus_tree = { tree = polish_focus keep_completed = no }
+					mark_focus_tree_layout_dirty = yes
+					unlock_national_focus = POL_restore_the_sejm
+					unlock_national_focus = POL_internationalism
+					unlock_national_focus = POL_liberalism_focus
+				}
+			}
+			# Give back POL focus tree to Sanation gov if they win the civil war against the peasants.
+			if = {
+				limit = {
+					original_tag = POL
+					has_government = neutrality
+					NOT = {
+						has_country_leader = {
+							character = POL_edward_rydzsmigly
+							ruling_only = yes
+						}
+						has_country_leader = {
+							character = POL_walery_slawek
+							ruling_only = yes
+						}
+					}
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = POL
+					}
+				}
+				load_focus_tree = { tree = polish_focus keep_completed = no }
+				mark_focus_tree_layout_dirty = yes
+				complete_national_focus = POL_complete_april_constitution
+				POL_sanation_left_opposition_remove = yes
+				POL_sanation_right_opposition_remove = yes
+				complete_national_focus = POL_polish_militarism
+				complete_national_focus = POL_consolidate_sanation_government
+				
+			}
+			# Give back POL focus tree to Sanation Right if they win the civil war.
+			if = {
+				limit = {
+					original_tag = POL
+					has_country_leader = {
+						character = POL_edward_rydzsmigly
+						ruling_only = yes
+					}
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = POL
+					}
+				}
+				load_focus_tree = { tree = polish_focus keep_completed = no }
+				mark_focus_tree_layout_dirty = yes
+				complete_national_focus = POL_complete_april_constitution
+				POL_sanation_left_opposition_remove = yes
+				POL_sanation_right_opposition_remove = yes
+				complete_national_focus = POL_polish_militarism
+				complete_national_focus = POL_consolidate_sanation_government
+				complete_national_focus = POL_the_sanation_right
+				complete_national_focus = POL_polish_revanchism
+				complete_national_focus = POL_support_right_paramilitaries
+				complete_national_focus = POL_second_man_of_the_state
+				unlock_national_focus = POL_ozon
+			}
+			# Give back POL focus tree to Sanation Left if they win the civil war.
+			if = {
+				limit = {
+					original_tag = POL
+					has_country_leader = {
+						character = POL_walery_slawek
+						ruling_only = yes
+					}
+					has_focus_tree = generic_focus
+					FROM = {
+						original_tag = POL
+					}
+				}
+				load_focus_tree = { tree = polish_focus keep_completed = no }
+				mark_focus_tree_layout_dirty = yes
+				complete_national_focus = POL_complete_april_constitution
+				POL_sanation_left_opposition_remove = yes
+				POL_sanation_right_opposition_remove = yes
+				complete_national_focus = POL_polish_militarism
+				complete_national_focus = POL_consolidate_sanation_government
+				complete_national_focus = POL_the_sanation_left
+				complete_national_focus = POL_modus_vivendi
+				complete_national_focus = POL_draft_a_new_constitution
+				complete_national_focus = POL_the_left_chairman
+				complete_national_focus = POL_common_organization_of_society
+				unlock_national_focus = POL_dissolve_the_bbwr
+			}
+			#Annex Belarus when the civil war ends
+			if = {
+				limit = {
+					original_tag = BLR
+				}
+				set_global_flag = belarus_baltic_resolved
+				if = {
+					limit = {
+						ROOT = { has_cosmetic_tag = BLR_baltic }
+					}
+					random_country = {
+						limit = {
+							is_baltic_state = yes
+							has_country_flag = sponsored_belarus_flag
+						}
+						annex_country = {
+							target = PREV
+							transfer_troops = yes
+						}
+						every_state = {
+							limit = {
+								is_core_of = BLR
+							}
+							add_core_of = PREV
+						}
+						if = {
+							limit = {
+								NOT = { has_cosmetic_tag = BAL_UNIFIED }
+								NOT = { has_cosmetic_tag = PLC_UNIFIED }
+							}
+							if = {
+								limit = {
+									original_tag = LIT
+								}
+								set_cosmetic_tag = LIT_belarus
+							}
+							if = {
+								limit = {
+									original_tag = LAT
+								}
+								set_cosmetic_tag = LAT_belarus
+							}
+							if = {
+								limit = {
+									original_tag = EST
+								}
+								set_cosmetic_tag = EST_belarus
+							}
+						}
+					}
+				}
+				else = {
+					SOV = {
+						annex_country = {
+							target = PREV
+							transfer_troops = yes
+						}
+					}
+					every_state = {
+						limit = {
+							is_core_of = BLR
+						}
+						add_core_of = SOV
+					}
+				}
+			}
+			#Puppet Lithuania/Romania when civil war ends
+			if = {
+				limit = {
+					OR = {
+						has_country_flag = POL_lithuanian_personal_union_flag
+						has_country_flag = POL_romanian_personal_union_flag
+						has_country_flag = POL_czech_personal_union_flag
+					}
+					POL = { 
+						is_subject = no 
+						has_government = neutrality 
+					}
+				}
+				POL = {
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_personal_union
+					}
+				}
+			}
+			#Puppet Poland when civil war ends
+			if = {
+				limit = {
+					has_country_flag = LIT_poland_personal_union_flag
+					LIT = { 
+						is_subject = no
+						has_government = neutrality 
+					}
+				}
+				LIT = {
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_personal_union
+					}
+				}
+			}
+			if = {
+				limit = {
+					original_tag = LIT
+					NOT = { has_focus_tree = lithuania_tree }
+					has_dlc = "No Step Back"
+				}
+				load_focus_tree = { tree = lithuania_tree keep_completed = yes }
+				if = { #Give Lithuania their focus tree back if the Iron Wolf win the civil war.
+					limit = { has_government = fascism }
+					if = {
+						limit = { has_completed_focus = LIT_exile_voldemares }
+						uncomplete_national_focus = { #Voldemares shouldn't exile himself
+							focus = LIT_exile_voldemares
+							uncomplete_children = yes
+						}
+					}
+					if = {
+						limit = { has_completed_focus = BALTIC_restore_workers_republic }
+						uncomplete_national_focus = {
+							focus = BALTIC_restore_workers_republic
+							uncomplete_children = yes
+						}
+					}
+					complete_national_focus = LIT_lithuanian_activist_front
+					complete_national_focus = LIT_organize_the_iron_wolf
+					complete_national_focus = LIT_lithuanian_youth
+					complete_national_focus = LIT_unify_the_military
+				}
+				if = { #In case the old government defeats the Communists
+					limit = { has_government = neutrality }
+					if = {
+						limit = { has_completed_focus = BALTIC_restore_workers_republic }
+						uncomplete_national_focus = {
+							focus = BALTIC_restore_workers_republic
+							uncomplete_children = yes
+						}
+					}
+					complete_national_focus = LIT_secure_a_loyal_cabinet
+				}
+			}
+			if = {
+				limit = {
+					original_tag = EST
+					NOT = { has_focus_tree = estonia_tree }
+					has_dlc = "No Step Back"
+				}
+				load_focus_tree = { tree = estonia_tree keep_completed = yes }
+				if = { #Give Estonia their focus tree back if the Vapsid win the civil war.
+					limit = { has_government = fascism }
+					if = {
+						limit = { has_completed_focus = EST_era_of_silence }
+						uncomplete_national_focus = {
+							focus = EST_era_of_silence
+							uncomplete_children = yes
+						}
+					}
+					if = {
+						limit = { has_completed_focus = BALTIC_restore_workers_republic }
+						uncomplete_national_focus = {
+							focus = BALTIC_restore_workers_republic
+							uncomplete_children = yes
+						}
+					}
+					unlock_national_focus = EST_rally_the_nation
+					unlock_national_focus = EST_march_on_talinn
+				}
+				if = { #In case the old government defeats the Communists
+					limit = { has_government = neutrality }
+					if = {
+						limit = { has_completed_focus = BALTIC_restore_workers_republic }
+						uncomplete_national_focus = {
+							focus = BALTIC_restore_workers_republic
+							uncomplete_children = yes
+						}
+					}
+					if = {
+						limit = { has_completed_focus = EST_rally_the_nation }
+						uncomplete_national_focus = {
+							focus = EST_rally_the_nation
+							uncomplete_children = yes
+						}
+					}
+					complete_national_focus = EST_era_of_silence
+				}
+				if = { #In case of communist uprising
+					limit = { has_government = communism }
+					if = {
+						limit = { has_completed_focus = EST_era_of_silence }
+						uncomplete_national_focus = {
+							focus = EST_era_of_silence
+							uncomplete_children = yes
+						}
+					}
+					if = {
+						limit = { has_completed_focus = EST_rally_the_nation }
+						uncomplete_national_focus = {
+							focus = EST_rally_the_nation
+							uncomplete_children = yes
+						}
+					}
+					complete_national_focus = BALTIC_restore_workers_republic
+				}
+			}
+			if = {
+				limit = {
+					original_tag = LAT
+					NOT = { has_focus_tree = latvia_tree }
+					has_dlc = "No Step Back"
+				}
+				load_focus_tree = { tree = latvia_tree keep_completed = yes }
+				if = { #Give Latvia their focus tree back if the Perkonkrust win the civil war.
+					limit = { has_government = fascism }
+					if = {
+						limit = { has_completed_focus = LAT_banish_clemens }
+						uncomplete_national_focus = {
+							focus = LAT_banish_clemens
+							uncomplete_children = yes
+						}
+					}
+					if = {
+						limit = { has_completed_focus = LAT_anti_german_propaganda }
+						uncomplete_national_focus = {
+							focus = LAT_anti_german_propaganda
+							uncomplete_children = yes
+						}
+					}
+					if = {
+						limit = { has_completed_focus = BALTIC_restore_workers_republic }
+						uncomplete_national_focus = {
+							focus = BALTIC_restore_workers_republic
+							uncomplete_children = yes
+						}
+					}
+					unlock_national_focus = LAT_latvia_for_latvians
+					unlock_national_focus = LAT_lift_ban_on_perkonkrusts
+					unlock_national_focus = LAT_fanatic_recruitment
+					complete_national_focus = LAT_the_old_ways
+					random_list = {
+						75 = {
+							complete_national_focus = LAT_alignment_with_germany
+						}
+						25 = {
+							complete_national_focus = LAT_the_thunder_strikes_alone
+						}
+					}
+				}
+				if = { #In case the old government defeats the Communists
+					limit = { has_government = neutrality }
+					if = {
+						limit = { has_completed_focus = BALTIC_restore_workers_republic }
+						uncomplete_national_focus = {
+							focus = BALTIC_restore_workers_republic
+							uncomplete_children = yes
+						}
+					}
+					complete_national_focus = LAT_suspend_the_constitution
+				}
+			}
+			if = {
+				limit = {
+					has_completed_focus = BALTIC_soviet_volunteer_forces
+				}
+				delete_unit_template_and_units = {
+					division_template = "Soviet Volunteers"
+				}
+			}
+		}
+	}
+	
+	on_ruling_party_change = { 
+		# temp var old_ideology_token is available for effects
+		effect = {
+			if = {
+				limit = {
+					original_tag = LAT
+					has_government = fascism
+				}
+				remove_perkonkrust_effect = yes
+			}
+			if = {
+				limit = {
+					has_government = democratic
+					has_idea = democratic_opposition
+				}
+				remove_ideas = democratic_opposition
+			}
+			if = {
+				limit = {
+					has_government = democratic
+					has_idea = democratic_opposition_idea_1
+				}
+				remove_ideas = democratic_opposition_idea_1
+			}
+			if = {
+				limit = {
+					has_government = democratic
+					has_idea = democratic_opposition_idea_2
+				}
+				remove_ideas = democratic_opposition_idea_2
+			}
+			if = {
+				limit = {
+					has_government = fascism
+					any_owned_state = {
+						is_capital = yes
+						is_on_continent = south_america
+					}
+					is_in_faction = no
+					has_country_flag = SOV_political_influence_americas_flag
+				}
+				country_event = {
+					id = NSB_soviet_fascist_tsarist.8
+					days = 3
+				}
+			}
+		}
+		effect = { #SOV - make FT dirty to force reload and tweak loc and icons to fit the new (wrong ^.^' ) ideology
+			if = {
+				limit = {
+					original_tag = SOV
+				}
+				mark_focus_tree_layout_dirty = yes
+				SOV_replace_stuff_based_on_ideology_effect = yes
+				if = { #Remove Paranoia, if for whatever reason country changes ideology while still active
+					limit = {
+						NOT = { has_government = communism }
+						has_country_flag = SOV_paranoia_system_active_flag
+					}
+					SOV_remove_paranoia_effect = yes
+				}
+				if = {
+					limit = { #Kerensky comes back from exile if Democratic
+						has_government = democratic
+						SOV_aleksandr_kerensky = {
+							has_character_flag = SOV_exiled_flag
+						}
+					}
+					SOV_aleksandr_kerensky = {
+						clr_character_flag = SOV_exiled_flag
+					}
+				}
+			}
+		}
+	}
+	
+	#FROM - Country (owner)
+	#ROOT - leader
+	#FROMFROM - original owner for exiled leaders
+	on_unit_leader_level_up = {
+		effect = {
+			if = { 
+				limit = { 
+					FROM = { 
+						has_idea = bold_attack_spirit 
+					} 
+				}
+				character = { 
+					IF = { 
+						limit = { is_army_leader = yes }
+					
+						random_list = { 
+							50 = { add_attack = 1 } 
+							50 = {} 
+						} 
+					}
+				}
+			}
+			else_if = { #since these spirits are mutually exclusive, we can use else_if for added performance!
+				limit = {
+					FROM = { has_idea = tenacious_defense_spirit }
+				}
+				character = { 
+					IF = { 
+						limit = { is_army_leader = yes }
+					
+						random_list = {
+							50 = { add_defense = 1 }
+							50 = {}
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					FROM = { has_idea = meticulous_preparation_spirit }
+				}
+				character = { 
+					IF = { 
+						limit = { is_army_leader = yes }
+					
+						random_list = {
+							50 = { 
+								add_planning = 1 
+								add_logistics = 1
+							}
+							50 = {}
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					FROM = { has_idea = instilled_aggression_spirit }
+				}
+				character = { 
+					IF = { 
+						limit = { is_navy_leader = yes }
+		
+						random_list = {
+							40 = { 
+								add_attack = 1 
+							}
+							60 = {}
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					FROM = { has_idea = calculated_restraint_spirit }
+				}
+				character = { 
+					IF = { 
+						limit = { is_navy_leader = yes }
+					
+						random_list = {
+							40 = { 
+								add_defense = 1 
+							}
+							60 = {}
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					FROM = { has_idea = signals_training_spirit }
+				}
+				character = { 
+					IF = { 
+						limit = { is_navy_leader = yes }
+					
+						random_list = {
+							40 = { 
+								add_maneuver = 1
+								add_coordination = 1
+							}
+							60 = {}
+						}
+					}
+				}
+			}
+		}  
+	}
+
+	on_unit_leader_created = { # This uses the UNIT LEADER sub scope of a character, FROM == country
+		effect = {
+			character = {
+				if = { 
+					limit = {
+						is_army_leader = yes
+					}
+					if = {
+						limit = {	
+							FROM = { has_idea = political_loyalty_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+						}
+						root = {
+							random_list = {
+								50 = { 
+									add_unit_leader_trait = media_personality
+								}
+								50 = { 
+									add_unit_leader_trait = politically_connected
+								}
+							}
+						}
+						
+					}
+					else_if = {
+						limit = {
+							FROM = { has_idea = mobile_warfare_academy_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+						}
+						root = {
+							random_list = {
+								50 = { 
+									add_unit_leader_trait = panzer_leader
+								}
+								50 = {}
+							}
+						}
+					}
+					else_if = { #tweaked r56 to match loc description
+						limit = {
+							FROM = { has_idea = inventive_leadership_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+						}
+						root = {
+							random_list = {
+								50 = { 
+									random_list = {
+										33 = { add_unit_leader_trait = naval_invader }
+										33 = { add_unit_leader_trait = commando }
+										33 = { add_unit_leader_trait = trickster }
+									}
+								}
+								50 = {}
+							}
+						}
+					}
+					else_if = {
+						limit = {
+							FROM = { has_idea = mass_assault_academy_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+						}
+						root = {
+							random_list = {
+								50 = { 
+									add_unit_leader_trait = infantry_officer
+								}
+								50 = {}
+							}
+						}
+					}
+					else_if = {
+						limit = {
+							FROM = { has_idea = superior_firepower_academy_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+						}
+						root = {
+							random_list = {
+								50 = { 
+									add_unit_leader_trait = engineer_officer
+								}
+								50 = {}
+							}
+						}
+					}
+					else_if = {
+						limit = {
+							FROM = { has_idea = theatre_training_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+						}
+						root = {
+							random_list = {
+								50 = { 
+									random_list = {
+										50 = { add_unit_leader_trait = brilliant_strategist }
+										50 = { add_unit_leader_trait = inflexible_strategist }
+									}
+								}
+								50 = {}
+							}
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						FROM = { has_idea = fleet_in_being_academy_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+					}
+					root = {
+						random_list = {
+							50 = { 
+								add_unit_leader_trait = gunnery_expert
+							}
+							50 = {}
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						FROM = { has_idea = trade_interdiction_academy_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+					}
+					root = {
+						random_list = {
+							25 = { 
+								add_unit_leader_trait = seawolf
+							}
+							25 = { 
+								add_unit_leader_trait = blockade_runner
+							}
+							50 = {}
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						FROM = { has_idea = base_strike_academy_spirit } #done here instead of the trait file to avoid some oddness with generating assignable traits under certain circumstances, makes it easier to control probabilities
+					}
+					root = {
+						random_list = {
+							50 = { 
+								add_unit_leader_trait = aviation_enthusiast 
+							}
+							50 = {}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	on_government_change = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = EST
+					has_government = fascism
+				}
+				remove_vaps_effect = yes
+			}
+		}
+	}
+	on_peace = { 
+		effect = { 
+			IF = {
+				limit = {
+					THIS = {
+						has_country_flag = SOV_unrecognized_country_flag
+						has_country_flag = SOV_breakaway_country_flag
+					}
+				}
+				THIS = { clr_country_flag = SOV_unrecognized_country_flag }
+				set_rule = { can_join_factions = yes }
+			}
+		} 
+	}
+	
+	#ROOT - country that just went to peace
+	on_peaceconference_ended = { 
+		effect = {
+			if = {
+				limit = {
+					ROOT = { original_tag = POL }
+					FROM = { original_tag = HUN }
+					POL = { has_completed_focus = POL_press_the_habsburg_claim }
+					HUN = { has_government = neutrality }
+				}
+				HUN = {
+					promote_character = HUN_otto_von_habsburg
+					add_ruling_to_neu = yes
+					set_politics = {
+						ruling_party = neutrality
+						elections_allowed = no
+						name = HUN_legitimists_party
+						long_name = HUN_legitimists_party_long
+					}
+					if = { #Switch to the Habsburg branch
+						limit = {
+							has_focus_tree = hungarian_focus
+						}
+						if = {
+							limit = {
+								has_completed_focus = HUN_economic_intervention
+							}
+							uncomplete_national_focus = {
+								focus = HUN_economic_intervention
+								uncomplete_children = yes
+							}
+						}
+						if = {
+							limit = {
+								has_completed_focus = HUN_elect_a_democratic_king
+							}
+							uncomplete_national_focus = {
+								focus = HUN_elect_a_democratic_king
+								uncomplete_children = yes
+							}
+						}
+						if = {
+							limit = {
+								has_completed_focus = HUN_elect_a_fascist_king
+							}
+							uncomplete_national_focus = {
+								focus = HUN_elect_a_fascist_king
+								uncomplete_children = yes
+							}
+						}
+						if = {
+							limit = {
+								NOT = { has_completed_focus = HUN_balanced_budget }
+							}
+							complete_national_focus = HUN_balanced_budget
+						}
+						if = {
+							limit = {
+								NOT = { has_completed_focus = HUN_elect_a_king }
+							}
+							complete_national_focus = HUN_elect_a_king
+						}
+						unlock_national_focus = HUN_invite_the_habsburg_prince
+						if = {
+							limit = {
+								NOT = { has_completed_focus = HUN_strengthen_the_monarchists }
+							}
+							complete_national_focus = HUN_strengthen_the_monarchists
+						}
+						swap_ideas = {
+							add_idea = HUN_habsburg_restored
+							remove_idea = HUN_hungarian_monarchy_2
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					tag = GER
+					is_subject = yes
+				}
+				GER = { #Stop democratic Germany from doing Anschluss and awakening their ambition of global domination
+					uncomplete_national_focus = {
+						focus = GER_rhineland
+						uncomplete_children = yes
+					}
+					uncomplete_national_focus = {
+						focus = GER_oppose_hitler
+						uncomplete_children = yes
+					}
+				}
+			}
+			if = {
+				limit = {
+					POL = { is_subject_of = GER }
+					GER = { is_ai = yes }
+				}
+				GER = {
+					every_controlled_state = {
+						limit = {
+							OR = {
+								is_core_of = POL
+								is_claimed_by = POL
+							}
+							NOT = { is_core_of = GER }
+						}
+						POL = {
+							transfer_state = PREV
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					is_baltic_state = yes
+					is_subject_of = SOV
+					SOV = { is_ai = yes }
+				}
+				SOV = { 	
+					clr_global_flag = BALTIC_more_than_one_territory
+					clear_global_event_target = BALTIC_loose_territory_country
+					clear_global_event_target = BALTIC_country_to_transfer
+					every_controlled_state = { #This transfers any baltic states SOV controls to the player if the player is a baltic country puppeted by SOV. 
+						limit = {
+							OR = {
+								is_core_of = LIT
+								is_core_of = LAT
+								is_core_of = EST
+							}
+						}
+						if = { #This is to check if territories of more than one country are being transferred
+							limit = {
+								is_core_of = LIT 
+								NOT = { is_core_of = event_target:BALTIC_country_to_transfer }
+							}
+							set_global_flag = BALTIC_more_than_one_territory
+						}
+						else_if = {
+							limit = {
+								is_core_of = LAT 
+								NOT = { is_core_of = event_target:BALTIC_country_to_transfer }
+							}
+							set_global_flag = BALTIC_more_than_one_territory
+						}
+						else_if = {
+							limit = {
+								is_core_of = EST 
+								NOT = { is_core_of = event_target:BALTIC_country_to_transfer }
+							}
+							set_global_flag = BALTIC_more_than_one_territory
+						}
+						save_global_event_target_as = BALTIC_country_to_transfer
+						random_country = { 
+							limit = {
+								is_baltic_state = yes
+								is_subject_of = SOV
+								is_ai = no
+							}
+							transfer_state = PREV
+						}
+					}
+					every_country = { #This gives the player playing a baltic country any other baltic country that is AI as long as they're both SOV puppets
+						limit = {
+							is_baltic_state = yes
+							is_subject_of = SOV
+							is_ai = yes
+						}
+						save_global_event_target_as = BALTIC_country_to_transfer
+						random_country = {
+							limit = {
+								is_baltic_state = yes
+								is_ai = yes
+								NOT = { tag = PREV } 	
+							}
+							save_global_event_target_as = BALTIC_loose_territory_country
+						}
+						random_country = {
+							limit = {
+								is_baltic_state = yes
+								is_subject_of = SOV
+								is_ai = no
+							}
+							country_event = { id = BALTIC_events.19 } #This lets the player know that they were given a baltic state. 
+							annex_country = {
+								target = PREV
+								transfer_troops = yes
+							}
+							country_event = { id = baltic.8 } #This lets the player know that they were given a baltic state. 
+						}
+					}
+				}
+			}
+		}
+		effect = { #SOV - Fourth Five Year Plan
+			if = {
+				limit = {
+					original_tag = SOV
+					has_country_flag = SOV_third_five_year_plan_locked_flag
+					NOT = { has_country_flag = SOV_fourth_five_year_plan_available_flag }
+					OR = {
+						NOT = {
+							any_country = {
+								has_country_flag = SOV_third_five_year_plan_disruptor_flag
+							}
+						}
+						any_country = {
+							has_country_flag = SOV_third_five_year_plan_disruptor_flag
+							NOT = { has_war_with = ROOT }
+						}
+					}
+				}
+				set_country_flag = SOV_fourth_five_year_plan_available_flag
+				clr_country_flag = SOV_great_patriotic_war_flag
+				complete_national_focus = SOV_restoration_and_development
+			}
+		}
+	}
+
+	#ROOT = attacking side
+	#FROM = defending side
+	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
+	on_war_relation_added = { # ---> Fires in 2nd place (1st is on_declare_war) -> This one is triggered ALWAYS 
+		effect = {
+			if = {
+				limit = {
+					original_tag = GER
+					FROM = {
+						original_tag = POL
+					}
+				}
+				SOV = { set_country_flag = achievement_GER_attacked_POL_first }
+			}
+		}
+		effect = { #SOV - Great Patriotic War and Third Five Year Plan
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							ROOT = { original_tag = SOV }
+							FROM = {
+								is_major = yes
+								NOT = { original_tag = SOV }
+							}
+						}
+						AND = {
+							FROM = { original_tag = SOV }
+							ROOT = {
+								is_major = yes
+								NOT = { original_tag = SOV }
+							}
+						}
+					}
+				}
+				if = { ## GREAT PATRIOTIC WAR
+					limit = {
+						NOT = { has_country_flag = SOV_great_patriotic_war_flag }
+					}
+					SOV = { set_country_flag = SOV_great_patriotic_war_flag }
+				}
+				if = { ## THIRD FIVE YEAR PLAN
+					limit = {
+						SOV = { NOT = { has_country_flag = SOV_third_five_year_plan_locked_flag } }
+					}
+					SOV = {
+						set_country_flag = SOV_third_five_year_plan_locked_flag
+
+						if = { #Prio Germany if possible
+							limit = {
+								has_war_with = GER
+								GER = { is_major = yes }
+							}
+							GER = { set_country_flag = SOV_third_five_year_plan_disruptor_flag }
+						}
+						else = { #If no Germany, choose a random enemy major
+							random_enemy_country = {
+								limit = {
+									is_major = yes
+								}
+								set_country_flag = SOV_third_five_year_plan_disruptor_flag
+							}
+						}
+						random_country = {
+							limit = {
+								has_country_flag = SOV_third_five_year_plan_disruptor_flag
+							}
+							#log = "The disruptor is [THIS.GetName]"
+						}
+
+						country_event = NSB_soviet_five_year_plan.01
+					}
+				}
+			}
+		}
+
+		#SOVIET - If Soviet has "Long Live to Peace" propaganda campaign active, bad shit happens if they enter a war
+		effect = {
+			if = { #SOV is attacker - bad SOV gets properly punished
+				limit = {
+					ROOT = { original_tag = SOV }
+					SOV = {
+						has_country_flag = SOV_propaganda_peace_active_flag
+						NOT = { has_country_flag = SOV_punished_for_breaking_flag }
+					}
+				}
+				country_event = { id = NSB_soviet_propaganda_capmaign_events.2 hours = 4 random_hours = 2 }
+			}
+			else_if = { #SOV is defender - SOV gets mild punishment // #TODO_Manu: This is not triggering when someone declares on SOV
+				limit = {
+					FROM = { original_tag = SOV }
+					SOV = {
+						has_country_flag = SOV_propaganda_peace_active_flag
+						NOT = { has_country_flag = SOV_punished_for_breaking_flag }
+					}
+				}
+				country_event = { id = NSB_soviet_propaganda_capmaign_events.3 hours = 4 random_hours = 2 }
+			}
+		}
+
+		#FINLAND - Winter War has started!
+		effect = {
+			if = {
+				limit = {
+					ROOT = { tag = SOV }
+					FROM = { tag = FIN }
+					NOT = { has_global_flag = SOV_winter_war_flag }
+				}
+				set_global_flag = SOV_winter_war_flag
+				FIN = { country_event = finland.10 }
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					FROM = { tag =  SOV } 
+					ROOT = { tag =  GER } 
+					NOT = {
+						SOV = {
+							has_country_flag = SOV_barbarossa_scorched_earth_delay
+						}
+					}
+				}
+				SOV = {
+					set_country_flag = { flag = SOV_barbarossa_scorched_earth_delay days = 45 value = 1 }
+				}
+			}
+		}
+
+		# Iran (or overlord) at war with SOV -> Remove resource rights
+		effect = {
+			if = { #British Puppet
+				limit = {
+					OR = {
+						AND = {
+							ROOT = { original_tag = SOV }
+							OR = {
+								FROM = { original_tag = PER }
+								PER = { is_subject_of = FROM }
+							}
+						}
+						AND = {
+							FROM = { original_tag = SOV }
+							OR = {
+								ROOT = { original_tag = PER }
+								PER = { is_subject_of = ROOT }
+							}
+						}
+					}
+					PER = {
+						any_owned_state = {
+							has_state_flag = SOV_soviet_resource_rights_iran_flag
+						}
+					}
+				}
+				PER = {
+					every_owned_state = {
+						limit = {
+							has_state_flag = SOV_soviet_resource_rights_iran_flag
+						}
+						PREV = { remove_resource_rights = PREV }
+						clr_state_flag = SOV_soviet_resource_rights_iran_flag
+					}
+				}
+			}
+			else_if = { #Soviet Puppet
+				limit = {
+					OR = {
+						AND = {
+							ROOT = { original_tag = ENG }
+							OR = {
+								FROM = { original_tag = PER }
+								PER = { is_subject_of = FROM }
+							}
+						}
+						AND = {
+							FROM = { original_tag = ENG }
+							OR = {
+								ROOT = { original_tag = PER }
+								PER = { is_subject_of = ROOT }
+							}
+						}
+					}
+					PER = {
+						any_owned_state = {
+							has_state_flag = SOV_british_resource_rights_iran_flag
+						}
+					}
+				}
+				PER = {
+					every_owned_state = {
+						limit = {
+							has_state_flag = SOV_british_resource_rights_iran_flag
+						}
+						PREV = { remove_resource_rights = PREV }
+						clr_state_flag = SOV_british_resource_rights_iran_flag
+					}
+				}
+			}
+		}
+	}
+
+	on_weekly_SOV = {
+		effect ={ #Weekly Paranoia modifiers
+			if = { #If other modifiers affect Paranoia, then use the same flag with different values, which will work as a multiplier
+				limit = {
+					has_country_flag = SOV_paranoia_system_active_flag
+					has_country_flag = SOV_paranoia_modifier_active_flag #Stalin's Paranoid leader trait
+				}
+				SOV_paranoia_modifier_increase_effect = yes
+			}
+		}
+
+		effect = { #Randomly Triggered Purges
+			if = {
+				limit = {
+					NOT = { has_country_flag = SOV_civil_war_triggered_flag } # check if Civil war has been triggered first TODO_THOMAS: remove if not using paranoia
+					has_country_flag = SOV_paranoia_system_active_flag
+				}
+				set_temp_variable = { SOV_temp_paranoia_days = SOV_medium_paranoia_days }
+				add_to_temp_variable = { SOV_temp_paranoia_days = SOV_high_paranoia_days }
+				#log = "Total Paranoia days = [?SOV_temp_paranoia_days]"
+
+				if = {
+					limit = {
+						check_variable = { SOV_temp_paranoia_days > 3 }
+						NOT = { has_country_flag = SOV_paranoia_conducting_inspection_flag } #Don't trigger a random purge if one is already going to be triggered from decision
+						SOV_paranoia_is_finishing_purge_focus = no #Don't trigger a random purge if one is already going to be triggered from focus
+						NOT = { has_country_flag = SOV_paranoia_random_purge_cooldown_from_focus_flag } #Wait 15 days after a purge has been triggered from focus
+						NOT = { has_country_flag = SOV_paranoia_random_purge_cooldown_from_decision_flag } #Wait 15 days after a purge has been triggered from decision
+					}
+					random_list = {
+						100 = { # Nothing Happens
+							modifier = {
+								factor = 5
+								check_variable = { SOV_paranoia_weekly_bucket < 400 }
+							}
+							modifier = {
+								factor = 0.75
+								check_variable = { SOV_paranoia_weekly_bucket > 500 }
+							}
+							#log = "Lucky you: No random purge this week"
+						}
+
+						100 = { # Regular Purge
+							modifier = {
+								factor = 0
+								check_variable = { SOV_medium_paranoia_days = 0 }
+							}
+							modifier = {
+								factor = 1.5
+								check_variable = { SOV_paranoia_weekly_bucket > 400 }
+							}
+							modifier = {
+								factor = 2
+								check_variable = { SOV_medium_paranoia_days > SOV_high_paranoia_days }
+							}
+							SOV_manage_a_regular_purge_effect = yes
+						}
+
+						100 = { #Great Purge
+							modifier = {
+								factor = 0
+								check_variable = { SOV_high_paranoia_days = 0 }
+							}
+							modifier = {
+								factor = 0.5
+								check_variable = { SOV_high_paranoia_days < 3 }
+							}
+							modifier = {
+								factor = 2
+								check_variable = { SOV_high_paranoia_days > SOV_medium_paranoia_days }
+							}
+							modifier = {
+								factor = 1.5
+								check_variable = { SOV_paranoia_weekly_bucket > 400 }
+							}
+
+							SOV_manage_a_great_purge_effect = yes
+						}
+					}
+				}
+
+				#CLEAN STUFF FOR NEXT WEEK
+				set_variable = { SOV_medium_paranoia_days = 0 }
+				set_variable = { SOV_high_paranoia_days = 0 }
+				set_variable = { SOV_paranoia_weekly_bucket = 0 }
+			}
+		}
+	}
+
+	on_daily_SOV = {
+		effect = {
+			if = {
+				limit = {
+					has_country_flag = { flag = SOV_last_purge_flag days > 15 }
+				}
+				add_to_variable = { SOV_paranoia_weekly_bucket = SOV_paranoia }
+				#log = "Added [?SOV_paranoia] Paranoia. Weekly BUCKET = [?SOV_paranoia_weekly_bucket]" #Debug 
+
+				if = { #MEDIUM PARANOIA LEVEL
+					limit = {
+						SOV_paranoia_is_medium_level = yes
+					}
+					add_to_variable = { SOV_medium_paranoia_days = 1 } #Used to randomize having a Great or a Regular purge (so that every day kinda counts)
+				}
+				else_if = { #HIGH PARANOIA LEVEL
+					limit = {
+						SOV_paranoia_is_high_level = yes
+					}
+					add_to_variable = { SOV_high_paranoia_days = 1 } #Used to randomize having a Great or a Regular purge (so that every day kinda counts)
+				}
+				#log = "Medium Paranoia days = [?SOV_medium_paranoia_days] // High Paranoia days = [?SOV_high_paranoia_days]" #Debug
+			}
+			else = {
+				#log = "NOT A PURGE WEEK" #Debug
+			}
+
+			### SOVIET CIVIL WAR TRIGGER
+			IF = {
+				limit = { 
+					SOV_is_opposition = yes # Don't test for Stalin
+					SOV_soviet_civil_war_not_started = yes # Only test before the war has started 
+					check_variable = { SOV_paranoia > 89}
+				}
+				random_list = {
+					80 = { } # No effect
+					20 = { 
+						set_country_flag = SOV_civil_war_triggered_flag 
+						country_event = {
+							id = NSB_soviet_civil_war_common.003
+							hours = 0
+						}
+					}
+				}
+			}
+		}
+	}
+
+	on_monthly_SOV = { 
+		effect = { 
+			IF = {
+				limit = { has_global_flag = SOV_soviet_civil_war }
+				# nationalist uprisings 
+				IF = { 
+					limit = { 
+						check_variable = { SOV.SOV_civil_war_months > 2 }
+						SOV = { SOV_is_exiles = yes } # currently exiles only
+					}
+					SOV = {
+						country_event = {
+							id = NSB_soviet_nationalist.000
+							days = 2
+							random_days = 4
+						}
+					}
+				}
+				add_to_variable = { SOV.SOV_civil_war_months = 1 } # Civil war counter
+			}
+			# Check for leader desertions
+			IF = {
+				limit = {
+					ROOT = { has_global_flag = SOV_soviet_civil_war }
+
+					SOS = {
+						any_unit_leader = {
+							has_trait = trait_SOV_cowed_by_stalin_army
+							NOT = { has_trait = trait_SOV_stalinist }
+						}
+					}
+				}
+				SOS = {
+					random_unit_leader = {
+						limit = {
+							has_trait = trait_SOV_cowed_by_stalin_army
+							NOT = { has_trait = trait_SOV_stalinist }
+						}
+						set_variable = { SOS.SOV_general_to_desert = THIS }
+					}
+					
+				}
+				random_list = {
+					25 = {
+				        # defections
+				        country_event = {
+				        	id = NSB_soviet_communist_civil_war.010
+				        	hours = 1
+				        }
+				    }
+					75 = {
+				        # Nothing happens
+				    }
+				}
+			}
+		} 
+	}
+	
+	#FROM is faction leader on join faction requests. THIS DOES NOT FIRE ON ADD_TO_FACTION EFFECT! USE ON_OFFER_JOIN_FACTION!
+	on_join_faction = {
+		effect = {
+			#Add to Baltic research
+			if = {
+				limit = {
+					any_other_country = {
+						is_in_faction_with = ROOT
+						is_in_tech_sharing_group = baltic_allied_research
+					}
+				}
+				add_to_tech_sharing_group = baltic_allied_research
+			}
+		}
+
+		#SINKIANG counter
+		effect = {
+			if = {
+				limit = {
+					tag = SIK
+					FROM = { original_tag = SOV }
+				}
+				FROM = { set_country_flag = SOV_sinkiang_joined_comintern_counter_flag }
+			}
+		}
+	}
+
+	#FROM is country getting invited.
+	on_offer_join_faction = {
+		effect = {
+			if = {
+				limit = {
+					FROM = { tag = SIK }
+					original_tag = SOV
+				}
+				SOV = { set_country_flag = SOV_sinkiang_joined_comintern_counter_flag }
+			}
+		}
+	}
+
+	on_release_as_puppet = { 
+		effect = { 
+			if = {
+				limit = {
+					FROM = { 
+						tag = SOV 
+						has_completed_focus = SOV_autonomous_soviet_republics
+					}
+				}
+				ROOT = {
+					add_ideas = {
+						SOV_system_decentralization_idea
+						SOV_the_local_soviets_idea
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM = { 
+						tag = SOV 
+						has_completed_focus = SOV_international_union_of_soviet_republics
+					}
+				}
+				ROOT = {
+					add_ideas = {
+						SOV_puppet_international_of_soviet_republics_idea
+					}
+				}
+			}
+		}
+	}
+
+	# called when a country send volunteers to another
+	# ROOT is sender, FROM is receiver
+	on_send_volunteers = {
+		#Manage Soviet volunteers in China
+		effect = {
+			if = { #Russia has sent volunteers to a Chinese faction
+				limit = {
+					original_tag = SOV
+					FROM = {is_literally_china = yes }
+				}
+				FROM = { set_country_flag = SOV_russian_volunteers_in_china_flag }
+			}	
+		}
+	}
+
+	on_startup = {
+		effect = {
+			#Set Iranian initial states (for Anglo-Soviet invasion of Iran)
+			PER = {
+				every_owned_state = {
+					add_to_array = { SOV_iranian_initial_states = PREV }
+				}
+			}
+		}
+	}
+
+	# ROOT is capitulated country, FROM is winner
+	on_capitulation = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = GER
+					FROM = { tag = SOV }
+					SOV = {
+						NOT = { has_global_flag = GER_lost_core_state }
+						has_global_flag = achievement_france_surrender
+					}
+				}
+				SOV = { set_country_flag = achievement_race_for_germany }
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					tag = GER
+					FROM = {
+						original_tag = SOV
+					}
+					SOV = {
+						casualties_inflicted_by = {
+							opponent = GER
+							thousands < 1000
+						}
+					}
+				}
+				SOV = {
+					set_country_flag = achievement_no_statistics
+				}
+			}
+		}
+		#Soviet / Anglo-Soviet Invasion of Iran
+		effect = {
+			if = {
+				limit = {
+					original_tag = PER
+					FROM = { original_tag = SOV }
+				}
+				if = { #Soviets alone (or joint but ENG died)
+					limit = {
+						OR = {
+							has_global_flag = SOV_soviet_invasion_of_iran_flag
+							AND = {
+								has_global_flag = SOV_agreed_anglo_soviet_invasion_of_iran_flag
+								NOT = { country_exists = ENG }
+							}
+						}
+					}
+					FROM = {
+						white_peace = PER
+						puppet = ROOT #SOV puppet Iran
+					}
+
+					if = {
+						limit = {
+							has_global_flag = SOV_soviet_invasion_of_iran_flag
+						}
+						clr_global_flag = SOV_soviet_invasion_of_iran_flag
+					}
+					else = {
+						clr_global_flag = SOV_agreed_anglo_soviet_invasion_of_iran_flag
+					}
+					FROM = { country_event = { id = NSB_soviet_foreign_politics_events.156 days = 1 } } #Hidden Effect to transfer states and give resource rights
+				}
+				else_if = {
+					limit = {
+						has_global_flag = SOV_agreed_anglo_soviet_invasion_of_iran_flag
+					}
+					FROM = { white_peace = PER }
+					ENG = {
+						white_peace = PER
+						puppet = ROOT #ENG gets to puppet Iran
+					}
+
+					clr_global_flag = SOV_agreed_anglo_soviet_invasion_of_iran_flag
+
+					FROM = { country_event = { id = NSB_soviet_foreign_politics_events.157 days = 1 } } #Hidden Effect to transfer states and give resource rights and military access
+				}
+			}
+		}
+
+		#Spanish general from SPD/SPC exile in SOV -> NSB
+		effect = {
+			if = {
+				limit = {
+					SOV = { has_country_flag = SOV_spanish_refugee_generals_welcome_flag }
+					has_dlc = "La Resistance"
+					OR = {
+						tag = SPD
+						tag = SPC
+					}
+					OR = {
+						SPR_scw_in_progress = yes #In case someone else caps the Spanish faction
+						FROM = { original_tag = SPR }
+					}
+				}
+				SOV_manage_spanish_generals_exiled_in_ussr_effect = yes
+			}
+		}
+
+		#If Soviet capitulates, remove dynamic modifiers from propagandas and stuff
+		effect = {
+			if = {
+				limit = {
+					original_tag = SOV
+				}
+				if = { #SOV_invaders_must_die
+					limit = {
+						any_state = {
+							has_dynamic_modifier = { modifier = SOV_invaders_must_die }
+						}
+					}
+					every_state = {
+						limit = {
+							has_dynamic_modifier = { modifier = SOV_invaders_must_die }
+						}
+						remove_dynamic_modifier = { modifier = SOV_invaders_must_die }
+					}
+				}
+				if = { #SOV_defend_moscow
+					limit = {
+						any_state = {
+							has_dynamic_modifier = { modifier = SOV_defend_moscow }
+						}
+					}
+					every_state = {
+						limit = {
+							has_dynamic_modifier = { modifier = SOV_defend_moscow }
+						}
+						remove_dynamic_modifier = { modifier = SOV_defend_moscow }
+					}
+				}
+				if = { #SOV_increased_metals_production
+					limit = {
+						any_state = {
+							has_dynamic_modifier = { modifier = SOV_increased_metals_production }
+						}
+					}
+					every_state = {
+						limit = {
+							has_dynamic_modifier = { modifier = SOV_increased_metals_production }
+						}
+						remove_dynamic_modifier = { modifier = SOV_increased_metals_production }
+					}
+				}
+				if = { #SOV_factory_worker_militias_raised
+					limit = {
+						any_state = {
+							has_dynamic_modifier = { modifier = SOV_factory_worker_militias_raised }
+						}
+					}
+					every_state = {
+						limit = {
+							has_dynamic_modifier = { modifier = SOV_factory_worker_militias_raised }
+						}
+						remove_dynamic_modifier = { modifier = SOV_factory_worker_militias_raised }
+					}
+				}
+				if = { #SOV_civilian_labor_in_defense_mod
+					limit = {
+						any_state = {
+							has_dynamic_modifier = { modifier = SOV_civilian_labor_in_defense_mod }
+						}
+					}
+					every_state = {
+						limit = {
+							has_dynamic_modifier = { modifier = SOV_civilian_labor_in_defense_mod }
+						}
+						remove_dynamic_modifier = { modifier = SOV_civilian_labor_in_defense_mod }
+					}
+				}
+			}
+		}
+
+		effect = {
+			if = {
+				limit = {
+					tag = SOV
+					FROM = { 
+						tag = GER 
+					}
+					FROM = {
+						has_country_flag = achievement_stalingrad_not_taken
+					}
+				}
+				FROM = { set_country_flag = achievement_not_much_fun_in_stalingrad }
+			}
+		}
+	}
+	#ROOT = attacking side
+	#FROM = defending side
+	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
+	on_war_relation_added = {
+		effect = {
+			if = {
+				limit = {
+					tag = GER
+					FROM = { tag = SOV }
+				}
+			}
+			GER = {
+				set_country_flag = achievement_stalingrad_not_taken #will be removed in on_state_control_change if Germany takes Stalingrad
+			}
+		}
+	}
+
+	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
+	on_state_control_changed = {
+		effect = {
+			if = {
+				limit = {
+					FROM.FROM = {
+						state = 217
+					}
+					tag = GER
+					has_country_flag = achievement_stalingrad_not_taken
+					divisions_in_state = { state = 217 size > 1 } #only happens if Germany has at least one division in the state, because state control changes before on_capitulation fires
+				}
+				clr_country_flag = achievement_stalingrad_not_taken
+			}
+		}
+	}
+
+	
+}
+

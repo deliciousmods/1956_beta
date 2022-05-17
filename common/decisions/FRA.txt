@@ -9,7 +9,7 @@ political_actions = {
 		days_remove = 30
 
 		allowed = {
-			tag = FRA
+			original_tag = FRA
 		}
 
 		available = {
@@ -18,7 +18,20 @@ political_actions = {
 				controls_state = 4
 				4 = {
 					OWNER = {
-						is_puppet_of = FRA
+						OR = {
+							is_puppet_of = FRA
+							is_in_faction_with = FRA
+							AND = {
+								tag = GER
+								has_global_flag = FRA_GER_sphere_of_influence_agreement
+								NOT = {
+									has_war_with = GER
+								}
+								has_non_aggression_pact_with = GER
+							}
+							
+						}
+						
 					}
 				}
 			}
@@ -35,10 +48,169 @@ political_actions = {
 		}
 
 		remove_effect = {
+			if = {
+				limit = {
+					has_global_flag = FRA_GER_sphere_of_influence_agreement_resistance
+					NOT = {
+						has_war_with = GER
+					}
+					has_non_aggression_pact_with = GER
+					GER = {
+						owns_state = 4
+					}					
+				}
+				add_opinion_modifier = { target = GER modifier = huge_increase }
+			}
 			add_stability = 0.03
 			set_global_flag = napoleon_ii_repatriated
 		}
+		ai_will_do = {
+			factor = 200
+		}		
+	}
+	FRA_assimilate_wallonia = {
+
+		icon = generic_nationalism
+
+		cost = 25
+		fire_only_once = yes
+
+		days_remove = 30
+
+		allowed = {
+			original_tag = FRA
+		}
+
+		available = {
+			34 = {
+				is_owned_by = ROOT
+				is_fully_controlled_by = ROOT
+				compliance > 50
+			}
+		}
+
+		visible = {
+			has_government = neutrality
+			OR = {
+				has_completed_focus = FRA_our_natural_borders
+				has_completed_focus = FRA_split_belgium
+			}
+		}
+
+		remove_effect = {
+			34 = {
+				add_core_of = ROOT
+			}
+		}
+		ai_will_do = {
+			factor = 10
+		}		
+	}	
+	FRA_divide_catalogne_into_departments = {
+
+		icon = generic_nationalism
+
+		cost = 25
+		fire_only_once = yes
+
+		days_remove = 30
+
+		allowed = {
+			original_tag = FRA
+		}
+
+		available = {
+			165 = {
+				is_owned_by = ROOT
+				is_controlled_by = ROOT
+				compliance > 15
+			}
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = FRA_secure_catalonia	
+		}
+
+		ai_will_do = {
+			factor = 4
+		}
+
+		remove_effect = {
+			165 = {
+				add_compliance = 15
+				remove_dynamic_modifier = { modifier = autonomous_state }
+			}
+		}
+	}		
+	FRA_reestablish_the_government_in_paris = {
+
+		icon = generic_nationalism
+
+		fire_only_once = yes
+
+		days_remove = 30
+
+		allowed = {
+			original_tag = FRA
+		}
+
+		available = {
+			controls_state = 16
+			16 = {
+				is_core_of = ROOT
+			}
+		}
+
+		visible = {
+			NOT = {
+				16 = {
+					is_capital = yes
+				}
+			}
+		}
+
+		remove_effect = {
+			add_stability = 0.03
+			set_capital = { state = 16 }
+		}
+		ai_will_do = {
+			factor = 2
+		}		
+	}			
+	FRA_the_popular_front = {
+
+		icon = eng_trade_unions_demand
+
+		priority = 50
+
+		is_good = no
+		days_mission_timeout = 939
+
+		allowed = {
+			original_tag = FRA
+		}
+
+		visible = {
+			has_government = democratic
+		}
+		activation = {                          
+			has_completed_focus = FRA_status_quo
+		}
+		available = {
+			has_government = democratic
+			has_completed_focus = FRA_popular_front_united
+		}
+
+		cancel_if_not_visible = yes
+
 		complete_effect = {
+			add_political_power = 20
+			add_stability = 0.03 #just a little reward for you
+		}
+
+		timeout_effect = {
+			country_event = france.107
 		}
 	}
 }
@@ -67,13 +239,12 @@ foreign_influence = {
 			has_completed_focus = FRA_brumaire_movement
 			has_government = neutrality
 			USA = {
-				is_puppet_of = FRA
+				is_subject_of = FRA
 				has_government = neutrality
 			}
 		}
 
 		complete_effect = {
-
 			USA = {
 				create_country_leader = {
 					name = "Jerome Napoleon Bonaparte"
@@ -94,7 +265,7 @@ FRA_vichy_france = {
 
 	FRA_scuttle_the_fleet = {
 
-		icon = generic_ignite_civil_war
+		icon = generic_naval
 
 		available = {
 			OR = {
@@ -242,6 +413,7 @@ FRA_vichy_france = {
 					state = 459
 					state = 460
 					state = 513
+					state = 860
 				}
 				is_core_of = FRA
 				is_controlled_by = FRA #Free France has taken back some territory on the mainland
@@ -329,7 +501,7 @@ category_test_decisions = {
 					}
 					add_core_of = PREV
 				}
-				set_capital = 26
+				set_capital = { state = 26 }
 				set_politics = {
 					ruling_party = fascism
 					elections_allowed = no
@@ -340,7 +512,7 @@ category_test_decisions = {
 					fascism = 80
 					communism = 0
 				}
-				set_cosmetic_tag = FRA_VICHY
+				set_cosmetic_tag = VICHY_FRANCE
 				create_country_leader = {
 					name = "Philippe Pétain"
 					desc = "POLITICS_PHILIPPE_PETAIN_DESC"
@@ -348,7 +520,7 @@ category_test_decisions = {
 					expire = "1965.1.1"
 					ideology = fascism_ideology
 					traits = {
-
+						popular_figurehead2
 					}
 				}
 				add_ideas = FRA_occupation_costs_4
@@ -448,9 +620,6 @@ FRA_weapons_purchases_category = {
 	}
 	FRA_order_tanks_in_USA = {
 		icon = generic_air
-		available = {
-
-		}
 		visible = {
 			USA_can_sell_weapons_trigger = yes
 		}
@@ -479,18 +648,21 @@ FRA_weapons_purchases_category = {
 		remove_effect = {
 			if = {
 				limit = {
-					USA = {
-						has_tech = basic_light_tank
-						NOT = {
-							OR = {
-								has_tech = basic_medium_tank
-								has_tech = improved_medium_tank #needed because basic can be bypassed
-							}
+					USA = { 
+						OR = {
+							has_tech = basic_light_tank 
+							has_tech = basic_light_tank_chassis
+						}
+						NOT = { 
+							has_tech = basic_medium_tank 
+							has_tech = improved_medium_tank #needed because basic can be bypassed
+							has_tech = basic_medium_tank_chassis
+							has_tech = improved_medium_tank_chassis
 						}
 					}
 				}
 				add_equipment_to_stockpile = {
-					type = light_tank_equipment
+					type = light_tank_chassis
 					amount = 50
 				}
 			}
@@ -500,11 +672,13 @@ FRA_weapons_purchases_category = {
 						OR = {
 							has_tech = basic_medium_tank
 							has_tech = improved_medium_tank #needed because basic can be bypassed
+							has_tech = basic_medium_tank_chassis
+							has_tech = improved_medium_tank_chassis
 						}
 					}
 				}
 				add_equipment_to_stockpile = {
-					type = medium_tank_equipment
+					type = medium_tank_chassis
 					amount = 50
 				}
 			}
@@ -598,6 +772,7 @@ FRA_weapons_purchases_category = {
 
 FRA_spanish_intervention_category = {
 	FRA_invite_FROM_to_non_intervention = {
+		icon = hol_exchange_intelligence_data
 		available = {
 			has_country_flag = FRA_non_intervention
 		}
@@ -644,7 +819,7 @@ FRA_spanish_intervention_category = {
 
 	FRA_allow_non_military_aid = {
 		available = {  }
-
+		icon = hol_draw_up_staff_plans
 		visible = { not = { has_country_flag = FRA_non_military_aid_allowed } }
 
 		cancel_trigger = {
@@ -657,7 +832,7 @@ FRA_spanish_intervention_category = {
 		complete_effect = {
 			set_country_flag = FRA_non_military_aid_allowed
 			clr_country_flag = FRA_non_intervention
-			unlock_decision_tooltip = { decision = FRA_send_non_military_aid_to_FROM show_effect_tooltip = yes }
+			custom_effect_tooltip = FRA_non_military_aid_tt
 			unlock_decision_tooltip = FRA_ban_non_military_aid
 		}
 
@@ -701,7 +876,7 @@ FRA_spanish_intervention_category = {
 				support_equipment > 99
 			}
 		}
-
+		icon = hol_draw_up_staff_plans
 		visible = { has_country_flag = FRA_non_military_aid_allowed }
 		target_root_trigger = { has_country_flag = FRA_non_military_aid_allowed }
 
@@ -733,7 +908,7 @@ FRA_spanish_intervention_category = {
 	}
 	FRA_allow_arms_purchases = {
 		available = {  }
-
+		icon = generic_industry
 		visible = { not = { has_country_flag = FRA_arms_purchases_allowed } }
 
 		cancel_trigger = {
@@ -788,7 +963,7 @@ FRA_spanish_intervention_category = {
 
 	FRA_allow_sending_weapons = {
 		available = {  }
-
+		icon = generic_prepare_civil_war
 		visible = { not = { has_country_flag = FRA_sending_weapons_allowed } }
 
 		cancel_trigger = {
@@ -839,6 +1014,7 @@ FRA_spanish_intervention_category = {
 		}
 	}
 	FRA_allow_volunteer_work = {
+		icon = generic_shovels
 		available = {  }
 
 		visible = { not = { has_country_flag = FRA_volunteer_work_allowed } }
@@ -854,7 +1030,7 @@ FRA_spanish_intervention_category = {
 			set_country_flag = FRA_volunteer_work_allowed
 			clr_country_flag = FRA_non_intervention
 			unlock_decision_tooltip = FRA_ban_volunteer_work
-			every_country = {
+			every_other_country = {
 				limit = {
 					OR = {
 						tag = SPA
@@ -904,7 +1080,7 @@ FRA_spanish_intervention_category = {
 	}
 	FRA_allow_covert_intervention = {
 		available = {  }
-
+		icon = generic_ignite_civil_war
 		visible = { not = { has_country_flag = FRA_covert_intervention_allowed } }
 
 		cancel_trigger = {
@@ -971,7 +1147,7 @@ FRA_spanish_intervention_category = {
 
 	FRA_intervene_on_side_of_FROM = {
 		available = { has_war_support > 0.25 }
-
+		icon = generic_ignite_civil_war
 		visible = { has_war = no }
 
 		targets = { SPD SPA SPC SPB SPR }
@@ -1478,6 +1654,7 @@ FRA_intervention_in_overseas_territories = {
 								state = 462
 								state = 459
 								state = 513
+								state = 860
 								state = 460
 								state = 458
 								state = 665
@@ -1772,6 +1949,11 @@ FRA_intervention_in_overseas_territories = {
 								state = 670
 								state = 286
 								state = 741
+								state = 851
+								state = 852
+								state = 853
+								state = 854
+								state = 855
 							}
 						}
 						add_compliance = 5
@@ -1819,6 +2001,11 @@ FRA_intervention_in_overseas_territories = {
 					state = 670
 					state = 286
 					state = 741
+					state = 851
+					state = 852
+					state = 853
+					state = 854
+					state = 855
 				}
 				any_neighbor_state = {
 					CONTROLLER = {
@@ -1841,6 +2028,11 @@ FRA_intervention_in_overseas_territories = {
 						state = 670
 						state = 286
 						state = 741
+						state = 851
+						state = 852
+						state = 853
+						state = 854
+						state = 855
 					}
 					not = { is_controlled_by = ROOT }
 					any_neighbor_state = {
@@ -1958,231 +2150,231 @@ FRA_intervention_in_overseas_territories = {
 		}
 		cost = 25
 	}
-	FRA_promise_independence_to_central_africa = {
-		available = {
-			NOT = {
-				FRA_controls_central_africa = yes
-			}
-		}
-
-		visible = { has_completed_focus = FRA_intervention_in_central_africa }
-
-
-
-		complete_effect = {
-			set_country_flag = FRA_central_africa_promised_independence
-			custom_effect_tooltip = FRA_promise_independence_tt
-			random_list = {
-				25 = {
-					VIC = { country_event = LaR_france_vichy_notification_events.3 }
-					FRA_transfer_central_africa_effect = yes
-					every_owned_state = {
-						limit = {
-							is_controlled_by = ROOT
-							OR = {
-								state = 772
-								state = 539
-								state = 773
-								state = 660
-								state = 774
-							}
-						}
-						add_compliance = 5
-					}
-				}
-				75 = {}
-			}
-		}
-		fire_only_once = yes
-		cost = 25
-		ai_will_do = {
-			factor = 3
-		}
-
-	}
-	FRA_prepare_coup_in_central_africa = {
-		available = {
-			NOT = {
-				FRA_controls_central_africa = yes
-			}
-			has_intelligence_agency = yes
-		}
-
-		visible = {
-			has_completed_focus = FRA_intervention_in_central_africa
-		}
-
-		complete_effect = {
-			custom_effect_tooltip = FRA_prepare_coup_tt
-			set_country_flag = FRA_coup_in_central_africa_flag
-		}
-
-		fire_only_once = yes
-		cost = 25
-		ai_will_do = {
-			factor = 0
-		}
-	}
-	FRA_invasion_in_central_africa = {
-		available = {
-			NOT = {
-				FRA_controls_central_africa = yes
-			}
-			any_state = {
-				OR = {
-					state = 772
-					state = 539
-					state = 773
-					state = 660
-					state = 774
-				}
-				any_neighbor_state = {
-					CONTROLLER = {
-						OR = {
-							tag = ROOT
-							is_in_faction_with = ROOT
-						}
-					}
-				}
-			}
-		}
-
-		visible = { has_completed_focus = FRA_intervention_in_central_africa }
-
-		complete_effect = {
-			random_state = { #find a neighbouring state of Syria that is controlled by an ally or ourselves
-				limit = {
-					OR = {
-						state = 772
-						state = 539
-						state = 773
-						state = 660
-						state = 774
-					}
-					not = { is_controlled_by = ROOT }
-					any_neighbor_state = {
-						CONTROLLER = {
-							OR = {
-								tag = ROOT
-								is_in_faction_with = ROOT
-							}
-						}
-					}
-				}
-				save_event_target_as = FRA_defender_state
-				random_neighbor_state = {
-					limit = {
-						CONTROLLER = {
-							OR = {
-								tag = ROOT
-								is_in_faction_with = ROOT
-							}
-						}
-					}
-					save_event_target_as = FRA_attacker_state
-				}
-			}
-			event_target:FRA_attacker_state = {
-				CONTROLLER = {
-					division_template = {
-						name = "Central Africa Intervention Force"
-						division_names_group = FRA_INF_01
-						is_locked = yes
-						regiments = {
-							infantry = { x = 0 y = 0 }
-							infantry = { x = 0 y = 1 }
-							infantry = { x = 0 y = 2 }
-
-							infantry = { x = 1 y = 0 }
-							infantry = { x = 1 y = 1 }
-							infantry = { x = 1 y = 2 }
-						}
-						support = {
-							engineer = { x = 0 y = 0 }
-							artillery = { x = 0 y = 1 }
-							recon = { x = 0 y = 2 }
-						}
-					}
-					event_target:FRA_attacker_state = { #set up attacker unit(s)
-						create_unit = {
-							division = "name = \"Central Africa Force 1\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
-							owner = PREV
-						}
-						create_unit = {
-							division = "name = \"Central Africa Force 2\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
-							owner = PREV
-						}
-						create_unit = {
-							division = "name = \"Central Africa Force 3\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
-							owner = PREV
-						}
-						create_unit = {
-							division = "name = \"Central Africa Force 4\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
-							owner = PREV
-						}
-						create_unit = {
-							division = "name = \"Central Africa Force 5\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
-							owner = PREV
-						}
-					}
-				}
-			}
-			event_target:FRA_defender_state = { #set up defender unit(s)
-				CONTROLLER = {
-					division_template = {
-						name = "Central Africa Defense Force"
-						division_names_group = FRA_INF_01
-						is_locked = yes
-						regiments = {
-							infantry = { x = 0 y = 0 }
-							infantry = { x = 0 y = 1 }
-							infantry = { x = 0 y = 2 }
-
-							infantry = { x = 1 y = 0 }
-							infantry = { x = 1 y = 1 }
-							infantry = { x = 1 y = 2 }
-						}
-						support = {
-							engineer = { x = 0 y = 0 }
-							artillery = {x = 0 y = 1 }
-						}
-					}
-					event_target:FRA_defender_state = { #set up defenders
-						create_unit = {
-							division = "name = \"Central Africa Defense Force 1\" division_template = \"Central Africa Defense Force\" start_experience_factor = 0.5"
-							owner = PREV
-						}
-					}
-				}
-			}
-			event_target:FRA_attacker_state = {
-				CONTROLLER = {
-					start_border_war = {
-						change_state_after_war = no
-						attacker = {
-							state = event_target:FRA_attacker_state
-							num_provinces = 4
-							on_win = FRA_central_africa_intervention.1
-							on_lose = FRA_central_africa_intervention.2
-							on_cancel = FRA_central_africa_intervention.3
-						}
-						defender = {
-							state = event_target:FRA_defender_state
-							num_provinces = 4
-							on_win = FRA_central_africa_intervention.2
-							on_lose = FRA_central_africa_intervention.1
-							on_cancel = FRA_central_africa_intervention.3
-						}
-					}
-				}
-			}
-		}
-		fire_only_once = yes
-		cost = 25
-		ai_will_do = {
-			factor = 0
-		}
-	}
+#	FRA_promise_independence_to_central_africa = {
+#		available = {
+#			NOT = {
+#				FRA_controls_central_africa = yes
+#			}
+#		}
+#
+#		visible = { has_completed_focus = FRA_intervention_in_central_africa }
+#
+#
+#
+#		complete_effect = {
+#			set_country_flag = FRA_central_africa_promised_independence
+#			custom_effect_tooltip = FRA_promise_independence_tt
+#			random_list = {
+#				25 = {
+#					VIC = { country_event = LaR_france_vichy_notification_events.3 }
+#					FRA_transfer_central_africa_effect = yes
+#					every_owned_state = {
+#						limit = {
+#							is_controlled_by = ROOT
+#							OR = {
+#								state = 772
+#								state = 539
+#								state = 773
+#								state = 660
+#								state = 774
+#							}
+#						}
+#						add_compliance = 5
+#					}
+#				}
+#				75 = {}
+#			}
+#		}
+#		fire_only_once = yes
+#		cost = 25
+#		ai_will_do = {
+#			factor = 3
+#		}
+#
+#	}
+#	FRA_prepare_coup_in_central_africa = {
+#		available = {
+#			NOT = {
+#				FRA_controls_central_africa = yes
+#			}
+#			has_intelligence_agency = yes
+#		}
+#
+#		visible = {
+#			has_completed_focus = FRA_intervention_in_central_africa
+#		}
+#
+#		complete_effect = {
+#			custom_effect_tooltip = FRA_prepare_coup_tt
+#			set_country_flag = FRA_coup_in_central_africa_flag
+#		}
+#
+#		fire_only_once = yes
+#		cost = 25
+#		ai_will_do = {
+#			factor = 0
+#		}
+#	}
+#	FRA_invasion_in_central_africa = {
+#		available = {
+#			NOT = {
+#				FRA_controls_central_africa = yes
+#			}
+#			any_state = {
+#				OR = {
+#					state = 772
+#					state = 539
+#					state = 773
+#					state = 660
+#					state = 774
+#				}
+#				any_neighbor_state = {
+#					CONTROLLER = {
+#						OR = {
+#							tag = ROOT
+#							is_in_faction_with = ROOT
+#						}
+#					}
+#				}
+#			}
+#		}
+#
+#		visible = { has_completed_focus = FRA_intervention_in_central_africa }
+#
+#		complete_effect = {
+#			random_state = { #find a neighbouring state of Syria that is controlled by an ally or ourselves
+#				limit = {
+#					OR = {
+#						state = 772
+#						state = 539
+#						state = 773
+#						state = 660
+#						state = 774
+#					}
+#					not = { is_controlled_by = ROOT }
+#					any_neighbor_state = {
+#						CONTROLLER = {
+#							OR = {
+#								tag = ROOT
+#								is_in_faction_with = ROOT
+#							}
+#						}
+#					}
+#				}
+#				save_event_target_as = FRA_defender_state
+#				random_neighbor_state = {
+#					limit = {
+#						CONTROLLER = {
+#							OR = {
+#								tag = ROOT
+#								is_in_faction_with = ROOT
+#							}
+#						}
+#					}
+#					save_event_target_as = FRA_attacker_state
+#				}
+#			}
+#			event_target:FRA_attacker_state = {
+#				CONTROLLER = {
+#					division_template = {
+#						name = "Central Africa Intervention Force"
+#						division_names_group = FRA_INF_01
+#						is_locked = yes
+#						regiments = {
+#							infantry = { x = 0 y = 0 }
+#							infantry = { x = 0 y = 1 }
+#							infantry = { x = 0 y = 2 }
+#
+#							infantry = { x = 1 y = 0 }
+#							infantry = { x = 1 y = 1 }
+#							infantry = { x = 1 y = 2 }
+#						}
+#						support = {
+#							engineer = { x = 0 y = 0 }
+#							artillery = { x = 0 y = 1 }
+#							recon = { x = 0 y = 2 }
+#						}
+#					}
+#					event_target:FRA_attacker_state = { #set up attacker unit(s)
+#						create_unit = {
+#							division = "name = \"Central Africa Force 1\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
+#							owner = PREV
+#						}
+#						create_unit = {
+#							division = "name = \"Central Africa Force 2\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
+#							owner = PREV
+#						}
+#						create_unit = {
+#							division = "name = \"Central Africa Force 3\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
+#							owner = PREV
+#						}
+#						create_unit = {
+#							division = "name = \"Central Africa Force 4\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
+#							owner = PREV
+#						}
+#						create_unit = {
+#							division = "name = \"Central Africa Force 5\" division_template = \"Central Africa Intervention Force\" start_experience_factor = 0.5"
+#							owner = PREV
+#						}
+#					}
+#				}
+#			}
+#			event_target:FRA_defender_state = { #set up defender unit(s)
+#				CONTROLLER = {
+#					division_template = {
+#						name = "Central Africa Defense Force"
+#						division_names_group = FRA_INF_01
+#						is_locked = yes
+#						regiments = {
+#							infantry = { x = 0 y = 0 }
+#							infantry = { x = 0 y = 1 }
+#							infantry = { x = 0 y = 2 }
+#
+#							infantry = { x = 1 y = 0 }
+#							infantry = { x = 1 y = 1 }
+#							infantry = { x = 1 y = 2 }
+#						}
+#						support = {
+#							engineer = { x = 0 y = 0 }
+#							artillery = {x = 0 y = 1 }
+#						}
+#					}
+#					event_target:FRA_defender_state = { #set up defenders
+#						create_unit = {
+#							division = "name = \"Central Africa Defense Force 1\" division_template = \"Central Africa Defense Force\" start_experience_factor = 0.5"
+#							owner = PREV
+#						}
+#					}
+#				}
+#			}
+#			event_target:FRA_attacker_state = {
+#				CONTROLLER = {
+#					start_border_war = {
+#						change_state_after_war = no
+#						attacker = {
+#							state = event_target:FRA_attacker_state
+#							num_provinces = 4
+#							on_win = FRA_central_africa_intervention.1
+#							on_lose = FRA_central_africa_intervention.2
+#							on_cancel = FRA_central_africa_intervention.3
+#						}
+#						defender = {
+#							state = event_target:FRA_defender_state
+#							num_provinces = 4
+#							on_win = FRA_central_africa_intervention.2
+#							on_lose = FRA_central_africa_intervention.1
+#							on_cancel = FRA_central_africa_intervention.3
+#						}
+#					}
+#				}
+#			}
+#		}
+#		fire_only_once = yes
+#		cost = 25
+#		ai_will_do = {
+#			factor = 0
+#		}
+#	}
 	FRA_promise_independence_to_west_africa = {
 		available = {
 			NOT = {
@@ -2213,6 +2405,7 @@ FRA_intervention_in_overseas_territories = {
 								state = 778
 								state = 781
 								state = 776
+								state = 777 	#Togo too
 							}
 						}
 						add_compliance = 5
@@ -2265,6 +2458,7 @@ FRA_intervention_in_overseas_territories = {
 						state = 778
 						state = 781
 						state = 776
+						state = 777 	#Togo too
 				}
 				any_neighbor_state = {
 					CONTROLLER = {
@@ -2291,6 +2485,7 @@ FRA_intervention_in_overseas_territories = {
 						state = 778
 						state = 781
 						state = 776
+						state = 777 	#Togo too
 					}
 					not = { is_controlled_by = ROOT }
 					any_neighbor_state = {
@@ -2539,6 +2734,11 @@ FRA_decolonization = {
 			670 = { is_controlled_by = ROOT }
 			286 = { is_controlled_by = ROOT }
 			741 = { is_controlled_by = ROOT }
+			851 = { is_controlled_by = ROOT }
+			852 = { is_controlled_by = ROOT }
+			853 = { is_controlled_by = ROOT }
+			854 = { is_controlled_by = ROOT }
+			855 = { is_controlled_by = ROOT }
 		}
 
 		days_mission_timeout = 180
@@ -2603,6 +2803,7 @@ FRA_decolonization = {
 			462 = { is_controlled_by = ROOT }
 			459 = { is_controlled_by = ROOT }
 			513 = { is_controlled_by = ROOT }
+			860 = { is_controlled_by = ROOT }
 			460 = { is_controlled_by = ROOT }
 			458 = { is_controlled_by = ROOT }
 			665 = { is_controlled_by = ROOT }
@@ -2726,7 +2927,7 @@ FRA_decolonization = {
 	}
 }
 
-# Economic reforms to decrease inflation
+# Economic reforms to decrease deflation
 FRA_economic_reforms = {
 	FRA_devaluation = {
 
@@ -2749,55 +2950,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 
@@ -2806,7 +3007,7 @@ FRA_economic_reforms = {
 
 	FRA_budget_deficit_law = {
 
-		icon = generic_decision
+		icon = eng_trade_unions_support
 
 		fire_only_once = yes
 
@@ -2817,55 +3018,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -2873,7 +3074,7 @@ FRA_economic_reforms = {
 
 	FRA_exchange_rate_stabilisation = {
 
-		icon = generic_decision
+		icon = generic_scales
 
 		fire_only_once = yes
 
@@ -2884,55 +3085,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -2940,7 +3141,7 @@ FRA_economic_reforms = {
 
 	FRA_agriculture_national_office = {
 
-		icon = generic_decision
+		icon = generic_shovels
 
 		fire_only_once = yes
 
@@ -2951,55 +3152,55 @@ FRA_economic_reforms = {
 
 		visible = {
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -3007,7 +3208,7 @@ FRA_economic_reforms = {
 
 	FRA_national_department_state_market = {
 
-		icon = generic_decision
+		icon = hol_attract_foreign_investors
 
 		fire_only_once = yes
 
@@ -3024,55 +3225,55 @@ FRA_economic_reforms = {
 		visible = {
 			has_government = democratic
 			OR = {
-				has_idea = FRA_inflation1
-				has_idea = FRA_inflation2
-				has_idea = FRA_inflation3
-				has_idea = FRA_inflation4
-				has_idea = FRA_inflation5
+				has_idea = FRA_deflation1
+				has_idea = FRA_deflation2
+				has_idea = FRA_deflation3
+				has_idea = FRA_deflation4
+				has_idea = FRA_deflation5
 			}
 		}
 
 		complete_effect = {
 			if = {
 				limit = {
-					has_idea = FRA_inflation5
+					has_idea = FRA_deflation5
 				}
-				remove_ideas = FRA_inflation5
+				remove_ideas = FRA_deflation5
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation4
+					has_idea = FRA_deflation4
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation5
-					remove_idea = FRA_inflation4
-				}
-			}
-			if = {
-				limit = {
-					has_idea = FRA_inflation3
-				}
-				swap_ideas = {
-					add_idea = FRA_inflation4
-					remove_idea = FRA_inflation3
+					add_idea = FRA_deflation5
+					remove_idea = FRA_deflation4
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation2
+					has_idea = FRA_deflation3
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation3
-					remove_idea = FRA_inflation2
+					add_idea = FRA_deflation4
+					remove_idea = FRA_deflation3
 				}
 			}
 			if = {
 				limit = {
-					has_idea = FRA_inflation1
+					has_idea = FRA_deflation2
 				}
 				swap_ideas = {
-					add_idea = FRA_inflation2
-					remove_idea = FRA_inflation1
+					add_idea = FRA_deflation3
+					remove_idea = FRA_deflation2
+				}
+			}
+			if = {
+				limit = {
+					has_idea = FRA_deflation1
+				}
+				swap_ideas = {
+					add_idea = FRA_deflation2
+					remove_idea = FRA_deflation1
 				}
 			}
 		}
@@ -3464,6 +3665,7 @@ FRA_nationalisation = {
 				set_country_flag = { flag = FRA_nationalize_aircraft_2 value = 1 }
 				set_country_flag = { flag = dewoitine_nat value = 1 }
 				set_country_flag = { flag = potez_nat value = 1 }
+				set_country_flag = { flag = fouga_nat value = 1 }
 				set_country_flag = { flag = levasseur_nat value = 1 }
 				set_country_flag = { flag = loire_nat value = 1 }
 				set_country_flag = { flag = brest_nat value = 1 }

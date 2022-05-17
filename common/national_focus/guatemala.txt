@@ -12,7 +12,7 @@ focus_tree = {
 	}
 
   continuous_focus_position = { x = 0 y = 900 }
-
+  shared_focus = USC_UNIFIED_central_american_unification
 	default = no
 
 #	focus = {
@@ -78,7 +78,7 @@ focus = {
 
 focus = {
 	id = GUA_strengthen_militant_society
-	icon = GFX_r56_goal_FRA_militarist_society
+	icon = GFX_goal_FRA_militarist_society
   prerequisite = { focus = GUA_march_towards_civilization }
 	x = 1
 	y = 1
@@ -142,7 +142,7 @@ focus = {
 
 focus = {
 	id = GUA_controlled_civil_service
-	icon = GFX_r56_goal_FRA_class_collaboration
+	icon = GFX_goal_FRA_class_collaboration
   prerequisite = { focus = GUA_ubiquistas }
   prerequisite = { focus = GUA_strengthen_militant_society }
 	x = 1
@@ -156,6 +156,7 @@ focus = {
 	available_if_capitulated = yes
 
 	completion_reward = {
+	   add_political_power = 75
 	  add_ideas = GUA_controlled_civil_service
 	}
 	search_filters = { FOCUS_FILTER_POLITICAL }
@@ -171,8 +172,41 @@ focus = {
   mutually_exclusive = { focus = GUA_american_diplomacy }
 	cost = 10
 	ai_will_do = {
-		factor = 2
+		factor = 2.5
+		modifier = {
+			factor = 0
+			is_historical_focus_on = yes
+		}
+		modifier = {
+			factor = 0
+			OR = {
+				HON = {
+					is_ai = no
+				}
+				ELS = {
+					is_ai = no
+				}
+				COS = {
+					is_ai = no
+				}
+			}
+		}
+		modifier = {
+			add = 7.5
+			AND = {
+				HON = {
+					is_ai = yes
+				}
+				ELS = {
+					is_ai = yes
+				}
+				COS = {
+					is_ai = yes
+				}
+			}
+		}
 	}
+
 
 	available_if_capitulated = yes
 
@@ -188,16 +222,7 @@ focus = {
         name = GUA_ubico_fascist
      }
   }
-  create_country_leader = {
-  	name = "Jorge Ubico Castañeda"
-  	desc = "POLITICS_JORGE_UBICO_DESC"
-  	picture = "r56_portrait_GUA_Jorge_Ubico.tga"
-  	expire = "1965.1.1"
-    ideology = fascism_ideology
-    traits = {
-      GUA_napoleon
-    }
-  }
+ 
 
     set_politics = {
       ruling_party = fascism
@@ -208,12 +233,19 @@ focus = {
 
 focus = {
 	id = GUA_strike_elsalvador
-	icon = GFX_goal_strike_elsalvador
+	icon = GFX_goal_generic_attack_el_salvador
 	prerequisite = { focus = GUA_the_final_barrier }
 	x = -1
 	y = 1
 	relative_position_id = GUA_the_final_barrier
 	cost = 10
+
+	available = {
+		r56_script_i_am_sane = yes
+		has_army_manpower = {
+			size > 50000
+		}
+	}
 
 
 	completion_reward = {
@@ -228,12 +260,19 @@ focus = {
 
 focus = {
 	id = GUA_stike_honduras
-	icon = GFX_goal_strike_honduras
+	icon = GFX_goal_generic_attack_honduras
 	prerequisite = { focus = GUA_the_final_barrier }
 	x = 1
 	y = 1
 	relative_position_id = GUA_the_final_barrier
 	cost = 10
+
+	available = {
+		r56_script_i_am_sane = yes
+		has_army_manpower = {
+			size > 50000
+		}
+	}
 
 
 	completion_reward = {
@@ -248,13 +287,19 @@ focus = {
 
 focus = {
 	id = GUA_strike_nicaragua
-	icon = GFX_goal_strike_nicaragua
+	icon = GFX_goal_generic_attack_nicaragua
 	prerequisite = { focus = GUA_stike_honduras  focus = GUA_strike_elsalvador  }
 	x = -1
 	y = 1
 	relative_position_id = GUA_stike_honduras
 	cost = 10
 
+	available = {
+		r56_script_i_am_sane = yes
+		has_army_manpower = {
+			size > 50000
+		}
+	}
 
 	completion_reward = {
 		create_wargoal = {
@@ -268,13 +313,19 @@ focus = {
 
 focus = {
 	id = GUA_strike_costarica
-	icon = GFX_goal_strike_costarica
+	icon = GFX_goal_generic_attack_costa_rica
 	prerequisite = { focus = GUA_strike_nicaragua }
 	x = -2
 	y = 1
 	relative_position_id = GUA_strike_nicaragua
 	cost = 10
 
+	available = {
+		r56_script_i_am_sane = yes
+		has_army_manpower = {
+			size > 50000
+		}
+	}
 
 	completion_reward = {
 		create_wargoal = {
@@ -308,33 +359,241 @@ focus = {
 
 focus = {
 	id = GUA_berlin_mission
-	icon = GFX_focus_chi_mission_to_germany
+	icon = GFX_goal_generic_the_axis
 	prerequisite = { focus = GUA_strike_nicaragua }
 	x = 0
 	y = 1
 	relative_position_id = GUA_strike_nicaragua
 	cost = 5
 	available = {
-		GER = {
-		  OR = {
-			  has_government = neutrality
+		OR = {
+			GER = {
+				NOT = { has_war_with = ROOT }
 				has_government = fascism
+				has_capitulated = no
+				is_faction_leader = yes
 			}
-			has_war_with = ENG
-			is_in_faction = yes
+			any_other_country = {
+				is_major = yes
+				has_government = fascism
+				is_faction_leader = yes
+				NOT = { has_war_with = ROOT }
+			}
 		}
 	}
-
 	bypass = {
 		is_in_faction_with = GER
 	}
-
-
 	completion_reward = {
-		GER = {
-			country_event = generic.2
+		if = {
+			limit = {
+				GER = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			GER = {
+				country_event = generic.2
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = medium_increase
+				}
+			}
+			ROOT = {
+				add_opinion_modifier = {
+					target = GER
+					modifier = medium_increase
+				}
+			}
 		}
-  }
+		else_if = {
+			limit = {
+				USA = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			USA = {
+				country_event = generic.2
+			}
+		}
+		else_if = {
+			limit = {
+				CAN = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			CAN = {
+				country_event = generic.2
+			}
+		}
+		else_if = {
+			limit = {
+				MEX = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			MEX = {
+				country_event = generic.2
+			}
+		}
+		else_if = {
+			limit = {
+				BRA = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			BRA = {
+				country_event = generic.2
+			}
+		}		
+		else_if = {
+			limit = {
+				ARG = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			ARG = {
+				country_event = generic.2
+			}
+		}								
+		else_if = {
+			limit = {
+				ITA = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			ITA = {
+				country_event = generic.2
+			}
+		}
+		else_if = {
+			limit = {
+				JAP = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			JAP = {
+				country_event = generic.2
+			}
+		}
+							
+		else_if = {
+			limit = {
+				ENG = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			ENG = {
+				country_event = generic.2
+			}
+		}							
+		else_if = {
+			limit = {
+				any_other_country = {
+					has_government = fascism
+					is_faction_leader = yes
+					is_major = yes
+					has_capitulated = no
+					num_of_factories > 70
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			random_other_country = {
+				limit = {
+					has_government = fascism
+					is_faction_leader = yes
+					is_major = yes
+					num_of_factories > 70
+					NOT = { has_war_with = ROOT }
+				}
+				country_event = generic.2
+			}				
+		}
+		else_if = {
+			limit = {
+				any_other_country = {
+					has_government = fascism
+					is_faction_leader = yes
+					is_major = yes
+					has_capitulated = no
+					num_of_factories > 50
+				}
+			}
+			random_other_country = {
+				limit = {
+					has_government = fascism
+					is_faction_leader = yes
+					is_major = yes
+					num_of_factories > 50
+				}
+				country_event = generic.2
+			}				
+		}			
+		else_if = {
+			limit = {
+				any_other_country = {
+					has_government = fascism
+					is_faction_leader = yes
+					is_major = yes
+					has_capitulated = no
+				}
+			}
+			random_other_country = {
+				limit = {
+					has_government = fascism
+					is_faction_leader = yes
+					is_major = yes
+					has_capitulated = no
+				}
+				country_event = generic.2
+			}
+		}
+		else_if = {
+			limit = {
+				any_other_country = {
+					has_government = fascism
+					is_faction_leader = yes
+
+					has_capitulated = no
+				}
+			}
+			random_other_country = {
+				limit = {
+					has_government = fascism
+					is_faction_leader = yes
+					has_capitulated = no
+				}
+				country_event = generic.2
+			}
+		}				
+	}
+	search_filters = { FOCUS_FILTER_ALLIANCE }
 }
 
 
@@ -346,6 +605,13 @@ focus = {
 	y = 1
 	relative_position_id = GUA_exploit_nicaragua_gold
 	cost = 10
+
+	available = {
+		r56_script_i_am_sane = yes
+		has_army_manpower = {
+			size > 65000
+		}
+	}
 
 
 	completion_reward = {
@@ -368,7 +634,24 @@ focus = {
   mutually_exclusive = { focus = GUA_the_final_barrier }
 	cost = 10
 	ai_will_do = {
-		factor = 20
+		factor = 10
+		modifier = {
+			factor = 15
+			OR = {
+				USA = {
+					is_ai = no
+				}
+				HON = {
+					is_ai = no
+				}
+				ELS = {
+					is_ai = no
+				}
+				COS = {
+					is_ai = no
+				}
+			}
+		}
 	}
 
 	available_if_capitulated = yes
@@ -550,20 +833,66 @@ focus = {
 	relative_position_id = GUA_cherish_our_land
 	cost = 10
 	ai_will_do = {
-		factor = 10
-	}
-	available = {
-		USA = {
-			has_war_with = GER
-			is_in_faction = yes
+		factor = 0.25
+		modifier = {
+			add = 10.1
+			USA = { 
+				has_government = democratic
+				has_war_with = GER
+				is_in_faction_with = ENG
+			}
+			GER = {
+				has_government = fascism
+				has_war = yes
+			}
 		}
 	}
+	available = {
+		OR = {
+			ENG = {
+				has_war_with = GER
+				is_in_faction = yes
+			}
+			USA = {
+				has_war_with = GER
+				is_in_faction = yes
+			}
+		}
+		is_in_faction = no
+	}
 	bypass = {
-		is_in_faction_with = USA
+		OR = {
+			is_in_faction_with = USA
+			is_in_faction_with = ENG
+		}
 	}
 	completion_reward = {
-		USA = { country_event = r56_guatemala.1 }
+		if = {
+			limit = {
+				ENG = {
+					has_government = democratic
+					is_faction_leader = yes
+					has_capitulated = no
+					NOT = { has_war_with = ROOT }
+				}
+			}
+			ENG = {
+				country_event = generic.2
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = 200
+				}
+			}
+		}
+		else = {
+			get_best_alliance_match_democratic_effect = yes
+			var:best_leader = {
+				country_event = generic.2
+			}
+		}
 	}
+	search_filters = { FOCUS_FILTER_ALLIANCE }
 }
 
 focus = {
@@ -582,7 +911,8 @@ focus = {
 		has_war_with = ENG
 	}
 	completion_reward = {
-	  add_state_claim = 311
+	  add_political_power = 75
+	  add_state_core = 311
 
 	}
 	search_filters = { FOCUS_FILTER_ANNEXATION }

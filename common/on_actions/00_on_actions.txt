@@ -10,6 +10,10 @@ on_actions = {
 			100 = usa.11
 			100 = usa.12
 			100 = r56_usa.1
+			100 = r56_usa.3 #usa.2 is unrelated
+			100 = r56_usa.7
+			100 = r56_usa.8
+			100 = r56_usa.9
 		}
 		random_events = {
 			100 = spain.9
@@ -108,12 +112,6 @@ on_actions = {
 			100 = war_justification.18
 			100 = war_justification.19
 			17000 = 0
-			#Soviet demands
-			2000 = soviet.30
-			2000 = soviet.31
-			2000 = soviet.32
-			2000 = soviet.33
-			2000 = soviet.34
 		}
 	}
 
@@ -226,10 +224,8 @@ on_actions = {
 		effect = {
 			if = {
 				limit = { 
-					AND = {
-						tag = CAN 	
-						NOT = { has_dlc = "Together for Victory" }
-					}
+					tag = CAN 	
+					NOT = { has_dlc = "Together for Victory" }
 				}
 				abandon_colony_tag = yes
 			}
@@ -442,7 +438,6 @@ on_actions = {
 				limit = {
 					OR = {
 						original_tag = CAN
-						original_tag = RAJ
 						original_tag = MAL
 						original_tag = INS
 					}
@@ -514,21 +509,6 @@ on_actions = {
 					ROOT = { is_major = yes }
 				}
 				SOV = { country_event = { id = soviet.46 days = 2 } }
-			}
-
-			## Soviet war after purge
-			if = {
-				limit = {
-					OR = {
-						FROM = { tag = SOV }
-						ROOT = { tag = SOV }
-					}
-					SOV = {
-						NOT = { has_country_flag = SOV_war_since_purge }
-						has_completed_focus = SOV_great_purge
-					}
-				}
-				SOV = { set_country_flag = SOV_war_since_purge }
 			}
 
 			# Remove pact opinion modifiers if at war with Germany
@@ -687,9 +667,19 @@ on_actions = {
 		effect = {
 			if = {
 				limit = {
-					NOT = { original_tag = GER }
-					NOT = { has_government = fascism }
-					NOT = { has_civil_war = yes }
+					tag = GER
+					FROM = { 
+						tag = SOV
+					}
+					NOT = { has_global_flag = fall_of_berlin_sov }
+				}
+				play_victory_parade_effect = yes
+			}
+			if = {
+				limit = {
+					#NOT = { original_tag = GER }
+					#NOT = { has_government = fascism }
+					has_civil_war = no
 					NOT = {
 						AND = {
 							FROM = {
@@ -698,6 +688,14 @@ on_actions = {
 							original_tag = SPR
 						}
 					}
+					NOT = {
+						AND = {
+							FROM = {
+								original_tag = GER
+							}
+							original_tag = GER
+						}
+					}					
 				}
 				news_event = { id = country_capitulated.0 days = 0 }
 			}
@@ -1031,7 +1029,6 @@ on_actions = {
 			every_country = {
 				limit = {
 					OR = {
-						original_tag = RAJ
 						original_tag = CAN
 						original_tag = MAL
 						original_tag = INS
@@ -1039,6 +1036,17 @@ on_actions = {
 					is_puppet = no
 				}
 				abandon_colony_tag = yes
+			}
+			if = {
+				limit = {
+					original_tag = INS
+				}
+				every_unit_leader = {
+					limit = {
+						has_unit_leader_flag = HOL_indonesia_commander
+					}
+					set_nationality = HOL
+				}
 			}
 		}
 	}
@@ -1051,61 +1059,139 @@ on_actions = {
 					limit = {
 						has_dlc = "Waking the Tiger"
 						has_game_rule = {
-							rule = GER_ai_behavior
-							option = RANDOM
+							rule = GER_focus_tree_selection
+							option = STANDARD_TREE
+						}						
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = GER_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = GER_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
-						50 = { GER = { set_country_flag = GER_AI_RANDOM_FASCIST } }
-						35 = { GER = { set_country_flag = GER_AI_RANDOM_KAISER } }
-						15 = { GER = { set_country_flag = GER_AI_RANDOM_DEMOCRATIC } }
+						50 = { GER = { set_country_flag = GER_AI_RANDOM_FASCIST_AGGRESSIVE } }
+						20 = { GER = { set_country_flag = GER_AI_RANDOM_MONARCHIST_CENTRAL_POWERS } }
+						10 = { GER = { set_country_flag = GER_AI_RANDOM_MONARCHIST_ALLIES } }
+						10 = { GER = { set_country_flag = GER_AI_RANDOM_DEMOCRATIC } }
+						5 = { GER = { set_country_flag = GER_AI_RANDOM_COMMUNIST_WORLD_REVOLUTION } }
+						4 = { GER = { set_country_flag = GER_AI_RANDOM_COMMUNIST_COMINTERN } }
+						1 = { GER = { set_country_flag = GER_AI_RANDOM_FASCIST_PASSIVE } }
+					}
+				}
+				if = {
+					limit = {
+						has_game_rule = {
+							rule = GER_focus_tree_selection
+							option = R56_TREE
+						}						
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = GER_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = GER_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						50 = { GER = { set_country_flag = GER_AI_RANDOM_FASCIST_AGGRESSIVE } }
+						30 = { GER = { set_country_flag = GER_AI_RANDOM_MONARCHIST_CENTRAL_POWERS } }
+						10 = { GER = { set_country_flag = GER_AI_RANDOM_DEMOCRATIC } }
+						5 = { GER = { set_country_flag = GER_AI_RANDOM_COMMUNIST_WORLD_REVOLUTION } }
+						4 = { GER = { set_country_flag = GER_AI_RANDOM_COMMUNIST_COMINTERN } }
+						1 = { GER = { set_country_flag = GER_AI_RANDOM_FASCIST_PASSIVE } }
+						0 = { GER = { set_country_flag = GER_AI_RANDOM_MONARCHIST_ALLIES } }
 					}
 				}
 			}
 			ITA = {
 				if = {
 					limit = {
-						has_game_rule = {
-							rule = ITA_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = ITA_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = ITA_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
-						50 = { ITA = { set_country_flag = ITA_AI_RANDOM_FASCIST_HISTORICAL } }
-						50 = { ITA = { set_country_flag = ITA_AI_RANDOM_FASCIST_ALTERNATE } }
+						70 = { ITA = { set_country_flag = ITA_AI_RANDOM_FASCIST_HISTORICAL } }
+						30 = { ITA = { set_country_flag = ITA_AI_RANDOM_FASCIST_ALTERNATE } }
 					}
 				}
 			}
-	#		CHI = {
-	#			if = {
-	#				limit = {
-	#					has_dlc = "Waking the Tiger"
-	#					has_game_rule = {
-	#						rule = CHI_ai_behavior
-	#						option = RANDOM
-	#					}
-	#				}
-	#				random_list = {
-	#					50 = { CHI = { set_country_flag = CHI_AI_RANDOM_HISTORICAL } }
-	#					50 = { CHI = { set_country_flag = CHI_AI_RANDOM_ALTERNATE } }
-	#				}
-	#			}
-	#		}
-	#		MAN = {
-	#			if = {
-	#				limit = {
-	#					has_dlc = "Waking the Tiger"
-	#					has_game_rule = {
-	#						rule = MAN_ai_behavior
-	#						option = RANDOM
-	#					}
-	#				}
-	#				random_list = {
-	#					40 = { MAN = { set_country_flag = MAN_AI_RANDOM_OBEDIENCE } }
-	#					60 = { MAN = { set_country_flag = MAN_AI_RANDOM_INDEPENDENCE } }
-	#				}
-	#			}
-	#		}
+			CHI = {
+				if = {
+					limit = {
+						has_dlc = "Waking the Tiger"
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = CHI_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = CHI_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						50 = { CHI = { set_country_flag = CHI_AI_RANDOM_HISTORICAL } }
+						50 = { CHI = { set_country_flag = CHI_AI_RANDOM_ALTERNATE } }
+					}
+				}
+			}
+			MAN = {
+				if = {
+					limit = {
+						has_dlc = "Waking the Tiger"
+						has_game_rule = {
+							rule = MAN_focus_tree_selection
+							option = STANDARD_TREE
+						}						
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = MAN_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = MAN_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						80 = { MAN = { set_country_flag = MAN_AI_RANDOM_OBEDIENCE } }
+						20 = { MAN = { set_country_flag = MAN_AI_RANDOM_INDEPENDENCE } }
+					}
+				}
+			}
 	#		PRC = {
 	#			if = {
 	#				limit = {
@@ -1122,56 +1208,64 @@ on_actions = {
 	#				}
 	#			}
 	#		}
-	#		SOV = {
-	#			if = {
-	#				limit = {
-	#					has_game_rule = {
-	#						rule = SOV_ai_behavior
-	#						option = RANDOM
-	#					}
-	#				}
-	#				random_list = {
-	#					50 = { SOV = { set_country_flag = ITA_SOV_RANDOM_COMMUNIST_HISTORICAL } }
-	#					50 = { SOV = { set_country_flag = ITA_SOV_RANDOM_COMMUNIST_ALTERNATE } }
-	#				}
-	#			}
-	#		}
-			FRA = {
-				if = { 
+			SOV = {
+				if = {
 					limit = {
-						has_game_rule = {
-							rule = FRA_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = SOV_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = SOV_ai_behavior
+								option = RANDOM
+							}
 						}
-						NOT = { has_dlc = "La Resistance" }
 					}
 					random_list = {
-						15 = { set_country_flag = FRA_AI_COMMUNIST }
-						40 = { set_country_flag = FRA_AI_RANDOM_DEMOCRATIC_ALTERNATE }
-						30 = { set_country_flag = FRA_AI_DEMOCRATIC_HISTORICAL }
-						15 = { set_country_flag = FRA_AI_FASCIST }
+						40 = { SOV = { set_country_flag = SOV_AI_RANDOM_COMMUNIST_HISTORICAL } }
+						20 = { SOV = { set_country_flag = SOV_AI_RANDOM_COMMUNIST_ANTI_CAPITALIST } }
+						20 = { SOV = { set_country_flag = SOV_AI_RANDOM_COMMUNIST_WORLD_REVOLUTION } }
+						10 = { SOV = { set_country_flag = SOV_AI_RANDOM_RUSSIAN_DEMOCRACY }  }
+						10 = { SOV = { set_country_flag = SOV_AI_RANDOM_RUSSIAN_FASCISM }  }
+						10 = { SOV = { set_country_flag = SOV_AI_RANDOM_RETURN_OF_THE_TSAR } }
+						
 					}
 				}
 			}
 			FRA = {
 				if = { 
 					limit = {
-						has_game_rule = {
-							rule = FRA_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = FRA_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = FRA_ai_behavior
+								option = RANDOM
+							}
 						}
-						has_dlc = "La Resistance"
 					}
 					random_list = {
-						15 = { set_country_flag = FRA_AI_COMMUNIST }
-						40 = { set_country_flag = FRA_AI_DEMOCRATIC_ALTERNATE }
-						25 = { set_country_flag = FRA_AI_DEMOCRATIC_HISTORICAL }
-						10 = { set_country_flag = FRA_AI_FASCIST }
-						10 = {
+						15 = { set_country_flag = FRA_AI_RANDOM_COMMUNIST_COMINTERN }
+						10 = { set_country_flag = FRA_AI_RANDOM_COMMUNIST_HUMANITE_UNIE }
+						25 = { set_country_flag = FRA_AI_RANDOM_DEMOCRATIC_LITTLE_ENTENTE }
+						40 = { set_country_flag = FRA_AI_RANDOM_DEMOCRATIC_HISTORICAL }
+						10 = { set_country_flag = FRA_AI_RANDOM_FASCIST_FRONT_LIBERTE }
+						10 = { set_country_flag = FRA_AI_RANDOM_FASCIST_LA_CAGOULE_COUP  }
+						15 = {
 							random_list = {
-								35 = { set_country_flag = FRA_AI_ORLEANIST }
-								50 = { set_country_flag = FRA_AI_LEGITIMIST }
-								15 = { set_country_flag = FRA_AI_BONAPARTIST }
+								15 = { set_country_flag = FRA_AI_RANDOM_MONARCHIST_ORLEANISTS }
+								15 = { set_country_flag = FRA_AI_RANDOM_MONARCHIST_LEGITIMISTS }
+								#50 = { set_country_flag = FRA_AI_LEGITIMIST }
+								15 = { set_country_flag = FRA_AI_RANDOM_MONARCHIST_BONAPARTISTS }
 							}
 						}
 					}
@@ -1181,9 +1275,18 @@ on_actions = {
 				if = {
 					limit = {
 						has_dlc = "Waking the Tiger"
-						has_game_rule = {
-							rule = JAP_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = JAP_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = JAP_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1198,16 +1301,26 @@ on_actions = {
 				if = { 
 					limit = {
 						has_dlc = "Death or Dishonor"
-						has_game_rule = {
-							rule = ROM_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = ROM_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = ROM_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
-						25 = { set_country_flag = ROM_AI_RANDOM_BALKAN_DOMINANCE }
-						10 = { set_country_flag = ROM_AI_RANDOM_DEMOCRATIC }
-						40 = { set_country_flag = ROM_AI_RANDOM_FASCIST_HISTORICAL }
-						25 = { set_country_flag = ROM_AI_RANDOM_COMMUNIST }
+						24 = { set_country_flag = ROM_AI_RANDOM_BALKAN_DOMINANCE }
+						9 = { set_country_flag = ROM_AI_RANDOM_DEMOCRATIC }
+						39 = { set_country_flag = ROM_AI_RANDOM_FASCIST_HISTORICAL }
+						24 = { set_country_flag = ROM_AI_RANDOM_COMMUNIST }
+						5 = { set_country_flag = ROM_AI_RANDOM_FASCIST_CODREANU }
 					}
 				}
 			}
@@ -1215,9 +1328,18 @@ on_actions = {
 				if = { 
 					limit = {
 						has_dlc = "Death or Dishonor"
-						has_game_rule = {
-							rule = HUN_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = HUN_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = HUN_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1251,9 +1373,18 @@ on_actions = {
 				if = { 
 					limit = {
 						has_dlc = "Death or Dishonor"
-						has_game_rule = {
-							rule = YUG_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = YUG_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = YUG_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1268,9 +1399,18 @@ on_actions = {
 				if = { 
 					limit = {
 						has_dlc = "Together for Victory"
-						has_game_rule = {
-							rule = AST_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = AST_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = AST_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1281,23 +1421,83 @@ on_actions = {
 					}
 				}
 			}
-		#	CAN = {
-		#		if = { 
-		#			limit = {
-		#				has_dlc = "Together for Victory"
-		#				has_game_rule = {
-		#					rule = CAN_ai_behavior
-		#					option = RANDOM
-		#				}
-		#			}
-		#			random_list = {
-		#				15 = { set_country_flag = CAN_AI_RANDOM_COMMUNIST }
-		#				30 = { set_country_flag = CAN_AI_RANDOM_DEMOCRATIC_ALTERNATE }
-		#				40 = { set_country_flag = CAN_AI_DEMOCRATIC_HISTORICAL }
-		#				15 = { set_country_flag = CAN_AI_RANDOM_FASCIST }
-		#			}
-		#		}
-		#	}
+			CAN = {
+				if = { 
+					limit = {
+						has_dlc = "Together for Victory"
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = CAN_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = CAN_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						15 = { set_country_flag = CAN_AI_RANDOM_COMMUNIST }
+						30 = { set_country_flag = CAN_AI_RANDOM_DEMOCRATIC_ALTERNATE }
+						40 = { set_country_flag = CAN_AI_DEMOCRATIC_HISTORICAL }
+						15 = { set_country_flag = CAN_AI_RANDOM_FASCIST }
+					}
+				}
+			}
+			ADR = {
+				if = {
+					limit = {
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = ADR_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = ADR_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						25 = { ADR = { set_country_flag = ADR_AI_RANDOM_NEUTRALITY } }
+						25 = { ADR = { set_country_flag = ADR_AI_RANDOM_NEUTRALITY_SPANISH_GUARANTEE } }
+						25 = { ADR = { set_country_flag = ADR_AI_RANDOM_FLEXIBLE_FOREIGN_POLICY } }
+						25 = { ADR = { set_country_flag = ADR_AI_RANDOM_FRENCH_PROTECTORATE } }
+					}
+				}
+			}
+			DEN = {
+				if = {
+					limit = {
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = DEN_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = DEN_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						50 = { DEN = { set_country_flag = DEN_AI_RANDOM_SOCIAL_DEMOCRATIC } }
+						30 = { DEN = { set_country_flag = DEN_AI_RANDOM_CONSERVATIVE } }
+						5 = { DEN = { set_country_flag = DEN_AI_RANDOM_FASCIST } }
+						5 = { DEN = { set_country_flag = DEN_AI_RANDOM_COMMUNIST } }
+						10 = { DEN = { set_country_flag = DEN_AI_RANDOM_KING_CHRISTIAN_COUP } }
+					}
+				}
+			}
 		#	SAF = {
 		#		if = { 
 		#			limit = {
@@ -1319,35 +1519,44 @@ on_actions = {
 				if = { 
 					limit = {
 						has_dlc = "Together for Victory"
-						has_game_rule = {
-							rule = NZL_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = NZL_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = NZL_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
 						20 = { set_country_flag = NZL_AI_RANDOM_COMMUNIST }
-						25 = { set_country_flag = NZL_AI_RANDOM_DEMOCRATIC_ALTERNATE }
-						30 = { set_country_flag = NZL_AI_DEMOCRATIC_HISTORICAL }
-						25 = { set_country_flag = NZL_AI_RANDOM_FASCIST }
+						20 = { set_country_flag = NZL_AI_RANDOM_DEMOCRATIC_ALTERNATE }
+						40 = { set_country_flag = NZL_AI_DEMOCRATIC_HISTORICAL }
+						20 = { set_country_flag = NZL_AI_RANDOM_FASCIST }
 					}
 				}
 			}
-			RAJ = {
-				if = { 
-					limit = {
-						has_dlc = "Together for Victory"
-						has_game_rule = {
-							rule = RAJ_ai_behavior
-							option = RANDOM
-						}
-					}
-					random_list = {
-						25 = { set_country_flag = RAJ_AI_RANDOM_COMMUNIST }
-						50 = { set_country_flag = RAJ_AI_DEMOCRATIC_HISTORICAL }
-						25 = { set_country_flag = RAJ_AI_RANDOM_FASCIST }
-					}
-				}
-			}
+		#	RAJ = {
+		#		if = { 
+		#			limit = {
+		#				has_dlc = "Together for Victory"
+		#				has_game_rule = {
+		#					rule = RAJ_ai_behavior
+		#					option = RANDOM
+		#				}
+		#			}
+		#			random_list = {
+		#				25 = { set_country_flag = RAJ_AI_RANDOM_COMMUNIST }
+		#				50 = { set_country_flag = RAJ_AI_DEMOCRATIC_HISTORICAL }
+		#		25 = { set_country_flag = RAJ_AI_RANDOM_FASCIST }
+		#			}
+		#		}
+		#	}
 		#	POL = {
 		#		if = { 
 		#			limit = {
@@ -1368,9 +1577,18 @@ on_actions = {
 				if = { 
 					limit = {
 						has_dlc = "Man the Guns"
-						has_game_rule = {
-							rule = ENG_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = ENG_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = ENG_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1386,9 +1604,18 @@ on_actions = {
 				if = { 
 					limit = {
 						has_dlc = "Man the Guns"
-						has_game_rule = {
-							rule = USA_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = USA_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = USA_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1424,8 +1651,21 @@ on_actions = {
 					limit = {
 						has_dlc = "Man the Guns"
 						has_game_rule = {
-							rule = MEX_ai_behavior
-							option = RANDOM
+							rule = MEX_focus_tree_selection
+							option = STANDARD_TREE
+						}						
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = MEX_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = MEX_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1443,8 +1683,21 @@ on_actions = {
 					limit = {
 						has_dlc = "La Resistance"
 						has_game_rule = {
-							rule = SPR_ai_behavior
-							option = RANDOM
+							rule = SPR_focus_tree_selection
+							option = STANDARD_TREE
+						}						
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = SPR_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = SPR_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1463,8 +1716,21 @@ on_actions = {
 					limit = {
 						has_dlc = "La Resistance"
 						has_game_rule = {
-							rule = POR_ai_behavior
-							option = RANDOM
+							rule = POR_focus_tree_selection
+							option = STANDARD_TREE
+						}						
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = POR_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = POR_ai_behavior
+								option = RANDOM
+							}
 						}
 					}
 					random_list = {
@@ -1478,17 +1744,302 @@ on_actions = {
 					}
 				}
 			}
+			BUL = {
+				if = {
+					limit = {
+						has_dlc = "Battle for the Bosporus"
+						has_game_rule = {
+							rule = BUL_focus_tree_selection
+							option = STANDARD_TREE
+						}						
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = BUL_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = BUL_ai_behavior
+								option = RANDOM
+							}
+						}					
+					}
+					random_list = {
+						20 = { set_country_flag = BUL_AI_RANDOM_HISTORICAL }
+						15 = { set_country_flag = BUL_AI_RANDOM_COMMUNIST }
+						10 = { set_country_flag = BUL_AI_RANDOM_COMMUNIST_BALKAN_FEDERATION }
+						15 = { set_country_flag = BUL_AI_RANDOM_FASCIST_AXIS }
+						15 = { set_country_flag = BUL_AI_RANDOM_THE_RETURN_OF_FERDINAND }
+						15 = { set_country_flag = BUL_AI_RANDOM_DEMOCRATIC_LIBERAL }
+						10 = { set_country_flag = BUL_AI_RANDOM_DEMOCRATIC_SOCIALIST }
+					}
+				}
+			}
+			GRE = {
+				if = {
+					limit = {
+						has_dlc = "Battle for the Bosporus"						
+						has_game_rule = {
+							rule = GRE_focus_tree_selection
+							option = STANDARD_TREE
+						}
+						has_game_rule = {
+							rule = GRE_ai_behavior
+							option = RANDOM
+						}						
+					}
+					random_list = {
+						20 = { set_country_flag = GRE_AI_RANDOM_NEUTRALITY_HISTORICAL }
+						15 = { set_country_flag = GRE_AI_RANDOM_MONARCHIST }
+						10 = { set_country_flag = GRE_AI_RANDOM_MONARCHIST_ALTERNATE }
+						15 = { set_country_flag = GRE_AI_RANDOM_COMMUNIST }
+						10 = { set_country_flag = GRE_AI_RANDOM_COMMUNIST_ALTERNATE }
+						10 = { set_country_flag = GRE_AI_RANDOM_DEMOCRATIC }
+						15 = { set_country_flag = GRE_AI_RANDOM_FASCISM }
+						5 = { set_country_flag = GRE_AI_RANDOM_FASCISM_ALTERNATE }
+					}
+				}
+			}
+			TUR = {
+				if = {
+					limit = {
+						has_dlc = "Battle for the Bosporus"
+						has_game_rule = {
+							rule = TUR_focus_tree_selection
+							option = STANDARD_TREE
+						}						
+						has_game_rule = {
+							rule = TUR_ai_behavior
+							option = RANDOM
+						}
+					}
+					random_list = {
+						20 = { set_country_flag = TUR_AI_RANDOM_NEUTRALITY_HISTORICAL }
+						15 = { set_country_flag = TUR_AI_RANDOM_ALT_KEMALIST }
+						10 = { set_country_flag = TUR_AI_RANDOM_COMMUNISM }
+						5 = { set_country_flag = TUR_AI_RANDOM_COMMUNISM_ALTERNATE }
+						15 = { set_country_flag = TUR_AI_RANDOM_DEMOCRATIC }
+						5 = { set_country_flag = TUR_AI_RANDOM_DEMOCRATIC_ALTERNATE }
+						10 = { set_country_flag = TUR_AI_RANDOM_FASCISM }
+						10 = { set_country_flag = TUR_AI_RANDOM_FASCISM_ALTERNATE }
+						5 = { set_country_flag = TUR_AI_RANDOM_BALKAN_ENTENTE }
+						5 = { set_country_flag = TUR_AI_RANDOM_OTTOMAN }
+					}
+				}
+			}
+			LIT = {
+				if = {
+					limit = {
+						has_dlc = "No Step Back"
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = LIT_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = LIT_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						15 = { set_country_flag = LIT_AI_RANDOM_HISTORICAL }
+						15 = { set_country_flag = LIT_AI_RANDOM_COMMUNIST }
+						10 = { set_country_flag = LIT_AI_RANDOM_FASCIST }
+						15 = { set_country_flag = LIT_AI_RANDOM_MONARCHY }
+						10 = { set_country_flag = LIT_AI_RANDOM_DEMOCRATIC }
+					}
+				}
+			}
+			LAT = {
+				if = {
+					limit = {
+						has_dlc = "No Step Back"
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = LAT_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = LAT_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						20 = { set_country_flag = LAT_AI_RANDOM_HISTORICAL }
+						15 = { set_country_flag = LAT_AI_RANDOM_COMMUNIST }
+						10 = { set_country_flag = LAT_AI_RANDOM_FASCIST }
+						10 = { set_country_flag = LAT_AI_RANDOM_DEMOCRATIC }
+					}
+				}
+			}
+			EST = {
+				if = {
+					limit = {
+						has_dlc = "No Step Back"
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = EST_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = EST_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						20 = { set_country_flag = EST_AI_RANDOM_HISTORICAL }
+						15 = { set_country_flag = EST_AI_RANDOM_COMMUNIST }
+						10 = { set_country_flag = EST_AI_RANDOM_FASCIST }
+						10 = { set_country_flag = EST_AI_RANDOM_DEMOCRATIC }
+					}
+				}
+			}						
 		}
 	}
 	
 	on_unit_leader_created = {
 		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = INS
+						has_cosmetic_tag = INS_HOL						
+					}
+
+				}
+				set_unit_leader_flag = HOL_indonesia_commander
+			}
+			if = {
+				limit = {
+					FROM = {						
+						OR = {
+							AND = {
+								original_tag = MAL
+								has_cosmetic_tag = MAL_UK
+							}
+							AND = {
+								original_tag = RAJ
+								has_cosmetic_tag = RAJ_UK
+							}						
+						}
+					}	
+				}
+				set_unit_leader_flag = ENG_colonial_commander
+			}			
+		}
+	}
+	#ROOT = country that joined a war
+	on_war = {
+		effect = {
+			if = {
+				limit = {
+					tag = USA
+					has_war_with = JAP
+					NOT = { has_global_flag = day_of_infamy_happened }
+					has_country_leader = { name = "Franklin Delano Roosevelt" ruling_only = yes }
+				}
+				play_day_of_infamy_effect = yes
+			}
+			if = {
+				limit = {
+					tag = ENG
+					has_war_with = GER
+					has_country_leader = { name = "Neville Chamberlain" ruling_only = yes }
+				}
+				play_war_with_germany_effect = yes
+			}
+		}
+	}
+	#ROOT = attacking side
+	#FROM = defending side
+	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
+	on_war_relation_added = {
+		effect = {
+			if = {
+				limit = {
+					tag = GER
+					FROM = { 
+						tag = SOV 
+						has_government = communism
+					}
+				}
+				set_global_flag = { flag = barbarossa_counter value = 1 days = 60 }
+			}
+		}
+	}
+	#ROOT - country that just went to peace
+	on_peaceconference_ended = {
+		effect = {
+			if = {
+				limit = {
+					tag = USA
+					is_historical_focus_on = yes
+					has_global_flag = day_of_infamy_happened
+					has_government = democratic
+					JAP = { has_government = democratic }
+				}
+				play_guns_are_silent_effect = yes
+			}
 		}
 	}
 
 	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
 	on_state_control_changed = {
 		effect = {
+			if = {
+				limit = {
+					tag = FRA #to avoid third party taking over
+					FROM = {
+						is_in_faction_with = GER
+					}
+					FROM.FROM = { 
+						is_core_of = FRA 
+						NOT = {
+							state = 459
+							state = 460
+							state = 513
+							state = 860
+						}
+					}
+					FRA = {
+						has_capitulated = yes
+						is_in_faction_with = USA
+					}
+					NOT = { has_global_flag = d_day_happened }
+				}
+				play_order_of_the_day_effect = yes
+			}
+			if = {
+				limit = {
+					tag = "PHI"
+					FROM = {
+						is_in_faction_with = JAP
+					}
+					FROM.FROM = { 
+						is_core_of = "PHI" 
+					}
+					"PHI" = {
+						has_capitulated = yes
+						is_in_faction_with = USA
+					}
+					NOT = { has_global_flag = i_have_returned_happened }
+				}
+				play_i_have_returned_effect = yes
+			}
 			if = {
 				limit = {
 					OR = {
@@ -1596,6 +2147,12 @@ on_actions = {
 			}
 			if = {
 				limit = {
+                    NOT = {
+                        has_game_rule = {
+                            rule = usa_fragmentation_status
+                            option = USA_FRAGMENTED
+                        } 
+                    }					
 					tag = CSA
 					has_war = yes
 					FROM = {
@@ -1618,6 +2175,12 @@ on_actions = {
 			}
 			if = {
 				limit = {
+                    NOT = {
+                        has_game_rule = {
+                            rule = usa_fragmentation_status
+                            option = USA_FRAGMENTED
+                        } 
+                    }					
 					tag = USA
 					has_war_with = CSA
 					FROM = {
@@ -1699,13 +2262,44 @@ on_actions = {
 					multiply_temp_variable = { chance = factor }
 					check_variable = { random < chance }
 					NOT = { has_trait = wounded }
+					NOT = { has_trait = lucky }
 				}
 				add_timed_unit_leader_trait = {
 					trait = wounded
 					days = 90
 				}
-				unit_leader_event = { id = generic.18 }
+				random_list = {
+					99 = {
+						unit_leader_event = { id = generic.18 }
+					}
+					1 = {
+						unit_leader_event = { id = r56_leader_events.1 }
+					}
+				}
 			}
+			if = {
+				limit = {
+					set_temp_variable = { chance = 0.001 }
+					set_temp_variable = { factor = 1.0 }
+					add_to_temp_variable = { factor = leader_modifier@wounded_chance_factor } 
+					multiply_temp_variable = { chance = factor }
+					check_variable = { random < chance }
+					NOT = { has_trait = wounded }
+					has_trait = lucky
+				}
+				add_timed_unit_leader_trait = {
+					trait = wounded
+					days = 90
+				}
+				random_list = {
+					85 = {
+						unit_leader_event = { id = generic.18 }
+					}
+					15 = {
+						unit_leader_event = { id = r56_leader_events.1 }
+					}
+				}
+			}			
 		}
 	}
 	
@@ -1714,18 +2308,49 @@ on_actions = {
 		effect = {
 			if = {
 				limit = {
+					set_temp_variable = { chance = 0.001 }
+					set_temp_variable = { factor = 1.0 }
+					add_to_temp_variable = { factor = leader_modifier@wounded_chance_factor } 
+					multiply_temp_variable = { chance = factor }
+					check_variable = { random < chance }
+					NOT = { has_trait = wounded }
+					NOT = { has_trait = lucky }
+				}
+				add_timed_unit_leader_trait = {
+					trait = wounded
+					days = 90
+				}
+				random_list = {
+					99 = {
+						unit_leader_event = { id = generic.18 }
+					}
+					1 = {
+						unit_leader_event = { id = r56_leader_events.1 }
+					}
+				}
+			}
+			if = {
+				limit = {
 					set_temp_variable = { chance = 0.005 }
 					set_temp_variable = { factor = 1.0 }
 					add_to_temp_variable = { factor = leader_modifier@wounded_chance_factor } 
 					multiply_temp_variable = { chance = factor }
 					check_variable = { random < chance }
 					NOT = { has_trait = wounded }
+					has_trait = lucky
 				}
 				add_timed_unit_leader_trait = {
 					trait = wounded
 					days = 90
 				}
-				unit_leader_event = { id = generic.18 }
+				random_list = {
+					85 = {
+						unit_leader_event = { id = generic.18 }
+					}
+					15 = {
+						unit_leader_event = { id = r56_leader_events.1 }
+					}
+				}
 			}
 		}
 	}

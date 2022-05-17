@@ -1409,6 +1409,9 @@ country_event = {
 			transfer_state = 670
 			transfer_state = 671
 			transfer_state = 741
+			transfer_state = 851
+			transfer_state = 852
+			transfer_state = 853
 		}
 	}
 }
@@ -2142,16 +2145,33 @@ country_event = {
 			country_event = lar_spheres_of_influence.2
 		}
 		effect_tooltip = {
-			ROOT = {
-				add_state_claim = 8
+			ROOT = {#they
 				add_state_claim = 7
 				add_state_claim = 35
 				add_state_claim = 36
-				add_to_faction = FROM
+				add_state_claim =  893
+				#add_to_faction = FROM
 			}
 			FROM = {
+				add_state_claim = 8
 				add_state_claim = 34
 				add_state_claim = 6
+				if = {
+					limit = {
+						42 = {
+							is_claimed_by = ROOT
+						}
+					}
+					remove_state_claim = 42
+				}
+				if = {
+					limit = {
+						51 = {
+							is_claimed_by = ROOT
+						}
+					}
+					remove_state_claim = 51
+				}
 			}
 		}
 	}
@@ -2163,7 +2183,7 @@ country_event = {
 		}
 		FROM = {
 			country_event = lar_spheres_of_influence.3
-			set_country_flag = lar_germany_refused_spheres
+			set_global_flag = lar_germany_refused_spheres
 		}
 	}
 }
@@ -2177,20 +2197,40 @@ country_event = {
 	is_triggered_only = yes
 	option = {
 		name = lar_spheres_of_influence.2.a #agree
-		ai_chance = {
-			factor = 100
-		}
 		FROM = {
-			add_state_claim = 8
 			add_state_claim = 7
 			add_state_claim = 35
 			add_state_claim = 36
-			add_to_faction = ROOT
+			add_state_claim =  893
+			#add_to_faction = ROOT
+			diplomatic_relation = {
+				country = ROOT
+				relation = non_aggression_pact
+				active = yes
+			}			
 		}
 		ROOT = {
+			add_state_claim = 8
 			add_state_claim = 34
 			add_state_claim = 6
+			if = {
+				limit = {
+					42 = {
+						is_claimed_by = ROOT
+					}
+				}
+				remove_state_claim = 42
+			}
+			if = {
+				limit = {
+					51 = {
+						is_claimed_by = ROOT
+					}
+				}
+				remove_state_claim = 51
+			}
 		}
+		set_global_flag = FRA_GER_sphere_of_influence_agreement
 		hidden_effect = {
 			news_event = { id = lar_news.7 days = 3 random_days = 7 }
 		}
@@ -2205,15 +2245,13 @@ country_event = {
 	is_triggered_only = yes
 	option = {
 		name = lar_spheres_of_influence.3.a #agree
-		ai_chance = {
-			factor = 80
-		}
 		add_state_claim = 34
 		add_state_claim = 6
 		add_state_claim = 8
 		add_state_claim = 7
 		add_state_claim = 35
 		add_state_claim = 36
+		add_state_claim =  893
 	}
 }
 
@@ -2324,15 +2362,58 @@ country_event = {
 		name = lar_split_belgium.1.a #agree
 		ai_chance = {
 			factor = 40
+			modifier = {
+				tag = WLL
+				factor = 10
+			}
+			modifier = {
+				tag = FLA
+				factor = 10
+			}			
 		}
 		FRA = {
 			country_event = lar_split_belgium.2
 		}
-		effect_tooltip = {
-			FRA = {
-				puppet = PREV
-				transfer_state = 34
+		if = {
+			limit = {
+				original_tag = BEL
 			}
+			#BEL = {
+			#	release = FLA
+			#}
+			FLA = {
+				set_state_owner = 6
+				set_state_controller = 6
+			}			
+			FLA = {
+				change_tag_from = BEL
+			}
+			GER = {
+				puppet = FLA
+			}
+			transfer_state = 34
+			GER = {
+				transfer_state = 893
+				add_state_core = 893
+			}						
+		}
+		if = {
+			limit = {
+				original_tag = WLL
+			}
+			transfer_state = 34
+			GER = {
+				transfer_state = 893
+				add_state_core = 893
+			}						
+		}
+		if = {
+			limit = {
+				original_tag = FLA
+			}
+			GER = {
+				puppet = FLA
+			}					
 		}
 	}
 
@@ -2365,8 +2446,17 @@ country_event = {
 		ai_chance = {
 			factor = 100
 		}
-		puppet = FROM
-		transfer_state = 34
+				
+		effect_tooltip = {
+			transfer_state = 34
+			GER = {
+				transfer_state = 893
+				add_state_core = 893
+				puppet = FLA
+			}	
+		}
+		
+
 	}
 }
 #response event for France - Belgium refuses
@@ -2981,14 +3071,234 @@ country_event = {
 			factor = 50
 		}
 		hidden_effect = { news_event = { id = lar_news.4 days = 3 random_days = 5 } }
+
 		every_state = { #take over core french territory that is being held by Germany
 			limit = {
 				is_core_of = ROOT
 				NOT = { state = 28 } #Elsass-Lothringen ist deutsch!
-				NOT = { state = 735 } #Savoy is Italian
+				 
+
+				if = {
+					limit = {
+						735 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = ITA
+									original_tag = SWI
+								}
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 735
+					}
+				}
+				if = { #Savoy is Italian
+					limit = {
+						735 = {
+							CONTROLLER = {
+								original_tag = ITA
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 735
+					}
+				}
+				
+				if = { #Corsican is Italian/corsican, but they all agree that Corsica Nazione is not legitimate
+					limit = {
+						1 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = COR
+									original_tag = SAD
+									original_tag = SIC
+									original_tag = ITA
+									original_tag = CAT
+									original_tag = SPR
+									original_tag = AUS
+									original_tag = ADU
+									original_tag = GRE
+									original_tag = CZE
+									original_tag = YUG
+									original_tag = TUR
+									original_tag = MOR
+									original_tag = ALG
+									original_tag = TUN
+									original_tag = EGY
+									original_tag = LBA
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 1
+					}
+				}				
+
+				if = { #Nord Pas de Calais is rightful Benelux Clay.
+					limit = {
+						29 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = FLA
+									original_tag = WLL
+									original_tag = BEL
+									original_tag = HOL
+									original_tag = LUX
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 29
+					}
+				}
+
+				if = { #Champagne is not rightful Benelux Clay... but we will keep it.
+					limit = {
+						18 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = FLA
+									original_tag = WLL
+									original_tag = BEL
+									original_tag = HOL
+									original_tag = LUX
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 18
+					}
+				}
+				if = { #Franche Compté is rightful Burgundian Clay.
+					limit = {
+						17 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = FLA
+									original_tag = WLL
+									original_tag = BEL
+									original_tag = HOL
+									original_tag = LUX
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 17
+					}
+				}
+				if = { #Burgundy is rightful Burgundian Clay.
+					limit = {
+						27 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = FLA
+									original_tag = WLL
+									original_tag = BEL
+									original_tag = HOL
+									original_tag = LUX
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 27
+					}
+				}								
+				if = { #Champagne is not rightful Benelux Clay... but we will keep it.
+					limit = {
+						18 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = FLA
+									original_tag = WLL
+									original_tag = BEL
+									original_tag = HOL
+									original_tag = LUX
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 18
+					}
+				}
+				if = { #Basque country belongs to Euskadi.
+					limit = {
+						806 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = NAV
+									original_tag = SPR
+									original_tag = CAT
+									original_tag = ADU
+									original_tag = POR
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 806
+					}
+				}
+				if = { #Toulouse country belongs to Euskadi apparently...
+					limit = {
+						31 = {
+							CONTROLLER = {
+								OR = {
+									original_tag = NAV
+									original_tag = SPR
+									original_tag = CAT
+									original_tag = ADU
+									original_tag = POR
+								}
+								
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 31
+					}
+				}				
+				if = {
+					limit = { #Brittany can into map apparition!
+						14 = {
+							OWNER = {
+								original_tag = BRI
+								is_in_faction_with = FROM
+							}
+						}						
+					}
+					NOT = {
+						state = 14
+					}
+				}
 				OR = {
 					is_controlled_by = FROM
 					CONTROLLER = {
+						is_ai = yes
 						is_in_faction_with = FROM 
 					}
 				}
@@ -3006,6 +3316,7 @@ country_event = {
 		unlock_national_focus = FRA_front_liberte
 		unlock_national_focus = FRA_support_ppf
 		unlock_national_focus = FRA_diplomatic_freedom
+		set_country_flag = FRA_vichy_occupation_ended
 	}
 }
 
@@ -3184,6 +3495,7 @@ country_event = {
 		}
 		start_civil_war = {
 			ideology = communism
+			size = 0.5
 		}
 	}
 }
@@ -3225,6 +3537,7 @@ country_event = {
 		}
 		start_civil_war = {
 			ideology = fascism
+			size = 0.5
 		}
 	}
 }
@@ -3659,24 +3972,24 @@ country_event = {
 	is_triggered_only = yes
 	immediate = {
 		random_list = {
-			85 = { country_event = lar_appeal_to_overseas_territories.2 } #indochina remains with Vichy
-			15 = { country_event = lar_appeal_to_overseas_territories.3 } #indochina switches sides
+			90 = { country_event = lar_appeal_to_overseas_territories.2 } #indochina remains with Vichy
+			10 = { country_event = lar_appeal_to_overseas_territories.3 } #indochina switches sides
 		}
 		random_list = {
-			80 = { country_event = { id = lar_appeal_to_overseas_territories.4 days = 3 } } #syria remains with Vichy
-			20 = { country_event = { id = lar_appeal_to_overseas_territories.5 days = 3 } } #syria switches sides
+			95 = { country_event = { id = lar_appeal_to_overseas_territories.4 days = 3 } } #syria remains with Vichy
+			5 = { country_event = { id = lar_appeal_to_overseas_territories.5 days = 3 } } #syria switches sides
 		}
 		random_list = {
-			80 = { country_event = { id = lar_appeal_to_overseas_territories.6 days = 8 } } #central africa remains with Vichy
-			20 = { country_event = { id = lar_appeal_to_overseas_territories.7 days = 8 } } #central africa switches sides
+			0 = { country_event = { id = lar_appeal_to_overseas_territories.6 days = 8 } } #central africa remains with Vichy
+			100 = { country_event = { id = lar_appeal_to_overseas_territories.7 days = 8 } } #central africa switches sides
 		}
 		random_list = {
-			90 = { country_event = { id = lar_appeal_to_overseas_territories.8 days = 12 } } #western africa remains with Vichy
-			10 = { country_event = { id = lar_appeal_to_overseas_territories.9 days = 12 } } #western africa switches sides
+			95 = { country_event = { id = lar_appeal_to_overseas_territories.8 days = 12 } } #western africa remains with Vichy
+			5 = { country_event = { id = lar_appeal_to_overseas_territories.9 days = 12 } } #western africa switches sides
 		}
 		random_list = {
-			70 = { country_event = { id = lar_appeal_to_overseas_territories.10 days = 16 } } #madagascar remains with Vichy
-			30 = { country_event = { id = lar_appeal_to_overseas_territories.11 days = 16 } } #madagascar switches sides
+			85 = { country_event = { id = lar_appeal_to_overseas_territories.10 days = 16 } } #madagascar remains with Vichy
+			15 = { country_event = { id = lar_appeal_to_overseas_territories.11 days = 16 } } #madagascar switches sides
 		}
 		random_list = {
 			95 = { country_event = { id = lar_appeal_to_overseas_territories.12 days = 20 } } #north africa remains with Vichy
@@ -3779,6 +4092,7 @@ country_event = {
 		}
 		VIC = { country_event = LaR_france_vichy_notification_events.3 }
 		FRA_transfer_central_africa_effect = yes
+		set_capital = { state = 772 }
 	}
 }
 # western africa remains with Vichy France

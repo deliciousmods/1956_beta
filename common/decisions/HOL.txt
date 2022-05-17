@@ -381,14 +381,16 @@ HOL_prepare_the_inundation_lines = {
 
 		days_remove = 14
 
-		highlight_state_targets = { state = 7 }
-
-		highlight_provinces = {
-			9498
-			391
-			11456
-			6241
+		highlight_states = {
+ 			highlight_state_targets = { state = 7 } 
+			highlight_provinces = {
+				9498
+				391
+				11456
+				6241
+			}
 		}
+
 
 		modifier = {
 		}
@@ -493,14 +495,16 @@ HOL_prepare_the_inundation_lines = {
 
 		days_remove = 14
 
-		highlight_state_targets = { state = 7 }
-
-		highlight_provinces = {
-			9498
-			391
-			11456
-			6241
+		highlight_states = {
+ 			highlight_state_targets = { state = 7 } 
+			highlight_provinces = {
+				9498
+				391
+				11456
+				6241
+			}
 		}
+
 
 		modifier = {
 		}
@@ -722,6 +726,67 @@ HOL_war_on_pacifism = {
 
 		remove_effect = {
 			HOL_shell_shocked_spectator_level_down = yes
+			clr_country_flag = hol_war_on_pacifism_in_progress
+		}
+
+		complete_effect = {
+			set_country_flag = hol_war_on_pacifism_in_progress
+		}
+
+	}
+	
+	HOL_anti_pacifist_propaganda_long = {
+
+		icon = hol_war_on_pacifism
+
+		allowed = {
+			tag = HOL
+		}
+
+		available = { #could be allowed at <60% war support, but might be exploited to get very high war support during the removal of shell shocked spectator
+			NOT = { has_country_flag = hol_war_on_pacifism_in_progress }
+			OR = {
+				hidden_trigger = { #lower than this itll be unbalanced
+					has_idea = HOL_shell_shocked_spectator_4 
+				}
+				has_idea = HOL_shell_shocked_spectator_5 #worst one
+			}
+		}
+
+		
+		cost = 150
+
+		fire_only_once = no
+
+		days_remove = 270
+
+		modifier = {
+			war_support_weekly = 0.005
+			political_power_factor = -0.35
+		}
+
+		visible = {
+			tag = HOL
+			has_completed_focus = HOL_war_on_pacifism
+			OR = {
+				has_idea = HOL_shell_shocked_spectator_5
+				has_idea = HOL_shell_shocked_spectator_4
+			}
+		}
+
+		remove_effect = {
+			if = {
+				limit = {
+					has_idea = HOL_shell_shocked_spectator_4
+				}
+				remove_ideas = HOL_shell_shocked_spectator_4
+			}
+			if = {
+				limit = {
+					has_idea = HOL_shell_shocked_spectator_5
+				}
+				remove_ideas = HOL_shell_shocked_spectator_5
+			}
 			clr_country_flag = hol_war_on_pacifism_in_progress
 		}
 
@@ -993,9 +1058,9 @@ HOL_secret_staff_talks = {
 			FROM = { country_event = { id = mtg_netherlands.41 hours = 6 } }
 			FROM = { army_experience = -5 }
 			effect_tooltip = {
-				add_tech_bonus = {
+				add_doctrine_cost_reduction = {
 					name = HOL_secret_staff_talks
-					bonus = 1.0
+					cost_reduction = 0.5
 					uses = 1
 					category = land_doctrine
 				}
@@ -1016,14 +1081,47 @@ HOL_gateway_to_europe_eng_category = {
 		allowed = {
 			tag = ENG
 		}
-
+		visible = {
+			has_civil_war = no
+		}
 		available = {
-			has_government = democratic
-			GER = { has_government = fascism }
+			hidden_trigger = {
+				has_global_flag = hol_mtg_focus_tree
+			}
+			is_major = yes
+			NOT = {
+				is_puppet_of = GER
+			}
+			has_civil_war = no
+			custom_trigger_tooltip = {
+				tooltip = HOL_can_ENG_or_GER_influence_tt
+				NOT = { #this is a bit confusing but we don't want them to be transitioning
+					OR = {
+						AND = { #transitioning to fascism
+							OR = {
+								has_completed_focus = ENG_organize_the_blackshirts
+								has_completed_focus = ENG_visit_germany
+							}
+							NOT = { has_government = fascism }
+						}
+						AND = { #transitioning to communism
+							OR = {
+								has_completed_focus = ENG_opposition_to_the_national_government
+								has_completed_focus = ENG_concessions_to_the_trade_unions
+							}
+							NOT = { has_government = communism }
+						}
+						AND = { #transitioning to monarchism
+							has_completed_focus = ENG_the_kings_party
+							NOT = { has_government = neutrality }
+						}
+					}
+				}
+			}
 		}
 
 		targets = { HOL }
-		
+
 		target_trigger = {
 			FROM = {
 				tag = HOL
@@ -1221,8 +1319,43 @@ HOL_gateway_to_europe_ger_category = {
 		}
 
 		available = {
-			has_government = fascism
-			ENG = { has_government = democratic }
+			hidden_trigger = {
+				has_global_flag = hol_mtg_focus_tree
+			}
+			is_major = yes
+			NOT = {
+				is_puppet_of = ENG
+			}
+			has_civil_war = no
+			custom_trigger_tooltip = {
+				tooltip = HOL_can_ENG_or_GER_influence_tt
+				NOT = { #we want this to not be the case
+					OR = {
+						AND = { #DLC tree only needs focus checks
+							has_completed_focus = GER_oppose_hitler
+							NOT = { #has not stabilized
+								OR = {
+									has_completed_focus = GER_return_of_the_kaiser #has stabilized with Kaiser
+									has_completed_focus = GER_the_monarchy_compromise #has stabilized as democracy
+								}
+							}
+						}
+						AND = { #has not stabilized as non-DLC kaiserreich
+							has_completed_focus = GER_rally_the_monarchists
+							NOT = { has_completed_focus = GER_consolidate_new_reich }
+						}
+						AND = {
+							has_completed_focus = GER_kill_hitler
+							NOT = {
+								OR = { #by lack of better checks
+									has_government = communism
+									has_government = democratic
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		targets = { HOL }
@@ -1299,6 +1432,13 @@ HOL_gateway_to_europe_ger_category = {
 				factor = 0
 				focus_progress = {
 					focus = GER_around_maginot
+					progress > 0
+				}
+			}
+			modifier = {
+				factor = 0
+				focus_progress = {
+					focus = GER_around_maginot_vanilla
 					progress > 0
 				}
 			}
@@ -1405,11 +1545,38 @@ HOL_gateway_to_europe_hol_category = {
 		}
 
 		available = {
-			has_global_flag = hol_mtg_focus_tree
+			hidden_trigger = {
+				has_global_flag = hol_mtg_focus_tree
+			}
 			HOL = { has_completed_focus = HOL_gateway_to_europe }
 			ENG = {
 				exists = yes
-				has_government = democratic
+				has_civil_war = no
+				custom_trigger_tooltip = {
+					tooltip = HOL_is_placated_changing_gov_tt
+					NOT = { #this is a bit confusing but we don't want them to be transitioning
+						OR = {
+							AND = { #transitioning to fascism
+								OR = {
+									has_completed_focus = ENG_organize_the_blackshirts
+									has_completed_focus = ENG_visit_germany
+								}
+								NOT = { has_government = fascism }
+							}
+							AND = { #transitioning to communism
+								OR = {
+									has_completed_focus = ENG_opposition_to_the_national_government
+									has_completed_focus = ENG_concessions_to_the_trade_unions
+								}
+								NOT = { has_government = communism }
+							}
+							AND = { #transitioning to monarchism
+								has_completed_focus = ENG_the_kings_party
+								NOT = { has_government = neutrality }
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -1541,19 +1708,43 @@ HOL_gateway_to_europe_hol_category = {
 		}
 
 		available = {
-			has_global_flag = hol_mtg_focus_tree
+			hidden_trigger = {
+				has_global_flag = hol_mtg_focus_tree
+			} 
 			HOL = { has_completed_focus = HOL_gateway_to_europe }
 			GER = {
 				exists = yes
-				has_government = fascism
 				#NOT = { has_completed_focus = GER_oppose_hitler }
-				NOT = {
-					OR ={
-						#has_completed_focus = GER_oppose_hitler
-						has_completed_focus = GER_kill_hitler
-						has_completed_focus = GER_rally_the_monarchists
+				has_civil_war = no
+				custom_trigger_tooltip = {
+					tooltip = HOL_is_placated_changing_gov_tt
+					NOT = { #we want this to not be the case
+						OR = {
+							AND = { #DLC tree only needs focus checks
+								has_completed_focus = GER_oppose_hitler
+								NOT = { #has not stabilized
+									OR = {
+										has_completed_focus = GER_return_of_the_kaiser #has stabilized with Kaiser
+										has_completed_focus = GER_the_monarchy_compromise #has stabilized as democracy
+									}
+								}
+							}
+							AND = { #has not stabilized as non-DLC kaiserreich
+								has_completed_focus = GER_rally_the_monarchists
+								NOT = { has_completed_focus = GER_consolidate_new_reich }
+							}
+							AND = {
+								has_completed_focus = GER_kill_hitler
+								NOT = {
+									OR = { #by lack of better checks
+										has_government = communism
+										has_government = democratic
+									}
+								}
+							}
+						}
 					}
-				}				
+				}
 			}
 		}
 
@@ -2083,11 +2274,11 @@ political_actions = {
 				}
 				add_compliance = 70
 			}
-			set_capital = 335
+			set_capital = { state = 335 }
 			hidden_effect = { news_event = { id = mtg_news.46 days = 1 } }
 		}
 	}
-
+	
 	HOL_propose_benelux_unification = {
 
 		icon = eng_trade_unions_support
@@ -2097,8 +2288,19 @@ political_actions = {
 		}
 
 		available = {
-			is_in_faction_with = BEL
-			BEL = { has_government = ROOT }
+			OR = {
+				AND = {
+					is_in_faction_with = BEL
+					BEL = { has_government = ROOT }
+				}
+				#remove when fully working with FLA and WLL
+				#AND = {
+				#	is_in_faction_with = fLA
+				#	FLA = { has_government = ROOT }
+				#	is_in_faction_with = WLL
+				#	WLL = { has_government = ROOT }
+				#}
+			}
 			is_in_faction_with = LUX
 			LUX = { has_government = ROOT }
 		}
@@ -2142,6 +2344,9 @@ political_actions = {
 					}
 					add_core_of = ROOT
 				}
+				add_ideas = generic_recent_political_unification
+				add_ideas = generic_recent_army_unification
+				add_ideas = generic_recent_economic_unification	
 			}
 			custom_effect_tooltip = HOL_propose_benelux_unification_tt
 			BEL = {
@@ -2152,6 +2357,4 @@ political_actions = {
 			}
 		}
 	}
-
 }
-
