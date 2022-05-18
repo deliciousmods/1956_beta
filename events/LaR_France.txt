@@ -3552,78 +3552,77 @@ country_event = {
 #events to notify player that they are having worker issues
 # add_namespace = lar_worker_shortage
 
-#  #country switched to extensive conscription while on full employment
-#  country_event = {
-# 	 id = lar_worker_shortage.1
-# 	 title = lar_worker_shortage.1.t
-# 	 desc = lar_worker_shortage.1.desc
-# 	 picture = GFX_report_event_generic_factory
+  #country switched to extensive conscription while on full employment
+  country_event = {
+ 	 id = lar_worker_shortage.1
+ 	 title = lar_worker_shortage.1.t
+ 	 desc = lar_worker_shortage.1.desc
+ 	 picture = GFX_report_event_generic_factory
+ 	 trigger = {
+ 		 tag = FRA
+ 		 has_idea = FRA_full_employment
+ 		 not = { has_idea = FRA_worker_shortage }
+ 		 OR = {
+ 			 has_idea = extensive_conscription
+ 			 has_idea = service_by_requirement
+ 			 has_idea = all_adults_serve
+ 			 has_idea = scraping_the_barrel
+ 		 }
+ 	 }
+ 	 mean_time_to_happen = { days = 20 }
 
-# 	 trigger = {
-# 		 tag = FRA
-# 		 has_idea = FRA_full_employment
-# 		 not = { has_idea = FRA_worker_shortage }
-# 		 OR = {
-# 			 has_idea = extensive_conscription
-# 			 has_idea = service_by_requirement
-# 			 has_idea = all_adults_serve
-# 			 has_idea = scraping_the_barrel
-# 		 }
-# 	 }
-# 	 mean_time_to_happen = { days = 20 }
-	
-# 	 immediate = {
-# 		 hidden_effect = {
-# 			 swap_ideas = {
-# 				 remove_idea = FRA_full_employment
-# 				 add_idea = FRA_worker_shortage
-# 			 }
-# 		 }
-# 	 }
+ 	 immediate = {
+ 		 hidden_effect = {
+ 			 swap_ideas = {
+ 				 remove_idea = FRA_full_employment
+ 				 add_idea = FRA_worker_shortage
+ 			 }
+ 		 }
+ 	 }
+	  
+ 	 option = {
+ 		 name = lar_worker_shortage.1.a #agree
+ 		 ai_chance = {
+ 			 factor = 80
+ 		 }
+ 		 effect_tooltip = { #actual effect in immediate so player can not avoid by waiting it out, tooltip here to tell player what is happening
+ 			 swap_ideas = {
+ 				 remove_idea = FRA_full_employment
+ 				 add_idea = FRA_worker_shortage
+ 			 }
+ 		 }
+ 	 }
+  }
 
-# 	 option = {
-# 		 name = lar_worker_shortage.1.a #agree
-# 		 ai_chance = {
-# 			 factor = 80
-# 		 }
-# 		 effect_tooltip = { #actual effect in immediate so player can not avoid by waiting it out, tooltip here to tell player what is happening
-# 			 swap_ideas = {
-# 				 remove_idea = FRA_full_employment
-# 				 add_idea = FRA_worker_shortage
-# 			 }
-# 		 }
-# 	 }
-#  }
+  #country demobilizes while having worker shortage
+  country_event = {
+ 	 id = lar_worker_shortage.2
+ 	 title = lar_worker_shortage.2.t
+ 	 desc = lar_worker_shortage.2.desc
+ 	 picture = GFX_report_event_france_tank_production
 
-#  #country demobilizes while having worker shortage
-#  country_event = {
-# 	 id = lar_worker_shortage.2
-# 	 title = lar_worker_shortage.2.t
-# 	 desc = lar_worker_shortage.2.desc
-# 	 picture = GFX_report_event_france_tank_production
-
-# 	 trigger = {
-# 		 tag = FRA
-# 		 has_idea = FRA_worker_shortage
-# 		 not = { has_idea = FRA_full_employment }
-# 		 OR = {
-# 			 has_idea = limited_conscription
-# 			 has_idea = disarmed_nation
-# 			 has_idea = volunteer_only
-# 		 }
-# 	 }
-# 	 mean_time_to_happen = { days = 20 }
-# 	 option = {
-# 		 name = lar_worker_shortage.2.a #agree
-# 		 ai_chance = {
-# 			 factor = 80
-# 		 }
-# 		 swap_ideas = {
-# 			 remove_idea = FRA_worker_shortage
-# 			 add_idea = FRA_full_employment
-# 		 }
-# 	 }
-#  }
+ 	 trigger = {
+ 		 tag = FRA
+ 		 has_idea = FRA_worker_shortage
+ 		 not = { has_idea = FRA_full_employment }
+ 		 OR = {
+ 			 has_idea = limited_conscription
+ 			 has_idea = disarmed_nation
+ 			 has_idea = volunteer_only
+ 		 }
+ 	 }
+ 	 mean_time_to_happen = { days = 20 }
+ 	 option = {
+ 		 name = lar_worker_shortage.2.a #agree
+ 		 ai_chance = {
+ 			 factor = 80
+ 		 }
+ 		 swap_ideas = {
+ 			 remove_idea = FRA_worker_shortage
+ 			 add_idea = FRA_full_employment
+ 		 }
+ 	 }
+  }
 
  ##  ###  #   #  ##     ###  #  # ###   ##  #  #  ##   ## ###  ## 
 #  # #  # ## ## #       #  # #  # #  # #  # #  # #  # #   #   #   
@@ -3725,7 +3724,32 @@ country_event = {
 		else_if = {
 			limit = { has_government = democratic }
 			set_variable = { volunteer_strength = FRA.party_popularity@democratic }
-			multiply_variable = { volunteer_strength = FRA.war_support } #special modifier to reduce impact of democratic support
+			#Since war_support is targeted poorly, had to add those checks
+			if = {
+				limit = {
+					FRA = {
+						has_war_support > 0.5 #somehow manages to get
+					}
+				}
+				multiply_variable = { volunteer_strength = 0.6 } #special modifier to reduce impact of democratic support
+			}
+			if = {
+				limit = {
+					FRA = {
+						has_war_support < 0.5
+						has_war_support > 0.2
+					}
+				}
+				multiply_variable = { volunteer_strength = 0.3 } #special modifier to reduce impact of democratic support
+			}
+			if = {
+				limit = {
+					FRA = {
+						has_war_support < 0.2
+					}
+				}
+				multiply_variable = { volunteer_strength = 0.15 } #special modifier to reduce impact of democratic support
+			}
 		}
 		else_if = {
 			limit = { has_government = neutrality }
