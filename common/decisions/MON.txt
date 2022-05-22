@@ -3081,45 +3081,27 @@ MON_on_the_crossroads_of_the_world_category = {
 
 		icon = GFX_decision_generic_scales
 		available = {
-			FROM = {
-				exists = yes
-			}
-			ROOT = {
-				NOT = {
-					is_subject_of = FROM
+			is_subject = no
+			OR = {
+				custom_trigger_tooltip = {
+					tooltip = MON_sov_influence_more_30_tt
+					check_variable = { sov_influence_in_mon = 30 compare = greater_than_or_equals }
+				}
+				custom_trigger_tooltip = {
+					tooltip = MON_jap_influence_more_30_tt
+					check_variable = { jap_influence_in_mon = 30 compare = greater_than_or_equals }
+				}
+				custom_trigger_tooltip = {
+					tooltip = MON_chi_influence_more_30_tt
+					check_variable = { chi_influence_in_mon = 30 compare = greater_than_or_equals }
+				}
+				custom_trigger_tooltip = {
+					tooltip = MON_prc_influence_more_30_tt
+					check_variable = { prc_influence_in_mon = 30 compare = greater_than_or_equals }
 				}
 			}
 		}
-		target_trigger = {
-			FROM = {
-				OR = {
-					AND = {
-						original_tag = SOV
-						MON = {
-							check_variable = { sov_influence_in_mon = 30 compare = greater_than_or_equals }
-						}
-					}
-					AND = {
-						original_tag = JAP
-						MON = {
-							check_variable = { jap_influence_in_mon = 30 compare = greater_than_or_equals }
-						}
-					}
-					AND = {
-						original_tag = CHI
-						MON = {
-							check_variable = { chi_influence_in_mon = 30 compare = greater_than_or_equals }
-						}
-					}
-					AND = {
-						original_tag = PRC
-						MON = {
-							check_variable = { prc_influence_in_mon = 30 compare = greater_than_or_equals }
-						}
-					}
-				}
-			}
-		}
+
 		days_re_enable = 270
 
 		cost = 75
@@ -6385,12 +6367,6 @@ MON_greater_mongolia = {
 			controls_state = 714
 			controls_state = 715
 			controls_state = 873
-			all_state = {
-				OR = {
-					compliance < 25
-					has_state_flag = MON_states_required_for_greater_mongolia_flag
-				}
-			}
 		}
 
 		visible = {
@@ -8776,13 +8752,16 @@ MON_thousand_year_rivalry = {
 	#Decisions aimed onto the confrontations with warlords
 	MON_plan_to_attack_warlord = {
 		
-		icon = generic_form_nation
+		icon = hol_draw_up_staff_plans
 
 		visible = {
 			original_tag = MON
 			has_capitulated = no
 			MON = {
 				has_completed_focus = MON_confrontations_with_warlords
+			}
+			NOT = {
+				has_global_flag = MON_has_picked_a_warlord_to_attack
 			}
 		}
 
@@ -8826,25 +8805,28 @@ MON_thousand_year_rivalry = {
 		complete_effect = {
 			add_war_support = 0.01
 			set_global_flag = MON_has_picked_a_warlord_to_attack
+			FROM = {
+				set_country_flag = MON_is_willing_to_go_for_you
+			}
 		}
 		
 		remove_effect = {
 			add_command_power = 25
-			FROM = {
-				set_country_flag = MON_is_willing_to_go_for_you
-			}
 		}
 	}
 
 	MON_invite_from_country_to_attack_warlord = {
 		
-		icon = generic_form_nation
+		icon = generic_political_discourse
 
 		visible = {
 			original_tag = MON
 			has_capitulated = no
 			has_completed_focus = MON_confrontations_with_warlords
 			has_global_flag = MON_has_picked_a_warlord_to_attack
+			any_other_country = {
+				has_country_flag = MON_is_willing_to_go_for_you
+			}
 		}
 
 		target_trigger = {
@@ -8891,7 +8873,7 @@ MON_thousand_year_rivalry = {
 			}
 		}
 		icon = {	#Too many other countries, decided to showcase that it is claimed by someone else already
-			key = GFX_decision_india_forward
+			key = generic_form_nation 
 			trigger = {
 				FROM = {
 					has_state_flag = MON_state_fully_claimed_by_someone_already
@@ -8902,7 +8884,7 @@ MON_thousand_year_rivalry = {
 			}
 		}
 		icon = {
-			key = generic_form_nation
+			key = GFX_decision_india_forward
 			trigger = {
 				FROM = {
 					has_state_flag = MON_state_fully_claimed_by_someone_already
@@ -8924,11 +8906,11 @@ MON_thousand_year_rivalry = {
 				controller = {
 					OR = {
 						has_country_flag = MON_is_willing_to_go_for_you
-					}
-					AND = {
-						is_subject = yes
-						OVERLORD = {
-							has_country_flag = MON_is_willing_to_go_for_you
+						AND = {
+							is_subject = yes
+							OVERLORD = {
+								has_country_flag = MON_is_willing_to_go_for_you
+							}
 						}
 					}
 				}
@@ -8947,6 +8929,9 @@ MON_thousand_year_rivalry = {
 		}
 
 		available = {
+			any_country = {
+				has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
+			}
 			NOT ={
 				has_country_flag = MON_already_claiming_a_state
 			}
@@ -8954,9 +8939,6 @@ MON_thousand_year_rivalry = {
 				NOT = {
 					has_state_flag = MON_state_fully_claimed_by_someone_already
 				}
-			}
-			any_other_country = {
-				has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
 			}
 		}
 
@@ -8978,41 +8960,43 @@ MON_thousand_year_rivalry = {
 					value = 1
 				}
 			}
-			every_country = {
-				limit = {
-					OR = {
-						original_tag = MON
-						has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
-					}
-				}
-				#If influenced five times, no other party cannot further influence it!
-				if = {
+			hidden_effect = {
+				every_country = {
 					limit = {
-						FROM = {
-							check_variable = {
-								var = var_warlord_claim_strength_@PREV
-								value = 3
-								compare = greater_than_or_equals
-							}
+						OR = {
+							original_tag = MON
+							has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
 						}
 					}
-					FROM = {
-						set_state_flag = MON_state_fully_claimed_by_someone_already
-					}
-				}
-				#In case country claims it, they get to keep it
-				if = {
-					limit = {
-						FROM = {
-							check_variable = {
-								var = var_warlord_claim_strength_@ROOT
-								value = 3
-								compare = greater_than_or_equals
+					#If influenced five times, no other party cannot further influence it!
+					if = {
+						limit = {
+							FROM = {
+								check_variable = {
+									var = var_warlord_claim_strength_@PREV
+									value = 3
+									compare = greater_than_or_equals
+								}
 							}
 						}
+						FROM = {
+							set_state_flag = MON_state_fully_claimed_by_someone_already
+						}
 					}
-					FROM = {
-						set_state_flag = MON_state_is_fully_claimed_by_@ROOT
+					#In case country claims it, they get to keep it
+					if = {
+						limit = {
+							FROM = {
+								check_variable = {
+									var = var_warlord_claim_strength_@ROOT
+									value = 3
+									compare = greater_than_or_equals
+								}
+							}
+						}
+						FROM = {
+							set_state_flag = MON_state_is_fully_claimed_by_@ROOT
+						}
 					}
 				}
 			}
@@ -9021,9 +9005,7 @@ MON_thousand_year_rivalry = {
 
 	MON_present_an_ultimatum = {
 
-		icon = {
-			key = eng_trade_unions_demand
-		}
+		icon = eng_trade_unions_demand
 
 		allowed = {
 			OR = {
