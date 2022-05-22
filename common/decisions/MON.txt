@@ -3077,6 +3077,76 @@ MON_on_the_crossroads_of_the_world_category = {
 		}
 	}
 
+	MON_promote_an_independent_diplomatic_stance = {
+
+		icon = GFX_decision_generic_scales
+		available = {
+			FROM = {
+				exists = yes
+			}
+			ROOT = {
+				NOT = {
+					is_subject_of = FROM
+				}
+			}
+		}
+		target_trigger = {
+			FROM = {
+				OR = {
+					AND = {
+						original_tag = SOV
+						MON = {
+							check_variable = { sov_influence_in_mon = 30 compare = greater_than_or_equals }
+						}
+					}
+					AND = {
+						original_tag = JAP
+						MON = {
+							check_variable = { jap_influence_in_mon = 30 compare = greater_than_or_equals }
+						}
+					}
+					AND = {
+						original_tag = CHI
+						MON = {
+							check_variable = { chi_influence_in_mon = 30 compare = greater_than_or_equals }
+						}
+					}
+					AND = {
+						original_tag = PRC
+						MON = {
+							check_variable = { prc_influence_in_mon = 30 compare = greater_than_or_equals }
+						}
+					}
+				}
+			}
+		}
+		days_re_enable = 270
+
+		cost = 75
+
+		fire_only_once = no
+
+		ai_will_do = {
+			factor = 0.1
+			modifier = {
+				factor = 100
+				is_historical_focus_on = yes
+				date < 1940.01.01
+			}
+		}
+
+		complete_effect = {
+			custom_effect_tooltip = GEN_270_days_tt
+		}
+		
+		remove_effect = {
+			MON_soviet_medium_influence_decrease_effect = yes
+			MON_jap_medium_influence_decrease_effect = yes
+			MON_chi_medium_influence_decrease_effect = yes
+			MON_prc_medium_influence_decrease_effect = yes
+		}
+	}
+
 	MON_obtain_new_weapon_designs = {
 
 		icon = ger_military_buildup
@@ -7079,6 +7149,7 @@ MON_a_puppet_republic = {
 					FROM = { country_event = { id = mongol_soviet_puppet.2 hours = 1 } }
 				}
 				MON_propaganda_good_outcome = {
+					add_political_power = 10
 				}
 			}
 		}
@@ -7161,6 +7232,7 @@ MON_a_puppet_republic = {
 					FROM = { country_event = { id = mongol_soviet_puppet.2 hours = 1 } }
 				}
 				MON_propaganda_good_outcome = {
+					add_political_power = 10
 				}
 			}
 		}
@@ -8700,9 +8772,142 @@ MON_thousand_year_rivalry = {
 	}
 
 	#Decisions aimed onto the confrontations with warlords
-	MON_claim_the_warlord = {
+	MON_plan_to_attack_warlord = {
 		
 		icon = generic_form_nation
+
+		visible = {
+			original_tag = MON
+			has_capitulated = no
+			MON = {
+				has_completed_focus = MON_confrontations_with_warlords
+			}
+		}
+
+		target_trigger = {
+			FROM = {
+				is_subject = no #don't attack puppets/subjects of some other powers
+				NOT = {
+					has_country_flag = MON_is_willing_to_go_for_you
+				}
+				OR = {
+					AND = {
+						NOT = {
+							original_tag = PRC
+							original_tag = CHI
+						}
+						is_literally_china = yes
+					}
+					original_tag = MEN
+					original_tag = MAN
+				}
+				ROOT = {	#Can't attack your overlord, buddy
+					NOT = {
+						is_subject_of = FROM
+					}
+				}
+			}
+		}
+
+		available = {
+			NOT = {
+				has_global_flag = MON_has_picked_a_warlord_to_attack
+			}
+		}
+
+		cost = 25
+
+		fire_only_once = no
+
+		days_remove = 14
+		
+		complete_effect = {
+			add_war_support = 0.01
+			set_global_flag = MON_has_picked_a_warlord_to_attack
+		}
+		
+		remove_effect = {
+			add_command_power = 25
+			FROM = {
+				set_country_flag = MON_is_willing_to_go_for_you
+			}
+		}
+	}
+
+	MON_invite_from_country_to_attack_warlord = {
+		
+		icon = generic_form_nation
+
+		visible = {
+			original_tag = MON
+			has_capitulated = no
+			has_completed_focus = MON_confrontations_with_warlords
+			has_global_flag = MON_has_picked_a_warlord_to_attack
+		}
+
+		target_trigger = {
+			FROM = {
+				is_subject = no #don't attack puppets/subjects of some other powers
+				NOT = {	#can't invite country which you are going to attack
+					has_country_flag = MON_is_willing_to_go_for_you
+				}
+				OR = {
+					is_literally_china = yes
+					original_tag = MEN
+					original_tag = MAN
+				}
+				NOT = {	#already got an event and decided to stay out
+					has_country_flag = MON_will_not_attack_warlord_together_woth_mongolia
+				}
+			}
+		}
+
+		cost = 5
+
+		fire_only_once = no
+
+		complete_effect = {
+			FROM = {
+				country_event = {
+					id = mongol_foreign_influence.10
+				}
+			}
+		}
+	}
+
+	MON_claim_the_warlord = {
+
+		icon = {
+			key = GFX_decision_generic_scales
+			trigger = {
+				FROM = {
+					NOT = {
+						has_state_flag = MON_state_fully_claimed_by_someone_already
+						has_state_flag = MON_state_is_fully_claimed_by_@ROOT
+					}
+				}
+			}
+		}
+		icon = {	#Too many other countries, decided to showcase that it is claimed by someone else already
+			key = GFX_decision_india_forward
+			trigger = {
+				FROM = {
+					has_state_flag = MON_state_fully_claimed_by_someone_already
+					NOT = {
+						has_state_flag = MON_state_is_fully_claimed_by_@ROOT
+					}
+				}
+			}
+		}
+		icon = {
+			key = generic_form_nation
+			trigger = {
+				FROM = {
+					has_state_flag = MON_state_fully_claimed_by_someone_already
+					has_state_flag = MON_state_is_fully_claimed_by_@ROOT
+				}
+			}
+		}
 
 		allowed = {
 			OR = {
@@ -8711,35 +8916,164 @@ MON_thousand_year_rivalry = {
 			}
 		}
 
-		visible = {
-			has_capitulated = no
-			MON = {
-				has_completed_focus = MON_the_battle_for_tuva_uriankai
+		state_target = yes
+		target_trigger = {
+			FROM = {
+				controller = {
+					OR = {
+						has_country_flag = MON_is_willing_to_go_for_you
+					}
+					AND = {
+						is_subject = yes
+						OVERLORD = {
+							has_country_flag = MON_is_willing_to_go_for_you
+						}
+					}
+				}
 			}
 		}
 
-		cost = 75
+		visible = {
+			has_capitulated = no
+			MON = {
+				has_completed_focus = MON_confrontations_with_warlords
+			}
+			OR = {
+				original_tag = MON
+				has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
+			}
+		}
+
+		available = {
+			NOT ={
+				has_country_flag = MON_already_claiming_a_state
+			}
+			FROM = {
+				NOT = {
+					has_state_flag = MON_state_fully_claimed_by_someone_already
+				}
+			}
+			any_other_country = {
+				has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
+			}
+		}
+
+		cost = 5
 
 		fire_only_once = no
 
 		days_remove = 14
 
+		complete_effect = {
+			set_country_flag = MON_already_claiming_a_state
+		}
+
 		remove_effect = {
-			custom_effect_tooltip = MON_tan_influence_flag_and_adj_tooltip	#Tuva gains influence
-			custom_effect_tooltip = MON_add_25_influence_tt
-			add_to_variable = {
-				var = tan_battle_for_tuva_uriankai_influence
-				value = 25
+			clr_country_flag = MON_already_claiming_a_state
+			FROM = {
+				add_to_variable = {
+					var = var_warlord_claim_strength_@ROOT
+					value = 1
+				}
 			}
-			clamp_variable = {
-				var = tan_battle_for_tuva_uriankai_influence
-				min = 0
-				max = 100
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = MON
+						has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
+					}
+				}
+				#If influenced five times, no other party cannot further influence it!
+				if = {
+					limit = {
+						FROM = {
+							check_variable = {
+								var = var_warlord_claim_strength_@PREV
+								value = 3
+								compare = greater_than_or_equals
+							}
+						}
+					}
+					FROM = {
+						set_state_flag = MON_state_fully_claimed_by_someone_already
+					}
+				}
+				#In case country claims it, they get to keep it
+				if = {
+					limit = {
+						FROM = {
+							check_variable = {
+								var = var_warlord_claim_strength_@ROOT
+								value = 3
+								compare = greater_than_or_equals
+							}
+						}
+					}
+					FROM = {
+						set_state_flag = MON_state_is_fully_claimed_by_@ROOT
+					}
+				}
 			}
-			add_stability= 0.03
-			add_popularity = {
-				ideology = communism
-				popularity = 0.05
+		}
+	}
+
+	MON_present_an_ultimatum = {
+
+		icon = {
+			key = eng_trade_unions_demand
+		}
+
+		allowed = {
+			OR = {
+				original_tag = MON
+				is_literally_china = yes
+			}
+		}
+
+		target_trigger = {
+			FROM = {
+				has_country_flag = MON_is_willing_to_go_for_you
+			}
+		}
+
+		visible = {
+			has_capitulated = no
+			MON = {
+				has_completed_focus = MON_confrontations_with_warlords
+			}
+			OR = {
+				original_tag = MON
+				has_country_flag = MON_joined_mongolia_to_secure_one_of_the_warlords
+			}
+		}
+
+		available = {
+			all_state = {
+				OR = {
+					NOT = { 
+						controller = {
+							OR = {
+								tag = FROM
+								is_subject_of = FROM
+							}
+						}
+					}
+					has_state_flag = MON_state_fully_claimed_by_someone_already
+				}
+			}	
+		}
+
+		cost = 25
+
+		fire_only_once = no
+
+		complete_effect = {
+			clr_global_flag = MON_has_picked_a_warlord_to_attack  #Can further issue demands/ultimatums
+			FROM = {	#event to demand lands
+				country_event = {
+					id = mongol_foreign_influence.13
+					hours = 12
+				}
 			}
 		}
 	}
