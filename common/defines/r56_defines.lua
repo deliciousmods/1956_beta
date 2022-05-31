@@ -131,7 +131,7 @@ NMilitary = {
 NDefines.NAI.GARRISON_FRACTION = 0.01 					-- How large part of a front should always be holding the line rather than advancing at the enemy
 
 NDefines.NAI.DIPLOMATIC_ACTION_GOOD_BAD_RATIO_THRESHOLD = 1
-NDefines.NAI.BASE_RELUCTANCE = 5 						-- (Original value: 20) Base reluctance applied to all diplomatic offers
+NDefines.NAI.BASE_RELUCTANCE = 15 						-- (Original value: 20) Base reluctance applied to all diplomatic offers
 NDefines.NAI.DIPLOMATIC_ACTION_RANDOM_FACTOR = 0.5 		-- How much of the AI diplomatic action scoring is randomly determined (1.0 = half random, 2.0 = 2/3rd random, etc)
 NDefines.NAI.DIPLOMATIC_ACTION_PROPOSE_SCORE = 50 		-- AI must score a diplomatic action at least this highly to propose it themselves
 NDefines.NAI.DILPOMATIC_ACTION_DECLARE_WAR_WARGOAL_BASE = 50 -- Base diplomatic action score bonus to go to war per wargoal
@@ -358,8 +358,10 @@ NAI = {
 			0.0, -- army leaders
 			0.6, -- operatives
 		},
-
+		STARTING_COMMAND_POWER = 10.0,					-- starting command power for every country
+		GIE_EXILE_ARMY_LEADER_START_LEVEL = 3,	--Starting level for exile leader
 	},	
+
 }
 
 
