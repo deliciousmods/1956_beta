@@ -358,8 +358,10 @@ NAI = {
 			0.0, -- army leaders
 			0.6, -- operatives
 		},
-
+		STARTING_COMMAND_POWER = 10.0,					-- starting command power for every country
+		GIE_EXILE_ARMY_LEADER_START_LEVEL = 3,	--Starting level for exile leader
 	},	
+
 }
 
 
