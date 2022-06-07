@@ -322,6 +322,11 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		completion_reward = {
+			set_party_name = {
+				ideology = neutrality
+				name = "Kungens Regi"
+				long_name = "Kungens Regering"			
+			}
 			add_popularity = {
 				ideology = neutrality
 				popularity = 0.25
@@ -450,6 +455,8 @@ focus_tree = {
 
 		available_if_capitulated = yes
 
+		available = { has_completed_focus = SWE_abandon_neutrality }
+
 		completion_reward = {
 			add_popularity = {
 				ideology = neutrality
@@ -473,14 +480,27 @@ focus_tree = {
 
 		available_if_capitulated = yes
 
+		available = { 
+			has_completed_focus = SWE_scandinavian_isolation
+			neutrality > 0.45
+		}
+
 		completion_reward = {
-			add_popularity = {
-				ideology = neutrality
-				popularity = 0.25
+			set_politics = {
+				ruling_party = neutrality
+				elections_allowed = no
 			}
-			add_timed_idea = {
-				idea = SWE_monarchist_fervor
-				days = 730
+			add_country_leader_role = {
+				character = SWE_gustaf_adolf_v
+				promote_leader = yes
+				country_leader = {
+					ideology = absolute_monarchism
+					expire = "1950.10.29.8"
+					traits = { 
+						SWE_sveriges_kung
+					}
+
+				}
 			}
 		}
 	}
@@ -649,22 +669,53 @@ focus_tree = {
 		id = SWE_the_northern_lights
 		icon = GFX_goal_NOR_nordic_alliance
 		prerequisite = { focus = SWE_discussions_with_denmark }
-		mutually_exclusive = { }
+		mutually_exclusive = { focus = SWE_join_the_allies }
 		relative_position_id = SWE_discussions_with_denmark
 		x = 0
 		y = 2
-		cost = 10
+		cost = 8
 
 		available_if_capitulated = yes
 
 		completion_reward = {
-			add_popularity = {
-				ideology = neutrality
-				popularity = 0.25
+			set_rule = { can_create_factions = yes }
+			if = {
+				limit = {
+					any_country = {
+						is_faction_leader = yes 
+						NOT = {
+							has_government = fascism
+							has_government = communism
+						}
+					gen_is_nordic_country = yes
+					}
+				}
+				random_country = {
+					limit = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = fascism
+							has_government = communism
+						}
+						gen_is_nordic_country = yes
+					}
+					country_event = generic.2
+				}
 			}
-			add_timed_idea = {
-				idea = SWE_monarchist_fervor
-				days = 730
+			else = {
+				create_faction = "North Europe Treaty Organisation"
+				every_other_country = {
+					limit = {
+						is_in_faction = no
+						is_subject = no
+						NOT = {
+							has_government = fascism
+							has_government = communism
+						}
+						gen_is_nordic_country = yes
+					}
+					country_event = generic.5
+				}
 			}
 		}
 	}
@@ -672,27 +723,30 @@ focus_tree = {
 		id = SWE_join_the_allies
 		icon = GFX_focus_eng_the_sun_never_sets
 		prerequisite = { focus = SWE_discussions_with_denmark }
-		mutually_exclusive = { }
+		mutually_exclusive = { focus = SWE_the_northern_lights }
 		relative_position_id = SWE_discussions_with_denmark
 		x = -2
 		y = 2
-		cost = 10
+		cost = 5
 
 		available_if_capitulated = yes
 
+		available = {
+			ENG = {
+				NOT = {
+					has_government = communism
+					has_government = fascism
+				}
+				is_faction_leader = yes
+			}
+		}
+
 		completion_reward = {
-			add_popularity = {
-				ideology = neutrality
-				popularity = 0.25
-			}
-			add_timed_idea = {
-				idea = SWE_monarchist_fervor
-				days = 730
-			}
+			ENG = { country_event = generic.2 }
 		}
 	}
 	focus = {
-		id = SWE_diplomatic_mission_to_germany
+		id = SWE_secure_our_southern_border
 		icon = GFX_focus_generic_seek_accomodation_with_germany
 		prerequisite = { focus = SWE_the_northern_lights focus = SWE_join_the_allies  }
 		mutually_exclusive = { }
@@ -703,15 +757,27 @@ focus_tree = {
 
 		available_if_capitulated = yes
 
+		available = {
+			GER = {
+				OR = {
+					has_government = communism
+					has_government = fascism
+				}
+			}			
+		}		
+
 		completion_reward = {
-			add_popularity = {
-				ideology = neutrality
-				popularity = 0.25
-			}
-			add_timed_idea = {
-				idea = SWE_monarchist_fervor
-				days = 730
-			}
+			GER = { country_event = sweden_nap.2 }
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = { 				
+				GER = {
+					diplomatic_relation = {
+						country = SWE
+						relation = non_aggression_pact
+						active = yes
+					}	
+				}
+			}			
 		}
 	}		
 	focus = {
@@ -726,14 +792,33 @@ focus_tree = {
 
 		available_if_capitulated = yes
 
-		completion_reward = {
-			add_popularity = {
-				ideology = neutrality
-				popularity = 0.25
+		available = {
+			OR = {
+				country_exists = EST
+				country_exists = LAT
+				country_exists = LIT
 			}
-			add_timed_idea = {
-				idea = SWE_monarchist_fervor
-				days = 730
+		}
+
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					is_in_faction = no
+					is_subject = no
+					NOT = {
+						has_government = fascism
+						has_government = communism
+					}
+					gen_is_baltic_country = yes
+				}
+				SWE = { 
+						diplomatic_relation = {
+						country = PREV 
+						relation = guarantee
+						active = yes
+					}
+				}			
+				country_event = generic.5
 			}
 		}
 	}								
@@ -789,10 +874,23 @@ focus_tree = {
 
 		available_if_capitulated = yes	
 
-		available = { has_completed_focus = SWE_press_aland_claim }
+		available = { 
+			has_completed_focus = SWE_press_aland_claim 
+			country_exists = FIN
+			FIN = { 
+				NOT = { is_subject = yes } 
+				NOT = { is_in_faction_with = SWE } 
+			}
+		}
+
+		bypass = {
+			FIN = {
+				is_subject_of = SWE
+			}
+		}
 
 		completion_reward = {
-			
+			FIN = { country_event = sweden_auth.1 }
 		}
 	}
 	focus = {
@@ -808,7 +906,8 @@ focus_tree = {
 		available_if_capitulated = yes	
 
 		completion_reward = {
-			
+			set_country_flag = SWE_recently_expanded_livgardet
+			add_ideas = SWE_livgardet
 		}
 	}
 	focus = {
@@ -823,8 +922,16 @@ focus_tree = {
 
 		available_if_capitulated = yes	
 
+		available = {
+			has_country_flag = {
+				flag = SWE_recently_expanded_livgardet
+				days > 210
+			}
+		}
+
 		completion_reward = {
-			
+			clr_country_flag = SWE_recently_expanded_livgardet
+			add_ideas = SWE_modern_caroleans_idea			
 		}
 	}	
 	focus = {
@@ -1926,6 +2033,19 @@ focus_tree = {
         cost = 10
 
         available_if_capitulated = no
+		
+		bypass = {
+			OR = {
+				FIN = {
+					exists = no
+					is_subject_of = SWE
+					is_subject_of = SOV
+					is_in_faction_with = SWE
+					is_in_faction_with = SOV
+				}
+			}
+
+		}
 
         completion_reward = { FIN = { country_event = { days = 3 id = sweden_soviet.7 } } }
     }
