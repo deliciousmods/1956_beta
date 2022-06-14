@@ -82,6 +82,11 @@ focus_tree = {
 		ai_will_do = {
 			factor = 16
 		}
+		available = {
+			any_controlled_state = {
+				is_coastal = yes
+			}
+		}
 
 		available_if_capitulated = yes
 
@@ -89,6 +94,7 @@ focus_tree = {
 			custom_trigger_tooltip = {
 				tooltip = naval_effort_tt
 				NOT = {
+					has_civil_war = yes
 					any_owned_state = {
 						free_building_slots = {
 							building = dockyard
@@ -845,6 +851,17 @@ focus_tree = {
 		}
 		x = 53
 		y = 0
+		offset = {
+			x = -20
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = GER_denounce_versailles
+			}
+		}
 		ai_will_do = {
 			factor = 75
 			modifier = {
@@ -1468,7 +1485,7 @@ focus_tree = {
 			add_ideas = deutsche_arbeitsfront_idea
 		}
 		search_filters = {
-			FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MANPOWER
+			FOCUS_FILTER_INDUSTRY #FOCUS_FILTER_MANPOWER #idea no longer negatively impacts manpower
 		}
 	}
 	focus = {
@@ -1519,6 +1536,12 @@ focus_tree = {
 		x = 4
 		y = 1
 		relative_position_id = GER_appoint_economic_positions
+		available = {
+			has_full_control_of_state = 64
+			has_full_control_of_state = 60
+			has_full_control_of_state = 59
+			has_full_control_of_state = 54
+		}
 		ai_will_do = {
 			factor = 10
 			modifier = {
@@ -5681,6 +5704,8 @@ focus_tree = {
 				uses = 1
 				category = air_doctrine
 			}
+			custom_effect_tooltip = available_military_high_command
+			show_ideas_tooltip = hugo_sperrle
 		}
 		search_filters = {
 			FOCUS_FILTER_RESEARCH
@@ -7064,6 +7089,10 @@ focus_tree = {
 				}
 			}
 		}
+		available = {
+			is_subject = no
+			has_war = no
+		}
 		# prerequisite = {
 		# 	focus = GER_political_sphere
 		# }
@@ -7096,11 +7125,18 @@ focus_tree = {
 			country_event = {
 				id = germany.71
 			}
-			unlock_decision_tooltip = GER_remilitarize_rhineland
 			custom_effect_tooltip = available_political_advisor
 			show_ideas_tooltip = ernst_thalmann
 			custom_effect_tooltip = available_political_advisor
 			show_ideas_tooltip = kurt_schumacher
+			add_timed_idea = {
+				idea = GER_political_turmoil_idea
+				days = 365
+			}
+			add_popularity = {
+				ideology = fascism
+				popularity = -0.15
+			}
 			mark_focus_tree_layout_dirty = yes
 		}
 
@@ -7112,6 +7148,10 @@ focus_tree = {
 		prerequisite = {
 			focus = GER_kill_hitler
 		}
+		available = {
+			is_subject = no
+			has_war = no
+		}
 		x = 0
 		y = 1
 		relative_position_id = GER_kill_hitler
@@ -7119,23 +7159,156 @@ focus_tree = {
 			factor = 50
 		}
 		completion_reward = {
-			add_timed_idea = {
-				idea = GER_political_turmoil_idea
-				days = 365
-			}
-			if = {
-				limit = {
-					is_faction_leader = yes
-					NOT = {
-						any_other_country = {
-							is_in_faction_with = GER
+			custom_effect_tooltip = GER_civil_war_tt
+			hidden_effect = {
+				every_owned_state = { #get out of warzones
+					limit = {
+						OR = {
+							state = 60
+							state = 65
+							state = 848 #East Rhineland
+							state = 50 
+							state = 51 #Rhineland
+							state = 52 #Bavaria
+							state = 53 #Bavaria
+							state = 54 #Bavaria
+							state = 59 #Hannover, heavily contested
+							state = 42 #Mosselland
+							state = 849
+							state = 850 #Baden
+							state = 67 #Oppeln
 						}
 					}
+					teleport_armies = {
+						limit = {
+							tag = GER
+						}
+						to_state = 56 #tried array, didnt work right, this is a strategic place
+					}
 				}
-				dismantle_faction = yes
+				if = {
+					limit = {
+						is_faction_leader = yes
+						NOT = {
+							any_other_country = {
+								is_in_faction_with = GER
+							}
+						}
+					}
+					dismantle_faction = yes
+				}
+				add_popularity = {
+					ideology = fascism
+					popularity = 0.3 #these are splitting off
+				}
+				create_dynamic_country = { #commies
+					original_tag = GER
+					set_country_flag = is_commie_ger_cw
+					transfer_state = 60
+					transfer_state = 65
+					set_province_controller = 9560
+					set_province_controller = 9375
+					set_province_controller = 6218
+					set_province_controller = 6377
+					set_province_controller = 6487
+					set_province_controller = 11468
+					set_province_controller = 11402
+					set_province_controller = 11493
+					set_province_controller = 6513
+					set_province_controller = 526
+					set_province_controller = 3522
+					set_province_controller = 3526
+					set_province_controller = 6298
+					set_politics = {
+						ruling_party = communism
+					}
+					add_popularity = {
+						ideology = communism
+						popularity = 0.75
+					}
+					declare_war_on = {
+						target = GER
+						type = civil_war
+					}
+					add_civil_war_target = ROOT #does not seem to work like wiki lists
+					set_capital = {state = 65} #largest communist share
+					load_focus_tree = german_focus #seems I cant keep progress since they are a different tag, force path
+					unlock_national_focus = GER_kill_hitler
+					unlock_national_focus = GER_political_turmoil
+					complete_national_focus = GER_repeal_reichstag_fire_decree
+					#do not split units yet, because player could sabotage the nazis before picking in event
+					add_ideas = {
+						extensive_conscription
+						war_economy
+					}
+					set_rule = {
+						can_send_volunteers = yes
+					}
+				}
+				create_dynamic_country = { #democrats
+					original_tag = GER
+					set_country_flag = is_democratic_ger_cw
+					transfer_state = 848 #East Rhineland
+					transfer_state = 50 
+					transfer_state = 51 #Rhineland
+					transfer_state = 52 #Bavaria
+					transfer_state = 53 #Bavaria
+					transfer_state = 54 #Bavaria
+					transfer_state = 42 #Mosselland
+					transfer_state = 849
+					transfer_state = 850 #Baden
+					transfer_state = 67 #Oppeln
+					set_politics = {
+						ruling_party = democratic
+					}
+					set_popularities = {
+						democratic = 45
+						neutrality = 25
+						fascism = 10
+						communism = 20
+					}
+					declare_war_on = {
+						target = GER
+						type = civil_war
+					}
+					add_civil_war_target = ROOT #does not seem to work like wiki lists
+					every_country = { #declare war on commie side
+						limit = {
+							original_tag = GER
+							not = {
+								tag = GER
+							}
+						}
+						declare_war_on = {
+							target = PREV
+							type = civil_war
+						}
+						add_civil_war_target = PREV #does not seem to work like wiki lists
+					}
+					load_focus_tree = german_focus #seems I cant keep progress since they are a different tag, force path
+					unlock_national_focus = GER_kill_hitler
+					unlock_national_focus = GER_political_turmoil
+					complete_national_focus = GER_restore_weimar  #no switching ideology afterwards :P
+					#do not split units yet, because player could sabotage the nazis before picking in event
+					add_ideas = {
+						limited_conscription
+						partial_economic_mobilisation
+					}
+					set_rule = {
+						can_send_volunteers = yes
+					}
+				}
+				uncomplete_national_focus = {
+					focus = GER_kill_hitler
+					uncomplete_children = yes
+					refund_political_power = no
+				}
+				complete_national_focus = GER_denounce_versailles
+				unlock_national_focus = GER_rhineland
 			}
+			country_event = r56.ger.25
+			set_global_flag = r56_german_cw_ongoing
 		}
-
 	}
 	focus = {
 		id = GER_repeal_reichstag_fire_decree
@@ -7178,15 +7351,22 @@ focus_tree = {
 		ai_will_do = {
 			factor = 10
 		}
+		available = {
+			has_civil_war = no
+		}
 		completion_reward = {
 			set_rule = {
 				can_create_factions = yes
 			}
-			set_politics = {
-				ruling_party = communism
-				elections_allowed = no
-			}
+			# set_politics = { #unnecessary with cw
+			# 	ruling_party = communism
+			# 	elections_allowed = no
+			# }
 			add_ideas = GER_world_revolution_idea
+			delete_unit_template_and_units = {
+				division_template = "Rotesregiment"
+				disband = yes
+			}
 		}
 		search_filters = {
 			FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL
@@ -7211,6 +7391,7 @@ focus_tree = {
 		}
 		available = {
 			is_puppet = no
+			has_civil_war = no
 			SOV = {
 				NOT = {
 					has_war_with = GER
@@ -7240,9 +7421,13 @@ focus_tree = {
 				add_ideas = soviet_german_friendship
 				country_event = germany.89
 			}
-			set_politics = {
-				ruling_party = communism
-				elections_allowed = no
+			# set_politics = { #unnecessary with cw
+			# 	ruling_party = communism
+			# 	elections_allowed = no
+			# }
+			delete_unit_template_and_units = {
+				division_template = "Rotesregiment"
+				disband = yes
 			}
 		}
 		search_filters = {
@@ -7266,6 +7451,9 @@ focus_tree = {
 		}
 		completion_reward = {
 			add_ideas = GER_rehabilitate_military_idea
+			custom_effect_tooltip = GER_recruit_officers_com_tt
+			#defeated generals get unassigned, 
+			recruit_character = GER_ernst_udet
 		}
 
 	}
@@ -7305,10 +7493,6 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			add_timed_idea = {
-				idea = GER_restore_weimar_idea
-				days = 730
-			}
 			if = {
 				limit = {
 					date<1942.01.01
@@ -7355,10 +7539,50 @@ focus_tree = {
 		ai_will_do = {
 			factor = 10
 		}
+		available = {
+			has_civil_war = no
+		}
 		completion_reward = {
-			set_politics = {
-				ruling_party = democratic
-				elections_allowed = yes
+			add_timed_idea = {
+				idea = GER_restore_weimar_idea
+				days = 730
+			}
+			if = {
+				limit = {
+					has_country_leader = {
+						character = GER_erwin_von_witzleben
+						ruling_only = yes
+					}
+				}
+				GER_erwin_von_witzleben={
+					promote_leader = yes
+					add_unit_leader_trait = offensive_doctrine
+					add_advisor_role = {
+						advisor = {
+							slot = army_chief
+							cost = 100
+							idea_token = GER_erwin_von_witzleben
+							traits = {
+								army_chief_offensive_1
+							}
+							allowed = {
+								always = yes
+							}
+						}
+					  	activate = yes
+					}
+					remove_country_leader_role = {
+						ideology = conservatism
+					}
+				}
+			}
+			GER_konrad_adenauer = {
+				promote_character = yes
+				promote_character = liberalism
+			}
+			delete_unit_template_and_units = {
+				division_template = "Landsturmregiment"
+				disband = yes
 			}
 		}
 		search_filters = {
@@ -7849,6 +8073,7 @@ focus_tree = {
 				}
 				NOT = {
 					has_completed_focus = GER_kill_hitler
+					has_completed_focus = GER_denounce_versailles
 				}
 			}
 		}
@@ -8138,6 +8363,7 @@ focus_tree = {
 				}
 				NOT = {
 					has_completed_focus = GER_kill_hitler
+					has_completed_focus = GER_denounce_versailles
 				}
 			}
 		}
@@ -8508,6 +8734,7 @@ focus_tree = {
 				}
 				NOT = {
 					has_completed_focus = GER_kill_hitler
+					has_completed_focus = GER_denounce_versailles
 				}
 			}
 		}
@@ -8592,6 +8819,7 @@ focus_tree = {
 				}
 				NOT = {
 					has_completed_focus = GER_kill_hitler
+					has_completed_focus = GER_denounce_versailles
 				}
 			}
 		}
@@ -9455,6 +9683,8 @@ focus_tree = {
 		}
 		completion_reward = {
 			add_ideas = GER_collectivize_industry_idea
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = GER_Walter_Ulbricht
 		}
 		search_filters = {
 			FOCUS_FILTER_INDUSTRY FOCUS_FILTER_STABILITY
@@ -9703,6 +9933,7 @@ focus_tree = {
 				}
 				NOT = {
 					has_completed_focus = GER_kill_hitler
+					has_completed_focus = GER_denounce_versailles
 				}
 			}
 		}
@@ -10339,6 +10570,7 @@ focus_tree = {
 		}
 		available = {
 			is_subject = no
+			is_faction_leader = no #unlikely to be empty at this time
 		}
 		x = -1
 		y = 1
@@ -10347,7 +10579,32 @@ focus_tree = {
 			factor = 10
 		}
 		completion_reward = {
-			ENG = { country_event = { id = generic.2 hours = 6 } } #I want to replace this with a dynamic one but forgot the name
+			if = {
+				limit = {
+					ENG = {
+						has_government = democratic
+						is_faction_leader = yes
+						NOT = { has_war_with = ROOT }
+					}
+				}
+				ENG = { country_event = { id = generic.2 } }
+			}
+			else_if = {
+				limit = {
+					FRA = {
+						has_government = democratic
+						is_faction_leader = yes
+						NOT = { has_war_with = ROOT }
+					}
+				}
+				FRA = { country_event = { id = generic.2 } }			
+			}
+			else = {
+				get_best_alliance_match_democratic_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}				
+			}
 		}
 		search_filters = {
 			FOCUS_FILTER_ALLIANCE
@@ -10427,7 +10684,7 @@ focus_tree = {
 				has_war = no
 			}
 		}
-		x = -2
+		x = -1
 		y = 2
 		relative_position_id = GER_expansionism_light
 		ai_will_do = {
@@ -10567,7 +10824,7 @@ focus_tree = {
 		}
 		relative_position_id = GER_expansionism_light
 		x = 1
-		y = 6
+		y = 7
 		cost = 6
 		ai_will_do = {
 			factor = 1
@@ -10693,12 +10950,14 @@ focus_tree = {
 			is_faction_leader = yes
 			OR = {
 				HOL = {
+					exists = yes
 					OR ={
 						has_government = democratic
 						has_government = neutrality
 					}
 				}
 				BEL = {
+					exists = yes
 					OR = {
 						has_government = democratic
 						has_government = neutrality
@@ -10724,13 +10983,62 @@ focus_tree = {
 			}
 		}
 		search_filters = {
-			FOCUS_FILTER_INDUSTRY
+			FOCUS_FILTER_ALLIANCE
+		}
+	}
+	focus = {
+		id = GER_western_communist
+		icon = GFX_goal_plan
+		cost = 10.00
+		prerequisite = {
+			focus = GER_ally_benelux
+		}
+		available={
+			is_subject = no
+			any_country = {
+				OR = {
+					original_tag = HOL
+					original_tag = BEL
+					original_tag = LUX
+					original_tag = FRA					
+				}
+				has_government = communism
+				NOT = {
+					is_in_faction_with = ROOT
+				}
+			}
+		}
+		relative_position_id = GER_ally_benelux
+		x = 0
+		y = 1
+		ai_will_do = {
+			factor = 10
+		}
+		completion_reward = {
+			every_country={
+				limit = {
+					OR = {
+						original_tag = HOL
+						original_tag = BEL
+						original_tag = LUX
+						original_tag = FRA
+					}
+					has_government = communism
+				}
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = THIS
+				}
+			}
+		}
+		search_filters = {
+			FOCUS_FILTER_ANNEXATION
 		}
 	}
 	focus = {
 		id = GER_dem_anschluss_prep 
 		icon = GFX_goal_GER_boost_germanism_in_austria
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = GER_lead_democracies
 			focus = GER_join_allies
@@ -10780,9 +11088,12 @@ focus_tree = {
 	focus = {
 		id = GER_dem_anschluss
 		icon = GFX_goal_GER_democratic_anschluss
-		cost = 5.00
+		cost = 10.00
 		prerequisite = {
 			focus = GER_dem_anschluss_prep
+		}
+		mutually_exclusive = {
+			focus = GER_aus_ally
 		}
 		available = {
 			is_subject = no
@@ -10793,7 +11104,7 @@ focus_tree = {
 			}
 		}
 		relative_position_id = GER_dem_anschluss_prep
-		x = 0
+		x = 2
 		y = 1
 		ai_will_do = {
 			factor = 10
@@ -10805,6 +11116,56 @@ focus_tree = {
 		}
 		search_filters = {
 			FOCUS_FILTER_ANNEXATION
+		}
+	}
+	focus = {
+		id = GER_aus_ally
+		icon = GFX_goal_flag_austria
+		cost = 5
+		prerequisite = {
+			focus = GER_dem_anschluss_prep
+		}
+		mutually_exclusive = {
+			focus = GER_dem_anschluss
+		}
+		available = {
+			is_subject = no
+			is_faction_leader = yes
+			AUS = {
+				exists = yes
+				is_subject = no
+				NOT = {
+					has_government = communism
+				}
+			}
+			OR = {
+				AUS = {
+					NOT = {
+						has_government = fascism
+					}
+				}
+				has_completed_focus = GER_anti_bolshevist_bloc
+			}
+		}
+		relative_position_id = GER_dem_anschluss_prep
+		x = 0
+		y = 1
+		ai_will_do = {
+			factor = 5
+		}
+		completion_reward = {
+			custom_effect_tooltip = GER_AUS_wont_get_annexed_tt
+			AUS = {
+				add_ai_strategy = {
+					type = alliance
+					id = GER
+					value = 200
+				}
+			 	country_event = generic.5
+			}
+		}
+		search_filters = {
+			FOCUS_FILTER_ALLIANCE
 		}
 	}
 	focus = {
@@ -10973,6 +11334,22 @@ focus_tree = {
 			is_subject = no
 			is_faction_leader = yes
 		}
+		bypass = {
+			ROM = {
+				OR = {
+					exists = no
+					is_subject = yes
+					is_in_faction = yes
+				}
+			}
+			YUG = {
+				OR = {
+					exists = no
+					is_subject = yes
+					is_in_faction = yes
+				}
+			}
+		}
 		relative_position_id = GER_lead_democracies
 		x = -5
 		y = 1
@@ -11032,6 +11409,57 @@ focus_tree = {
 		}
 	}
 	focus = {
+		id = GER_ally_czechoslovakia
+		icon = GFX_goal_generic_befriend_czech
+		cost = 10.00
+		prerequisite = {
+			focus = GER_ally_eastern_europe
+		}
+		available = {
+			is_subject = no
+			is_faction_leader = yes
+			CZE = {
+				exists = yes
+				is_subject = no
+				is_in_faction = no
+			}
+		}
+		relative_position_id = GER_ally_eastern_europe
+		x = -1
+		y = 2
+		ai_will_do = {
+			factor = 10
+		}
+		completion_reward = {
+			if = {
+				limit = {
+					CZE = {
+						NOT = {
+							if = {
+								limit = {
+									ROOT = {
+										NOT = {
+											has_government = communism
+										}
+									}
+								}
+								has_government = communism
+							}
+							has_government = fascism
+						}
+						exists = yes
+					}
+				}
+				CZE = {
+					country_event = { id = generic.5 }
+				}
+			}
+		}
+		search_filters = {
+			FOCUS_FILTER_ALLIANCE
+		}
+	}
+	focus = {
 		id = GER_counter_soviet_agression
 		icon = GFX_goal_sov_east_vs_west
 		cost = 5.00
@@ -11041,6 +11469,7 @@ focus_tree = {
 		mutually_exclusive = {
 			focus = GER_soviet_support
 		}
+		continue_if_invalid = yes
 		available = {
 			is_subject = no
 			SOV = {
@@ -11241,6 +11670,77 @@ focus_tree = {
 		}
 	}
 	focus = {
+		id = GER_dem_italy_alliance
+		icon = GFX_goal_generic_befriend_italy
+		cost = 5.00
+		prerequisite = {
+			focus = GER_dem_anti_commie_bloc_hungary
+		}
+		prerequisite = {
+			focus = GER_aus_ally
+		}
+		available = {
+			is_subject = no
+			is_faction_leader = yes
+			ITA = {
+				exists = yes
+				is_in_faction = no
+				is_subject = no
+				NOT = {
+					has_government = communism
+				}
+				OR = {
+					NOT = {
+						has_government = fascism
+					}
+					YUG = {
+						exists = yes
+						has_government = communism
+					}
+				}
+			}
+		}
+		relative_position_id = GER_dem_anti_commie_bloc_hungary
+		x = 1
+		y = 1
+		ai_will_do = {
+			factor = 10
+		}
+		completion_reward = {
+			custom_effect_tooltip = GER_dem_ITA_pact_tt
+			ITA = {
+				if = {
+					limit = {
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}
+					country_event = generic.5
+				}
+				else = {
+					add_state_claim = 102
+					add_state_claim = 886
+					add_state_claim = 103
+					add_state_claim = 105
+					declare_war_on = {
+						target = YUG
+						type = take_state_focus
+					}
+					ROOT = {
+						declare_war_on = {
+							target = YUG
+							type = puppet_wargoal_focus
+						}
+					}
+				}
+			}
+		}
+		search_filters = {
+			FOCUS_FILTER_ALLIANCE FOCUS_FILTER_ANNEXATION
+		}
+	}
+	focus = {
 		id = GER_anti_soviet_friend_baltics
 		icon = GFX_goal_baltic_cooperation
 		cost = 5.00
@@ -11289,6 +11789,19 @@ focus_tree = {
 			SOV = {
 				has_government = communism
 				has_civil_war = no
+			}
+			FIN = {
+				exists = yes
+				is_subject = no
+				is_in_faction = no
+			}
+		}
+		bypass = {
+			FIN = {
+				OR = {
+					exists = no
+					is_subject = yes
+				}
 			}
 		}
 		relative_position_id = GER_counter_soviet_agression
@@ -11575,7 +12088,7 @@ focus_tree = {
 		}
 		relative_position_id = GER_anti_soviet_friend_baltics
 		x = -2
-		y = 1
+		y = 2
 		ai_will_do = {
 			factor = 10
 		}
