@@ -12536,7 +12536,12 @@ country_event = { #Democratic anschluss
 				target = ROOT
 				transfer_troops = yes
 			}
+			add_state_core = 4
+			add_state_core = 152
+			add_state_core = 153
+			#AI would probably do stupid things with a claim on South Tyrol, perhaps something for a future focus
 		}
+		country_event = r56.ger.26 #world event
 	}
 	option = { #Yes, except the referendum doesnt pass because of commies
 		name = r56.ger.20.a
@@ -12583,10 +12588,10 @@ country_event = { #Democratic anschluss
 			}
 			add_stability = -0.15
 		}
+		set_global_flag = dem_anschluss_refused #this has to be before the event for dynamic loc
 		FROM = {
 			country_event = r56.ger.21
 		}
-		set_global_flag = dem_anschluss_refused
 	}
 }
 country_event = { #Democratic anschluss failure, success becomes world event
@@ -12781,6 +12786,584 @@ country_event = { #Trade Lithuania for Gdynia (allows forming Poland-Lithuania)
 		set_global_flag = GER_dem_poland_trade_failed
 		GER = {
 			country_event = r56.ger.23
+		}
+	}
+}
+country_event = { #Germany civil war
+	id = r56.ger.25
+	title = erwache.5.t #reused from monarchists
+	desc = r56.ger.25.d
+	picture = GFX_report_event_german_reichstag_bombed
+
+	fire_only_once = yes
+
+	is_triggered_only = yes
+
+	timeout_days = 3
+
+	immediate = {
+		hidden_effect={
+			random_country = {
+				limit = {
+					original_tag = GER
+					NOT = {
+						tag = GER
+					}
+					has_government = communism
+				}
+				save_event_target_as = communist_germany
+			}
+			random_country = {
+				limit = {
+					original_tag = GER
+					NOT = {
+						tag = GER
+					}
+					has_government = democratic
+				}
+				save_event_target_as = conservative_germany
+			}
+			every_character = {
+				limit = {
+					OR = {
+						is_character = GER_ernst_thalmann
+						is_character = GER_Walter_Ulbricht
+						is_character = GER_franz_jacob
+						is_character = GER_Franz_Dahlem
+						is_character = GER_Bernhard_Bastlein
+					}
+				}
+				set_nationality = event_target:communist_germany
+			}
+			every_character = { #move over advisors and leaders
+				limit = {
+					OR = {
+						is_advisor = yes
+						is_unit_leader = yes
+						is_character = GER_konrad_adenauer
+					}
+					NOT = {
+						is_character = GER_rudolf_hess
+						is_character = GER_martin_bormann
+						is_character = GER_joseph_goebbels
+						is_character = GER_wilhelm_keitel
+						is_character = GER_heinrich_himmler
+						is_character = GER_hermann_goring
+						is_character = GER_joachim_von_ribbentrop
+						is_character = GER_fritz_todt
+						is_character = GER_albert_speer
+						is_character = GER_werner_von_fritsch #despite the Blomberg–Fritsch affair, he seemingly didnt stop supporting anti-democratic and nazi ideals
+						is_character = GER_ferdinand_schorner
+						has_id = 10 #Walter Model
+						has_id = 15 #Walter Kruger
+						has_id = 20 #Paul Hausser
+						has_id = 24 #Sepp Dietrich
+					}
+				}
+				set_nationality = event_target:conservative_germany
+			}
+			event_target:conservative_germany = {
+				GER_erwin_von_witzleben = {
+					add_country_leader_role = {
+						promote_leader = yes
+						country_leader = {
+						  	ideology = conservatism
+						  	expire = "1942.1.1.1" #health
+						  	traits = {  }
+						}
+					}
+				}
+				division_template = {
+					name = "Landsturmregiment"
+					is_locked = yes
+				
+					division_names_group = GER_Inf_01
+				
+					regiments = {
+						infantry = { x = 0 y = 0 }
+						infantry = { x = 0 y = 1 }
+						infantry = { x = 0 y = 2 }
+						infantry = { x = 0 y = 3 }
+					}
+					support = { 
+						engineer = { x = 0 y = 0 }
+					}
+				}
+				every_controlled_state = {
+					limit = {
+						OR = {
+							state = 67 #Poland enclave
+							state = 54 #East
+							state = 848 #Upper
+							state = 849 #Center
+						}
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Landsturmregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Landsturmregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Landsturmregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+				}
+			}
+			event_target:communist_germany = {
+				add_command_power = 50
+				#Thalmann was imprisoned in the communist area, make him leader here and fire an event about him being freed if communists are chosen
+				GER_ernst_thalmann = {
+					promote_character = yes
+					promote_character = stalinism
+				}
+				add_equipment_to_stockpile = { #buff to compensate for lack of industry, 5-divisions worth
+					type = infantry_equipment
+					amount = 5000
+					producer = GER
+				}
+				division_template = {
+					name = "Rotesregiment"
+					is_locked = yes
+				
+					division_names_group = GER_Inf_01
+				
+					regiments = {
+						infantry = { x = 0 y = 0 }
+						infantry = { x = 0 y = 1 }
+						infantry = { x = 0 y = 2 }
+						infantry = { x = 0 y = 3 }
+					}
+					support = { 
+						engineer = { x = 0 y = 0 }
+					}
+				}
+				every_controlled_state = { #16 weak units in stronghold
+					limit = {
+						OR = {
+							state = 60
+							state = 65
+						}
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+					}
+				}
+				every_state = { #8 divisions in contested areas
+					limit = {
+						OR = {
+							state = 59
+							state = 64
+						}
+					}
+					create_unit = {
+						division = "name = \"Hamburger Rotes Regiment\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+						allow_spawning_on_enemy_provs = no
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+						allow_spawning_on_enemy_provs = no
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+						allow_spawning_on_enemy_provs = no
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Rotesregiment\" start_experience_factor = 0.05"
+						owner = PREV
+						allow_spawning_on_enemy_provs = no
+					}
+				}
+			}
+		}
+	}
+
+	#Unit handling NEEDS to be in options or the player can disband the fascist army before switching
+	option = { #Democrats
+		name = r56.ger.25.a
+		hidden_effect = {
+			transfer_units_fraction= {
+				target = event_target:communist_germany
+				size = 0.2
+				stockpile_ratio = 0.2 #bit of raiding
+				army_ratio = 0.15
+				navy_ratio = 0.1 #no majorities in naval regions
+				air_ratio = 0.05
+				keep_unit_leaders_trigger = {
+					always = yes 
+				}
+			}
+			transfer_units_fraction= {
+				target = event_target:conservative_germany
+				size = 0.4
+				stockpile_ratio = 0.55 #industrial core
+				army_ratio = 0.4
+				navy_ratio = 0.3 #no majorities in naval regions
+				air_ratio = 0.35
+				keep_unit_leaders_trigger = {
+					always = yes 
+				}
+			}
+			#create fascist paramilitaries here, after splitting and after the player can mess with them
+			division_template = {
+				name = "SS-Sturmbrigade"
+				is_locked = yes
+			
+				division_names_group = GER_Inf_01
+			
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+					infantry = { x = 0 y = 3 }
+				}
+				support = { 
+					engineer = { x = 0 y = 0 }
+				}
+			}
+			every_controlled_state = {
+				create_unit = {
+					division = "name = \"Infantry Division\" division_template = \"SS-Sturmbrigade\" start_experience_factor = 0.05"
+					owner = PREV
+					allow_spawning_on_enemy_provs = no
+				}				
+			}
+		}
+		event_target:conservative_germany = {
+			change_tag_from = ROOT
+		}
+	}
+	option = { #Commies
+		name = r56.ger.25.b
+		hidden_effect = {
+			transfer_units_fraction= {
+				target = event_target:communist_germany
+				size = 0.2
+				stockpile_ratio = 0.2 #bit of raiding
+				army_ratio = 0.15
+				navy_ratio = 0.1 #no majorities in naval regions
+				air_ratio = 0.05
+				keep_unit_leaders_trigger = {
+					always = yes 
+				}
+			}
+			transfer_units_fraction= {
+				target = event_target:conservative_germany
+				size = 0.4
+				stockpile_ratio = 0.55 #industrial core
+				army_ratio = 0.4
+				navy_ratio = 0.3 #no majorities in naval regions
+				air_ratio = 0.35
+				keep_unit_leaders_trigger = {
+					always = yes 
+				}
+			}
+			#create fascist paramilitaries here, after splitting and after the player can mess with them
+			division_template = {
+				name = "SS-Sturmbrigade"
+				is_locked = yes
+			
+				division_names_group = GER_Inf_01
+			
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+					infantry = { x = 0 y = 3 }
+				}
+				support = { 
+					engineer = { x = 0 y = 0 }
+				}
+			}
+			every_controlled_state = {
+				create_unit = {
+					division = "name = \"Infantry Division\" division_template = \"SS-Sturmbrigade\" start_experience_factor = 0.05"
+					owner = PREV
+					allow_spawning_on_enemy_provs = no
+				}
+			}
+		}
+		event_target:communist_germany = {
+			change_tag_from = ROOT
+		}
+	}
+}
+country_event = { #based on original anschluss, as some strings still apply
+	id = r56.ger.26
+	title = news.36.t
+	desc = r56.ger.26.d
+	picture = GFX_report_event_german_troops
+	
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = news.36.a
+		trigger = {
+			NOT = {
+				TAG = GER
+				TAG = ITA
+				TAG = FRA
+				TAG = ENG
+			}
+		}
+	}
+	option = {
+		name = r56.ger.26.b
+		trigger = { TAG = GER }
+	}
+	option = {
+		name = news.36.c
+		trigger = { TAG = ITA }
+	}
+	option = {
+		name = news.36.e
+		trigger = {
+			OR = {
+				TAG = FRA
+				TAG = ENG
+			}
+		}
+	}
+}
+country_event = { #German-Soviet trade treaty, but initiated by Germany
+	id = r56.ger.27
+	title = r56.ger.27.t
+	desc = r56.ger.27.d
+	picture = GFX_report_event_german_troops
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = r56.ger.27.a #yes
+		diplomatic_relation = {
+			country = GER
+			relation = non_aggression_pact
+			active = yes
+		}
+		give_resource_rights = { receiver = ROOT state = 232 }
+		if = {
+			limit = {
+				has_dlc = "Man the Guns"
+			}
+			if = {
+				limit = {
+					NOT = { has_tech = basic_ship_hull_cruiser }
+				}
+				set_technology = { basic_ship_hull_cruiser = 1 }
+			}
+			if = {
+				limit = {
+					NOT = { has_tech = basic_cruiser_armor_scheme }
+				}
+				set_technology = { basic_cruiser_armor_scheme = 1 }
+			}
+			
+			# CA: Lützow -> Petropavlovsk
+			add_equipment_production = {
+				equipment = {
+					type = ship_hull_cruiser_2
+					creator = "SOV"
+					version_name = "Hipper Class"
+				}
+				name = "Petropavlovsk"
+				requested_factories = 1
+				progress = 0.5
+				amount = 1
+			}
+
+			if = { #Default name
+				limit = {
+					has_government = communism
+				}
+				add_tech_bonus = {
+					name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name
+					bonus = 0.5
+					uses = 2
+					category = ship_modules_tech
+					category = bb_tech
+					category = dd_tech
+				}
+			}
+			else = { #Alt name
+				add_tech_bonus = {
+					name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name_alt
+					bonus = 0.5
+					uses = 2
+					category = ship_modules_tech
+					category = bb_tech
+					category = dd_tech
+				}
+			}
+		}
+		else = { #No MTG
+			if = {
+				limit = {
+					NOT = { has_tech = basic_heavy_cruiser }
+				}
+				set_technology = { basic_heavy_cruiser = 1 }
+			}
+			create_equipment_variant = {
+				name = "Hipper Class"
+				type = heavy_cruiser_2
+				parent_version = 0
+				upgrades = {
+					ship_reliability_upgrade = 1
+					ship_engine_upgrade = 1
+					ship_armor_upgrade = 2
+					ship_gun_upgrade = 2
+				}
+			}
+
+			add_equipment_production = {
+				equipment = {
+					type = heavy_cruiser_2
+					creator = "SOV"
+				}
+				requested_factories = 1
+				progress = 0.5
+				amount = 1
+			}
+
+			if = { #Default name
+				limit = {
+					has_government = communism
+				}
+				add_tech_bonus = {
+					name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name
+					bonus = 0.5
+					uses = 2
+					category = ca_tech
+					category = bb_tech
+					category = dd_tech
+				}
+			}
+			else = { #Alt name
+				add_tech_bonus = {
+					name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name_alt
+					bonus = 0.5
+					uses = 2
+					category = ca_tech
+					category = bb_tech
+					category = dd_tech
+				}
+			}
+		}
+
+		if = { #Default name
+			limit = {
+				has_government = communism
+			}
+			add_tech_bonus = {
+				name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name
+				bonus = 0.5
+				uses = 2
+				category = air_equipment
+			}
+		}
+		else = { #Alt name
+			add_tech_bonus = {
+				name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name_alt
+				bonus = 0.5
+				uses = 2
+				category = air_equipment
+			}
+		}
+
+		#Effects to Germans
+		add_timed_idea = { idea = SOV_soviet_german_trade_agreement days = 545 } #Technically 1 year but really 18 months for Soviet payment 
+
+		add_opinion_modifier = {
+			target = GER
+			modifier = SOV_strengthened_relations_with_us
+		}
+		GER = {
+			add_opinion_modifier = {
+				target = ROOT
+				modifier = SOV_strengthened_relations_with_us
+			}
+		}
+	}
+	option = {
+		name = r56.ger.27.b
+	}
+}
+country_event = { #Germany proposes invading communist Yugoslavia with Italy
+	id = r56.ger.28
+	title = r56.ger.28.t
+	desc = r56.ger.28.d
+	picture = GFX_report_event_german_polish_border
+
+	fire_only_once = yes
+
+	is_triggered_only = yes
+
+	option = { #Yes
+		name = r56.ger.28.a
+		ai_chance = { 
+			factor = 80
+			modifier = { #we're kinda busy
+				factor = 0
+				any_home_area_neighbor_country = {
+					has_war_with = ITA
+					is_major = yes
+				}
+			}
+		}
+		add_state_claim = 102
+		add_state_claim = 886
+		add_state_claim = 103
+		add_state_claim = 105
+		declare_war_on = {
+			target = YUG
+			type = take_state_focus
+		}
+		FROM = {
+			declare_war_on = {
+				target = YUG
+				type = puppet_wargoal_focus
+			}
+		}
+	}
+	option = { #No
+		name = r56.ger.28.b
+		ai_chance = { 
+			factor = 20
 		}
 	}
 }
