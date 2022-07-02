@@ -58,7 +58,7 @@ NDefines.NMilitary.PLANNING_DECAY = 0.04
 NDefines.NMilitary.PLANNING_GAIN = 0.08
 
 -- NDefines.NMilitary.PLAN_SPREAD_ATTACK_WEIGHT = 6.0
-NDefines.NMilitary.BASE_DIVISION_BRIGADE_CHANGE_COST = 5
+NDefines.NMilitary.BASE_DIVISION_BRIGADE_CHANGE_COST = 4	-- was 4 before... - Fantom
 --This is a Trace to make sure mod is taken into account
 
 NDefines.NMilitary.PLAN_PROVINCE_BASE_IMPORTANCE = 2.0
