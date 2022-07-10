@@ -168,23 +168,68 @@ SOV_build_2M_army = {
 	}
 	abort_when_not_enabled = yes
 
-	ai_strategy = { type = build_army id = infantry value = 500 }
-	ai_strategy = { type = force_build_armies value = 300 }
+	ai_strategy = { type = force_build_armies id = "SOV" value = 500 }
+	
+	ai_strategy = {
+		type = role_ratio
+		id = infantry
+		value = 20
+	}
 }
 
-GER_build_3_5M_army = {
-	allowed = { tag = GER }
+SOV_build_3_5M_army = {
+	allowed = { tag = SOV }
 	enable = {
-		AND = {
-			date > 1940.1.1
-			date < 1944.1.1
-		}
-		has_war = yes
+		date > 1940.1.1
 		has_army_manpower = { size < 3500000 }
 	}
 	abort_when_not_enabled = yes
 
-	ai_strategy = { type = force_build_armies value = 300 }
+	ai_strategy = { type = force_build_armies id = "SOV" value = 500 }
+	
+	ai_strategy = {
+		type = role_ratio
+		id = infantry
+		value = 20
+	}
+}
+
+SOV_manpower_issue = {
+	allowed = { tag = SOV }
+	enable = {
+		date > 1940.1.1
+		OR = {
+			threat > 0.20
+			has_idea = disarmed_nation
+			has_idea = volunteer_only
+		}
+	}
+	
+	abort = {
+		has_idea = limited_conscription
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = force_build_armies id = "SOV" value = 500 }
+	
+	ai_strategy = {
+		type = pp_spend_priority
+		id = relation
+		value = -9999
+	}
+
+	ai_strategy = {
+		type = pp_spend_priority
+		id = guarantee
+		value = -9999
+	}
+	
+	ai_strategy = {
+		type = pp_spend_priority
+		id = mobilization_laws
+		value = 9999
+	}
 }
 
 R56_SOV_dont_switch_start_t26_production_to_bt7 = { #allows soviets to fill Tanks divs early game
@@ -347,6 +392,12 @@ r56_SOV_save_some_guns_in_the_back_for_german_invasion = {
 	ai_strategy = { #So our troops aren't all fighting with sticks 
 		type = save_equipment
 		id = infantry_equipment
+		value = 1
+	}
+	
+	ai_strategy = { 
+		type = save_equipment
+		id = artillery_equipment
 		value = 1
 	}
 
@@ -1024,10 +1075,10 @@ SOV_cold_war_navy = { #the red navy
 		date > 1944.1.1
 	        NOT = { has_war_with = GER }
         }
-        
-        abort_when_not_enabled = yes
+		
+	abort_when_not_enabled = yes
 	
-        ai_strategy = {
+    ai_strategy = {
 		type = role_ratio
 		id = naval_capital_bb
 		value = 20
@@ -1082,22 +1133,14 @@ SOV_cold_war_navy = { #the red navy
 	}
 }
 
-SOV_default = {
-	allowed = { tag = SOV }
-	enable = { always = yes }
-
-	ai_strategy = { type = air_factory_balance  value = 100 }
-	ai_strategy = { type = equipment_production_factor id = armor value = -25 }
-}
-
 SOV_reduce_armor_production = {
 	allowed = { tag = SOV }
 	enable = {
-		has_army_manpower = { type = infantry size < 2000000 }
+		has_army_manpower = { type = infantry size < 3000000 }
 	}
 	
 	abort = {
-		has_army_manpower = { type = infantry size > 2300000 }
+		has_army_manpower = { type = infantry size > 3300000 }
 	}
 
 	ai_strategy = { type = equipment_production_factor id = armor               value = -35 }
@@ -1116,56 +1159,119 @@ SOV_increase_armor_production = {
 	ai_strategy = { type = equipment_production_factor id = armor               value = 25 }
 }
 
-SOV_focus_on_convoys = {
-	allowed = { tag = SOV }
+SOV_MIN_convoy_building = {
 	enable = {
-		has_war = no
-
-		stockpile_ratio = { archetype = convoy ratio < 400 }
-	}
-	abort = {
-		NOT = { stockpile_ratio = { archetype = convoy ratio < 450 } }
+		original_tag = SOV
 	}
 
-	ai_strategy = { type = equipment_production_factor id = capital_ship 	                    value = -200 }
-	ai_strategy = { type = equipment_production_factor id = convoy 			                    value = 200 }
+	ai_strategy = {
+		type = equipment_production_min_factories
+		id = convoy
+		value = 3
+	}
 }
 
-SOV_support_eq = {
-	allowed = { tag = SOV }
+SOV_convoy_hungry = {
 	enable = {
-		has_war = no
-
-		has_equipment = { support_equipment < 2000 }
-	}
-	abort = {
-		NOT = { 
-			AND = {
-				has_war = no
-			
-				has_equipment = { support_equipment < 3000 } 
-			}
-		}
-	}
-
-	ai_strategy = { type = equipment_variant_production_factor id = support_equipment value = 150 }
-}
-
-SOV_artillery_eq = {
-	allowed = { tag = SOV }
-	enable = {
-		has_war = no
-
-		if = { limit = { check_variable = { num_equipment@artillery_equipment < 100 } check_variable = { num_target_equipment_in_armies_k@artillery_equipment > 2000 } }
-
-			set_temp_variable = { t1 = num_equipment_in_armies_k@artillery_equipment }
-			divide_temp_variable = { t1 = num_target_equipment_in_armies_k@artillery_equipment }
-			check_variable = { t1 < 0.9 }
-		}
-		else = { always = no }
+		date > 1940.1.1
+		has_equipment = {
+  			convoy < 500 #MODDED
+  		}
+		#MODDED
 	}
 	abort_when_not_enabled = yes
 
-	ai_strategy = { type = equipment_variant_production_factor id = artillery_equipment value = 100 }
+	ai_strategy = {
+		type = unit_ratio
+		id = convoy
+		value = 40 #MODDED
+	}
+}
 
+SOV_dont_naval_invade_axis = {
+	allowed = {
+		original_tag = SOV
+	}
+
+	enable = {
+		OR = {
+			has_war_with = GER
+			has_war_with = ITA
+			has_war_with = ROM
+		}
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 168
+		value = 800
+	}
+
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 29
+		value = 800
+	}
+	
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 169
+		value = 800
+	}
+
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 18
+		value = 800
+	}		
+
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 42
+		value = 800
+	}
+	
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 173
+		value = 800
+	}
+	
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 174
+		value = 800
+	}
+	
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 206
+		value = 800
+	}
+	
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 207
+		value = 800
+	}
+	
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 9
+		value = 800
+	}
+	
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 30
+		value = 600
+	}
+
+	ai_strategy = {
+		type = naval_avoid_region
+		id = 46
+		value = 400
+	}		
 }
