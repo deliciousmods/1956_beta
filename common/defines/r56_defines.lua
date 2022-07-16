@@ -181,6 +181,7 @@ NMilitary = {
 
 
 -- AI
+
 NDefines.NAI.ENTRENCHMENT_WEIGHT = 50.0
 NDefines.NAI.AI_FRONT_MOVEMENT_FACTOR_FOR_READY = 0.50
 NDefines.NAI.MAIN_ENEMY_FRONT_IMPORTANCE = 50.0
@@ -273,7 +274,7 @@ NDefines.NAI.DESPERATE_AI_MIN_ORG_BEFORE_ATTACK = 0.85					-- ai will wait for t
 NDefines.NAI.DESPERATE_AI_MIN_ORG_BEFORE_MOVE = 0.25					-- ai will wait for this much org to move in desperate situations
 NDefines.NAI.DESPERATE_ATTACK_WITHOUT_ORG_WHEN_NO_ORG_GAIN = 175		-- if ai can't regain enough org to attack in this many hours, it will go truly desperate and attack anyway (still has to wait for move org)
 
-
+NDefines.NAI.WANTED_UNITS_MANPOWER_DIVISOR = 300000
 
 NDefines.NAI.DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
 	--Army Values
