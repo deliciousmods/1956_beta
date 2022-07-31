@@ -2365,6 +2365,8 @@ focus_tree = {
 			}
 			custom_effect_tooltip = available_chief_of_airforce
 			show_ideas_tooltip = ritter_von_greim
+			custom_effect_tooltip = available_military_high_command
+			show_ideas_tooltip = hugo_sperrle
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -2520,6 +2522,8 @@ focus_tree = {
 			}
 			custom_effect_tooltip = available_chief_of_army
 			show_ideas_tooltip = walther_von_brauchitsch
+			custom_effect_tooltip = available_military_high_command
+			show_ideas_tooltip = erwin_rommel
 		}
 	}
 	
@@ -5868,21 +5872,18 @@ focus_tree = {
 		available = {
 			is_subject = no
 			has_government = fascism
-			custom_trigger_tooltip = {
-				tooltip = GER_improve_national_spirit_tooltip
-				OR = {
-					GER = { controls_state = 126 }
-					any_other_country = {
-						is_in_faction_with = GER
-						controls_state = 126
-					}
+			OR = {
+				GER = { controls_state = 126 }
+				any_other_country = {
+					is_subject_of = GER
+					controls_state = 126
 				}
-				OR = {
-					GER = { controls_state = 16 }
-					any_other_country = {
-						is_in_faction_with = GER
-						controls_state = 16
-					}
+			}
+			OR = {
+				GER = { controls_state = 16 }
+				any_other_country = {
+					is_subject_of = GER
+					controls_state = 16
 				}
 			}
 		}
@@ -5890,15 +5891,15 @@ focus_tree = {
 			AND = {
 				has_war = no
 				126 = {
-					owner = {
+					controller = {
 						NOT = { tag = GER }
-						NOT = { is_in_faction_with = GER }
+						NOT = { is_subject_of = GER }
 					}
 				}
 				16 = {
-					owner = {
+					controller = {
 						NOT = { tag = GER }
-						NOT = { is_in_faction_with = GER }
+						NOT = { is_subject_of = GER }
 					}
 				}
 			}
@@ -8657,7 +8658,10 @@ focus_tree = {
 		available = {
 			is_subject = no
 			has_war = no
-			SOV = { has_government = communism }
+			any_other_country = {
+				original_tag = SOV
+				has_government = communism
+			}
 			has_added_tension_amount < 15
 		}
 		
@@ -8671,7 +8675,13 @@ focus_tree = {
 		
 		completion_reward = {
 			add_named_threat = { threat = 10 name = GER_the_great_red_menace }
-			SOV = { country_event = { id = wtt_germany.19 days = 1 } }
+			every_other_country = {
+				limit = {
+					original_tag = SOV
+					has_government = communism
+				}
+				country_event = { id = wtt_germany.19 days = 1 }
+			}
 			hidden_effect = { news_event = { id = wtt_news.21 hours = 6 } }
 			every_other_country = {
 				limit = {
@@ -8693,18 +8703,22 @@ focus_tree = {
 				}
 				country_event = { id = wtt_germany.24 }
 				add_timed_idea = { idea = GER_the_great_red_menace days = 1095 }
-				add_ai_strategy = {
+				add_ai_strategy = {	#A bit too high, don't you think?
 					type = befriend
 					id = "GER"			
-					value = 200
+					value = 100
 				}
 				add_ai_strategy = {
 					type = befriend
 					id = "ENG"			
-					value = -200
+					value = -100
 				}
 			}
-			SOV = { 
+			every_other_country = {
+				limit = {
+					original_tag = SOV
+					has_government = communism
+				}
 				add_opinion_modifier = { target = GER modifier = embargo } 
 			}
 		}
@@ -8788,8 +8802,12 @@ focus_tree = {
 				}
 				if = {
 					limit = {
-						SOV = { has_government = communism }
+						any_other_country = {
+							original_tag = SOV
+							has_government = communism
+						}
 					}
+					save_event_target_as = SOV_getitng_allies_target
 					random_other_country = {
 						limit = {
 							original_tag = SPR
@@ -8798,12 +8816,12 @@ focus_tree = {
 						}
 						add_ai_strategy = {
 							type = befriend
-							id = "SOV"			
+							id = event_target:SOV_getitng_allies_target		
 							value = 200
 						}
 						add_ai_strategy = {
 							type = alliance
-							id = "SOV"			
+							id = event_target:SOV_getitng_allies_target				
 							value = 200
 						}
 					}
@@ -9392,7 +9410,7 @@ focus_tree = {
 							has_government = fascism
 							has_war_with = ROOT
 						}
-						is_is_faction = no
+						is_in_faction = no
 						is_puppet = no
 					}
 				}
@@ -9408,7 +9426,7 @@ focus_tree = {
 							has_government = fascism
 							has_war_with = ROOT
 						}
-						is_is_faction = no
+						is_in_faction = no
 					
 					}
 					
@@ -9425,7 +9443,7 @@ focus_tree = {
 							has_government = fascism
 							has_war_with = ROOT
 						}
-						is_is_faction = no
+						is_in_faction = no
 						is_puppet = no					
 					}
 					
@@ -9445,7 +9463,11 @@ focus_tree = {
 		available = {
 			is_subject = no
 			NOT = { has_war_with = POL }
-			SOV = { NOT = { has_war_with = POL } }
+			any_other_country = {
+				original_tag = SOV
+				has_government = communism
+				NOT = { has_war_with = POL }
+			}
 		}
 		bypass = {
 			OR = {
@@ -9784,14 +9806,18 @@ focus_tree = {
 		mutually_exclusive = { focus = GER_help_SOV_revolutionaries }
 		available = {
 			is_subject = no
-			SOV = {
+			any_other_country = {
+				original_tag = SOV
 				has_government = communism
+				NOT = { is_in_faction_with = ROOT }
 			}
-			NOT = { is_in_faction_with = SOV }
 		}
 		bypass = {
 			OR = {
-				has_war_with = SOV
+				any_enemy_country = {
+					original_tag = SOV
+					has_government = communism
+				}
 				NOT = { country_exists = SOV }
 			}
 		}
@@ -9805,10 +9831,19 @@ focus_tree = {
 		}
 		
 		completion_reward = {
-			create_wargoal = {
-				type = topple_government
-				target = SOV
-				expire = 0
+			every_other_country = {
+				limit = {
+					original_tag = SOV
+					has_government = communism
+					NOT = { is_in_faction_with = ROOT }
+				}
+				ROOT = {
+					create_wargoal = {
+						type = topple_government
+						target = PREV
+						expire = 0
+					}
+				}
 			}
 			if = {
 				limit = {
@@ -9832,22 +9867,36 @@ focus_tree = {
 		available = {
 			is_subject = no
 			is_faction_leader = yes
-			SOS = {
-				has_government = communism
-				exists = yes
-			}
-			NOT = { 
-				is_in_faction_with = SOV
-				has_war_with = SOV
-				SOV = {
+			any_other_country = {
+				original_tag = SOV
+				NOT = {
+					has_government = communism
+				}
+				has_war = yes
+				NOT = {
+					is_in_faction_with = ROOT
+					has_war_with = ROOT
 					is_in_faction = yes
+				}
+				any_enemy_country = {
+					original_tag = SOV
+					has_government = communism
 				}
 			}
 		}
 		bypass = {
 			OR = {
-				has_war_with = SOS
-				is_in_faction_with = SOV
+				any_enemy_country = {
+					original_tag = SOV
+					has_government = communism
+				}
+				any_other_country = {
+					original_tag = SOV
+					NOT = {
+						has_government = communism
+					}
+					is_in_faction_with = ROOT
+				}
 			}
 		}
 		
@@ -9860,10 +9909,40 @@ focus_tree = {
 		}
 		
 		completion_reward = {
-			add_to_faction = SOV
-			add_to_war = { 
-				targeted_alliance = SOV
-				enemy = SOS
+			every_other_country = {
+				limit = {
+					original_tag = SOV
+					NOT = {
+						has_government = communism
+					}
+					has_war = yes
+					any_enemy_country = {
+						original_tag = SOV
+						has_government = communism
+					}
+				}
+				ROOT = {
+					add_to_faction = PREV
+				}
+				every_other_country = {
+					limit = {
+						original_tag = SOV
+						has_government = communism
+						has_war = yes
+						any_enemy_country = {
+							original_tag = SOV
+							NOT = {
+								has_government = communism
+							}
+						}
+					}
+					ROOT = {
+						add_to_war = { 
+							targeted_alliance = PREV.PREV
+							enemy = PREV
+						}
+					}
+				}
 			}
 			if = {
 				limit = {
@@ -10489,7 +10568,7 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_increase_influence_over_benelux
-		icon = gfx_postive_heroism
+		icon = GFX_postive_heroism
 		prerequisite = { focus = GER_increase_influence_over_balkans focus = GER_increase_influence_over_eastern_europe }
 		available = {
 			is_subject = no
