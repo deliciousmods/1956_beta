@@ -4344,9 +4344,9 @@ focus = {
 		icon = GFX_goal_support_fourth_int
 		mutually_exclusive = { focus = SOV_socialism_in_one_country_old }
 		prerequisite = { focus = SOV_trotskyite_victory }
-
-		x = 32
-		y = 2
+		relative_position_id = SOV_trotskyite_victory
+		x = -6
+		y = 1
 
 
 		cost = 5
@@ -4404,10 +4404,10 @@ focus = {
 ##---> Anti fascist diplomacy <><> <><> <><>
 
 focus = {
-		id = SOV_anti_fascist_diplomacy
+		id = SOV_western_expansion
 		icon = GFX_goal_fascism_banned
-		prerequisite = { focus = SOV_socialism_in_one_country_old focus = SOV_permanent_revolution }
-		mutually_exclusive = { focus = SOV_anti_capitalist_diplomacy focus = SOV_world_revolution_old }
+		prerequisite = { focus = SOV_socialism_in_one_country_old }
+		#mutually_exclusive = { focus = SOV_anti_capitalist_diplomacy focus = SOV_world_revolution_old }
 		x = 5
 		y = 1
 		relative_position_id = SOV_socialism_in_one_country_old
@@ -4476,10 +4476,13 @@ focus = {
 		id = SOV_far_east_fortification_old
 		text = SOV_far_east_fortification
 		icon = GFX_goal_generic_construct_military
-		prerequisite = { focus = SOV_anti_fascist_diplomacy }
+		prerequisite = { focus = SOV_western_expansion }
+		mutually_exclusive = {
+			focus = SOV_reconcile_japan_old
+		}
 		x = -1
 		y = 1
-		relative_position_id = SOV_anti_fascist_diplomacy
+		relative_position_id = SOV_western_expansion
 		cost = 10
 		ai_will_do = {
 			factor = 10
@@ -4708,7 +4711,7 @@ focus = {
 	focus = {
 		id = SOV_annex_tannu_tuva_old
 		text = SOV_annex_tannu_tuva
-		icon = GFX_goal_generic_territory_or_war
+		icon = GFX_focus_generic_treaty
 		prerequisite = { focus = SOV_operation_zet focus = SOV_claim_on_sinkiang }
 		available = { 
 			is_puppet = no
@@ -4826,10 +4829,10 @@ focus = {
 	focus = {
 		id = SOV_improve_stalin_line
 		icon = GFX_goal_generic_fortify_city
-		prerequisite = { focus = SOV_anti_fascist_diplomacy }
-		x = 1
+		prerequisite = { focus = SOV_western_expansion focus = SOV_world_revolution_old }
+		x = 3
 		y = 1
-		relative_position_id = SOV_anti_fascist_diplomacy
+		relative_position_id = SOV_western_expansion
 		cost = 10
 		ai_will_do = {
 			factor = 8
@@ -4964,139 +4967,172 @@ focus = {
 	}
 
 	focus = {
-		id = SOV_claims_on_baltic
-		icon = GFX_goal_SOV_baltic_aggression
+		id = SOV_claims_in_baltic_old
+		text = SOV_claims_in_baltic
+		icon = 	GFX_goal_SOV_baltic_aggression
 		prerequisite = { focus = SOV_improve_stalin_line }
-		x = 0
+		prerequisite = { focus = SOV_western_expansion }
+		x = -1
 		y = 1
 		relative_position_id = SOV_improve_stalin_line
 		cost = 10
+
 		ai_will_do = {
-			factor = 10
+			factor = 1
 			modifier = {
 				factor = 0
-				date < 1939.1.1
-				NOT = {
-					GER = { OR = { has_completed_focus = GER_demand_memel has_completed_focus = GER_demand_memel_vanilla } }
+				OR = {
+					has_civil_war = yes
+					date < 1939.1.1
 				}
-			}
+			}	
 		}
-		bypass = {
-			NOT = {
-				EST = { exists = yes }
-				LAT = { exists = yes }
-				LIT = { exists = yes }
-			}
-		}
-		completion_reward = {
-			add_state_claim = 11
-			add_state_claim = 189
-			add_state_claim = 12
-			add_state_claim = 190
-			add_state_claim = 13
-			add_state_claim = 191
-			add_named_threat = { threat = 1.2 name = SOV_claims_on_baltic }
 
-			every_other_country = {
-				limit = {
-					OR = {
-						owns_state = 11
-						owns_state = 12
-						owns_state = 13
-						owns_state = 189
-						owns_state = 190
-						owns_state = 191
-					}
+		mutually_exclusive = { focus = SOV_respect_baltic_self_determination_old }
+
+		available = {
+			#NOT = { has_country_flag = SOV_paranoia_system_active_flag }
+			is_subject = no
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					is_core_of = EST
+					is_core_of = LAT
+					is_core_of = LIT
 				}
-				add_opinion_modifier = { target = SOV modifier = threat_to_baltic }
+				NOT = { state = 188 }
+				is_controlled_by = ROOT
 			}
 		}
-		search_filters = { FOCUS_FILTER_ANNEXATION }
+		
+		search_filters = {FOCUS_FILTER_ANNEXATION}
+
+		completion_reward = {
+			# Estonia + Latvia + Lithuania except Memel
+			custom_effect_tooltip = SOV_claims_in_baltics_tt
+			hidden_effect = {
+				every_state = {
+					limit = {
+						OR = {
+							AND = {
+								NOT = {
+									state = 188
+								}
+								region = 37
+							}
+							state = 784
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			#Activate targeted decisions
+			activate_targeted_decision = { target = EST decision = SOV_send_ultimatum_to_country_baltic }
+			activate_targeted_decision = { target = LAT decision = SOV_send_ultimatum_to_country_baltic }
+			activate_targeted_decision = { target = LIT decision = SOV_send_ultimatum_to_country_baltic }
+
+			add_named_threat = { threat = 1 name = SOV_claims_in_baltic }
+		}
 	}
 
 	focus = {
-		id = SOV_baltic_security_old
-		text = SOV_baltic_security
-		icon = GFX_goal_generic_forceful_treaty
-		prerequisite = { focus = SOV_claims_on_baltic }
-		x = 0
+		id = SOV_respect_baltic_self_determination_old
+		text = SOV_respect_baltic_self_determination
+		icon = GFX_goal_SOV_true_baltic_freedom
+		prerequisite = { focus = SOV_improve_stalin_line }
+		x = 1
 		y = 1
-		relative_position_id = SOV_claims_on_baltic
-		cost = 10
+		relative_position_id = SOV_improve_stalin_line
+		cost = 5
+
 		ai_will_do = {
-			factor = 10
+			factor = 1
 			modifier = {
 				factor = 0
-				date < 1939.1.1
-			}
+				has_civil_war = yes
+			}	
 		}
+		
+		mutually_exclusive = { focus = SOV_claims_in_baltic_old }
+
 		bypass = {
-			OR = {
-				owns_state = 146
+			NOT = {
+				country_exists = EST
+				country_exists = LAT
+				country_exists = LIT
 			}
-		#	OR = {
-		#		owns_state = 191
-		#	}
-		#	OR = {
-		#		owns_state = 13
-		#	}
 		}
+
+		available = {
+			#NOT = { has_country_flag = SOV_paranoia_system_active_flag }
+			is_subject = no
+		}
+
+		completion_reward = {
+			activate_targeted_decision = { target = EST decision = SOV_promote_ideology_rallies_baltic }
+			activate_targeted_decision = { target = LAT decision = SOV_promote_ideology_rallies_baltic }
+			activate_targeted_decision = { target = LIT decision = SOV_promote_ideology_rallies_baltic }
+			activate_targeted_decision = { target = EST decision = SOV_pressure_country_government_baltic }
+			activate_targeted_decision = { target = LAT decision = SOV_pressure_country_government_baltic }
+			activate_targeted_decision = { target = LIT decision = SOV_pressure_country_government_baltic }
+		}
+	}
+
+	focus = {
+		id = SOV_secure_leningrad_old
+		text = SOV_secure_leningrad
+		icon = GFX_focus_fin_karjala_question
+		prerequisite = { focus = SOV_respect_baltic_self_determination_old focus = SOV_claims_in_baltic_old }
+		x = 1
+		y = 1
+		relative_position_id = SOV_claims_in_baltic_old
+		cost = 10
+		
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+			}	
+		}
+		dynamic = yes 
+
+		available = {
+			#NOT = { has_country_flag = SOV_paranoia_system_active_flag }
+			is_subject = no
+		}
+
+		bypass = {
+			has_full_control_of_state = 146
+		}
+		
+		search_filters = {FOCUS_FILTER_ANNEXATION}
+
 		completion_reward = {
 			add_state_claim = 146 # Karjala
-			# Estonia
-			#add_state_claim = 191
-			#add_state_claim = 13
-			add_named_threat = { threat = 1 name = SOV_baltic_security }
-			if = {
-				limit = {
-					has_government = communism
-					}
-				FIN = {
+			146 = {
+				controller = {
 					add_timed_idea = {
 						idea = communist_pressure
 						days = 365
 					}
-				}
-				SWE = {
-					add_timed_idea = {
-						idea = communist_pressure
-						days = 365
-					}
-				}
-				DEN = {
-					add_timed_idea = {
-						idea = communist_pressure
-						days = 365
-					}
-				}
-				NOR = {
-					add_timed_idea = {
-						idea = communist_pressure
-						days = 365
-					}
-				}
-			}
-			hidden_effect = {
-				SOV = {
-					add_ai_strategy = {
-					type = conquer
-					id = "EST"
-					value = 100
-					}
+					country_event = { id = finland.1 hours = 16 random_hours = 8 }
 				}
 			}
 		}
-		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	focus = {
 		id = SOV_claims_on_poland_old
 		text = SOV_claims_on_poland
 		icon = GFX_goal_generic_occupy_states_ongoing_war
-		prerequisite = { focus = SOV_baltic_security_old focus = SOV_workers_of_the_world_unite_old }
-		x = 0
+		prerequisite = { focus = SOV_secure_leningrad_old }
+		prerequisite = { focus = SOV_western_expansion }
+		x = -2
 		y = 1
-		relative_position_id = SOV_baltic_security_old
+		relative_position_id = SOV_secure_leningrad_old
 		cost = 10
 		ai_will_do = {
 			factor = 9
@@ -5371,7 +5407,7 @@ focus = {
 		id = SOV_offer_poland_protection_old
 		text = SOV_offer_poland_protection
 		icon = GFX_goal_POL_LWP
-		prerequisite = { focus = SOV_claims_on_poland_old }
+		prerequisite = { focus = SOV_claims_on_poland_old focus = SOV_workers_of_the_world_unite_old }
 		mutually_exclusive = { focus = SOV_demand_eastern_poland_old }
 		available = {
 			POL = {
@@ -5383,7 +5419,7 @@ focus = {
 			is_puppet = no
 
 		}
-		x = 2
+		x = 3
 		y = 1
 		relative_position_id = SOV_claims_on_poland_old
 		cost = 10
@@ -5654,11 +5690,11 @@ focus = {
 		id = SOV_anti_capitalist_diplomacy
 		icon = GFX_goal_molotov_ribbentrop_pact
 		prerequisite = { focus = SOV_socialism_in_one_country_old }
-		mutually_exclusive = { focus = SOV_world_revolution_old }
-		mutually_exclusive = { focus = SOV_anti_fascist_diplomacy }
+		#mutually_exclusive = { focus = SOV_world_revolution_old }
+		#mutually_exclusive = { focus = SOV_western_expansion }
 		x = -5
 		y = 0
-		relative_position_id = SOV_anti_fascist_diplomacy
+		relative_position_id = SOV_western_expansion
 		cost = 5
 		ai_will_do = {
 			factor = 0.5
@@ -5742,46 +5778,12 @@ focus = {
 	}
 
 	focus = {
-		id = SOV_anti_colonialist_rebels
-		icon = GFX_focus_propaganda_soviet
+		id = SOV_southern_thrust
+		icon = GFX_goal_generic_military_sphere
 		prerequisite = { focus = SOV_anti_capitalist_diplomacy }
 		x = -1
 		y = 1
 		relative_position_id = SOV_anti_capitalist_diplomacy
-		cost = 10
-		ai_will_do = {
-			factor = 1
-		}
-		completion_reward = {
-			add_named_threat = { threat = 1 name = SOV_anti_colonialist_rebels }
-			FRA = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			ENG = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			GER = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			FIN = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			POL = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			ROM = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-		}
-	}
-
-	focus = {
-		id = SOV_southern_thrust
-		icon = GFX_goal_generic_military_sphere
-		prerequisite = { focus = SOV_anti_colonialist_rebels }
-		x = -1
-		y = 1
-		relative_position_id = SOV_anti_colonialist_rebels
 		cost = 10
 		ai_will_do = {
 			factor = 1
@@ -6056,6 +6058,9 @@ focus = {
 		text = SOV_reconcile_japan
 		icon = GFX_goal_JAP_defence
 		prerequisite = { focus = SOV_anti_capitalist_diplomacy }
+		mutually_exclusive = {
+			focus = SOV_far_east_fortification_old
+		}
 		available = {
 			is_puppet = no
 			655 = { is_controlled_by = ROOT }
@@ -6073,7 +6078,7 @@ focus = {
 				has_completed_focus = JAP_support_the_kodoha_faction #They are coming for us
 			}
 		}
-		x = 1
+		x = 2
 		y = 1
 		relative_position_id = SOV_anti_capitalist_diplomacy
 		cost = 5
@@ -6102,7 +6107,7 @@ focus = {
 		available = {
 			JAP = { has_war_with = CHI }
 		}
-		x = 1
+		x = 0
 		y = 1
 		relative_position_id = SOV_reconcile_japan_old
 		cost = 10
@@ -6269,53 +6274,157 @@ focus = {
 		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
+	###ROAD TO 56 IRON CURTAIN###
+
 	focus = {
 		id = SOV_iron_curtain_old
 		text = SOV_iron_curtain
 		icon = GFX_goal_sov_iron_curtain
-		prerequisite = { focus = SOV_ultimatum_to_greece_old focus = SOV_war_with_germany }
 		prerequisite = { focus = SOV_lessons_of_war_old }
+		prerequisite = { focus = SOV_war_with_germany focus = SOV_ultimatum_to_greece }
 		x = -1
 		y = 5
 		relative_position_id = SOV_southern_thrust
 
-		cost = 7
+		cost = 5
 
 		ai_will_do = {
-			factor = 0
+			factor = 1.1
+			modifier = { #Go for the unthinkable asap
+				add = 25
+				OR = {
+					USA = {
+						exists = yes
+						is_major = yes
+						has_war = no
+						is_faction_leader = yes
+					}
+					ENG = {
+						exists = yes
+						is_major = yes
+						has_war = no
+						is_faction_leader = yes
+					}
+				}
+				ROOT = {
+					has_war = no
+					is_faction_leader = yes
+					is_major = yes
+				}
+				has_global_flag = r56_ww2_got_done_early_make_ai_move_toward_ww3
+			}
 		}
 
 		available = {
+			NOT = { has_country_flag = SOV_paranoia_system_active_flag }
 			hidden_trigger = {
 				is_ai = no
 			}
-			has_civil_war = no
-			has_war = no
+			surrender_progress < 0.1
 			is_puppet = no
-			NOT = {
-				has_completed_focus = SOV_permanent_revolution	
-			}
-			NOT = { has_idea = trotskyite_plot }
 			custom_trigger_tooltip = {
-				tooltip = SOV_has_not_officers_purged_tt
-				NOT = { has_idea = officers_purged_civil_war }
-				NOT = { has_idea = officers_purged }
-				NOT = { has_idea = officers_purged_2 }
-				NOT = { has_idea = officers_purged_3 }
-				NOT = { has_idea = officers_purged_4 }
-				NOT = { has_idea = officers_purged_5 }
-				NOT = { has_idea = officers_purged_6 }
-				NOT = { has_idea = officers_purged_7 }
-				NOT = { has_idea = officers_purged_8 }
-				NOT = { has_idea = officers_purged_9 }
-				NOT = { has_idea = officers_purged_10 }
+				tooltip = iron_curtain_tt		
+				count_triggers = {
+					amount = 3
+					ROM = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					BUL = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					POL = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					DDR = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					GER = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					TUR = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					GRE = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					HUN = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					AUS = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					YUG = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					CZE = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+					FIN = {
+						has_government = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
+						}
+						num_of_factories > 30
+					}
+				}
 			}
 		}
-
-		
-		
-		
-
 
 		completion_reward = {
 			add_ideas = SOV_iron_curtain_idea
@@ -6371,32 +6480,47 @@ focus = {
 		y = 1
 		relative_position_id = SOV_iron_curtain_old
 
-		cost = 5
+		cost = 10
 
 		ai_will_do = {
-			factor = 0
+			factor = 1
+			modifier = { #Go for the unthinkable asap
+				add = 25
+				OR = {
+					USA = {
+						exists = yes
+						is_major = yes
+						has_war = no
+						is_faction_leader = yes
+					}
+					ENG = {
+						exists = yes
+						is_major = yes
+						has_war = no
+						is_faction_leader = yes
+					}
+				}
+				ROOT = {
+					has_war = no
+					is_faction_leader = yes
+					is_major = yes
+				}
+				has_global_flag = r56_ww2_got_done_early_make_ai_move_toward_ww3
+			}
 		}
 
-		
-		
-		
-
-
 		completion_reward = {
-			FRA = {
+			every_other_country = {
+				limit = {
+					has_government = democratic
+					OR = {
+						capital_scope = {
+							is_on_continent = europe
+						}
+						original_tag = USA
+					}
+				}
 				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			ENG = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			WGR = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			FIN = {
-				add_timed_idea = { idea = comintern_influence days = 547 }
-			}
-			USA = {
-				add_timed_idea = { idea = comintern_influence days = 730 }
 			}
 		}
 	}
@@ -6413,7 +6537,7 @@ focus = {
 		cost = 10
 
 		ai_will_do = {
-			factor = 0
+			factor = 0.1
 		}
 		will_lead_to_war_with = GRE
 		available = {
@@ -6495,7 +6619,7 @@ focus = {
 					ideology = communism
 					size = 0.6
 					capital = 106
-					states = { 106 813 803 802 816 108 826 }
+					states = { 106 878 803 802 881 108 891 }
 				}
 			}
 		}
@@ -6515,7 +6639,7 @@ focus = {
 		cost = 10
 
 		ai_will_do = {
-			factor = 0
+			factor = 0.1
 		}
 
 		available = {
@@ -6612,7 +6736,7 @@ focus = {
 		completion_reward = {
 			YUG = {
 				country_event = {
-					id = soviet.98
+					id = r56.soviet.98
 					days = 1
 				}
 			}
@@ -6632,7 +6756,7 @@ focus = {
 		cost = 5
 
 		ai_will_do = {
-			factor = 0
+			factor = 0.9
 		}
 
 		available = {
@@ -6673,10 +6797,23 @@ focus = {
 					remove_state_claim = 745
 				}
 			}
-			give_guarantee = PRC
+			if = {
+				limit = {
+					PRC = {
+						is_major = no
+					}
+				}
+				give_guarantee = PRC
+			}
+			else = {
+				diplomatic_relation = {
+					country = PRC
+					relation = non_aggression_pact
+					active = yes
+				}
+			}
 			PRC = {
 				set_state_owner = 745
-				give_guarantee = SOV
 			}
 		}
 	}
@@ -6690,10 +6827,10 @@ focus = {
 		y = 1
 		relative_position_id = SOV_return_dalian_old
 
-		cost = 9
+		cost = 10
 
 		ai_will_do = {
-			factor = 0
+			factor = 0.9
 		}
 
 		available = {
@@ -6703,7 +6840,16 @@ focus = {
 			}
 		}
 
-		
+		bypass = {
+			PRC = {
+				OR = {
+					exists = no
+					NOT = {
+						has_government = communism
+					}
+				}
+			}
+		}
 		
 		
 
@@ -6711,7 +6857,7 @@ focus = {
 		completion_reward = {
 			PRC = {
 				country_event = {
-					id = soviet.93
+					id = r56.soviet.93
 					days = 1
 				}
 			}
@@ -6721,12 +6867,14 @@ focus = {
 
 	focus = {
 		id = SOV_support_vietnamese_revolutionaries_old
+		text = SOV_support_vietnamese_revolutionaries
 		icon = GFX_goal_generic_revolt
-		cost = 7
+		cost = 5
 		ai_will_do = {
-			factor = 0
+			factor = 0.1
 			modifier = {
-				factor = 95
+				add = 1000
+				date > 1950.5.18
 			}
 			modifier = {
 				add = 1000
@@ -6734,6 +6882,17 @@ focus = {
 			}
 		}
 		available = {
+			FRI = {
+				is_ai = yes
+				has_war = no
+				OR = {
+					has_full_control_of_state = 671
+					has_full_control_of_state = 670
+					has_full_control_of_state = 854
+					has_full_control_of_state = 286
+				}
+				
+			}
 			VIN = {
 				exists = no
 			}
@@ -6770,7 +6929,30 @@ focus = {
 		cost = 5
 
 		ai_will_do = {
-			factor = 0
+			factor = 0.9
+			modifier = { #Go for the unthinkable asap
+				add = 25
+				OR = {
+					USA = {
+						exists = yes
+						is_major = yes
+						has_war = no
+						is_faction_leader = yes
+					}
+					ENG = {
+						exists = yes
+						is_major = yes
+						has_war = no
+						is_faction_leader = yes
+					}
+				}
+				ROOT = {
+					has_war = no
+					is_faction_leader = yes
+					is_major = yes
+				}
+				has_global_flag = r56_ww2_got_done_early_make_ai_move_toward_ww3
+			}
 		}
 
 		available = {
@@ -6788,15 +6970,11 @@ focus = {
 			}
 		}
 
-		
-		
-		
-
 
 		completion_reward = {
 			CUB = {
 				country_event = {
-					id = soviet.92
+					id = r56.soviet.92
 					days = 1
 				}
 			}
@@ -6817,16 +6995,12 @@ focus = {
 		cost = 6
 
 		ai_will_do = {
-			factor = 0
+			factor = 0.1
 		}
 
 		available = {
 			has_war = no
 		}
-
-		
-		
-		
 
 
 		completion_reward = {
@@ -6852,38 +7026,90 @@ focus = {
 		cost = 10
 
 		available = {
-			country_exists = USA
+			is_faction_leader = yes
+			is_subject = no
+			any_other_country = {
+				is_major = yes
+				num_of_factories > 100
+				has_government = democratic
+				NOT = { is_in_faction_with = ROOT }
+			}
 		}
 
 		bypass = {
-			has_war_with = USA
+			all_other_country = {
+				is_major = yes
+				num_of_factories > 100
+				has_government = democratic
+				has_war_with = ROOT
+			}
 		}
 
 		ai_will_do = {
 			factor = 0
+			modifier = { #Go for the unthinkable asap
+				add = 25
+				any_other_country = {
+					exists = yes
+					is_major = yes
+					num_of_factories > 100
+					has_government = democratic
+					has_war = no
+					is_faction_leader = yes
+				}
+				ROOT = {
+					has_war = no
+					is_faction_leader = yes
+					is_major = yes
+				}
+				has_global_flag = r56_ww2_got_done_early_make_ai_move_toward_ww3
+			}
 		}
 
-		
-		
-		
-
+		select_effect = {
+			every_country = {
+				limit = {
+					OR ={
+						AND = {
+							is_major = yes
+							num_of_factories > 100
+						}
+						is_neighbor_of = ROOT
+					}
+					has_government = democratic
+					NOT = { is_in_faction_with = ROOT }
+				}
+				ROOT = {
+					add_ai_strategy = {
+						type = prepare_for_war
+						id = PREV
+						value = 100
+					}
+				}
+			}
+		}
 
 		completion_reward = {
 			custom_effect_tooltip = sov_hot_war_tt
-			create_wargoal = {
-				type = puppet_wargoal_focus
-				target = USA
-				expire = 0
-			}
-			create_wargoal = {
-				type = puppet_wargoal_focus
-				target = WGR
-				expire = 0
-			}
-			create_wargoal = {
-				type = puppet_wargoal_focus
-				target = ENG
-				expire = 0
+			every_other_country = {
+				limit = {
+					OR ={
+						AND = {
+							is_major = yes
+							num_of_factories > 100
+						}
+						is_neighbor_of = ROOT
+					}
+					has_government = democratic
+					NOT = { is_in_faction_with = ROOT }
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
 			}
 		}
 		search_filters = { FOCUS_FILTER_ANNEXATION }
@@ -6894,10 +7120,10 @@ focus = {
 		text = SOV_world_revolution
 		icon = GFX_goal_spread_communism
 		prerequisite = { focus = SOV_permanent_revolution }
-		mutually_exclusive = { focus = SOV_anti_capitalist_diplomacy focus = SOV_anti_fascist_diplomacy }
-		x = 34
-		y = 3
-
+		#mutually_exclusive = { focus = SOV_anti_capitalist_diplomacy focus = SOV_western_expansion }
+		relative_position_id = SOV_permanent_revolution
+		x = 1
+		y = 1
 		cost = 5
 
 		ai_will_do = {
@@ -7006,7 +7232,7 @@ focus = {
 	focus = {
 		id = SOV_ideological_propaganda_old
 		text = SOV_ideological_propaganda
-		icon = GFX_focus_propaganda_soviet
+		icon = GFX_focus_generic_support_the_left_right
 		prerequisite = { focus = SOV_world_revolution_old focus = SOV_begin_destalinization_old }
 		x = 2
 		y = 2
@@ -7036,6 +7262,39 @@ focus = {
 			add_ideas = r56_clandestine_propaganda_techniques
 		}
 		search_filters = { FOCUS_FILTER_ESPIONAGE }
+	}
+	focus = {
+		id = SOV_anti_colonialist_rebels
+		icon = GFX_focus_propaganda_soviet
+		prerequisite = { focus = SOV_ideological_propaganda_old }
+		x = 0
+		y = 1
+		relative_position_id = SOV_ideological_propaganda_old
+		cost = 10
+		ai_will_do = {
+			factor = 1
+		}
+		completion_reward = {
+			add_named_threat = { threat = 1 name = SOV_anti_colonialist_rebels }
+			FRA = {
+				add_timed_idea = { idea = comintern_influence days = 547 }
+			}
+			ENG = {
+				add_timed_idea = { idea = comintern_influence days = 547 }
+			}
+			GER = {
+				add_timed_idea = { idea = comintern_influence days = 547 }
+			}
+			FIN = {
+				add_timed_idea = { idea = comintern_influence days = 547 }
+			}
+			POL = {
+				add_timed_idea = { idea = comintern_influence days = 547 }
+			}
+			ROM = {
+				add_timed_idea = { idea = comintern_influence days = 547 }
+			}
+		}
 	}
 	focus = {
 		id = SOV_state_of_perpetual_warfare
@@ -7256,6 +7515,7 @@ focus = {
 					}
 					country_event = { id = soviet.46 days = 3 }
 				}
+				mark_focus_tree_layout_dirty = yes
 			}
 		}
 		search_filters = { FOCUS_FILTER_STABILITY }
@@ -7603,7 +7863,7 @@ focus = {
 		text = SOV_form_a_fifth_column
 		icon = GFX_goal_SOV_trot_destalinization
 		mutually_exclusive = { focus = SOV_great_purge }
-		x = 43
+		x = 47
 		y = 0
 
 		cost = 14.30
@@ -7791,7 +8051,8 @@ focus = {
 		icon = GFX_counter_coup
 		prerequisite = { focus = SOV_form_a_fifth_column_old }
 		mutually_exclusive = { focus = SOV_trotskyite_victory  }
-		x = 48
+		relative_position_id = SOV_form_a_fifth_column_old
+		x = 5
 		y = 1
 
 		cost = 10
@@ -7921,8 +8182,9 @@ focus = {
 		allow_branch = {
 			tag = SOV
 		}
-		x = 48
-		y = 2
+		relative_position_id = SOV_counter_coup_old
+		x = 0
+		y = 1
 
 		prerequisite = { focus = SOV_counter_coup_old }
 
@@ -10081,11 +10343,12 @@ focus = {
 focus = {
 		id = SOV_trotskyite_victory
 		icon = GFX_goal_SOV_trotsky_victory
-		x = 39
-		y = 1
 		prerequisite = { focus = SOV_form_a_fifth_column_old }
 		mutually_exclusive = { focus = SOV_counter_coup_old }
 		cost = 10
+		relative_position_id = SOV_form_a_fifth_column_old
+		x = -4
+		y = 1
 		ai_will_do = {
 			factor = 10
 		}
@@ -10475,8 +10738,10 @@ focus = {
 		bypass = {
 			
 		}
-		
-		x = 2
+		allow_branch = {
+			has_completed_focus = SOV_great_purge
+		}		
+		x = 6
 		y = 1
 		relative_position_id = SOV_war_with_germany
 		cost = 10
