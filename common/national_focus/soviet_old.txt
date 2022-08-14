@@ -4654,13 +4654,13 @@ focus = {
 		id = SOV_far_east_fortification_old
 		text = SOV_far_east_fortification
 		icon = GFX_goal_generic_construct_military
-		prerequisite = { focus = SOV_permanent_revolution focus = SOV_socialism_in_one_country_old }
-		mutually_exclusive = {
-			focus = SOV_reconcile_japan_old
-		}
-		x = 2
+		prerequisite = { focus = SOV_policy_of_collective_security_old }
+		# mutually_exclusive = {
+		# 	focus = SOV_reconcile_japan_old
+		# }
+		x = 1
 		y = 1
-		relative_position_id = SOV_socialism_in_one_country_old
+		relative_position_id = SOV_policy_of_collective_security_old
 		cost = 10
 		ai_will_do = {
 			factor = 10
@@ -4794,7 +4794,7 @@ focus = {
 		text = SOV_two_red_flags
 		icon = GFX_focus_chi_cooperation_with_the_communists
 		prerequisite = { focus = SOV_far_east_fortification_old }
-		x = 2
+		x = 1
 		y = 1
 		relative_position_id = SOV_far_east_fortification_old
 		cost = 5
@@ -4882,7 +4882,7 @@ focus = {
 			}
 			
 		}
-		x = 0
+		x = -1
 		y = 1
 		relative_position_id = SOV_far_east_fortification_old
 		cost = 10
@@ -5156,7 +5156,7 @@ focus = {
 		text = SOV_send_military_advisors_to_spain
 		icon = GFX_focus_intervention_spain_republic
 		prerequisite = { focus = SOV_socialism_in_one_country_old focus = SOV_permanent_revolution }
-		x = 5
+		x = 6
 		y = 1
 		relative_position_id = SOV_socialism_in_one_country_old
 		cost = 5
@@ -5281,10 +5281,493 @@ focus = {
 	}
 
 	focus = {
+		id = SOV_policy_of_collective_security_old
+		text = SOV_policy_of_collective_security
+		icon = GFX_goal_anschluss
+		prerequisite = { focus = SOV_socialism_in_one_country_old focus = SOV_permanent_revolution }
+		mutually_exclusive = { focus = SOV_policy_of_individual_security_old }
+		x = 2
+		y = 1
+		relative_position_id = SOV_socialism_in_one_country_old
+		cost = 5
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+			}	
+		}
+		
+		search_filters = {FOCUS_FILTER_POLITICAL}
+
+		completion_reward = {
+			add_political_power = 35
+			if = {
+				limit = {
+					NOT = {
+						has_completed_focus = SOV_the_bloc_of_rights_and_trotskyites
+					}
+				}
+				custom_effect_tooltip = available_political_advisor
+				show_ideas_tooltip = SOV_maksim_litvinov
+			}
+		}
+	}
+
+	focus = {
+		id = SOV_anti_fascist_policies_old
+		text = SOV_anti_fascist_policies
+		icon = GFX_focus_generic_anti_fascist_diplomacy
+		prerequisite = { focus = SOV_policy_of_collective_security_old }
+		x = 4
+		y = 1
+		relative_position_id = SOV_policy_of_collective_security_old
+		cost = 5
+		
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+			}	
+		}
+				
+		search_filters = {FOCUS_FILTER_PROPAGANDA}
+
+		completion_reward = {
+			add_named_threat = { threat = 0.2 name = SOV_anti_fascist_diplomacy_t }
+			if = {
+				limit = {
+						has_idea = civilian_economy
+					}
+				swap_ideas = { remove_idea = civilian_economy add_idea = low_economic_mobilisation  }
+			}
+			every_other_country = {
+				limit = {
+					is_major = yes
+					OR = {
+						has_government = democratic
+						has_government = communism
+					}
+					NOT = { has_war_with = ROOT }
+				}
+				add_opinion_modifier = { target = SOV modifier = SOV_anti_fascist_policies_good } 
+			}
+
+			every_other_country = {
+				limit = {
+					is_major = yes
+					has_government = fascism
+				}
+				add_opinion_modifier = { target = SOV modifier = SOV_anti_fascist_policies_bad } 
+			}
+
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+					AST = {
+						NOT = { has_government = communism }
+					} 	
+				}
+				create_operative_leader = {
+					name = "Rupert Lockwood"
+					portrait_path = gfx/leaders/Europe/portrait_europe_generic_operative_male_10.dds 
+					traits = {  }
+					bypass_recruitment = no
+					available_to_spy_master = yes
+					female = yes
+					nationalities = { SOV AST }
+				}					
+			}
+
+			if = {
+				limit = {
+					has_government = communism
+				}
+				custom_effect_tooltip = unlock_propaganda_campaign_tt
+				unlock_decision_tooltip = SOV_propaganda_anti_fascism
+				custom_effect_tooltip = propaganda_campaign_requirement_tt
+			}
+		}
+	}
+
+	focus = {
+		id = SOV_seek_a_defense_pact_with_the_allies_old
+		text = SOV_seek_a_defense_pact_with_the_allies
+		icon = GFX_focus_hol_the_fourth_ally
+		prerequisite = { focus = SOV_anti_fascist_policies_old }
+		x = 0
+		y = 1
+		relative_position_id = SOV_anti_fascist_policies_old
+		cost = 5
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+			}	
+		}
+		
+		bypass = {
+			OR = {
+				NOT = { country_exists = FRA }
+				FRA = { has_capitulated = yes }
+			}
+			NOT = {
+				any_other_country = {
+					is_faction_leader = yes
+					SOV_is_valid_collective_security_target = yes
+				}
+			}
+		}
+
+		available = {
+			NOT = { has_country_flag = SOV_paranoia_system_active_flag }
+			is_subject = no
+		}
+		
+		search_filters = {}
+
+		completion_reward = {
+			if = { #FRA is default target
+				limit = {
+					country_exists = FRA
+					FRA = {	SOV_is_valid_collective_security_target = yes }
+				}
+				set_variable = { SOV_collective_security_target = FRA }
+				FRA = { country_event = { id = NSB_soviet_policies_of_collective_security.1 hours = 8 random_hours = 4 } }
+			}
+			else_if = { #ENG is first fallback target
+				limit = {
+					country_exists = ENG
+					is_faction_leader = yes
+					ENG = {	SOV_is_valid_collective_security_target = yes }
+				}
+				set_variable = { SOV_collective_security_target = FRA }
+				ENG = { country_event = { id = NSB_soviet_policies_of_collective_security.1 hours = 8 random_hours = 4 } }
+			}
+			else_if = { #Non-Fascist European faction leader is next
+				limit = {
+					any_country = {
+						is_faction_leader = yes
+						capital_scope = { is_on_continent = europe }
+						SOV_is_valid_collective_security_target = yes
+					}
+				}
+				random_other_country = {
+					limit = {
+						is_faction_leader = yes
+						capital_scope = { is_on_continent = europe }
+						SOV_is_valid_collective_security_target = yes
+					}
+					ROOT = { set_variable = { SOV_collective_security_target = PREV } }
+					country_event = { id = NSB_soviet_policies_of_collective_security.1 hours = 8 random_hours = 4 }
+				}
+			}
+			else_if = { #Alright I don't really care anymore, pick whoever is left alive
+				limit = {
+					any_other_country = {
+						is_faction_leader = yes
+						SOV_is_valid_collective_security_target = yes
+					}
+				}
+				random_other_country = {
+					limit = {
+						is_faction_leader = yes
+						SOV_is_valid_collective_security_target = yes
+					}
+					ROOT = { set_variable = { SOV_collective_security_target = PREV } }
+					country_event = { id = NSB_soviet_policies_of_collective_security.1 hours = 8 random_hours = 4 }
+				}
+			}
+
+			custom_effect_tooltip = SOV_seek_a_defense_pact_with_the_allies_event_effects_tt
+
+			if = {
+				limit = {
+					country_exists = POL
+					POL = { SOV_is_valid_collective_security_target = yes }
+					var:SOV_collective_security_target = {
+						capital_scope = { is_on_continent = europe }
+					}
+				}
+				custom_effect_tooltip = SOV_seek_a_defense_pact_with_the_allies_poland_tt
+			}
+		}
+	}
+
+	focus = {
+		id = SOV_policy_of_individual_security_old
+		text = SOV_policy_of_individual_security
+		icon = GFX_goal_generic_defence
+		prerequisite = { focus = SOV_socialism_in_one_country_old focus = SOV_permanent_revolution }
+		mutually_exclusive = { focus = SOV_policy_of_collective_security_old }
+		x = 0
+		y = 1
+		relative_position_id = SOV_socialism_in_one_country_old
+		cost = 5
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+			}	
+		}
+
+		available = {
+
+		}
+		
+		search_filters = {FOCUS_FILTER_POLITICAL}
+
+		completion_reward = {
+			add_political_power = 35
+
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = SOV_vyacheslav_molotov
+		}
+	}
+
+	focus = {
+		id = SOV_approach_germany_old
+		text = SOV_approach_germany
+		icon = GFX_goal_germanic_brotherhood_full
+		prerequisite = { focus = SOV_policy_of_individual_security_old }
+		x = 0
+		y = 1
+		relative_position_id = SOV_policy_of_individual_security_old
+		cost = 5
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+			}	
+		}
+		
+		available = {
+			#NOT = { has_country_flag = SOV_paranoia_system_active_flag }
+			country_exists = GER
+			GER = { SOV_is_valid_subject = yes }
+			NOT = { has_war_with = GER }
+			is_subject = no
+		}
+
+		bypass = {
+			NOT = { country_exists = GER }
+		}
+		
+		search_filters = {}
+
+		completion_reward = {
+			GER = { country_event = { id = NSB_soviet_soviet_german_trade_agreement.1 hours = 1 } }
+
+			custom_effect_tooltip = if_they_accept #This will also make GER more likely to take Molotov-Ribbentrop pact and less to take Anti-Soviet Pact
+			effect_tooltip = {
+				if = {
+					limit = {
+						has_dlc = "Man the Guns"
+					}
+					if = {
+						limit = {
+							NOT = { has_tech = basic_ship_hull_cruiser }
+						}
+						set_technology = { basic_ship_hull_cruiser = 1 }
+					}
+					if = {
+						limit = {
+							NOT = { has_tech = basic_cruiser_armor_scheme }
+						}
+						set_technology = { basic_cruiser_armor_scheme = 1 }
+					}
+					if = {
+						limit = {
+							has_tech = basic_medium_battery
+						}
+						create_equipment_variant = {
+							name = "Hipper Class"
+							type = ship_hull_cruiser_2
+							name_group = SOV_CA_HISTORICAL
+							parent_version = 0
+							modules = {
+								fixed_ship_battery_slot = ship_medium_battery_2
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = ship_fire_control_system_0
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = cruiser_ship_engine_1
+								fixed_ship_secondaries_slot = empty
+								fixed_ship_armor_slot = ship_armor_cruiser_2
+								front_1_custom_slot = ship_anti_air_1
+								mid_1_custom_slot = ship_torpedo_1
+								mid_2_custom_slot = ship_airplane_launcher_1
+								rear_1_custom_slot = ship_medium_battery_2
+							}
+						}
+					}
+					else = {
+						create_equipment_variant = {
+							name = "Hipper Class"
+							type = ship_hull_cruiser_2
+							name_group = SOV_CA_HISTORICAL
+							parent_version = 0
+							modules = {
+								fixed_ship_battery_slot = ship_medium_battery_1
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = ship_fire_control_system_0
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = cruiser_ship_engine_1
+								fixed_ship_secondaries_slot = empty
+								fixed_ship_armor_slot = ship_armor_cruiser_2
+								front_1_custom_slot = ship_anti_air_1
+								mid_1_custom_slot = ship_torpedo_1
+								mid_2_custom_slot = ship_airplane_launcher_1
+								rear_1_custom_slot = ship_medium_battery_1
+							}
+						}
+					}
+					
+					# CA: Lützow -> Petropavlovsk
+					add_equipment_production = {
+						equipment = {
+							type = ship_hull_cruiser_2
+							creator = "SOV"
+							version_name = "Hipper Class"
+						}
+						name = "Petropavlovsk"
+						requested_factories = 1
+						progress = 0.5
+						amount = 1
+					}
+
+					if = { #Default name
+						limit = {
+							has_government = communism
+						}
+						add_tech_bonus = {
+							name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name
+							bonus = 0.5
+							uses = 2
+							category = ship_modules_tech
+							category = bb_tech
+							category = dd_tech
+						}
+					}
+					else = { #Alt name
+						add_tech_bonus = {
+							name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name_alt
+							bonus = 0.5
+							uses = 2
+							category = ship_modules_tech
+							category = bb_tech
+							category = dd_tech
+						}
+					}
+				}
+				else = { #No MTG
+					if = {
+						limit = {
+							NOT = { has_tech = basic_heavy_cruiser }
+						}
+						set_technology = { basic_heavy_cruiser = 1 }
+					}
+					create_equipment_variant = {
+						name = "Hipper Class"
+						type = heavy_cruiser_2
+						parent_version = 0
+						upgrades = {
+							ship_reliability_upgrade = 1
+							ship_engine_upgrade = 1
+							ship_armor_upgrade = 2
+							ship_gun_upgrade = 2
+						}
+					}
+
+					add_equipment_production = {
+						equipment = {
+							type = heavy_cruiser_2
+							creator = "SOV"
+						}
+						requested_factories = 1
+						progress = 0.5
+						amount = 1
+					}
+
+					if = { #Default name
+						limit = {
+							has_government = communism
+						}
+						add_tech_bonus = {
+							name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name
+							bonus = 0.5
+							uses = 2
+							category = ca_tech
+							category = bb_tech
+							category = dd_tech
+						}
+					}
+					else = { #Alt name
+						add_tech_bonus = {
+							name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name_alt
+							bonus = 0.5
+							uses = 2
+							category = ca_tech
+							category = bb_tech
+							category = dd_tech
+						}
+					}
+				}
+
+				if = { #Default name
+					limit = {
+						has_government = communism
+					}
+					add_tech_bonus = {
+						name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name
+						bonus = 0.5
+						uses = 2
+						category = air_equipment
+					}
+				}
+				else = { #Alt name
+					add_tech_bonus = {
+						name = NSB_soviet_soviet_german_trade_agreement_tech_bonus_name_alt
+						bonus = 0.5
+						uses = 2
+						category = air_equipment
+					}
+				}
+
+				#Effects to Germans
+				GER = {
+					add_timed_idea = { idea = SOV_soviet_german_trade_agreement days = 545 } #Technically 1 year but really 18 months for Soviet payment 
+					capital_scope = {
+						add_dynamic_modifier = { modifier = SOV_soviet_imports }
+					}
+				}
+
+				add_opinion_modifier = {
+					target = GER
+					modifier = SOV_strengthened_relations_with_us
+				}
+				GER = {
+					add_opinion_modifier = {
+						target = ROOT
+						modifier = SOV_strengthened_relations_with_us
+					}
+				}
+			}
+		}
+	}
+
+	focus = {
 		id = SOV_improve_stalin_line
 		icon = GFX_goal_generic_fortify_city
 		prerequisite = { focus = SOV_permanent_revolution focus = SOV_socialism_in_one_country_old }
-		x = 7
+		x = 9
 		y = 1
 		relative_position_id = SOV_socialism_in_one_country_old
 		cost = 10
@@ -6531,7 +7014,7 @@ focus = {
 		text = SOV_middle_east_diplomacy
 		icon = GFX_focus_TUR_treaty_of_saadabad
 		prerequisite = { focus = SOV_permanent_revolution focus = SOV_socialism_in_one_country_old }
-		x = 11
+		x = 13
 		y = 1
 		relative_position_id = SOV_socialism_in_one_country_old
 		cost = 5
@@ -7017,10 +7500,10 @@ focus = {
 		id = SOV_reconcile_japan_old
 		text = SOV_reconcile_japan
 		icon = GFX_goal_JAP_defence
-		prerequisite = { focus = SOV_socialism_in_one_country_old }
-		mutually_exclusive = {
-			focus = SOV_far_east_fortification_old
-		}
+		prerequisite = { focus = SOV_policy_of_individual_security_old }
+		# mutually_exclusive = {
+		# 	focus = SOV_far_east_fortification_old
+		# }
 		available = {
 			is_puppet = no
 			655 = { is_controlled_by = ROOT }
@@ -7040,7 +7523,7 @@ focus = {
 		}
 		x = 0
 		y = 1
-		relative_position_id = SOV_socialism_in_one_country_old
+		relative_position_id = SOV_policy_of_individual_security_old
 		cost = 5
 		ai_will_do = {
 			factor = 1
@@ -7348,9 +7831,9 @@ focus = {
 		icon = GFX_goal_sov_iron_curtain
 		prerequisite = { focus = SOV_lessons_of_war_old }
 		prerequisite = { focus = SOV_war_with_germany } #focus = SOV_ultimatum_to_greece_old
-		x = -9
-		y = 1
-		relative_position_id = SOV_war_with_germany
+		x = 2
+		y = 5
+		relative_position_id = SOV_lessons_of_war_old
 
 		cost = 5
 
@@ -8950,7 +9433,7 @@ focus = {
 		text = SOV_form_a_fifth_column
 		icon = GFX_goal_SOV_trot_destalinization
 		mutually_exclusive = { focus = SOV_great_purge }
-		x = 49
+		x = 51
 		y = 0
 
 		cost = 14.30
