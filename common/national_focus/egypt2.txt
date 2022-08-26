@@ -1609,7 +1609,7 @@ focus_tree = {
         id = EGY_the_new_egyptian_model
         icon = GFX_focus_generic_befriend_egypt
         relative_position_id = EGY_found_the_new_kingdom
-		x = -2
+		x = -4
 		y = 1
         cost = 5
         available = {
@@ -1619,6 +1619,7 @@ focus_tree = {
             focus = EGY_found_the_new_kingdom
         }
         mutually_exclusive = {
+            focus = EGY_radicalize_the_iron_guard
             focus = EGY_seek_democratic_allies
         }
         search_filters = {FOCUS_FILTER_ALLIANCE}
@@ -1632,10 +1633,150 @@ focus_tree = {
         }
     }
     focus = {
+        id = EGY_radicalize_the_iron_guard
+        icon = GFX_goal_extensive_conscription_fascism
+        relative_position_id = EGY_found_the_new_kingdom
+		x = 0
+		y = 1
+        cost = 5
+        available = {
+            is_subject = no
+        }
+        prerequisite = {
+            focus = EGY_found_the_new_kingdom
+        }
+        mutually_exclusive = {
+            focus = EGY_the_new_egyptian_model
+            focus = EGY_seek_democratic_allies
+        }
+        search_filters = {FOCUS_FILTER_MANPOWER}
+        ai_will_do = {
+            factor = 10
+        }
+        completion_reward = {
+            swap_ideas = {
+                remove_idea = EGY_the_iron_guard
+                add_idea = EGY_the_iron_guard_2
+            }
+        }
+    }
+    focus = {
+        id = EGY_the_rashad_mission
+        icon = GFX_goal_generic_befriend_italy
+        relative_position_id = EGY_radicalize_the_iron_guard
+		x = -1
+		y = 1
+        cost = 5
+        available = {
+            is_in_faction = no
+			is_puppet = no
+			any_other_country = {
+				is_major = yes
+				has_government = democratic
+				is_faction_leader = yes
+				NOT = { has_war_with = ROOT }
+				has_opinion = {
+					target = ROOT
+					value > 0
+				}
+			}
+        }
+        prerequisite = {
+            focus = EGY_radicalize_the_iron_guard
+        }
+        bypass = {
+            OR = {
+                is_in_faction_with = ITA
+                is_in_faction_with = GER
+            }
+        }
+        search_filters = {FOCUS_FILTER_ALLIANCE}
+        ai_will_do = {
+            factor = 10
+        }
+        completion_reward = {
+            if = {
+				limit = {
+					ITA = {
+                        OR = {
+						    has_government = fascism
+                            has_government = neutrality
+                        }
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = ITA
+							has_war_with = ROOT
+						}
+					}
+				}
+                add_ai_strategy = {
+                    type = alliance
+                    id = "ITA"
+                    value = 100
+                }
+				ITA = {
+                    add_opinion_modifier = { target = EGY modifier = medium_increase }
+					country_event = { id = generic.2 }
+				}
+			}
+			else = {
+				get_best_alliance_match_fascism_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+			}
+        }
+    }
+    focus = {
+        id = EGY_the_iron_intelligence_department
+        icon = GFX_goal_generic_secret_police
+        relative_position_id = EGY_radicalize_the_iron_guard
+		x = 0
+		y = 2
+        cost = 10
+        available = {
+            has_intelligence_agency = yes
+        }
+        prerequisite = {
+            focus = EGY_radicalize_the_iron_guard
+        }
+        prerequisite = {
+            focus = EGY_the_rashad_mission
+        }
+        search_filters = {FOCUS_FILTER_ESPIONAGE}
+        ai_will_do = {
+            factor = 10
+        }
+        completion_reward = {
+            swap_ideas = {
+                remove_idea = EGY_the_iron_guard_2
+                add_idea = EGY_the_iron_guard_3
+            }
+            if = {
+                limit = {
+                    has_dlc = "La Resistance"
+                }
+                upgrade_intelligence_agency = upgrade_psycho_warfare
+            }
+            else = {
+                add_stability = 0.02
+                add_tech_bonus = {
+                    bonus = 1
+                    uses = 1
+                    category = military_police_tech
+                }
+            }
+        }
+    }
+    focus = {
         id = EGY_seek_democratic_allies
         icon = GFX_goal_generic_freedom
         relative_position_id = EGY_found_the_new_kingdom
-		x = 2
+		x = 4
 		y = 1
         cost = 5
         available = {
@@ -1646,6 +1787,7 @@ focus_tree = {
             focus = EGY_found_the_new_kingdom
         }
         mutually_exclusive = {
+            focus = EGY_radicalize_the_iron_guard
             focus = EGY_the_new_egyptian_model
         }
         search_filters = {}
@@ -1704,6 +1846,11 @@ focus_tree = {
 						}
 					}
 				}
+                add_ai_strategy = {
+                    type = alliance
+                    id = "ENG"
+                    value = 100
+                }
 				ENG = {
                     add_opinion_modifier = { target = ROOT modifier = medium_increase }
 					country_event = { id = generic.2 }
@@ -1720,12 +1867,12 @@ focus_tree = {
     focus = {
         id = EGY_intervention_force
         icon = GFX_goal_infantry_offensive
-        relative_position_id = EGY_the_new_egyptian_model
-		x = 2
+        relative_position_id = EGY_seek_democratic_allies
+		x = -2
 		y = 1
         cost = 10
         prerequisite = {
-            focus = EGY_the_new_egyptian_model
+            focus = EGY_radicalize_the_iron_guard
             focus = EGY_seek_democratic_allies
         }
         search_filters = {}
@@ -3534,6 +3681,19 @@ focus_tree = {
                         target = PREV
                         transfer_troops = yes
                     }
+                }
+            }
+            hidden_effect = {
+                every_owned_state = {
+                    limit = {
+                        OR = {
+                            is_core_of = LEB
+                            is_core_of = SYR
+                            is_core_of = LBA
+                            is_core_of = ALG
+                        }
+                    }
+                    add_core_of = ROOT
                 }
             }
             set_cosmetic_tag = EGY_ARAB_REPUBLIC
