@@ -3158,16 +3158,24 @@ focus_tree = {
 				if = {
 					limit = {
 						is_controlled_by = ROOT
+						is_demilitarized_zone = no
 					}
 					custom_effect_tooltip = GER_west_wall_forts
+				}
+				else = {
+					custom_effect_tooltip = GER_forts_unavailable
 				}
 			}
 			850 = {
 				if = {
 					limit = {
 						is_controlled_by = ROOT
+						is_demilitarized_zone = no
 					}
 					custom_effect_tooltip = GER_west_wall_forts
+				}
+				else = {
+					custom_effect_tooltip = GER_forts_unavailable
 				}
 			}
 			hidden_effect = {
@@ -5684,17 +5692,17 @@ focus_tree = {
 		ai_will_do = {
 			factor = 11
 		}
-		available = {
+		available = { #removed one of the bypass conditions that was adding unnecessary clutter
 			is_puppet = no
 			NOT = {
 				is_in_faction_with = YUG
 			}
+			country_exists = YUG
+			NOT = {
+				has_war_with = YUG
+			}
 			OR = {
 				AND = {
-					country_exists = YUG
-					NOT = {
-						has_war_with = YUG
-					}
 					OR = {
 						owns_state = 102
 						ITA = {
@@ -5702,32 +5710,20 @@ focus_tree = {
 							is_in_faction_with = ROOT
 						}
 					}
-					OR = {
-						owns_state = 884
-						HUN = {
-							owns_state = 884
-							is_in_faction_with = ROOT
-						}
-					}
 					owns_state = 885
 				}
-				AND = {
-					NOT = {
-						country_exists = YUG
-					}
-					owns_state = 102
-					owns_state = 884
-					owns_state = 885
-					owns_state = 45
-					owns_state = 106
-					owns_state = 878
-					owns_state = 803
-					owns_state = 103
-					owns_state = 886
-					owns_state = 105
-					owns_state = 891
+				SLV = {
+					exists = yes
+					is_subject_of = GER
 				}
 			}
+			# OR = { #is prekmurje really that important?
+			# 	owns_state = 884
+			# 	HUN = {
+			# 		owns_state = 884
+			# 		is_in_faction_with = ROOT
+			# 	}
+			# }
 			OR = {
 				YUG = {
 					is_puppet = no
@@ -6803,10 +6799,8 @@ focus_tree = {
 			factor = 10 #the AI does a dice roll I believe, making this a slightly higher priority than others doesnt help
 		}
 		available = {
+			is_subject = no
 			r56_script_i_am_sane = yes
-			LIT = {
-				r56_script_target_is_sane = yes
-			}
 			has_army_manpower = {
 				size > 550000
 			}
@@ -6815,50 +6809,26 @@ focus_tree = {
 			}
 		}
 		bypass = {
-			OR = {
-				NOT = {
-					country_exists = LIT
-				}
-				AND = {
-					188 = {
-						is_owned_by = GER
-					}
-					85 = {
-						is_owned_by = GER
-					}
-					86 = {
-						is_owned_by = GER
-					}
-					807 = {
-						is_owned_by = GER
-					}
-				}
-			}
+			owns_state = 188
+			owns_state = 85
+			owns_state = 86
+			owns_state = 762
 		}
 		completion_reward = {
-			add_state_core = 85
-			add_state_core = 188
-			86 = {
-				add_claim_by = GER
-			}
-			807 = {
-				add_claim_by = GER
-			}
+			add_state_claim = 85
+			add_state_claim = 188
+			add_state_claim = 86
+			add_state_claim = 807
 			add_named_threat = {
 				threat = 2
 				name = GER_demand_memel_threat
 			}
-			if = {
+			every_other_country = {	#ask the controller for things!
 				limit = {
-					LIT = {
-						owns_state = 188
-					}
+					controls_state = 188
+					NOT = { is_in_faction_with = ROOT }
 				}
-				LIT = {
-					country_event = {
-						id = baltic.4
-					}
-				}
+				country_event = { id = baltic.4 }
 			}
 		}
 
@@ -6918,7 +6888,7 @@ focus_tree = {
 			POL = {
 				if = {
 					limit = {
-						GER = {
+						ROOT = {
 							has_government = fascism
 						}
 					}
@@ -6929,7 +6899,7 @@ focus_tree = {
 				}
 				if = {
 					limit = {
-						GER = {
+						ROOT = {
 							has_government = communism
 						}
 					}
@@ -6940,7 +6910,7 @@ focus_tree = {
 				}
 				if = {
 					limit = {
-						GER = {
+						ROOT = {
 							has_government = democratic
 						}
 					}
@@ -7064,7 +7034,7 @@ focus_tree = {
 			}
 			modifier = {
 				factor = 3
-				date<1939.03.01
+				date < 1939.03.01
 			}
 			modifier = {
 				add = 1
@@ -8126,6 +8096,25 @@ focus_tree = {
 				target = SOV
 				expire = 0
 			}
+			SOV = { #declare war on civil war's so it doesnt become on big mess
+				if = {
+					limit = {
+						has_civil_war = yes
+					}
+					every_other_country = {
+						limit = {
+							original_tag = SOV
+						}
+						ROOT = {
+							create_wargoal = {
+								type = annex_everything
+								target = PREV
+								expire = 0
+							}
+						}
+					}
+				}
+			}
 			hidden_effect = {#Filling some of the supply gaps the ai will have at this point
 				if = {
 					limit = {
@@ -8467,10 +8456,6 @@ focus_tree = {
 			country_event = {
 				id = germany.71
 			}
-			custom_effect_tooltip = available_political_advisor
-			show_ideas_tooltip = ernst_thalmann
-			custom_effect_tooltip = available_political_advisor
-			show_ideas_tooltip = kurt_schumacher
 			add_timed_idea = {
 				idea = GER_political_turmoil_idea
 				days = 365
@@ -8670,6 +8655,8 @@ focus_tree = {
 		}
 
 		completion_reward = {
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = ernst_thalmann
 			add_timed_idea = {
 				idea = GER_repeal_reichstag_fire_decree_idea
 				days = 730
@@ -8869,6 +8856,8 @@ focus_tree = {
 		}
 
 		completion_reward = {
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = kurt_schumacher
 			if = {
 				limit = {
 					date<1942.01.01
@@ -8898,7 +8887,6 @@ focus_tree = {
 				# 	logistics_skill = 2
 				# }
 			}
-
 		}
 
 	}
@@ -9709,7 +9697,7 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_restore_the_central_powers
-		icon = GFX_focus_generic_befriend_bulgaria
+		icon = GFX_goal_GER_central_powers
 		cost = 5.00
 		prerequisite = {
 			focus = GER_restore_the_empire
@@ -9724,6 +9712,7 @@ focus_tree = {
 			factor = 10
 		}
 		completion_reward = { #copy from DLC but these are all generic, Id have used the same
+			custom_effect_tooltip = GER_central_powers_tt
 			if = {
 				limit = {
 					ITA = { 
@@ -13697,6 +13686,12 @@ focus_tree = {
 		y = 3
 		ai_will_do = {
 			factor = 10
+			modifier = {
+				factor = 0
+				SOV = { #might mess things up and democratic side is more willing to see if anything changes
+					has_civil_war = yes
+				}
+			}
 		}
 		completion_reward = {
 			add_war_support = 0.1
