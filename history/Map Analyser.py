@@ -3,7 +3,6 @@
 HOIIVPath = "E:\Games\Steam\steamapps\common\Hearts of Iron IV"
 SavetoFile = True                   #Save results to a csv file
 GetStateNames = True                #Get state names if they are in the same path as in vanilla
-getmissingstateinfo = False         #Use vanilla data where a mod doesn't seem to override it
 UseRoadto56 = False                 #Wether to check for Road to 56 buildings (just modify this with entries of any other mod if desired)
 
 import os
@@ -34,8 +33,10 @@ for num in range(1, max(statenumbers)):
     if num not in statenumbers:
         missingstates.append(num)
 if len(missingstates) > 0:
-    getmissingstateinfo = True #change this if you dont want vanilla to be checked
+    getmissingstateinfo = True #change this to false if you want to ignore gaps for some reason
     print("The following states {} are not overwritten, assuming this mod has more states than vanilla: ".format(len(missingstates)) + str(missingstates))
+else:
+    getmissingstateinfo = False
 
 if GetStateNames:
     statekey = ("state name",)                      #create tuple with just the statename entry
