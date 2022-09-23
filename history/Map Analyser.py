@@ -1,7 +1,7 @@
 #created by marijn211
 #this script is focused on generating map statistics based on the state history files of a mod, taking vanilla values if there is gaps in state numbers, the script ignores commented out lines in the history files, but doesnt in localization
 HOIIVPath = "E:\Games\Steam\steamapps\common\Hearts of Iron IV"
-SavetoFile = True                   #Save results to a csv file
+SavetoFile = True                   #Save results to a csv and excel file, use "pip install openpyxl" if the latter throws an error
 GetStateNames = True                #Get state names if they are in the same path as in vanilla
 UseRoadto56 = False                 #Wether to check for Road to 56 buildings (just modify this with entries of any other mod if desired)
 
@@ -84,7 +84,7 @@ def extract_statistics(filelist):
                         elif key == "add_claim_by" and not value in claimlist:
                             claimlist.append(value)
                         elif key == "add_claim_by" and value in claimlist: #note files with dupe
-                            dupecore = True
+                            dupeclaim = True
                         elif key == "add_core_of" and not value in corelist:
                             corelist.append(value)
                         elif key == "add_core_of" and value in corelist: #note files with dupe
@@ -122,3 +122,4 @@ print(sorted_df.to_string(index = False))
 if SavetoFile:
     os.chdir(ROOT_PATH)
     sorted_df.to_csv('output.csv', index = False)
+    sorted_df.to_excel('output.xlsx', index = False)
