@@ -3158,16 +3158,24 @@ focus_tree = {
 				if = {
 					limit = {
 						is_controlled_by = ROOT
+						is_demilitarized_zone = no
 					}
 					custom_effect_tooltip = GER_west_wall_forts
+				}
+				else = {
+					custom_effect_tooltip = GER_forts_unavailable
 				}
 			}
 			850 = {
 				if = {
 					limit = {
 						is_controlled_by = ROOT
+						is_demilitarized_zone = no
 					}
 					custom_effect_tooltip = GER_west_wall_forts
+				}
+				else = {
+					custom_effect_tooltip = GER_forts_unavailable
 				}
 			}
 			hidden_effect = {
@@ -5684,17 +5692,17 @@ focus_tree = {
 		ai_will_do = {
 			factor = 11
 		}
-		available = {
+		available = { #removed one of the bypass conditions that was adding unnecessary clutter
 			is_puppet = no
 			NOT = {
 				is_in_faction_with = YUG
 			}
+			country_exists = YUG
+			NOT = {
+				has_war_with = YUG
+			}
 			OR = {
 				AND = {
-					country_exists = YUG
-					NOT = {
-						has_war_with = YUG
-					}
 					OR = {
 						owns_state = 102
 						ITA = {
@@ -5702,32 +5710,20 @@ focus_tree = {
 							is_in_faction_with = ROOT
 						}
 					}
-					OR = {
-						owns_state = 884
-						HUN = {
-							owns_state = 884
-							is_in_faction_with = ROOT
-						}
-					}
 					owns_state = 885
 				}
-				AND = {
-					NOT = {
-						country_exists = YUG
-					}
-					owns_state = 102
-					owns_state = 884
-					owns_state = 885
-					owns_state = 45
-					owns_state = 106
-					owns_state = 878
-					owns_state = 803
-					owns_state = 103
-					owns_state = 886
-					owns_state = 105
-					owns_state = 891
+				SLV = {
+					exists = yes
+					is_subject_of = GER
 				}
 			}
+			# OR = { #is prekmurje really that important?
+			# 	owns_state = 884
+			# 	HUN = {
+			# 		owns_state = 884
+			# 		is_in_faction_with = ROOT
+			# 	}
+			# }
 			OR = {
 				YUG = {
 					is_puppet = no
@@ -8100,6 +8096,25 @@ focus_tree = {
 				target = SOV
 				expire = 0
 			}
+			SOV = { #declare war on civil war's so it doesnt become on big mess
+				if = {
+					limit = {
+						has_civil_war = yes
+					}
+					every_other_country = {
+						limit = {
+							original_tag = SOV
+						}
+						ROOT = {
+							create_wargoal = {
+								type = annex_everything
+								target = PREV
+								expire = 0
+							}
+						}
+					}
+				}
+			}
 			hidden_effect = {#Filling some of the supply gaps the ai will have at this point
 				if = {
 					limit = {
@@ -8667,8 +8682,25 @@ focus_tree = {
 		}
 		available = {
 			has_civil_war = no
+			if = {
+				limit = {
+					NOT = {
+						SOV = {
+							OR = {
+								is_subject = yes
+								has_civil_war = yes
+							}
+						}
+					}
+				}
+				custom_trigger_tooltip = {
+					tooltip = not_too_much_soviet_influence_tt
+					check_variable = { GER_commie_soviet_influence < 4 }
+				}
+			}
 		}
 		completion_reward = {
+			set_cosmetic_tag = GER_civil_war
 			set_rule = {
 				can_create_factions = yes
 			}
@@ -8677,6 +8709,13 @@ focus_tree = {
 			# 	elections_allowed = no
 			# }
 			add_ideas = GER_world_revolution_idea
+			GER_ernst_thalmann = {
+				set_portraits = { #revert to fancy uniform which he doesnt use during the civil war
+					civilian = {
+						large="gfx/leaders/GER/r56_portrait_GER_ernst_thalmann.dds"
+					}
+				}
+			}
 			delete_unit_template_and_units = {
 				division_template = "Rotesregiment"
 				disband = yes
@@ -8713,12 +8752,14 @@ focus_tree = {
 				is_puppet = no
 			}
 		}
-		bypass = {
-			SOV = {
-				r56_script_standard_bypass = yes
-			}
-		}
+		# bypass = { #free, locked units need to be removed and cant be done during cw
+		# 	has_civil_war = no
+		# 	SOV = {
+		# 		r56_script_standard_bypass = yes
+		# 	}
+		# }
 		completion_reward = {
+			set_cosmetic_tag = GER_civil_war
 			if = {
 				limit = {
 					is_faction_leader = yes
@@ -8739,6 +8780,13 @@ focus_tree = {
 			# 	ruling_party = communism
 			# 	elections_allowed = no
 			# }
+			GER_ernst_thalmann = {
+				set_portraits = { #revert to fancy uniform which he doesnt use during the civil war
+					civilian = {
+						large="gfx/leaders/GER/r56_portrait_GER_ernst_thalmann.dds"
+					}
+				}
+			}
 			delete_unit_template_and_units = {
 				division_template = "Rotesregiment"
 				disband = yes
@@ -8892,6 +8940,7 @@ focus_tree = {
 			has_civil_war = no
 		}
 		completion_reward = {
+			set_cosmetic_tag = GER_civil_war
 			add_timed_idea = {
 				idea = GER_restore_weimar_idea
 				days = 730
@@ -9354,25 +9403,20 @@ focus_tree = {
 			factor = 10
 		}
 		available = {
-			custom_trigger_tooltip = {
-				tooltip = GER_improve_national_spirit_tooltip
-				OR = {
-					GER = {
-						controls_state = 126
-					}
-					any_country = {
-						is_in_faction_with = GER
-						controls_state = 126
-					}
+			is_subject = no
+			has_government = fascism
+			OR = {
+				GER = { controls_state = 126 }
+				any_other_country = {
+					is_subject_of = GER
+					controls_state = 126
 				}
-				OR = {
-					GER = {
-						controls_state = 16
-					}
-					any_country = {
-						is_in_faction_with = GER
-						controls_state = 16
-					}
+			}
+			OR = {
+				GER = { controls_state = 16 }
+				any_other_country = {
+					is_subject_of = GER
+					controls_state = 16
 				}
 			}
 		}
@@ -9380,30 +9424,24 @@ focus_tree = {
 			AND = {
 				has_war = no
 				126 = {
-					owner = {
-						NOT = {
-							tag = GER
-						}
-						NOT = {
-							is_in_faction_with = GER
-						}
+					controller = {
+						NOT = { tag = GER }
+						NOT = { is_subject_of = GER }
 					}
 				}
 				16 = {
-					owner = {
-						NOT = {
-							tag = GER
-						}
-						NOT = {
-							is_in_faction_with = GER
-						}
+					controller = {
+						NOT = { tag = GER }
+						NOT = { is_subject_of = GER }
 					}
 				}
 			}
 		}
 		completion_reward = {
-			remove_ideas = sour_loser
-			add_ideas = triumphant_will
+			swap_ideas = {
+				remove_idea = sour_loser
+				add_idea = triumphant_will
+			}
 		}
 		search_filters = {
 			FOCUS_FILTER_POLITICAL
@@ -9622,6 +9660,9 @@ focus_tree = {
 			set_rule = {
 				can_create_factions = yes
 			}
+			set_rule = {
+				can_send_volunteers = yes
+			}
 			if = {
 				limit = {
 					NOT = {
@@ -9682,7 +9723,7 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_restore_the_central_powers
-		icon = GFX_focus_generic_befriend_bulgaria
+		icon = GFX_goal_GER_central_powers
 		cost = 5.00
 		prerequisite = {
 			focus = GER_restore_the_empire
@@ -9697,6 +9738,7 @@ focus_tree = {
 			factor = 10
 		}
 		completion_reward = { #copy from DLC but these are all generic, Id have used the same
+			custom_effect_tooltip = GER_central_powers_tt
 			if = {
 				limit = {
 					ITA = { 
@@ -11995,7 +12037,7 @@ focus_tree = {
 			is_subject = no
 			is_faction_leader = no #unlikely to be empty at this time
 		}
-		x = -1
+		x = 1
 		y = 1
 		relative_position_id = GER_expansionism_light
 		ai_will_do = {
@@ -12272,6 +12314,84 @@ focus_tree = {
 		}
 	}
 	focus = {
+		id = GER_colonies_for_support
+		icon = GFX_goal_ger_not_nazi_africa
+		cost = 4
+		prerequisite = {
+			focus = GER_join_allies
+		}
+		available = {
+			is_subject = no
+			ENG = {
+				is_subject = no
+				is_in_faction_with = ROOT
+				any_other_country = {
+					num_of_factories > 20
+					has_war_with = ENG
+					NOT = {
+						has_war_with = ROOT
+					}
+				}
+			}
+			all_state = {
+				OR = {
+					NOT = {
+						state = 541 #West Africa
+						state = 546 #East Africa
+						state = 737 #Bismarck
+					}
+					OWNER = {
+						OR = {
+							is_subject_of = ENG
+							tag = ENG
+						}
+					}
+				}
+			}
+		}
+		x = 1
+		y = 1
+		relative_position_id = GER_join_allies
+		ai_will_do = {
+			factor = 10
+		}
+		completion_reward = {
+			ENG = {
+				country_event = r56.ger.29
+				effect_tooltip = {
+					546 = {
+						set_state_owner_to = GER
+					}
+					541 = {
+						set_state_owner_to = GER
+					}
+					737 = {
+						set_state_owner_to = GER
+					}
+					every_country = {
+						limit = {
+							has_war_with = ENG
+						}
+						GER = {
+							add_to_war = {
+								targeted_alliance = ENG
+								enemy = PREV
+							}
+						}
+					}
+					GER = {
+						add_war_support = 0.1
+						add_stability = 0.05
+					}
+				}
+				custom_effect_tooltip = needs_approval
+			}
+		}
+		search_filters = {
+			FOCUS_FILTER_ANNEXATION
+		}
+	}
+	focus = {
 		id = GER_lead_communists
 		icon = GFX_focus_ger_great_red_menace
 		cost = 5.00
@@ -12507,9 +12627,11 @@ focus_tree = {
 					}
 					has_government = communism
 				}
-				create_wargoal = {
-					type = puppet_wargoal_focus
-					target = THIS
+				ROOT = {
+					create_wargoal = {
+						type = puppet_wargoal_focus
+						target = PREV
+					}
 				}
 			}
 		}
@@ -13670,6 +13792,12 @@ focus_tree = {
 		y = 3
 		ai_will_do = {
 			factor = 10
+			modifier = {
+				factor = 0
+				SOV = { #might mess things up and democratic side is more willing to see if anything changes
+					has_civil_war = yes
+				}
+			}
 		}
 		completion_reward = {
 			add_war_support = 0.1
