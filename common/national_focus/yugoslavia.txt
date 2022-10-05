@@ -79,7 +79,7 @@ focus_tree = {
 
 	focus = {
 		id = YUG_friendship_treaty_with_italy
-		icon = GFX_goal_italian_cooperation
+		icon = GFX_goal_generic_befriend_italy
 		prerequisite = { focus = YUG_western_focus }
 		mutually_exclusive = { focus = YUG_reinforce_old_alliances }
 		x = -1
@@ -243,6 +243,8 @@ focus_tree = {
 		ai_will_do = {
 			factor = 80
 		}
+
+		available_if_capitulated = yes
 
 		search_filters = { FOCUS_FILTER_MANPOWER }
 
@@ -1272,6 +1274,8 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
+			is_in_faction = no
 			OR = {
 				GER = {
 					NOT = { has_war_with = ROOT }
@@ -1333,14 +1337,16 @@ focus_tree = {
 					country_event = DOD_yugoslavia.70
 				}
 			}
-			create_country_leader = {
-				name = "Prince Paul"
-				desc = "POLITICS_PRINCE_PAUL_DESC"
-				picture = "Portrait_Yugoslavia_Prince_Paul.dds"
-				expire = "1965.1.1"
-				ideology = fascism_ideology
-				traits = {
-					mediator
+			YUG_prince_paul = {
+				add_country_leader_role = {
+					country_leader = {
+						expire = "1965.1.1"
+						ideology = fascism_ideology
+						traits = {
+							mediator
+						}
+					}
+					promote_leader = yes
 				}
 			}
 		}
@@ -1488,7 +1494,7 @@ focus_tree = {
 
 	focus = {
 		id = YUG_claim_macedonia
-		icon = GFX_goal_BUL_annex_gre
+		icon = GFX_goal_generic_attack_greece
 		prerequisite = { focus = YUG_zara_for_axis focus = YUG_surrender_italian_claims }
 		x = -2
 		y = 1
@@ -1673,7 +1679,7 @@ focus_tree = {
 
 		bypass = {
 			has_country_leader = {
-				name = "Peter II"
+				character = YUG_peter_ii
 				ruling_only = yes
 			}
 		}
@@ -1685,47 +1691,14 @@ focus_tree = {
 				limit = {
 					date < 1941.09.06
 				}
-				create_country_leader = {
-					name = "Peter II"
-					desc = "POLITICS_PETER_II_DESC"
-					picture = "portrait_YUG_peter_II_young.dds"
-					expire = "1965.1.1"
-					ideology = despotism
-					traits = {
-						underage_monarch
-					}
-				}
-				create_country_leader = {
-					name = "Peter II"
-					desc = "POLITICS_PETER_II_DESC"
-					picture = "portrait_YUG_peter_II_young.dds"
-					expire = "1965.1.1"
-					ideology = conservatism
-					traits = {
-						underage_monarch
-					}
+				YUG_peter_ii = {
+					promote_character = {ideology = despotism }
+					promote_character = {ideology = conservatism }
 				}
 			}
 			else = {
-				create_country_leader = {
-					name = "Peter II"
-					desc = "POLITICS_PETER_II_DESC"
-					picture = "Portrait_Yugoslavia_Peter_II.dds"
-					expire = "1965.1.1"
-					ideology = despotism
-					traits = {
-						legitimate_heir
-					}
-				}
-				create_country_leader = {
-					name = "Peter II"
-					desc = "POLITICS_PETER_II_DESC"
-					picture = "Portrait_Yugoslavia_Peter_II.dds"
-					expire = "1965.1.1"
-					ideology = conservatism
-					traits = {
-						legitimate_heir
-					}
+				YUG_peter_ii = {
+					swap_country_leader_traits = { remove = underage_monarch add = legitimate_heir }
 				}
 				hidden_effect = { set_country_flag = peter_is_of_age }
 			}
@@ -1750,7 +1723,7 @@ focus_tree = {
 			OR = {
 				AND = {
 					has_country_leader = {
-						name = "Peter II"
+						character = YUG_peter_ii
 						ruling_only = yes
 					}
 					NOT = { has_country_leader_with_trait = underage_monarch }
@@ -1758,7 +1731,7 @@ focus_tree = {
 				AND = {
 					NOT = { has_idea = king_peter_1 }
 					has_country_leader = {
-						name = "Prince Paul"
+						character = YUG_prince_paul
 						ruling_only = yes
 					}
 				}
@@ -1787,21 +1760,21 @@ focus_tree = {
 				if = {
 					limit = {
 						has_country_leader = {
-							name = "Prince Paul"
+							character = YUG_prince_paul
 							ruling_only = yes
 						}
 						NOT = { has_idea = king_peter_1 }
 						has_completed_focus = YUG_western_focus
 					}
-					create_country_leader = {
-						name = "Paul I"
-						desc = "POLITICS_PRINCE_PAUL_DESC"
-						picture = "Portrait_Yugoslavia_Prince_Paul.dds"
-						expire = "1965.1.1"
-						ideology = fascism_ideology
-						traits = {
-							collaborator_king
+					add_country_leader_role = {
+						character = YUG_prince_paul
+						country_leader = {
+							ideology = fascism_ideology
+							traits = {
+								collaborator_king
+							}
 						}
+						promote_leader = yes
 					}
 					set_party_name = { 
 						ideology = fascism
@@ -1846,7 +1819,7 @@ focus_tree = {
 
 		available = {
 			has_country_leader = {
-				name = "Peter II"
+				character = YUG_peter_ii
 				ruling_only = yes
 			}
 			NOT = { has_country_leader_with_trait = underage_monarch }
@@ -1875,6 +1848,8 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
+			is_in_faction = no
 			hidden_trigger = {
 				OR = {
 					event_target:yugoslavia_wedding_partner = {
@@ -2228,16 +2203,117 @@ focus_tree = {
 		}
 
 		search_filters = { FOCUS_FILTER_MANPOWER }
-		completion_reward = {
+
+		select_effect = {	#do the faction stuff before splitting, otherwise puppet breakoff needs to be delayed (since faction invites take time for response)
 			set_rule = {
 				can_create_factions = yes
 			}
 			if = {
 				limit = {
 					is_in_faction = no
+					ROM = {
+						is_faction_leader = yes
+						has_war = no
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}
+				}
+				ROM = {
+					country_event = generic.2
+				}
+			}
+			
+			else_if = {
+				limit = {
+					is_in_faction = no
+					CZE = {
+						is_faction_leader = yes
+						has_war = no
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}
+				}
+				CZE = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					is_in_faction = no
+					GRE = {
+						is_faction_leader = yes
+						has_war = no
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}
+				}
+				GRE = {
+					country_event = generic.2
+				}
+			}	
+			
+			else_if = {
+				limit = {
+					is_in_faction = no
+					TUR = {
+						is_faction_leader = yes
+						has_war = no
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}
+				}
+				TUR = {
+					country_event = generic.2
+				}
+			}	
+			else_if = {
+				limit = {
+					is_in_faction = no
+					HUN = {
+						is_faction_leader = yes
+						has_war = no
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}
+				}
+				HUN = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					is_in_faction = no
+					AUS = {
+						is_faction_leader = yes
+						has_war = no
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+					}
+				}
+				AUS = {
+					country_event = generic.2
+				}
+			}											
+			else_if = {
+				limit = {
+					is_in_faction = no
 				}
 				create_faction = YUGOSLAV_DEFENCE_LEAGUE
 			}
+		}
+		completion_reward = {
 			set_division_template_lock = {
 				division_template = "Teritorijalna Odbrana"
 				is_locked = no
@@ -2642,6 +2718,7 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
 			is_in_faction = no
 			OR = {
 				SOV = {
@@ -2693,7 +2770,7 @@ focus_tree = {
 
 	focus = {
 		id = YUG_yugoslavian_path_to_communism
-		icon = GFX_goal_befriend_communist_YUG
+		icon = GFX_goal_generic_befriend_yugoslavia_communist
 		prerequisite = { focus = YUG_abolish_the_monarchy }
 		mutually_exclusive = { focus = YUG_soviet_cooperation focus = YUG_yugoslavian_international_communism }
 		x = 5
@@ -2977,13 +3054,13 @@ focus_tree = {
 		}
 
 		available = {
+			has_war = yes
 			OR = {
+				surrender_progress > 0.1
 				AND = {
 					has_government = communism
 					has_completed_focus = YUG_federal_defense_council
 				}
-				
-				surrender_progress > 0.1
 			}
 			NOT = {
 				any_country = {
@@ -2992,12 +3069,11 @@ focus_tree = {
 					has_government = communism
 				}
 			}
-			
-			has_war = yes
 		}
 
-		completion_reward = {
+		available_if_capitulated = yes
 
+		completion_reward = {
 			swap_ideas = { remove_idea = YUG_idea_local_militias add_idea = CRO_veteran_partisans}
 			add_war_support = 0.05
 			add_tech_bonus = {
@@ -3019,7 +3095,7 @@ focus_tree = {
 	}
 	focus = {
 		id = YUG_invite_bulgaria
-		icon = GFX_goal_befriend_communist_BUL
+		icon = GFX_goal_generic_befriend_bulgaria_communist
 		prerequisite = { focus = YUG_pan_slavic_workers_congress }
 		x = -1
 		y = 1
@@ -3181,7 +3257,7 @@ focus_tree = {
 
 	focus = {
 		id = YUG_invite_albania
-		icon = GFX_goal_befriend_communist_ALB
+		icon = GFX_goal_generic_befriend_albania_communist
 		prerequisite = { focus = YUG_pan_slavic_workers_congress }
 		x = 1
 		y = 1
@@ -3740,7 +3816,7 @@ focus_tree = {
 	}	
 	focus = {
 		id = YUG_invite_romania
-		icon = GFX_goal_BUL_befriend_commie_ROM
+		icon = GFX_goal_generic_befriend_romania_communist
 		prerequisite = { focus = YUG_pan_balkan_workers_congress }
 		x = -2
 		y = 1
@@ -3799,7 +3875,7 @@ focus_tree = {
 
 	focus = {
 		id = YUG_invite_greece
-		icon = GFX_focus_YUG_GRE_communist_alliance
+		icon = GFX_goal_generic_befriend_yugoslavia_communist
 		prerequisite = { focus = YUG_pan_balkan_workers_congress }
 		x = 0
 		y = 1
@@ -4098,7 +4174,7 @@ focus_tree = {
 
 	focus = {
 		id = YUG_invite_turkey
-		icon = GFX_goal_ENG_collaboration_with_turkey
+		icon = GFX_goal_generic_befriend_turkey
 		prerequisite = { focus = YUG_invite_greece }
 		prerequisite = { focus = YUG_invite_hungary }
 		prerequisite = { focus = YUG_invite_romania }
@@ -5151,9 +5227,9 @@ focus_tree = {
 					category = cat_scout_plane
 				}				
 			}					
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = air_doc_bonus
-				bonus = 1.0
+				cost_reduction = 0.5
 				uses = 1
 				category = air_doctrine
 			}
@@ -5590,7 +5666,7 @@ focus_tree = {
 	}
 	focus = {
 		id = YUG_kraljevo_state_airlines_factory
-		icon = GFX_goal_italy_increase_aircraft_production
+		icon = GFX_focus_generic_aircraft_production
 		prerequisite = { focus = YUG_license_production }
 		x = -2
 		y = 1
@@ -6085,12 +6161,12 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_RESEARCH }
 
 		completion_reward = {
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = YUG_army_maneuvers
-				bonus = 1.0
+				cost_reduction = 0.5
 				uses = 1
 				category = land_doctrine
-			}
+			}			
 		}
 	}
 
@@ -6120,14 +6196,15 @@ focus_tree = {
 
 
 		completion_reward = {
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = YUG_supremacy_of_offense
-				bonus = 1.0
+				cost_reduction = 0.5
 				uses = 2
 				category = cat_mobile_warfare
 				category = cat_superior_firepower
-			}
+			}			
 		}
+		
 	}
 
 	focus = {
@@ -6156,14 +6233,14 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_RESEARCH }
 
 		completion_reward = {
-			add_tech_bonus = {
-				name = YUG_supremacy_of_defense
-				bonus = 1.0
+			add_doctrine_cost_reduction = {
+				name = YUG_supremacy_of_offense
+				cost_reduction = 0.5
 				uses = 2
 				category = cat_grand_battle_plan
 				category = cat_mass_assault
 				category = cat_r56_guerilla_warfare
-			}
+			}				
 		}
 	}
 
@@ -6258,9 +6335,9 @@ focus_tree = {
 
 		completion_reward = {
 			navy_experience = 15
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = YUG_contest_the_adriatic
-				bonus = 1.0
+				cost_reduction = 0.5
 				uses = 2
 				category = naval_doctrine
 			}
@@ -6669,13 +6746,12 @@ focus_tree = {
 
 		completion_reward = {
 			navy_experience = 15
-			every_navy_leader = { 
-			
+			every_navy_leader = { 		
 				add_coordination = 1
 			}
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = YUG_contest_the_adriatic
-				bonus = 1.0
+				cost_reduction = 0.5
 				uses = 1
 				category = naval_doctrine
 			}
@@ -6709,9 +6785,9 @@ focus_tree = {
 
 		completion_reward = {
 			navy_experience = 15
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = YUG_contest_the_adriatic
-				bonus = 1.0
+				cost_reduction = 0.5
 				uses = 1
 				category = naval_doctrine
 			}

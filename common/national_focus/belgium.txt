@@ -379,7 +379,7 @@ focus_tree = {
 	}	
     focus = { 
         id = tblra_communist_propaganda_Benelux
-        icon = gfx_postive_heroism
+        icon = GFX_postive_heroism
         prerequisite = { focus = tblra_political_commissars}
 		mutually_exclusive = { focus = tblra_puppet_netherlands }
         relative_position_id = tblra_political_commissars
@@ -674,7 +674,6 @@ focus_tree = {
                 limit = { NOT = { has_idea = neutrality_idea } }
                 add_ideas = neutrality_idea
             }
-			set_country_flag = tblra_declared_neutrality
             add_political_power = 150
         }
         search_filters = { FOCUS_FILTER_ANNEXATION FOCUS_FILTER_POLITICAL }
@@ -1462,8 +1461,11 @@ focus_tree = {
 			remove_ideas = tblra_extended_royal_powers
 			remove_ideas = tblra_monarchist_repression
 			if = {
-				limit = {has_idea = BEL_auguste_lippens}
-				swap_ideas = { remove_idea = BEL_auguste_lippens add_idea = BEL_achille_van_acker } 
+				limit = {
+					has_idea = BEL_auguste_lippens
+				}
+				remove_ideas = BEL_auguste_lippens 
+				add_ideas = BEL_achille_van_acker 
 			}
 			BEL = { set_politics = { ruling_party = democratic elections_allowed = yes } }
 			add_political_power = 50
@@ -1846,7 +1848,7 @@ focus_tree = {
     }
     focus = {
         id = tblra_proclaim_dietsland
-        icon = GFX_goal_Verdinaso
+		icon = GFX_goal_centralize_power
         prerequisite = { focus = tblra_unite_dietsland }
         relative_position_id = tblra_unite_dietsland
 		x = 0
@@ -2030,7 +2032,7 @@ focus_tree = {
 
     focus = {
         id = tblra_reactivate_caur_contacts
-        icon = GFX_goal_italian_cooperation
+        icon = GFX_goal_generic_befriend_italy
         prerequisite = { focus = tblra_belgian_militarism }
 		mutually_exclusive = { focus = tblra_germany_millitary_coop focus = tblra_belgium_first focus = tblra_an_ally_across_the_channel focus = BEL_spanish_ties }
 		relative_position_id = tblra_belgium_first
@@ -2173,7 +2175,7 @@ focus_tree = {
     }
 	focus = {
 		id = BEL_spanish_ties
-		icon = GFX_focus_generic_invite_nat_spain
+		icon = GFX_goal_generic_befriend_spain_nationalist
 		relative_position_id = tblra_belgium_first 
 		prerequisite = { focus = tblra_belgian_militarism }
 		mutually_exclusive = {focus = tblra_germany_millitary_coop focus = tblra_belgium_first focus = tblra_reactivate_caur_contacts focus = tblra_an_ally_across_the_channel }
@@ -3941,7 +3943,9 @@ focus_tree = {
 				}
 			}
 		}
-
+		available = {
+			has_tech = interwar_antiair
+		}
 		completion_reward = {
 			6 = {
 				add_building_construction = {
@@ -4039,20 +4043,65 @@ focus_tree = {
 			}				
 		}		
         completion_reward = {
-            add_tech_bonus = {
-                name = armor_bonus
-                bonus = 1
-                uses = 1
-                technology = improved_light_tank
-				technology = advanced_light_tank
-            } 
-            add_tech_bonus = {
-                name = armor_bonus
-                bonus = 1
-                uses = 1
-                technology = improved_light_td
-				technology = advanced_light_td
-            } 		
+			if = {
+				limit = {
+					NOT = {
+						has_dlc = "No Step Back"
+					}
+				}
+				add_tech_bonus = {
+					name = armor_bonus
+					bonus = 1
+					uses = 1
+					technology = improved_light_tank
+					technology = advanced_light_tank
+				} 
+				add_tech_bonus = {
+					name = armor_bonus
+					bonus = 1
+					uses = 1
+					technology = improved_light_td
+					technology = advanced_light_td
+				} 						
+			}
+			else = {
+				add_tech_bonus = {
+					name = infantry_artillery_bonus
+					bonus = 1
+					uses = 1
+					category = cat_anti_tank
+				}
+				add_tech_bonus = {
+					name = armor_bonus
+					bonus = 1
+					uses = 1
+					technology = advanced_light_tank_chassis
+				}									
+				add_tech_bonus = {
+					name = infantry_artillery_bonus
+					bonus = 1
+					uses = 2
+					category = armor_variant_tech
+				}				
+				create_equipment_variant = {
+					name = "T-13 B3" #
+					type = light_tank_destroyer_chassis_2
+					parent_version = 0
+					modules = {
+						main_armament_slot = tank_high_velocity_cannon
+						turret_type_slot = tank_light_three_man_tank_turret
+						suspension_type_slot = tank_bogie_suspension
+						armor_type_slot = tank_riveted_armor
+						engine_type_slot = tank_gasoline_engine
+					}
+					upgrades = {
+						tank_nsb_engine_upgrade = 5
+						tank_nsb_armor_upgrade = 2
+					}
+					icon = "gfx/interface/technologies/tank/light_tank/r56_tech_BEL_light_tank_02_TD.dds"
+				}
+			}
+			
 			custom_effect_tooltip = available_designer
 			show_ideas_tooltip = BEL_familleureux	
         }
@@ -4252,7 +4301,7 @@ focus_tree = {
 			}
 			
 		}
-		immediate = {
+		select_effect = {
 			add_ideas = tblra_supplementary_payments
 		}
 		available = {
@@ -4269,8 +4318,10 @@ focus_tree = {
 				controls_state = 6
 				controls_state = 34
 			}
-			
-			has_tech = armored_train
+			OR = {
+				has_tech = armored_train
+				has_tech = r56_gw_railway_gun
+			}
 			has_manpower > 1000
 		}
 		completion_reward = {
@@ -4283,6 +4334,17 @@ focus_tree = {
 			if = {
 				limit = {
 					has_tech = armored_train
+					NOT = {
+						has_tech = railway_gun
+					}
+				}
+				set_technology = {
+					railway_gun = 1
+				}				
+			}
+			else_if = {
+				limit = {
+					has_tech = r56_gw_railway_gun
 					NOT = {
 						has_tech = railway_gun
 					}
@@ -4312,6 +4374,9 @@ focus_tree = {
         icon = GFX_goal_generic_special_forces
 		prerequisite = {focus = tblra_experimental_weaponry}
 		relative_position_id = tblra_experimental_weaponry
+		mutually_exclusive = {
+			focus = tblra_resist_and_bite
+		}		
         x = 1
         y = 1
         cost = 10
@@ -4330,9 +4395,61 @@ focus_tree = {
 				category = r56_mountain_infantry_tech	
 				category = r56_shock_infantry_tech
             }
+			add_tech_bonus = {
+				name = special_forces_bonus
+				bonus = 1.0
+				uses = 2
+				category = r56_special_forces_training_tech 
+			}				
         }
         search_filters = { FOCUS_FILTER_RESEARCH }
-	}		
+	}
+    focus = {
+        id = tblra_resist_and_bite
+        icon = GFX_focus_generic_manpower
+		prerequisite = {focus = tblra_experimental_weaponry}
+		relative_position_id = tblra_experimental_weaponry
+		mutually_exclusive = {
+			focus = tblra_specialized_divisions
+		}
+        x = 3
+        y = 1
+        cost = 10
+		ai_will_do = {
+			factor = 3			
+		}		
+		available_if_capitulated = yes
+        completion_reward = {
+            army_experience = 5
+            add_tech_bonus = {
+                name = special_forces_bonus
+                bonus = 1
+                uses = 1
+				category = r56_jaeger_infantry_tech
+            }
+            add_tech_bonus = {
+                name = special_forces_bonus
+                bonus = 1
+                uses = 1
+				category = r56_jaeger_infantry_tech
+				category = camo_tech
+            }			
+			add_tech_bonus = {
+				name = special_forces_bonus
+				bonus = 1.0
+				uses = 1
+				category = r56_special_forces_training_tech
+				category = camo_tech 
+			}
+			add_tech_bonus = {
+				name = special_forces_bonus
+				bonus = 1.0
+				uses = 1
+				category = r56_special_forces_training_tech
+			}							
+        }
+        search_filters = { FOCUS_FILTER_RESEARCH }
+	}				
     focus = {
         id = tblra_military_research_interest
         icon = GFX_focus_research
@@ -4488,7 +4605,7 @@ focus_tree = {
                 name = antiair_tech_bonus_name
                 bonus = 1
                 uses = 1
-				category = anti_air_tech
+				category = cat_anti_air
 			}
 			 add_ideas = BEL_raoul_overstraeten2
 		}
@@ -4514,7 +4631,7 @@ focus_tree = {
                 name = antiair_tech_bonus_name
                 bonus = 1
                 uses = 1
-				category = anti_air_tech
+				category = cat_anti_air
 			}
             add_ideas = tblra_aa_expertise
 		}
@@ -5184,8 +5301,8 @@ focus_tree = {
 				uses = 2
 				category = submarine_doctrine
 			}
-            search_filters = { FOCUS_FILTER_RESEARCH }
         }
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
     focus = {
         id = tblra_reinvigorate_naval_prowess_of_old

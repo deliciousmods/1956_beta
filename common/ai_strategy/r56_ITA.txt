@@ -1,0 +1,403 @@
+# befriend
+# conquer
+# antagonize
+# build_ship
+# build_army
+# unit_ratio
+# build_building
+# research_tech
+# garrison
+# protect
+# influence
+
+ITA_default_air = {
+	allowed = { tag = ITA }
+	enable = { always = yes }
+
+	ai_strategy = { type = air_factory_balance                                  value = 50 }
+}
+
+ITA_naval_bombers = {
+	allowed = { tag = ITA }
+	enable = { 
+		has_deployed_air_force_size = { size < 800 type = naval_bomber }
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = equipment_production_min_factories id = naval_bomber value = 2 }
+	
+	ai_strategy = {
+		type = equipment_variant_production_factor
+		id = med_maritime_equipment
+		value = -100
+	}
+	
+	ai_strategy = {
+		type = equipment_variant_production_factor
+		id = strat_maritime_equipment
+		value = -100
+	}
+	
+	ai_strategy = {
+		type = equipment_variant_production_factor
+		id = flying_boat_equipment
+		value = -100
+	}
+}
+
+ITA_garrison_home = {
+	allowed = { tag = ITA }
+	enable = {
+		has_war = yes
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = put_unit_buffers
+		ratio = 0.15
+		states = { 
+			451
+			663
+			450
+		}
+		subtract_invasions_from_need = no
+		subtract_fronts_from_need = no
+	}
+}
+
+ITA_garrison_north_africa = {
+	allowed = { tag = ITA }
+	enable = {
+		always = yes
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = put_unit_buffers
+		ratio = 0.15
+		states = { 
+			115
+			156
+			117
+			2
+			157
+			162
+			161
+			158
+			160
+		}
+		subtract_invasions_from_need = no
+		subtract_fronts_from_need = no
+	}
+}
+
+ITA_north_africa_west = {
+	allowed = { tag = ITA }
+	enable = {
+		surrender_progress < 0.2
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = front_unit_request
+		state_trigger = {
+			region = 126
+			any_neighbor_state = { CONTROLLER = { original_tag = FRA } }
+		}
+		value = 100
+	}
+}
+
+ITA_north_africa_east = {
+	allowed = { tag = ITA }
+	enable = {
+		surrender_progress < 0.2
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = front_unit_request
+		state_trigger = {
+			OR = {
+				region = 126
+				state = 452
+				state = 447
+				state = 446
+				state = 453
+				state = 454
+			}
+			NOT = { any_neighbor_state = { CONTROLLER = { original_tag = FRA } } }
+		}
+		value = 125
+	}
+}
+
+ITA_treat_ven_bad_just_cause = { #used to prevent ealry ww2's
+	allowed = {
+		original_tag = ITA
+	}
+
+	enable = {
+		ROOT = {
+			has_government = fascism
+			OR = {
+				is_faction_leader = yes
+				is_in_faction = yes
+			}
+		}
+		VEN = {
+			has_government = fascism
+			is_ai = yes
+			is_in_faction = no
+		}		
+		country_exists = VEN
+	}
+	
+	abort_when_not_enabled = yes
+	
+	ai_strategy = {
+		type = befriend
+		id = "VEN"			
+		value = -55
+	}
+	ai_strategy = {
+		type = alliance
+		id = "VEN"			
+		value = -85
+	}	
+}
+
+
+portugal_ally = {
+	allowed = {
+		original_tag = ITA
+	}
+	enable = {
+		has_completed_focus = ITA_complete_the_latin_alliance
+		country_exists = POR
+	}
+	abort = {
+		NOT = { country_exists = POR }
+	}
+
+
+	ai_strategy = {
+		type = befriend
+		id = "POR"
+		value = 100
+	}
+	ai_strategy = {
+		type = alliance
+		id = "POR"
+		value = 100
+	}
+}
+
+crush_ethiopia = {
+	allowed = {
+		original_tag = ITA
+	}
+
+	enable = {
+		country_exists = ETH
+		ROOT = { has_war_with = ETH }
+		date < 1940.1.1
+	}
+	abort = {
+		NOT = { ITA = { has_war_with = ETH } }
+	}
+	
+	#ai_strategy = {
+	#	type = area_priority
+	#	id = africa
+	#	value = 500
+	#}
+	#ai_strategy = {
+    #    type = area_priority
+    #    id = suez
+    #    value = 500
+	#}
+	
+	ai_strategy = {
+        type = invade
+        id = "ETH"
+        value = 500
+	}
+	ai_strategy = {
+        type = ignore_army_incompetence
+        id = "ITA"
+        value = 500
+	}
+	ai_strategy = {
+        type = garrison
+        id = "ITA"
+        value = -1000
+	}
+	ai_strategy = {		
+		type = put_unit_buffers
+		ratio = 0.1
+		order_id = 2
+		subtract_invasions_from_need = yes
+		subtract_fronts_from_need = yes
+		states = { 
+			550
+			559
+		}
+	}	
+}
+
+ITA_hesitate_to_join_wars_becuase_we_need_more_time_or_we_will_get_crushed = {#this was a okay strat PDX it just needed to be coded better!
+	allowed = {
+		original_tag = ITA
+	}
+
+ 	enable = {
+		if = {
+			limit = {
+				is_historical_focus_on = yes
+			}
+			OR = {
+				date < 1940.5.1
+				if = {
+					limit = {
+						GER = {
+							AND = {
+								has_war_with = FRA
+								is_in_faction_with = ITA
+							}
+						}
+					}
+					FRA = {
+						surrender_progress < 0.20 #time to cash in
+					}
+				}
+				NOT = {
+					has_global_flag = FRA_already_surrendered
+				}
+			}
+		}
+		else = {
+			OR = {
+				date < 1939.1.1 #if you drag me into a pre 1939 war i'll cut you
+				if = {
+					limit = {
+						GER = {
+							AND = {
+								has_war_with = FRA
+								is_in_faction_with = ITA
+							}
+						}
+					}
+					FRA = {
+						surrender_progress < 0.20 #time to cash in
+					}
+				}
+				NOT = {
+					has_global_flag = FRA_already_surrendered
+				}
+			}
+		}
+		ROOT = {
+			has_government = fascism
+			OR = {
+				is_in_faction_with = GER
+				is_in_faction_with = SLO
+			}
+			OR = {
+				NOT = { has_war_with = POL }
+				NOT = { has_war_with = FRA }
+				NOT = { has_war_with = ENG }
+				NOT = { has_war_with = SOV }
+				NOT = { has_war_with = USA }
+			}
+		}
+		GER = {
+			has_government = fascism
+			OR = {
+				has_war_with = POL
+				has_war_with = SOV
+				has_war_with = FRA
+				has_war_with = ENG
+				has_war_with = USA
+			}
+		}
+ 	}
+
+ 	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = force_build_armies
+		id = "ITA"
+		value = 50
+	}
+
+	ai_strategy = {
+		type = dont_join_wars_with
+		id = GER
+		value = 185 #Vaules were way to high down from... 1000
+	}
+
+	ai_strategy = { #help you in other ways
+		type = send_lend_lease_desire
+		id = "GER"
+		value = 250
+	}
+
+	ai_strategy = { #help you in other ways
+		type = send_volunteers_desire
+		id = "GER"
+		value = 225
+	}
+	
+ 	ai_strategy = {
+ 		type = dont_join_wars_with
+ 		id = SLO
+ 		value = 175 #Vaules were way to high down from... 1000
+ 	}
+
+	ai_strategy = {
+		type = diplo_action_desire
+	 	target = join_allies
+	    	id = SLO
+		value = -1000
+	}
+}
+
+ITA_MIN_convoy_building = {
+	enable = {
+		original_tag = ITA
+	}
+
+	ai_strategy = {
+		type = equipment_production_min_factories
+		id = convoy
+		value = 3
+	}
+}
+
+ITA_convoy_hungry = {
+	enable = {
+		original_tag = ITA
+	}
+
+	enable = {
+		date < 1940.1.1
+		has_equipment = {
+  			convoy < 200 #MODDED
+  		}
+		#MODDED
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = unit_ratio
+		id = convoy
+		value = 40 #MODDED
+	}
+}
+
+
+
+

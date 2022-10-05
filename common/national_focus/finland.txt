@@ -24,7 +24,7 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 			completion_reward = {
-					add_political_power = 100
+					add_political_power = 75
 				}
 				search_filters = { FOCUS_FILTER_POLITICAL }
 
@@ -41,9 +41,9 @@ focus_tree = {
 		
 		completion_reward = {
 			army_experience = 10
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = land_doc_bonus
-				bonus = 1
+				cost_reduction = 0.5
 				uses = 1
 				category = land_doctrine
 			}
@@ -196,9 +196,9 @@ focus_tree = {
 					instant_build = yes
 				}
 			}			
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = air_doc_bonus
-				bonus = 1
+				cost_reduction = 0.5
 				uses = 1
 				category = air_doctrine
 			}			
@@ -251,9 +251,9 @@ focus_tree = {
 					ROOT = { set_country_flag = aviation_effort_AB }
 				}
 			}
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = air_doc_bonus
-				bonus = 1
+				cost_reduction = 0.5
 				uses = 1
 				category = air_doctrine
 			}
@@ -265,7 +265,7 @@ focus_tree = {
 		id = fin_industry
 		text = fin_industry
 		icon = GFX_goal_generic_production
-		cost = 10
+		cost = 5
 		x = 67
 		y = 0
 		
@@ -315,9 +315,10 @@ focus_tree = {
 		
 		available_if_capitulated = yes
 		
-				completion_reward = {
+			completion_reward = {
 				add_political_power = 75
-			add_ideas = fin_freedom_focus
+				add_stability = 0.05
+				add_ideas = fin_freedom_focus
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
@@ -327,7 +328,7 @@ focus_tree = {
 	focus = {
 		id = fin_neutralfoc
 		icon = GFX_goal_generic_generic_political
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = fin_individual_freedom
 		}
@@ -339,17 +340,20 @@ focus_tree = {
 		y = 1
 		
 		ai_will_do = {
-			factor = 2
+			factor = 1
 			modifier = {
 				is_historical_focus_on = yes
-				factor = 1
+				factor = 3
 			}
 		}
 		
 		available_if_capitulated = yes
 		
 		completion_reward = {
+			add_political_power = 75
+			add_stability = 0.05
 			add_ideas = neutrality_idea
+			set_rule = { can_join_factions = no }
 		}
 		search_filters = { FOCUS_FILTER_ANNEXATION FOCUS_FILTER_POLITICAL }
 	}
@@ -360,6 +364,11 @@ focus_tree = {
 		text = fin_armedneutfoc
 		icon = GFX_focus_secret_rearmament
 		cost = 10
+		available = {
+			NOT = {
+				has_idea = FIN_revenge
+			}
+		}
 		prerequisite = {
 			focus = fin_neutralfoc
 		}
@@ -378,9 +387,7 @@ focus_tree = {
 			}
 		}
 		
-		
-		
-				complete_tooltip = {
+	complete_tooltip = {
 			add_extra_state_shared_building_slots = 2
 			add_building_construction = {
 				type = arms_factory
@@ -420,7 +427,6 @@ focus_tree = {
 					instant_build = yes
 				}
 			}
-			
 			add_ideas = FIN_wepon
 			
 		}
@@ -451,18 +457,30 @@ focus_tree = {
 			}
 		}
 		
-		
-		
 		available = {
 			NOT = { has_war_with = GER }
-			has_country_flag = winterwarlost
+			NOT = {
+				has_government = communism
+			}
+			OR = {
+				has_country_flag = winterwarlost
+				AND = { #Don't blocked path if event chain was bypassed
+					SOV = {
+						has_full_control_of_state = 146
+						has_government = communism
+						NOT = {
+							is_in_faction_with = FIN
+						}
+					}
+				}
+			}
 			is_subject = no
 			is_in_faction = no
 		}
 
 		bypass = {
-			
 			OR = {
+				has_idea = FIN_revenge
 				is_in_faction_with = GER
 				has_war_with = GER
 				NOT = { country_exists = GER }
@@ -470,20 +488,15 @@ focus_tree = {
 		}
 		
 		
-		
-		completion_reward = {
+	completion_reward = {
+			add_war_support = 0.1
+			add_ideas = FIN_wepon
+			add_ideas = fin_revenge
 			swap_ideas = { remove_idea = fin_freedom_focus add_idea = fin_freedom_focus2 }
-			GER = {
-				add_opinion_modifier = { target = FIN modifier = FIN_ger_diplomacy }
+			hidden_effect = {
+				news_event = { id = fin_news.1 days = 3 } 
 			}
-		
-		FIN = {
-			add_opinion_modifier = { target = GER modifier = FIN_ger_diplomacy }
-			
-			}
-			news_event = { id = fin_news.1 days = 1 } 
 		}
-
 	}
 	
 	focus = {
@@ -502,11 +515,89 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-			add_ideas = deterrence
+			add_ideas = GEN_Anti_Invasion_I
+			if = {
+				limit = {
+					has_idea = disarmed_nation 
+				}
+				swap_ideas = { remove_idea = disarmed_nation  add_idea = extensive_conscription }
+			}
+			if = {
+				limit = {
+					has_idea = volunteer_only 
+				}
+				swap_ideas = { remove_idea = volunteer_only  add_idea = extensive_conscription }
+			}
+			if = {
+				limit = {
+					has_idea = limited_conscription
+				}
+				swap_ideas = { remove_idea = limited_conscription  add_idea = extensive_conscription }
+			}
+			if = {
+				limit = {
+					has_full_control_of_state = 111
+					NOT = {
+						has_full_control_of_state = 146
+					}
+				}
+				111 = {
+					add_building_construction = {
+						type = bunker
+						level = 1
+						province = 6186
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = bunker
+						level = 1
+						province = 6082
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = bunker
+						level = 1
+						province = 52
+						instant_build = yes
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_full_control_of_state = 150
+					NOT = {
+						has_full_control_of_state = 146
+					}
+				}
+				150 = {
+					add_building_construction = {
+						type = bunker
+						level = 1
+						province = 139
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = bunker
+						level = 1
+						province = 3030
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = bunker
+						level = 1
+						province = 9181
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = bunker
+						level = 1
+						province = 6210
+						instant_build = yes
+					}
+				}
+			}
 		}
-		search_filters = { FOCUS_FILTER_INDUSTRY }
-		
-
+		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MANPOWER }
 	}
 	
 	focus = {
@@ -523,9 +614,7 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-			
 			add_ideas = universalconscription
-			add_ideas = extensive_conscription
 		}
 		search_filters = { FOCUS_FILTER_MANPOWER }
 
@@ -534,8 +623,8 @@ focus_tree = {
 	focus = {
 		id = fin_germantreatyfoc
 		text = fin_germantreatyfoc
-		icon = GFX_goal_generic_german_assistance
-		cost = 5
+		icon = GFX_focus_generic_seek_accomodation_with_germany
+		cost = 10
 		prerequisite = {
 			focus = fin_guardfoc
 		}
@@ -546,14 +635,131 @@ focus_tree = {
 		available = {
 			is_subject = no
 			is_in_faction = no
-			FIN = { NOT = {has_war_with = GER}}}
+			exists = yes
+			GER = {
+				exists = yes
+				is_faction_leader = yes
+				NOT = {
+					is_in_faction_with = SOV
+					has_completed_focus = GER_soviet_ally
+				}
+				any_neighbor_country = {
+					tag = SOV
+				}
+			}
+			NOT = {
+				has_war_with = FIN
+			}
+		}
+
 			
 		completion_reward = {
-			custom_effect_tooltip = fin_militaryger_tt
-			hidden_effect = {
-				FIN = { give_military_access = GER }
+			if = {
+				limit = {
+					GER = {
+						NOT = {
+							has_war_with = SOV
+						}
+					}
+				}
 				GER = {
-					country_event = { id = finland.10 days = 1 }
+					country_event = { id = finland.84 days = 1 }
+				}
+				set_country_flag = r56_finnish_proposal_was_sent
+				custom_effect_tooltip = FIN_GER_agreement
+			}
+			if = {
+				limit = {
+					has_country_flag = r56_finnish_proposal_was_sent
+				}
+				effect_tooltip = {
+					if = {
+						limit = {
+							GER = {
+								NOT = {
+									has_military_access_to = GER
+								}
+							}
+						}
+						FIN = { give_military_access = GER }
+					}
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						GER = {
+							NOT = {
+								has_military_access_to = GER
+							}
+						}
+					}
+					FIN = { give_military_access = GER }
+				}
+			}
+			if = {
+				limit = {
+					FIN = {
+						has_full_control_of_state = 148
+					}
+				}
+				148 = {
+					if = {
+						limit = {
+							free_building_slots = {
+								building = infrastructure
+								size > 1
+								include_locked = yes
+							}
+						}
+						add_building_construction = {
+							type = infrastructure
+							level = 1
+							instant_build = yes
+						}
+					}
+					add_building_construction = { 
+						type = supply_node
+						level = 1
+						province = 11164
+						instant_build = yes
+					}
+					add_building_construction = { 
+						type = supply_node
+						level = 1
+						province = 6045
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = naval_base
+						level = 1
+						province = 11164
+						instant_build = yes
+					}
+				}
+			}
+			if = {
+				limit = {
+					GER = {
+						has_full_control_of_state = 148
+					}
+				}
+				build_railway = { 
+					path = { 11125 11115 11050 }				
+				}
+			}
+			build_railway = { 
+				path = { 11125 3193 11115 11130 }				
+			}
+			build_railway = { 
+				path = { 11130 30 3026 3153 6045 }				
+			}
+			hidden_effect = {
+				FIN = {
+					add_opinion_modifier = { target = GER modifier = FIN_ger_diplomacy }
+				}
+				GER = {
+					add_opinion_modifier = { target = FIN modifier = FIN_ger_diplomacy }
 				}
 			}
 		}
@@ -562,7 +768,7 @@ focus_tree = {
 	focus = {
 		id = fin_gerequipmentfoc
 		text = fin_gerequipmentfoc
-		icon = GFX_focus_generic_military_mission
+		icon = GFX_goal_ROM_invite_german_advisors
 		cost = 10
 		prerequisite = {
 			focus = fin_germantreatyfoc
@@ -575,120 +781,45 @@ focus_tree = {
 		available = {
 			is_subject = no
 			is_in_faction = no
-			FIN = { NOT = {has_war_with = GER}}
+			exists = yes
+			GER = {
+				exists = yes
+				is_faction_leader = yes
+				NOT = {
+					is_in_faction_with = SOV
+				}
+			}
+			NOT = {
+				has_war_with = FIN
+			}
 		}
 		
-		completion_reward = { #remember to add equipment!
-
-				custom_effect_tooltip = FIN_GER_Units
-				
-				custom_effect_tooltip = FIN_GER_agreement
-				
-				hidden_effect = {
-				set_rule = { can_join_factions = no }
-				add_ideas = FIN_stopai
-				add_equipment_to_stockpile = {
-					type = infantry_equipment_1 #type of equipment, from file
-					amount = 2500 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = support_equipment_1 #type of equipment, from file
-					amount = 1200 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = artillery_equipment_1 #type of equipment, from file
-					amount = 900 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = motorized_equipment_1 #type of equipment, from file
-					amount = 900 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = anti_tank_equipment_1 #type of equipment, from file
-					amount = 800 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-			
-				division_template = {
-					name = "SS Division"
-					division_names_group = FIN_INF_01
-					priority = 2
-					regiments = {
-						jaeger = { x = 0 y = 0 }
-						jaeger = { x = 0 y = 1 }
-						jaeger = { x = 0 y = 2 }
-						jaeger = { x = 0 y = 3 }
-						jaeger = { x = 0 y = 4 }
-			
-	    	   		 	artillery_brigade = { x = 1 y = 0 }
-						anti_tank_brigade = { x = 1 y = 1 }
-						jaeger = { x = 1 y = 2 }
-						jaeger = { x = 1 y = 3 }
-						jaeger = { x = 1 y = 4 }
-
-					}
-					
-					support = {
-						recon = { x = 0 y = 0 }
-						engineer = { x = 0 y = 1 }
-						signal_company = { x = 0 y = 2 }
-						logistics_company = { x = 0 y = 3 }
-					
-					}
-				}
-				
-				division_template = {
-					name = "Infantrie Division"
-					priority = 2
-					division_names_group = FIN_INF_01
-					regiments = {
-						jaeger = { x = 0 y = 0 }
-						jaeger = { x = 0 y = 1 }
-						jaeger = { x = 0 y = 2 }
-						jaeger = { x = 0 y = 3}
-						
-						jaeger = { x = 1 y = 0 }
-						jaeger = { x = 1 y = 1 }
-						jaeger = { x = 1 y = 2 }
-						jaeger = { x = 1 y = 3 }
-					}
-					
-					support = {
-	    	   		 	artillery = { x = 0 y = 0 }
-						anti_tank = { x = 0 y = 1 }
-						engineer = { x = 0 y = 0 }
-					
-					}
-				}
-	
-				random_owned_controlled_state = {
-					create_unit = {
-						division = "name = \"6th SS Mountain Division Nord\" division_template = \"SS Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}	
-					create_unit = {
-						division = "name = \"169th Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}
-					create_unit = {
-						division = "name = \"163rd Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}	
-					create_unit = {
-						division = "name = \"71st Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}
-					create_unit = {
-						division = "name = \"212th Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}
-					
-					
-				}
+		completion_reward = { 
+			custom_effect_tooltip = FIN_GER_Units
+			add_ideas = FIN_stopai
+			add_equipment_to_stockpile = {
+				type = infantry_equipment_1 
+				amount = 1000 
+				producer = GER 
+			}
+			add_equipment_to_stockpile = {
+				type = support_equipment_1 
+				amount = 250 
+				producer = GER 
+			}
+			add_equipment_to_stockpile = {
+				type = artillery_equipment_1 
+				amount = 100 
+				producer = GER 
+			}
+			add_equipment_to_stockpile = {
+				type = motorized_equipment
+				amount = 25
+				producer = GER
+			}
+			hidden_effect = {
+				add_manpower = 10000
+				load_oob = "FIN_GER"
 			}
 		}	
 		search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_MILITARY_EQUIPMENT }
@@ -698,56 +829,208 @@ focus_tree = {
 		id = fin_stabinthebackfoc
 		text = fin_stabinthebackfoc
 		icon = GFX_goal_generic_forceful_treaty
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = fin_gerequipmentfoc
 		}
 		mutually_exclusive = {
 			focus = fin_joinaxifoc
 		}
+
+		cancel_if_invalid = no
+		
+		
 		available = {
 			has_war_with = SOV
-			surrender_progress > 0.25
 			is_subject = no
 			is_in_faction = no
+			GER = {
+				exists = yes
+				has_offensive_war_with = SOV
+			}
+			OR = {
+				surrender_progress > 0.20
+				AND = {
+					surrender_progress > 0.07
+					NOT = {
+						ROOT = {
+							AND = {
+								has_full_control_of_state = 150
+								has_full_control_of_state = 111
+							}
+						}
+					}
+				}
+				AND = {
+					date > 1944.7.1
+					SOV = {
+						surrender_progress < 0.15
+					}
+				}
+			}
 		}
+
+		will_lead_to_war_with = GER
+
 		relative_position_id = fin_gerequipmentfoc
 		x = -1
 		y = 1
 		
 		ai_will_do = {
-			factor = 2
+			factor = 8
 			modifier = {
 				is_historical_focus_on = yes
-				factor = 1
+				factor = 100
 			}
 		}
-		
-		
-		
+
+		select_effect = {
+			if = {
+				limit = {
+					GER ={
+						has_war_with = SOV
+					}
+				}
+				GER = {
+					country_event = { id = finland.86 hours = 2 }
+				}
+			}
+			
+		}
+			
 		completion_reward = {
-			custom_effect_tooltip = FIN_stabinthebackev
-			remove_ideas = FIN_revenge
-		
-			hidden_effect = {
-				remove_ideas = FIN_stopai
-				set_rule = { can_join_factions = yes }
-					SOV = {
+			if = {
+				limit = {
+					FIN = {
+						has_idea = fin_revenge
+					}
+				}
+				effect_tooltip = {
+					FIN = {
+						remove_ideas = FIN_revenge
+					}
+				}
+			}
+			SOV = {
 				country_event = { id = finland.12 days = 1 }
+			}
+			custom_effect_tooltip = FIN_stabinthebackev_tt
+			effect_tooltip = {
+				SOV = {
+					white_peace = FIN
 				}
 
+				every_country = {
+					limit = {
+						is_in_faction_with = SOV
+						has_war_with = FIN
+					}
+					white_peace = FIN
+				}
+
+				if = {
+					limit = {
+						FIN = {
+							controls_state = 722
+						}
+					}
+					SOV = {
+						transfer_state = 722
+					}
+					
+				}
+
+				if = {
+					limit = {
+						has_idea = FIN_revenge
+					}
+					remove_ideas = FIN_revenge
+				}
+
+				if = {
+					limit = {
+						has_idea = FIN_communism_banned 
+					}
+					remove_ideas = FIN_communism_banned 
+				}
+				
+				if = {
+					limit = {
+						FIN = {
+							gives_military_access_to = FIN
+						}
+					}
+					GER = {
+						diplomatic_relation = { country = FIN relation = military_access active = no }
+					}
+				}
+
+				if = {
+					limit = {
+						has_completed_focus = fin_gerequipmentfoc
+					}
+					delete_unit_template_and_units = {
+						division_template = "Jaeger SS Division"
+						disband = no
+					}
+					delete_unit_template_and_units = {
+						division_template = "Jaeger German Infanterie-Division"
+						disband = no
+					}
+				}
+
+				if = {
+					limit = {
+						is_ai = yes
+						GER = {
+							has_war_with = SOV
+						}
+					}
+					declare_war_on = {
+						target = GER
+						type = topple_government
+					}
+				}
+				else_if = {
+					limit = {
+						GER = {
+							has_war_with = SOV
+						}
+					}
+					create_wargoal = {
+						target = GER
+						type = topple_government
+						expire = 0
+					}
+				} 
+				
 			}
-		
+			custom_effect_tooltip = FIN_stabinthebackev_tt_2
+			effect_tooltip = {
+				if = {
+					limit = {
+						GER = {
+							is_faction_leader = yes
+							exists = yes
+						}
+					}
+					GER = {
+						country_event = { id = finland.15 days = 1 }
+					}
+				}
+				unlock_national_focus = fin_joinaxifoc
+			}
+
+			hidden_effect = {
+				remove_ideas = FIN_stopai
+			}
 		}
-		
-
-
 	}
 	
 	focus = {
 		id = fin_joinaxifoc
 		icon = GFX_focus_chi_mission_to_germany
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = fin_gerequipmentfoc
 		}
@@ -763,17 +1046,22 @@ focus_tree = {
 			NOT = { has_war_with = GER }
 		}
 		bypass = {
-			is_in_faction_with = GER
+			OR = {
+				is_in_faction_with = GER
+				hidden_trigger = {
+					has_country_flag = r56_fin_double_down
+				}
+			}
 		}
 		relative_position_id = fin_gerequipmentfoc
 		x = 1
 		y = 1
 
 		ai_will_do = {
-			factor = 0.5
+			factor = 0
 			modifier = {
-				is_historical_focus_on = yes
-				factor = 0
+				is_historical_focus_on = no
+				factor = 0.5
 			}
 		}
 		
@@ -816,12 +1104,27 @@ focus_tree = {
 		}
 
 		completion_reward = {
-					set_rule = { can_send_volunteers = yes }
-					add_ideas = { fin_interventionism }
-		
-		
+			if = {
+				limit = {
+					has_idea = disarmed_nation 
+				}
+				swap_ideas = { remove_idea = disarmed_nation  add_idea = extensive_conscription }
+			}
+			if = {
+				limit = {
+					has_idea = volunteer_only 
+				}
+				swap_ideas = { remove_idea = volunteer_only  add_idea = extensive_conscription }
+			}
+			if = {
+				limit = {
+					has_idea = limited_conscription
+				}
+				swap_ideas = { remove_idea = limited_conscription  add_idea = extensive_conscription }
+			}
+			set_rule = { can_send_volunteers = yes }
+			add_ideas = { fin_interventionism }
 		}
-		
 	}
 	
 	focus = {
@@ -855,9 +1158,9 @@ focus_tree = {
 		
 		
 		completion_reward = {
-					set_rule = { can_create_factions = yes }
-					create_faction = nordic_defence_alliance
-					news_event = fin_news.4
+				set_rule = { can_create_factions = yes }
+				create_faction = nordic_defence_alliance
+				news_event = fin_news.4
 		}
 		search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_POLITICAL }
 		
@@ -904,7 +1207,7 @@ focus_tree = {
 	focus = {
 		id = fin_invswefoc
 		text = fin_invswefoc
-		icon = GFX_goal_invitesweden
+		icon = GFX_goal_generic_befriend_sweden
 		cost = 5
 		prerequisite = {
 			focus = fin_ambadassorfoc
@@ -947,7 +1250,7 @@ focus_tree = {
 	focus = {
 		id = fin_invnorfoc
 		text = fin_invnorfoc
-		icon = GFX_goal_invitenorway
+		icon = GFX_goal_generic_befriend_norway
 		cost = 5
 		prerequisite = {
 			focus = fin_ambadassorfoc
@@ -990,7 +1293,7 @@ focus_tree = {
 	focus = {
 		id = fin_invdenfoc
 		text = fin_invdenfoc
-		icon = GFX_goal_invitedenmark
+		icon = GFX_goal_generic_befriend_denmark
 		cost = 5
 		prerequisite = {
 			focus = fin_ambadassorfoc
@@ -1241,8 +1544,7 @@ focus_tree = {
 		continue_if_invalid = yes
 		
 		completion_reward = { 
-						add_ideas = universalconscription
-						add_ideas = extensive_conscription
+			add_ideas = universalconscription
 		}
 		search_filters = { FOCUS_FILTER_MANPOWER }
 
@@ -1251,7 +1553,8 @@ focus_tree = {
 	focus = {
 		id = fin_nationalismfoc
 		text = fin_nationalismfoc
-		icon = GFX_focus_fin_nationalism
+		icon = GFX_focus_EST_national_pride_in_finland
+		#GFX_focus_fin_nationalism icon quite bad
 		cost = 10
 		prerequisite = {
 			focus = fin_political_focus
@@ -1360,26 +1663,26 @@ focus_tree = {
                 custom_effect_tooltip = needs_approval
 			}
             effect_tooltip = {
-                add_tech_bonus = {
+                add_doctrine_cost_reduction = {
                     name = naval_doc_bonus
-                    bonus = 1
+                    cost_reduction = 0.5
                     uses = 2
                     category = naval_doctrine
                 }
-				add_tech_bonus = {
+				add_doctrine_cost_reduction = {
 					name = infantry_weapons_bonus
-					bonus = 1
+					cost_reduction = 0.5
 					uses = 1
 					category = infantry_weapons					
                 }
             }
         }
-            search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+        search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
     }
 
 	focus = {
 		id = fin_independent_diplomacy	
-		icon = GFX_goal_morale_bonus
+		icon = GFX_focus_invite_finland
 		cost = 10
 		prerequisite = {
 			focus = fin_nationalismfoc
@@ -1440,7 +1743,7 @@ focus_tree = {
 	focus = {
 		id = fin_annexswefoc
 		text = fin_annexswefoc
-		icon = GFX_goal_annexsweden
+		icon = GFX_goal_generic_attack_sweden
 		cost = 10
 		prerequisite = {
 			focus = FIN_push_towards_scandinavia
@@ -1477,9 +1780,10 @@ focus_tree = {
 		icon = GFX_focus_fin_finnish_militarism
 		cost = 10
 		prerequisite = {
-			focus = fin_axisalliancefoc
-			focus = fin_independent_diplomacy
-			focus = fin_fascist_british_alliance
+			focus = fin_nationalismfoc
+		}
+		available = {
+			fascism > 0.35
 		}
 		x = 22
 		y = 3
@@ -1487,7 +1791,7 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-					add_ideas = militarism_focus
+			add_ideas = militarism_focus
 		
 		}
 		search_filters = {  FOCUS_FILTER_MANPOWER }
@@ -1515,7 +1819,7 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-				country_event = finland.25
+			country_event = finland.25
 		
 		}
 
@@ -1535,7 +1839,7 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-					add_ideas = paramilitarism_focus
+			add_ideas = paramilitarism_focus
 		
 		}
 
@@ -1592,117 +1896,28 @@ focus_tree = {
 		
 		
 		completion_reward = { #remember to add equipment!
-					custom_effect_tooltip = FIN_GER_Units
-				hidden_effect = {
-				custom_effect_tooltip = FIN_GER_Units
-				
-				custom_effect_tooltip = FIN_GER_agreement
-				hidden_effect = {
-				
-				add_equipment_to_stockpile = {
-					type = infantry_equipment_1 #type of equipment, from file
-					amount = 2500 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = support_equipment_1 #type of equipment, from file
-					amount = 1200 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = artillery_equipment_1 #type of equipment, from file
-					amount = 900 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = motorized_equipment_1 #type of equipment, from file
-					amount = 900 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-				add_equipment_to_stockpile = {
-					type = anti_tank_equipment_1 #type of equipment, from file
-					amount = 800 #amount
-					producer = GER #Name of country that "built" the equipment
-				}
-			
-				division_template = {
-					name = "SS Division"
-					priority = 2
-					division_names_group = FIN_INF_01
-					regiments = {
-						mountaineers = { x = 0 y = 0 }
-						mountaineers = { x = 0 y = 1 }
-						mountaineers = { x = 0 y = 2 }
-						mountaineers = { x = 0 y = 3 }
-						mountaineers = { x = 0 y = 4 }
-			
-	    	   		 	artillery_brigade = { x = 1 y = 0 }
-						anti_tank_brigade = { x = 1 y = 1 }
-						mountaineers = { x = 1 y = 2 }
-						mountaineers = { x = 1 y = 3 }
-						mountaineers = { x = 1 y = 4 }
-
-					}
-					
-					support = {
-						recon = { x = 0 y = 0 }
-						engineer = { x = 0 y = 1 }
-						signal_company = { x = 0 y = 2 }
-						logistics_company = { x = 0 y = 3 }
-					
-					}
-				}
-				
-				division_template = {
-					name = "Infantrie Division"
-					priority = 2
-					division_names_group = FIN_INF_01
-					regiments = {
-						mountaineers = { x = 0 y = 0 }
-						mountaineers = { x = 0 y = 1 }
-						mountaineers = { x = 0 y = 2 }
-						mountaineers = { x = 0 y = 3}
-						
-						mountaineers = { x = 1 y = 0 }
-						mountaineers = { x = 1 y = 1 }
-						mountaineers = { x = 1 y = 2 }
-						mountaineers = { x = 1 y = 3 }
-					}
-					
-					support = {
-	    	   		 	artillery = { x = 0 y = 0 }
-						anti_tank = { x = 0 y = 1 }
-						engineer = { x = 0 y = 2 }
-					
-					}
-				}
-	
-				random_owned_controlled_state = {
-					create_unit = {
-						division = "name = \"6th SS Mountain Division Nord\" division_template = \"SS Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}	
-					create_unit = {
-						division = "name = \"169th Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}
-					create_unit = {
-						division = "name = \"163rd Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}	
-					create_unit = {
-						division = "name = \"71st Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}
-					create_unit = {
-						division = "name = \"212th Infantry Division\" division_template = \"Infantrie Division\" start_experience_factor = 0.5" 
-						owner = FIN
-					}					
-					
-				}
+			custom_effect_tooltip = FIN_GER_Units
+			add_ideas = FIN_stopai
+			add_equipment_to_stockpile = {
+				type = infantry_equipment_1 #type of equipment, from file
+				amount = 1000 #amount
+				producer = GER #Name of country that "built" the equipment
 			}
+			add_equipment_to_stockpile = {
+				type = support_equipment_1 #type of equipment, from file
+				amount = 250 #amount
+				producer = GER #Name of country that "built" the equipment
+			}
+			add_equipment_to_stockpile = {
+				type = artillery_equipment_1 #type of equipment, from file
+				amount = 100 #amount
+				producer = GER #Name of country that "built" the equipment
+			}
+			hidden_effect = {
+				load_oob = "FIN_GER"
+				add_manpower = 10000
+			}			
 		}
-	}
 	search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_MILITARY_EQUIPMENT }
 	}
 	
@@ -1750,7 +1965,7 @@ focus_tree = {
 	focus = {
 		id = fin_estonia
 		text = fin_estonia
-		icon = GFX_goal_generic_more_territorial_claims
+		icon = GFX_goal_generic_attack_estonia
 		cost = 10
 		prerequisite = {
 			focus = fin_lebensraumfoc
@@ -1769,10 +1984,8 @@ focus_tree = {
 		x = 20
 		y = 4
 		
-		
-		
 		completion_reward = {
-				EST = { country_event = finland.60 }
+			EST = { country_event = finland.60 }
 		}
 
 	}
@@ -1873,7 +2086,7 @@ focus_tree = {
 		id = fin_demcomunbanfoc
 		text = fin_demcomunbanfoc
 		icon = GFX_goal_FIN_communist_party
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = fin_comfoc
 		}
@@ -1894,6 +2107,10 @@ focus_tree = {
 		completion_reward = {
 			remove_ideas = FIN_communism_banned
 			add_stability = -0.05
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
 		}
 		search_filters = { FOCUS_FILTER_STABILITY }
 
@@ -2330,10 +2547,10 @@ focus_tree = {
 		}
 		
 		completion_reward ={
-		army_experience = 10
-		add_tech_bonus = {
+			army_experience = 10
+			add_doctrine_cost_reduction = {
 				name = land_doc_bonus
-				bonus = 1
+				cost_reduction = 0.5
 				uses = 1
 				category = land_doctrine
 			}
@@ -2419,10 +2636,10 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-		army_experience = 10
-		add_tech_bonus = {
+			army_experience = 10
+			add_doctrine_cost_reduction = {
 				name = land_doc_bonus
-				bonus = 1
+				cost_reduction = 0.5
 				uses = 1
 				category = land_doctrine
 			}
@@ -2465,10 +2682,10 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		completion_reward = {
-		army_experience = 10
-			add_tech_bonus = {
+			army_experience = 10
+			add_doctrine_cost_reduction = {
 				name = land_doc_bonus
-				bonus = 1
+				cost_reduction = 0.5
 				uses = 1
 				category = land_doctrine
 			}
@@ -2490,12 +2707,16 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		completion_reward = {
-		army_experience = 5
-			add_tech_bonus = {
+			army_experience = 5
+			add_doctrine_cost_reduction = {
 				name = land_doc_bonus
-				bonus = 1
+				cost_reduction = 0.5
 				uses = 1
 				category = land_doctrine
+			}
+			custom_effect_tooltip = r56_enable_motti_tactics
+			hidden_effect = {
+				set_technology = { masterful_double_envelopment = 1 popup = no }
 			}
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
@@ -2639,8 +2860,10 @@ focus_tree = {
 		available = {
 			OR = {
 				has_war = yes
-				threat > 0.15
-			
+				threat > 0.1
+				SOV = {
+					has_completed_focus = SOV_baltic_security
+				}
 			}
 		}
 		
@@ -2649,6 +2872,17 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
+			hidden_effect = {
+				if = {
+					limit = {
+						ROOT = {
+							is_ai = yes
+						}
+					}
+					add_manpower = 10000
+				}
+			}
+			add_timed_idea = { idea = rt56_USA_mobilize_the_national_guard days = 365 }
 			add_ideas = fin_milpropaganda
 		}
 
@@ -2658,7 +2892,7 @@ focus_tree = {
 		id = fin_mannherimline
 		text = fin_mannherimline
 		icon = GFX_goal_generic_fortify_city
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = fin_militarypropaganda
 		}
@@ -2678,21 +2912,27 @@ focus_tree = {
 		
 		
 		completion_reward = {
-		
+			if = {
+				limit = {
+					ROOT = {
+						has_full_control_of_state = 146
+					}
+				}
 				146 = {
-				if = {
-					limit = { is_controlled_by = ROOT }
-						add_building_construction = {
-							type = bunker
-							level = 2
-							province = 9105
-							instant_build = yes
+					if = {
+						limit = { is_controlled_by = ROOT }
+							add_building_construction = {
+								type = bunker
+								level = 3
+								province = 9105
+								instant_build = yes
+							}
+							add_building_construction = {
+								type = bunker
+								level = 3
+								province = 9100
+								instant_build = yes
 						}
-						add_building_construction = {
-							type = bunker
-							level = 2
-							province = 9100
-							instant_build = yes
 					}
 				}
 			}
@@ -2704,7 +2944,7 @@ focus_tree = {
 		id = fin_salpa
 		text = fin_salpa
 		icon = GFX_goal_generic_construct_military
-		cost = 15
+		cost = 5
 		prerequisite = {
 			focus = fin_militarypropaganda
 		}
@@ -2714,12 +2954,26 @@ focus_tree = {
 		
 		
 		available = {
-			has_country_flag = winterwarlost
+			OR = {
+				has_country_flag = winterwarlost
+				SOV = {
+					has_full_control_of_state = 146
+				}
+			}
+		
 			NOT = {
 				controls_state = 146
 				controls_state = 147
 				is_subject_of = SOV
 				is_in_faction_with = SOV
+			}
+			ROOT = {
+				AND = {
+					has_full_control_of_state = 111
+					has_full_control_of_state = 150
+					has_full_control_of_state = 148
+					has_full_control_of_state = 722
+				}
 			}
 		}
 		
@@ -2930,8 +3184,9 @@ focus_tree = {
 		prerequisite = {
 			focus = fin_forts
 		}
-		x = 42
-		y = 3
+		relative_position_id = fin_forts
+		x = 0
+		y = 2
 		
 		available = {
 			controls_state = 111
@@ -2968,8 +3223,9 @@ focus_tree = {
 		prerequisite = {
 			focus = fin_guardthegulf
 		}
-		x = 42
-		y = 4
+		relative_position_id = fin_guardthegulf
+		x = 0
+		y = 1
 		
 		available_if_capitulated = yes
 		
@@ -3037,8 +3293,9 @@ focus_tree = {
 		prerequisite = {
 			focus = fin_militaryindstry
 		}
-		x = 44
-		y = 3
+		relative_position_id = fin_militaryindstry
+		x = 0
+		y = 2
 		
 		available_if_capitulated = yes
 
@@ -3068,10 +3325,11 @@ focus_tree = {
 		icon = GFX_goal_generic_positive_trade_relations
 		cost = 10
 		prerequisite = {
-			focus = fin_baltictrl
+			focus = fin_militaryindstry
 		}
-		x = 44
-		y = 4
+		relative_position_id = fin_militaryindstry
+		x = 1
+		y = 1
 		
 		available_if_capitulated = yes
 		
@@ -3093,11 +3351,11 @@ focus_tree = {
 		icon = GFX_goal_generic_cold_war
 		cost = 10
 		prerequisite = {
-			focus = fin_logistics
-			focus = fin_engineer
+			focus = fin_forts
+			focus = fin_militaryindstry
 		}
 		x = 43
-		y = 5
+		y = 3
 		
 		available_if_capitulated = yes
 			
@@ -3122,7 +3380,7 @@ focus_tree = {
 				category = winter_clothing_tech
 			}				
 		}	
-		search_filters = { FOCUS_FILTER_RESEARCH }
+		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_ARMY_IMPROVEMENT }
 		
 	}
 	
@@ -3250,10 +3508,10 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-			add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = naval_doc_bonus
 				uses = 3
-				bonus = 1
+				cost_reduction = 0.5
 				category = naval_doctrine
 			}
 		}
@@ -3415,14 +3673,14 @@ focus_tree = {
 		
 		
 		completion_reward = {
-		
-			111 = {
-			add_extra_state_shared_building_slots = 3
-					add_building_construction = {
-						type = dockyard
-						level = 3
-						instant_build = yes
-					}
+			random_owned_controlled_state = {
+				prioritize = { 111 }
+				add_extra_state_shared_building_slots = 3
+				add_building_construction = {
+					type = dockyard
+					level = 3
+					instant_build = yes
+				}
 			}
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY }
@@ -3447,14 +3705,14 @@ focus_tree = {
 		
 		
 		completion_reward = {
-		
-			149 = {
-			add_extra_state_shared_building_slots = 2
-					add_building_construction = {
-						type = dockyard
-						level = 2
-						instant_build = yes
-					}
+			random_owned_controlled_state = {
+				prioritize = { 149 }
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = dockyard
+					level = 2
+					instant_build = yes
+				}
 			}
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY }
@@ -3465,7 +3723,7 @@ focus_tree = {
 		id = fin_fighterfocus
 		text = fin_fighterfocus
 		icon = GFX_focus_hol_fokker
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = fin_airforce
 		}
@@ -3537,7 +3795,7 @@ focus_tree = {
 	focus = {
 		id = fin_fundvlt
 		text = fin_fundvlt
-		icon = GFX_goal_generic_air_fighter
+		icon = GFX_goal_HOL_standardize_plane_designs
 		cost = 10
 		prerequisite = {
 			focus = fin_fighterfocus
@@ -3596,20 +3854,21 @@ focus_tree = {
 		
 		
 		completion_reward = { 
-				random_owned_controlled_state = {
-					add_building_construction = {
-						type = air_base
-						level = 2
-						instant_build = yes
-					}
+			air_experience = 25
+			random_owned_controlled_state = {
+				add_building_construction = {
+					type = air_base
+					level = 2
+					instant_build = yes
 				}
-				random_owned_controlled_state = {
-					add_building_construction = {
-						type = air_base
-						level = 2
-						instant_build = yes
-					}
+			}
+			random_owned_controlled_state = {
+				add_building_construction = {
+					type = air_base
+					level = 2
+					instant_build = yes
 				}
+			}
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 
@@ -3630,12 +3889,20 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward ={
-			add_tech_bonus = {
-				name =  air_doc_bonus
-				bonus = 1
-				uses = 1
-				category = air_doctrine
-			}
+			air_experience = 10
+			add_ideas = SAF_national_air_training
+			#add_doctrine_cost_reduction = {
+			#	name = air_doc_bonus
+			#	cost_reduction = 0.5
+			#	uses = 1
+			#	category = air_doctrine
+			#}
+			add_ace = {
+				name = "Ilmari"
+				surname = "Juutilainen"
+				callsign = "Illu"
+				type = fighter_genius
+			}			
 		
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
@@ -3656,13 +3923,20 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward ={
-			add_tech_bonus = {
-				name =  air_doc_bonus
-				bonus = 1
-				uses = 1
+			air_experience = 20
+			add_doctrine_cost_reduction = {
+				name = air_doc_bonus
+				cost_reduction = 0.5
+				uses = 2
 				category = air_doctrine
 			}
-		
+			add_ace = {
+				name = "Hans"
+				surname = "Wind"
+				callsign = "Hasse"
+				type = fighter_genius
+			}
+			add_ace = { name = "Eino" surname = "Luukkanen" callsign = "Bulldog" type = fighter_good }				
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 
@@ -3712,7 +3986,7 @@ focus_tree = {
 		id = fin_bombers
 		text = fin_bombers
 		icon = GFX_goal_generic_air_bomber
-		cost = 10
+		cost = 5
 		prerequisite = {
 			focus = fin_airforce
 		}
@@ -3862,7 +4136,7 @@ focus_tree = {
 	focus = {
 		id = fin_lemminkainen
 		text = fin_lemminkainen
-		icon = GFX_goal_generic_construct_infrastructure
+		icon = GFX_goal_generic_road
 		cost = 10
 		prerequisite = {
 			focus = fin_industry
@@ -3874,6 +4148,7 @@ focus_tree = {
 		
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = { 111 149  }
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = industrial_complex
@@ -3882,6 +4157,7 @@ focus_tree = {
 				}
 			}
 			random_owned_controlled_state = {
+				prioritize = { 111 149 148 }
 				add_building_construction = {
 					type = infrastructure
 					level = 1
@@ -3889,6 +4165,7 @@ focus_tree = {
 				}
 			}
 			random_owned_controlled_state = {
+				prioritize = { 111 149 148 }
 					add_building_construction = {
 					type = infrastructure
 					level = 1
@@ -3914,17 +4191,50 @@ focus_tree = {
 		
 		
 		completion_reward = {
+			add_equipment_to_stockpile = {
+				type = train_equipment
+				amount = 15
+			}			
+			build_railway = { 
+				path = { 169 32 3025 6138 }				
+			}			
+			#build_railway = {
+			#	level = 1
+			#	build_only_on_allied = yes
+			#	controller_priority = {
+			#	  base = 1
+			#	  modifier = {
+			#		tag = ROOT
+			#		add = 5
+			#	  }
+			#	}
+			#	fallback = yes
+			#	#path = { 10 20 30 40 }
+			#	start_province = 169
+			#	target_province = 149
+			#}
+			if = {
+				limit = {
+					controls_state = 148
+				}
+				build_railway = {
+					path = { 11164 124 6087 }
+				#	start_province = 11164
+				#	target_province = 6087
+				}				
+			}
+							
 			random_owned_controlled_state = {
 				add_building_construction = {
 					type = infrastructure
-					level = 2
+					level = 1
 					instant_build = yes
 				}
 			}
 			random_owned_controlled_state = {
 				add_building_construction = {
 					type = infrastructure
-					level = 2
+					level = 1
 					instant_build = yes
 				}
 			}
@@ -3949,6 +4259,7 @@ focus_tree = {
 		
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = { 149 150 }
 				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = industrial_complex
@@ -3957,6 +4268,7 @@ focus_tree = {
 				}
 			}
 			random_owned_controlled_state = {
+				prioritize = { 148 }
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = industrial_complex
@@ -4032,6 +4344,7 @@ focus_tree = {
 		
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = { 111 148 150 }
 				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = industrial_complex
@@ -4058,6 +4371,7 @@ focus_tree = {
 		
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = { 150 }
 				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = arms_factory
@@ -4073,7 +4387,7 @@ focus_tree = {
 	focus = {
 		id = fin_vkt
 		text = fin_vkt
-		icon = GFX_goal_generic_construct_mil_factory
+		icon = GFX_goal_polish_wartime_industry
 		cost = 10
 		prerequisite = {
 			focus = fin_tikkakoski
@@ -4085,6 +4399,7 @@ focus_tree = {
 		
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = { 150 }
 				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = arms_factory
@@ -4112,6 +4427,7 @@ focus_tree = {
 		
 		completion_reward = {
 			random_owned_controlled_state = {
+				prioritize = { 111 }
 				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = arms_factory
@@ -4137,14 +4453,14 @@ focus_tree = {
 		y = 4
 		
 		available = {
-			controls_state = 149
 			has_tech = synth_oil_experiments
 		}
 		
 		
 		
 		completion_reward = {
-			149 = {
+			random_owned_controlled_state = {
+				prioritize = { 149 }
 				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = rubber_refinery
@@ -4192,7 +4508,6 @@ focus_tree = {
 		
 		completion_reward = {
 				country_event = finland.30
-				
 		}
 
 	}
@@ -4224,6 +4539,11 @@ focus_tree = {
 		text = fin_realtionsfoc
 		icon = GFX_goal_generic_major_alliance
 		cost = 5
+		available = {
+			NOT = {
+				has_idea = FIN_revenge
+			}
+		}
 		prerequisite = {
 			focus = fin_armedneutfoc
 		}
@@ -4261,7 +4581,9 @@ focus_tree = {
 		available = {
 			NOT = { has_war_with = SWE }
 			SWE = { exists = yes }
-		
+			NOT = {
+				has_idea = FIN_revenge
+			}
 		}
 		relative_position_id = fin_realtionsfoc
 		x = 0
@@ -4319,7 +4641,7 @@ focus_tree = {
 		y = 2
 		
 		available = {
-			date > 1938.06.01
+			date > 1938.6.1
 			is_in_faction_with = DEN 
 			is_in_faction_with = SWE
 			is_in_faction_with = NOR
@@ -4483,6 +4805,7 @@ focus_tree = {
 				142 = { add_core_of = ROOT }
 				143 = { add_core_of = ROOT }
 				144 = { add_core_of = ROOT }
+				895 = { add_core_of = ROOT }
 			
 			# Sweden
 				124 = { add_core_of = ROOT }
@@ -4492,8 +4815,8 @@ focus_tree = {
 				141 = { add_core_of = ROOT }
 				38 = { add_core_of = ROOT }
 				666 = { add_core_of = ROOT }
-				842 = { add_core_of = ROOT }
-				843 = { add_core_of = ROOT }
+				896 = { add_core_of = ROOT }
+				897 = { add_core_of = ROOT }
 			
 			# Denmark / European Mainland
 				37 = { add_core_of = ROOT }
@@ -4589,10 +4912,10 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		completion_reward = {
-		add_tech_bonus = {
+			add_doctrine_cost_reduction = {
 				name = naval_doc_bonus
 				uses = 3
-				bonus = 1
+				cost_reduction = 0.5
 				category = naval_doctrine
 			}
 		}
@@ -4642,7 +4965,7 @@ focus_tree = {
 	
 	focus = {
 		id = fin_annexnorfoc
-		icon = GFX_goal_annexnorway
+		icon = GFX_goal_generic_attack_norway
 		cost = 10
 		prerequisite = {
 			focus = FIN_push_towards_scandinavia
@@ -4676,7 +4999,7 @@ focus_tree = {
 	
 	focus = {
 		id = fin_annexdenfoc
-		icon = GFX_goal_annexdenmark
+		icon = GFX_goal_generic_attack_denmark
 		cost = 10
 		prerequisite = {
 			focus = fin_annexswefoc
