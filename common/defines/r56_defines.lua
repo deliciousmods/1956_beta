@@ -106,8 +106,8 @@ NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.54				-- increased from 0.50 ; 
 NDefines.NMilitary.PLAN_BLITZ_OPTIMISM = 0.3						-- increased from 0.2 ; Additional combat balance value in favor of blitzing side when considering targets (not a combat bonus, just offsets planning)
 
 -- Peace Conferences
-NDefines.NMilitary.WAR_SCORE_LEND_LEASE_GIVEN_IC_FACTOR = 0.05,  			-- war score gained for every IC of lend lease sent to allies, halved
-NDefines.NMilitary.WAR_SCORE_LEND_LEASE_RECEIVED_IC_FACTOR = 0.05,  			-- war score deducted for every IC of lend lease received from allies, halved
+NDefines.NMilitary.WAR_SCORE_LEND_LEASE_GIVEN_IC_FACTOR = 0.05  			-- war score gained for every IC of lend lease sent to allies, halved
+NDefines.NMilitary.WAR_SCORE_LEND_LEASE_RECEIVED_IC_FACTOR = 0.05  			-- war score deducted for every IC of lend lease received from allies, halved
 
 -- Technology
 NDefines.NTechnology.BASE_TECH_COST = 80
