@@ -50,7 +50,7 @@ if GetStateNames:
         statenamelines = statenamefile.split("\n")
         for line in statenamelines:
             if "STATE_" in line:
-                lineisolate = line.replace("STATE_", ":")           #isolate the ID by making the symbols before and after the same
+                lineisolate = line.replace("_", ":")                #isolate the ID by making the symbols before and after the same, since bba I no longer check for "STATE_" but "_" because name variants exist with a _ after the ID as well
                 currid = int(lineisolate.split(":")[1])             #save the detected ID to a variable
                 statenameslist[currid - 1] = line.split("\"")[1]    #the text between brackets is assigned to the matching ID entry in the list
     DefaultDir()
