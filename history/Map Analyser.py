@@ -1,20 +1,30 @@
 #created by marijn211
-#this script is focused on generating map statistics based on the state history files of a mod, taking vanilla values if there is gaps in state numbers
+#this script is focused on generating map statistics based on the state history files of a mod, taking vanilla values if there is gaps in state numbers, the script ignores commented out lines in the history files, but doesnt in localization
 HOIIVPath = "E:\Games\Steam\steamapps\common\Hearts of Iron IV"
+SavetoFile = True                   #Save results to a csv and excel file, use "pip install openpyxl" if the latter throws an error
+GetStateNames = True                #Get state names if they are in the same path as in vanilla
+UseRoadto56 = False                 #Wether to check for Road to 56 buildings (just modify this with entries of any other mod if desired)
 
 import os
+import pandas as pd #use "pip install pandas" in console if you are using something which doesnt auto-download
+
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-os.chdir(ROOT_PATH + "\states")
+def DefaultDir():
+    os.chdir(ROOT_PATH + "\states")
+DefaultDir()
 filelistmod = os.listdir()
 
-modstringkeys = ("rubber_refinery", "aluminum_mill", "steel_mill")#r56 buildings, change to tuple() to use for vanilla
+if UseRoadto56:
+    modstringkeys = ("rubber_refinery", "aluminum_mill", "steel_mill")
+else:
+    modstringkeys = tuple()
 numkeys = ("id", "infrastructure", "industrial_complex", "arms_factory", "synthetic_refinery", "air_base", "anti_air_building", "radar_station", "manpower", "local_supplies", "steel", "tungsten", "oil", "rubber", "aluminium", "chromium") #excluding nuclear because obviously it isnt a typical starting one
 sumkeys = ("naval_base", "bunker", "coastal_bunker") #can be spread across several province entries
 stringkeys = ("owner", "state_category", "add_core_of", "add_claim_by")
 validkeys = numkeys + sumkeys + stringkeys + modstringkeys
 statistics = list()
 statenumbers = list()
-getmissingstateinfo = False
+
 for filename in filelistmod:
     extract = filename.split("-") #merely filtering on digits gives issues if the state name has a number
     statenumbers.append(int(extract[0]))
@@ -23,9 +33,27 @@ for num in range(1, max(statenumbers)):
     if num not in statenumbers:
         missingstates.append(num)
 if len(missingstates) > 0:
-    getmissingstateinfo = True #change this if you dont want vanilla to be checked
+    getmissingstateinfo = True #change this to false if you want to ignore gaps for some reason
     print("The following states {} are not overwritten, assuming this mod has more states than vanilla: ".format(len(missingstates)) + str(missingstates))
+else:
+    getmissingstateinfo = False
 
+if GetStateNames:
+    statekey = ("state name",)                      #create tuple with just the statename entry
+    validkeys = validkeys + statekey                #add it as entry to the info range
+    statenameslist = [None]*max(statenumbers)       #list of state names is as long as the amount of states
+    os.chdir(ROOT_PATH)
+    os.chdir("..")
+    os.chdir("localisation\english")
+    with open( "state_names_l_english.yml", encoding='utf8' ) as statenamesread:
+        statenamefile = statenamesread.read()
+        statenamelines = statenamefile.split("\n")
+        for line in statenamelines:
+            if "STATE_" in line:
+                lineisolate = line.replace("_", ":")                #isolate the ID by making the symbols before and after the same, since bba I no longer check for "STATE_" but "_" because name variants exist with a _ after the ID as well
+                currid = int(lineisolate.split(":")[1])             #save the detected ID to a variable
+                statenameslist[currid - 1] = line.split("\"")[1]    #the text between brackets is assigned to the matching ID entry in the list
+    DefaultDir()
 
 def extract_statistics(filelist):
     for file in filelist:
@@ -56,7 +84,7 @@ def extract_statistics(filelist):
                         elif key == "add_claim_by" and not value in claimlist:
                             claimlist.append(value)
                         elif key == "add_claim_by" and value in claimlist: #note files with dupe
-                            dupecore = True
+                            dupeclaim = True
                         elif key == "add_core_of" and not value in corelist:
                             corelist.append(value)
                         elif key == "add_core_of" and value in corelist: #note files with dupe
@@ -69,6 +97,8 @@ def extract_statistics(filelist):
             print("Duplicate claim entry in state file " + str(statedict["id"]))
         statedict["add_core_of"] = corelist
         statedict["add_claim_by"] = claimlist
+        if GetStateNames:   #set state name by using ID value as index
+            statedict["state name"] = statenameslist[statedict["id"] - 1]   #state 1 is index 0
         statistics.append(statedict)
 
 extract_statistics(filelistmod)
@@ -86,15 +116,10 @@ if getmissingstateinfo and os.path.exists(HOIIVPath): #go get vanilla files
 elif getmissingstateinfo:
     print("Invalid game directory")
 
-UsePandas = True
-SavetoFile = True
-if UsePandas:
-    import pandas as pd #use "pip install pandas" in console if you are using something which doesnt auto-download
-    df = pd.DataFrame(statistics)
-    sorted_df = df.sort_values(by='id')
-    print(sorted_df.to_string(index = False))
-    if SavetoFile:
-        os.chdir(ROOT_PATH)
-        sorted_df.to_csv('output.csv', index = False)
-else:
-    print(statistics)
+df = pd.DataFrame(statistics)
+sorted_df = df.sort_values(by='id')
+print(sorted_df.to_string(index = False))
+if SavetoFile:
+    os.chdir(ROOT_PATH)
+    sorted_df.to_csv('output.csv', index = False)
+    sorted_df.to_excel('output.xlsx', index = False)
