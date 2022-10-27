@@ -8397,20 +8397,25 @@ focus_tree = {
 			x = -20
 			y = 0
 			trigger = {
+				has_dlc = "By Blood Alone"
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
 				OR = {
-					NOT = { has_dlc = "By Blood Alone" }
-					AND = {
-						has_game_rule = {
-							rule = obsolete_focus_branches_visibility
-							option = HIDE
-						}
-						OR = {
-							has_completed_focus = ITA_culto_del_duce
-							has_completed_focus = ITA_convene_the_grand_council
-						}
-					}
+					has_completed_focus = ITA_culto_del_duce
+					has_completed_focus = ITA_convene_the_grand_council
 				}
 			}
+		}
+		offset = {
+			x = -10
+			y = 0
+			trigger = {
+				NOT = {
+					has_dlc = "By Blood Alone"
+				}
+			}		
 		}
 
 		relative_position_id = ITA_the_abyssinian_fiasco
@@ -8535,7 +8540,6 @@ focus_tree = {
 		id = ITA_servizio_informazione_militare
 		icon = GFX_focus_generic_secret_service_agency
 		prerequisite = { focus = ITA_solid_progress focus = ITA_the_abyssinian_fiasco focus = ITA_struggle_in_ethiopia }
-		mutually_exclusive = { focus = ITA_royal_intervention }
 
 		x = 0
 		y = 1
@@ -8594,13 +8598,19 @@ focus_tree = {
 	focus = {
 		id = ITA_royal_intervention
 		icon = GFX_goal_italy_end_the_army_corruption
-		prerequisite = { focus = ITA_solid_progress focus = ITA_the_abyssinian_fiasco focus = ITA_struggle_in_ethiopia }
-		mutually_exclusive = { focus = ITA_servizio_informazione_militare }
+		prerequisite = { focus = ITA_triumph_in_africa_bba }
+		mutually_exclusive = { focus = ITA_culto_del_duce }
 
-		x = 36
-		y = 0
+		x = -10
+		y = 3
 		relative_position_id = ITA_servizio_informazione_militare
 		cost = 10
+
+		allow_branch = {
+			NOT = {
+				has_dlc = "By Blood Alone"
+			}
+		}
 
 		ai_will_do = {
 			factor = 5
@@ -9680,7 +9690,7 @@ focus_tree = {
 		icon = GFX_focus_ITA_culto_del_duce
 		prerequisite = { focus = ITA_triumph_in_africa_bba }
 
-		mutually_exclusive = { focus = ITA_convene_the_grand_council focus = ITA_defy_the_duce }
+		mutually_exclusive = { focus = ITA_convene_the_grand_council focus = ITA_defy_the_duce focus = ITA_royal_intervention }
 
 		allow_branch = {
 			if = {
@@ -15431,9 +15441,14 @@ focus_tree = {
 		relative_position_id = ITA_triumph_in_africa_bba
 		cost = 5
 		available = {
-			NOT = {
-				has_completed_focus = ITA_unite_the_opposition
-				has_completed_focus = ITA_defy_the_duce
+			if = {
+				limit = {
+					has_dlc = "By Blood Alone"
+				}
+				NOT = {
+					has_completed_focus = ITA_unite_the_opposition
+					has_completed_focus = ITA_defy_the_duce
+				}
 			}
 		}
 
@@ -15454,10 +15469,12 @@ focus_tree = {
 	}
 
 	focus = {
-		id = ITA_balkan_ambition
-		icon = GFX_focus_generic_balkans_focus
+		id = ITA_balkan_ambition	#claims on Yugoslavia
+		text = "Claims on Yugoslavia"	#for some reason overriding wouldnt load
+		icon = GFX_goal_BUL_divide_yugoslavia
 		prerequisite = { focus = ITA_foreign_affairs }
-		mutually_exclusive = { focus = ITA_potential_allies_in_the_balkans }
+		mutually_exclusive = { focus = ITA_ally_yugoslavia }
+		#mutually_exclusive = { focus = ITA_potential_allies_in_the_balkans }
 
 		x = -1
 		y = 1
@@ -15514,23 +15531,22 @@ focus_tree = {
 			}
 		}
 	}
-
 	focus = {
-		id = ITA_potential_allies_in_the_balkans
-		icon = GFX_focus_generic_balkan_diplomacy
+		id = ITA_ally_yugoslavia
+		icon = GFX_goal_generic_befriend_yugoslavia
 		prerequisite = { focus = ITA_foreign_affairs }
 		mutually_exclusive = { focus = ITA_balkan_ambition }
 
 		x = 1
 		y = 1
 		relative_position_id = ITA_foreign_affairs
-		cost = 5
+		cost = 2	#rather short so I dont have to weirdly change historical AI
 		
 		available = {
 			is_subject = no
 		}
 
-		completion_reward = { #Changing stuff here will require changing stuff in History file for 1939 bookmark
+		completion_reward = {
 			YUG = {
 				add_opinion_modifier = { target = ITA modifier = ita_diplomacy_focus }
 				if = {
@@ -15551,6 +15567,48 @@ focus_tree = {
 				}
 				country_event = { id = generic.1 }
 			}
+			activate_targeted_decision = { target = YUG decision = ITA_pressure_country_government_balkan }
+			activate_targeted_decision = { target = YUG decision = ITA_promote_ideology_rallies_balkan }
+		}
+	}
+
+
+	focus = {
+		id = ITA_potential_allies_in_the_balkans
+		icon = GFX_focus_generic_balkan_diplomacy
+		prerequisite = { focus = ITA_balkan_ambition focus = ITA_ally_yugoslavia }
+		#mutually_exclusive = { focus = ITA_balkan_ambition }
+
+		x = 2
+		y = 1
+		relative_position_id = ITA_ally_yugoslavia
+		cost = 3	#rather short so I dont have to weirdly change historical AI
+		
+		available = {
+			is_subject = no
+		}
+
+		completion_reward = {
+			# YUG = {
+			# 	add_opinion_modifier = { target = ITA modifier = ita_diplomacy_focus }
+			# 	if = {
+			# 		limit = { ROOT = { has_government = fascism } }
+			# 		add_timed_idea = { idea = fascist_influence days = 1095 }
+			# 	}
+			# 	if = {
+			# 		limit = { ROOT = { has_government = democratic } }
+			# 		add_timed_idea = { idea = democratic_influence days = 1095 }
+			# 	}
+			# 	if = {
+			# 		limit = { ROOT = { has_government = communism } }
+			# 		add_timed_idea = { idea = communist_influence days = 1095 }
+			# 	}
+			# 	if = {
+			# 		limit = { ROOT = { has_government = neutrality } }
+			# 		add_timed_idea = { idea = neutrality_influence days = 1095 }
+			# 	}
+			# 	country_event = { id = generic.1 }
+			# }
 			ROM = {
 				add_opinion_modifier = { target = ITA modifier = ita_diplomacy_focus }
 				if = {
@@ -15593,10 +15651,10 @@ focus_tree = {
 			}
 
 
-			activate_targeted_decision = { target = YUG decision = ITA_pressure_country_government_balkan }
+			#activate_targeted_decision = { target = YUG decision = ITA_pressure_country_government_balkan }
 			activate_targeted_decision = { target = ROM decision = ITA_pressure_country_government_balkan }
 			activate_targeted_decision = { target = BUL decision = ITA_pressure_country_government_balkan }
-			activate_targeted_decision = { target = YUG decision = ITA_promote_ideology_rallies_balkan }
+			#activate_targeted_decision = { target = YUG decision = ITA_promote_ideology_rallies_balkan }
 			activate_targeted_decision = { target = ROM decision = ITA_promote_ideology_rallies_balkan }
 			activate_targeted_decision = { target = BUL decision = ITA_promote_ideology_rallies_balkan }
 		}
@@ -15605,12 +15663,12 @@ focus_tree = {
 	focus = {
 		id = ITA_formalize_the_albanian_protectorate
 		icon = GFX_goal_italy_albanian_protectorate
-		prerequisite = { focus = ITA_potential_allies_in_the_balkans focus = ITA_balkan_ambition }
+		prerequisite = { focus = ITA_ally_yugoslavia focus = ITA_balkan_ambition }
 		mutually_exclusive = { focus = ITA_albanian_occupation }
 
 		x = -16
 		y = 1
-		relative_position_id = ITA_potential_allies_in_the_balkans
+		relative_position_id = ITA_ally_yugoslavia
 		cost = 3
 
 		ai_will_do = {
@@ -15707,11 +15765,11 @@ focus_tree = {
 	focus = {
 		id = ITA_albanian_occupation
 		icon = GFX_goal_commie_kill_zog
-		prerequisite = { focus = ITA_potential_allies_in_the_balkans focus = ITA_balkan_ambition }
+		prerequisite = { focus = ITA_ally_yugoslavia focus = ITA_balkan_ambition }
 		mutually_exclusive = { focus = ITA_formalize_the_albanian_protectorate }
 		x = -14
 		y = 1
-		relative_position_id = ITA_potential_allies_in_the_balkans
+		relative_position_id = ITA_ally_yugoslavia
 		cost = 5
 
 		available = {
@@ -16003,11 +16061,11 @@ focus_tree = {
 	focus = {
 		id = ITA_guarantee_austrian_independence
 		icon = GFX_goal_italy_garantee_austria
-		prerequisite = { focus = ITA_potential_allies_in_the_balkans focus = ITA_balkan_ambition }
+		prerequisite = { focus = ITA_ally_yugoslavia focus = ITA_balkan_ambition }
 		mutually_exclusive = { focus = ITA_pact_of_steel focus = ITA_militarize_the_rome_protocols }
 		x = -12
 		y = 1
-		relative_position_id = ITA_potential_allies_in_the_balkans
+		relative_position_id = ITA_ally_yugoslavia
 		cost = 5
 		available = {
 			country_exists = AUS
@@ -16493,11 +16551,11 @@ focus_tree = {
 	focus = {
 		id = ITA_pact_of_steel
 		icon = GFX_focus_chi_mission_to_germany
-		prerequisite = { focus = ITA_potential_allies_in_the_balkans focus = ITA_balkan_ambition }
+		prerequisite = { focus = ITA_ally_yugoslavia focus = ITA_balkan_ambition }
 		mutually_exclusive = { focus = ITA_guarantee_austrian_independence focus = ITA_militarize_the_rome_protocols }
 		x = -6
 		y = 1
-		relative_position_id = ITA_potential_allies_in_the_balkans
+		relative_position_id = ITA_ally_yugoslavia
 		cost = 5
 
 		bypass = {
@@ -16807,11 +16865,11 @@ focus_tree = {
 	focus = {
 		id = ITA_militarize_the_rome_protocols
 		icon = GFX_goal_italy_militarize_the_rome_protocols
-		prerequisite = { focus = ITA_potential_allies_in_the_balkans focus = ITA_balkan_ambition }
+		prerequisite = { focus = ITA_ally_yugoslavia focus = ITA_balkan_ambition }
 		mutually_exclusive = { focus = ITA_guarantee_austrian_independence focus = ITA_pact_of_steel }
 		x = 0
 		y = 1
-		relative_position_id = ITA_potential_allies_in_the_balkans
+		relative_position_id = ITA_ally_yugoslavia
 		cost = 10
 
 		ai_will_do = {
@@ -17453,7 +17511,7 @@ focus_tree = {
 					add_state_claim = 103
 					add_state_claim = 958
 					add_state_claim = 956
-					add_state_claim = 957
+					add_state_claim = 853
 				}
 			}
 			if = {
@@ -17472,14 +17530,14 @@ focus_tree = {
 								956 = {
 									is_claimed_by = CRO
 								}
-								957 = {
+								853 = {
 									is_claimed_by = CRO
 								}
 							}
 							956 = {
 								remove_claim_by = CRO
 							}
-							957 = {
+							853 = {
 								remove_claim_by = CRO
 								add_claim_by = ITA
 							}
