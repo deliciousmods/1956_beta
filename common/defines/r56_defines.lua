@@ -427,7 +427,6 @@ NDefines.NSupply.SUPPLY_DISRUPTION_DAILY_RECOVERY = 3.0
 
 NDefines.NMilitary.SUPPLY_GRACE = 120 -- 72
 
-
 NDefines.NBuildings.SUPPLY_PORT_LEVEL_THROUGHPUT = 3 -- 3
 
 NDefines.NNavy.SUPPLY_NEED_FACTOR = 3 -- 4
