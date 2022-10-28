@@ -843,7 +843,7 @@ on_actions = {
 						if = {
 							limit = { #Affect only these states.
 								OR = {
-									state = 28 state = 39 state = 63 state = 66 state = 67 state = 68 state = 69 state = 85 state = 86 state = 152 state = 153 state = 188 state = 807 state = 957 state = 965
+									state = 28 state = 39 state = 63 state = 66 state = 67 state = 68 state = 69 state = 85 state = 86 state = 152 state = 153 state = 188 state = 807 state = 853 state = 965
 								}
 							}
 							THIS = { remove_core_of = GER }
@@ -902,12 +902,12 @@ on_actions = {
 					}
 					if = {
 						limit = {
-							957 = {
+							853 = {
 								is_claimed_by = GER
 							}
 						}
 						GER = {
-							remove_state_claim = 957
+							remove_state_claim = 853
 						}
 					}
 				}
@@ -2479,6 +2479,30 @@ on_actions = {
 						set_cosmetic_tag = GCDcivilwar
 						set_global_flag = PRC_civil_war_started
 					}
+				}
+			}
+			# Middle Eastern countries get an option to join war against Israel
+			if = {
+				limit = {
+					has_global_flag = anti_israeli_coalition
+					AND = { tag = EGY FROM = { tag = ISR } }
+				}
+				every_country = {
+					limit = {
+						capital_scope = {
+							is_on_continent = middle_east
+						}
+						is_subject = no
+						NOT = {
+							original_tag = TUR
+							original_tag = EGY
+							original_tag = ISR
+							has_war_with = EGY
+							is_in_faction_with = ISR
+							has_non_aggression_pact_with = ISR
+						}
+					}
+					country_event = { id = egypt.49 days = 2 }
 				}
 			}
 		}
@@ -4729,7 +4753,6 @@ on_actions = {
 						original_tag = CAR
 						original_tag = CAT
 						original_tag = DJI
-						original_tag = EGY
 						original_tag = EQG
 						original_tag = ERI
 						original_tag = NAV
@@ -7952,6 +7975,18 @@ on_actions = {
 					add_ideas = idea_game_rule_special_forces_cap_100
 				}
 			}
+
+			if = {
+				limit = {
+					ROOT = { original_tag = EGY }
+					EGY = {
+						has_cosmetic_tag = EGY_BRITISH_PUPPET
+					}
+				}
+				EGY = {
+					set_cosmetic_tag = EGY
+				}
+			}
 		}
 	}
 
@@ -8068,6 +8103,25 @@ on_actions = {
 			ALB = {
 				give_resource_rights = { receiver = ITA state = 910 }
 				give_resource_rights = { receiver = ITA state = 44 }
+			}
+			# British control over the very small amount of Sudanese aluminum
+			EGY = {
+				give_resource_rights = { receiver = ENG state = 903 }
+			}
+			903 = {
+				set_state_flag = EGY_britain_owns_darfur_resources
+			}
+			EGY = { #Starts the feedback loop for Sudanese agitation mission. EGY_counter_rebels_in_sudan_category / EGY_sudanese_agitation = here for folder search reasons 
+				if = {
+					limit = {
+						EGY = {
+							exists = yes
+						}
+					}
+					EGY = {
+						set_country_flag = EGY_sudanese_activity_feedback_loop
+					}
+				}
 			}
 			FRI = {
 				#tried to idea...
@@ -8473,6 +8527,10 @@ on_actions = {
 				#}
 			}
 
+			# Remove Egyptian bookmark idea - dynamic modifers don't show there
+			EGY = {
+				remove_ideas = EGY_the_egyptian_army_idea
+			}
 
 			if = {
 				limit = {
@@ -9548,6 +9606,59 @@ on_actions = {
 							traits = {
 							}
 						}
+					}
+				}
+			}
+
+# Germany status
+			if = { #MOD. Small OP. Due to the number of possible states, a default check seemed like a good idea.
+				limit = {
+					has_game_rule = {
+						rule = egy_fragmentation_status
+						option = DEFAULT
+					}
+				}
+				# This is purposefully empty.
+			}
+			else_if = { 
+				limit = {
+					has_game_rule = {
+						rule = egy_fragmentation_status
+						option = EGY_FRAGMENTED
+					}
+				}
+				EGY = {
+					release = SSU
+					release = SUD
+				}
+				SUD = {
+					load_oob = SUD_rebellion
+				}
+				903 = {
+					create_unit = {
+						division = "name = \"Anyanya\" division_template = \"Firqat Mushaa\" start_experience_factor = 0.1 start_equipment_factor = 0.6 force_equipment_variants = { infantry_equipment_0 = { owner = SSU } }"
+						owner = SSU
+					}
+				}
+			}
+			else_if = { 
+				limit = {
+					has_game_rule = {
+						rule = egy_fragmentation_status
+						option = EGY_DECENTRALIZED
+					}
+				}
+				EGY = {
+					release_puppet = SSU
+					release_puppet = SUD
+				}
+				SUD = {
+					load_oob = SUD_rebellion
+				}
+				903 = {
+					create_unit = {
+						division = "name = \"Anyanya\" division_template = \"Firqat Mushaa\" start_experience_factor = 0.1 start_equipment_factor = 0.6 force_equipment_variants = { infantry_equipment_0 = { owner = SSU } }"
+						owner = SSU
 					}
 				}
 			}
@@ -13390,8 +13501,6 @@ on_actions = {
 					transfer_state = 269
 				}
 				ENG = {
-					release = EGY
-					release = SUD
 					release = UGA
 					release = TZN
 					release = ZAM
@@ -15045,24 +15154,24 @@ on_actions = {
 	on_state_control_changed = {
 		effect = {
 
-			#instead of revolt use resistance against our enemies to ensure total liberation
-		#	if = {
-		#		limit = {
-		#			ROOT = {
-		#				has_war_with = FROM
-		#			}
-		#			FROM.FROM = {
-		#				has_resistance = yes
-		#				resistance > 60
-		#				NOT = {
-		#					OR = {
-		#						is_core_of = FROM
-		#						is_core_of = ROOT
-		#					}
-		#				}
-		#			}
-		#		}
-		#	}
+				#instead of revolt use resistance against our enemies to ensure total liberation
+			#	if = {
+			#		limit = {
+			#			ROOT = {
+			#				has_war_with = FROM
+			#			}
+			#			FROM.FROM = {
+			#				has_resistance = yes
+			#				resistance > 60
+			#				NOT = {
+			#					OR = {
+			#						is_core_of = FROM
+			#						is_core_of = ROOT
+			#					}
+			#				}
+			#			}
+			#		}
+			#	}
 
 			if = { #MOD. City-fall events. Now checks for state ID first, then extra conditions. Order preserved.
 				limit = {
@@ -16781,54 +16890,110 @@ on_actions = {
 					}
 					FROM.FROM = { set_state_flag = UKR_recaptured_territory_flag }
 				}
-
+			}
 				if = {
 					limit = {
-						OR = {
-							AND = {
-								RUT = { is_in_faction_with = ROOT }
-								FROM.FROM = { is_core_of = UKR }
-							}
-							AND = {
-								RUT = { is_subject_of = ROOT }
-								FROM.FROM = { is_core_of = UKR }
-							}
-							AND = {
-								ROOT = { original_tag = UKR }
-								FROM.FROM = { is_core_of = ROOT }
-							}
+						ROOT = { NOT = { tag = EGY } }
+						FROM.FROM = { 
+							has_dynamic_modifier = { modifier = EGY_mild_sudanese_separatism }
+							has_state_flag = EGY_sudanese_separatism_flag
 						}
 					}
-					RUT = {
-						add_equipment_to_stockpile = {
-							type = infantry_equipment_1
-							amount = 1775
-							producer = UKR
-						}
-						add_equipment_to_stockpile = {
-							type = support_equipment_1
-							amount = 10
-							producer = UKR
-						}
-						add_equipment_to_stockpile = {
-							type = artillery_equipment_1
-							amount = 2
-							producer = UKR
-						}
+					FROM.FROM = { 
+						remove_dynamic_modifier = { modifier = EGY_mild_sudanese_separatism } 
+						clr_state_flag = EGY_sudanese_separatism_flag
+						set_state_flag = EGY_sudanese_state_not_egypt
 					}
-					FROM.FROM = { set_state_flag = UKR_recaptured_territory_flag }
 				}
-			}
+				if = {
+					limit = {
+						ROOT = { tag = EGY }
+						FROM.FROM = {
+							NOT = {
+								has_country_flag = EGY_sudan_was_pacified
+								has_state_flag = EGY_mild_sudanese_separatism_flag
+							}
+							has_state_flag = EGY_sudanese_state_not_egypt
+						}
+					}
+					FROM.FROM = { 
+						add_dynamic_modifier = { modifier = EGY_mild_sudanese_separatism } 
+						clr_state_flag = EGY_sudanese_state_not_egypt
+						set_state_flag = EGY_sudanese_separatism_flag
+					}
+				}
+				if = {
+					limit = {
+						ROOT = { NOT = { tag = EGY } }
+						FROM.FROM = { 
+							has_dynamic_modifier = { modifier = EGY_moderate_sudanese_separatism }
+							has_state_flag = EGY_sudanese_separatism_flag
+						}
+					}
+					FROM.FROM = { 
+						remove_dynamic_modifier = { modifier = EGY_moderate_sudanese_separatism } 
+						clr_state_flag = EGY_sudanese_separatism_flag
+						set_state_flag = EGY_sudanese_state_not_egypt
+					}
+				}
+				if = {
+					limit = {
+						ROOT = { tag = EGY }
+						FROM.FROM = {
+							NOT = {
+								has_country_flag = EGY_sudan_was_pacified
+								has_state_flag = EGY_mild_sudanese_separatism_flag
+							}
+							has_state_flag = EGY_sudanese_state_not_egypt
+						}
+					}
+					FROM.FROM = { 
+						add_dynamic_modifier = { modifier = EGY_moderate_sudanese_separatism } 
+						clr_state_flag = EGY_sudanese_state_not_egypt
+						set_state_flag = EGY_sudanese_separatism_flag
+					}
+				}
+				if = {
+					limit = {
+						ROOT = { NOT = { tag = EGY } }
+						FROM.FROM = { 
+							has_dynamic_modifier = { modifier = EGY_fierce_sudanese_separatism }
+							has_state_flag = EGY_sudanese_separatism_flag
+						}
+					}
+					FROM.FROM = { 
+						remove_dynamic_modifier = { modifier = EGY_fierce_sudanese_separatism } 
+						clr_state_flag = EGY_sudanese_separatism_flag
+						set_state_flag = EGY_sudanese_state_not_egypt
+					}
+				}
+				if = {
+					limit = {
+						ROOT = { tag = EGY }
+						FROM.FROM = {
+							NOT = {
+								has_country_flag = EGY_sudan_was_pacified
+								has_state_flag = EGY_mild_sudanese_separatism_flag
+							}
+							has_state_flag = EGY_sudanese_state_not_egypt
+						}
+					}
+					FROM.FROM = { 
+						add_dynamic_modifier = { modifier = EGY_fierce_sudanese_separatism } 
+						clr_state_flag = EGY_sudanese_state_not_egypt
+						set_state_flag = EGY_sudanese_separatism_flag
+					}
+				}
 
-			#Danzig auto-annex workaround, but weird, also check DNZ_join_germany
-		#	if = {
-		#		limit = {
-		#			POL = { controls_state = 807 }
-		#			GER = { controls_state = 85 }
-		#		}
-		#		GER = { transfer_state = 807 }
-		#		807 = {	add_core_of = GER }
-		#	}
+				#Danzig auto-annex workaround, but weird, also check DNZ_join_germany
+			#	if = {
+			#		limit = {
+			#			POL = { controls_state = 807 }
+			#			GER = { controls_state = 85 }
+			#		}
+			#		GER = { transfer_state = 807 }
+			#		807 = {	add_core_of = GER }
+			#	}
 			if = {
 				limit = {
 					country_exists = DNZ
@@ -17283,7 +17448,48 @@ on_actions = {
 			}
 		} 
 	}
-
+	#ROOT = attacking side
+	#FROM = defending side
+	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
+	on_war_relation_added = {
+		effect = {
+			if = {		#Danzig can join Germany - from Polish tree
+				limit = {
+					OR = {	#Germany and Poland warring with each other
+						AND = {
+							tag = GER
+							FROM = { 
+								tag = POL
+							}
+						}
+						AND = {
+							tag = POL
+							FROM = { 
+								tag = GER
+							}
+						}
+					}
+					GER = {	
+						owns_state = 5
+						controls_state = 5
+					}
+					DNZ = {			#sanity check
+						exists = yes
+						OR = {
+							is_subject_of = POL
+							is_subject = no
+						}
+					}
+				}
+				DNZ = {
+					country_event = {
+						id = poland.55
+						hours = 1 random_hours = 24
+					}
+				}
+			}
+		}
+	}
 	#ROOT - country that just went to peace
 	on_peaceconference_ended = {
 		effect = {
