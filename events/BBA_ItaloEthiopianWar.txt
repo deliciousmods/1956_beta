@@ -1812,7 +1812,7 @@ country_event = {
 		trigger= {
 			FROM = {	
 				NOT = {
-					has_country_flag = ITA_italy_asks_ehtiopian_host_for_help
+					has_country_flag = ITA_italy_asks_ethiopian_host_for_help
 				}
 			}
 		}
@@ -1823,13 +1823,8 @@ country_event = {
 			country_event = { id = BBA_italo_ethiopian_war_events.501 hours = 2 random_hours = 1 }
 		}
 		effect_tooltip = {
-			ITA = {
-				start_peace_conference = {
-					tag = ETH
-					score_factor = 0.25
-				}
-			}
 			custom_effect_tooltip = ITA_peace_with_ethiopia_tt
+			ITA_forced_italo_ethiopian_peace_deal = yes
 			ENG = { 
 				country_event = { id = BBA_italy_interaction_events.31 }
 			}
@@ -1839,7 +1834,7 @@ country_event = {
 		name = BBA_italo_ethiopian_war_events.500.b 
 		trigger= {
 			FROM = {	
-				has_country_flag = ITA_italy_asks_ehtiopian_host_for_help
+				has_country_flag = ITA_italy_asks_ethiopian_host_for_help
 			}
 		}
 		ai_chance = { 
@@ -1849,13 +1844,8 @@ country_event = {
 			country_event = { id = BBA_italo_ethiopian_war_events.501 hours = 2 random_hours = 1 }
 		}
 		effect_tooltip = {
-			ITA = {
-				start_peace_conference = {
-					tag = ETH
-					score_factor = 0.25
-				}
-			}
 			custom_effect_tooltip = ITA_peace_with_ethiopia_tt
+			ITA_forced_italo_ethiopian_peace_deal = yes
 			FROM = { 
 				country_event = { id = BBA_italy_interaction_events.60 }
 			}
@@ -1885,19 +1875,31 @@ country_event = {
 	
 	is_triggered_only = yes
 	
-	option = { 
+	option = { #We'll fold....
 		name = BBA_italo_ethiopian_war_events.501.a
-		ITA = {
-			start_peace_conference = {
-				tag = ETH
-				score_factor = 0.25
-			}
+		ai_chance = { 
+			base = 10
 		}
 		hidden_effect = {
+			if = { #These flags are used in the PC and are intended to incentivise ETH to take these states, and not Italian states far away
+				limit = {
+					has_global_flag = second_italo_ethiopian_war_flag
+				}
+				550 = { set_state_flag = ITA_forced_peace_states_flag }
+				908 = { set_state_flag = ITA_forced_peace_states_flag }
+				559 = { set_state_flag = ITA_forced_peace_states_flag }
+				844 = { set_state_flag = ITA_forced_peace_states_flag }	
+				set_global_flag = end_of_second_italo_ethiopian_war_flag
+			}
 			if = {
-				limit = { 
-					ENG = {
-						has_country_flag = ITA_italy_asks_ehtiopian_host_for_help
+				limit = {#Checks if ENG is the host of exiled ETH or is allied to the host 
+					ITA_hosting_exiled_ethiopia = yes
+					if = {
+						limit = { 
+							ENG = {
+								has_country_flag = ITA_italy_asks_ethiopian_host_for_help
+							}
+						}
 					}
 				}
 				ENG = { #If ENG is the host of the exiled ETH government or is allied to the host 		and have been asked by ITA to guarantee AUS, then do this
@@ -1910,7 +1912,60 @@ country_event = {
 				}
 			}
 		}
+		ITA_forced_italo_ethiopian_peace_deal = yes
 	}	
+
+	option = { #We'll fight on!
+		name = BBA_italo_ethiopian_war_events.501.b
+		trigger = {
+			ROOT = {
+				any_core_state = {
+					is_controlled_by = ROOT
+				}
+				is_government_in_exile = no
+			}
+		}
+		ai_chance = { 
+			base = 0
+		}
+
+		custom_effect_tooltip = BBA_ethiopia_is_expelled_tt
+		if = {
+			limit = {
+				ROOT = { is_in_faction_with = ENG }
+			}
+			ROOT = { leave_faction = yes}
+		}
+
+		set_truce = {
+			target = ENG
+			days = 365
+		}
+
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = ETH_host_confirmed_flag
+				}
+				clr_country_flag = ETH_host_confirmed_flag
+			}
+			if = {
+				limit = {
+					has_country_flag = ETH_request_sent_flag
+				}
+				clr_country_flag = ETH_request_sent_flag
+			}
+			set_country_flag = ETH_refused_forced_peace_flag
+			if = {
+				limit = {
+					check_variable = { ETH.host_nation = ENG }
+				}
+				clear_variable = ETH.host_nation
+			}
+		}
+		ENG = { country_event = { id = BBA_italy_interaction_events.31 hours = 6 }}
+		ITA = { country_event = { id = BBA_italo_ethiopian_war_events.503 hours = 6 }}
+	}
 }
 
 #Event for England or France if Italy refuses to sue for peace
@@ -1925,7 +1980,30 @@ country_event = {
 	option = { #Such a shame
 		name = BBA_italo_ethiopian_war_events.502.a 
 		hidden_effect = {
-			clr_country_flag = ITA_italy_asks_ehtiopian_host_for_help
+			clr_country_flag = ITA_italy_asks_ethiopian_host_for_help
+		}
+	}
+}
+
+#Event for ITA if ETH refuses to sign the forced peace deal
+country_event = {  
+	id = BBA_italo_ethiopian_war_events.503
+	title = BBA_italo_ethiopian_war_events.503.t 
+	desc = BBA_italo_ethiopian_war_events.503.desc
+	picture = GFX_report_event_ETH_ethiopian_warriors
+	
+	is_triggered_only = yes
+ 
+	option = { #Such a shame
+		name = BBA_italo_ethiopian_war_events.503.a 
+		custom_effect_tooltip = BBA_ethiopia_is_expelled_tt
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = ITA_italy_asks_ethiopian_host_for_help
+				}
+				clr_country_flag = ITA_italy_asks_ethiopian_host_for_help
+			}
 		}
 	}
 }
