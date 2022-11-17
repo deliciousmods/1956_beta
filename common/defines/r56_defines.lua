@@ -105,10 +105,6 @@ NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.54				-- increased from 0.50 ; 
 
 NDefines.NMilitary.PLAN_BLITZ_OPTIMISM = 0.3						-- increased from 0.2 ; Additional combat balance value in favor of blitzing side when considering targets (not a combat bonus, just offsets planning)
 
--- Peace Conferences
-NDefines.NMilitary.WAR_SCORE_LEND_LEASE_GIVEN_IC_FACTOR = 0.05  			-- war score gained for every IC of lend lease sent to allies, halved
-NDefines.NMilitary.WAR_SCORE_LEND_LEASE_RECEIVED_IC_FACTOR = 0.05  			-- war score deducted for every IC of lend lease received from allies, halved
-
 -- Technology
 NDefines.NTechnology.BASE_TECH_COST = 80
 NDefines.NTechnology.BASE_YEAR_AHEAD_PENALTY_FACTOR = 3 -- Base year ahead penalty
@@ -155,6 +151,7 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
 		0.0, -- NAVAL_MINES_PLANTING
 		0.0, -- NAVAL_MINES_SWEEPING
 		0.0, -- MISSION_RECON
+		0.0, -- NAVAL_PATROL
     }
 	
 NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0	
