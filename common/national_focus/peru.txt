@@ -50,7 +50,7 @@ focus = {
 
 	completion_reward = {
 		add_political_power = 50
-		add_stability = 0.07
+		add_stability = 0.1
 		country_event = { hours = 5 id = peru.1 }
 	}
 	search_filters = { FOCUS_FILTER_POLITICAL }
@@ -146,6 +146,7 @@ focus = {
     prerequisite = { focus =  PRU_invite_carlos}
 	icon = GFX_focus_spa_supremacy_of_the_communion
 	relative_position_id = PRU_look_to_the_past
+	mutually_exclusive = { focus = PRU_royal_haciendas focus = PRU_labour_reforms } #far too OP otherwise
 	x = -4
 	y = 3
 
@@ -247,6 +248,7 @@ focus = {
     prerequisite = { focus = PRU_Appoint_a_Peruvian_monarch}
 	icon = GFX_goal_PRU_labbour
 	relative_position_id = PRU_look_to_the_past
+	mutually_exclusive = { focus = PRU_royal_haciendas focus = PRU_restore_the_viceroyalty_system } #far too OP otherwise
 	x = 0
 	y = 3
 
@@ -307,6 +309,7 @@ focus = {
     prerequisite = { focus =  PRU_invite_carlos focus= PRU_Appoint_a_Peruvian_monarch}
 	icon = GFX_goal_generic_land_seizure
 	relative_position_id = PRU_look_to_the_past
+	mutually_exclusive = { focus = PRU_restore_the_viceroyalty_system focus = PRU_labour_reforms } #far too OP otherwise
 	x = -2
 	y = 3
 
@@ -387,7 +390,7 @@ focus = {
 
 	completion_reward = {
 		add_ideas = PRU_royal_industry
-		add_stability = -0.07
+		add_stability = -0.1
 		unlock_decision_category_tooltip = PRU_reforms_in_the_constitution
 	}
 	search_filters = { FOCUS_FILTER_INDUSTRY }
@@ -418,12 +421,12 @@ focus = {
     prerequisite = { focus = PRU_viva_el_rey}
 	icon = GFX_goal_wargaming
 	relative_position_id = PRU_look_to_the_past
-	x = -4
+	x = -3
 	y = 7
 
 	cost = 10
 available = {
-		is_puppet = no
+		is_subject = no
 		controls_state = 302
 		controls_state = 487
 		controls_state = 688
@@ -448,7 +451,7 @@ focus = {
 	x = -1
 	y = 1
 available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 400000 }
 		SPR = {
 			r56_script_target_is_sane = yes
@@ -486,7 +489,7 @@ focus = {
 	y = 1
 
 available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 300000 }
 		BRA = {
 			r56_script_target_is_sane = yes
@@ -545,7 +548,7 @@ focus = {
 	x = 0
 	y = 2
 available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 500000 }
 		POR = {
 			r56_script_target_is_sane = yes
@@ -689,7 +692,7 @@ focus = {
 	}
     available = {
 			has_civil_war = no
-			is_puppet = no
+			is_subject = no
 		}
 
 	completion_reward = {
@@ -804,18 +807,30 @@ focus = {
 
 	bypass = {
 		OR= {
-		has_war_with = USA
-		USA = {
-			NOT = {
-			exists = yes
-			 }
-		}
+			has_war_with = USA
+			USA = {
+				NOT = {
+				exists = yes
+				}
+			}
 		}
 	}
 
 	completion_reward = {
-	unlock_decision_category_tooltip = PRU_strengthen_the_industry
-	add_ideas = PRU_inca_economy
+		random_core_state = {
+			limit = {
+				owner = ROOT
+				controller = ROOT
+			}
+			add_extra_state_shared_building_slots = 2
+			add_building_construction = {
+				type = industrial_complex
+				level = 2
+				instant_build = yes
+			}
+		}
+		unlock_decision_category_tooltip = PRU_strengthen_the_industry
+		#add_ideas = PRU_inca_economy	#the economic branch already buffs these categories and the branch already has many flat buffs
 	}
 	search_filters = { FOCUS_FILTER_INDUSTRY }
 }
@@ -891,7 +906,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 50000 }
 		BOL = {
 			r56_script_target_is_sane = yes
@@ -1047,6 +1062,79 @@ focus = {
 	search_filters = { FOCUS_FILTER_INDUSTRY }
 }
 
+
+			
+	focus = {
+		id = PRU_retake_antofagasta
+		icon = GFX_goal_generic_attack_chile
+		prerequisite = { focus = PRU_reclaim_bolivia }
+
+		x = 2
+		y = 1
+		relative_position_id = PRU_reclaim_bolivia
+
+		cost = 5
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 70000 }
+			any_state = {
+				OR = {
+					state = 506
+					state = 954
+				}
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = { 
+						OR = {
+							state = 506
+							state = 954
+						}
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}	
+
+		completion_reward = {
+			add_state_claim = 506
+			add_state_claim = 954
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						OR = {
+							state = 506
+							state = 954
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+
 focus = {
 	id = PRU_reclaim_argentina
     prerequisite = { focus = PRU_reclaim_bolivia}
@@ -1057,8 +1145,10 @@ focus = {
 
 	cost = 6
 available = {
-		is_puppet = no
-		has_border_with = ARG
+		is_subject = no
+		any_neighbor_country = {
+			original_tag = ARG
+		}
 		has_army_manpower = { size > 70000 }
 		ARG = {
 			r56_script_target_is_sane = yes
@@ -1107,72 +1197,10 @@ bypass = {
 	search_filters = { FOCUS_FILTER_ANNEXATION }
 }
 
-focus = {
-	id = PRU_reclaim_chile
-    prerequisite = { focus = PRU_reclaim_bolivia}
-	icon = GFX_goal_generic_attack_chile
-	relative_position_id = PRU_secure_the_andes
-	x = 2
-	y = 0
-
-	cost = 6
-available = {
-		is_puppet = no
-		has_army_manpower = { size > 70000 }
-		CHL = {
-			r56_script_target_is_sane = yes
-		}
-		r56_script_i_am_sane = yes
-	}
-	ai_will_do = {
-		factor = 10
-	}
-	bypass = {
-	
-		CHL = {
-		r56_script_standard_bypass = yes
-		}
-	}	
-
-	completion_reward = {
-		CHL = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-		create_wargoal = {
-			type = take_state_focus
-			target = CHL
-			expire = 0
-			generator = { 279 506 507 882 }
-		}
-		
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
 
 focus = {
 	id = PRU_secure_the_southern_Andes
-    prerequisite = { focus = PRU_reclaim_chile}
-	prerequisite = { focus = PRU_reclaim_argentina}
+	prerequisite = { focus = PRU_reclaim_argentina focus = PRU_retake_antofagasta }
 	icon = GFX_goal_PRU_perusuyu
 	relative_position_id = PRU_secure_the_andes
 	x = 3
@@ -1180,7 +1208,7 @@ focus = {
 
 	cost = 5
     available = {
-		is_puppet = no
+		is_subject = no
 		506 = {
 				controls_or_subject_of = yes
 				is_core_or_compliance_60 = yes
@@ -1290,589 +1318,71 @@ focus = {
 }
 
 focus = {
-	id = PRU_reclaim_colombia
-    prerequisite = { focus =PRU_reclaim_bolivia}
-	icon = GFX_goal_COL_political_effort
-	relative_position_id = PRU_secure_the_andes
-	x = 10
-	y = 0
-available = {
-		is_puppet = no
-		has_army_manpower = { size > 100000 }
-		COL = {
-			r56_script_target_is_sane = yes
-		}
-		r56_script_i_am_sane = yes
-	}
-	cost = 7
-bypass = {
-		COL = {
-			r56_script_standard_bypass = yes
-		}
-		
-	}
-	ai_will_do = {
-		factor = 10
-	}
-
-	completion_reward = {
-		COL = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-			create_wargoal = {
-			type = take_state_focus
-			target = COL
-			expire = 0
-		}
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-focus = {
-	id = PRU_reclaim_venezuela
-    prerequisite = { focus = PRU_reclaim_bolivia}
-	icon = GFX_goal_generic_attack_venezuela
-	relative_position_id = PRU_secure_the_andes
-	x = 8
-	y = 0
-available = {
-		is_puppet = no
-		has_border_with = VEN
-		has_army_manpower = { size > 100000 }
-		VEN = {
-			r56_script_target_is_sane = yes
-		}
-		r56_script_i_am_sane = yes
-	}
-	cost = 6
-bypass = {
-		VEN = {
-			r56_script_standard_bypass = yes
-		}
-		
-	}
-	ai_will_do = {
-		factor = 10
-	}
-
-	completion_reward = {
-		VEN = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-			create_wargoal = {
-			type = take_state_focus
-			target = VEN
-			expire = 0
-		}
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-focus = {
-	id = PRU_reclaim_ecuador
-    prerequisite = { focus = PRU_reclaim_bolivia}
-	icon = GFX_goal_attack_ecuador
-	relative_position_id = PRU_secure_the_andes
-	x = 6
-	y = 0
-available = {
-		is_puppet = no
-		has_army_manpower = { size > 100000 }
-		ECU = {
-			r56_script_target_is_sane = yes
-		}
-		r56_script_i_am_sane = yes
-	}
-	cost = 6
-bypass = {
-		ECU = {
-			r56_script_standard_bypass = yes
-		}
-		
-	}
-	ai_will_do = {
-		factor = 10
-	}
-
-	completion_reward = {
-		ECU = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-			create_wargoal = {
-			type = take_state_focus
-			target = ECU
-			expire = 0
-		}
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-focus = {
-	id = PRU_secure_the_north
-    prerequisite = { focus = PRU_reclaim_ecuador}
-	prerequisite = { focus = PRU_reclaim_colombia}
-	prerequisite = { focus = PRU_reclaim_venezuela}
-
-	icon = GFX_goal_COL_legitimize_gran_colombia
-	relative_position_id = PRU_secure_the_andes
-	x = 8
-	y = 1
-
-	cost = 5
- 	available = {
-		is_puppet = no
-		488 = {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-			307 = {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-			489 = {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-			875 = {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-			493 = {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-			306 = {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-			486 = {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-			305= {
-				controls_or_subject_of = yes
-				is_core_or_compliance_60 = yes
-			}
-	}
-	ai_will_do = {
-		factor = 10
-	}
-
-	completion_reward = {
-		add_war_support = 0.1
-		if = {
-				limit = {
-					493 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 493
-				add_state_core =493
-			}
-			add_state_core =493
-			if = {
-				limit = {
-					306  = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 306 
-				add_state_core =306 
-			}
-			add_state_core =306 
-			if = {
-				limit = {
-					305 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 305
-				add_state_core =305
-			}
-			add_state_core =305
-			if = {
-				limit = {
-					875 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 875
-				add_state_core =875
-			}
-			add_state_core =875
-			if = {
-				limit = {
-					489 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 489
-				add_state_core =489
-			}
-			add_state_core =489
-			if = {
-				limit = {
-					307 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 307
-				add_state_core =307
-			}
-			add_state_core =307
-			if = {
-				limit = {
-					488  = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 488 
-				add_state_core =488
-			}
-			add_state_core =488
-			if = {
-				limit = {
-					304  = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 304 
-				add_state_core =304 
-			}
-			add_state_core =304 
-			if = {
-				limit = {
-					864 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 864
-				add_state_core =864
-			}
-			add_state_core =864
-			if = {
-				limit = {
-					695 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 695
-				add_state_core =695
-			}
-			add_state_core =695
-			if = {
-				limit = {
-					691 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 691
-				add_state_core =691 
-			}
-			add_state_core =691 
-			if = {
-				limit = {
-					649 = { owner = { is_subject_of = ROOT } }
-				}
-				transfer_state = 649
-				add_state_core =649
-			}
-			add_state_core =649
-	set_rule = {
-				can_create_factions = yes
-	  		}
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-focus = {
-	id = PRU_reclaim_paraguay
-    prerequisite = { focus = PRU_secure_the_north focus = PRU_secure_the_southern_Andes}
-	icon =  GFX_goal_generic_attack_paraguay
-	relative_position_id = PRU_secure_the_andes
-	x = 4
-	y = 2
-
-	available = {
-		is_puppet = no
-		has_army_manpower = { size > 100000 }
-		PAR = {
-			r56_script_target_is_sane = yes
-		}
-		r56_script_i_am_sane = yes
-	}
-	cost = 10
-bypass = {
-		PAR = {
-			r56_script_standard_bypass = yes
-		}
-		
-	}
-	ai_will_do = {
-		factor = 10
-	}
-
-	completion_reward = {
-		PAR = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-			create_wargoal = {
-			type = take_state_focus
-			target = PAR
-			expire = 0
-		}
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-focus = {
-	id = PRU_reclaim_uruguay
-    prerequisite = { focus = PRU_secure_the_north focus = PRU_secure_the_southern_Andes}
-	icon = GFX_goal_generic_attack_uruguay
-	relative_position_id = PRU_secure_the_andes
-	x = 7
-	y = 2
-
-	available = {
-		is_puppet = no
-		has_army_manpower = { size > 100000 }
-		URG = {
-			r56_script_target_is_sane = yes
-		}
-		r56_script_i_am_sane = yes
-	}
-	cost = 10
-bypass = {
-		URG = {
-			r56_script_standard_bypass = yes
-		}
-		
-	}
-	ai_will_do = {
-		factor = 10
-	}
-
-	completion_reward = {
-		URG = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-			create_wargoal = {
-			type = take_state_focus
-			target = URG
-			expire = 0
-		}
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-
-
-focus = {
 	id = PRU_expel_europeans_from_south_america
     prerequisite = { focus = PRU_restore_the_borders_of_the_empire}
-	icon = GFX_focus_ger_break_anglo_french_colonial_hegemony
+	icon = GFX_goal_ENG_reassess_continental_commitments
 	relative_position_id = PRU_restore_the_borders_of_the_empire
 	x = 0
 	y = 1
 
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 900000 }
-		any_other_country = {
-        limit = {
-        OR = {
-        original_tag = ENG 
-        original_tag = FRA
-		original_tag = HOL
-         }
-        OR = {
-        owns_state = 687
-        owns_state = 309
-		owns_state = 310
-		owns_state = 691
-		owns_state = 692
-		owns_state = 694
-		owns_state = 689
-		owns_state = 693
-		owns_state = 690
-		owns_state = 311
-		owns_state = 299
-		owns_state = 720
-           } 
-		     } 
-		} 
 		r56_script_i_am_sane = yes
+		any_state = {
+			is_on_continent = south_america
+			OR = {
+				owner = {
+					capital_scope = { 
+						NOT = { is_on_continent = south_america }
+					}
+				}
+				owner = {
+					custom_trigger_tooltip = {
+						tooltip = is_subject_extra_tt
+						is_subject = yes
+					}
+					OVERLORD = {
+						capital_scope = {
+							is_on_continent = europe
+						}
+					}
+				}
+			}
+		}
 	}
 	cost = 10
-  bypass = {
-		ENG = {
-			r56_script_standard_bypass = yes
-		}
-		
-	}
 	ai_will_do = {
 		factor = 10
 	}
 
 	completion_reward = {
-          if = {
-		limit = {
-			ENG= {
-				 OR = {
-        owns_state = 687
-        owns_state = 309
-		owns_state = 310
-		owns_state = 691
-		owns_state = 692
-		owns_state = 694
-		owns_state = 689
-		owns_state = 693
-		owns_state = 690
-		owns_state = 311
-		owns_state = 299
-		owns_state = 720
-           } 
-				exists = yes
+		every_other_country = {
+			limit = {
+				NOT = { is_subject_of = ROOT }
+				any_owned_state = {
+					is_on_continent = south_america
+				}
+				OR = {
+					capital_scope = { NOT = { is_on_continent = south_america }}
+					AND = {
+						is_subject = yes
+						OVERLORD = {
+							capital_scope = {
+								is_on_continent = europe
+							}
+						}
+					}
+				}
+			}
+			ROOT = {
+				create_wargoal = {
+					target = PREV
+					type = take_state_focus
+					expire = 0
+				}
 			}
 		}
-			create_wargoal = {
-			type = take_state_focus
-			target = ENG
-			expire = 0
-		}
-	    }
-
-		  if = {
-		limit = {
-			FRA= {
-				 OR = {
-        owns_state = 687
-        owns_state = 309
-		owns_state = 310
-		owns_state = 691
-		owns_state = 692
-		owns_state = 694
-		owns_state = 689
-		owns_state = 693
-		owns_state = 690
-		owns_state = 311
-		owns_state = 299
-		owns_state = 720
-           } 
-				exists = yes
-			}
-		}
-			create_wargoal = {
-			type = take_state_focus
-			target = FRA
-			expire = 0
-		}
-	    }
-
-		  if = {
-		limit = {
-			HOL= {
-				 OR = {
-        owns_state = 687
-        owns_state = 309
-		owns_state = 310
-		owns_state = 691
-		owns_state = 692
-		owns_state = 694
-		owns_state = 689
-		owns_state = 693
-		owns_state = 690
-		owns_state = 311
-		owns_state = 299
-		owns_state = 720
-           } 
-				exists = yes
-			}
-		}
-			create_wargoal = {
-			type = take_state_focus
-			target = HOL
-			expire = 0
-		}
-	    }
 
 	}
 	search_filters = { FOCUS_FILTER_ANNEXATION }
@@ -1975,557 +1485,1088 @@ focus = {
 		}
 	}
 	search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_MANPOWER}
-}
-focus = {
-	id = PRU_hispanism
-	prerequisite = { focus = PRU_peruvian_blackshirts focus = give_power_to_general_ureta}
-	icon = GFX_focus_spa_the_phalanx_ascendant
-
-	x = 6
-	y = 1
-	relative_position_id = PRU_peruvian_blackshirts
-
-	cost = 5
-
-	ai_will_do = {
-		factor = 10
 	}
 
-	completion_reward = {
+	focus = {
+		id = PRU_hispanism
+		prerequisite = { focus = PRU_peruvian_blackshirts focus = give_power_to_general_ureta focus = PRU_invite_carlos }
+		icon = GFX_focus_spa_the_phalanx_ascendant
 
-		add_ideas = PRU_peru_falangism
-		
-	}
-	search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
-}
-focus = {
-	id = PRU_expand_south
-	prerequisite = { focus = PRU_hispanism }
-	icon = GFX_goal_CHL_the_spread_of_fascism
+		x = 9
+		y = 1
+		relative_position_id = PRU_peruvian_blackshirts
 
-	x = 0
-	y = 3
-	relative_position_id = PRU_hispanism
+		cost = 5
 
-	cost = 10
-	available = {
-		is_puppet = no
-		has_army_manpower = { size > 100000 }
-			CHL= {
-				exists = yes
-
-				NOT = {
-					has_war_with = PRU
-					is_in_faction_with = PRU
+		available = {
+			OR = {
+				has_completed_focus = PRU_legacy_of_sachez_cerro
+				AND = {
+					has_completed_focus = PRU_invite_carlos
+					has_completed_focus = PRU_viva_el_rey
 				}
-				r56_script_target_is_sane = yes
 			}
-			r56_script_i_am_sane = yes
-	}
-	ai_will_do = {
-		factor = 10
-	}
-bypass = {
-	
-		CHL = {
-			r56_script_standard_bypass = yes
 		}
-		
-	}
-	completion_reward = {
-		CHL = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
+
+		ai_will_do = {
+			factor = 10
 		}
-		if = {
-			limit = {
-				CHL = {
+
+		completion_reward = {
+
+			add_ideas = PRU_peru_falangism
+			
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
+	}
+
+	focus = {
+		id = PRU_spanish_civil_war_involvement
+		icon = GFX_goal_generic_spanish_civil_war_soldier
+		prerequisite = { focus = PRU_hispanism }
+		x = -1
+		y = 1
+		relative_position_id = PRU_hispanism
+
+		cost = 5
+
+		ai_will_do = {
+			factor = 0.1
+			modifier = {
+				is_historical_focus_on = no
+				has_global_flag = scw_is_ai_driven
+				factor = 500
+			}
+		}
+
+		available = {
+			has_global_flag = spanish_civil_war
+			has_war = no
+			NOT = {
+				has_global_flag = r56_scw_our_own_ending_check
+			}
+		}
+
+		completion_reward = {
+			set_rule = { can_send_volunteers = yes }
+			add_timed_idea = {
+				idea = r56_CHL_spanish_civil_war_involvement
+				days = 1095
+			}
+
+		}
+		search_filters = { FOCUS_FILTER_SPA_CIVIL_WAR }
+	}
+
+	focus = {
+		id = PRU_alliance_with_spain
+		icon = GFX_focus_generic_befriend_nationalist_spain_focus
+		prerequisite = { focus = PRU_hispanism }
+		x = 1
+		y = 1
+		relative_position_id = PRU_hispanism
+
+		cost = 7.2
+
+		available = {
+			is_subject = no
+			is_faction_leader = yes
+			SPR = {
+				is_subject = no
+				is_in_faction = no
+				OR = {
 					has_government = fascism
+					has_government = neutrality
 				}
 			}
-			country_event = { hours = 8 id = generic.5 }
 		}
-		else = {
-			create_wargoal = {
-				type = puppet_wargoal_focus
-				target = CHL
-				expire = 0
 
+		ai_will_do = {
+			factor = 10
+		}
+
+		completion_reward = {
+			random_other_country = {
+				limit = {
+					original_tag = SPR
+					is_subject = no
+					is_in_faction = no
+					OR = {
+						has_government = fascism
+						has_government = neutrality
+					}
+				}
+				country_event = { hours = 8 id = generic.5 }
 			}
 		}
-
+		search_filters = {FOCUS_FILTER_ALLIANCE}
 	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-focus = {
-	id = the_only_sun
-	prerequisite = { focus = PRU_expand_south }
-	icon = GFX_goal_ARG_reich
-    search_filters = { FOCUS_FILTER_ANNEXATION }
-	x = 0
-	y = 4
-	relative_position_id = PRU_hispanism
-    bypass = {
 	
-		ARG = {
-			r56_script_standard_bypass = yes
+
+	focus = {
+		id = PRU_legacy_of_guayaquil_treaty
+		prerequisite = { focus = PRU_hispanism }
+		icon = GFX_focus_GRE_Question_the_trade_Unions
+
+		mutually_exclusive = {
+			focus = PRU_hispanic_union
 		}
-		
-	}
-	cost = 10
-	available = {
-		is_puppet = no
-		has_border_with = ARG
-		has_army_manpower = { size > 100000 }
-			ARG= {
-				exists = yes
+
+		x = -2
+		y = 2
+		relative_position_id = PRU_hispanism
+
+		cost = 10
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 80000 }
+		}
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			OR = {
+				is_subject = yes
 				NOT = {
-					has_war_with = PRU
-					is_in_faction_with = PRU
+					controls_state = 491
+					controls_state = 490
+					controls_state = 305
 				}
-				r56_script_target_is_sane = yes
-			}
-			r56_script_i_am_sane = yes
-	}
-	ai_will_do = {
-		factor = 10
-	}
-
-	completion_reward = {
-		ARG = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-		if = {
-			limit = {
-				ARG = {
-					has_government = fascism
-				}
-			}
-			country_event = { hours = 8 id = generic.5 }
-		}
-		else = {
-			create_wargoal = {
-				type = puppet_wargoal_focus
-				target = ARG
-				expire = 0
-
 			}
 		}
 
-	}
+		completion_reward = {
+			add_war_support = 0.05
+			every_controlled_state = {
+				limit = {
+					OR = {
+						state = 491
+						state = 490
+						state = 305
+					}
+				}
+				if = {
+					limit = {
+						free_building_slots = {
+							building = infrastructure
+							size > 0
+						}
+					}
+					add_building_construction = {
+						type = infrastructure
+						level = 1
+						instant_build = yes
+					}
+				}
+				if = {
+					limit = {
+						air_base < 8
+					}
+					add_building_construction = {
+						type = air_base
+						level = 2
+						instant_build = yes
+					}
+				}
+			}
+			every_other_country = {
+				limit = {
+					capital_scope = {
+						is_core_of = PREV
+						region = 124
+					}
+				}
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = hostile_status
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = -100
+				}
+			}
+		}
 		search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-focus = {
-	id = PRU_intervention_in_brazil
-	prerequisite = { focus = the_only_sun }
-	icon = GFX_goal_generic_attack_brazil
-    search_filters = { FOCUS_FILTER_ANNEXATION }
-	x = 0
-	y = 5
-	relative_position_id = PRU_hispanism
-    bypass = {
-	
-		ARG = {
-			r56_script_standard_bypass = yes
-		}
-		
 	}
-	cost = 10
-	available = {
-		is_puppet = no
-		has_army_manpower = { size > 300000 }
-		is_subject = no
-            BRA = {
-                NOT = {
-                    is_in_faction_with = PRU
+
+		
+	focus = {
+		id = PRU_reclaim_ecuador
+		prerequisite = { focus = PRU_legacy_of_guayaquil_treaty }
+		icon = GFX_goal_PRU_peru_ecuador_war12
+		x = -1
+		y = 1
+		relative_position_id = PRU_legacy_of_guayaquil_treaty
+		
+		cost = 5
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 60000 }
+			491 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			any_state = {
+				is_core_of = ECU
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = { 
+						is_core_of = ECU
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}	
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					is_core_of = ECU
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						is_core_of = ECU
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+
+	focus = {
+		id = PRU_reclaim_colombia
+		prerequisite = { focus = PRU_reclaim_ecuador }
+		icon = GFX_goal_spr_recolonize_colombia
+		x = 0
+		y = 1
+		relative_position_id = PRU_reclaim_ecuador
+
+		cost = 7.2
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 90000 }
+			305 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			491 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			490 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			any_state = {
+				is_core_of = COL
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = { 
+						is_core_of = COL
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}	
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					is_core_of = COL
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						is_core_of = COL
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+
+	focus = {
+		id = PRU_reclaim_venezuela
+		prerequisite = { focus = PRU_reclaim_colombia }
+		icon = GFX_goal_generic_attack_venezuela
+		x = 0
+		y = 1
+		relative_position_id = PRU_reclaim_colombia
+
+		cost = 7.2
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 120000 }
+			493 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			306 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			486 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			any_state = {
+				is_core_of = VEN
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = { 
+						is_core_of = VEN
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}	
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					is_core_of = VEN
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						is_core_of = VEN
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+
+	focus = {
+		id = PRU_hispanic_union
+		prerequisite = { focus = PRU_hispanism }
+	
+		icon = GFX_goal_CHL_hispanic_pan_nationalism
+		x = 0
+		y = 2
+		relative_position_id = PRU_hispanism
+
+		mutually_exclusive = {
+			focus = PRU_prepare_for_another_pacific_war
+			focus = PRU_legacy_of_guayaquil_treaty
+		}
+	
+		cost = 10
+	
+		available = {
+			is_subject = no
+			is_in_faction = no
+			has_government = fascism
+	
+			NOT = {
+				has_completed_focus = PRU_inti_raymi
+				has_completed_focus = PRU_join_axis
+				has_completed_focus = PRU_trans_pacific_alliance
+				has_completed_focus = PRU_revolucion_restauradora
+			}
+			
+		}
+	
+		ai_will_do = {
+			factor = 4
+		}
+	
+		completion_reward = {
+			add_ideas = r56_CHL_hispanic_pan_nationalism
+			create_faction = "Union Hispanica"
+			every_other_country = {
+				limit = {
+					is_subject = no
+					is_major = no #not targeting major countries
+					NOT = { has_war_with = ROOT }
+					NOT = {
+						has_government = fascism
+					}
+					capital_scope = {
+						is_core_of = PREV
+						is_on_continent = south_america
+					}
+					NOT = {					#Not that Hispanic
+						original_tag = BRA
+					}
+				}
+				country_event = { 
+					id = peru.22
+					days = 1  random_days = 2
+				}
+			}
+			every_other_country = {
+				limit = {
+					is_subject = no
+					is_major = no #not targeting major countries
+					NOT = { has_war_with = ROOT }
+					has_government = fascism
+					capital_scope = {
+						is_core_of = FROM
+						is_on_continent = south_america
+					}
+					NOT = {					#Not that Hispanic
+						original_tag = BRA
+					}
+				}
+				country_event = { 
+					id = generic.5
+					hours = 12 random_hours = 36
+				}
+			}
+			unlock_decision_category_tooltip = PRU_propagate_fascism_in_latin_america
+		}
+		search_filters = {FOCUS_FILTER_ALLIANCE}
+	}
+
+	focus = {
+        id = PRU_Support_the_banana_industry
+        icon = GFX_goal_HON_bannana_takeover
+        prerequisite = { focus =  PRU_hispanic_union }
+        x = 1
+        y = 1
+        relative_position_id = PRU_hispanic_union
+
+        mutually_exclusive = {
+            focus = PRU_secure_the_central_america
+        }
+
+        cost = 5
+
+        available = {
+            is_subject = no
+            is_in_faction = yes
+			HON = {
+                OR = {
+                    has_government = fascism
+                    has_government = neutrality
                 }
             }
-	}
-	ai_will_do = {
-		factor = 10
-	}
+		}
+        ai_will_do = {
+            factor = 10
+        }
+		
+        completion_reward = {
+            HON = {
+                country_event = { 
+					id = generic.5
+					hours = 12
+				}
+            }
+        }
+        search_filters = {FOCUS_FILTER_ALLIANCE}
+    }
 
-	completion_reward = {
-		BRA = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
+	focus = {
+		id = PRU_secure_the_central_america
+		icon = GFX_goal_MEX_march_southwards
+        prerequisite = { focus =  PRU_hispanic_union focus = PRU_legacy_of_guayaquil_treaty }
+        x = -1
+        y = 1
+        relative_position_id = PRU_hispanic_union
+
+		mutually_exclusive = {
+			focus = PRU_Support_the_banana_industry
 		}
-			USA = {
-			diplomatic_relation = {
-				country = PRU
-				relation = guarantee
-				active = no
+	
+		cost = 10
+		available = {
+			is_subject = no
+			493 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			any_state = {
+				OR = {
+					is_core_of = PAN
+					is_core_of = COS
+					is_core_of = NIC
+					is_core_of = HON
+					is_core_of = GUA
+				}
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
 			}
 		}
-		create_wargoal = {
-				type = puppet_wargoal_focus
-				target = BRA
-				expire = 0
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = {
+						is_core_of = PAN
+						is_core_of = COS
+						is_core_of = NIC
+						is_core_of = HON
+						is_core_of = GUA
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
 			}
-	}
+		}
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					OR = {
+						is_core_of = PAN
+						is_core_of = COS
+						is_core_of = NIC
+						is_core_of = HON
+						is_core_of = GUA
+					}
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						OR = {
+							is_core_of = PAN
+							is_core_of = COS
+							is_core_of = NIC
+							is_core_of = HON
+							is_core_of = GUA
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = annex_everything
+						expire = 0
+					}
+				}
+			}
+		}
 		search_filters = { FOCUS_FILTER_ANNEXATION }
-}
+	}
 
-focus = {
-	id = PRU_looking_north
-	prerequisite = { focus = PRU_expand_south }
-	icon = GFX_goal_COL_political_effort
-    search_filters = { FOCUS_FILTER_ANNEXATION }
-	x = 2
-	y =4
-	relative_position_id = PRU_hispanism
+	focus = {
+		id = PRU_regain_the_new_spain_heritage
+		icon = GFX_focus_attack_mexico
+		prerequisite = { focus = PRU_secure_the_central_america focus=PRU_Support_the_banana_industry }
+		mutually_exclusive = { focus = PRU_alliance_with_mexico }
+		x = 0
+		y = 1
+		relative_position_id = PRU_secure_the_central_america
+		cost = 7.2
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 300000 }
+			313 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			any_state = {
+				is_core_of = MEX
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
+			}
+		}
 
-	cost = 10
-	available = {
-		is_puppet = no
-		has_army_manpower = { size > 100000 }
-			COL= {
-				exists = yes
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = {
+						is_core_of = MEX
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					OR = {
+						is_core_of = MEX
+					}
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						OR = {
+							is_core_of = MEX
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = annex_everything
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+	
+	focus = {
+	   id = PRU_alliance_with_mexico
+	   icon = GFX_goal_mexico_mexico_first
+	   prerequisite = { focus = PRU_secure_the_central_america focus=PRU_Support_the_banana_industry }
+	   mutually_exclusive = { focus = PRU_regain_the_new_spain_heritage }
+	   x = 2
+	   y = 1
+	   relative_position_id = PRU_secure_the_central_america
+	   cost = 5
+	   
+	   available = {
+		   is_subject = no
+		   is_faction_leader = yes
+		   MEX = {
+			   is_subject = no
+			   OR = {
+				   has_government = fascism
+				   has_government = neutrality
+			   }
+		   }
+	   }
+	   completion_reward = {
+		   MEX = {
+			   country_event = { hours = 8 id = generic.5 }
+		   }
+	   }
+	   search_filters = {FOCUS_FILTER_ALLIANCE}
+   }
+
+	focus = {
+		id = PRU_prepare_for_another_pacific_war
+		prerequisite = { focus = PRU_hispanism }
+		icon = GFX_goal_plan
+
+		mutually_exclusive = {
+			focus = PRU_hispanic_union
+		}
+
+		x = 2
+		y = 2
+		relative_position_id = PRU_hispanism
+
+		cost = 10
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 100000 }
+		}
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			OR = {
+				is_subject = yes
 				NOT = {
-					has_war_with = PRU
-					is_in_faction_with = PRU
+					controls_state = 492
+					controls_state = 494
 				}
-				r56_script_target_is_sane = yes
 			}
-			r56_script_i_am_sane = yes
+		}
+		completion_reward = {
+			add_war_support = 0.1
+			every_controlled_state = {
+				limit = {
+					OR = {
+						state = 492
+						state = 494
+					}
+				}
+				if = {
+					limit = {
+						free_building_slots = {
+							building = infrastructure
+							size > 0
+						}
+					}
+					add_building_construction = {
+						type = infrastructure
+						level = 1
+						instant_build = yes
+					}
+				}
+				if = {
+					limit = {
+						air_base < 8
+					}
+					add_building_construction = {
+						type = air_base
+						level = 2
+						instant_build = yes
+					}
+				}
+			}
+			every_other_country = {
+				limit = {
+					capital_scope = {
+						is_core_of = PREV
+						OR = {
+							region = 35
+							region = 201
+						}
+					}
+				}
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = hostile_status
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = -100
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
-	ai_will_do = {
-		factor = 10
+		
+	focus = {
+		id = PRU_reclaim_chile
+		icon = GFX_goal_generic_attack_chile
+		prerequisite = { focus = PRU_prepare_for_another_pacific_war }
+
+		x = 1
+		y = 1
+		relative_position_id = PRU_prepare_for_another_pacific_war
+
+		cost = 5
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 70000 }
+			492 = {
+				is_controlled_by_ROOT_or_ally = yes
+			}
+			any_state = {
+				is_core_of = CHL
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = { 
+						is_core_of = CHL
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}	
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					is_core_of = CHL
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						is_core_of = CHL
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = puppet_wargoal_focus
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
-    bypass = {
-	
-		COL = {
-			r56_script_standard_bypass = yes
+
+	focus = {
+		id = PRU_the_only_sun
+		prerequisite = { focus = PRU_reclaim_chile }
+		icon = GFX_goal_ARG_reich
+
+		x = 0
+		y = 1
+		relative_position_id = PRU_reclaim_chile
+		cost = 10
+		
+		ai_will_do = {
+			factor = 10
 		}
 		
-	}
-	completion_reward = {
-	COL = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
+		available = {
+			is_subject = no
+			has_army_manpower = { size > 100000 }
+			OR = {
+				302 = {
+					is_controlled_by_ROOT_or_ally = yes
 				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-		if = {
-			limit = {
-			   COL= {
-					has_government = fascism
+				506 = {
+					is_controlled_by_ROOT_or_ally = yes
 				}
 			}
-			country_event = { hours = 8 id = generic.5 }
-		}
-		else = {
-			create_wargoal = {
-				type = puppet_wargoal_focus
-				target = COL
-				expire = 0
-
+			any_state = {
+				is_core_of = ARG
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
 			}
 		}
 
-	}
-}
-
-focus = {
-	id = PRU_Create_the_Gran_Colombian_provinces
-	prerequisite = { focus = PRU_looking_north }
-	icon = GFX_goal_COL_legitimize_gran_colombia
-    search_filters = { FOCUS_FILTER_ANNEXATION }
-	x = 2
-	y =5
-	relative_position_id = PRU_hispanism
-
-	cost = 7
-	available = {
-		is_puppet = no
-		controls_state = 493
-		controls_state = 306
-		controls_state = 486
-	}
-	ai_will_do = {
-		factor = 10
-	}
-    bypass = {
-	
-	}
-	completion_reward = {
-	add_state_core =493 
-	add_state_core =306 
-	add_state_core =307
-	add_state_core =489 
-	add_state_core =304 
-	add_state_core =486 
-	add_state_core =687 
-	}
-}
-
-focus = {
-	id = PRU_secure_plata_states
-	prerequisite = { focus = PRU_expand_south }
-	icon = GFX_goal_uruguay_democracy
-    search_filters = { FOCUS_FILTER_ANNEXATION }
-	x = 4
-	y =4
-	relative_position_id = PRU_hispanism
-
-	cost = 7
-	available = {
-		is_puppet = no
-		ARG = { is_subject_of = PRU }
-			r56_script_i_am_sane = yes
-			PAR = {
-				r56_script_target_is_sane = yes
-			}
-	}
-	ai_will_do = {
-		factor = 10
-	}
-    bypass = {
-		PAR = {
-				r56_script_standard_bypass = yes
-			}
-	}
-	completion_reward = {
-	  PAR = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-		URG = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-		create_wargoal = { type = puppet_wargoal_focus target = URG 
-			expire = 0}
-		create_wargoal = { type = puppet_wargoal_focus target = PAR 
-			expire = 0}
-	}
-}
-
-focus = {
-	id = PRU_Draw_our_southern_borders
-	prerequisite = { focus = PRU_secure_plata_states }
-	icon = GFX_goal_generic_red_freedom
-    search_filters = { FOCUS_FILTER_ANNEXATION }
-	x = 4
-	y =5
-	relative_position_id = PRU_hispanism
-
-	cost = 7
-	available = {
-		is_puppet = no
-		controls_state = 506
-		controls_state = 882
-		controls_state = 508
-		controls_state = 509
-		controls_state = 688
-	} 
-	ai_will_do = {
-		factor = 10
-	}
-    bypass = {
-		
-	}
-	completion_reward = {
-		add_state_core =	506
-	   add_state_core = 882 
-	   add_state_core = 508 
-	  add_state_core = 509
-		add_state_core =688 
-	}
-}
-
-focus = {
-	id = PRU_the_bolivarian_problem
-	prerequisite = { focus = PRU_expand_south }
-	icon = GFX_goal_VEN_communism
-    search_filters = { FOCUS_FILTER_ANNEXATION }
-	x = 6
-	y =4
-	relative_position_id = PRU_hispanism
-
-	cost = 10
-	available = {
-		is_puppet = no
-		has_border_with = VEN
-		has_army_manpower = { size > 100000 }
-			VEN= {
-				exists = yes
-				has_government = communism
-				NOT = {
-					has_war_with = PRU
-					is_in_faction_with = PRU
-				}
-				r56_script_target_is_sane = yes
-			}
-			r56_script_i_am_sane = yes
-	}
-	ai_will_do = {
-		factor = 10
-	}
-bypass = {
-	
-		VEN = {
-			r56_script_standard_bypass = yes
-		}
-		
-	}
-	completion_reward = {
-		VEN = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-		if = {
-			limit = {
-				VEN= {
-					has_government = fascism
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = {
+						is_core_of = ARG
+					}
+					is_controlled_by_ROOT_or_ally = yes
 				}
 			}
-			country_event = { hours = 8 id = generic.5 }
 		}
-		else = {
-			create_wargoal = {
-				type = puppet_wargoal_focus
-				target = VEN
-				expire = 0
 
+		completion_reward = {
+			every_state = {
+				limit = {
+					is_core_of = ARG
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						is_core_of = ARG
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = annex_everything
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+
+	focus = {
+		id = PRU_secure_plata_states
+		prerequisite = { focus = PRU_the_only_sun }
+		icon = GFX_goal_uruguay_democracy
+		x = 0
+		y = 1
+		relative_position_id = PRU_the_only_sun
+
+		cost = 10
+		available = {
+			is_subject = no
+			OR = {
+				509 = {
+					is_controlled_by_ROOT_or_ally = yes
+				}
+				510 = {
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+			any_state = {
+				OR = {
+					is_core_of = URG
+					is_core_of = PAR
+				}
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
 			}
 		}
 
+		ai_will_do = {
+			factor = 10
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = {
+						is_core_of = URG
+						is_core_of = PAR
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					OR = {
+						is_core_of = URG
+						is_core_of = PAR
+					}
+					NOT = {
+						is_claimed_by = ROOT
+						is_core_of = ROOT
+					}
+				}
+				add_claim_by = ROOT
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						OR = {
+							is_core_of = URG
+							is_core_of = PAR
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = annex_everything
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
-}
 focus = {
 	id = PRU_incaism
 	prerequisite = { focus = PRU_peruvian_blackshirts focus = give_power_to_general_ureta}
@@ -2556,24 +2597,21 @@ focus = {
 	relative_position_id = PRU_incaism
 
 	cost = 7
-	ai_will_do = {
-		factor = 0.2
-	}
 
 	ai_will_do = {
 		factor = 3
 		modifier = {
-				factor = 1
-				
-					BOL = {
-						is_ai = no
-					}
+			factor = 10
 			
+				BOL = {
+					is_ai = no
+				}
+		
 			}
 	}
 	available = {
 		PRU= {
-			is_puppet = no
+			is_subject = no
 			exists = yes
 			is_in_faction = no
 			NOT = {
@@ -2582,7 +2620,7 @@ focus = {
 
 		}
 		BOL = {
-			is_puppet = no
+			is_subject = no
 			NOT = {
 				is_in_Faction_with = ROOT
 			}
@@ -2642,7 +2680,7 @@ focus = {
 				category = industry
 			}
 		}
-		add_stability = 0.03
+		add_stability = 0.05
 	}
 	search_filters = { FOCUS_FILTER_INDUSTRY }
 }
@@ -2798,7 +2836,7 @@ focus = {
 		factor = 7
 	}
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 40000 }
 		BOL = {
 			r56_script_target_is_sane = yes
@@ -2887,7 +2925,7 @@ focus = {
 	cost = 10
 
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 40000 }
 		ECU = {
 							r56_script_target_is_sane = yes
@@ -3064,9 +3102,8 @@ focus = {
 focus = {
 	id = PRU_inti_raymi
 	prerequisite = { focus =  PRU_hasta_quemar_el_ultimo_cartucho  }
-	mutually_exclusive = { focus = PRU_hispanic_union }
 	mutually_exclusive = { focus = PRU_join_axis }
-	mutually_exclusive = { focus = PRU_join_Co-Prosperity_Sphere }
+	mutually_exclusive = { focus = PRU_trans_pacific_alliance }
 	mutually_exclusive = { focus = PRU_revolucion_restauradora }
 
 	icon = GFX_goal_PRU_inti_raymi
@@ -3077,7 +3114,7 @@ focus = {
 	cost = 5
 	available = {
 		PRU= {
-			is_puppet = no
+			is_subject = no
 			exists = yes
 			is_in_faction = no
 			has_government = fascism
@@ -3524,9 +3561,8 @@ focus = {
 focus = {
 	id = PRU_join_axis
 	prerequisite = { focus = PRU_hasta_quemar_el_ultimo_cartucho  }
-	mutually_exclusive = { focus = PRU_hispanic_union }
 	mutually_exclusive = { focus = PRU_inti_raymi }
-	mutually_exclusive = { focus = PRU_join_Co-Prosperity_Sphere }
+	mutually_exclusive = { focus = PRU_trans_pacific_alliance }
 	mutually_exclusive = { focus = PRU_revolucion_restauradora }
 	icon = GFX_focus_chi_mission_to_germany
 	x = 3
@@ -3595,9 +3631,8 @@ focus = {
 	search_filters = {FOCUS_FILTER_ALLIANCE}
 }
 focus = {
-	id = PRU_join_Co-Prosperity_Sphere
+	id = PRU_trans_pacific_alliance
 	prerequisite = { focus =  PRU_hasta_quemar_el_ultimo_cartucho }
-	mutually_exclusive = { focus = PRU_hispanic_union }
 	mutually_exclusive = { focus = PRU_inti_raymi }
 	mutually_exclusive = { focus = PRU_revolucion_restauradora }
 	mutually_exclusive = { focus = PRU_join_axis }
@@ -3613,7 +3648,7 @@ focus = {
 		OR = { has_government = fascism has_government = neutrality }
 		JAP = {
 			has_government = fascism
-			is_puppet = no
+			is_subject = no
 			is_faction_leader = yes
 		}
 		has_completed_focus = give_power_to_general_ureta
@@ -3624,466 +3659,6 @@ focus = {
 
 	completion_reward = {
 		JAP = { country_event = { days = 1 id = generic.2 } }
-	}
-	search_filters = {FOCUS_FILTER_ALLIANCE}
-}
-focus = {
-	id = PRU_hispanic_union
-	prerequisite = { focus =  the_only_sun focus =PRU_looking_north }
-	mutually_exclusive = { focus = PRU_inti_raymi }
-	mutually_exclusive = { focus = PRU_join_axis }
-	mutually_exclusive = { focus = PRU_join_Co-Prosperity_Sphere }
-	mutually_exclusive = { focus = PRU_revolucion_restauradora }
-
-	icon = GFX_goal_CHL_hispanic_pan_nationalism
-	x = 7
-	y = 6
-	relative_position_id = PRU_incaism
-
-	cost = 5
-	available = {
-		PRU= {
-			is_puppet = no
-			exists = yes
-			is_in_faction = no
-			has_government = fascism
-
-		}
-		
-	}
-
-	ai_will_do = {
-		factor = 4
-	}
-
-	completion_reward = {
-	  unlock_decision_category_tooltip = PRU_propagate_fascism_in_latin_america
-	  add_ideas = r56_CHL_hispanic_pan_nationalism
-	  create_faction = "Union Hispanica"
-	  if = {
-		limit = {
-			BRA= {
-				
-				NOT= {
-				
-				has_government = fascism
-			
-			}
-				exists = yes
-			}
-		}
-		BRA = { country_event = { days = 1 id = peru.22 } }	
-	    }
-	  if = {
-		limit = {
-			BOL= {
-				is_in_faction = no
-				has_government = fascism
-				exists = yes
-			}
-		}
-		BOL = { country_event = { days = 1 id = generic.5 } }
-	}
-	if = {
-		limit = {
-			BOL= {
-				
-				NOT= {
-				
-				has_government = fascism
-			
-			}
-				exists = yes
-			}
-		}
-		BOL = { country_event = { days = 1 id = peru.22 } }	
-	    }
-	if = {
-		limit = {
-			BOL = {
-				is_faction_leader = yes
-				exists = yes
-				has_government = fascism
-				NOT = {
-					has_government = communism
-				}
-			}
-		}
-		every_country = {
-			limit = {
-				OR = {
-					tag = PRU
-					is_in_faction_with = PRU
-				}
-			}
-			BOL = {
-				add_to_faction = PREV
-				add_opinion_modifier = { target = PREV modifier = huge_increase }
-			}
-
-		}
-
-		hidden_effect = {
-			BOL = {
-				save_event_target_as = alliance_inviter
-				set_country_flag = alliance_inviter@ROOT
-			}
-
-			PRU = {
-				set_country_flag = alliance_applicant@ROOT
-				save_event_target_as = alliance_applicant
-			}
-
-			news_event = { id = r56i.event.16 hours = 12 }
-		}
-
-	}
-
-	if = {
-		limit = {
-			COL= {
-				is_in_faction = no
-				has_government = fascism
-				exists = yes
-			}
-		}
-		COL = { country_event = { days = 1 id = generic.5 } }
-	}
-	if = {
-		limit = {
-			COL= {
-				
-				NOT= {
-				
-				has_government = fascism
-			
-			}
-				exists = yes
-			}
-		}
-		COL = { country_event = { days = 1 id = peru.22 } }	
-	    }
-	if = {
-		limit = {
-			COL = {
-				is_faction_leader = yes
-				has_government = fascism
-				exists = yes
-				NOT = {
-					has_government = communism
-				}
-			}
-		}
-		every_country = {
-			limit = {
-				OR = {
-					tag = PRU
-					is_in_faction_with = PRU
-				}
-			}
-			COL = {
-				add_to_faction = PREV
-				add_opinion_modifier = { target = PREV modifier = huge_increase }
-			}
-
-		}
-
-		hidden_effect = {
-			COL = {
-				save_event_target_as = alliance_inviter
-				set_country_flag = alliance_inviter@ROOT
-			}
-
-			PRU = {
-				set_country_flag = alliance_applicant@ROOT
-				save_event_target_as = alliance_applicant
-			}
-
-			news_event = { id = r56i.event.16 hours = 12 }
-		}
-
-	}
-
-	if = {
-		limit = {
-			CHL= {
-				is_in_faction = no
-				has_government = fascism
-				exists = yes
-			}
-		}
-		CHL = { country_event = { days = 1 id = generic.5 } }
-	}
-	if = {
-		limit = {
-			CHL= {
-				
-				NOT= {
-				
-				has_government = fascism
-			
-			}
-				exists = yes
-			}
-		}
-		CHL = { country_event = { days = 1 id = peru.22 } }	
-	    }
-	if = {
-		limit = {
-			CHL = {
-				is_faction_leader = yes
-				has_government = fascism
-				exists = yes
-				NOT = {
-					has_government = communism
-				}
-			}
-		}
-		every_country = {
-			limit = {
-				OR = {
-					tag = PRU
-					is_in_faction_with = PRU
-				}
-			}
-			CHL = {
-				add_to_faction = PREV
-				add_opinion_modifier = { target = PREV modifier = huge_increase }
-			}
-
-		}
-
-		hidden_effect = {
-			CHL = {
-				save_event_target_as = alliance_inviter
-				set_country_flag = alliance_inviter@ROOT
-			}
-
-			PRU = {
-				set_country_flag = alliance_applicant@ROOT
-				save_event_target_as = alliance_applicant
-			}
-
-			news_event = { id = r56i.event.16 hours = 12 }
-		}
-
-	}
-
-	if = {
-		limit = {
-			ARG= {
-				is_in_faction = no
-				has_government = fascism
-				exists = yes
-			}
-		}
-		ARG = { country_event = { days = 1 id = generic.5 } }
-	}
-	if = {
-		limit = {
-			ARG= {
-				
-				NOT= {
-				
-				has_government = fascism
-			
-			}
-				exists = yes
-			}
-		}
-		ARG = { country_event = { days = 1 id = peru.22 } }	
-	    }
-	if = {
-		limit = {
-			ARG = {
-				is_faction_leader = yes
-				has_government = fascism
-				exists = yes
-				NOT = {
-					has_government = communism
-				}
-			}
-		}
-		every_country = {
-			limit = {
-				OR = {
-					tag = PRU
-					is_in_faction_with = PRU
-				}
-			}
-			ARG = {
-				add_to_faction = PREV
-				add_opinion_modifier = { target = PREV modifier = huge_increase }
-			}
-
-		}
-
-		hidden_effect = {
-			ARG = {
-				save_event_target_as = alliance_inviter
-				set_country_flag = alliance_inviter@ROOT
-			}
-
-			PRU = {
-				set_country_flag = alliance_applicant@ROOT
-				save_event_target_as = alliance_applicant
-			}
-
-			news_event = { id = r56i.event.16 hours = 12 }
-		}
-
-	}
-
-	if = {
-		limit = {
-			VEN= {
-				is_in_faction = no
-				has_government = fascism
-				exists = yes
-			}
-		}
-		VEN = { country_event = { days = 1 id = generic.5 } }
-	}
-	if = {
-		limit = {
-			VEN = {
-				is_faction_leader = yes
-				exists = yes
-				NOT = {
-					has_government = communism
-				}
-			}
-		}
-		every_country = {
-			limit = {
-				OR = {
-					tag = PRU
-					is_in_faction_with = PRU
-				}
-			}
-			VEN = {
-				add_to_faction = PREV
-				add_opinion_modifier = { target = PREV modifier = huge_increase }
-			}
-
-		}
-
-		hidden_effect = {
-			VEN = {
-				save_event_target_as = alliance_inviter
-				set_country_flag = alliance_inviter@ROOT
-			}
-
-			PRU = {
-				set_country_flag = alliance_applicant@ROOT
-				save_event_target_as = alliance_applicant
-			}
-
-			news_event = { id = r56i.event.16 hours = 12 }
-		}
-
-	}
-
-	if = {
-		limit = {
-			PAR= {
-				is_in_faction = no
-				has_government = fascism
-				exists = yes
-			}
-		}
-		PAR = { country_event = { days = 1 id = generic.5 } }
-	}
-	if = {
-		limit = {
-			PAR = {
-				is_faction_leader = yes
-				exists = yes
-				NOT = {
-					has_government = communism
-				}
-			}
-		}
-		every_country = {
-			limit = {
-				OR = {
-					tag = PRU
-					is_in_faction_with = PRU
-				}
-			}
-			PAR = {
-				add_to_faction = PREV
-				add_opinion_modifier = { target = PREV modifier = huge_increase }
-			}
-
-		}
-
-		hidden_effect = {
-			PAR = {
-				save_event_target_as = alliance_inviter
-				set_country_flag = alliance_inviter@ROOT
-			}
-
-			PRU = {
-				set_country_flag = alliance_applicant@ROOT
-				save_event_target_as = alliance_applicant
-			}
-
-			news_event = { id = r56i.event.16 hours = 12 }
-		}
-
-	}
-
-	if = {
-		limit = {
-			URG= {
-				is_in_faction = no
-				has_government = fascism
-				exists = yes
-			}
-		}
-		URG = { country_event = { days = 1 id = generic.5 } }
-	}
-	if = {
-		limit = {
-			URG = {
-				is_faction_leader = yes
-				exists = yes
-				NOT = {
-					has_government = communism
-				}
-			}
-		}
-		every_country = {
-			limit = {
-				OR = {
-					tag = PRU
-					is_in_faction_with = PRU
-				}
-			}
-			URG = {
-				add_to_faction = PREV
-				add_opinion_modifier = { target = PREV modifier = huge_increase }
-			}
-
-		}
-
-		hidden_effect = {
-			URG= {
-				save_event_target_as = alliance_inviter
-				set_country_flag = alliance_inviter@ROOT
-			}
-
-			PRU = {
-				set_country_flag = alliance_applicant@ROOT
-				save_event_target_as = alliance_applicant
-			}
-
-			news_event = { id = r56i.event.16 hours = 12 }
-		}
-
-	}
-
 	}
 	search_filters = {FOCUS_FILTER_ALLIANCE}
 }
@@ -4713,10 +4288,9 @@ focus = {
 focus = {
 	id = PRU_revolucion_restauradora
 	prerequisite = { focus= PRU_follow_in_the_footsteps_of_tupac_amaru focus= PRU_hasta_quemar_el_ultimo_cartucho focus= PRU_wake_up_a_giant focus =PRU_benavides_is_dead focus =PRU_food_importation }
-	mutually_exclusive = { focus = PRU_hispanic_union }
 	mutually_exclusive = { focus = PRU_inti_raymi }
 	mutually_exclusive = { focus = PRU_place_odria_as_adviser }
-	mutually_exclusive = { focus = PRU_join_Co-Prosperity_Sphere }
+	mutually_exclusive = { focus = PRU_trans_pacific_alliance }
 	mutually_exclusive = { focus = PRU_join_axis }
 	mutually_exclusive = { focus = PRU_ask_for_enter_to_comintern}
 	mutually_exclusive = { focus = PRU_our_revolution }
@@ -4771,250 +4345,11 @@ focus = {
 	}
 
 	completion_reward = {
-        add_stability = 0.07
+        add_stability = 0.05
 		add_ideas=PRU_odria_advisor
 	}
 	search_filters = { FOCUS_FILTER_POLITICAL  FOCUS_FILTER_STABILITY }
 }
-
-
-
-focus = {
-	id = PRU_interve_central
-	prerequisite = {focus = PRU_hispanism}
-	icon = GFX_goal_generic_demand_territory
-	x = 5
-	y = 1
-	relative_position_id = PRU_hispanism
-	 mutually_exclusive = {
-            focus = PRU_Support_the_banana_industry
-        }
-
-	cost = 7
-	available = {
-		 is_puppet = no
-	       has_full_control_of_state = 493
-            has_full_control_of_state = 304
-            has_full_control_of_state = 864
-	}
-	ai_will_do = {
-		factor = 10
-            modifier = {
-                has_war = yes
-                factor = 0
-            }
-	}
-
-	completion_reward = {
-	if = {
-                limit = {
-                    NOT = {
-                        owns_state = 316
-                    }
-                    316 = {
-                        OWNER = {
-                            NOT = {
-                                is_in_faction_with = PRU
-                            }
-                        }
-                    }
-                }
-                add_state_claim = 316
-                316 = {
-                    OWNER = {
-                        ROOT = {
-                            create_wargoal = {
-                                target = PREV
-                                expire = 0
-                                type = take_state_focus
-                                generator = { 316 }
-                            }
-                        }
-                    }
-                }
-            }
-            if = {
-                limit = {
-                    NOT = {
-                        owns_state = 317
-                    }
-                    317 = {
-                        OWNER = {
-                            NOT = {
-                                is_in_faction_with = PRU
-                            }
-                        }
-                    }
-                }
-                add_state_claim = 317
-                317 = {
-                    OWNER = {
-                        ROOT = {
-                            create_wargoal = {
-                                target = PREV
-                                expire = 0
-                                type = take_state_focus
-                                generator = { 317 }
-                            }
-                        }
-                    }
-                }
-            }
-            if = {
-                limit = {
-                    NOT = {
-                        owns_state = 312
-                    }
-                    312 = {
-                        OWNER = {
-                            NOT = {
-                                is_in_faction_with = PRU
-                            }
-                        }
-                    }
-                }
-                add_state_claim = 312
-                312 = {
-                    OWNER = {
-                        ROOT = {
-                            create_wargoal = {
-                                target = PREV
-                                expire = 0
-                                type = take_state_focus
-                                generator = { 312 }
-                            }
-                        }
-                    }
-                }
-            }
-            if = {
-                limit = {
-                    NOT = {
-                        owns_state = 314
-                    }
-                    314 = {
-                        OWNER = {
-                            NOT = {
-                                is_in_faction_with = PRU
-                            }
-                        }
-                    }
-                }
-                add_state_claim = 314
-                314 = {
-                    OWNER = {
-                        ROOT = {
-                            create_wargoal = {
-                                target = PREV
-                                expire = 0
-                                type = take_state_focus
-                                generator = { 314 }
-                            }
-                        }
-                    }
-                }
-            }
-            if = {
-                limit = {
-                    NOT = {
-                        owns_state = 313
-                    }
-                    313 = {
-                        OWNER = {
-                            NOT = {
-                                is_in_faction_with = PRU
-                            }
-                        }
-                    }
-                }
-                add_state_claim = 313
-                313 = {
-                    OWNER = {
-                        ROOT = {
-                            create_wargoal = {
-                                target = PREV
-                                expire = 0
-                                type = take_state_focus
-                                generator = { 313 }
-                            }
-                        }
-                    }
-                }
-            }
-	}
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-}
-
-focus = {
-        id = PRU_Support_the_banana_industry
-        icon = GFX_goal_HON_bannana_takeover
-        relative_position_id = PRU_hispanism
-        x = 3
-        y = 1
-        cost = 7
-
-        available = {
-            is_puppet = no
-            is_in_faction = yes
-			HON = {
-                OR = {
-                    has_government = fascism
-                    has_government = neutrality
-                }
-            }
-		}
-        mutually_exclusive = {
-            focus = PRU_interve_central
-        }
-        prerequisite = {
-            focus =  PRU_hispanism
-        }
-        search_filters = {FOCUS_FILTER_ALLIANCE}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-            HON = {
-                country_event = { hours = 8 id = generic.5 }
-            }
-
-        }
-    }
-
-	focus = {
-        id = PRU_alliance_with_spain
-        icon = GFX_focus_generic_befriend_nationalist_spain_focus
-        relative_position_id = PRU_hispanism
-        x = 1
-        y = 2
-        cost = 7
-
-        available = {
-            is_puppet = no
-            is_in_faction = yes
-			SPR = {
-                OR = {
-                    has_government = fascism
-                    has_government = neutrality
-                }
-            }
-		}
-      
-        prerequisite = {
-            focus =  PRU_spanish_civil_war_involvement
-        }
-        search_filters = {FOCUS_FILTER_ALLIANCE}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-            HON = {
-                country_event = { hours = 8 id = generic.5 }
-            }
-
-        }
-    }
-
 
 focus = {
 	id = PRU_ask_for_enter_to_comintern
@@ -5108,8 +4443,8 @@ focus = {
 
 	cost = 7
 	available = {
-		is_puppet = no
-		CUB = { is_puppet_of = HON }
+		is_subject = no
+		CUB = { is_subject_of = HON }
 			r56_script_i_am_sane = yes
 			HAI = {
 				r56_script_target_is_sane = yes
@@ -5151,7 +4486,7 @@ focus = {
 
 	cost = 7
 	available = {
-		is_puppet = no
+		is_subject = no
 		r56_script_i_am_sane = yes
 			CUB = {
 				r56_script_target_is_sane = yes
@@ -5190,7 +4525,7 @@ focus = {
 
 	cost = 7
 	available = {
-		is_puppet = no
+		is_subject = no
 		r56_script_i_am_sane = yes
 			MEX = {
 				r56_script_target_is_sane = yes
@@ -5274,7 +4609,7 @@ focus = {
 
 	cost = 7
 	available = {
-		is_puppet = no
+		is_subject = no
             is_in_faction = yes
 			MEX = {
                 exists = yes
@@ -5330,7 +4665,7 @@ focus = {
 
 	cost = 7
 	available = {
-		 is_puppet = no
+		 is_subject = no
 	       has_full_control_of_state = 493
             has_full_control_of_state = 304
             has_full_control_of_state = 864
@@ -5493,7 +4828,7 @@ focus = {
         cost = 10
 
         available = {
-            is_puppet = no
+            is_subject = no
             is_in_faction = yes
 			HON = {
                     has_government = communism      
@@ -5529,7 +4864,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		r56_script_i_am_sane = yes
 			BRA = {
 				r56_script_target_is_sane = yes
@@ -5587,7 +4922,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		controls_state = 506
 		controls_state = 882
 		controls_state = 508
@@ -5620,7 +4955,7 @@ focus = {
 
 	cost = 7
 	available = {
-		is_puppet = no
+		is_subject = no
 		controls_state = 493
 		controls_state = 306
 		controls_state = 307
@@ -5657,7 +4992,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		controls_state = 305
 		controls_state = 649
 		controls_state = 302
@@ -5695,7 +5030,7 @@ focus = {
 	cost = 7
 	available = {
 		PRU= {
-			is_puppet = no
+			is_subject = no
 			exists = yes
 			is_in_faction = no
 		}
@@ -6088,7 +5423,7 @@ focus = {
 
 	completion_reward = {
 		add_war_support = 0.1
-		add_stability = -0.03
+		add_stability = -0.05
 		add_popularity = { ideology = neutrality popularity = 0.08 }
 		country_event = { hours = 5 id = peru.18 }
 	}
@@ -6160,7 +5495,7 @@ focus = {
 
 	completion_reward = {
 
-		add_stability = 0.07
+		add_stability = 0.05
 		add_popularity = { ideology = neutrality popularity = 0.05 }
 		unlock_decision_category_tooltip = PRU_reforms_in_the_constitution
 	}
@@ -6247,7 +5582,7 @@ focus = {
 	}
 
 	completion_reward = {
-		add_stability = 0.03
+		add_stability = 0.05
 		add_ideas = PRU_wake_up
 	}
 	search_filters = { FOCUS_FILTER_POLITICAL  FOCUS_FILTER_STABILITY }
@@ -6263,7 +5598,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 70000 }
 		BOL = {
 			r56_script_target_is_sane = yes
@@ -6327,7 +5662,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 70000 }
 		CHL = {
 			r56_script_target_is_sane = yes
@@ -6389,8 +5724,10 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
-		has_border_with = ARG
+		is_subject = no
+		any_neighbor_country = {
+			original_tag = ARG
+		}
 		has_army_manpower = { size > 70000 }
 		ARG = {
 			r56_script_target_is_sane = yes
@@ -6451,7 +5788,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 100000 }
 		COL = {
 			r56_script_target_is_sane = yes
@@ -6519,8 +5856,10 @@ focus = {
 
 	cost = 10
 	available = {
-		has_border_with = VEN
-		is_puppet = no
+		any_neighbor_country = {
+			original_tag = VEN
+		}
+		is_subject = no
 		has_army_manpower = { size > 100000 }
 		VEN = {
 			r56_script_target_is_sane = yes
@@ -6581,7 +5920,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 100000 }
 		ECU = {
 			r56_script_target_is_sane = yes
@@ -6640,7 +5979,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		has_army_manpower = { size > 800000 }
 		USA = {
 			r56_script_target_is_sane = yes
@@ -6727,7 +6066,7 @@ focus = {
 					has_country_flag = PRU_war
 				  }
 			}
-		is_puppet = no
+		is_subject = no
 
 			ECU = {
 				r56_script_target_is_sane = yes
@@ -6755,7 +6094,7 @@ focus = {
 #
 #	cost = 10
 #	available = {
-#		is_puppet = no
+#		is_subject = no
 #		PRU = {
 #			controls_state = 490
 #		}
@@ -6799,7 +6138,7 @@ focus = {
 	}
 
 	completion_reward = {
-		add_stability = 0.07
+		add_stability = 0.05
 		remove_ideas = PRU_apra_revolution
 		add_ideas = PRU_oppresed_apristas
 	}
@@ -6915,7 +6254,7 @@ focus = {
 	}
 
 	completion_reward = {
-		add_stability = 0.07
+		add_stability = 0.05
 		remove_ideas = PRU_apra_revolution
 		add_ideas = PRU_friend_aprac
 	}
@@ -7249,7 +6588,7 @@ focus = {
 			limit = {
 				BOL= {
 					is_in_faction = no
-					is_puppet = no
+					is_subject = no
 					exists = yes
 				}
 			}
@@ -7298,7 +6637,7 @@ focus = {
 			limit = {
 				COL= {
 					is_in_faction = no
-					is_puppet = no
+					is_subject = no
 					exists = yes
 				}
 			}
@@ -7347,7 +6686,7 @@ focus = {
 			limit = {
 				CHL= {
 					is_in_faction = no
-					is_puppet = no
+					is_subject = no
 					exists = yes
 				}
 			}
@@ -7396,7 +6735,7 @@ focus = {
 			limit = {
 				ARG= {
 					is_in_faction = no
-					is_puppet = no
+					is_subject = no
 					exists = yes
 				}
 			}
@@ -7536,7 +6875,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		JAP = {
 			has_government = fascism
 			NOT = {
@@ -7573,7 +6912,7 @@ focus = {
 
 	cost = 10
 	available = {
-		is_puppet = no
+		is_subject = no
 		GER = {
 			has_government = fascism
 			NOT = {
@@ -7597,122 +6936,7 @@ focus = {
 	}
 	search_filters = {FOCUS_FILTER_ANNEXATION}
 }
-focus = {
-	id = PRU_spanish_civil_war_involvement
-	icon = GFX_goal_generic_spanish_civil_war_soldier
-	relative_position_id = PRU_hispanism
-	prerequisite = { focus = PRU_hispanism }
-	x = 1
-	y = 1
-	cost = 2
-	ai_will_do = {
-		factor = 0.1
-		modifier = {
-			is_historical_focus_on = no
-			has_global_flag = scw_is_ai_driven
 
-			has_government = fascism
-
-			factor = 500
-		}
-	}
-
-	available = {
-		has_global_flag = spanish_civil_war
-		has_war = no
-		NOT = {
-			has_global_flag = r56_scw_our_own_ending_check
-		}
-	}
-
-	completion_reward = {
-		set_rule = { can_send_volunteers = yes }
-		add_timed_idea = {
-			idea = r56_CHL_spanish_civil_war_involvement
-			days = 1095
-		}
-
-	}
-	search_filters = { FOCUS_FILTER_SPA_CIVIL_WAR }
-}
-  focus = {
-	id = PRU_intervene_in_mexico
-	icon = GFX_focus_attack_mexico
-	relative_position_id = PRU_hispanism
-	prerequisite = { focus = PRU_interve_central focus=PRU_Support_the_banana_industry }
-	mutually_exclusive = { focus = PRU_alliance_with_mexico }
-	x = 3
-	y = 2
-	cost = 2
-    
-	available = {
-		has_army_manpower = { size > 400000 }
-	MEX = {
-			r56_script_target_is_sane = yes
-		}
-		r56_script_i_am_sane = yes
-		 has_full_control_of_state = 313
-	}
-	completion_reward = {
-        create_wargoal = { type = puppet_wargoal_focus target = MEX 
-			expire = 0}
-
-	}
-
-	search_filters = { FOCUS_FILTER_ANNEXATION }
-    }
-
- focus = {
-	id = PRU_alliance_with_mexico
-	icon = GFX_goal_mexico_mexico_first
-	relative_position_id = PRU_hispanism
-	prerequisite = { focus = PRU_interve_central focus=PRU_Support_the_banana_industry}
-	mutually_exclusive = { focus = PRU_intervene_in_mexico }
-	x = 5
-	y = 2
-	cost = 8
-    
-	available = {
-		is_puppet = no
-            is_in_faction = yes
-			MEX = {
-                exists = yes
-                OR = {
-                    has_government = fascism
-                    has_government = neutrality
-                }
-            }
-	}
-	completion_reward = {
-		MEX = {clr_country_flag = monroe_doctrine
-			if = { limit = { has_idea = american_protection_defence_democratic}
-				remove_ideas = american_protection_defence_democratic 
-				}
-			if = { limit = { has_idea = american_protection_drift_democratic}
-				remove_ideas = american_protection_drift_democratic
-				}
-			if = { limit = { has_idea = american_protection_defence_communism}
-				remove_ideas = american_protection_defence_communism
-				}
-			if = { limit = { has_idea = american_protection_drift_communism}
-				remove_ideas = american_protection_drift_communism
-				}
-			if = { limit = { has_idea = american_protection_defence_fascism}
-				remove_ideas = american_protection_defence_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				}
-			if = { limit = { has_idea = american_protection_drift_fascism}
-				remove_ideas = american_protection_drift_fascism
-				} 
-		}
-        MEX = {
-                country_event = { hours = 8 id = generic.5 }
-            }
-	}
-	 search_filters = {FOCUS_FILTER_ALLIANCE}
-    }
 
 	focus = {
 		id = PRU_czech_equipment_aquisition
