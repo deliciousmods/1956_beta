@@ -1,5 +1,3 @@
-
-
 #Category only allowed for CHI
 CHI_anti_imperialism = {
 	
@@ -18,10 +16,10 @@ CHI_anti_imperialism = {
 		activation = {			
 			owns_state = 525
 			owns_state = 527
-			owns_state = 844
-			owns_state = 845
-			owns_state = 846
-			owns_state = 847
+			owns_state = 917
+			owns_state = 918
+			owns_state = 919
+			owns_state = 920
 			KOR = {
 				exists = no
 			}
@@ -34,10 +32,10 @@ CHI_anti_imperialism = {
 		visible = {
 			owns_state = 525
 			owns_state = 527
-			owns_state = 844
-			owns_state = 845
-			owns_state = 846
-			owns_state = 847
+			owns_state = 917
+			owns_state = 918
+			owns_state = 919
+			owns_state = 920
 			KOR = {
 				exists = no
 			}
@@ -302,27 +300,22 @@ CHI_war_of_resistance = {
 		}
 	}
 	
-	CHI_Huayuankou_embankment_breach_incident = {
-
-		icon = hol_inundate_water_lines
-
-		allowed = {
-			is_literally_china = yes
-		}
-
+	CHI_Huayuankou_embankment_breach_incident = { #CHI_breach_the_yellow_river, but lets use the name we gave it:D - Fantom
+		icon = GFX_decision_hol_inundate_water_lines
+		
 		available = {
 			has_war = yes
-			owns_state = 607
 			NOT = {
 				has_full_control_of_state = 607
 			}
+			OR = {
+				NOT = { controls_state = 608 }
+				NOT = { controls_state = 614 }
+				NOT = { controls_state = 597 }
+				NOT = { controls_state = 598 }
+				NOT = { controls_state = 606 }
+			}
 		}
-
-		cost = 100
-
-		fire_only_once = yes
-
-		days_remove = 3
 
 		highlight_states = {
  			highlight_state_targets = { state = 607 } 
@@ -332,40 +325,63 @@ CHI_war_of_resistance = {
 				1004
 			}
 		}
-
-		ai_will_do = {
-			factor = 10
-		}
-
+		
 		visible = {
 			controls_state = 607
+			is_literally_china = yes
+			NOT = { has_global_flag = chi_yellow_river_blown } #So warlords don't do this too
 		}
+		
+		fire_only_once = yes
+		
+		cost = 50	#originally 20
+
+		ai_will_do = {
+			base = 0
+			#Pretty damn important
+			modifier = {
+				add = 25
+				NOT = { controls_state = 608 }
+			}
+			modifier = {
+				add = 25
+				NOT = { controls_state = 614 }
+			}
+			modifier = {
+				add = 25
+				NOT = { controls_state = 597 }
+			}
+			modifier = {
+				add = 25
+				NOT = { controls_state = 598 }
+			}
+			modifier = {
+				add = 25
+				NOT = { controls_state = 606 }
+			}
+		}
+
+		days_remove = 3
+		
 		complete_effect = {
 			add_war_support = -0.05
 		}
+
 		remove_effect = {
-			607 = {
-				damage_building = {
-					type = infrastructure
-					damage = 3
-				}
-				damage_building = {
-					type = industrial_complex
-					damage = 1.5
-				}
-				add_province_modifier = {
-					static_modifiers = { flooded }
-					province = {
-						id = 7126
-						id = 10098
-						id = 4066
-						id = 7656
-						id = 9958
+			every_owned_state = {
+				limit = {
+					OR = {
+						state = 606
+						state = 607
+						state = 598
+						state = 597
 					}
 				}
-			}
-			606 = {
-				damage_building = {
+				add_dynamic_modifier = {
+					modifier = yellow_river_blown
+					days = 730 
+				}
+				damage_building = {	#r56 effect - stuff get damaged too! - Fantom
 					type = infrastructure
 					damage = 4
 				}
@@ -373,33 +389,10 @@ CHI_war_of_resistance = {
 					type = industrial_complex
 					damage = 1.5
 				}
-				add_province_modifier = {
-					static_modifiers = { flooded }
-					province = {
-						id = 11916
-						id = 12036
-						id = 4079
-						id = 9937
-						id = 10079
-					}
-				}
 			}
-			598 = {
-				damage_building = {
-					type = infrastructure
-					damage = 2
-				}
-				damage_building = {
-					type = industrial_complex
-					damage = 1.5
-				}
-				add_province_modifier = {
-					static_modifiers = { flooded }
-					province = {
-						id = 1001
-						id = 4148
-					}
-				}
+			hidden_effect = { 
+				news_event = { id = news.409 } 
+				set_global_flag = chi_yellow_river_blown
 			}
 			set_global_flag = huayuankou_destroyed
 		}
@@ -467,7 +460,7 @@ CHI_war_of_resistance = {
 					damage = 2
 				}
 				damage_building = {
-					type = railway
+					type = rail_way
 					damage = 2
 				}
 				damage_building = {
@@ -1171,6 +1164,214 @@ CHI_army_reform = {
 }
 
 economy_decisions = {
+	CHI_expand_industrial_capabilities = {
+
+		icon = generic_construction
+
+		allowed = {
+			is_literally_china = yes
+		}
+
+		available = {
+			command_power > 10
+			if = {
+				limit = {
+					OR = {
+						has_idea = incompetent_industry_real
+						has_idea = incompetent_industry_real_navy
+					}
+				}
+				has_tech = basic_machine_tools
+				OR = {
+					has_tech = concentrated_industry
+					has_tech = dispersed_industry
+				}
+				has_tech = construction1
+				OR = {
+					AND = {
+						num_of_factories > 40 #was 50
+						has_war = no
+					}
+					AND = {
+						num_of_factories > 50 #was 65
+						has_defensive_war = yes
+					}
+					AND = {
+						num_of_factories > 65 #was 75
+						has_offensive_war = yes
+					}
+				}
+				amount_research_slots > 2
+			}
+			if = {
+				limit = {
+					OR = {
+						has_idea = incompetent_industry_real_2
+						has_idea = incompetent_industry_real_2_navy
+					}
+				}
+				has_tech = improved_machine_tools
+				OR = {
+					has_tech = concentrated_industry2
+					has_tech = dispersed_industry2
+				}
+				has_tech = construction2
+				OR = {
+					AND = {
+						num_of_factories > 70
+						has_war = no
+					}
+					AND = {
+						num_of_factories > 80
+						has_defensive_war = yes
+					}
+					AND = {
+						num_of_factories > 90
+						has_offensive_war = yes
+					}
+				}
+				amount_research_slots > 3
+			}
+			if = {
+				limit = {
+					OR = {
+						has_idea = incompetent_industry_real_3
+						has_idea = incompetent_industry_real_3_navy
+					}
+				}
+				has_tech = advanced_machine_tools
+				OR = {
+					has_tech = concentrated_industry3
+					has_tech = dispersed_industry3
+				}
+				has_tech = construction3
+				OR = {
+					AND = {
+						num_of_factories > 90
+						has_war = no
+					}
+					AND = {
+						num_of_factories > 115
+						has_defensive_war = yes
+					}
+					AND = {
+						num_of_factories > 125
+						has_offensive_war = yes
+					}
+				}
+				has_idea = incompetent_industry_real_3
+				amount_research_slots > 3
+			}
+			if = {
+				limit = {
+					OR = {
+						has_idea = incompetent_industry_real_4
+						has_idea = incompetent_industry_real_4_navy
+					}
+				}
+				has_tech = assembly_line_production
+				OR = {
+					has_tech = concentrated_industry4
+					has_tech = dispersed_industry4
+				}
+				has_tech = construction4
+				OR = {
+					AND = {
+						num_of_factories > 110
+						has_war = no
+					}
+					AND = {
+						num_of_factories > 140
+						has_defensive_war = yes
+					}
+					AND = {
+						num_of_factories > 150
+						has_offensive_war = yes
+					}
+				}
+				has_idea = incompetent_industry_real_4
+				amount_research_slots > 4
+			}
+			if = {
+				limit = {
+					OR = {
+						has_idea = incompetent_industry_real_5
+						has_idea = incompetent_industry_real_5_navy
+					}
+				}
+				OR = {
+					has_tech = flexible_line
+					has_tech = streamlined_line
+				}
+				OR = {
+					has_tech = concentrated_industry5
+					has_tech = dispersed_industry5
+				}
+				has_tech = construction5
+				OR = {
+					AND = {
+						num_of_factories > 130
+						has_war = no
+					}
+					AND = {
+						num_of_factories > 170
+						has_defensive_war = yes
+					}
+					AND = {
+						num_of_factories > 190
+						has_offensive_war = yes
+					}
+				}
+				has_idea = incompetent_industry_real_5
+				amount_research_slots > 4
+			}
+		}
+
+		visible = {
+			OR = {
+				has_idea = incompetent_industry_real_5
+				has_idea = incompetent_industry_real_4
+				has_idea = incompetent_industry_real_3
+				has_idea = incompetent_industry_real_2
+				has_idea = incompetent_industry_real
+				has_idea = incompetent_industry_real_5_navy
+				has_idea = incompetent_industry_real_4_navy
+				has_idea = incompetent_industry_real_3_navy
+				has_idea = incompetent_industry_real_2_navy
+				has_idea = incompetent_industry_real_navy
+			}
+		}
+
+		custom_cost_text = r56_10_command_power_cost
+		custom_cost_trigger = {
+			command_power > 10
+		}
+
+		ai_will_do = {
+			factor = 500	#of course we want to have better industry!
+		}
+
+		days_remove = 30
+
+		modifier = {
+			consumer_goods_factor = 0.05
+			political_power_gain = 0.15
+		}
+
+		complete_effect = {
+			every_controlled_state = {
+				limit = {
+					is_core_of = ROOT
+				}
+				add_extra_state_shared_building_slots = 1
+			}
+		}
+
+		remove_effect = {
+			CHI_incompetent_industry_level_down = yes
+		}
+	}
+
 	CHI_forced_loans = {
 
 		icon = ger_mefo_bills
@@ -2628,6 +2829,235 @@ political_actions = {
 	}
 }
 
+CHI_weapons_purchases_category = {
+	CHI_order_weapons_in_USA = {
+	icon = generic_prepare_civil_war
+		available = {
+
+		}
+		visible = {
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 25
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				has_equipment = {
+					infantry_equipment < 1
+				}
+				factor = 50
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 2 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = 2500
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -2 }
+			}
+		}
+	}
+	CHI_order_artillery_in_USA = {
+		icon = ger_military_buildup
+		available = {
+
+		}
+		visible = {
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 25
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				has_equipment = {
+					artillery_equipment < 1
+				}
+				factor = 50
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 2 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = artillery_equipment
+				amount = 75
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 2 }
+			}
+		}
+	}
+	CHI_order_tanks_in_USA = {
+		icon = generic_air
+		visible = {
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 50
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				has_equipment = {
+					light_tank_chassis < 10
+				}
+				factor = 5
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		modifier = {
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 5 }
+			}
+		}
+		remove_effect = {
+			if = {
+				limit = {
+					USA = { 
+						OR = {
+							has_tech = basic_light_tank 
+							has_tech = basic_light_tank_chassis
+						}
+						NOT = { 
+							has_tech = basic_medium_tank 
+							has_tech = improved_medium_tank #needed because basic can be bypassed
+							has_tech = basic_medium_tank_chassis
+							has_tech = improved_medium_tank_chassis
+						}
+					}
+				}
+				add_equipment_to_stockpile = {
+					type = light_tank_chassis
+					amount = 50
+				}
+			}
+			else_if = {
+				limit = {
+					USA = {
+						OR = {
+							has_tech = basic_medium_tank
+							has_tech = improved_medium_tank #needed because basic can be bypassed
+							has_tech = basic_medium_tank_chassis
+							has_tech = improved_medium_tank_chassis
+						}
+					}
+				}
+				add_equipment_to_stockpile = {
+					type = medium_tank_chassis
+					amount = 50
+				}
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -5 }
+			}
+		}
+	}
+	CHI_order_fighters_in_USA = {
+		icon = generic_air
+		available = {
+
+		}
+		visible = {
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 50
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				has_equipment = {
+					fighter_equipment < 1
+				}
+				factor = 5
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		modifier = {
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 5 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = fighter_equipment
+				amount = 50
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -5 }
+			}
+		}
+	}
+	CHI_order_bombers_in_USA = {
+		icon = generic_air
+		available = {
+
+		}
+		visible = {
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 50
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				has_equipment = {
+					tac_bomber_equipment < 1
+				}
+				factor = 5
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		modifier = {
+
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 5 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = tac_bomber_equipment
+				amount = 25
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -5 }
+			}
+		}
+	}
+}
+
 CHI_xian_incident = {
 	CHI_instigate_xian_incident = {
 		icon = generic_political_discourse
@@ -2733,11 +3163,11 @@ operations = {
 			controls_state = 670
 			controls_state = 286
 			controls_state = 741
-			controls_state = 851
-			controls_state = 852
-			controls_state = 853
-			controls_state = 854
-			controls_state = 855
+			controls_state = 924
+			controls_state = 925
+			controls_state = 926
+			controls_state = 927
+			controls_state = 928
 		} 
 
 		days_mission_timeout = 360

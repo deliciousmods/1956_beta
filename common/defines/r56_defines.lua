@@ -146,11 +146,12 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
 		0.0, -- NAVAL_KAMIKAZE
 		0.0, -- PORT_STRIKE
 		0.0, -- ATTACK_LOGISTICS
-		0.1, -- AIR_SUPPLY
+		0.05, -- AIR_SUPPLY
 		0.0, -- TRAINING
 		0.0, -- NAVAL_MINES_PLANTING
 		0.0, -- NAVAL_MINES_SWEEPING
 		0.0, -- MISSION_RECON
+		0.0, -- NAVAL_PATROL
     }
 	
 NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0	
@@ -181,6 +182,7 @@ NMilitary = {
 
 
 -- AI
+
 NDefines.NAI.ENTRENCHMENT_WEIGHT = 50.0
 NDefines.NAI.AI_FRONT_MOVEMENT_FACTOR_FOR_READY = 0.50
 NDefines.NAI.MAIN_ENEMY_FRONT_IMPORTANCE = 50.0
@@ -273,7 +275,7 @@ NDefines.NAI.DESPERATE_AI_MIN_ORG_BEFORE_ATTACK = 0.85					-- ai will wait for t
 NDefines.NAI.DESPERATE_AI_MIN_ORG_BEFORE_MOVE = 0.25					-- ai will wait for this much org to move in desperate situations
 NDefines.NAI.DESPERATE_ATTACK_WITHOUT_ORG_WHEN_NO_ORG_GAIN = 175		-- if ai can't regain enough org to attack in this many hours, it will go truly desperate and attack anyway (still has to wait for move org)
 
-
+NDefines.NAI.WANTED_UNITS_MANPOWER_DIVISOR = 300000
 
 NDefines.NAI.DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
 	--Army Values
@@ -425,7 +427,6 @@ NDefines.NSupply.SUPPLY_DISRUPTION_DAILY_RECOVERY = 3.0
 
 
 NDefines.NMilitary.SUPPLY_GRACE = 120 -- 72
-
 
 NDefines.NBuildings.SUPPLY_PORT_LEVEL_THROUGHPUT = 3 -- 3
 
