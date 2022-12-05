@@ -1,8 +1,6 @@
-version="1.12.6"
+version="1"
 tags={
-	"Beta"
+	"Alternative History"
 }
-name="The Road to 56 [Beta]"
-remote_file_id="1088963694"
-replace_path="history/states"
-replace_path="map/strategicregions"
+name="Road to 56 Github"
+supported_version="1.11.5"
