@@ -1,0 +1,279 @@
+############################################################################################################
+#	Expert AI mod - attache effects
+############################################################################################################
+
+### Strategies
+
+EAI_attache_strategies = {
+
+	if = { limit = { is_historical_focus_on = yes }
+
+		if = { 		limit = { tag = SOV } EAI_attache_strategy_SOV = yes }
+		else_if = { limit = { tag = GER } EAI_attache_strategy_GER = yes }
+		else_if = { limit = { tag = ITA } EAI_attache_strategy_ITA = yes }
+		else_if = { limit = { tag = USA } EAI_attache_strategy_USA = yes }
+		else_if = { limit = { tag = ENG } EAI_attache_strategy_ENG = yes }
+	}
+}
+
+###
+
+EAI_attache_strategy_SOV = {
+
+	if = { # Republican spain
+		limit = {
+			SPD = {
+				has_civil_war = yes
+			}
+		}
+
+		SPD = { EAI_send_attache = yes }
+	}
+}
+
+EAI_attache_strategy_GER = {
+
+	if = {
+		limit = {
+			SPA = {
+				has_civil_war = yes
+			}
+		}
+
+		SPA = { EAI_send_attache = yes }
+	}
+}
+
+EAI_attache_strategy_ITA = {
+
+	if = {
+		limit = {
+			SPA = {
+				has_civil_war = yes
+			}
+		}
+
+		SPA = { EAI_send_attache = yes }
+	}
+}
+
+EAI_attache_strategy_USA = {
+
+	if = {
+		limit = {
+			ENG = {
+				has_war_with = GER
+			}
+		}
+
+		ENG = { EAI_send_attache = yes }
+	}
+}
+
+EAI_attache_strategy_ENG = {
+
+	if = {
+		limit = {
+			SPD = {
+				has_civil_war = yes
+			}
+		}
+
+		SPD = { EAI_send_attache = yes }
+	}
+}
+
+###
+
+EAI_recall_invalid_attache = {
+
+	if = {
+		limit = {
+			has_variable = EAI_attache_target
+
+			var:EAI_attache_target = {
+
+				EAI_cancel_attache = yes
+			}
+		}
+
+		if = { limit = { has_country_flag = EAI_attache_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | ATTACHE: recalled invalid attache" }
+
+		var:EAI_attache_target = {
+
+			EAI_recall_attache = yes
+		}
+	}
+
+	EAI_fix_attache_idea = yes
+}
+
+EAI_fix_attache_idea = {
+
+	if = { # Attache received from both game and script, remove mod idea
+		limit = {
+			has_idea = EAI_attache_received
+			has_attache = yes
+		}
+
+		remove_ideas = EAI_attache_received
+
+		if = { limit = { has_country_flag = EAI_attache_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | ATTACHE: removed duplicate received idea" }
+	}
+
+	else_if = { # Attache received but no idea
+		limit = {
+			check_variable = { EAI_attache_senders^num > 0 }
+			NOT = { has_idea = EAI_attache_received }
+			NOT = { has_attache = yes }
+		}
+
+		add_ideas = EAI_attache_received
+
+		if = { limit = { has_country_flag = EAI_attache_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | ATTACHE: added missing received idea" }
+	}
+
+	# Attache sender is invalid
+	if = { limit = { check_variable = { EAI_attache_senders^num > 0 } }
+
+		for_each_scope_loop = { array = EAI_attache_senders
+
+			if = {
+				limit = {
+					OR = {
+						exists = no
+					}
+				}
+
+				add_to_temp_array = { remove_senders = THIS.id }
+
+				if = { limit = { has_country_flag = EAI_attache_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | ATTACHE: removed invalid attache received idea" }
+			}
+		}
+
+		if = { limit = { check_variable = { remove_senders^num > 0 } }
+
+			for_each_scope_loop = { array = remove_senders
+
+				remove_from_array = { EAI_attache_senders = THIS.id }
+			}
+		}
+	}
+}
+
+EAI_send_attache = { # THIS = target ROOT = sender
+
+	if = {
+		limit = {
+
+			THIS = {
+
+				NOT = { EAI_has_received_attache_from_ROOT = yes }
+
+				EAI_is_valid_attache_target = yes
+			}
+
+			ROOT = {
+
+				set_temp_variable = { temp = political_power }
+				add_to_temp_variable = { temp = EAI_stored_pp }
+				NOT = { check_variable = { temp < 110 } } # +10 for improved relations because the AI absolutely refuses to improve relations no matter what
+
+				set_temp_variable = { temp2 = command_power }
+				add_to_temp_variable = { temp2 = EAI_stored_command_power }
+				NOT = { check_variable = { temp2 < 50 } }
+			}
+		}
+
+		ROOT = {
+
+			add_political_power = EAI_stored_pp
+			set_variable = { EAI_stored_pp = 0 }
+			add_political_power = -110
+
+			add_command_power = EAI_stored_command_power
+			set_variable = { EAI_stored_command_power = 0 }
+			add_command_power = -50
+
+			add_ideas = EAI_attache_sent
+
+			set_variable = { EAI_attache_target = PREV.id }
+
+			if = { limit = { has_country_flag = EAI_attache_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | ATTACHE: sent attache to [PREV.GetName]" }
+		}
+
+		THIS = {
+
+			add_ideas = EAI_attache_received
+			add_to_array = { EAI_attache_senders = ROOT.id }
+
+			set_variable = { EAI_prev_army_xp_@ROOT = army_experience }
+			set_variable = { EAI_prev_air_xp_@ROOT = air_experience }
+			set_variable = { EAI_prev_navy_xp_@ROOT = navy_experience }
+		}
+	}
+}
+
+EAI_recall_attache = { # THIS = target ROOT = sender
+	
+	if = { limit = { EAI_has_received_attache_from_ROOT = yes }
+
+		ROOT = {
+		
+			remove_ideas = EAI_attache_sent
+
+			clear_variable = EAI_attache_target
+
+			if = { limit = { has_country_flag = EAI_attache_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | ATTACHE: recalled attache from [PREV.GetName]" }
+		}
+
+		THIS = {
+
+			remove_from_array = { EAI_attache_senders = ROOT.id }
+
+			if = { limit = { NOT = { check_variable = { EAI_attache_senders^num > 0 } } }
+
+				remove_ideas = EAI_attache_received
+			}
+		}
+	}
+}
+
+EAI_attache_xp_gain = {
+
+	@EAI_ATTACHE_XP_GAIN = 0.15
+
+	if = { limit = { has_variable = EAI_attache_target }
+
+		var:EAI_attache_target = {
+
+			set_temp_variable = { army_xp_gained = army_experience }
+			subtract_from_temp_variable = { army_xp_gained = EAI_prev_army_xp_@ROOT }
+			multiply_temp_variable = { army_xp_gained = @EAI_ATTACHE_XP_GAIN }
+			if = { limit = { check_variable = { army_xp_gained > 0 } check_variable = { army_xp_gained < 5 } } # 5 or more = xp was likely gained from focuses etc.
+				ROOT = { army_experience = army_xp_gained add_to_variable = { EAI_attache_army_xp_gained_total = army_xp_gained } }
+			}
+			set_variable = { EAI_prev_army_xp_@ROOT = army_experience }
+
+			set_temp_variable = { air_xp_gained = air_experience }
+			subtract_from_temp_variable = { air_xp_gained = EAI_prev_air_xp_@ROOT }
+			multiply_temp_variable = { air_xp_gained = @EAI_ATTACHE_XP_GAIN }
+			if = { limit = { check_variable = { air_xp_gained > 0 } check_variable = { air_xp_gained < 5 } }
+
+				ROOT = { air_experience = air_xp_gained add_to_variable = { EAI_attache_air_xp_gained_total = air_xp_gained } }
+			}
+			set_variable = { EAI_prev_air_xp_@ROOT = air_experience }
+
+			set_temp_variable = { navy_xp_gained = navy_experience }
+			subtract_from_temp_variable = { navy_xp_gained = EAI_prev_navy_xp_@ROOT }
+			multiply_temp_variable = { navy_xp_gained = @EAI_ATTACHE_XP_GAIN }
+			if = { limit = { check_variable = { navy_xp_gained > 0 } check_variable = { navy_xp_gained < 5 } }
+
+				ROOT = { navy_experience = navy_xp_gained add_to_variable = { EAI_attache_navy_xp_gained_total = navy_xp_gained } }
+			}
+			set_variable = { EAI_prev_navy_xp_@ROOT = navy_experience }
+		}
+
+		if = { limit = { has_country_flag = EAI_attache_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | ATTACHE: gained XP army = [?EAI_attache_army_xp_gained_total] air = [?EAI_attache_air_xp_gained_total] navy = [?EAI_attache_navy_xp_gained_total]" }
+	}
+}

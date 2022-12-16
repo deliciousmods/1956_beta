@@ -1,0 +1,225 @@
+############################################################################################################
+#	Expert AI mod - scripted AI effects
+############################################################################################################
+
+EAI_PATHFIND/get_path = {
+
+	if = { limit = { has_country_flag = EAI_pathfind_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | PATHFIND: START - [?pathfind_start.GetName] -> [?pathfind_target.GetName] - type [?pathfind_type]" }
+
+	var:pathfind_start = {
+		clear_variable = EAI_PATHFIND/g_score
+		clear_variable = EAI_PATHFIND/f_score
+	}
+
+	add_to_temp_array = { open_list = pathfind_start }
+
+	while_loop_effect = { limit = { check_variable = { its < 75 } check_variable = { open_list^num > 0 } }
+
+		EAI_PATHFIND/get_lowest_from_open_list = yes
+
+		EAI_PATHFIND/check_success_conditions = yes
+
+		if = { limit = { check_variable = { found_path = 1 } }
+
+			if = { limit = { has_country_flag = EAI_pathfind_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | PATHFIND: found path, end = [?current.GetName]" }
+
+			EAI_PATHFIND/build_path = yes
+		
+			set_temp_variable = { break = 1 }
+		}
+		else = {
+
+			var:current = {
+
+				add_to_temp_array = { closed_list = THIS.id }
+
+				EAI_PATHFIND/get_neighbors = yes
+
+				for_each_scope_loop = { array = neighbors
+
+					if = { limit = { NOT = { is_in_array = { closed_list = THIS.id } } }
+
+						set_temp_variable = { pathfind_g_score = PREV.EAI_PATHFIND/g_score }
+						add_to_temp_variable = { pathfind_g_score = distance_to@PREV }
+						EAI_PATHFIND/apply_g_score_modifier = yes
+
+						var:pathfind_target = { set_temp_variable = { pathfind_h_score = distance_to@PREV } }
+						multiply_temp_variable = { pathfind_h_score = 1.1 }
+
+						set_temp_variable = { pathfind_f_score = pathfind_g_score }
+						add_to_temp_variable = { pathfind_f_score = pathfind_h_score }
+
+						if = {
+							limit = { 
+								if = { limit = { NOT = { is_in_array = { open_list = THIS.id } } }
+
+									always = yes
+								}
+								else = {
+									
+									check_variable = { pathfind_f_score < EAI_PATHFIND/f_score }
+								}
+							}
+
+							set_variable = { EAI_PATHFIND/came_from = PREV.id }
+							set_variable = { EAI_PATHFIND/g_score = pathfind_g_score }
+							set_variable = { EAI_PATHFIND/f_score = pathfind_f_score }
+
+							add_to_temp_array = { open_list = THIS.id }
+						}
+					}
+				}
+			}
+		}
+
+		add_to_temp_variable = { its = 1 }
+	}
+
+	if = { limit = { has_country_flag = EAI_pathfind_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | PATHFIND: END - iterations = [?its]" }
+
+	clear_temp_array = open_list
+	clear_temp_array = closed_list
+	set_temp_variable = { pathfind_type = 0 }
+	set_temp_variable = { its = 0 }
+}
+
+EAI_PATHFIND/apply_g_score_modifier = {
+
+	# supply line - prefer high infrastructure states
+	if = { limit = { check_variable = { pathfind_type = 1 } }
+
+		set_temp_variable = { infra = building_level@infrastructure }
+		multiply_temp_variable = { infra = -0.1 }
+		add_to_temp_variable = { infra = 1 }
+		multiply_temp_variable = { pathfind_g_score = infra }
+	}
+}
+
+EAI_PATHFIND/get_neighbors = {
+
+	clear_temp_array = neighbors
+
+	# supply line - outdated
+	if = { limit = { check_variable = { pathfind_type = 1 } }
+
+		every_neighbor_state = {
+			limit = {
+				free_building_slots = { building = infrastructure size < 5 include_locked = no } # not impassable state
+				is_controlled_by = ROOT
+			}
+
+			add_to_temp_array = { neighbors = THIS.id }
+		}
+	}
+
+	# default
+	else = {
+
+		every_neighbor_state = {
+			limit = {
+				free_building_slots = { building = infrastructure size < 5 include_locked = no } # not impassable state
+				is_controlled_by = ROOT
+			}
+
+			add_to_temp_array = { neighbors = THIS.id }
+		}
+	}
+}
+
+EAI_PATHFIND/check_success_conditions = {
+
+	set_temp_variable = { found_path = 0 }
+
+	if = {
+		limit = {
+
+			OR = {
+				check_variable = { current = pathfind_target }
+				
+				# supply line - reached enemy front line
+				if = { limit = { check_variable = { pathfind_type = 1 } }
+
+					var:pathfind_target = {
+
+						CONTROLLER = {
+
+							set_temp_variable = { pathfind_target_controller = THIS.id }
+						}
+					}
+
+					var:current = { 
+
+						any_neighbor_state = { 
+
+							CONTROLLER = {
+								
+								NOT = { tag = ROOT }
+
+								OR = {
+									tag = var:pathfind_target_controller
+								}
+							}
+						}
+					}
+				}
+				else = { always = no }
+			}
+		}
+
+		set_temp_variable = { found_path = 1 }
+	}
+}
+
+EAI_PATHFIND/build_path = {
+
+	set_temp_variable = { pathfind_success = 0 }
+	clear_temp_array = pathfind_path_reversed
+	clear_temp_array = pathfind_path
+
+	set_temp_variable = { its2 = 0 }
+	while_loop_effect = { limit = { check_variable = { its2 < 50 } }
+
+		if = { limit = { check_variable = { current = pathfind_start } } 
+
+			set_temp_variable = { pathfind_success = 1 }
+			set_temp_variable = { break = 1 } 
+		}
+
+		var:current = {
+			add_to_temp_array = { pathfind_path_reversed = THIS.id }
+			set_temp_variable = { current = EAI_PATHFIND/came_from }
+		}
+
+		add_to_temp_variable = { its2 = 1 }
+	}
+
+	set_temp_variable = { last_index = pathfind_path_reversed^num }
+	subtract_from_temp_variable = { last_index = 1 }
+
+	for_each_loop = { array = pathfind_path_reversed
+	
+		set_temp_variable = { rev_index = last_index }
+		subtract_from_temp_variable = { rev_index = i }
+		add_to_temp_array = { array = pathfind_path value = pathfind_path_reversed^rev_index }
+	}
+}
+
+EAI_PATHFIND/get_lowest_from_open_list = {
+
+	set_temp_variable = { current = 0 }
+	set_temp_variable = { lowest_f_score = 99999 }
+
+	for_each_loop = { array = open_list
+
+		var:v = {
+			if = { limit = { check_variable = { EAI_PATHFIND/f_score < lowest_f_score } }
+
+				set_temp_variable = { lowest_f_score = EAI_PATHFIND/f_score }
+				set_temp_variable = { remove_index = i }
+				set_temp_variable = { current = THIS.id }
+			}
+		}
+	}
+
+	remove_from_temp_array = { array = open_list index = remove_index }
+}

@@ -1,0 +1,336 @@
+############################################################################################################
+#	Expert AI mod - misc triggers
+############################################################################################################
+
+EAI_reserve_manpower_more_than_25p = {
+
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio > 0.25 }
+		has_manpower > 500000
+	}
+}
+
+EAI_reserve_manpower_more_than_20p = {
+
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio > 0.20 }
+		has_manpower > 250000
+	}
+}
+
+EAI_reserve_manpower_more_than_15p = {
+
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio > 0.15 }
+		has_manpower > 187500
+	}
+}
+
+EAI_reserve_manpower_more_than_10p = {
+
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio > 0.10 }
+		has_manpower > 125000
+	}
+}
+
+EAI_reserve_manpower_more_than_5p = {
+
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio > 0.05 }
+		has_manpower > 62500
+	}
+}
+
+###
+
+EAI_reserve_manpower_less_than_25p = {
+
+	NOT = {
+		check_variable = { EAI_reserve_mp_ratio > 0.25 }
+		has_manpower > 500000
+	}
+}
+
+EAI_reserve_manpower_less_than_20p = {
+
+	NOT = {
+		check_variable = { EAI_reserve_mp_ratio > 0.20 }
+		has_manpower > 250000
+	}
+}
+
+EAI_reserve_manpower_less_than_15p = {
+
+	NOT = {
+		check_variable = { EAI_reserve_mp_ratio > 0.15 }
+		has_manpower > 187500
+	}
+}
+
+EAI_reserve_manpower_less_than_10p = {
+
+	NOT = {
+		check_variable = { EAI_reserve_mp_ratio > 0.10 }
+		has_manpower > 125000
+	}
+}
+
+EAI_reserve_manpower_less_than_5p = {
+
+	NOT = {
+		check_variable = { EAI_reserve_mp_ratio > 0.05 }
+		has_manpower > 62500
+	}
+}
+
+###
+
+EAI_limited_minors = {
+
+	is_major = no
+
+	OR = {
+		CAPITAL_SCOPE = { is_on_continent = asia }
+		CAPITAL_SCOPE = { is_on_continent = africa }
+		CAPITAL_SCOPE = { is_on_continent = south_america }
+		CAPITAL_SCOPE = { is_on_continent = middle_east }
+	}
+}
+
+###
+
+# true majors in the game
+EAI_major_country = { 
+
+	OR = {
+		original_tag = ENG
+		original_tag = FRA
+		original_tag = USA
+
+		original_tag = GER
+		original_tag = ITA
+		original_tag = JAP
+
+		original_tag = SOV
+	}
+}
+
+# civil war country tags
+EAI_civil_war_country = { 
+
+	OR = {
+		tag = D01
+		tag = D02
+		tag = D03
+		tag = D04
+		tag = D05
+		tag = D06
+		tag = D07
+		tag = D08
+		tag = D09
+		tag = D10
+		tag = D11
+		tag = D12
+		tag = D13
+		tag = D14
+		tag = D15
+	}
+}
+
+### significant minors
+
+EAI_asian_minor = {
+	OR = {
+		original_tag = CHI
+		original_tag = SHX
+		original_tag = PRC
+		original_tag = XSM
+		original_tag = GXC
+		original_tag = YUN
+		original_tag = SIA
+		original_tag = PHI
+	}
+}
+
+EAI_commonwealth = {
+	OR = {
+		original_tag = CAN
+		original_tag = AST
+		original_tag = SAF
+		original_tag = RAJ
+		original_tag = NZL
+	}
+}
+
+EAI_european_minor = {
+	OR = {
+		original_tag = CZE
+		original_tag = POL
+		original_tag = ROM
+		original_tag = HUN
+		original_tag = BUL
+		original_tag = SPR
+		original_tag = FIN
+		original_tag = SWE
+		original_tag = NOR
+		original_tag = GRE
+		original_tag = TUR
+		original_tag = DEN
+		original_tag = POR
+		original_tag = YUG
+	}
+}
+
+###
+
+# true neutrals
+EAI_neutral_country = { 
+	NOT = { has_war = yes }
+	OR = { has_government = neutrality has_government = democratic }
+	OR = {
+		tag = BEL
+		tag = SWI
+		tag = SWE
+		tag = IRE
+		tag = TIB
+		tag = NEP
+		tag = BHU
+		tag = POR
+	}
+}
+
+# triggers the AI to build more units when threatened
+EAI_mobilize_army = {
+	NOT = { has_war = yes EAI_major_country = yes }
+
+	OR = {
+		has_country_flag = EAI_mobilize_army
+
+		any_neighbor_country = {
+
+			capital_scope = { has_state_flag = EAI_original_capital_@PREV }
+
+			any_of_scopes = { array = controlled_states
+				is_in_home_area = yes
+				any_neighbor_state = {
+					is_controlled_by = ROOT
+					is_in_home_area = yes
+				}
+			}
+
+			OR = {
+				has_added_tension_amount > 10
+				has_war = yes
+				is_justifying_wargoal_against = ROOT
+				has_wargoal_against = ROOT
+				any_other_country = { 
+					OR = {
+						is_justifying_wargoal_against = PREV 
+						has_wargoal_against = PREV
+					}
+				}
+			}
+		}
+
+		### special cases
+
+		original_tag = CHI
+	}
+}
+
+# minors build infantry according to their division cap during peace time
+EAI_build_infantry = {
+
+	NOT = { EAI_major_country = yes }
+	
+	NOT = { has_country_flag = EAI_infantry_division_limit }
+
+	if = { limit = { has_country_flag = EAI_mobilize_army }
+		meta_trigger = {
+			text = { has_army_manpower = { size < [x][y] } }
+			x = "[?EAI_division_cap|.0]"
+			y = "0000"
+		}
+	}
+	else = {
+		set_temp_variable = { t1 = EAI_division_cap }
+		divide_temp_variable = { t1 = 2 }
+
+		meta_trigger = {
+			text = { has_army_manpower = { size < [x][y] } }
+			x = "[?t1|.0]"
+			y = "0000"
+		}
+	}
+}
+
+EAI_defend_core = {
+
+	OR = {
+		# surrender_progress > 0.5
+	
+		AND = { # guard cairo, singapore
+			OR = { original_tag = EGY original_tag = MAL }
+			is_in_faction_with = ENG
+		}
+
+		AND = { # keep units on the east front
+			OR = { tag = ROM tag = HUN tag = FIN }
+			is_neighbor_of = SOV
+			has_war_with = SOV
+		}
+	}
+}
+
+### resource extraction decisions
+
+EAI_oil_extraction_decision = {
+
+	OR = {
+		has_political_power > 250
+		AND = { is_major = no has_idea = free_trade }
+		fuel_ratio < 0.5
+		check_variable = { resource_imported@oil > 20 }
+	}
+}
+
+EAI_rubber_extraction_decision = {
+
+	OR = {
+		has_country_flag = EAI_extract_rubber
+		has_country_flag = EAI_allies_need_rubber
+	}
+}
+
+EAI_aluminium_extraction_decision = {
+
+	OR = {
+		has_country_flag = EAI_extract_aluminium
+		has_country_flag = EAI_allies_need_aluminium
+	}
+}
+
+EAI_steel_extraction_decision = {
+
+	OR = {
+		has_country_flag = EAI_extract_steel
+		has_country_flag = EAI_allies_need_steel
+	}
+}
+
+EAI_chromium_extraction_decision = {
+
+	OR = {
+		has_country_flag = EAI_extract_chromium
+		has_country_flag = EAI_allies_need_chromium
+	}
+}
+
+EAI_tungsten_extraction_decision = {
+
+	OR = {
+		has_country_flag = EAI_extract_tungsten
+		has_country_flag = EAI_allies_need_tungsten
+	}
+}

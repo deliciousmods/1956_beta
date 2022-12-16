@@ -1,0 +1,447 @@
+############################################################################################################
+#	Expert AI mod - resource effects
+############################################################################################################
+
+# Take resource extraction decisions when AI can't produce enough resources for its lines
+EAI_resource_extraction_decisions = {
+
+	if = { # Minors should get all the resources possible
+		limit = {
+			OR = {
+				has_political_power > 250
+				AND = { is_major = no has_idea = free_trade }
+			}
+		}
+
+		set_country_flag = { flag = EAI_extract_aluminium value = 1 days = 30 }
+		set_country_flag = { flag = EAI_extract_rubber value = 1 days = 30 }
+		set_country_flag = { flag = EAI_extract_tungsten value = 1 days = 30 }
+		set_country_flag = { flag = EAI_extract_steel value = 1 days = 30 }
+		set_country_flag = { flag = EAI_extract_chromium value = 1 days = 30 }
+	}
+
+	else = {
+
+		if = { limit = { check_variable = { EAI_needs_aluminium = 3 } }
+
+			set_country_flag = { flag = EAI_extract_aluminium value = 1 days = 30 }
+		}
+
+		if = { limit = { check_variable = { EAI_needs_rubber = 3 } }
+
+			set_country_flag = { flag = EAI_extract_rubber value = 1 days = 30 }
+		}
+
+		if = { limit = { check_variable = { EAI_needs_tungsten = 3 } }
+
+			set_country_flag = { flag = EAI_extract_tungsten value = 1 days = 30 }
+		}
+
+		if = { limit = { check_variable = { EAI_needs_steel = 3 } }
+
+			set_country_flag = { flag = EAI_extract_steel value = 1 days = 30 }
+		}
+
+		if = { limit = { check_variable = { EAI_needs_chromium = 3 } }
+
+			set_country_flag = { flag = EAI_extract_chromium value = 1 days = 30 }
+		}
+	}
+}
+
+### Checked every 15 days. Tracked over time because resource needs fluctuate due to various reasons and the AI may be able to solve it on its own before it needs more drastic measures.
+
+# Does the AI have to trade to fulfill its production line needs?
+# Use decisions, build refineries, infrastructure etc. to fix
+EAI_check_resource_needs = {
+
+	### aluminium
+
+	if = {
+		limit = {
+			OR = {
+				check_variable = { resource@aluminium < -20 }
+				check_variable = { resource_imported@aluminium > 20 }
+			}
+		}
+
+		add_to_variable = { EAI_needs_aluminium = 1 }
+	}
+	else = { subtract_from_variable = { EAI_needs_aluminium = 1 } }
+	clamp_variable = { var = EAI_needs_aluminium min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_needs_aluminium = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: ALUMINIUM extraction not sufficient for production, resource@aluminium = [?resource@aluminium], resource_imported@aluminium = [?resource_imported@aluminium]" }
+
+	### rubber
+
+	if = {
+		limit = {
+			OR = {
+				check_variable = { resource@rubber < -20 }
+				check_variable = { resource_imported@rubber > 20 }
+			}
+		}
+
+		add_to_variable = { EAI_needs_rubber = 1 }
+	}
+	else = { subtract_from_variable = { EAI_needs_rubber = 1 } }
+	clamp_variable = { var = EAI_needs_rubber min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_needs_rubber = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: RUBBER extraction not sufficient for production, resource@rubber = [?resource@rubber], resource_imported@rubber = [?resource_imported@rubber]" }
+
+	### steel
+
+	if = {
+		limit = {
+			OR = {
+				check_variable = { resource@steel < -20 }
+				check_variable = { resource_imported@steel > 20 }
+			}
+		}
+
+		add_to_variable = { EAI_needs_steel = 1 }
+	}
+	else = { subtract_from_variable = { EAI_needs_steel = 1 } }
+	clamp_variable = { var = EAI_needs_steel min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_needs_steel = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: STEEL extraction not sufficient for production, resource@steel = [?resource@steel], resource_imported@steel = [?resource_imported@steel]" }
+
+	### tungsten
+
+	if = {
+		limit = {
+			OR = {
+				check_variable = { resource@tungsten < -20 }
+				check_variable = { resource_imported@tungsten > 20 }
+			}
+		}
+
+		add_to_variable = { EAI_needs_tungsten = 1 }
+	}
+	else = { subtract_from_variable = { EAI_needs_tungsten = 1 } }
+	clamp_variable = { var = EAI_needs_tungsten min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_needs_tungsten = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: TUNGSTEN extraction not sufficient for production, resource@tungsten = [?resource@tungsten], resource_imported@tungsten = [?resource_imported@tungsten]" }
+
+	### chromium
+
+	if = {
+		limit = {
+			OR = {
+				check_variable = { resource@chromium < -20 }
+				check_variable = { resource_imported@chromium > 20 }
+			}
+		}
+
+		add_to_variable = { EAI_needs_chromium = 1 }
+	}
+	else = { subtract_from_variable = { EAI_needs_chromium = 1 } }
+	clamp_variable = { var = EAI_needs_chromium min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_needs_chromium = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: CHROMIUM extraction not sufficient for production, resource@chromium = [?resource@chromium], resource_imported@chromium = [?resource_imported@chromium]" }
+
+	##################################################################################
+
+	### allied resource needs
+
+	for_each_scope_loop = { array = allies
+
+		if = { limit = { check_variable = { resource@aluminium < -20 } } 	ROOT = { set_country_flag = { flag = EAI_allies_need_aluminium value = 1 days = 30 } } }
+		if = { limit = { check_variable = { resource@rubber < -20 } } 		ROOT = { set_country_flag = { flag = EAI_allies_need_rubber value = 1 days = 30 } } }
+		if = { limit = { check_variable = { resource@tungsten < -20 } } 	ROOT = { set_country_flag = { flag = EAI_allies_need_tungsten value = 1 days = 30 } } }
+		if = { limit = { check_variable = { resource@steel < -20 } } 		ROOT = { set_country_flag = { flag = EAI_allies_need_steel value = 1 days = 30 } } }
+		if = { limit = { check_variable = { resource@chromium < -20 } } 	ROOT = { set_country_flag = { flag = EAI_allies_need_chromium value = 1 days = 30 } } }
+	}
+}
+
+# Does the AI have significant resource deficits compared to its production line needs? 
+# More drastic measures; more decisions, refineries, more willing to change trade law, use forced labor
+EAI_check_resource_shortages = {
+
+	### ALUMINIUM
+
+	if = {
+		limit = {
+			# there is a deficit
+			check_variable = { resource@aluminium < 0 }
+			
+			# total needed for production
+			set_temp_variable = { aluminium_needed = resource_consumed@aluminium }
+			multiply_temp_variable = { aluminium_needed = -1 }
+			add_to_temp_variable = { aluminium_needed = resource@aluminium }
+
+			# need is at least this much
+			check_variable = { aluminium_needed < -50 }
+
+			# deficit is >25% of total need
+			set_temp_variable = { aluminium_deficit = resource@aluminium }
+			divide_temp_variable = { aluminium_deficit = aluminium_needed }
+			check_variable = { aluminium_deficit > 0.25 }
+		}
+
+		add_to_variable = { EAI_aluminium_resource_shortage = 1 }
+	}
+	else = { subtract_from_variable = { EAI_aluminium_resource_shortage = 1 } }
+	clamp_variable = { var = EAI_aluminium_resource_shortage min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_aluminium_resource_shortage = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: ALUMINIUM shortage, deficit : need = [?aluminium_deficit|%0]" }
+
+	### RUBBER
+
+	if = {
+		limit = {
+			# there is a deficit
+			check_variable = { resource@rubber < 0 }
+			
+			# total needed for production
+			set_temp_variable = { rubber_needed = resource_consumed@rubber }
+			multiply_temp_variable = { rubber_needed = -1 }
+			add_to_temp_variable = { rubber_needed = resource@rubber }
+
+			# need is at least this much
+			check_variable = { rubber_needed < -50 }
+
+			# deficit is >25% of total need
+			set_temp_variable = { rubber_deficit = resource@rubber }
+			divide_temp_variable = { rubber_deficit = rubber_needed }
+			check_variable = { rubber_deficit > 0.25 }
+		}
+
+		add_to_variable = { EAI_rubber_resource_shortage = 1 }
+	}
+	else = { subtract_from_variable = { EAI_rubber_resource_shortage = 1 } }
+	clamp_variable = { var = EAI_rubber_resource_shortage min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_rubber_resource_shortage = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: RUBBER shortage, deficit : need = [?rubber_deficit|%0]" }
+
+	### TUNGSTEN
+
+	if = {
+		limit = {
+			# there is a deficit
+			check_variable = { resource@tungsten < 0 }
+			
+			# total needed for production
+			set_temp_variable = { tungsten_needed = resource_consumed@tungsten }
+			multiply_temp_variable = { tungsten_needed = -1 }
+			add_to_temp_variable = { tungsten_needed = resource@tungsten }
+
+			# need is at least this much
+			check_variable = { tungsten_needed < -50 }
+
+			# deficit is >25% of total need
+			set_temp_variable = { tungsten_deficit = resource@tungsten }
+			divide_temp_variable = { tungsten_deficit = tungsten_needed }
+			check_variable = { tungsten_deficit > 0.25 }
+		}
+
+		add_to_variable = { EAI_tungsten_resource_shortage = 1 }
+	}
+	else = { subtract_from_variable = { EAI_tungsten_resource_shortage = 1 } }
+	clamp_variable = { var = EAI_tungsten_resource_shortage min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_tungsten_resource_shortage = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: TUNGSTEN shortage, deficit : need = [?tungsten_deficit|%0]" }
+
+	### STEEL
+
+	if = {
+		limit = {
+			# there is a deficit
+			check_variable = { resource@steel < 0 }
+			
+			# total needed for production
+			set_temp_variable = { steel_needed = resource_consumed@steel }
+			multiply_temp_variable = { steel_needed = -1 }
+			add_to_temp_variable = { steel_needed = resource@steel }
+
+			# need is at least this much
+			check_variable = { steel_needed < -50 }
+
+			# deficit is >25% of total need
+			set_temp_variable = { steel_deficit = resource@steel }
+			divide_temp_variable = { steel_deficit = steel_needed }
+			check_variable = { steel_deficit > 0.25 }
+		}
+
+		add_to_variable = { EAI_steel_resource_shortage = 1 }
+	}
+	else = { subtract_from_variable = { EAI_steel_resource_shortage = 1 } }
+	clamp_variable = { var = EAI_steel_resource_shortage min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_steel_resource_shortage = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: STEEL shortage, deficit : need = [?steel_deficit|%0]" }
+
+	### CHROMIUM
+
+	if = {
+		limit = {
+			# there is a deficit
+			check_variable = { resource@chromium < 0 }
+			
+			# total needed for production
+			set_temp_variable = { chromium_needed = resource_consumed@chromium }
+			multiply_temp_variable = { chromium_needed = -1 }
+			add_to_temp_variable = { chromium_needed = resource@chromium }
+
+			# need is at least this much
+			check_variable = { chromium_needed < -50 }
+
+			# deficit is >25% of total need
+			set_temp_variable = { chromium_deficit = resource@chromium }
+			divide_temp_variable = { chromium_deficit = chromium_needed }
+			check_variable = { chromium_deficit > 0.25 }
+		}
+
+		add_to_variable = { EAI_chromium_resource_shortage = 1 }
+	}
+	else = { subtract_from_variable = { EAI_chromium_resource_shortage = 1 } }
+	clamp_variable = { var = EAI_chromium_resource_shortage min = 0 max = 3 }
+	if = { limit = { has_country_flag = EAI_resources_logging check_variable = { EAI_chromium_resource_shortage = 3 } } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: CHROMIUM shortage, deficit : need = [?chromium_deficit|%0]" }
+}
+
+###
+
+# Average resource need : extraction ratio for resources the AI has a lot of
+EAI_calculate_resource_need = {
+
+	set_variable = { EAI_average_resource_need = 0 }
+
+	### ALUMINIUM
+
+	if = { limit = { check_variable = { resource_produced@aluminium > 75 } }
+
+		set_temp_variable = { EAI_aluminium_needed = resource_consumed@aluminium }
+		if = { limit = { check_variable = { resource@aluminium < 0 } }
+
+			set_temp_variable = { aluminium_deficit = resource@aluminium }
+			multiply_temp_variable = { aluminium_deficit = -1 }
+			add_to_temp_variable = { EAI_aluminium_needed = aluminium_deficit }
+		}
+		divide_temp_variable = { EAI_aluminium_needed = resource_produced@aluminium }
+		clamp_temp_variable = { var = EAI_aluminium_needed min = 0 max = 1 }
+		add_to_variable = { EAI_average_resource_need = EAI_aluminium_needed }	
+		add_to_temp_variable = { EAI_resource_count = 1 }
+
+		if = { limit = { has_country_flag = EAI_resources_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCE: aluminium needed : extracted = [?EAI_aluminium_needed|%0]" }
+	}
+
+	### RUBBER
+
+	if = { limit = { check_variable = { resource_produced@rubber > 75 } }
+
+		set_temp_variable = { EAI_rubber_needed = resource_consumed@rubber }
+		if = { limit = { check_variable = { resource@rubber < 0 } }
+
+			set_temp_variable = { rubber_deficit = resource@rubber }
+			multiply_temp_variable = { rubber_deficit = -1 }
+			add_to_temp_variable = { EAI_rubber_needed = rubber_deficit }
+		}
+		divide_temp_variable = { EAI_rubber_needed = resource_produced@rubber }
+		clamp_temp_variable = { var = EAI_rubber_needed min = 0 max = 1 }
+		add_to_variable = { EAI_average_resource_need = EAI_rubber_needed }	
+		add_to_temp_variable = { EAI_resource_count = 1 }
+
+		if = { limit = { has_country_flag = EAI_resources_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCE: rubber needed : extracted = [?EAI_rubber_needed|%0]" }
+	}
+
+	### TUNGSTEN
+
+	if = { limit = { check_variable = { resource_produced@tungsten > 75 } }
+
+		set_temp_variable = { EAI_tungsten_needed = resource_consumed@tungsten }
+		if = { limit = { check_variable = { resource@tungsten < 0 } }
+
+			set_temp_variable = { tungsten_deficit = resource@tungsten }
+			multiply_temp_variable = { tungsten_deficit = -1 }
+			add_to_temp_variable = { EAI_tungsten_needed = tungsten_deficit }
+		}
+		divide_temp_variable = { EAI_tungsten_needed = resource_produced@tungsten }
+		clamp_temp_variable = { var = EAI_tungsten_needed min = 0 max = 1 }
+		add_to_variable = { EAI_average_resource_need = EAI_tungsten_needed }	
+		add_to_temp_variable = { EAI_resource_count = 1 }
+
+		if = { limit = { has_country_flag = EAI_resources_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCE: tungsten needed : extracted = [?EAI_tungsten_needed|%0]" }
+	}
+
+	### STEEL
+
+	if = { limit = { check_variable = { resource_produced@steel > 75 } }
+
+		set_temp_variable = { EAI_steel_needed = resource_consumed@steel }
+		if = { limit = { check_variable = { resource@steel < 0 } }
+
+			set_temp_variable = { steel_deficit = resource@steel }
+			multiply_temp_variable = { steel_deficit = -1 }
+			add_to_temp_variable = { EAI_steel_needed = steel_deficit }
+		}
+		divide_temp_variable = { EAI_steel_needed = resource_produced@steel }
+		clamp_temp_variable = { var = EAI_steel_needed min = 0 max = 1 }
+		add_to_variable = { EAI_average_resource_need = EAI_steel_needed }	
+		add_to_temp_variable = { EAI_resource_count = 1 }
+
+		if = { limit = { has_country_flag = EAI_resources_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCE: steel needed : extracted = [?EAI_steel_needed|%0]" }
+	}
+
+	### CHROMIUM
+
+	if = { limit = { check_variable = { resource_produced@chromium > 75 } }
+
+		set_temp_variable = { EAI_chromium_needed = resource_consumed@chromium }
+		if = { limit = { check_variable = { resource@chromium < 0 } }
+
+			set_temp_variable = { chromium_deficit = resource@chromium }
+			multiply_temp_variable = { chromium_deficit = -1 }
+			add_to_temp_variable = { EAI_chromium_needed = chromium_deficit }
+		}
+		divide_temp_variable = { EAI_chromium_needed = resource_produced@chromium }
+		clamp_temp_variable = { var = EAI_chromium_needed min = 0 max = 1 }
+		add_to_variable = { EAI_average_resource_need = EAI_chromium_needed }	
+		add_to_temp_variable = { EAI_resource_count = 1 }
+
+		if = { limit = { has_country_flag = EAI_resources_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCE: chromium needed : extracted = [?EAI_chromium_needed|%0]" }
+	}
+
+	###
+
+	divide_variable = { EAI_average_resource_need = EAI_resource_count }
+
+	if = { limit = { has_country_flag = EAI_resources_logging } log = "[GetYear] [GetMonth] | AI | [Root.GetName] | RESOURCES: average resource need : extracted = [?EAI_average_resource_need|%0]" }
+}
+
+# Estimate max fuel consumption based on its armor, air and navy
+EAI_calculate_fuel_need = {
+
+	### air
+
+	set_temp_variable = { air_force_size = num_deployed_planes }
+
+	multiply_temp_variable = { air_force_size = 1.8 } # fuel consumption estimate
+
+	### land
+
+	set_temp_variable = { armor_size = 0 }
+
+	set_temp_variable = { armor_size = num_battalions_with_type@medium_armor }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@medium_sp_anti_air_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@medium_sp_artillery_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@medium_tank_destroyer_brigade }
+
+	add_to_temp_variable = { armor_size = num_battalions_with_type@heavy_armor }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@heavy_sp_anti_air_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@heavy_sp_artillery_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@heavy_tank_destroyer_brigade }
+
+	add_to_temp_variable = { armor_size = num_battalions_with_type@modern_armor }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@modern_sp_anti_air_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@modern_sp_artillery_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@modern_tank_destroyer_brigade }
+
+	add_to_temp_variable = { armor_size = num_battalions_with_type@light_armor }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@light_sp_anti_air_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@light_sp_artillery_brigade }
+	add_to_temp_variable = { armor_size = num_battalions_with_type@light_tank_destroyer_brigade }
+
+	multiply_temp_variable = { armor_size = 50 } # fuel consumption estimate
+
+	### navy
+
+	set_temp_variable = { navy_size = num_ships }
+
+	multiply_temp_variable = { navy_size = 60 } # fuel consumption estimate
+
+	### total
+
+	set_variable = { EAI_max_fuel_consumption_estimate = air_force_size }
+	add_to_variable = { EAI_max_fuel_consumption_estimate = armor_size }
+	add_to_variable = { EAI_max_fuel_consumption_estimate = navy_size }
+}

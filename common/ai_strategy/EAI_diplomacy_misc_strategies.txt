@@ -1,0 +1,838 @@
+############################################################################################################
+#	Expert AI mod - diplomacy
+############################################################################################################
+
+EAI_operation_countenance = {
+	allowed = { OR = { tag = ENG tag = SOV tag = RAJ } }
+	enable = {
+		has_global_flag = EAI_operation_countenance
+		is_neighbor_of = PER
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = conquer id = "PER" value = 200 }
+	ai_strategy = {
+		type = front_control
+		priority = 10
+		tag = PER
+
+		execution_type = rush
+		execute_order = yes
+	}
+	ai_strategy = {
+		type = front_unit_request
+		tag = PER 				
+		value = 100				
+	}
+}
+
+EAI_operation_countenance_PER = { # Without this, the invasion becomes a clusterfuck of hundreds of thousands of troops instead of a minor operation with 1k casualties
+	allowed = { tag = PER }
+	enable = {
+		has_global_flag = EAI_operation_countenance
+		SOV = { is_ai = yes } # No freebies for players
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = front_unit_request
+		tag = SOV 				
+		value = -200				
+	}
+	ai_strategy = {
+		type = front_unit_request
+		tag = RAJ 				
+		value = -200				
+	}
+}
+
+EAI_PER_dont_join_JAP = {
+	allowed = { tag = PER }
+	enable = {
+		is_historical_focus_on = yes
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = JAP target = join_faction value = -5000 }
+	ai_strategy = { type = diplo_action_acceptance id = JAP target = offer_join_faction value = -5000 }
+}
+
+### Comintern should not give access to allies
+
+EAI_SOV_no_access_to_allies = {
+	enable = {
+		OR = { tag = ENG is_in_faction_with = ENG }
+		has_war_together_with = SOV
+		NOT = { is_in_faction_with = SOV }
+		ENG = { SOV = { NOT = { EAI_PREV_has_same_ideology_with_THIS = yes } } }
+	}
+
+	abort_when_not_enabled = yes
+	
+	reversed = yes
+
+	ai_strategy = { type = diplo_action_desire id = SOV target = offer_military_access value = -2000 }
+	ai_strategy = { type = diplo_action_acceptance id = SOV target = military_access value = -2000 }
+}
+
+EAI_MON_no_access_to_allies = {
+	enable = {
+		OR = { tag = ENG is_in_faction_with = ENG }
+		has_war_together_with = MON
+		NOT = { is_in_faction_with = MON }
+		MON = { is_in_faction_with = SOV }
+		ENG = { SOV = { NOT = { EAI_PREV_has_same_ideology_with_THIS = yes } } }
+	}
+
+	abort_when_not_enabled = yes
+	
+	reversed = yes
+
+	ai_strategy = { type = diplo_action_desire id = MON target = offer_military_access value = -2000 }
+	ai_strategy = { type = diplo_action_acceptance id = MON target = military_access value = -2000 }
+}
+
+EAI_SIK_no_access_to_allies = {
+	enable = {
+		OR = { tag = ENG is_in_faction_with = ENG }
+		has_war_together_with = SIK
+		NOT = { is_in_faction_with = SIK }
+		SIK = { is_in_faction_with = SOV }
+		ENG = { SOV = { NOT = { EAI_PREV_has_same_ideology_with_THIS = yes } } }
+	}
+	
+	abort_when_not_enabled = yes
+	
+	reversed = yes
+
+	ai_strategy = { type = diplo_action_desire id = SIK target = offer_military_access value = -2000 }
+	ai_strategy = { type = diplo_action_acceptance id = SIK target = military_access value = -2000 }
+}
+
+# Ensure a historical alliace between PRC and CHI
+EAI_PRC_CHI_alliance = {
+	allowed = { tag = PRC }
+	enable = {
+		is_historical_focus_on = yes
+		
+		CHI = { 
+			OR = {
+				has_completed_focus = CHI_united_front 
+				focus_progress = { focus = CHI_united_front progress > 0.9 }
+				CHI = { has_war_with = JAP }
+			}
+		}
+		
+		NOT = {
+			AND = {
+				date > 1940.1.1
+			
+				NOT = { CHI = { has_war_with = JAP } }
+			}
+		}
+	}
+	
+	abort_when_not_enabled = yes
+	
+	ai_strategy = { type = diplo_action_desire id = CHI target = join_faction value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = CHI target = offer_join_faction value = 1000 }
+}
+
+### Stop european minors from joining Japan
+
+EAI_GER_minor_allies = {
+	enable = {
+		has_government = fascism
+		is_in_faction = no
+		GER = {
+			has_government = fascism
+		}
+		capital_scope = {
+			is_on_continent = europe
+		}
+	}
+	abort = {
+		GER = {
+			NOT = {
+				has_government = fascism
+			}
+		}
+	}
+
+	ai_strategy = { type = diplo_action_desire id = JAP target = join_faction value = -1000 }
+	ai_strategy = { type = diplo_action_acceptance id = JAP target = offer_join_faction value = -1000 }
+}
+
+EAI_GER_minor_allies_2 = {
+	allowed = { tag = JAP }
+	enable = {
+		has_government = fascism
+	}
+	abort = {
+		NOT = {
+			has_government = fascism
+		}
+	}
+
+	ai_strategy = { type = diplo_action_desire id = ROM target = offer_join_faction value = -1000 }
+	ai_strategy = { type = diplo_action_acceptance id = ROM target = join_faction value = -1000 }
+
+	ai_strategy = { type = diplo_action_desire id = BUL target = offer_join_faction value = -1000 }
+	ai_strategy = { type = diplo_action_acceptance id = BUL target = join_faction value = -1000 }
+
+	ai_strategy = { type = diplo_action_desire id = HUN target = offer_join_faction value = -1000 }
+	ai_strategy = { type = diplo_action_acceptance id = HUN target = join_faction value = -1000 }
+}
+
+### NAP between GER and SOV
+
+EAI_GER_SOV_non_aggression_pact = { 
+	allowed = { tag = GER }
+	enable = {
+		is_historical_focus_on = yes
+
+		date < 1941.1.1
+		
+		GER = { has_government = fascism }
+		SOV = { has_government = communism }
+		
+		GER = { has_completed_focus = GER_mol_rib_pact }
+		
+		NOT = {
+			GER = { has_completed_focus = GER_ussr_war_goal }
+		}
+		
+		NOT = {
+			GER = { has_war_with = SOV }
+			GER = { has_capitulated = yes is_subject = yes }
+			SOV = { has_capitulated = yes is_subject = yes }
+			GER = { is_in_faction_with = SOV }
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = SOV target = non_aggression_pact value = 500 }
+	ai_strategy = { type = diplo_action_acceptance id = SOV target = non_aggression_pact value = 500 }
+}
+EAI_SOV_GER_non_aggression_pact = {
+	allowed = { tag = SOV }
+	enable = {
+		is_historical_focus_on = yes
+
+		date < 1941.1.1
+
+		GER = { has_government = fascism }
+		SOV = { has_government = communism }
+		
+		GER = { has_completed_focus = GER_mol_rib_pact }
+		
+		NOT = {
+			GER = { has_war_with = SOV }
+			GER = { has_capitulated = yes is_subject = yes }
+			SOV = { has_capitulated = yes is_subject = yes }
+			GER = { is_in_faction_with = SOV }
+		}
+
+		if = { limit = { GER = { is_ai = yes } } GER = { NOT = { has_completed_focus = GER_ussr_war_goal } } }
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = non_aggression_pact value = 500 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = non_aggression_pact value = 500 }
+}
+EAI_break_non_aggression_pact = {
+	allowed = { tag = SOV }
+	enable = {
+		is_historical_focus_on = yes
+
+		GER = { EAI_is_threat = yes }
+
+		GER = { is_ai = yes }
+
+		GER = { has_completed_focus = GER_ussr_war_goal }
+
+		has_non_aggression_pact_with = GER
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = non_aggression_pact value = -1000 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = non_aggression_pact value = -1000 }
+}
+
+### NAP between JAP and comintern
+
+EAI_JAP_SOV_non_aggression_pact = {
+	allowed = {
+		OR = {
+			tag = JAP
+			tag = MEN
+			tag = MAN
+			tag = CHI
+		}
+	}
+	enable = {
+		is_historical_focus_on = yes
+
+		OR = {
+			tag = JAP
+			is_in_faction_with = JAP
+			is_subject_of = JAP
+		}
+		
+		JAP = { has_government = fascism }
+		SOV = { has_government = communism }
+
+		JAP = { has_completed_focus = JAP_non_aggression_pact_with_the_soviet_union }
+
+		NOT = {
+			JAP = { has_war_with = SOV }
+			JAP = { has_capitulated = yes is_subject = yes }
+			SOV = { has_capitulated = yes is_subject = yes }
+			JAP = { is_in_faction_with = SOV }
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = SOV target = non_aggression_pact value = 1000 }
+	ai_strategy = { type = diplo_action_desire id = MON target = non_aggression_pact value = 1000 }
+	ai_strategy = { type = diplo_action_desire id = SIK target = non_aggression_pact value = 1000 }
+}
+
+EAI_JAP_SOV_non_aggression_pact_2 = { 
+	allowed = {
+		OR = {
+			tag = SOV
+			tag = MON
+			tag = SIK
+		}
+	}
+	enable = {
+		is_historical_focus_on = yes
+
+		OR = {
+			tag = SOV
+			is_in_faction_with = SOV
+			is_subject_of = SOV
+		}
+		
+		JAP = { has_government = fascism }
+		SOV = { has_government = communism }
+
+		JAP = { has_completed_focus = JAP_non_aggression_pact_with_the_soviet_union }
+
+		NOT = {
+			JAP = { has_war_with = SOV }
+			JAP = { has_capitulated = yes is_subject = yes }
+			SOV = { has_capitulated = yes is_subject = yes }
+			JAP = { is_in_faction_with = SOV }
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_acceptance id = JAP target = non_aggression_pact value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = MAN target = non_aggression_pact value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = MEN target = non_aggression_pact value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = CHI target = non_aggression_pact value = 1000 }
+}
+
+### neutral countries join axis/allies
+
+# stay neutral
+EAI_neutral_south_america = {
+	enable = {
+		is_historical_focus_on = yes
+	
+		capital_scope = { is_on_continent = south_america }
+
+		NOT = {
+			is_in_faction = yes
+			has_war = yes
+		}
+
+		NOT = {
+			has_country_flag = EAI_neutral_joins_allies
+			has_country_flag = EAI_neutral_joins_axis
+		}
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = ENG target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = ENG target = offer_join_faction value = -500 }
+
+	ai_strategy = { type = diplo_action_desire id = USA target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = USA target = offer_join_faction value = -500 }
+
+	ai_strategy = { type = diplo_action_desire id = GER target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = -500 }
+
+	ai_strategy = { type = diplo_action_desire id = JAP target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = JAP target = offer_join_faction value = -500 }
+
+	ai_strategy = { type = diplo_action_desire id = SOV target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = SOV target = offer_join_faction value = -500 }
+}
+
+EAI_south_america_troops = {
+	enable = { 
+		is_historical_focus_on = yes 
+		capital_scope = { OR = { is_on_continent = south_america is_on_continent = north_america } } 
+		NOT = { original_tag = CAN original_tag = USA }
+		is_in_faction_with = USA
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = area_priority id = scandinavia value = -200 }
+	ai_strategy = { type = area_priority id = europe value = -200 }
+	ai_strategy = { type = area_priority id = africa value = -200 }
+	ai_strategy = { type = area_priority id = asia value = -200 }
+	ai_strategy = { type = area_priority id = middle_east value = -200 }
+	ai_strategy = { type = area_priority id = pacific value = -200 }
+	ai_strategy = { type = area_priority id = oceania value = -200 }
+}
+
+# join allies
+EAI_neutral_joins_allies = {
+	enable = {
+		is_historical_focus_on = yes
+
+		has_country_flag = EAI_neutral_joins_allies
+
+		NOT = { is_in_faction_with = ENG is_in_faction_with = USA }
+
+		OR = { has_government = neutrality has_government = democratic }
+
+		OR = {
+			ENG = { is_faction_leader = yes any_enemy_country = { is_major = yes } }
+			USA = { is_faction_leader = yes any_enemy_country = { is_major = yes } }
+		}
+
+		threat > 0.99
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_acceptance id = ENG target = offer_join_faction value = 700 }
+	ai_strategy = { type = diplo_action_acceptance id = USA target = offer_join_faction value = 700 }
+}
+EAI_neutral_joins_allies_2 = {
+	enable_reverse = {
+		is_faction_leader = yes
+	}
+
+	enable = {
+		is_historical_focus_on = yes
+
+		has_country_flag = EAI_neutral_joins_allies
+
+		NOT = { is_in_faction_with = ENG is_in_faction_with = USA }
+
+		OR = { has_government = neutrality has_government = democratic }
+
+		OR = {
+			ENG = { is_faction_leader = yes any_enemy_country = { is_major = yes } }
+			USA = { is_faction_leader = yes any_enemy_country = { is_major = yes } }
+		}
+
+		threat > 0.99
+	}
+
+	abort_when_not_enabled = yes
+
+	reversed = yes
+
+	ai_strategy = { type = diplo_action_desire id = ENG target = offer_join_faction value = 700 }
+	ai_strategy = { type = diplo_action_desire id = USA target = offer_join_faction value = 700 }
+}
+
+# join axis
+EAI_neutral_joins_axis = {
+	enable = {
+		is_historical_focus_on = yes
+
+		has_country_flag = EAI_neutral_joins_axis
+
+		NOT = { is_in_faction_with = GER }
+
+		has_government = fascism
+
+		GER = { 
+			has_war = yes 
+			surrender_progress < 0.1 
+			any_enemy_country = { is_major = yes }
+		}
+
+		threat > 0.99
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = 700 }
+}
+EAI_neutral_joins_axis_2 = {
+	enable = {
+		is_historical_focus_on = yes
+
+		has_country_flag = EAI_neutral_joins_axis
+
+		NOT = { is_in_faction_with = GER }
+
+		has_government = fascism
+
+		GER = { has_war = yes }
+
+		threat > 0.99
+	}
+
+	abort_when_not_enabled = yes
+
+	reversed = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = offer_join_faction value = 700 }
+}
+
+###
+
+# iceland joins allies
+EAI_ICE_joins_allies = {
+	allowed = { 
+		OR = {
+			tag = ENG
+			tag = ICE
+		}
+	}
+	enable = {
+		is_historical_focus_on = yes
+	
+		NOT = { ICE = { is_in_faction_with = ENG } }
+		
+		ENG = { ICE = { EAI_PREV_has_same_ideology_with_THIS = yes } }
+
+		ENG = { any_enemy_country = { is_major = yes } }
+
+		date > 1940.5.1
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = ICE target = offer_join_faction value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = ENG target = offer_join_faction value = 1000 }
+}
+
+# finland joins axis
+EAI_stay_out_of_axis_FIN = {
+	allowed = { tag = FIN }
+	enable = {
+		is_historical_focus_on = yes
+
+		NOT = { GER = { FIN = { EAI_PREV_has_same_ideology_with_THIS = yes } } }
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = join_faction value = -5000 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = -5000 }
+}
+EAI_join_axis_FIN = {
+	allowed = { tag = FIN }
+	enable = {
+		has_war_together_with = GER
+		has_war_with = SOV
+		NOT = { is_in_faction = yes }
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = join_faction value = 10000 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = 10000 }
+}
+EAI_dont_join_JAP_FIN = {
+	allowed = { tag = FIN }
+	enable = {
+		is_historical_focus_on = yes
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = JAP target = join_faction value = -5000 }
+	ai_strategy = { type = diplo_action_acceptance id = JAP target = offer_join_faction value = -5000 }
+}
+EAI_continuation_war_prep = {
+	allowed = { tag = FIN }
+	enable = {
+		is_historical_focus_on = yes
+
+		GER = { has_country_flag = EAI_FIN_joins_war_on_SOV }
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = conquer id = "SOV" value = 200 }
+
+	ai_strategy = {
+		type = front_unit_request
+		tag = GER
+		value = -200
+	}
+}
+EAI_hold_vs_SOV = {
+	allowed = { tag = FIN }
+	enable = {
+		is_historical_focus_on = yes
+
+		OR = {
+			has_war_with = SOV
+
+			GER = { has_country_flag = EAI_FIN_joins_war_on_SOV }
+		}
+
+		has_army_manpower = { size < 300000 }
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = front_control
+		tag = SOV
+		execute_order = no
+	}
+}
+
+### ROM HUN BUL join axis
+
+EAI_ROM_joins_axis_0 = {
+	allowed = { tag = ROM }
+	enable = {
+		is_historical_focus_on = yes
+
+		NOT = { 
+			ROM = { is_in_faction = yes }
+			ROM = { has_war_together_with = GER }
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = -500 }
+}
+EAI_ROM_joins_axis_1 = {
+	allowed = { 
+		OR = { 
+			tag = ROM 
+			tag = GER 
+		} 
+	}
+	enable = {
+		is_historical_focus_on = yes
+
+		OR = { tag = ROM AND = { ROM = { is_ai = yes } tag = GER } }
+
+		NOT = { ROM = { is_in_faction_with = GER } }
+		
+		if = { limit = { has_dlc = "Death or Dishonor" }
+		
+			OR = {
+				ROM = { has_completed_focus = ROM_join_axis }
+				GER = { has_completed_focus = GER_align_romania }
+			}
+		}
+		else = {
+			date > 1940.9.1
+		}
+
+		ROM = { GER = { EAI_PREV_has_same_ideology_with_THIS = yes } }
+
+		ROM = { NOT = { EAI_is_not_independent = yes } }
+				
+		GER = { NOT = { EAI_is_not_independent = yes } }
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = ROM target = offer_join_faction value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = 1000 }
+}
+
+EAI_HUN_joins_axis_0 = {
+	allowed = { tag = HUN }
+	enable = {
+		is_historical_focus_on = yes
+
+		NOT = { 
+			HUN = { is_in_faction = yes }
+			HUN = { has_war_together_with = GER }
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = -500 }
+}
+EAI_HUN_joins_axis_1 = {
+	allowed = { 
+		OR = { 
+			tag = HUN 
+			tag = GER 
+		} 
+	}
+	enable = {
+		is_historical_focus_on = yes
+	
+		OR = { tag = HUN AND = { HUN = { is_ai = yes } tag = GER } }
+
+		NOT = { HUN = { is_in_faction_with = GER } }
+		
+		if = { limit = { has_dlc = "Death or Dishonor" }
+		
+			OR = {
+				HUN = { has_completed_focus = HUN_join_axis }
+				GER = { has_completed_focus = GER_align_hungary }
+			}
+		}
+		else = {
+			date > 1940.9.1
+		}
+
+		HUN = { GER = { EAI_PREV_has_same_ideology_with_THIS = yes } }
+
+		HUN = { NOT = { EAI_is_not_independent = yes } }
+				
+		GER = { NOT = { EAI_is_not_independent = yes } }
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = HUN target = offer_join_faction value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = 1000 }
+}
+
+EAI_BUL_joins_axis_0 = {
+	allowed = { tag = BUL }
+	enable = {
+		is_historical_focus_on = yes
+
+		NOT = { 
+			BUL = { is_in_faction = yes }
+			BUL = { has_war_together_with = GER }
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = join_faction value = -500 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = -500 }
+}
+EAI_BUL_joins_axis_1 = {
+	allowed = { 
+		OR = { 
+			tag = BUL 
+			tag = GER 
+		} 
+	}
+	enable = {
+		is_historical_focus_on = yes
+
+		OR = { tag = BUL AND = { BUL = { is_ai = yes } tag = GER } }
+
+		NOT = { BUL = { is_in_faction_with = GER } }
+		
+		BUL = {
+			any_neighbor_country = {
+				is_in_faction_with = GER
+				has_war = yes
+			}
+		}
+
+		if = { limit = { has_dlc = "Battle for the Bosporus" }
+		
+			BUL = { has_completed_focus = BUL_join_the_tripartite_pact }
+		}
+		else = {
+			BUL = { GER = { EAI_PREV_has_same_ideology_with_THIS = yes } }
+		}
+
+		BUL = { NOT = { EAI_is_not_independent = yes } }
+				
+		GER = { NOT = { EAI_is_not_independent = yes } }
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = BUL target = offer_join_faction value = 1000 }
+	ai_strategy = { type = diplo_action_acceptance id = GER target = offer_join_faction value = 1000 }
+}
+EAI_BUL_befriend_GER = {
+	allowed = { 
+		tag = BUL 
+	}
+	enable = {
+		is_historical_focus_on = yes
+
+		country_exists = GER
+
+		OR = {
+			has_government = neutrality
+			has_government = fascism
+		}
+
+		focus_progress = {
+			focus = BUL_bulgarian_irredentism
+			progress > 0.1
+		}
+
+		NOT = {
+			GER = {
+				has_opinion	= {
+					target = ROOT
+					value > 40
+				}
+			}
+		}
+
+		GER = {
+			has_war = yes
+			is_major = yes
+			is_faction_leader = yes
+			NOT = { POL = { EAI_THIS_is_threat_to_PREV = yes } }
+			NOT = { FRA = { EAI_THIS_is_threat_to_PREV = yes } }
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = diplo_action_desire id = GER target = improve_relation value = 20000 }
+}
+
+###
+
+EAI_BUL_stop_doing_crazy_things = {
+	allowed = { tag = BUL }
+	enable = { is_historical_focus_on = yes }
+
+	ai_strategy = { type = ignore     	id = "GRE"     value = 1000 }
+	ai_strategy = { type = ignore     	id = "YUG"     value = 1000 }
+	ai_strategy = { type = ignore     	id = "ROM"     value = 1000 }
+	ai_strategy = { type = ignore     	id = "TUR"     value = 1000 }
+	
+	ai_strategy = { type = alliance     id = "JAP"     value = -1000 }
+}
+
+EAI_ROM_ignore_BUL = {
+	allowed = { tag = ROM }
+	enable = { 
+		original_tag = ROM
+		is_historical_focus_on = yes
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = { type = ignore_claim id = "BUL" value = 1 }
+	ai_strategy = { type = ignore     	id = "BUL" value = 1000 }
+}

@@ -1,0 +1,1794 @@
+######################################################
+#	Expert AI mod - scripted law AI triggers
+######################################################
+
+EAI_law_upgrade_special_prio = {
+
+	if = { limit = { has_focus_tree = soviet_focus has_completed_focus = SOV_the_centre }
+
+		has_completed_focus = SOV_secure_the_administration
+	}
+	else = { always = yes }
+}
+
+# Store PP if true
+EAI_store_pp_prio = {
+
+	NOT = {
+
+		AND = {
+			tag = SPR
+			is_historical_focus_on = yes
+			has_civil_war = no
+			date < 1937.1.1
+		}
+
+		AND = {
+			date < 1938.1.1
+			has_available_idea_with_traits = { idea = silent_workhorse limit = 1 }
+			NOT = { has_idea_with_trait = silent_workhorse }
+		}
+	}
+
+	### Law cost reduction
+	
+	if = { limit = { has_focus_tree = soviet_focus has_completed_focus = SOV_the_centre has_country_flag = EAI_improved_worker_conditions_taken }
+
+		OR = {
+			has_completed_focus = SOV_secure_the_administration
+			focus_progress = { focus = SOV_secure_the_administration progress > 0 }
+		}
+	}
+	else = { always = yes }
+
+	### SOV really needs to get these done
+
+	if = {
+		limit = {
+			has_focus_tree = soviet_focus
+			has_completed_focus = SOV_claims_in_baltic
+			is_historical_focus_on = yes
+			is_subject = no
+			date > 1940.4.1
+			date < 1941.1.1
+			has_political_power < 100
+		}
+
+		NOT = {
+			any_country =  {
+				OR = { tag = EST tag = LAT tag = LIT }
+
+				NOT = { has_war_with = ROOT }
+
+				# SOV_basic_ultimatum_triggers
+				country_exists = THIS
+				NOT = { has_war_with = ROOT }
+				NOT = { is_in_faction_with = ROOT } #CAN'T SEND ULTIMATUMS TO ALLIES OR SUBJECTS
+				#OR = { #Can send Ultimatum to non-allies or puppets (but not to faction allies)
+				#	NOT = { is_in_faction_with = ROOT }
+				#	is_Subject_of = ROOT
+				#}
+				NOT = { has_country_flag = SOV_ultimatum_sent_flag }
+			}
+		}
+	}
+}
+
+EAI_super_extra_special_pp_prio = {
+
+	OR = {
+		AND = {
+			tag = SOV
+			date < 1937.1.1
+			NOT = { has_idea = war_economy }
+		}
+		AND = {
+			tag = GER
+			date < 1937.1.1
+			NOT = { has_idea = war_economy }
+		}
+	}
+}
+
+###
+
+EAI_can_upgrade_economy_law = {
+
+	if = { limit = { EAI_ALLOWED_TO_REMOVE_economy_law = yes }
+
+		OR = {
+			EAI_can_take_civilian_economy = yes
+			EAI_can_take_low_economic_mobilisation = yes
+			EAI_can_take_partial_economic_mobilisation = yes
+			EAI_can_take_war_economy = yes
+			EAI_can_take_tot_economic_mobilisation = yes
+		}
+	}
+}
+
+EAI_can_upgrade_manpower_law = {
+
+	if = { limit = { EAI_ALLOWED_TO_REMOVE_conscription_law = yes }
+
+		if = { limit = { has_idea = disarmed_nation } EAI_can_take_volunteer_only = yes }
+		else_if = { limit = { has_idea = volunteer_only } EAI_can_take_limited_conscription = yes }
+		else_if = { limit = { has_idea = limited_conscription } EAI_can_take_extensive_conscription = yes }
+		else_if = { limit = { has_idea = extensive_conscription } EAI_can_take_service_by_requirement = yes }
+		else_if = { limit = { has_idea = service_by_requirement } EAI_can_take_all_adults_serve = yes }
+		else_if = { limit = { has_idea = all_adults_serve } EAI_can_take_scraping_the_barrel = yes }
+	}
+}
+
+EAI_can_upgrade_trade_law = {
+
+	if = { limit = { EAI_ALLOWED_TO_REMOVE_trade_law = yes }
+
+		OR = {
+			EAI_can_take_free_trade = yes
+			EAI_can_take_export_focus = yes
+			EAI_can_take_limited_exports = yes
+			EAI_can_take_closed_economy = yes
+		}
+	}
+}
+
+##############################################################################
+### 	Economy laws
+##############################################################################
+
+### Laws
+
+EAI_can_take_civilian_economy = {
+
+	### Downgrade due to crisis event
+
+	EAI_stability_event_trigger = yes
+
+	OR = {
+		has_idea = low_economic_mobilisation
+		has_idea = partial_economic_mobilisation
+		has_idea = war_economy
+		has_idea = tot_economic_mobilisation
+	}
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_civilian_economy = yes
+}
+
+EAI_can_take_low_economic_mobilisation = {
+
+	# Only worth taking early
+	date < 1938.1.1
+
+	# Special cases
+	if = { limit = { tag = SOV }
+
+		always = no
+	}
+
+	if = { limit = { original_tag = ENG }
+
+		date > 1941.1.1
+	}
+
+	# Priorities over other economy laws
+	NOT = {
+		EAI_can_take_partial_economic_mobilisation = yes
+		EAI_can_take_war_economy = yes
+		EAI_can_take_tot_economic_mobilisation = yes
+		has_idea = partial_economic_mobilisation
+		has_idea = war_economy
+		has_idea = tot_economic_mobilisation
+	}
+
+	# Avoid triggering draft events
+	NOT = { EAI_stability_event_trigger = yes }
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_low_economic_mobilisation = yes
+}
+
+EAI_can_take_partial_economic_mobilisation = {
+
+	# Special cases
+	if = { limit = { original_tag = SOV }
+
+		date > 1937.6.1 # Try to get war eco with an attache
+	}
+
+	if = { limit = { original_tag = JAP is_historical_focus_on = yes }
+
+		has_completed_focus = JAP_national_defense_state
+	}
+
+	# Priorities over other economy laws
+	NOT = {
+		EAI_can_take_war_economy = yes
+		EAI_can_take_tot_economic_mobilisation = yes
+		has_idea = war_economy
+		has_idea = tot_economic_mobilisation
+	}
+
+	# Avoid triggering draft events
+	NOT = { EAI_stability_event_trigger = yes }
+
+	# Need extra war support to reduce chance of draft events
+	has_war_support > 0.25
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_partial_economic_mobilisation = yes
+}
+
+EAI_can_take_war_economy = {
+
+	# Special cases
+	if = { limit = { original_tag = JAP is_historical_focus_on = yes }
+
+		has_completed_focus = JAP_national_defense_state
+	}
+
+	# Downgrade for manpower
+	if = { limit = { has_idea = tot_economic_mobilisation }
+
+		# Doesn't have women in the workforce
+		NOT = { has_country_flag = EAI_women_in_the_workforce_taken }
+
+		# Cant upgrade conscription instead
+		NOT = { EAI_can_upgrade_manpower_law = yes }
+		
+		# Get Mobile Warfare tech before upgrading to this
+		if = { limit = { has_tech = kampfgruppe }
+
+			has_tech = nd_conscription
+		}
+
+		# Not currently conscripting more manpower
+		NOT = { conscription_ratio < 0.99 }
+
+		# Manpower level
+		OR = {
+			check_variable = { EAI_reserve_mp_ratio < 0.05 }
+			has_manpower < 50000
+
+			### Special cases
+		}
+
+		# Only downgrade if women in the worforce cannot be taken
+		NOT = {
+			AND = {
+				# Decision requirements
+				has_war = yes
+				# has_idea = tot_economic_mobilisation
+				OR = {
+					AND = {
+						has_government = democratic
+						has_war_support > 0.79
+					}
+					AND = {
+						has_government = communism
+						has_war_support > 0.79
+					}
+					AND = {
+						has_government = fascism
+						OR = {
+							has_war_support > 0.89
+							surrender_progress > 0
+						}
+					}
+					AND = {
+						has_government = neutrality
+						has_war_support > 0.84
+						has_stability > 0.7
+					}
+				}
+			}
+		}
+	}
+
+	# Priorities over other economy laws
+	NOT = {
+		EAI_can_take_tot_economic_mobilisation = yes
+	}
+
+	# Avoid triggering draft events
+	if = { limit = { NOT = { has_idea = tot_economic_mobilisation } }
+
+		NOT = { EAI_stability_event_trigger = yes }
+	}
+
+	# Need extra war support to reduce chance of draft events
+	if = { limit = { NOT = { has_idea = tot_economic_mobilisation } }
+
+		has_war_support > 0.25
+	}
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_war_economy = yes
+}
+
+EAI_can_take_tot_economic_mobilisation = {
+
+	# Special cases
+	if = { limit = { original_tag = JAP is_historical_focus_on = yes }
+
+		has_completed_focus = JAP_national_defense_state
+	}
+
+	# Conscription law level
+	OR = {
+		has_idea = limited_conscription
+		has_idea = extensive_conscription
+		has_idea = service_by_requirement
+		has_idea = all_adults_serve
+		has_idea = scraping_the_barrel
+	}
+
+	# Upgrade only when
+	OR = {
+		# Manpower level
+		check_variable = { EAI_reserve_mp_ratio > 0.75 }
+
+		# Women in the workforce can be taken
+		AND = {
+			NOT = { has_country_flag = EAI_women_in_the_workforce_taken }
+
+			# Decision requirements
+			has_war = yes
+			# has_idea = tot_economic_mobilisation
+			OR = {
+				AND = {
+					has_government = democratic
+					has_war_support > 0.79
+				}
+				AND = {
+					has_government = communism
+					has_war_support > 0.79
+				}
+				AND = {
+					has_government = fascism
+					OR = {
+						has_war_support > 0.89
+						surrender_progress > 0
+					}
+				}
+				AND = {
+					has_government = neutrality
+					has_war_support > 0.84
+					has_stability > 0.7
+				}
+			}
+		}
+	}
+
+	# Avoid triggering draft events
+	NOT = { EAI_stability_event_trigger = yes }
+
+	# Need extra stability to reduce chance of draft events
+	has_stability > 0.5
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_tot_economic_mobilisation = yes
+}
+
+### Law requirements from game
+
+EAI_ALLOWED_TO_REMOVE_economy_law = {
+
+	if = { limit = { has_idea = undisturbed_isolation }
+
+		OR = {
+			has_war_support > 0.5
+			has_war = yes
+			has_completed_focus = USA_limited_intervention
+		}
+	}
+
+	if = { limit = { has_idea = undisturbed_isolation }
+
+		OR = {
+			has_war_support > 0.75
+			has_war = yes
+			has_completed_focus = USA_limited_intervention
+		}
+	}
+
+	if = { limit = { has_idea = new_economic_policy }
+
+		OR = {
+			surrender_progress > 0.75
+			NOT = { has_government = communism }
+		}
+	}
+
+	if = { limit = { has_idea = new_economic_policy_2 }
+
+		OR = {
+			surrender_progress > 0.75
+			NOT = { has_government = communism }
+		}
+	}
+}
+
+EAI_LAW_AVAILABLE_civilian_economy = {
+
+	NOT = { has_idea = civilian_economy }
+
+	### copy from idea file
+}
+
+EAI_LAW_AVAILABLE_low_economic_mobilisation = {
+
+	NOT = { has_idea = low_economic_mobilisation }
+
+	### copy from idea file
+	
+	has_war_support > 0.15
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			has_completed_focus = USA_limited_intervention
+			has_defensive_war = no
+		}
+		has_war_support > 0.3
+		congress_high_support_trigger = yes
+	}
+}
+
+EAI_LAW_AVAILABLE_partial_economic_mobilisation = {
+
+	NOT = { has_idea = partial_economic_mobilisation }
+
+	### copy from idea file
+	
+	has_war_support > 0.25
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		OR = {
+			has_completed_focus = HUN_secret_rearmament
+			NOT = { has_idea = HUN_treaty_of_triannon }
+		}
+	}
+	if = {
+		limit = {
+			has_completed_focus = USA_limited_intervention
+			has_defensive_war = no
+		}
+		has_war_support > 0.5
+		congress_high_support_trigger = yes
+	}
+}
+
+EAI_LAW_AVAILABLE_war_economy = {
+
+	NOT = { has_idea = war_economy }
+
+	### copy from idea file
+	
+	has_war_support > 0.5
+	OR = {
+		has_government = fascism
+		has_government = communism
+		custom_trigger_tooltip = { tooltip = or_clarification_tooltip always = no }
+		AND = {
+			has_war = yes
+			any_enemy_country = {
+				ic_ratio = { 
+					tag = ROOT 
+					ratio > 0.4
+				}
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			has_completed_focus = USA_limited_intervention
+			has_defensive_war = no
+		}
+		has_war_support > 0.75
+		congress_high_support_trigger = yes
+	}	
+}
+
+EAI_LAW_AVAILABLE_tot_economic_mobilisation = {
+
+	NOT = { has_idea = tot_economic_mobilisation }
+
+	### copy from idea file
+	
+	has_war = yes
+	has_war_support > 0.8
+	any_enemy_country = {
+		ic_ratio = { 
+			tag = ROOT 
+			ratio > 0.5
+		}
+	}
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			has_completed_focus = USA_limited_intervention
+			has_defensive_war = no
+		}
+		has_war_support > 0.9
+		congress_high_support_trigger = yes
+	}
+}
+
+##############################################################################
+### 	Conscription laws
+##############################################################################
+
+### Laws
+
+EAI_can_take_volunteer_only = {
+
+	OR = {
+
+		### Upgrade conditions
+
+		AND = {
+			has_idea = disarmed_nation
+
+			# Manpower level
+			OR = {
+				check_variable = { EAI_reserve_mp_ratio < 0.50 }
+				has_manpower < 50000
+			}
+
+			# Not currently conscripting more manpower
+			NOT = { conscription_ratio < 0.99 }
+
+			# Other PP use priorities
+			EAI_store_pp_prio = yes
+		}
+	}
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_volunteer_only = yes
+}
+
+EAI_can_take_limited_conscription = {
+
+	has_idea = volunteer_only
+
+	# Manpower level
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio < 0.50 }
+		has_manpower < 50000
+
+		### Special cases
+
+		AND = {
+			original_tag = SOV
+			date > 1939.1.1
+			has_manpower < 1500000
+		}
+	}
+
+	# Not currently conscripting more manpower
+	NOT = { conscription_ratio < 0.99 }
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	# Avoid triggering draft events
+	OR = {
+		NOT = { EAI_stability_event_trigger = yes }
+		
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.75
+				check_variable = { EAI_reserve_mp_ratio < 0.01 }
+			}
+		}
+	}
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_limited_conscription = yes
+}
+
+EAI_can_take_extensive_conscription = {
+
+	has_idea = limited_conscription
+
+	# Manpower level
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio < 0.50 }
+		has_manpower < 50000
+
+		### Special cases
+
+		AND = {
+			original_tag = SOV
+			has_manpower < 1500000
+		}
+
+		AND = {
+			original_tag = JAP
+			has_manpower < 2000000
+			date < 1941.1.1
+		}
+	}
+
+	# Not currently conscripting more manpower
+	NOT = { conscription_ratio < 0.99 }
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	# Avoid triggering draft events
+	OR = {
+		NOT = { EAI_stability_event_trigger = yes }
+		
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.75
+				check_variable = { EAI_reserve_mp_ratio < 0.01 }
+			}
+		}
+	}
+
+	# Need extra war support to reduce chance of draft events
+	OR = {
+		has_war_support > 0.60
+
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.25
+				check_variable = { EAI_reserve_mp_ratio < 0.03 }
+			}
+		}
+	}
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_extensive_conscription = yes
+}
+
+EAI_can_take_service_by_requirement = {
+
+	has_idea = extensive_conscription
+
+	# Manpower level
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio < 0.30 }
+		has_manpower < 50000
+
+		### Special cases
+	}
+
+	# Not currently conscripting more manpower
+	NOT = { conscription_ratio < 0.99 }
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	# Avoid triggering draft events
+	OR = {
+		NOT = { EAI_stability_event_trigger = yes }
+		
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.75
+				check_variable = { EAI_reserve_mp_ratio < 0.01 }
+			}
+		}
+	}
+
+	# Need extra war support to reduce chance of draft events
+	OR = {
+		has_war_support > 0.60
+
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.25
+				check_variable = { EAI_reserve_mp_ratio < 0.03 }
+			}
+		}
+	}
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_service_by_requirement = yes
+}
+
+EAI_can_take_all_adults_serve = {
+
+	has_idea = service_by_requirement
+
+	# Manpower level
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio < 0.05 }
+		has_manpower < 50000
+
+		### Special cases
+	}
+
+	# Not currently conscripting more manpower
+	NOT = { conscription_ratio < 0.99 }
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	# Avoid triggering draft events
+	OR = {
+		NOT = { EAI_stability_event_trigger = yes }
+		
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.75
+				check_variable = { EAI_reserve_mp_ratio < 0.01 }
+			}
+		}
+	}
+
+	# Need extra war support to reduce chance of draft events
+	OR = {
+		has_war_support > 0.60
+
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.25
+				check_variable = { EAI_reserve_mp_ratio < 0.03 }
+			}
+		}
+	}
+
+	# Get Mobile Warfare tech before upgrading to this
+	if = { limit = { has_tech = kampfgruppe }
+
+		has_tech = nd_conscription
+	}
+
+	# If it has tot mobilisation and it cant get women in the workforce, downgrade to war eco first
+	if = { limit = { has_idea = tot_economic_mobilisation }
+
+		OR = {
+			has_country_flag = EAI_women_in_the_workforce_taken
+
+			NOT = {
+				# Decision requirements
+				has_war = yes
+				# has_idea = tot_economic_mobilisation
+				OR = {
+					AND = {
+						has_government = democratic
+						has_war_support > 0.79
+					}
+					AND = {
+						has_government = communism
+						has_war_support > 0.79
+					}
+					AND = {
+						has_government = fascism
+						OR = {
+							has_war_support > 0.89
+							surrender_progress > 0
+						}
+					}
+					AND = {
+						has_government = neutrality
+						has_war_support > 0.84
+						has_stability > 0.7
+					}
+				}
+			}
+		}
+	}
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_all_adults_serve = yes
+}
+
+EAI_can_take_scraping_the_barrel = {
+
+	has_idea = all_adults_serve
+
+	# Manpower level
+	OR = {
+		check_variable = { EAI_reserve_mp_ratio < 0.10 }
+		has_manpower < 10000
+
+		### Special cases
+	}
+
+	# Not currently conscripting more manpower
+	NOT = { conscription_ratio < 0.99 }
+
+	# Doesn't have manpower locked up in the queue
+	amount_manpower_in_deployment_queue < 50000
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	# Avoid triggering draft events
+	OR = {
+		NOT = { EAI_stability_event_trigger = yes }
+		
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.75
+				check_variable = { EAI_reserve_mp_ratio < 0.01 }
+			}
+		}
+	}
+
+	# Need extra war support to reduce chance of draft events
+	OR = {
+		has_war_support > 0.60
+
+		AND = {
+			has_capitulated = no
+			
+			OR = {
+				surrender_progress > 0.25
+				check_variable = { EAI_reserve_mp_ratio < 0.03 }
+			}
+		}
+	}
+
+	# Get Mobile Warfare tech before upgrading to this
+	if = { limit = { has_tech = kampfgruppe }
+
+		has_tech = nd_conscription
+	}
+
+	# If it has tot mobilisation and it cant get women in the workforce, downgrade to war eco first
+	if = { limit = { has_idea = tot_economic_mobilisation }
+
+		OR = {
+			has_country_flag = EAI_women_in_the_workforce_taken
+
+			NOT = {
+				# Decision requirements
+				has_war = yes
+				# has_idea = tot_economic_mobilisation
+				OR = {
+					AND = {
+						has_government = democratic
+						has_war_support > 0.79
+					}
+					AND = {
+						has_government = communism
+						has_war_support > 0.79
+					}
+					AND = {
+						has_government = fascism
+						OR = {
+							has_war_support > 0.89
+							surrender_progress > 0
+						}
+					}
+					AND = {
+						has_government = neutrality
+						has_war_support > 0.84
+						has_stability > 0.7
+					}
+				}
+			}
+		}
+	}
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_scraping_the_barrel = yes
+}
+
+### Decisions
+
+EAI_can_take_women_in_the_workforce = {
+
+	if = { limit = { has_idea = tot_economic_mobilisation NOT = { has_country_flag = EAI_women_in_the_workforce_taken } }
+
+		# requirements for this decision
+		NOT = { has_country_flag = EAI_women_in_the_workforce_taken }
+		has_war = yes
+		has_idea = tot_economic_mobilisation
+		OR = {
+			AND = {
+				has_government = democratic
+				has_war_support > 0.79
+			}
+			AND = {
+				has_government = communism
+				has_war_support > 0.79
+			}
+			AND = {
+				has_government = fascism
+				OR = {
+					has_war_support > 0.89
+					surrender_progress > 0
+				}
+			}
+			AND = {
+				has_government = neutrality
+				has_war_support > 0.84
+				has_stability > 0.7
+			}
+		}
+	}
+	else = { always = no }
+}
+
+### Law requirements from game
+
+EAI_ALLOWED_TO_REMOVE_conscription_law = {
+
+	if = { limit = { has_idea = ETH_chitet_law }
+
+		always = no
+	}
+
+	if = { limit = { has_idea = ETH_chitet_law_peace_time }
+
+		always = no
+	}
+
+	if = { limit = { has_idea = SWI_citizen_militia_1 }
+
+		has_completed_focus = SWI_professionalize_militias
+		has_completed_focus = SWI_join_the_allies
+		has_completed_focus = SWI_join_france
+		has_completed_focus = SWI_jump_into_action
+	}
+
+	if = { limit = { has_idea = SWI_citizen_militia_2 }
+
+		has_completed_focus = SWI_professionalize_militias
+		has_completed_focus = SWI_join_the_allies
+		has_completed_focus = SWI_join_france
+		has_completed_focus = SWI_jump_into_action
+	}
+}
+
+EAI_LAW_AVAILABLE_volunteer_only = {
+
+	NOT = { has_idea = volunteer_only }
+
+	NOT = { has_idea = undisturbed_isolation has_idea = isolation }
+
+	### copy from idea file
+	
+	#has_manpower_for_recruit_change_to =  { value = 0.015 group = mobilization_laws }
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	NOT = { has_idea = undisturbed_isolation }
+	NOT = { has_idea = isolation }
+}
+
+EAI_LAW_AVAILABLE_limited_conscription = {
+
+	NOT = { has_idea = limited_conscription }
+
+	### copy from idea file
+	
+	#has_manpower_for_recruit_change_to =  { value = 0.025 group = mobilization_laws }
+	has_war_support > 0.1
+	NOT = { has_idea = undisturbed_isolation }
+	NOT = { has_idea = isolation }
+	if = {
+		limit = {
+			original_tag = AST
+			has_dlc = "Together for Victory"
+		}
+		has_completed_focus = AST_citizen_military_forces
+	}
+	if = {
+		limit = {
+			original_tag = CAN
+			has_dlc = "Together for Victory"
+		}
+		has_completed_focus = CAN_commit_to_the_war
+	}
+	if = {
+		limit = {
+			original_tag = RAJ
+			has_dlc = "Together for Victory"
+		}
+		is_subject = no
+	}
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			original_tag = ENG
+			has_dlc = "Man the Guns"
+			has_completed_focus = ENG_concessions_to_the_trade_unions
+		}
+		NOT = { has_country_flag = ENG_cannot_increase_conscription_law }
+	}
+}
+
+EAI_LAW_AVAILABLE_extensive_conscription = {
+
+	NOT = { has_idea = extensive_conscription }
+
+	### copy from idea file
+	
+	#has_manpower_for_recruit_change_to = { value = 0.05 group = mobilization_laws }
+	OR = {
+		has_government = fascism
+		has_government = communism
+		AND = {
+			has_war = yes
+			enemies_strength_ratio > 0.5
+			#any_enemy_country = {
+			#	strength_ratio = {
+			#		tag = ROOT 
+			#		ratio > 0.5
+			#	}
+			#}
+		}					
+	}
+	has_war_support > 0.2
+	#Special rules AST in TFV
+	if = {
+		limit = {
+			original_tag = AST
+			has_dlc = "Together for Victory"
+		}
+		has_completed_focus = AST_citizen_military_forces
+		has_completed_focus = AST_fight_work_or_perish
+	}				
+	if = {
+		limit = {
+			original_tag = CAN
+			has_dlc = "Together for Victory"
+		}
+		has_completed_focus = CAN_commit_to_the_war
+		has_completed_focus = CAN_if_day
+	}
+	if = {
+		limit = {
+			original_tag = RAJ
+			has_dlc = "Together for Victory"
+		}
+		is_subject = no
+	}
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			original_tag = ENG
+			has_dlc = "Man the Guns"
+			has_completed_focus = ENG_concessions_to_the_trade_unions
+		}
+		NOT = { has_country_flag = ENG_cannot_increase_conscription_law }
+	}
+}
+
+EAI_LAW_AVAILABLE_service_by_requirement = {
+
+	NOT = { has_idea = service_by_requirement }
+
+	### copy from idea file
+	
+	#has_manpower_for_recruit_change_to =  { value = 0.1 group = mobilization_laws }
+	OR = {
+		has_government = fascism
+		has_government = communism
+		AND = {
+			has_war = yes
+			enemies_strength_ratio > 0.6
+			#any_enemy_country = {
+			#	strength_ratio = {
+			#		tag = ROOT 
+			#		ratio > 0.6
+			#	}
+			#}
+		}
+	}
+	OR = {
+		has_war_support > 0.6
+		surrender_progress > 0
+	}
+
+	if = {
+		limit = {
+			original_tag = AST
+			has_dlc = "Together for Victory"
+		}
+		has_completed_focus = AST_citizen_military_forces
+		has_completed_focus = AST_fight_work_or_perish
+	}
+
+	if = {
+		limit = {
+			original_tag = CAN
+			has_dlc = "Together for Victory"
+		}
+		OR = {
+			has_completed_focus = CAN_compromise_with_quebec
+			has_completed_focus = CAN_forced_quebec_conscription
+		}
+	}
+	if = {
+		limit = {
+			original_tag = RAJ
+			has_dlc = "Together for Victory"
+		}
+		is_subject = no
+	}
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			original_tag = ENG
+			has_dlc = "Man the Guns"
+			has_completed_focus = ENG_concessions_to_the_trade_unions
+		}
+		NOT = { has_country_flag = ENG_cannot_increase_conscription_law }
+	}
+}
+
+EAI_LAW_AVAILABLE_all_adults_serve = {
+
+	NOT = { has_idea = all_adults_serve }
+
+	### copy from idea file
+	
+	#has_manpower_for_recruit_change_to =  { value = 0.2 group = mobilization_laws }
+	has_war = yes
+	OR = {
+		has_war_support > 0.7
+		surrender_progress > 0
+	}
+	enemies_strength_ratio > 0.75
+	#any_enemy_country = {
+	#	strength_ratio = {
+	#		tag = ROOT 
+	#		ratio > 0.75
+	#	}
+	#}
+
+	if = {
+		limit = {
+			original_tag = AST
+			has_dlc = "Together for Victory"
+		}
+		has_completed_focus = AST_citizen_military_forces
+		has_completed_focus = AST_fight_work_or_perish
+	}
+
+	if = {
+		limit = {
+			original_tag = CAN
+			has_dlc = "Together for Victory"
+		}
+		OR = {
+			has_completed_focus = CAN_compromise_with_quebec
+			has_completed_focus = CAN_forced_quebec_conscription
+		}					
+	}
+	if = {
+		limit = {
+			original_tag = RAJ
+			has_dlc = "Together for Victory"
+		}
+		is_subject = no
+	}
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			original_tag = ENG
+			has_dlc = "Man the Guns"
+			has_completed_focus = ENG_concessions_to_the_trade_unions
+		}
+		NOT = { has_country_flag = ENG_cannot_increase_conscription_law }
+	}
+}
+
+EAI_LAW_AVAILABLE_scraping_the_barrel = {
+
+	NOT = { has_idea = scraping_the_barrel }
+	
+	### copy from idea file
+
+	#has_manpower_for_recruit_change_to =  { value = 0.25 group = mobilization_laws }
+	has_war = yes
+	OR = {
+		has_war_support > 0.85
+		surrender_progress > 0.25
+	}
+	enemies_strength_ratio > 1
+	#any_enemy_country = {
+	#	strength_ratio = {
+	#		tag = ROOT 
+	#		ratio > 1
+	#	}
+	#}
+	if = {
+		limit = {
+			original_tag = AST
+			has_dlc = "Together for Victory"
+		}
+		has_completed_focus = AST_citizen_military_forces
+		has_completed_focus = AST_fight_work_or_perish
+	}
+
+	if = {
+		limit = {
+			original_tag = CAN
+			has_dlc = "Together for Victory"
+		}
+		OR = {
+			has_completed_focus = CAN_compromise_with_quebec
+			has_completed_focus = CAN_forced_quebec_conscription
+		}
+	}
+	if = {
+		limit = {
+			original_tag = RAJ
+			has_dlc = "Together for Victory"
+		}
+		is_subject = no
+	}
+
+	if = {
+		limit = {
+			original_tag = HUN
+			has_dlc = "Death or Dishonor"
+		}
+		NOT = { has_idea = HUN_treaty_of_triannon }
+	}
+	if = {
+		limit = {
+			original_tag = ENG
+			has_dlc = "Man the Guns"
+			has_completed_focus = ENG_concessions_to_the_trade_unions
+		}
+		NOT = { has_country_flag = ENG_cannot_increase_conscription_law }
+	}
+}
+
+##############################################################################
+### 	Trade laws
+##############################################################################
+
+@EAI_FREE_TRADE_RESOURCES_TO_MARKET = 0.8
+@EAI_FREE_TRADE_RESOURCES = 0.2
+@EAI_EXPORT_FOCUS_RESOURCES_TO_MARKET = 0.5
+@EAI_EXPORT_FOCUS_RESOURCES = 0.5
+@EAI_LIMITED_EXPORTS_RESOURCES_TO_MARKET = 0.25
+@EAI_LIMITED_EXPORTS_RESOURCES = 0.75
+
+### Laws
+
+EAI_can_take_free_trade = { # 80% resources to market
+
+	###### Special rules
+
+	# Keep resources to itself to be safe
+	if = {
+		limit = {
+			OR = {
+				original_tag = ENG
+				original_tag = FRA
+				original_tag = JAP
+				original_tag = ITA
+			}
+		}
+
+		has_war = no
+		date > 1942.1.1
+	}
+
+	# Prioritize war economy from SCW
+	if = { limit = { original_tag = SOV }
+		
+		OR = {
+			date > 1937.6.1
+			has_idea = war_economy
+		}
+	}
+
+	###### Resource needs
+
+	OR = {
+
+		### Special cases
+
+		###
+
+		AND = {
+			# How much of its extracted resources the AI needs for production
+			if = { limit = { has_idea = export_focus }
+
+				check_variable = { EAI_average_resource_need < 0.15 }
+			}
+			if = { limit = { has_idea = limited_exports }
+
+				check_variable = { EAI_average_resource_need < 0.20 }
+			}
+		}
+	}
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_free_trade = yes
+}
+
+EAI_can_take_export_focus = { # 50% resources to market
+
+	###### Special rules
+
+	# Keep oil available to Axis
+	if = { limit = { original_tag = ROM } 
+
+		NOT = { any_allied_country = { is_major = yes } } 
+	}
+
+	# Keep resources available to the Allies
+	if = { limit = { original_tag = USA } 
+
+		OR = {
+			NOT = { is_in_faction_with = ENG }
+			NOT = { check_variable = { EAI_average_resource_need < 0.65 } }
+		}
+	}
+
+	# Keep resources to itself to be safe
+	if = { 
+		limit = {
+			OR = {
+				original_tag = JAP
+				original_tag = ITA
+			}
+		}
+
+		has_war = no
+		date > 1942.1.1
+	}
+
+	if = { limit = { original_tag = SPR }
+
+		OR = {
+			date > 1940.1.1
+			has_civil_war = no
+		}
+	}
+
+	# Keep free exports as long as possible
+	if = { 
+		limit = {
+			OR = {
+				original_tag = SOV
+				original_tag = GER
+			}
+		}
+
+		OR = {
+			any_enemy_country = { is_major = yes }
+			date > 1940.1.1
+		}
+	}
+
+	###### Resource needs
+
+	OR = {
+
+		### Special cases
+
+		AND = {
+			original_tag = GER
+			any_enemy_country = { is_major = yes }
+		}
+
+		AND = {
+			original_tag = SOV
+			any_enemy_country = { is_major = yes }
+		}
+
+		###
+
+		AND = {
+			# How much of its extracted resources the AI needs for production
+			if = { limit = { has_idea = free_trade }
+
+				NOT = { check_variable = { EAI_average_resource_need < 0.25 } }
+				check_variable = { EAI_average_resource_need < 0.50 }
+			}
+			if = { limit = { has_idea = limited_exports }
+
+				NOT = { check_variable = { EAI_average_resource_need < 0.20 } }
+				check_variable = { EAI_average_resource_need < 0.45 }
+			}
+
+			# When switching down, consider whether it has a significant need or shortage and has a significant amount of needed resources
+			if = { limit = { OR = { has_idea = free_trade } }
+
+				OR = {
+					AND = { check_variable = { EAI_aluminium_resource_shortage = 3 } check_variable = { resource_produced@aluminium > 75 } }
+					AND = { check_variable = { EAI_rubber_resource_shortage = 3 } check_variable = { resource_produced@rubber > 75 } }
+					AND = { check_variable = { EAI_tungsten_resource_shortage = 3 } check_variable = { resource_produced@tungsten > 75 } }
+					AND = { check_variable = { EAI_steel_resource_shortage = 3 } check_variable = { resource_produced@steel > 75 } }
+					AND = { check_variable = { EAI_chromium_resource_shortage = 3 } check_variable = { resource_produced@chromium > 75 } }
+
+					count_triggers = {
+						amount = 2
+
+						AND = { check_variable = { EAI_needs_aluminium = 3 } check_variable = { resource_produced@aluminium > 75 } }
+						AND = { check_variable = { EAI_needs_rubber = 3 } check_variable = { resource_produced@rubber > 75 } }
+						AND = { check_variable = { EAI_needs_tungsten = 3 } check_variable = { resource_produced@tungsten > 75 } }
+						AND = { check_variable = { EAI_needs_steel = 3 } check_variable = { resource_produced@steel > 75 } }
+						AND = { check_variable = { EAI_needs_chromium = 3 } check_variable = { resource_produced@chromium > 75 } }
+					}
+				}
+			}
+		}
+	}
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_export_focus = yes
+}
+
+EAI_can_take_limited_exports = { # 25% resources to market
+
+	###### Special rules
+
+	# Minors in factions with majors should not close trade
+	if = { limit = { is_major = no } 
+
+		NOT = { any_allied_country = { is_major = yes } } 
+	}
+
+	if = { limit = { original_tag = SPR }
+
+		OR = {
+			date > 1940.1.1
+			has_civil_war = no
+		}
+	}
+
+	# Keep resources available to the Allies
+	if = { limit = { original_tag = USA } 
+
+		OR = {
+			NOT = { is_in_faction_with = ENG }
+			NOT = { check_variable = { EAI_average_resource_need < 0.65 } }
+		}
+	}
+
+	# Keep oil available to Axis
+	if = { limit = { original_tag = ROM } 
+
+		NOT = { any_allied_country = { is_major = yes } } 
+	}
+
+	# Provides resources to the Axis
+	if = { limit = { original_tag = GER }
+
+		NOT = { check_variable = { EAI_average_resource_need < 0.8 } }
+	}
+
+	###### Resource needs
+
+	OR = {
+
+		### Special cases
+
+		###
+
+		AND = {
+			# How much of its extracted resources the AI needs for production
+			if = { limit = { has_idea = free_trade }
+
+				NOT = { check_variable = { EAI_average_resource_need < 0.50 } }
+			}
+			if = { limit = { has_idea = export_focus }
+
+				NOT = { check_variable = { EAI_average_resource_need < 0.55 } }
+			}
+
+			# When switching down, consider whether it has a significant need or shortage and has a significant amount of needed resources
+			if = { limit = { OR = { has_idea = free_trade has_idea = export_focus } }
+
+				OR = {
+					AND = { check_variable = { EAI_aluminium_resource_shortage = 3 } check_variable = { resource_produced@aluminium > 75 } }
+					AND = { check_variable = { EAI_rubber_resource_shortage = 3 } check_variable = { resource_produced@rubber > 75 } }
+					AND = { check_variable = { EAI_tungsten_resource_shortage = 3 } check_variable = { resource_produced@tungsten > 75 } }
+					AND = { check_variable = { EAI_steel_resource_shortage = 3 } check_variable = { resource_produced@steel > 75 } }
+					AND = { check_variable = { EAI_chromium_resource_shortage = 3 } check_variable = { resource_produced@chromium > 75 } }
+
+					count_triggers = {
+						amount = 2
+						
+						AND = { check_variable = { EAI_needs_aluminium = 3 } check_variable = { resource_produced@aluminium > 75 } }
+						AND = { check_variable = { EAI_needs_rubber = 3 } check_variable = { resource_produced@rubber > 75 } }
+						AND = { check_variable = { EAI_needs_tungsten = 3 } check_variable = { resource_produced@tungsten > 75 } }
+						AND = { check_variable = { EAI_needs_steel = 3 } check_variable = { resource_produced@steel > 75 } }
+						AND = { check_variable = { EAI_needs_chromium = 3 } check_variable = { resource_produced@chromium > 75 } }
+					}
+				}
+			}
+		}
+	}
+
+	# Other PP use priorities
+	EAI_store_pp_prio = yes
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_limited_exports = yes
+}
+
+EAI_can_take_closed_economy = { # 0% resources to market
+
+	always = no
+
+	###### Requirements for this law
+
+	EAI_LAW_AVAILABLE_closed_economy = yes
+}
+
+### Law requirements from game
+
+EAI_ALLOWED_TO_REMOVE_trade_law = {
+
+	if = { limit = { has_idea = uncontrolled_exports }
+
+		OR = {
+			has_war = yes
+			has_completed_focus = POL_integrate_gdansk_industries
+			has_completed_focus = POL_expand_gdynia_seaport
+			NOT = {
+				owns_state = 85
+				owns_state = 807
+			}
+			any_owned_state = {
+				NOT = {
+					state = 85
+					state = 807
+				}
+				is_coastal = yes
+			}
+		}
+	}
+}
+
+EAI_LAW_AVAILABLE_free_trade = {
+
+	NOT = { has_idea = free_trade }
+
+	### copy from idea file
+
+	if = {
+		limit = {
+			original_tag = SPR
+			has_dlc = "La Resistance"
+		}
+		NOT = { has_completed_focus = SPR_all_must_bear_the_torch }
+	}
+}
+
+EAI_LAW_AVAILABLE_export_focus = {
+
+	NOT = { has_idea = export_focus }
+	
+	### copy from idea file
+
+	if = {
+		limit = {
+			original_tag = CHI
+			has_dlc = "Waking the Tiger"
+		}
+		NOT = { has_idea = CHI_nine_power_treaty }
+	}
+	if = {
+		limit = {
+			original_tag = SPR
+			has_dlc = "La Resistance"
+		}
+		NOT = { has_completed_focus = SPR_all_must_bear_the_torch }
+	}
+}
+
+EAI_LAW_AVAILABLE_limited_exports = {
+
+	NOT = { has_idea = limited_exports }
+
+	### copy from idea file
+	
+	OR = {
+		AND = {
+			has_government = democratic
+			has_war = yes
+			any_enemy_country = {
+				ic_ratio = {
+					tag = ROOT
+					ratio > 0.2
+				}
+			}
+		}
+		AND = {
+			NOT = { has_government = democratic }
+			OR = {
+				has_idea = partial_economic_mobilisation
+				has_idea = war_economy
+				has_idea = tot_economic_mobilisation
+			}
+		}
+	}
+
+
+	if = {
+		limit = {
+			original_tag = CHI
+			has_dlc = "Waking the Tiger"
+		}
+		NOT = { has_idea = CHI_nine_power_treaty }
+	}
+	if = {
+		limit = {
+			original_tag = SPR
+			has_dlc = "La Resistance"
+		}
+		NOT = { has_completed_focus = SPR_all_must_bear_the_torch }
+	}
+}
+
+EAI_LAW_AVAILABLE_closed_economy = {
+
+	NOT = { has_idea = closed_economy }
+
+	### copy from idea file
+	
+	has_war = yes
+	OR = {
+		has_government = fascism
+		has_government = communism
+	}
+	OR = {
+		has_idea = war_economy
+		has_idea = tot_economic_mobilisation
+	}
+	OR = {
+		NOT = {	tag = SOV }
+		NOT = { has_opinion_modifier = MR_pact }
+	}
+
+	if = {
+		limit = {
+			original_tag = CHI
+			has_dlc = "Waking the Tiger"
+		}
+		NOT = { has_idea = CHI_nine_power_treaty }
+	}
+}
+
+##############################################################################
+### 	Misc
+##############################################################################
+
+### Stability event trigger from event stability.3
+
+EAI_stability_event_trigger = {
+
+	has_war = yes
+	has_civil_war = no
+	OR = {
+		has_stability < 0.5
+		has_war_support < 0.5
+	}
+	NOT = {
+		AND = {
+			is_major = yes
+			all_enemy_country = {
+				is_major = no
+			}
+		}
+	}
+	# NOT = { 
+	# 	has_country_flag = crisis_in_progress
+	# }
+	NOT = { # Don't fire stability events if the country is not mobilising at all
+		OR = {
+			has_idea = disarmed_nation
+			has_idea = volunteer_only
+		}
+		OR = {
+			has_idea = undisturbed_isolation
+			has_idea = isolation
+			has_idea = civilian_economy
+		}
+	}
+	NOT = { has_completed_focus = SPR_all_must_bear_the_torch }
+}

@@ -1,0 +1,220 @@
+######################################################
+#	Expert AI mod - diplomacy triggers
+######################################################
+
+EAI_justifying_wargoal_via_focus_vs_PREV = {
+
+	OR = {
+
+		AND = { focus_progress = { focus = GER_danzig_or_war progress > 0 } NOT = { has_completed_focus = GER_danzig_or_war } PREV = { tag = POL } }
+
+		AND = { focus_progress = { focus = GER_weserubung progress > 0 } NOT = { has_completed_focus = GER_weserubung } PREV = { tag = DEN } }
+
+		AND = { focus_progress = { focus = GER_around_maginot progress > 0 } NOT = { has_completed_focus = GER_around_maginot } PREV = { OR = { tag = BEL tag = HOL tag = LUX } } }
+	}
+}
+
+EAI_THIS_is_strong_vs_PREV = {
+
+	NOT = { EAI_is_not_independent = yes }
+	surrender_progress < 0.05
+	strength_ratio = { tag = PREV ratio > 1.0 }
+	if = { limit = { PREV = { is_major = yes } } is_major = yes }
+}
+
+EAI_THIS_has_land_border_with_PREV = {
+
+	set_temp_variable = { prev_id = PREV.id }
+
+	any_country = {
+		EAI_PREV_on_same_side_with_THIS = yes
+
+		any_home_area_neighbor_country = {
+			var:prev_id = {
+				EAI_PREV_on_same_side_with_THIS = yes
+			}
+		}
+	}
+}
+
+EAI_is_prepared_for_war = {
+
+	OR = {
+		NOT = { 
+			any_home_area_neighbor_country = { 
+				has_war_with = PREV 
+			} 
+		}
+
+		AND = {
+			enemies_strength_ratio < 0.5
+			surrender_progress < 0.05
+		}
+	}
+
+	NOT = { EAI_is_not_independent = yes }
+
+	has_manpower > 200000
+}
+
+EAI_is_threat = {
+
+	AND = {
+		has_capitulated = no
+		exists = yes
+
+		NOT = { has_war_together_with = ROOT }
+		NOT = { is_subject_of = ROOT }
+		NOT = { has_government = ROOT }
+		NOT = { is_in_faction_with = ROOT }
+		NOT = { var:faction_leader = { has_government = ROOT } }
+		NOT = { var:overlord = { has_government = ROOT } }
+	}
+}
+
+EAI_THIS_is_threat_to_PREV = {
+
+	NOT = { EAI_PREV_has_same_ideology_with_THIS = yes }
+
+	set_temp_variable = { prev_id = PREV.id }
+
+	AND = {
+		has_capitulated = no
+		exists = yes
+
+		NOT = { has_war_together_with = PREV }
+		NOT = { is_subject_of = PREV }
+		NOT = { has_government = PREV }
+		NOT = { is_in_faction_with = PREV }
+		NOT = { var:faction_leader = { var:prev_id = { EAI_PREV_has_same_ideology_with_THIS = yes } } }
+		NOT = { var:overlord = { var:prev_id = { EAI_PREV_has_same_ideology_with_THIS = yes } } }
+	}
+}
+
+EAI_is_not_independent = {
+
+	OR = {
+		has_capitulated = yes
+		exists = no
+		is_subject = yes
+	}
+}
+
+EAI_player_intervening = {
+	
+	OR = {
+		any_enemy_country = { is_ai = no }
+		any_country = { is_ai = no is_justifying_wargoal_against = ROOT }
+		NOT = { check_variable = { EAI_wardec_script_target = 0 } }
+	}
+}
+
+### looks at ideology as well as party popularity to determine real alignment
+
+EAI_democratic_nation = {
+	OR = {
+		has_government = democratic
+
+		AND = {
+			has_government = neutrality
+
+			check_variable = { party_popularity@democratic > party_popularity@neutrality }
+			check_variable = { party_popularity@democratic > party_popularity@fascism }
+			check_variable = { party_popularity@democratic > party_popularity@communism }
+		}
+	}
+}
+EAI_democratic_focus = {
+	NOT = { EAI_major_country = yes }
+	OR = {
+		has_government = democratic 
+		has_country_flag = EAI_democratic_focus
+	}
+}
+
+EAI_communist_nation = {
+	OR = {
+		has_government = communism
+		
+		AND = {
+			has_government = neutrality
+			
+			check_variable = { party_popularity@communism > party_popularity@neutrality }
+			check_variable = { party_popularity@communism > party_popularity@fascism }
+			check_variable = { party_popularity@communism > party_popularity@democratic }
+		}
+	}
+}
+EAI_communist_focus = {
+	NOT = { EAI_major_country = yes }
+	OR = {
+		has_government = communism 
+		has_country_flag = EAI_communist_focus
+	}
+}
+
+EAI_fascist_nation = {
+	OR = {
+		has_government = fascism
+		
+		AND = {
+			has_government = neutrality
+
+			check_variable = { party_popularity@fascism > party_popularity@neutrality }
+			check_variable = { party_popularity@fascism > party_popularity@communism }
+			check_variable = { party_popularity@fascism > party_popularity@democratic }
+		}
+	}
+}
+EAI_fascist_focus = {
+	NOT = { EAI_major_country = yes }
+	OR = {
+		has_government = fascism 
+		has_country_flag = EAI_facist_focus
+
+		AND = {
+			original_tag = BUL 
+			has_government = neutrality 
+			date > 1940.1.1 
+			is_historical_focus_on = yes
+		}
+
+		AND = {
+			original_tag = SIA 
+			has_government = neutrality 
+			date > 1938.6.1 
+			is_historical_focus_on = yes
+		}
+	}
+}
+
+EAI_nonaligned_nation = {
+	NOT = {
+		EAI_democratic_nation = yes
+		EAI_communist_nation = yes
+		EAI_fascist_nation = yes
+	}
+}
+EAI_nonaligned_focus = {
+	NOT = { EAI_major_country = yes }
+	OR = {
+		has_country_flag = EAI_neutral_focus
+	}
+}
+
+EAI_PREV_has_same_ideology_with_THIS = {
+	if = { limit = { PREV = { has_government = neutrality } } has_government = neutrality }
+	else_if = { limit = { PREV = { has_government = democratic } } has_government = democratic }
+	else_if = { limit = { PREV = { has_government = fascism } } has_government = fascism }
+	else_if = { limit = { PREV = { has_government = communism } } has_government = communism }
+}
+
+EAI_PREV_on_same_side_with_THIS = {
+	PREV = {
+		OR = {
+			original_tag = PREV
+			is_in_faction_with = PREV
+			is_subject_of = PREV
+		}
+	}
+}
