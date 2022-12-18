@@ -921,7 +921,7 @@ on_actions = {
 					}
 				}
 				FROM = {
-					add_named_threat = { threat = -15 name = SOV_end_of_political_instability_th }
+					add_named_threat = { threat = -5 name = SOV_end_of_political_instability_th }	#was -15, lowered a bit ince BBA - Fantom
 				}
 			}
 		}
@@ -5030,7 +5030,7 @@ on_actions = {
 				}
 				FROM = {	#why limit to specific overlord?
 					ROOT = {
-						transfer_technology = yes
+						inherit_technology = FROM
 						set_country_flag = releasable_tech_boost_flag
 					}
 				}
@@ -5962,7 +5962,20 @@ on_actions = {
 				799 = { add_core_of = TUR }
 				TUR = { transfer_state = 799 }
 			}
-
+			###
+			##### PER claims
+			if = { #// Was duplicated.
+				limit = {
+					original_tag = ECU
+					is_puppet_of = PER
+					controls_state = 490
+					PER = {
+						controls_state = 491
+					}
+				}
+				490 = { add_core_of = PER }
+				ECU = { transfer_state = 799 }
+			}
 			###
 			##### UKR claims
 			if = { #MOD. Compressed
@@ -7439,10 +7452,6 @@ on_actions = {
 					add_political_power = 750
 				}
 				else = {
-					limit = {
-						date > 1937.1.1
-						date < 1938.1.1	
-					}
 					add_political_power = 900
 				}
 			}
@@ -7469,7 +7478,7 @@ on_actions = {
 				}
 				FROM = {	#why limit to specific overlord?
 					ROOT = {
-						transfer_technology = yes
+						inherit_technology = FROM
 						set_country_flag = releasable_tech_boost_flag
 					}
 				}
@@ -8099,7 +8108,7 @@ on_actions = {
 ###---> On Startup <><> <><> <><>
 	on_startup = {
 		effect = {
-			#Initializing array featuring ALL STATES to use for showcasing formable nations states + trying to improve user-friendly shwocase
+			#Initializing array featuring ALL STATES to use for showcasing formable nations states + trying to improve user-friendly showcase - Fantom
 			every_state = {
 				add_to_array = { global.r56_formables_states_array = THIS.id } 
 			}
@@ -14820,7 +14829,7 @@ on_actions = {
 				}
 			}
 
-#Hispanoamerica status.
+			#Hispanoamerica status.
 			if = {
 				limit = {
 					has_game_rule = {
@@ -15204,7 +15213,13 @@ on_actions = {
 					create_intelligence_agency = yes
 				}
 			}
-			else = {
+			else_if  = {
+				limit = {
+					has_game_rule = {
+						rule = starting_agencies
+						option = ALL_COUNTRIES
+					}
+				}				
 				every_country = {
 					create_intelligence_agency = yes
 				}
@@ -15255,6 +15270,43 @@ on_actions = {
 					add_ideas = idea_game_rule_resistance_decrease_25
 				}
 			}
+			if = { 
+				limit = {
+					has_game_rule = {
+						rule = renaming_of_states_setting
+						option = PHOHIBIT_RENAMING
+					}
+				}
+				set_global_flag = r56_state_renaming_prohibited_flag
+			}
+			#one-time renaming upon the game start if player decided to use state renaming game rule - Fantom
+			if = { #placed here to make sure it happends in decolonized/fragmented world toos
+				limit = {
+					NOT = {
+						has_global_flag = r56_state_renaming_prohibited_flag
+					}
+				}
+				every_state = {	
+					meta_effect = {
+						text = {
+							FAK = {
+								FAK_lord_debug = {
+									set_character_name = STATE_[STATE_NUMBER]_RENAMING
+								}
+							}
+						}
+						STATE_NUMBER = "[THIS.getID]"
+					}
+					meta_effect = {
+						text = {
+							THIS = {
+								set_state_name = "[NEW_STATE_NAME]"
+							}
+						}
+						NEW_STATE_NAME = "[FAK.GetLeader]"
+					}
+				}
+			}
 		}
 	}
 
@@ -15281,6 +15333,32 @@ on_actions = {
 			#			}
 			#		}
 			#	}
+
+			if = {	#state renaming tool for possible dynamical name changes, inspired by Kaiserreichs way to do that (in particular, the presence of meta effects) - Fantom
+				limit = {
+					NOT = {
+						has_global_flag = r56_state_renaming_prohibited_flag
+					}
+				}
+				meta_effect = {
+					text = {
+						FAK = {
+							FAK_lord_debug = {
+								set_character_name = STATE_[STATE_NUMBER]_RENAMING
+							}
+						}
+					}
+					STATE_NUMBER = "[FROM.FROM.getID]"
+				}
+				meta_effect = {
+					text = {
+						FROM.FROM = {
+							set_state_name = "[NEW_STATE_NAME]"
+						}
+					}
+					NEW_STATE_NAME = "[FAK.GetLeader]"
+				}
+			}
 
 			if = { #MOD. City-fall events. Now checks for state ID first, then extra conditions. Order preserved.
 				limit = {
@@ -17668,6 +17746,41 @@ on_actions = {
 				country_event = {
 					id = kmt.301
 					days = 1 random_days = 2
+				}
+			}
+			if = {		#Attacking warlords after declaring that China shall unite in fight against Japan - bad KMT, bad! - Fantom
+				limit = {
+					ROOT = { 
+						#tag = CHI					-Since warlords can adopt the tree, have to keep it for them too
+						has_idea = KMT_propaganda
+					}
+					FROM = {
+						original_tag = SHX
+						original_tag = PRC
+						original_tag = XSM
+						original_tag = SIK
+						original_tag = TNG
+						original_tag = YUN
+						original_tag = GXC
+					}
+				}
+				ROOT = {
+					country_event = {
+						id = kmt.6
+					}
+				}
+			}
+			if = {		#Japan invaded, let's get back to talk about how China has to be united - Fanrom
+				limit = {
+					ROOT = { 
+						original_tag = JAP
+					}
+					FROM = {
+						has_idea = KMT_propaganda_busted
+					}
+				}
+				FROM = {
+					remove_ideas = KMT_propaganda_busted
 				}
 			}
 		}
