@@ -5,6 +5,7 @@
  # IFB/ILP Independent Labour Party #
  ####################################
 declare_independence_political = {
+	hidden_effect = { raj_nativise_states = yes }
 	if = {
 		limit = {
 			original_tag = RAJ
@@ -172,6 +173,11 @@ declare_independence_political = {
 				}
 			}
 		}
+		set_party_name = {
+			ideology = fascism
+			name = "BJS"
+			long_name = "Bharatiya Jana Sangh"
+		}
 	}
 }
 raj_gained_independence_effect = {
@@ -198,6 +204,214 @@ raj_gained_independence_effect = {
 		}
 	}
 }
+raj_nativise_states = {
+	436 = {
+		set_state_name = "Madhya Pradesh"
+	}
+	437 = {
+		set_state_name = "Indore"
+	}
+	438 = {
+		set_state_name = "Uttar Pradesh"
+	}
+	439 = {
+		set_state_name = "Delhi"
+	}
+	442 = {
+		set_state_name = "Gandhara"
+	}
+	429 = {
+		set_state_name = "Maharashtra"
+	}
+	288 = {
+		set_state_name = "Lower Myanmar"
+	}
+	640 = {
+		set_state_name = "Mandalay"
+	}
+}
+raj_calculate_attitude = {
+	# calculations for speed bonus
+	# range 0.05 - 0.3
+	# increments 5
+	# increment 0.05
+	# loyalty = 55
+	#
+	# loyalty * increments / 100 + 0.5 = 3.25 #increment value between 0 and 8
+	# round_variable(3.25) = 3 #second increment to be used
+	# 3 * increment + 0.2 = 0.3 #value of the third increment
+	#
+	set_variable = {
+		investor_bonus = investor_relations
+	}
+	clamp_variable = {
+		var = investor_bonus
+		min_value = 0
+		max_value = 100
+	}
+	multiply_variable = {
+		investor_bonus = 5
+	}
+	multiply_variable = {
+		investor_bonus = 0.01
+	}
+	round_variable = investor_bonus
+	multiply_variable = {
+		investor_bonus = 0.05
+	}
+	add_to_variable = {
+		investor_bonus = 0.05
+	}
+	
+	# calculations for days
+	# range 80-120
+	# increments 5
+	# increment 10
+	# loyalty = 55
+	#
+	# loyalty * increments / 100 + 0.5 = 3.25 #increment value between 0 and 8
+	# round_variable(3.25) = 3 #second increment to be used
+	# 130 - (3 * increment) = 100 #value of the third increment
+	# 
+	set_variable = {
+		investors_timeout = investor_relations
+	}
+	clamp_variable = {
+		var = investors_timeout
+		min_value = 0
+		max_value = 100
+	}
+	multiply_variable = {
+		investors_timeout = 5
+	}
+	multiply_variable = {
+		investors_timeout = 0.01
+	}
+	round_variable = investors_timeout
+	multiply_variable = {
+		investors_timeout = 10
+	}
+	add_to_variable = {
+		investors_timeout = -130
+	}
+	multiply_variable = {
+		investors_timeout = -1
+	}
+	add_to_variable = {
+		investors_timeout = num_of_investments_days
+	}
+}
+raj_investors_missions = {
+	add_to_variable = {
+		num_of_investments = 1
+	}
+	if = {	#10 days after the tenth investment
+		limit = {
+			check_variable = { num_of_investments > 10 }
+		}
+		set_variable = {
+			num_of_investments_days = 50
+		}
+		set_temp_variable = { num_days_calc = num_of_investments }
+		subtract_from_variable = { num_days_calc = 10 }
+		multiply_temp_variable = { num_days_calc = 10 }
+		add_to_variable = {
+			num_of_investments_days = num_days_calc
+		}
+	}
+	else = {
+		set_variable = {
+			num_of_investments_days = num_of_investments
+		}
+		multiply_variable = {
+			num_of_investments_days = 5
+		}
+	}
+	raj_calculate_attitude = yes
+	random_list = {
+		30 = { 
+			modifier = {
+				factor = 5
+				check_variable = { invested_states^num = 1 }
+			}
+			modifier = {
+				factor = 0.75
+				check_variable = { invested_states^num > 2 }
+			}
+			modifier = {
+				factor = 0.7
+				check_variable = { invested_states^num > 4 }
+			}
+			modifier = {
+				factor = 0.5
+				check_variable = { invested_states^num > 6 }
+			}
+			activate_mission = raj_investor_new_state 
+		}
+		20 = { 
+			modifier = {
+				factor = 5
+				
+			}
+			activate_mission = raj_investor_industrial_complex 
+		}
+		20 = { 
+			modifier = {
+				factor = 3
+				OR = {
+					has_idea = war_economy
+					has_idea = tot_economic_mobilisation
+					has_country_flag = {
+						flag = raj_diverse_investments
+						days < 365
+						value = 1
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				NOT = { has_country_flag = raj_diverse_investments }
+			}
+			activate_mission = raj_investor_arms_factory 
+		}
+		20 = { 
+			modifier = {
+				factor = 2
+				
+			}
+			activate_mission = raj_investor_steel_mill 
+		}
+		10 = { 
+			modifier = {
+				factor = 2
+				has_built = {
+					type = aluminum_mill
+					value < 2
+				}
+			}
+			modifier = {
+				factor = 1.5
+				has_country_flag = {
+					flag = raj_diverse_investments
+					days < 365
+					value = 1
+				}
+			}
+			modifier = {
+				factor = 0
+				NOT = { has_country_flag = raj_diverse_investments }
+			}
+			activate_mission = raj_investor_aluminum_mill 
+		}
+		15 = { 
+			modifier = {
+				factor = 2
+				has_idea = civilian_economy
+			}
+			activate_mission = raj_investor_infrastructure 
+		}
+	}
+}
 pak_remove_dyn_mod = {
 	every_owned_state = {
 		limit = {
@@ -206,24 +420,6 @@ pak_remove_dyn_mod = {
 			}
 		}
 		remove_dynamic_modifier = { modifier = marginalized_muslims }
-	}
-	
-	every_owned_state = {
-		limit = {
-			has_dynamic_modifier = {
-				modifier = placated_muslims 
-			}
-		}
-		remove_dynamic_modifier = { modifier = placated_muslims  }
-	}
-	
-	every_owned_state = {
-		limit = {
-			has_dynamic_modifier = {
-				modifier = enraged_muslims
-			}
-		}
-		remove_dynamic_modifier = { modifier = enraged_muslims }
 	}
 	
 	every_owned_state = {
@@ -788,6 +984,7 @@ prince_integration = {
 				state = 426
 				state = 434
 			}
+			# then what
 		}
 	}
 }
