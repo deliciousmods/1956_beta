@@ -1701,6 +1701,10 @@ focus_tree = {
 			    uses = 2
 			    category = tp_tech
 			}
+			hidden_effect = {
+				set_country_flag = cite_a_marine_unit_flag
+			}
+			unlock_decision_tooltip = { decision = cite_a_marine_unit show_effect_tooltip = yes }			
 			# AI will build the required docks for the next focus
 			add_ai_strategy = {
 				type = building_target
@@ -2362,7 +2366,11 @@ focus_tree = {
                 bonus = 1.0
                 uses = 1
                 category = r56_special_forces_training_tech 
-            }					
+            }
+			hidden_effect = {
+				set_country_flag = cite_an_airborne_unit_flag
+			}
+			unlock_decision_tooltip = { decision = cite_an_airborne_unit show_effect_tooltip = yes }								
 		}
 	}
 
@@ -4861,6 +4869,9 @@ focus_tree = {
 				r56_script_target_is_sane = yes
 			}
 			has_civil_war = no
+			has_army_manpower = {
+				size > 179999
+			}				
 		}
 
 		bypass = {
@@ -5297,8 +5308,18 @@ focus_tree = {
 		relative_position_id = POR_observation_mission
 		cost = 10
 		completion_reward = {
-			add_stability = -0.2
+			
 			add_war_support = 0.1
+			if = {
+				limit = {
+					is_ai = yes
+				}
+				add_stability = -0.15
+				add_political_power = 150
+			}
+			else = {
+				add_stability = -0.2
+			}
 			add_ideas = POR_national_syndicalism
 			custom_effect_tooltip = available_political_advisor
 			show_ideas_tooltip = POR_jose_hipolito_raposo_2
@@ -5351,10 +5372,15 @@ focus_tree = {
 					limit = {
 						has_stability < 0.6
 					}
+					add_popularity = { #should help the civil war a bit(?)
+						ideology = fascism
+						popularity = 0.05
+					}					
 					set_temp_variable = { POR_fascist_cw_opposition = party_popularity@neutrality }
 					multiply_temp_variable = { POR_fascist_cw_opposition = 0.6 }
 					add_to_temp_variable = { POR_fascist_cw_opposition = party_popularity@democratic }
-					add_to_temp_variable = { POR_fascist_cw_opposition = party_popularity@communism }
+					#remove communists from the civil war because everything I don't like is fascism anyway.
+					#add_to_temp_variable = { POR_fascist_cw_opposition = party_popularity@communism }
 					start_civil_war = {
 						ideology = neutrality
 						size = POR_fascist_cw_opposition
@@ -5414,22 +5440,23 @@ focus_tree = {
 
 	focus = {
 		id = POR_join_the_axis
+
 		available = {
 			is_in_faction = no
-			has_government = fascism	
-			GER	= { 
-				exists = yes
+			is_puppet = no
+			has_government = fascism
+			any_other_country = {
+				is_major = yes
+				has_government = fascism
 				is_faction_leader = yes
-				has_capitulated = no
 				NOT = { has_war_with = ROOT }
+				has_opinion = {
+					target = ROOT
+					value > 0
+				}					
 			}
-			NOT = {
-				any_other_country = {
-					is_in_faction_with = GER
-					has_war_with = ROOT
-				}
-			}
-		}
+		}	
+
 
 		bypass = {
 		}
@@ -5442,11 +5469,35 @@ focus_tree = {
 		relative_position_id = POR_camisas_azuis
 		cost = 10
 		completion_reward = {
-			GER = {
-				country_event = { id = generic.2 hours = 4 }
+			if = {
+				limit = {
+					GER = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+						exists = yes
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = GER
+							has_war_with = ROOT
+						}
+					}					
+				}
+				GER = {
+					country_event = generic.2
+				}
 			}
-			remove_ideas = POR_unstable_republic
+			else = {
+				get_best_alliance_match_fascism_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+			}
+			remove_ideas = POR_unstable_republic			
 		}
+
 		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
@@ -6719,6 +6770,22 @@ focus_tree = {
 					constitutional_monarch_minor
 				}
 			}
+			create_corps_commander = {
+				name = "João de Almeida"
+				portrait_path = "gfx/leaders/POR/r56_portrait_POR_Joao_de_Almeida.dds"
+				traits = {
+					war_hero
+					politically_connected
+					career_officer
+					organizer
+				}
+				skill = 2
+				attack_skill = 1
+				defense_skill = 3
+				planning_skill = 2
+				logistics_skill = 1
+			}
+
 			custom_effect_tooltip = POR_potential_civil_war_low_requirement_tt
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_INDUSTRY FOCUS_FILTER_STABILITY }
