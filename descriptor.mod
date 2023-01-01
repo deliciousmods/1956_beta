@@ -1,4 +1,4 @@
-version="1.11.12"
+version="1.12.6"
 tags={
 	"Beta"
 }

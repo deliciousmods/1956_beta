@@ -8,6 +8,7 @@ add_namespace = sweden_auth
 add_namespace = sweden_winter_war
 add_namespace = sweden_german_trade
 add_namespace = sweden_mill_access
+add_namespace = SWE_foreign_politics_events
 
 country_event = {
 	id = sweden_german_trade.1
@@ -1210,101 +1211,6 @@ country_event = {
 	}																						
 }
 
-#country_event = {
-#	id = sweden_soviet.50
-#	title = sweden_soviet.50.t
-#	desc = sweden_soviet.50.d
-#	picture = GFX_report_event_generic_sign_treaty2
-#
-#	is_triggered_only = yes
-#	
-#	# Accept
-#	option = {
-#		name = sweden_soviet.50.a
-#		FROM = {
-#			add_opinion_modifier = { target = SWE modifier = ENG_non_interference_treaty }
-#			reverse_add_opinion_modifier = { target = SWE modifier = ENG_non_interference_treaty }
-#			effect_tooltip = {
-#				diplomatic_relation = {
-#					country = SWE
-#					relation = non_aggression_pact
-#					active = yes
-#				}
-#			}
-#		}
-#		SWE= { country_event = { id = sweden_soviet.51 hours = 6 } }
-#		if = {
-#			limit = { 
-#				original_tag = GER 
-#			}
-#			give_resource_rights = { receiver = GER state = 141 }
-#		}
-#		if = {
-#			limit = {
-#				original_tag = FRA
-#			}
-#			add_political_power = 150
-#			SWE = { add_political_power = -100 }
-#		}
-#	}
-#
-#	# Reject
-#	option = {
-#		name = sweden_soviet.50.b
-#		ai_chance = {
-#			factor = 0
-#		}
-#		SWE = { country_event = { id = sweden_soviet.52 hours = 6 } }
-#	}
-#}
-#
-#country_event = {
-#	id = sweden_soviet.51
-#	title = sweden_soviet.51.t
-#	desc = sweden_soviet.51.d
-#	picture = GFX_report_event_generic_sign_treaty2
-#
-#	is_triggered_only = yes
-#	
-#	# Ok
-#	option = {
-#		name = excellent
-#		diplomatic_relation = {
-#		    country = FROM
-#		    relation = non_aggression_pact
-#		    active = yes
-#		}
-#		hidden_effect = {
-#			FROM = {
-#				add_ai_strategy = {
-#					type = antagonize
-#					id = ROOT
-#					value = -100
-#				}
-#			}
-#			add_ai_strategy = {
-#				type = antagonize
-#				id = FROM
-#				value = -100
-#			}
-#		}
-#	}
-#}
-#
-#country_event = {
-#	id = sweden_soviet.52
-#	title = sweden_soviet.52.t
-#	desc = sweden_soviet.52.d
-#	picture = GFX_report_event_generic_sign_treaty2
-#
-#	is_triggered_only = yes
-#	
-#	# Ok
-#	option = {
-#		name = unfortunate
-#	}
-#}
-#
 news_event = {
 	id = sweden_soviet.60
 	title = sweden_soviet.60.t
@@ -1398,5 +1304,266 @@ country_event = {
 	option = {
 		name = sweden_mill_access.12.a
 		add_political_power = 5
+	}
+}
+
+country_event = {
+	id = SWE_foreign_politics_events.1
+	title = SWE_foreign_politics_events.1.t
+	desc = SWE_foreign_politics_events.1.desc
+	picture = "[GetPressureGovernmentGFX]"
+
+	is_triggered_only = yes
+
+	#immediate = { #Debug
+	#	log = "FROM is [FROM.GetName]"
+	#	log = "FROM.FROM [FROM.FROM.GetName]"
+	#	log = "FROM.PREV [FROM.PREV.GetName]"
+	#	log = "FROM.FROM.PREV [FROM.FROM.PREV.GetName]"
+	#	log = "ROOT.FROM [ROOT.FROM.GetName]"
+	#	log = "ROOT.PREV [ROOT.PREV.GetName]"
+	#}
+
+	option = { #Join Faction - Keep government
+		name = SWE_foreign_politics_events.1.a
+
+		ai_chance = {
+			base = 10
+			modifier = {
+				factor = 2
+				strength_ratio = {
+					tag = FROM
+					ratio < 0.5
+				}
+			}
+			modifier = {
+				factor = 4
+				strength_ratio = {
+					tag = FROM
+					ratio < 0.2
+				}
+			}
+			modifier = {
+				factor = 2
+				has_opinion = {
+					target = FROM
+					value > 75
+				}
+			}
+			modifier = { #Appropriate PC for Foreign Affairs
+				factor = 2
+				OR = {
+					FROM = {
+						original_tag = SOV
+						has_idea = SOV_maksim_litvinov
+					}
+					FROM = { ITA_has_foreign_affairs_or_nice_guy_hired = yes }
+				}
+			}
+			modifier = {
+				factor = 0
+				OR = {
+					is_in_faction = yes
+					is_subject = yes
+				}
+			}
+		}
+
+		trigger = {
+			NOT = { is_in_faction_with = FROM }
+		}
+
+		FROM = { add_to_faction = ROOT }
+		add_opinion_modifier = {
+			target = FROM
+			modifier = SOV_pressured_our_government
+		}
+		hidden_effect = {
+			country_event = { id = NSB_soviet_foreign_politics_events.151 hours = 1 }
+		}
+	}
+
+	option = { #Change Government
+		name = SWE_foreign_politics_events.1.b
+
+		ai_chance = {
+			base = 10
+			modifier = {
+				factor = 5
+				OR = {
+					FROM = {
+						has_government = communism
+						communism > 0.5
+					}
+					FROM = {
+						has_government = democratic
+						democratic > 0.5
+					}
+					FROM = {
+						has_government = fascism
+						fascism > 0.5
+					}
+					FROM = {
+						has_government = neutrality
+						neutrality > 0.5
+					}
+				}
+			}
+			modifier = {
+				factor = 2
+				has_opinion = {
+					target = FROM
+					value > 75
+				}
+			}
+			modifier = { #Appropriate PC for Foreign Affairs
+				factor = 2
+			}
+			modifier = {
+				factor = 0
+				OR = {
+					is_in_faction = yes
+					is_subject = yes
+				}
+			}
+		}
+
+		trigger = {
+			NOT = { has_government = FROM }
+		}
+
+		set_politics = { ruling_party = FROM }
+		add_opinion_modifier = {
+			target = FROM
+			modifier = SOV_pressured_our_government
+		}
+		hidden_effect = {
+			country_event = { id = NSB_soviet_foreign_politics_events.158 hours = 1 }
+		}
+	}
+
+	option = { #REFUSE
+		name = SWE_foreign_politics_events.1.c
+
+		ai_chance = {
+			base = 10
+			modifier = {
+				factor = 2
+				any_country = {
+					is_major = yes
+					has_guaranteed = ROOT
+				}
+			}
+			modifier = {
+				factor = 1.2
+				any_country = {
+					is_major = no
+					has_guaranteed = ROOT
+				}
+			}
+		}
+
+		add_popularity = {
+			ideology = FROM
+			popularity = 0.05
+		}
+		add_opinion_modifier = {
+			target = FROM
+			modifier = SOV_pressured_our_government
+		}
+		hidden_effect = {
+			country_event = { id = NSB_soviet_foreign_politics_events.152 hours = 1 }
+		}
+	}
+}
+country_event = {
+	id = SWE_foreign_politics_events.2
+	title = SWE_foreign_politics_events.2.t
+	desc = SWE_foreign_politics_events.2.desc
+	picture = "[GetPromotingIdeologyGFX]"
+
+	is_triggered_only = yes
+
+	immediate = {
+		log = "FROM is [FROM.GetName]"
+		log = "FROM.FROM [FROM.FROM.GetName]"
+		log = "FROM.PREV [FROM.PREV.GetName]"
+		log = "FROM.FROM.PREV [FROM.FROM.PREV.GetName]"
+		log = "ROOT.FROM [ROOT.FROM.GetName]"
+		log = "ROOT.PREV [ROOT.PREV.GetName]"
+	}
+
+	option = { #OK
+		name = SWE_foreign_politics_events.2.a
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 2
+				strength_ratio = {
+					tag = FROM
+					ratio < 0.5
+				}
+			}
+			modifier = {
+				factor = 5
+				strength_ratio = {
+					tag = FROM
+					ratio < 0.2
+				}
+			}
+			modifier = {
+				factor = 1.5
+				has_opinion = {
+					target = FROM
+					value > 75
+				}
+			}
+			modifier = {
+				factor = 0
+				OR = {
+					is_in_faction = yes
+					is_subject = yes
+				}
+			}
+			modifier = { #Appropriate PC for Foreign Affairs
+				factor = 2
+			}
+		}
+		add_popularity = {
+			ideology = FROM
+			popularity = 0.1
+		}
+		add_opinion_modifier = {
+			target = FROM
+			modifier = SOV_stirring_the_masses
+		}
+	}
+
+	option = { #Prevent it!
+		name = SWE_foreign_politics_events.2.b
+
+		ai_chance = {
+			base = 10
+			modifier = {
+				factor = 0
+				has_political_power < 70
+			}
+		}
+
+		trigger = {
+			NOT = { has_government = FROM }
+		}
+
+		add_political_power = -70
+		add_stability = -0.05
+		add_popularity = {
+			ideology = ROOT
+			popularity = 0.1
+		}
+		add_opinion_modifier = {
+			target = FROM
+			modifier = SOV_stirring_the_masses
+		}
 	}
 }

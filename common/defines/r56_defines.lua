@@ -121,7 +121,7 @@ NDefines.NAir.AIR_WING_MAX_STATS_DEFENCE = 1000 -- was 200
 NDefines.NAir.AIR_WING_MAX_STATS_AGILITY = 1000 -- was 200
 NDefines.NAir.AIR_WING_MAX_STATS_SPEED = 9999 -- Used to balance the damage done while bombing. was 1500
 NDefines.NAir.AIR_WING_XP_LOSS_REDUCTION_OVER_FRIENDLY_TERRITORY_FACTOR = 0.7
-NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Conversion scale for planes to air supply #original was 0.05
+--NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Claimed to be the same as vanilla previously, but BBA changed this value, so commented this out
 
 NDefines.NAir.AIR_WING_ATTACK_LOGISTICS_NO_TRUCK_DISRUPTION_FACTOR = 0.1 --0,2
 NDefines.NAir.AIR_WING_ATTACK_LOGISTICS_TRUCK_DAMAGE_FACTOR = 0.25 -- 0,5
@@ -146,11 +146,12 @@ NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to
 		0.0, -- NAVAL_KAMIKAZE
 		0.0, -- PORT_STRIKE
 		0.0, -- ATTACK_LOGISTICS
-		0.1, -- AIR_SUPPLY
+		0.05, -- AIR_SUPPLY
 		0.0, -- TRAINING
 		0.0, -- NAVAL_MINES_PLANTING
 		0.0, -- NAVAL_MINES_SWEEPING
 		0.0, -- MISSION_RECON
+		0.0, -- NAVAL_PATROL
     }
 	
 NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0	

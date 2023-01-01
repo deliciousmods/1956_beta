@@ -1,0 +1,449 @@
+MEX_foreign_affairs = {
+
+	MEX_invite_FROM_to_the_treaty = {
+		
+		icon = hol_exchange_intelligence_data 
+
+		targets = { GUA HON ELS NIC COS PAN COL VEN ECU PRU BOL CHL ARG PAR URG BRA CUB DOM HAI }
+
+		target_trigger = {
+			
+			FROM = {
+				is_subject = no
+				is_in_faction = no
+				NOT = { has_war_with = ROOT }
+			}
+		}
+		allowed = {
+			original_tag = MEX
+		}
+		available = {
+			has_completed_focus = MEX_lay_down_the_cooperative_basis
+			NOT = {
+				has_idea = ROOT_diplomatic_effort
+			}
+			FROM = {
+				is_subject = no
+				is_in_faction = no
+				is_major = no #not inviting major countries
+			}
+		}
+
+		visible = {
+			is_subject = no
+			has_completed_focus = MEX_lay_down_the_cooperative_basis
+		}
+		fire_only_once = yes
+		cost = 50
+
+		ai_will_do = {
+			factor = 20
+		}
+
+		days_remove = 30
+
+		complete_effect = {
+			add_ideas = ROOT_diplomatic_effort
+		}
+
+		remove_effect = {
+			remove_ideas = ROOT_diplomatic_effort
+			FROM = { 
+				country_event = {
+					id = generic.5 
+					hours = 6 
+				}
+				add_opinion_modifier = { 
+					target = ROOT 
+					modifier = huge_increase
+				}
+				reverse_add_opinion_modifier = {
+					target = ROOT
+					modifier = huge_increase
+				}
+			}
+		}
+	}
+}
+
+
+MEX_meddling_in_foreign_affairs = {
+	MEX_organize_fifth_columnists_in_enemy_neighbor = { #Initially for Enemy European Neighbors -> Then other continents
+		name = SOV_organize_fifth_columnists_in_enemy_neighbor
+		priority = 10
+
+		icon = GFX_decision_generic_nationalism
+
+		ai_will_do = {
+			base = 0.7
+		}
+
+		target_trigger = {
+			FROM = {
+				exists = yes
+				has_war_with = ROOT
+				NOT = { original_tag = MEX }
+				any_controlled_state = {
+					is_in_home_area = yes
+					any_neighbor_state = {
+						is_controlled_by = ROOT
+					}
+				}
+				capital_scope = {
+					OR = {
+						is_on_continent = north_america
+						is_on_continent = south_america
+						is_on_continent = australia
+					}
+				}
+			}
+		}
+
+		allowed = {
+			original_tag = MEX
+		}
+
+		available = {
+			has_completed_focus = MEX_the_end_of_the_imperialist_era
+			FROM = {
+				has_civil_war = no
+				any_controlled_state = {
+					is_in_home_area = yes
+					is_capital = no
+				}
+			}
+			has_equipment = {
+			    infantry_equipment > 19999
+			}
+		}
+
+		visible = {
+			is_subject = no
+			FROM = {
+				exists = yes
+				NOT = { has_government = communism }
+			}
+			has_completed_focus = MEX_the_end_of_the_imperialist_era
+		}
+
+		cost = 150
+
+		fire_only_once = yes
+
+		days_remove = SOV_permanent_revolution_uprising_days
+
+		complete_effect = {
+			add_equipment_to_stockpile = {
+			    type = infantry_equipment
+			    amount = -20000
+			}
+			hidden_effect = {
+				FROM = {
+					set_country_flag = SOV_permanent_revolution_ignite_uprising_timer_flag
+					activate_mission = SOV_ignite_uprising_timer_mission
+				}
+			}
+		}
+
+		remove_effect = {
+			SOV_permanent_revolution_spawn_fifth_columnists_effect = yes
+		}
+	}
+
+	MEX_ignite_revolutionary_uprisings = {
+		name = SOV_ignite_revolutionary_uprisings
+		priority = 5
+
+		icon = generic_political_rally
+
+		target_trigger = {
+			FROM = {
+				exists = yes
+				NOT = { is_in_faction_with = ROOT }
+				NOT = { tag = ROOT }
+				NOT = { original_tag = MEX }
+				has_capitulated = no
+				NOT = { has_government = communism }
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1
+				FROM = {
+					communism > 0.4
+				}
+			}
+		}
+
+		allowed = {
+			original_tag = MEX
+		}
+
+		available = {
+			has_completed_focus = MEX_the_end_of_the_imperialist_era
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				communism > 0.1
+				NOT = { has_government = communism }
+			}
+		}
+
+		visible = {
+			country_exists = FROM
+			NOT = { has_war_with = FROM }
+			FROM = {
+				NOT = { is_in_faction_with = ROOT }
+				has_capitulated = no
+				NOT = { has_government = communism }
+				any_controlled_state = {
+					is_in_home_area = yes
+					any_neighbor_state = {
+						is_controlled_by = ROOT
+					}
+				}
+			}
+			has_completed_focus = MEX_the_end_of_the_imperialist_era
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		days_remove = 120
+
+		complete_effect = {
+			FROM = {
+				if = { #If country has banned communism, then add the weakened version of the NS
+					limit = {
+						has_country_flag = banned_communism_flag
+					}
+					add_timed_idea = {
+						idea = SOV_trotskyist_revolutionary_agitation_weakened
+						days = 120
+					}
+				}
+				else = {
+					add_timed_idea = {
+						idea = SOV_trotskyist_revolutionary_agitation
+						days = 120
+					}
+				}
+				country_event = { id = NSB_soviet_permanent_revolution.1 hours = 2 }
+			}
+			hidden_effect = {
+				FROM = {
+					add_ai_strategy = {
+						type = prepare_for_war
+						id = ROOT
+						value = 100
+					}
+				}
+			}
+		}
+
+		remove_effect = {
+			create_wargoal = {
+				type = topple_government
+				target = FROM
+				expire = 90
+			}
+		}
+	}
+
+	MEX_ignite_uprising_timer_mission = {
+		name = SOV_ignite_uprising_timer_mission
+		icon = generic_ignite_civil_war
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		days_mission_timeout = SOV.SOV_permanent_revolution_uprising_days
+
+		fire_only_once = yes
+
+		activation = {
+			always = no
+		}
+
+		visible = {
+			has_country_flag = SOV_permanent_revolution_ignite_uprising_timer_flag
+		}
+
+		cancel_if_not_visible = no
+
+		is_good = yes
+
+		timeout_effect = {
+			clr_country_flag = SOV_permanent_revolution_ignite_uprising_timer_flag
+			custom_effect_tooltip = SOV_ignite_uprising_timer_mission_tt
+		}
+	}
+}
+
+MEX_PEMEX_Situation = {
+	MEX_Stove = {
+		icon = oil
+		available = {
+			has_idea = uncontrolled_exports
+		}
+		cost = 100
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 1
+		}
+		modifier = {
+			consumer_goods_factor = -0.05
+		}
+		days_remove = 365
+	}
+	MEX_Charity = {
+		icon = generic_political_discourse
+		available = {
+			has_idea = uncontrolled_exports
+		}
+		cost = 100
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 1
+		}
+		modifier = {
+			consumer_goods_factor = -0.05
+		}
+		days_remove = 365
+	}
+}
+
+MEX_DGIPS = {
+	MEX_utilize_spy_cells_in_the_usa = {
+		icon = revolt
+		allowed = {
+			original_tag = MEX
+		}
+		available = {
+			has_completed_focus = MEX_strengthen_seccion_primera
+			NOT = { has_government = USA }
+		}
+		visible = {
+			has_completed_focus = MEX_strengthen_seccion_primera
+		}
+		cost = 150
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 0
+			modifier = {
+				factor = 100
+				MEX = {
+					OR = {
+						is_in_faction_with = GER
+						is_in_faction_with = JAP
+					}
+				}
+			}
+		}
+		complete_effect = {
+			custom_effect_tooltip = tt_MEX_racial_tensions
+			hidden_effect = {
+				country_event = { days = 30 id = mexico_zoot_suit.5 }
+			}
+		}
+	}
+	MEX_arrest_hilde_kruger = {
+		icon = generic_secret_service
+		allowed = {
+			original_tag = MEX
+		}
+		available = {
+			has_completed_focus = MEX_squash_foreign_propaganda
+			NOT = {
+				has_government = GER
+			}
+		}
+		visible = {
+			has_completed_focus = MEX_squash_foreign_propaganda
+		}
+		cost = 100
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 1
+		}
+		complete_effect = {
+			add_stability = 0.10
+		}
+	}
+	MEX_dismantle_foreign_synarchist_support = {
+		icon = revolt
+		allowed = {
+			original_tag = MEX
+		}
+		available = {
+			has_completed_focus = MEX_strengthen_seccion_primera
+			NOT = {
+				has_government = fascism
+			}
+		}
+		visible = {
+			any_other_country = {
+				has_completed_focus = CAN_support_a_synarchist_baja
+			}
+			has_idea = synarchist_support_surge
+		}
+		cost = 150
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 1
+		}
+		complete_effect = {
+			remove_ideas = synarchist_support_surge
+		}
+	}
+}
+
+prospect_for_resources = {
+	MEX_Camargo = {
+		icon = aluminium
+		highlight_states = {
+ 			highlight_state_targets = { 
+				state = 482
+			} 
+		}
+		available = {
+			has_tech = excavation3
+			num_of_civilian_factories_available_for_projects > 2
+			owns_state = 482
+			controls_state = 482
+		}
+		visible = {
+			NOT = { has_global_flag = mex_mtg_focus_tree }
+			owns_state = 482
+			controls_state = 482
+			482 = {
+				NOT = {
+					has_state_flag = Camargo_aluminium_developed
+				}
+			}
+		}
+		fire_only_once = yes
+		cost = 25
+		days_remove = 60
+		modifier = {
+			civilian_factory_use = 3
+		}
+		ai_will_do = {
+			factor = 1
+		}
+		remove_effect = { 
+			482 = { set_state_flag = Camargo_aluminium_developed } 
+			482 = {
+				add_resource = {
+					type = aluminium
+					amount = 8
+				}
+			}
+		}
+	}
+}
