@@ -153,7 +153,7 @@ naval_decision_category = {
 			has_tech = basic_battery
 			has_tech = electronic_mechanical_engineering
 			has_tech = early_ship_hull_heavy
-			has_tech = basic_secondary_battery
+			#has_tech = basic_secondary_battery
 			num_of_naval_factories > 4
 		}
 		visible = {
@@ -201,7 +201,7 @@ naval_decision_category = {
 			has_tech = gw_artillery
 			has_tech = electronic_mechanical_engineering
 			has_tech = early_ship_hull_cruiser
-			has_tech = basic_secondary_battery
+			#has_tech = basic_secondary_battery
 			has_tech = basic_torpedo
 			num_of_naval_factories > 3
 		}
@@ -297,13 +297,15 @@ the_return_of_the_old_guard_category = {
 			neutrality > 0.5
 		}
 
-		visible = {
+		visible = {			
 			NOT = { has_government = neutrality }
-#			OR = {
-				neutrality > 0.6
+			OR = {
+				neutrality > 0.5
+				has_idea_with_trait = staunch_monarchist
+				has_idea_with_trait = staunch_traditionalist
 				#flag doesn't exist (yet?)
-				#has_country_flag = open_up_political_discourse_neutrality
-#			}
+				has_country_flag = open_up_political_discourse_neutrality
+			}
 			#check_has_focus_tree_to_switch_to_neutrality = yes
 		}
 
@@ -331,6 +333,111 @@ the_return_of_the_old_guard_category = {
 			}
 		}
 	}
+	open_up_political_discourse_neutrality = {
+
+		icon = generic_political_discourse
+
+		available = {
+			fascism < 0.9
+			democratic < 0.9
+			communism < 0.9
+			neutrality < 0.9
+		}
+
+		visible = {
+			OR = {
+				has_idea_with_trait = staunch_monarchist
+				has_idea_with_trait = staunch_traditionalist
+			}
+			NOT = { has_country_flag = open_up_political_discourse_neutrality }
+			NOT = { has_government = neutrality }
+		}
+		
+		remove_trigger = {
+			has_government = neutrality
+		}
+		
+		fire_only_once = yes
+		
+		cost = 75
+		
+		complete_effect = {
+			set_country_flag = open_up_political_discourse_neutrality
+		}
+		
+		ai_will_do = {
+			factor = 3
+		}
+	}
+	
+	discredit_government_neutrality = {
+
+		icon = generic_speech
+
+		available = {
+			fascism < 0.8
+			democratic < 0.8
+			communism < 0.8
+			neutrality < 0.8
+			OR = {
+				has_idea_with_trait = staunch_monarchist
+				has_idea_with_trait = staunch_traditionalist
+			}
+		}
+
+		visible = {
+			has_country_flag = open_up_political_discourse_neutrality
+			OR = {
+				has_idea_with_trait = staunch_monarchist
+				has_idea_with_trait = staunch_traditionalist
+			}
+			NOT = { has_government = neutrality }
+		}
+		
+		remove_trigger = {
+			has_government = neutrality
+		}
+		
+		fire_only_once = yes
+		
+		cost = 70
+		days_remove = 30
+		remove_effect = {
+			add_stability = -0.010
+			if = {
+				limit = {
+					has_government = democratic
+				}
+				add_popularity = {
+					ideology = democratic
+					popularity = -0.1
+				}
+			}
+			if = {
+				limit = {
+					has_government = communism
+				}
+				add_popularity = {
+					ideology = communism
+					popularity = -0.1
+				}
+			}
+			if = {
+				limit = {
+					has_government = fascism
+				}
+				add_popularity = {
+					ideology = fascism
+					popularity = -0.1
+				}
+			}
+		}
+		
+		
+		ai_will_do = {
+			factor = 2
+		}
+	}	
 }
 
 crisis = {
@@ -386,6 +493,11 @@ crisis = {
 					AND = {
 						original_tag = ENG
 						has_government = democratic
+					}
+					AND = {
+						original_tag = SWE
+						has_government = communism
+						has_completed_focus = SWE_stockholm_internationale
 					}
 				}
 			}
@@ -910,6 +1022,103 @@ political_actions = {
 		}		
 	}
 	
+	r56_defeat_the_upa_in_996 = {
+
+		icon = generic_police_action
+
+		on_map_mode = map_and_decisions_view
+
+		name = SOV_defeat_the_upa_in_73
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 996
+			} 
+		}
+
+		priority = 100
+
+		available = {
+			ROOT = {
+				has_tech = tech_military_police
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_UPA_decision_inprogress
+					}
+					NOT = {
+						original_tag = SOV
+					}
+				}		
+			}
+			996 = {
+				is_fully_controlled_by = ROOT
+				is_core_of = RUT
+				OR = {
+					compliance > 25
+					is_core_of = ROOT
+				}
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}			
+			}			
+		}
+
+		allowed = {
+			NOT = {
+				original_tag = SOV
+			}
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 24
+		}
+		
+		fire_only_once = yes
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			ROOT = {
+				NOT = {
+					original_tag = SOV
+				}
+			}
+			996 = { 
+				is_core_of = RUT
+				is_controlled_by = ROOT
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}		
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				set_country_flag = r56_UPA_decision_inprogress
+			}
+		}
+		
+		remove_effect = {	
+			hidden_effect = {
+				add_command_power = -25
+				clr_country_flag = r56_UPA_decision_inprogress
+			}
+			996 = {
+				remove_dynamic_modifier = { modifier = r56_upa_state_modifier } 
+			}					
+		}		
+	}
+	
 	r56_declare_independence = {
 		icon = eng_trade_unions_demand
 
@@ -1014,14 +1223,12 @@ political_actions = {
 					has_defensive_war = yes
 					surrender_progress > 0.25
 					has_tech = r56_milita_formation
-					has_tech = volkssturm
 				}
 			}
 			else = {
 				OR = {
 					surrender_progress > 0.35
 					has_tech = r56_milita_formation 
-					has_tech = volkssturm
 				}
 			}
 			command_power > 24
@@ -1265,7 +1472,7 @@ economy_decisions = {
 	}
 	
 	r56_generic_investments = {
-		icon = generic_industry
+		icon = hol_attract_foreign_investors
 		cost = 120
 		target_trigger = {
 			FROM = {

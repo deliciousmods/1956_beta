@@ -3,6 +3,8 @@
 ###########################
 
 add_namespace = finland
+add_namespace = fin_news
+add_namespace = FIN_elections
 
 # Soviet Ultimatum
 country_event = {
@@ -23,8 +25,8 @@ country_event = {
 					any_other_country = {
 						is_major = yes
 						OR = {
-							is_in_faction_with = FIN
-							has_guaranteed = FIN
+							is_in_faction_with = ROOT
+							has_guaranteed = ROOT
 						}
 					}
 					has_idea = anti_soviet_pact
@@ -35,8 +37,22 @@ country_event = {
 			country_event = { days = 5 id = soviet.12 }
 			effect_tooltip = {
 				transfer_state = 146
-				remove_state_claim = 722
-				remove_state_claim = 147
+				if = {
+					limit = {
+						722 = {
+							is_claimed_by = SOV
+						}
+					}
+					remove_state_claim = 722
+				}
+				if = {
+					limit = {
+						147 = {
+							is_claimed_by = SOV
+						}
+					}
+					remove_state_claim = 147
+				}
 			}
 		}
 	}
@@ -291,75 +307,6 @@ country_event = {
 	}
 }
 
-#Surrender when Soviet has taken too much land
-country_event = {
-	id = finland.7
-	title = finland.7.t
-	desc = finland.7.d
-	picture = GFX_report_event_soviet_tanks_snow
-	
-	trigger = {
-		tag = FIN
-		has_war_with = SOV
-		surrender_progress > 0.25
-		has_civil_war = no
-		is_in_faction = no
-	}
-
-	mean_time_to_happen = { days = 20 }
-
-	fire_only_once = yes
-
-	#Surrender and offer territory
-	option = {
-		name = finland.7.a
-		ai_chance = {
-			base = 8
-		}
-		SOV = {
-			country_event = { id = finland.8 }
-		}
-		#add_ideas = fin_revenge
-		set_country_flag = winterwarlost 
-		add_ai_strategy = {
-			type = antagonize
-			id = "SOV"			
-			value = 200
-		}
-		custom_effect_tooltip = finland.7.a_tt
-		effect_tooltip = {
-			SOV = { 
-				white_peace = {
-					tag = FIN 
-					message = FIN_agree_peace 
-				} 
-			}
-			transfer_state = 146
-			transfer_state = 147
-			if = {
-				limit = {
-					722 = {
-						is_claimed_by = SOV
-					}
-				}
-				SOV = { remove_state_claim = 722 }
-			}
-		}
-	}
-
-	#Never give up!
-	option = {
-		name = finland.7.b
-		ai_chance = {
-			base = 2
-			modifier = {
-				factor = 0
-				is_historical_focus_on = yes
-			}
-		}
-	}
-}
-
 #Soviet response to Finish surrender
 country_event = {
 	id = finland.8
@@ -418,7 +365,7 @@ country_event = {
 	#Take it all
 	option = {
 		name = finland.8.b
-		add_political_power = -25
+		add_political_power = -75
 		ai_chance = {
 			base = 1
 			modifier = {
@@ -471,9 +418,9 @@ country_event = {
 	fire_only_once = yes
 	
 	trigger = {
-		tag = FIN
+		original_tag = FIN
 		has_completed_focus = fin_germantreatyfoc
-		GER = { has_offensive_war_with = SOV }
+		GER = { has_war_with = SOV }
 		OR = {
 			GER = {
 				OR = {
@@ -502,12 +449,12 @@ country_event = {
 					AND = {
 						has_full_control_of_state = 812
 						has_full_control_of_state = 813
-						has_full_control_of_state = 896
+						has_full_control_of_state = 968
 					}
 				}
 			}
 			SOV = {
-				surrender_progress > 0.22
+				surrender_progress > 0.25
 			}
 		}
 		SOV = {
@@ -580,7 +527,7 @@ country_event = {
 				expire = 0
 			}
 		}
-	
+		set_country_flag = r56_fin_trigger_con_war_front_control
 		hidden_effect = {
 			news_event = fin_news.3
 		}
@@ -592,14 +539,14 @@ country_event = {
 		set_country_flag = r56_backstabed_germany
 		custom_effect_tooltip = FIN_lesser_backstab_tt
 		ai_chance = {
-			factor = 1.75
+			factor = 0
 			modifier = {
 				is_historical_focus_on = yes
 				factor = 0
 			}
 			modifier = {
 				is_historical_focus_on = no
-				add = 0.25
+				add = 2 #50/50
 			}
 		}
 		GER = {
@@ -721,7 +668,7 @@ country_event = {
 				is_historical_focus_on = yes
 			}			
 		}
-		FIN = { country_event = { id = finland.13  hours = 1 } }
+		FIN = { country_event = { id = finland.13  hours = 2 } }
 	}
 }
 
@@ -1999,7 +1946,7 @@ country_event = {
 		FIN = { 
 			country_event = { id = finland.52 } 
 			transfer_state = 99
-			transfer_state = 892
+			transfer_state = 964
 		}
 	}
 		
@@ -2043,7 +1990,7 @@ country_event = {
 			create_wargoal = {
 				type = take_state
 				target = DEN
-				generator = { 99 892 }
+				generator = { 99 964 }
 			}
 			country_event = { id = finland.54 }
 		}
@@ -2848,7 +2795,7 @@ country_event = {
 	
 	#Move it to Copenhagen
 	option = {
-		name = finland.82.d
+		name = finland.82.e
 		set_capital = { state = 37 }
 	}
 }
@@ -3011,6 +2958,453 @@ country_event = {
 			custom_effect_tooltip =  FIN_GER_Units_return_2_tt
 			hidden_effect = {
 				load_oob = "FIN_GER_return_2"
+			}
+		}
+	}
+}
+
+
+
+# Finnish-German Diplomacy
+news_event = {
+	id = fin_news.1
+	title = fin_news.1.t
+	desc = fin_news.1.d
+	picture = GFX_news_event_017
+	
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = { 
+			has_government = fascism 
+			NOT = {
+				OR = {	
+					original_tag = GER
+					original_tag = FIN
+					original_tag = ENG
+					original_tag = SOV
+				}
+			}
+		}
+		name = fin_news.1.a
+	}
+
+	option = {
+		trigger = { 
+			has_government = communism 
+			NOT = {
+				OR = {	
+					original_tag = GER
+					original_tag = FIN
+					original_tag = ENG
+					original_tag = SOV
+				}
+			}
+		}
+		name = fin_news.1.b
+	}
+	
+	option = {
+		name = fin_news.1.h
+		trigger = {
+			NOT = {
+				OR = {	
+					original_tag = GER
+					original_tag = FIN
+					original_tag = ENG
+					original_tag = SOV
+				}
+			}
+			NOT = { has_government = fascism }
+			NOT = { has_government = communism }	
+		}
+	}
+
+	option = {
+		name = fin_news.1.c
+		trigger = { original_tag = GER }
+	}
+
+	option = {
+		name = fin_news.1.e
+		trigger = { original_tag = FIN }
+	}
+
+	option = {
+		name = fin_news.1.f
+		trigger = { original_tag = SOV }
+	}
+
+	option = {
+		name = fin_news.1.g
+		trigger = { original_tag = ENG }
+	}
+	
+ }	
+ 
+ #FInland joins axis.
+ 
+news_event = {
+	id = fin_news.2
+	title = fin_news.2.t
+	desc = fin_news.2.d
+	picture = GFX_news_event_mannerheim_hitler
+
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = fin_news.2.a
+		trigger = {
+			NOT = {
+				tag = GER
+				original_tag = FIN
+				tag = SOV
+			}
+		}
+	}
+	
+	option = { 
+		name = fin_news.2.b
+		trigger = {
+			OR = {
+				tag = GER 
+				original_tag = FIN		
+			}
+		}
+	}
+		
+	option = { 
+		name = fin_news.2.c
+		trigger = {
+			tag = SOV		
+		}
+	}
+}
+ 
+#Continuation War
+news_event = {
+	id = fin_news.3
+	title = fin_news.3.t
+	desc = fin_news.3.d
+	picture = GFX_news_event_ryti_radio
+
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = fin_news.3.a
+		trigger = {
+			NOT = {
+				OR = {
+					original_tag = GER
+					original_tag = FIN
+					original_tag = SOV
+				}
+			}	
+		}
+	}
+	
+	option = { 
+		name = fin_news.3.b
+		trigger = {
+			OR = {
+				original_tag = GER 
+				original_tag = FIN				
+			}
+		}
+	}
+			
+	option = { 
+		name = fin_news.3.c
+		trigger = {
+			original_tag = SOV		
+		}
+	}	
+}
+ 
+	#Birth of the Nordic Defencive Alliance
+news_event = {
+	id = fin_news.4
+	title = fin_news.4.t
+	desc = fin_news.4.d
+	picture = news_event_generic_rally_3
+
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = fin_news.4.a
+		trigger = {
+			NOT = {
+				original_tag = FIN
+			}
+		}
+	}
+	
+	option = { 
+		name = fin_news.4.b
+		trigger = {
+			original_tag = FIN		
+		}
+	}
+}
+ 
+	#United Nordics
+news_event = {
+	id = fin_news.5
+	title = fin_news.5.t
+	desc = fin_news.5.d
+	picture = GFX_news_event_troenderbataljonen_at_skafferhullet_1940
+
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = fin_news.5.a
+		trigger = {
+			NOT = {
+				original_tag = FIN
+				tag = SCA
+			}
+		}
+	}
+	
+	option = {
+		name = fin_news.5.b
+		trigger = {
+			OR = {
+				original_tag = FIN
+				tag = SCA
+			}
+		}
+	}
+}
+
+# Options and results are now hard coded to doing focuses. 
+# Election of 1937: Svinhufvund vs Kallio
+country_event = { #Kallio being leader moved to doing focuses instead of dates fyi
+	id = FIN_elections.1
+	title = FIN_elections.1.t
+	desc = FIN_elections.1.d
+	picture = GFX_report_event_election_vote
+
+	fire_only_once = yes
+
+	trigger = {
+		tag = FIN
+		OR = {
+			has_completed_focus = fin_interfoc
+			has_completed_focus = fin_comfoc
+			has_completed_focus = fin_neutralfoc
+			has_completed_focus = fin_nationalismfoc
+		}
+	}
+	
+	option = { 	
+		name = FIN_elections.1.a
+		ai_chance = {
+			factor = 1
+		}
+		trigger = {
+			OR = {
+				has_completed_focus = fin_interfoc
+				has_completed_focus = fin_comfoc
+			}
+		}	
+		set_party_name = { ideology = democratic long_name = FIN_kokoomusparty_long name = FIN_kokoomusparty }
+		add_popularity = {
+			ideology = democratic
+			popularity = 0.02
+		}
+	}
+
+	option = { 
+		name = FIN_elections.1.b
+		trigger = {
+			OR = {
+				has_completed_focus = fin_neutralfoc
+				has_completed_focus = fin_nationalismfoc
+			}
+		}	
+		ai_chance = {
+			factor = 1
+		}
+		set_politics = {
+			ruling_party = neutrality
+			elections_allowed = yes
+		}
+		add_popularity = {
+			ideology = neutrality
+			popularity = 0.21
+		}
+		if = {
+			limit = {
+				has_completed_focus = fin_nationalismfoc
+			}
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.06
+			}
+		}
+		
+	}
+}
+
+# 1940 Kyösti Kallio resigns
+country_event = {
+	id = FIN_elections.2
+	title = FIN_elections.2.t
+	desc = FIN_elections.2.d
+	picture = GFX_report_event_election_vote
+
+	fire_only_once = yes
+
+	trigger = {
+		has_country_leader = {
+			name = "Kyösti Kallio"
+			ruling_only = yes
+		}
+		OR = {
+			has_completed_focus = fin_guardfoc #needs to get out of here one way or another by this time 
+			date > 1940.12.19 #irl death date 
+		}
+	}
+
+	
+	option = { 	
+		name = FIN_elections.2.a
+		kill_country_leader = yes
+		set_party_name = { ideology = democratic long_name = FIN_edistyspuolue_long name = FIN_edistyspuolue }
+		set_politics = {
+			ruling_party = democratic
+			elections_allowed = yes
+		}
+		add_popularity = {
+			ideology = democratic
+			popularity = 0.03
+		}
+		FIN_risto_heikki_ryti = {
+			promote_character = yes
+		}
+	}
+}
+
+#Mannerheim becomes defacto leader/elected
+country_event = {
+	id = FIN_elections.3
+	title = FIN_elections.3.t
+	desc = FIN_elections.3.d
+	picture = GFX_report_event_election_vote
+
+	fire_only_once = yes 
+
+	trigger = {
+		tag = FIN
+		OR = {
+			AND = {
+				has_country_leader = {
+					name = "Risto Heikki Ryti"
+					ruling_only = yes
+				}
+				date > 1944.8.03
+			}
+			AND = {
+				has_country_leader = {
+					name = "Risto Heikki Ryti"
+					ruling_only = yes
+				}
+				OR = {
+					has_completed_focus = fin_deffoc
+					has_completed_focus = fin_consprictfoc
+				}
+				OR = {
+					SOV = {
+						AND = { 
+							has_full_control_of_state = 146
+							NOT = {
+								is_in_faction_with = FIN
+							}
+						}
+					}
+					ROOT = {
+						OR = {
+							has_idea = fin_revenge
+							has_country_flag = winterwarlost
+						}
+					}
+				}
+			}
+		}
+	}
+
+	mean_time_to_happen = { days = 30 }
+	
+	option = {
+		ai_chance = {
+			factor = 1
+		}
+		name = FIN_elections.3.a
+		set_politics = {
+			ruling_party = neutrality
+			elections_allowed = yes
+		}
+		add_popularity = {
+			ideology = neutrality
+			popularity = 0.14
+		}
+		add_country_leader_role = {
+			Character = FIN_carl_mannerheim
+			Promote_leader = yes
+			Country_leader = {
+		  		ideology = centrism
+				expire = 1965.1.1.1
+			  	traits = {
+					nationalistic_tendencies fierce_patriot army_connections defacto_leader 
+			   	}
+				desc = FIN_carl_mannerheim_leader_desc
+			}
+		}
+	}
+		
+}
+
+country_event = { #removes defacto trait from Mannerheim. 
+	id = FIN_elections.4
+	title = FIN_elections.4.t
+	desc = FIN_elections.4.d
+	picture = GFX_report_event_election_vote
+
+	fire_only_once = yes 
+
+	hidden = yes
+
+	trigger = {
+		tag = FIN
+		has_country_leader = {
+			name = "Carl G. Mannerheim"
+			ruling_only = yes
+		}
+		date > 1944.8.01
+		has_country_leader_with_trait = defacto_leader 
+	}
+
+	option = {
+		ai_chance = {
+			factor = 1
+		}
+		name = FIN_elections.4.a
+		remove_country_leader_trait = defacto_leader 
+		hidden_effect = {
+			set_country_leader_description = {
+				ideology = neutrality
+				desc = FIN_carl_mannerheim_leader_clear
 			}
 		}
 	}

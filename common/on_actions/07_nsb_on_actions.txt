@@ -2,38 +2,6 @@ on_actions = {
 	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
 	on_state_control_changed = {
 		effect = {
-			if = {
-				limit = {
-					FROM.FROM = {
-						is_core_of = SOV
-					}
-					FROM = {
-						tag = SOV
-					}
-				}
-				SOV = { set_country_flag = achievement_lost_state }
-			}
-		}
-		effect = {
-			if = {
-				limit = {
-					FROM.FROM = {
-						is_core_of = GER
-						NOT = { #these two cores are given to germany in the Danzig or War event, but the states are not transfered immediately
-							state = 85
-							state = 807
-							state = 8 #Luxembourg & Alsace
-							state = 28
-						}
-					}
-					has_global_flag = achievement_france_surrender
-					NOT = { tag = SOV }
-					NOT = { tag = GER }#in case Germany recaptures a state
-				}
-				set_global_flag = GER_lost_core_state
-			}
-		}
-		effect = {
 			IF = {
 				limit = {
 					FROM.FROM = { 
@@ -491,41 +459,6 @@ on_actions = {
 					} # Trigger the Post Civil War effects
 				}
 			}
-			#Make Danzig demilitarised again
-			if = {
-				limit = {
-					original_tag = POL
-					NOT = {
-						has_completed_focus = POL_ban_the_nazi_party
-					}
-				}
-				85 = {
-					add_core_of = DNZ
-					set_demilitarized_zone = yes
-					add_dynamic_modifier = { modifier =  international_city }
-				}
-				if = {
-					limit = {
-						has_completed_focus = POL_clamp_down_on_danzig
-					}
-					85 = {
-						remove_dynamic_modifier = {
-							modifier = international_city
-						}
-						add_dynamic_modifier = {
-							modifier = international_city_2
-						}
-						force_enable_resistance = { 
-							clear = no
-							occupier = POL
-							occupied = DNZ
-						}
-						start_resistance = DNZ
-						set_resistance = 40
-						set_compliance = 30
-					}
-				}
-			}
 			if = {
 				limit = {
 					has_DLC = "No Step Back"
@@ -552,9 +485,8 @@ on_actions = {
 					}
 					load_focus_tree = { tree = polish_focus keep_completed = no }
 					mark_focus_tree_layout_dirty = yes
-					unlock_national_focus = POL_restore_the_sejm
-					unlock_national_focus = POL_internationalism
-					unlock_national_focus = POL_liberalism_focus
+					unlock_national_focus = POL_radicalize_the_front
+					unlock_national_focus = POL_The_Great_Peasant_Strike
 				}
 			}
 			# Give back POL focus tree to Sanation gov if they win the civil war against the peasants.
@@ -1486,17 +1418,6 @@ on_actions = {
 	#FROM = defending side
 	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
 	on_war_relation_added = { # ---> Fires in 2nd place (1st is on_declare_war) -> This one is triggered ALWAYS 
-		effect = {
-			if = {
-				limit = {
-					original_tag = GER
-					FROM = {
-						original_tag = POL
-					}
-				}
-				SOV = { set_country_flag = achievement_GER_attacked_POL_first }
-			}
-		}
 		effect = { #SOV - Great Patriotic War and Third Five Year Plan
 			if = {
 				limit = {
@@ -1642,7 +1563,7 @@ on_actions = {
 						limit = {
 							has_state_flag = SOV_soviet_resource_rights_iran_flag
 						}
-						PREV = { remove_resource_rights = PREV }
+						SOV = { remove_resource_rights = PREV }
 						clr_state_flag = SOV_soviet_resource_rights_iran_flag
 					}
 				}
@@ -1676,7 +1597,7 @@ on_actions = {
 						limit = {
 							has_state_flag = SOV_british_resource_rights_iran_flag
 						}
-						PREV = { remove_resource_rights = PREV }
+						ENG = { remove_resource_rights = PREV }
 						clr_state_flag = SOV_british_resource_rights_iran_flag
 					}
 				}
@@ -1971,7 +1892,7 @@ on_actions = {
 			#Set Iranian initial states (for Anglo-Soviet invasion of Iran)
 			PER = {
 				every_owned_state = {
-					add_to_array = { SOV_iranian_initial_states = PREV }
+					add_to_array = { SOV_iranian_initial_states = THIS }
 				}
 			}
 		}
@@ -1979,38 +1900,6 @@ on_actions = {
 
 	# ROOT is capitulated country, FROM is winner
 	on_capitulation = {
-		effect = {
-			if = {
-				limit = {
-					original_tag = GER
-					FROM = { tag = SOV }
-					SOV = {
-						NOT = { has_global_flag = GER_lost_core_state }
-						has_global_flag = achievement_france_surrender
-					}
-				}
-				SOV = { set_country_flag = achievement_race_for_germany }
-			}
-		}
-		effect = {
-			if = {
-				limit = {
-					tag = GER
-					FROM = {
-						original_tag = SOV
-					}
-					SOV = {
-						casualties_inflicted_by = {
-							opponent = GER
-							thousands < 1000
-						}
-					}
-				}
-				SOV = {
-					set_country_flag = achievement_no_statistics
-				}
-			}
-		}
 		#Soviet / Anglo-Soviet Invasion of Iran
 		effect = {
 			if = {
@@ -2153,56 +2042,6 @@ on_actions = {
 				}
 			}
 		}
-
-		effect = {
-			if = {
-				limit = {
-					tag = SOV
-					FROM = { 
-						tag = GER 
-					}
-					FROM = {
-						has_country_flag = achievement_stalingrad_not_taken
-					}
-				}
-				FROM = { set_country_flag = achievement_not_much_fun_in_stalingrad }
-			}
-		}
 	}
-	#ROOT = attacking side
-	#FROM = defending side
-	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
-	on_war_relation_added = {
-		effect = {
-			if = {
-				limit = {
-					tag = GER
-					FROM = { tag = SOV }
-				}
-			}
-			GER = {
-				set_country_flag = achievement_stalingrad_not_taken #will be removed in on_state_control_change if Germany takes Stalingrad
-			}
-		}
-	}
-
-	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
-	on_state_control_changed = {
-		effect = {
-			if = {
-				limit = {
-					FROM.FROM = {
-						state = 217
-					}
-					tag = GER
-					has_country_flag = achievement_stalingrad_not_taken
-					divisions_in_state = { state = 217 size > 1 } #only happens if Germany has at least one division in the state, because state control changes before on_capitulation fires
-				}
-				clr_country_flag = achievement_stalingrad_not_taken
-			}
-		}
-	}
-
-	
 }
 

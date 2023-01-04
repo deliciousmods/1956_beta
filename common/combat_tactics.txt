@@ -20,7 +20,16 @@ tactic_basic_attack = {
 	
 	active = yes
 
-	base =  { factor = 4 }
+	base =  { 
+		factor = 4
+			modifier = {
+			add = -4
+			AND = {
+				has_global_flag = planned_attack
+				min_planning > .15
+				}
+			}
+	}
 	picture = attack
 	
 	countered_by = tactic_counterattack
@@ -40,6 +49,8 @@ tactic_basic_defend = {
 	base =  { factor = 4 }
 	picture = defend
 	
+	countered_by = tactic_double_envelopment
+
 	defender = 0.05
 }
 
@@ -61,7 +72,6 @@ tactic_counterattack = { # counters basic attack, assault
 		}
 	}
 	picture = counterattack
-	
 	defender = 0.25
 }
 
@@ -79,17 +89,15 @@ tactic_assault = {
 		factor = 2
 		modifier = {
 			add = 2
-
 			has_trait = aggressive_assaulter
 		}
 
 		modifier = {
-			factor = 0.2
-
-			NOT = { is_fighting_in_terrain = urban }
+			add = 2
+			is_fighting_in_terrain = urban
+			}
 		}
-
-	} #Revisit ideally this should be more common in urban terrain
+	#Revisit ideally this should be more common in urban terrain
 	
 	picture = assault
 	countered_by = tactic_counterattack
@@ -110,6 +118,8 @@ tactic_cc_attack = {
 	
 	base =  { factor = 4 }
 	picture = cc_attack
+	countered_by = tactic_cc_garrison_building
+	
 	display_phase = close_combat
 
 	attacker = 0.1			#attacker gets a bonus to doing damage
@@ -143,6 +153,7 @@ tactic_cc_storm = {
 	base =  { factor = 2 }
 	picture = cc_storm
 	display_phase = close_combat
+	
 
 	attacker = 0.2			#attacker gets a bonus to doing damage
 	defender = 0.2
@@ -179,6 +190,97 @@ tactic_cc_withdraw = {
 	
 	attacker = -0.05
 	defender = -0.05
+}
+
+#modded CC
+tactic_cc_flamethrower_attack = { 
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		OWNER = { has_tech = flamethrower }
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 2	
+	}
+	picture = cc_flamethrower_attack
+	
+	
+	display_phase = close_combat
+
+	attacker = 0.1			#attacker gets a bonus to doing damage
+}
+
+tactic_cc_occupy_building = { 
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		is_fighting_in_terrain = urban
+	}
+	
+	active = yes
+	
+	base =  {
+		factor = 1 
+		modifier = {
+			add = 2
+			has_trait = urban_assault_specialist
+		}
+	}
+	
+	picture = cc_occupy_building
+	display_phase = close_combat
+
+	attacker = .1	#attacker gets a bonus to doing damage
+	defender = -.05
+	countered_by = tactic_cc_flamethrower_defend
+}
+
+tactic_cc_flamethrower_defend = { 
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		OWNER = { has_tech = flamethrower }
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 2
+	}
+	picture = cc_flamethrower_defend
+	display_phase = close_combat
+	
+	defender = 0.1
+	countered_by = tactic_cc_storm
+}
+
+tactic_cc_garrison_building = { 
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		is_fighting_in_terrain = urban
+	}
+	
+	active = yes
+	
+	base = {
+		factor = 4
+
+	}
+	picture = cc_garrison_building
+	display_phase = close_combat
+
+	defender = .1	#attacker gets a bonus to doing damage
+	attacker = -0.05
+	attacker_movement_speed = -0.5
+	countered_by = tactic_cc_flamethrower_attack
 }
 
 
@@ -858,6 +960,8 @@ tactic_barrage = { #Superior firepower attacker tactic
 	
 	attacker = 0.1
 	defender = -0.2	
+	
+	countered_by = tactic_counter_battery_fire
 }
 
 tactic_double_envelopment = { #Asymmetrical warfare attacker tactic
@@ -875,7 +979,7 @@ tactic_double_envelopment = { #Asymmetrical warfare attacker tactic
 
 	attacker = 0.1
 	attacker_movement_speed = 0.1
-	defender = -0.1
+	defender = -0.15
 
 	countered_by = tactic_overwhelming_fire
 }
@@ -947,3 +1051,56 @@ tactic_masterful_blitz = { #Improved version of Blitz for Soviets
 	defender = -0.2
 }
 
+tactic_counter_battery_fire = { #Skill enough to counter artillery
+
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = no
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 0 
+		modifier = {
+			add = 1
+			AND = {
+				skill > 3
+				skill_advantage > 1
+			}
+		}
+		modifier = {
+			add = 1
+			AND = {
+				skill > 3
+				skill_advantage > 2
+			}
+		}
+		modifier = {
+			add = 1
+			AND = {
+				skill > 3
+				recon_advantage > 0
+			}
+		}
+		modifier = {
+			add = 1
+			AND = {
+				skill > 3
+				recon_advantage > 1
+			}
+		}
+		modifier = {
+			add = 2
+			AND = {
+				recon_advantage > 2
+			}
+		}		
+	}
+	
+	picture = counter_battery_fire
+	
+	attacker = -0.2
+	
+}
