@@ -16,6 +16,8 @@
 #|_| |_|_\\___/|___/ \___/ \___| |_| |___\___/|_|\_|
 #
 
+
+
 	GER_we_dont_really_need_those = {
 		allowed = {
 			original_tag = GER
@@ -29,7 +31,7 @@
 	
 		ai_strategy = {
 			type = equipment_variant_production_factor
-			id = strat_bomber_equipment
+			id = armored_car_equipment
 			value = -200
 		}
 		
@@ -41,7 +43,7 @@
 		
 		ai_strategy = {
 			type = equipment_variant_production_factor
-			id = flying_boat_equipment
+			id = strat_maritime_equipment
 			value = -200
 		}	
 	}
@@ -59,32 +61,36 @@
 	
 		abort_when_not_enabled = yes
 	
-		ai_strategy = { type = equipment_production_factor id = armor               value = 35 }
+		ai_strategy = { type = equipment_production_factor id = armor  value = 35 }	
 	}
 	
 	GER_avoid_light_tank_production = {
 		allowed = { tag = GER }
 		enable = {
 			has_army_manpower = { size > 550000 }
-			
-			OR = { has_war = no num_of_military_factories > 50 }
-			
-			NOT = { has_army_size = { type = armor size > 20 } has_army_manpower = { type = armor size > 200000 } }
+			date > 1938.1.1
 		}
 	
 		abort_when_not_enabled = yes
 		
-		ai_strategy = { type = equipment_variant_production_factor id = light_tank_chassis value = -200 }
+		ai_strategy = { type = equipment_variant_production_factor id = light_tank_chassis value = -20 }
+
+		#keep one on it though
+		ai_strategy = { 
+			type = equipment_production_min_factories
+			id = armor
+			value = 1
+		}
 	}
 	
-	GER_build_750k_army_first = {
+	GER_build_800k_army_first = {
 		enable = {
 			original_tag = GER
-			has_army_manpower = { size < 750000 }
+			has_army_manpower = { size < 800000 }
 		}
 
 		abort = {	
-			has_army_manpower = { size > 750000 }
+			has_army_manpower = { size > 800000 }
 		}
 		
 		abort_when_not_enabled = yes
@@ -92,13 +98,10 @@
 		ai_strategy = {
 			type = role_ratio
 			id = infantry
-			value = 30
+			value = 35
 		}
-		ai_strategy = {
-			type = land_xp_spend_priority
-			id = division_template
-			value = -200
-		}
+
+		ai_strategy = { type = force_build_armies value = 125 }
 	}
 	
 	GER_build_1_5M_army = {
@@ -109,7 +112,7 @@
 		}
 		abort_when_not_enabled = yes
 	
-		ai_strategy = { type = force_build_armies id = "GER" value = 100 }
+		ai_strategy = { type = force_build_armies value = 100 }
 
 	}
 	
@@ -121,7 +124,7 @@
 		}
 		abort_when_not_enabled = yes
 	
-		ai_strategy = { type = force_build_armies id = "GER" value = 200 }
+		ai_strategy = { type = force_build_armies value = 75 }
 	}
 
 #  ___ _  _ ___  _   _ ___ _____ _____   __
@@ -159,6 +162,35 @@
 		ai_strategy = {
 			type = ignore
 			id = "ADR"
+			value = 100
+		}
+	}
+
+	GER_r56_mirco_state_lol_part_2 = {
+		allowed = {
+			original_tag = GER
+		}
+	
+		enable = {
+			is_historical_focus_on = yes
+			date < 1943.1.1 #Ill come for you sooner
+			country_exists = LIE	
+			LIE = {
+				is_puppet = no
+			}
+		}
+	
+		abort = {
+			NOT = {
+				country_exists = LIE
+			}
+		}
+	
+		abort_when_not_enabled = yes
+	
+		ai_strategy = {
+			type = ignore
+			id = "LIE"
 			value = 100
 		}
 	}
@@ -205,12 +237,12 @@
 		ai_strategy = {
 			type = antagonize
 			id = "POL"
-			value = 500
+			value = 999
 		}
 		ai_strategy = {
 			type = declare_war
 			id = "POL"
-			value = 500
+			value = 999
 		}
 	}
 	
@@ -435,10 +467,11 @@
 		enable = {
 			#tag = GER
 			has_government = fascism
-			is_historical_focus_on = no
+			#is_historical_focus_on = no
 			GER = {
 				has_completed_focus = GER_soviet_invasion
 				is_major = yes
+				is_neighbor_of = SOV
 			}
 			SOV = {
 				exists = yes
@@ -459,13 +492,50 @@
 		ai_strategy = {
 			type = antagonize
 			id = "SOV"
-			value = 300
+			value = 999
 		}
 			
 		ai_strategy = {
 			type = declare_war
 			id = "SOV"
-			value = 300
+			value = 999
+		}
+	}
+
+	r56_GER_dont_backdoor_russia_with_the_finish_front = { #Pro gamer move, but doing this is a kind of a dick thing to do
+		allowed = {
+			original_tag = GER
+		}
+	
+		enable = {
+			ROOT = {
+				has_government = fascism
+				has_war_with = SOV
+			}		
+			FIN = {
+				exists = yes
+				has_war_with = SOV
+				is_ai = yes #you can help a player 
+				is_neighbor_of = SOV
+				OR = {
+					has_completed_focus = fin_germantreatyfoc
+					is_in_faction_with = ROOT
+				}
+			}
+		}
+		
+		abort_when_not_enabled = yes
+	
+		ai_strategy = {
+			type = area_priority
+			id = southern_finland
+			value = -250
+		}
+	
+		ai_strategy = {
+			type = front_unit_request
+			area = southern_finland
+			value = -250
 		}
 	}
 	
@@ -479,14 +549,14 @@
 			GER = {
 				has_government = fascism
 				has_country_flag = r56_GER_endsieg_event_happened
-				surrender_progress > 0.14
+				surrender_progress > 0.15
 				has_war_with = SOV
 			}		
 		}
 		
 		abort_when_not_enabled = yes
 	
-		#Dialed back since they comeback once via this
+		#Dialed back since they cameback with this strat usage in one playtest...
 		ai_strategy = {
 			type = area_priority
 			id = germany_endsieg_front
@@ -514,7 +584,7 @@
 		ai_strategy = { #the allies will be nicer to us...
 			type = front_unit_request
 			area = metropolitan_france
-			value = -75
+			value = -65
 		}
 	
 		ai_strategy = { #Still need to hold here
@@ -528,8 +598,6 @@
 			id = den_nor_front
 			value = 100
 		}
-	
-		
 	}
 	
 	GER_save_some_stuff_in_the_back_for_late_war_or_things_will_get_ugly = {
@@ -540,9 +608,10 @@
 		enable = {
 			#original_tag = GER
 			date > 1941.1.1 #start the stockpile at this date
+			date < 1943.4.1 #Okay, time to go broke
 			GER = {
 				is_major = yes
-				surrender_progress < 0.02
+				surrender_progress < 0.01
 				NOT = {
 					has_war_with = SOV
 				}
@@ -664,14 +733,20 @@
 	
 		enable = {
 			#tag = GER
-			has_global_flag = FRA_already_surrendered
-			date > "1941.1.1"
+			OR = {
+				has_global_flag = FRA_already_surrendered
+				FRA = {
+					has_war_with = GER
+					has_capitulated = yes
+				}
+			}
+			date > "1940.5.5"
 			GER = {
 				has_government = fascism
 				has_war = yes
 				is_in_faction_with = ITA
 				is_neighbor_of = ITA
-				surrender_progress < 0.02
+				surrender_progress < 0.01
 				OR = {
 					has_war_with = ENG
 					has_war_with = FRA
@@ -770,21 +845,10 @@
 	
 		abort_when_not_enabled = yes
 		
-		ai_strategy = {
-	        type = area_priority
-	        id = suez
-	        value = 10
-	    }
-	
-		ai_strategy = {
-			type = front_unit_request
-			area = suez
-			value = 10
-		}
 	
 		ai_strategy = {
 			 	type = put_unit_buffers
-			 	ratio = 0.02
+			 	ratio = 0.01 #about 1-3 Divs depending on game state. 
 			 	states = { 
 					451
 					663
@@ -796,7 +860,9 @@
 					665
 					458
 					447
-					446
+					907
+					911
+					995
 				}
 			area = suez
 			subtract_invasions_from_need = yes
@@ -1231,7 +1297,6 @@
 	
 		ai_strategy = {
 			type = force_build_armies
-			id = "GER"
 			value = 100 
 		}
 	}
@@ -1382,6 +1447,12 @@
 			id = "CZE"
 			value = -300
 		}
+
+		ai_strategy = {
+			type = declare_war
+			id = "CZE"
+			value = -300
+		}
 	}
 	
 	r56_GER_hitler_helps_contested_mussolini = {
@@ -1418,6 +1489,9 @@
 		enable = {
 			has_war_with = POL
 			is_historical_focus_on = yes
+			FRA = {
+				is_ai = yes
+			}
 		}
 	
 		abort = {
@@ -1435,7 +1509,44 @@
 	
 			tag = FRA
 	
-			ratio = 0.21
+			ratio = 0.22
+	
+			priority = 100
+			ordertype = front
+			execution_type = careful
+		}
+	}
+
+	
+	GER_hunker_down_now_but_FRA_is_player_so_we_respect_them_more = {
+		allowed = {
+			original_tag = GER
+		}
+	
+		enable = {
+			has_war_with = POL
+			is_historical_focus_on = yes
+			FRA = {
+				is_ai = no
+			}
+		}
+	
+		abort = {
+			OR = {
+				date > 1940.1.1
+				POL = {
+					exists = no
+					has_capitulated = yes
+				}
+			}
+		}
+	
+		ai_strategy = {
+			type = front_control
+	
+			tag = FRA
+	
+			ratio = 0.24
 	
 			priority = 100
 			ordertype = front
