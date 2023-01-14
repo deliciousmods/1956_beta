@@ -213,6 +213,73 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}	
 	focus = {
+		id = UKR_protect_crimea
+		icon = GFX_focus_generic_treaty
+		available = { 
+			is_subject = no 
+			#is_faction_leader = yes
+			CRI = {
+				NOT = {
+					is_puppet = yes
+					is_in_faction = yes					
+				}
+			}
+		}
+	 	prerequisite = { focus = UKR_deterrence }
+	 	bypass = {
+	 		RUT = {
+	 			has_war_with = ROOT
+	 		}
+	 	}
+		x = -2
+		y = 1
+		relative_position_id = UKR_deterrence
+		cost = 5
+		ai_will_do = {
+			factor = 1
+		}
+		completion_reward = {
+			if = {
+				limit = {
+					137 = {
+						is_claimed_by = ROOT
+					}
+				}
+				ROOT = {
+					remove_state_claim = 137
+				}
+				add_stability = 0.1
+			}
+			else = {
+				add_stability = 0.05
+			}
+			if = {
+				limit = {
+					is_in_faction = yes
+					CRI = {
+						has_government = UKR
+					}
+				}
+				CRI = { country_event = generic.5 }
+			}
+			else_if = {
+				limit = {
+					CRI = {
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}	
+					}					
+				}
+				ROOT = {
+					give_guarantee = CRI
+				}				
+			}
+			
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}	
+	focus = {
 		id = UKR_why_we_fight
 		icon = GFX_goal_generic_propaganda
 		prerequisite = { focus = UKR_deterrence}
@@ -707,6 +774,10 @@ focus_tree = {
 
 		available_if_capitulated = yes
 
+		available = {
+			has_government = neutrality
+		}
+
 		completion_reward = {
 			division_template = {
 				name = "Cossack Division"
@@ -771,16 +842,18 @@ focus_tree = {
 
 				add_ideas = proper_heritage_spirit
 			}	
-			add_ideas = UKR_cossack_heritage_idea				
+			add_ideas = UKR_cossack_heritage_idea	
+			add_ideas = RUT_idea_conscript_management			
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MANPOWER }
 	}
+		
 	focus = {
 		id = UKR_demand_ukrainian_bessarabia
 		icon = GFX_focus_generic_attack_romania
-		prerequisite = { focus = UKR_cossack_heritage }
-		x = 0
-		y = 2
+		prerequisite = { focus = UKR_cult_of_action focus = UKR_cossack_heritage }
+		x = 6
+		y = 1
 		relative_position_id = UKR_cossack_heritage
 
 		cost = 10
@@ -839,6 +912,101 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MANPOWER }
 	}	
 	focus = {
+		id = UKR_embrace_the_1919_map
+		icon = GFX_goal_generic_more_territorial_claims
+		prerequisite = { focus = UKR_demand_ukrainian_bessarabia }
+		x = 0
+		y = 1
+		relative_position_id = UKR_demand_ukrainian_bessarabia
+
+		cost = 10
+
+		available_if_capitulated = yes
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				is_historical_focus_on = no
+				factor = 3
+			}
+			modifier = {
+				has_global_flag = r56_argo_ai
+				factor = 100
+			}
+		}
+
+		available = {
+			OR = { #More of a double check on the AI
+				has_government = fascism
+				has_government = neutrality
+			}
+		}
+
+		completion_reward = {
+			add_named_threat = { threat = 0.1 name = GEN_seeking_expansive_t }
+			add_war_support = 0.05
+
+			add_ideas = GEN_Conquer_I
+
+			ROOT = {
+				every_neighbor_country = {
+					limit = {
+						exists = yes
+						has_war = no
+						has_capitulated = no
+						is_major = no
+						NOT = {
+							is_in_faction_with = ROOT
+						}
+					}
+					news_event = {
+						hours = 8
+						id = r56.news_event.10
+					}
+				}
+			}
+
+			#AI Stuff
+			if = {
+				limit = {
+					is_historical_focus_on = no
+					ROOT = {
+						has_government = fascism
+						has_war = no
+					}
+					GER = {
+						has_government = fascism
+						has_war = yes
+						has_capitulated = no
+					}
+				}
+				ROOT = {
+					add_ai_strategy = {
+						type = alliance
+						id = GER
+						value = 30
+					}
+					add_ai_strategy = {
+						type = befriend
+						id = GER
+						value = 50
+					}
+				}
+			}
+
+			add_state_claim = 94
+			add_state_claim = 194
+			add_state_claim = 240
+			add_state_claim = 137
+			add_state_claim = 218
+			add_state_claim = 234
+
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION FOCUS_FILTER_MANPOWER FOCUS_FILTER_WAR_SUPPORT }
+	}
+
+
+	focus = {
 		id = UKR_defy_the_polish_cossack
 		icon = GFX_goal_generic_attack_poland
 		prerequisite = { focus = UKR_cossack_heritage }
@@ -851,19 +1019,30 @@ focus_tree = {
 
 		available = {
 			POL = {
+				exists = yes
+				is_subject = no				
 				has_country_leader = {
 					character = POL_pavel_bermondt_avalov ruling_only = yes
 				}
 			}
+			has_civil_war = no
+			is_subject = no
+			is_faction_leader = yes
+			has_army_manpower = {
+				size > 150000
+			}			
 		}
-
 		available_if_capitulated = yes
 
 		completion_reward = {
-				
+			create_wargoal = {
+				type = puppet_wargoal_focus
+				target = POL
+			}				
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MANPOWER }
 	}	
+
 	focus = {
 		id = UKR_ally_with_bermondt_avalov
 		icon = GFX_goal_generic_befriend_poland
@@ -876,17 +1055,74 @@ focus_tree = {
 		cost = 10
 
 		available = {
+			is_subject = no 
+			is_in_faction = no
+			OR = {
+				has_government = fascism
+				has_government = neutrality
+			}			
 			POL = {
 				has_country_leader = {
 					character = POL_pavel_bermondt_avalov ruling_only = yes
+				}				
+				OR = {
+					has_government = fascism
+					has_government = neutrality
 				}
-			}
+				is_in_faction = yes
+
+				has_capitulated = no
+				if = {
+					limit = {
+						is_faction_leader = no
+					}
+					faction_leader = {
+						OR = {
+							has_government = fascism
+							has_government = neutrality
+						}
+					}					
+				}
+			}			
 		}
 
 		available_if_capitulated = yes
 
 		completion_reward = {
-				
+			if = {
+				limit = {
+					POL = {
+						is_faction_leader = yes
+					}
+				}
+				POL = {
+					country_event = generic.2
+				}				
+			}
+			if = {
+				limit = {
+					POL = {
+						is_in_faction = yes
+						is_faction_leader = no
+					}
+				}
+				random_country = {
+					limit = {
+						OR = {
+							has_government = neutrality
+							has_government = fascism
+						}
+						
+						is_in_faction_with = POL
+						is_faction_leader = yes
+						NOT = {
+							is_puppet = yes
+						}
+					}
+					country_event = { id = generic.2 }
+				}			
+			}			
+
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MANPOWER }
 	}	
@@ -899,6 +1135,10 @@ focus_tree = {
 		
 		available = {
 			OR = {
+				has_government = neutrality
+				has_government = fascism
+			}
+			OR = {
 				threat > 0.3
 				has_war = yes
 			}
@@ -906,7 +1146,7 @@ focus_tree = {
 
 		continue_if_invalid = yes
 
-		x = 3
+		x = 1
 		y = 1
 		cost = 5
 
@@ -1018,6 +1258,60 @@ focus_tree = {
 				}					
 			}
 		}
+	}	
+	focus = {
+		id = UKR_alliance_with_the_kaiserreich
+		available = {
+			has_government = neutrality
+			is_puppet = no
+			is_in_faction = no
+			GER = { 
+				has_government = neutrality
+				OR = {
+					has_completed_focus = GER_the_central_powers
+					has_completed_focus = GER_consolidate_new_reich
+				}
+				is_faction_leader = yes
+				
+				NOT = {
+					is_puppet = yes
+				}
+			}			
+		}
+		prerequisite = { focus = UKR_our_place_in_the_world }
+		
+		icon = GFX_focus_ger_revive_kaiserreich
+		x = 3
+		y = 1
+		relative_position_id = UKR_our_place_in_the_world
+		cost = 10
+
+		available_if_capitulated = yes
+
+		search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			if = {
+				limit = {
+					GER = { 
+						has_government = neutrality
+						OR = {
+							has_completed_focus = GER_the_central_powers
+							has_completed_focus = GER_consolidate_new_reich
+						}
+						
+						NOT = {
+							is_puppet = yes
+						}
+					}
+				}
+				GER = {
+					country_event = { id = generic.2 }
+				}
+			}			
+			set_rule = {
+				can_create_factions = yes
+			}
+		}
 	}				
     focus = {
 		id = UKR_obtain_church_blessings
@@ -1040,6 +1334,7 @@ focus_tree = {
 		}
 
 		available = {
+			neutrality > 0.4
 			if = {
 				limit = {
 					is_puppet = yes
@@ -1060,13 +1355,22 @@ focus_tree = {
 			    ideology = neutrality
 			    popularity = 0.05
 			}
+			add_stability = 0.1
+			if = {
+				limit = {
+					neutrality > 0.45
+				}
+				set_politics = {
+					ruling_party = neutrality
+				}				
+			}			
 
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
     focus = {
 		id = UKR_we_were_born_in_a_great_hour
-		icon = GFX_goal_Ukraine_OUN_radicals
+		icon = GFX_goal_Ukraine_oun
 		prerequisite = {
 			focus = UKR_empower_the_head_of_state
 		}
@@ -1113,6 +1417,310 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 	focus = {
+		id = UKR_cement_military_rule
+		icon = GFX_focus_generic_military_dictatorship
+		prerequisite = { focus =UKR_we_were_born_in_a_great_hour }
+		relative_position_id = UKR_we_were_born_in_a_great_hour
+		available = {
+			fascism > 0.43
+			is_subject = no			
+		}
+		
+		x = 0
+		y = 1
+		cost = 5
+
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		completion_reward = {
+			add_ideas = RUT_military_government
+			if = {
+				limit = {
+					fascism > 0.45
+				}
+				set_politics = {
+					ruling_party = fascism
+				}				
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = UKR_cult_of_action
+		icon = GFX_focus_generic_military_mission
+		prerequisite = { focus =UKR_cement_military_rule }
+		relative_position_id = UKR_cement_military_rule
+		available = {
+			OR = {
+				has_government = neutrality
+				has_government = fascism
+			}
+			is_subject = no			
+		}
+		
+		x = -1
+		y = 1
+		cost = 10
+
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		completion_reward = {
+			add_ideas = UKR_cult_of_action_idea
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}	
+	focus = {
+		id = UKR_oun_militias
+		icon = GFX_goal_Ukraine_OUN_radicals
+		prerequisite = { focus = UKR_cement_military_rule }
+		relative_position_id = UKR_cement_military_rule
+		available = {
+			fascism > 0.4			
+		}
+		
+		x = 1
+		y = 1
+		cost = 10
+
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		completion_reward = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.1
+			}
+			#set_party_name = { ideology = fascism long_name = RUT_oun_radicals_party_long name = RUT_oun_radicals_party }
+
+
+			add_ideas = RUT_idea_oun_militias
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
+	}
+	focus = {
+		id = UKR_join_the_axis
+		icon = GFX_goal_generic_the_axis
+		prerequisite = { focus = UKR_cult_of_action}
+		prerequisite = { focus = UKR_oun_militias}
+		relative_position_id = UKR_cult_of_action
+		x = 0
+		y = 1
+		cost = 5
+
+		ai_will_do = {
+			factor = 6
+		}
+		available = {
+			has_government = fascism
+			is_subject = no
+			OR = {
+				GER = {
+					NOT = { has_war_with = ROOT }
+					has_government = fascism
+					has_capitulated = no
+					is_faction_leader = yes
+				}
+				any_other_country = {
+					is_major = yes
+					has_government = fascism
+					is_faction_leader = yes
+					NOT = { has_war_with = ROOT }
+				}
+			}
+		}
+		bypass = {
+			is_in_faction_with = GER
+		}
+			completion_reward = {
+				if = {
+					limit = {
+						GER = {
+							has_government = fascism
+							is_faction_leader = yes
+							has_capitulated = no
+							NOT = { has_war_with = ROOT }
+						}
+					}
+					GER = {
+						country_event = generic.2
+						add_opinion_modifier = {
+							target = ROOT
+							modifier = medium_increase
+						}
+					}
+					ROOT = {
+						add_opinion_modifier = {
+							target = GER
+							modifier = medium_increase
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						ITA = {
+							has_government = fascism
+							is_faction_leader = yes
+							has_capitulated = no
+							NOT = { has_war_with = ROOT }
+						}
+					}
+					ITA = {
+						country_event = generic.2
+					}
+				}
+				else_if = {
+					limit = {
+						GRE = {
+							has_government = fascism
+							is_faction_leader = yes
+							has_capitulated = no
+							NOT = { has_war_with = ROOT }
+						}
+					}
+					GRE = {
+						country_event = generic.2
+					}
+				}
+									
+				else_if = {
+					limit = {
+						ENG = {
+							has_government = fascism
+							is_faction_leader = yes
+							has_capitulated = no
+							NOT = { has_war_with = ROOT }
+						}
+					}
+					ENG = {
+						country_event = generic.2
+					}
+				}
+				else_if = {
+					limit = {
+						HUN = {
+							has_government = fascism
+							is_faction_leader = yes
+							has_capitulated = no
+							NOT = { has_war_with = ROOT }
+						}
+					}
+					HUN = {
+						country_event = generic.2
+					}
+				}							
+				else_if = {
+					limit = {
+						any_other_country = {
+							has_government = fascism
+							is_faction_leader = yes
+							is_major = yes
+							has_capitulated = no
+							num_of_factories > 70
+							NOT = { has_war_with = ROOT }
+						}
+					}
+					random_other_country = {
+						limit = {
+							has_government = fascism
+							is_faction_leader = yes
+							is_major = yes
+							num_of_factories > 70
+							NOT = { has_war_with = ROOT }
+						}
+						country_event = generic.2
+					}				
+				}
+				else_if = {
+					limit = {
+						any_other_country = {
+							has_government = fascism
+							is_faction_leader = yes
+							is_major = yes
+							has_capitulated = no
+							num_of_factories > 50
+						}
+					}
+					random_other_country = {
+						limit = {
+							has_government = fascism
+							is_faction_leader = yes
+							is_major = yes
+							num_of_factories > 50
+						}
+						country_event = generic.2
+					}				
+				}			
+				else_if = {
+					limit = {
+						any_other_country = {
+							has_government = fascism
+							is_faction_leader = yes
+							is_major = yes
+							has_capitulated = no
+						}
+					}
+					random_other_country = {
+						limit = {
+							has_government = fascism
+							is_faction_leader = yes
+							is_major = yes
+							has_capitulated = no
+						}
+						country_event = generic.2
+					}
+				}
+				else_if = {
+					limit = {
+						any_other_country = {
+							has_government = fascism
+							is_faction_leader = yes
+	
+							has_capitulated = no
+						}
+					}
+					random_other_country = {
+						limit = {
+							has_government = fascism
+							is_faction_leader = yes
+							has_capitulated = no
+						}
+						country_event = generic.2
+					}
+				}				
+			}
+			search_filters = { FOCUS_FILTER_ALLIANCE }
+		}	
+	focus = {
+		id = UKR_ukraine_has_not_yet_perished
+		text = RUT_ukraine_has_not_yet_perished
+		icon = GFX_goal_flag_ukraine2
+		prerequisite = { focus = UKR_cult_of_action}
+		prerequisite = { focus = UKR_oun_militias}
+		relative_position_id = UKR_cult_of_action
+		x = 2
+		y = 1
+		cost = 10
+
+		available = {
+			has_war = yes
+			is_puppet = no
+		}
+		continue_if_invalid = yes #the idea is generic, so lets not be too annoying
+		completion_reward = {
+			add_ideas = ideological_fanaticism_focus
+			set_rule = { can_create_factions = yes }
+		}
+		search_filters = { FOCUS_FILTER_WAR_SUPPORT }
+	}	
+	focus = {
 		id = UKR_organize_the_army
 		icon = GFX_focus_generic_military_mission
 		prerequisite = {
@@ -1144,6 +1752,39 @@ focus_tree = {
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
+	focus = {
+		id = UKR_conscript_management_focus
+		text = RUT_conscript_management_focus
+		icon = GFX_goal_manpower
+		prerequisite = { focus = UKR_organize_the_army }
+		relative_position_id = UKR_organize_the_army
+		x = 1
+		y = 1
+		cost = 10
+
+		available_if_capitulated = yes
+
+		available = {
+			NOT = {
+				OR = {
+					has_idea = disarmed_nation
+					has_idea = volunteer_only
+				}
+			}
+		}
+
+		completion_reward = {
+			add_doctrine_cost_reduction = {
+				name = land_doc_bonus
+				cost_reduction = 0.35
+				uses = 1
+				category = land_doctrine
+			}
+			add_ideas = RUT_idea_conscript_management
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_MANPOWER }
+		
+	}	
 	focus = {
 		id = UKR_small_arms_equipment
 		icon = GFX_goal_small_infantry
@@ -1593,7 +2234,7 @@ focus_tree = {
 	}	
 	focus = {
 		id = UKR_construction_technologies
-		icon = GFX_goal_generic_construction2
+		icon = GFX_goal_generic_construction
 		prerequisite = { focus = UKR_industrial_development }
 		relative_position_id = UKR_industrial_development
 		x = 0
@@ -1728,7 +2369,7 @@ focus_tree = {
 	}		
 	focus = {
 		id = UKR_invest_along_the_coast
-		icon = GFX_goal_generic_construction
+		icon = GFX_goal_generic_construction2
 		prerequisite = { focus = UKR_construction_technologies }
 		relative_position_id = UKR_construction_technologies
 		x = 2
