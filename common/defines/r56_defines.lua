@@ -195,10 +195,10 @@ NDefines.NAI.STR_UNIT_WEAK = 0.30 -- Instead of 0.15, should optimize usage of t
 NDefines.NAI.ORG_UNIT_STRONG = 0.80
 NDefines.NAI.UNIT_ASSIGNMENT_TERRAIN_IMPORTANCE = 20.0 -- Instead of 10, should improve terrain optimization
 
-NDefines.NAI.DIVISION_UPGRADE_MIN_XP = 200				-- Minimum XP before attempting to upgrade a division template.
-NDefines.NAI.DIVISION_CREATE_MIN_XP = 150				-- Minimum XP before attempting to create a fresh new division template.
-NDefines.NAI.VARIANT_UPGRADE_MIN_XP = 150				-- Minimum XP before attempting to create a new variant.
-NDefines.NAI.UPGRADE_XP_RUSH_UPDATE = 200				-- If XP is above this on the daily tick the AI will attempt to spend it
+NDefines.NAI.DIVISION_UPGRADE_MIN_XP = 100				-- Instead of 200, Minimum XP before attempting to upgrade a division template.
+NDefines.NAI.DIVISION_CREATE_MIN_XP = 100				-- Instead of 150,Minimum XP before attempting to create a fresh new division template.
+NDefines.NAI.VARIANT_UPGRADE_MIN_XP = 100				-- Instead of 150,Minimum XP before attempting to create a new variant.
+NDefines.NAI.UPGRADE_XP_RUSH_UPDATE = 150				-- Instead of 200,If XP is above this on the daily tick the AI will attempt to spend it
 
 NDefines.NAI.NAVY_PREFERED_MAX_SIZE = 50.0 -- Upgraded from 20.0
 
@@ -438,8 +438,8 @@ NAI = {
 		'industrial_complex',
 		'infrastructure',
 		'arms_factory',
-		'synthetic_refinery',
 		'air_base',
+		'synthetic_refinery',
 		'radar_station',
 		'nuclear_reactor',
 
