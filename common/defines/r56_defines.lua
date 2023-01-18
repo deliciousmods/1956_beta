@@ -273,7 +273,7 @@ NAI = {
 	MAIN_ENEMY_FRONT_IMPORTANCE = 50.0,
 	RESERVE_TO_COMMITTED_BALANCE = 0.2,
 	FRONT_REASSIGN_DISTANCE = 250.0,
-	ATTACK_HEAVILY_DEFENDED_LIMIT = 0.8	,			-- reduced from 1.0 ; AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%)
+	ATTACK_HEAVILY_DEFENDED_LIMIT = 0.8,			-- reduced from 1.0 ; AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%)
 	HOUR_BAD_COMBAT_REEVALUATE = 90,                  -- reduced from 168 ; if we are in combat for this amount and it goes shitty then try skipping it 
 	ORG_UNIT_WEAK = 0.30, -- Instead of 0.15, should optimize usage of troops
 	STR_UNIT_WEAK = 0.30, -- Instead of 0.15, should optimize usage of troops
@@ -375,7 +375,7 @@ NAI = {
 	PLAN_ACTIVATION_PLAYER_WEIGHT_FACTOR = 1, 		                -- AI countries will hold on activating plans if player controlled countries have plans in the same location. Majors count extra (value of 1 will negate this)
 
 	FALLBACK_LOSING_FACTOR = 0.0,
-	PLAN_MIN_SIZE_FOR_FALLBACK = 5000					                -- A country with less provinces than this will not draw fallback plans  but rather station their troops along the front
+	PLAN_MIN_SIZE_FOR_FALLBACK = 5000,					                -- A country with less provinces than this will not draw fallback plans  but rather station their troops along the front
 
 -- these are all 3 numbers for min, desired, max unit need weights for area defense
 	AREA_DEFENSE_CAPITAL_PEACE_VP_WEIGHT = { 1.0, 1.0, 1.0 },
