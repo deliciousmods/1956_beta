@@ -80,9 +80,9 @@
 	--This is a Trace to make sure mod is taken into account
 	
 	NDefines.NMilitary.PLAN_PROVINCE_BASE_IMPORTANCE = 2.0
-	NDefines.NMilitary.PLAN_PROVINCE_LOW_VP_IMPORTANCE_AREA = 2.0
+	NDefines.NMilitary.PLAN_PROVINCE_LOW_VP_IMPORTANCE_AREA = 4.0
 	NDefines.NMilitary.PLAN_PROVINCE_MEDIUM_VP_IMPORTANCE_AREA = 6.0 --Vanilla 5
-	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_AREA = 12.0 -- Was 20 vanilla 10 lowered to 12 to swap importance of naval base
+	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_AREA = 10.0 -- vanilla 10
 	NDefines.NMilitary.PLAN_PROVINCE_LOW_VP_IMPORTANCE_FRONT = 4.0
 	NDefines.NMilitary.PLAN_PROVINCE_MEDIUM_VP_IMPORTANCE_FRONT = 6.0
 	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_FRONT = 8.0
@@ -90,7 +90,7 @@
 	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.60
 	
 	-- Addition with 1.3.2
-	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 18.0		-- increased from 12.0 ; Added importance for area defense province with a port
+	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 15.0		-- increased from 12.0 ; Added importance for area defense province with a port
 	NDefines.NMilitary.PLAN_PORVINCE_PORT_LEVEL_FACTOR = 0.5			-- Bonus factor for port level
 	NDefines.NMilitary.PLAN_PORVINCE_AIRFIELD_BASE_IMPORTANCE = 3.0	-- Added importance for area defense province with air field
 	NDefines.NMilitary.PLAN_PORVINCE_AIRFIELD_POPULATED_FACTOR = 1.5	-- Bonus factor when an airfield has planes on it
@@ -185,7 +185,7 @@
 	NDefines.NAI.RESEARCH_NAVAL_DOCTRINE_NEED_GAIN_FACTOR = 0	-- Multiplies value based on relative naval industry size / country size.
 	NDefines.NAI.RESEARCH_AIR_DOCTRINE_NEED_GAIN_FACTOR = 0		-- Multiplies value based on relative number of air base / country size.
 	
-	NDefines.NAI.MAX_AHEAD_RESEARCH_PENALTY = 2
+	NDefines.NAI.MAX_AHEAD_RESEARCH_PENALTY = 1.3
 	NDefines.NAI.RESEARCH_NEW_WEIGHT_FACTOR = 0.5 			-- Impact of previously unexplored tech weights. Higher means more random exploration.
 	NDefines.NAI.RESEARCH_BONUS_FACTOR = 3 				-- To which extent AI should care about bonuses to research
 	NDefines.NAI.RESEARCH_AHEAD_OF_TIME_FACTOR = 2.0 		-- To which extent AI should care about ahead of time penalties to research
@@ -497,7 +497,7 @@
 	
 	NDefines.NAI.MIN_NUM_CONQUERED_PROVINCES_TO_DEPRIO_NAVAL_INVADED_FRONTS = 35	-- if you conquer this amount of provinces after a naval invasion it will lose its prio status and will act as a regular front	
 
-	NDefines.NAI.GARRISON_FRACTION = 0.01 					-- How large part of a front should always be holding the line rather than advancing at the enemy
+	NDefines.NAI.GARRISON_FRACTION = 0.05 					-- How large part of a front should always be holding the line rather than advancing at the enemy
 
 --------------------------------------------------------------------------------------------------------------
 -- NAVY
