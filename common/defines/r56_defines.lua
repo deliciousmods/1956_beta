@@ -5,10 +5,17 @@ NGame = {
 },
 
 NDiplomacy = {
-		LICENSE_ACCEPTANCE_PUPPET_BASE = 20,			-- Acceptance modifier for puppets requesting production licenses.
-		LICENSE_ACCEPTANCE_TECH_DIFFERENCE = 2, 		-- Acceptance modifier for each year of technology difference.
-		LICENSE_ACCEPTANCE_TECH_DIFFERENCE_BASE = 20,    -- Acceptance base for tech difference
-		LICENSE_ACCEPTANCE_SAME_FACTION = 30,			-- Acceptance modifier for being in the same faction
+	LICENSE_ACCEPTANCE_PUPPET_BASE = 20,			-- Acceptance modifier for puppets requesting production licenses.
+	LICENSE_ACCEPTANCE_TECH_DIFFERENCE = 2, 		-- Acceptance modifier for each year of technology difference.
+	LICENSE_ACCEPTANCE_TECH_DIFFERENCE_BASE = 20,    -- Acceptance base for tech difference
+	LICENSE_ACCEPTANCE_SAME_FACTION = 30,			-- Acceptance modifier for being in the same faction
+	MAX_TRUST_VALUE = 200,									-- Vanilla is 100
+	MIN_TRUST_VALUE = -200,									-- Vanilla is -100
+	MAX_OPINION_VALUE = 200,								-- Vanilla is 100
+	MIN_OPINION_VALUE = -200,								-- Vanilla is -100
+	VERY_GOOD_OPINION = 100,								-- Vanilla is 50
+	VERY_BAD_OPINION = -100,								-- Vanilla is -50
+	FRONT_IS_DANGEROUS = 0,									-- Vanilla is -100	
 },
 
 NCountry = {
