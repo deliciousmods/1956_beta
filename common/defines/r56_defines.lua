@@ -309,7 +309,7 @@ NAI = {
 	DIPLOMACY_SCARED_MINOR_EXTRA_RELUCTANCE = -50, -- extra reluctance to join stuff as scared minor
 	DIPLOMACY_FACTION_PLAYER_JOIN = 20,			-- Bonus for human players asking to join a faction.
 	DIPLOMACY_BOOST_PARTY_COST_FACTOR = 100.0,	-- Desire to boost party popularity subtracts the daily cost multiplied by this
-	DIPLOMACY_IMPROVE_RELATION_COST_FACTOR = 5.0,-- Desire to boost relations subtracts the cost multiplied by this
+	DIPLOMACY_IMPROVE_RELATION_COST_FACTOR = 7.0,-- Desire to boost relations subtracts the cost multiplied by this
 	DIPLOMACY_IMPROVE_RELATION_PP_FACTOR = 0.1,	-- Desire to boost relations adds total PP multiplied by this
 	DIPLOMACY_SEND_ATTACHE_COST_FACTOR = 5.0,	-- Desire to send attache substracts the cost multiplied by this
 	DIPLOMACY_SEND_ATTACHE_PP_FACTOR = 0.1,	-- Desire to send attache adds total PP multiplied by this
@@ -326,6 +326,12 @@ NAI = {
 	GENERATE_WARGOAL_THREAT_BASELINE = 0.6,
 	LENDLEASE_FRACTION_OF_PRODUCTION = 0.25, --0.5
 	LENDLEASE_FRACTION_OF_STOCKPILE = 0.125, --0.25
+	
+	FASCISTS_ALLY_DEMOCRACIES = -150,
+	FASCISTS_ALLY_COMMUNISTS = -150,
+	COMMUNISTS_ALLY_FASCISTS = -150,
+	DEMOCRACIES_ALLY_COMMUNISTS = -75,
+	COMMUNISTS_ALLY_DEMOCRACIES = -75,
 	
 	PRODUCTION_EQUIPMENT_SURPLUS_FACTOR = 0.15,	-- Base value for how much of currently used equipment the AI will at least strive to have in stock
 	
@@ -347,14 +353,47 @@ NAI = {
 	},
 	
 --------------------------------------------------------------------------------------------------------------
--- FRONT CONTROL
+-- FRONT CONTROL/ARMY
 --------------------------------------------------------------------------------------------------------------	
+
+	MIN_AI_UNITS_PER_TILE_FOR_STANDARD_COHESION = 2.0,	-- How many units should we have for each tile along a front in order to switch to standard cohesion (less moving around)
+	MIN_FRONT_SIZE_TO_CONSIDER_STANDARD_COHESION = 2000,	-- How long should fronts be before we consider switching to standard cohesion (under this, standard cohesion fronts will switch back to relaxed)
+
+	ASSIGN_TANKS_TO_WAR_FRONT = 8.0, --4.0
+	ASSIGN_TANKS_TO_NON_WAR_FRONT = 0.2, --0.4
 	
-	PLAN_ATTACK_MIN_STRENGTH_FACTOR_LOW = 0.60,	-- Minimum strength for a unit to actively attack an enemy unit when executing a plan
-	PLAN_ATTACK_MIN_ORG_FACTOR_MED = 0.75,		-- (LOW,MED,HIGH) corresponds to the plan execution agressiveness level.
-	PLAN_ATTACK_MIN_STRENGTH_FACTOR_MED = 0.50,	
-	PLAN_ATTACK_MIN_ORG_FACTOR_HIGH = 0.25,	
-	PLAN_ATTACK_MIN_STRENGTH_FACTOR_HIGH = 0.40,
+	PLAN_EXECUTE_RUSH = -10,
+	PLAN_ATTACK_MIN_ORG_FACTOR_LOW = 0.85,							-- Minimum org % for a unit to actively attack an enemy unit when executing a plan
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_LOW = 0.85,						-- Minimum strength for a unit to actively attack an enemy unit when executing a plan
+	PLAN_ATTACK_MIN_ORG_FACTOR_MED = 0.65,							-- (LOW,MED,HIGH) corresponds to the plan execution agressiveness level.
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_MED = 0.65,	
+	PLAN_ATTACK_MIN_ORG_FACTOR_HIGH = 0.5,		
+	PLAN_ATTACK_MIN_STRENGTH_FACTOR_HIGH = 0.5,
+	PLAN_FACTION_STRONG_TO_EXECUTE = 0.65, --0.80	0.60		        -- % or more of units in an order to consider ececuting the plan	
+	
+	PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 1,		                    -- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
+	PLAN_ACTIVATION_PLAYER_WEIGHT_FACTOR = 1, 		                -- AI countries will hold on activating plans if player controlled countries have plans in the same location. Majors count extra (value of 1 will negate this)
+
+	FALLBACK_LOSING_FACTOR = 0.0,
+	PLAN_MIN_SIZE_FOR_FALLBACK = 5000					                -- A country with less provinces than this will not draw fallback plans  but rather station their troops along the front
+
+-- these are all 3 numbers for min, desired, max unit need weights for area defense
+	AREA_DEFENSE_CAPITAL_PEACE_VP_WEIGHT = { 1.0, 1.0, 1.0 },
+	AREA_DEFENSE_CAPITAL_VP_WEIGHT = { 0.0, 1.0, 2.0 },
+	AREA_DEFENSE_HOME_VP_WEIGHT = { 0.0, 0.5, 1.0 },
+	AREA_DEFENSE_OTHER_VP_WEIGHT = { 0.0, 0.0, 1.0 },
+
+	AREA_DEFENSE_CAPITAL_PEACE_COAST_WEIGHT = { 0.0, 0.0, 0.0 },
+	AREA_DEFENSE_CAPITAL_COAST_WEIGHT = { 0.0, 0.2, 0.7 },
+	AREA_DEFENSE_HOME_COAST_WEIGHT = { 0.0, 0.1, 0.5 },
+	AREA_DEFENSE_OTHER_COAST_WEIGHT = { 0.0, 0.0, 0.0 },
+
+	AREA_DEFENSE_CAPITAL_PEACE_BASE_WEIGHT = { 0.0, 0.0, 0.0 },
+	AREA_DEFENSE_CAPITAL_BASE_WEIGHT = { 0.5, 1.0, 1.5 },
+	AREA_DEFENSE_HOME_BASE_WEIGHT = { 0.5, 1.0, 1.0 },
+	AREA_DEFENSE_OTHER_BASE_WEIGHT = { 0.5, 0.5, 1.0 },
+
+
 	ORG_UNIT_WEAK = 0.4,						-- Organization % for unit to be considered weak
 	STR_UNIT_WEAK = 0.4,					-- Strength (equipment) % for unit to be considered weak
 	
@@ -367,18 +406,12 @@ NAI = {
 	
 	MAX_ALLOWED_NAVAL_DANGER = 51,				-- AI will ignore naval paths that has danger value of above this threshold while assigning units
 	
-	FASCISTS_ALLY_DEMOCRACIES = -150,
-	FASCISTS_ALLY_COMMUNISTS = -150,
-	COMMUNISTS_ALLY_FASCISTS = -150,
-	DEMOCRACIES_ALLY_COMMUNISTS = -75,
-	COMMUNISTS_ALLY_DEMOCRACIES = -75,
-	
 	DESPERATE_AI_WEAK_UNIT_STR_LIMIT = 0.1,					-- ai will increase number of units assigned to break from desperate situations when units are start falling lower than this str limit
 	DESPERATE_AI_MIN_ORG_BEFORE_ATTACK = 0.85,					-- ai will wait for this much org to attack an enemy prov in desperate situations
 	DESPERATE_AI_MIN_ORG_BEFORE_MOVE = 0.25,				-- ai will wait for this much org to move in desperate situations
 	DESPERATE_ATTACK_WITHOUT_ORG_WHEN_NO_ORG_GAIN = 175,		-- if ai can't regain enough org to attack in this many hours, it will go truly desperate and attack anyway (still has to wait for move org)
 	
-	WANTED_UNITS_MANPOWER_DIVISOR = 300000,
+	WANTED_UNITS_MANPOWER_DIVISOR = 22000,
 	
 	DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
 		--Army Values
@@ -450,15 +483,14 @@ NAI = {
 		-0.5, -- build_cost_ic
 	},
 	
-	INVASION_COASTAL_PROVS_PER_ORDER = 28,				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
 	
 	MAX_UNITS_FACTOR_INVASION_ORDER = 1.0,				-- Factor for max number of units to assign to naval invasion orders
 	DESIRED_UNITS_FACTOR_INVASION_ORDER = 1.0,			-- Factor for desired number of units to assign to naval invasion orders
 	MIN_UNITS_FACTOR_INVASION_ORDER = 0.5,				-- Factor for min number of units to assign to naval invasion orders #was 1.0 should reduce low unit number naval invasions
 	
-	NEW_LEADER_EXTRA_PP_FACTOR = 1.5,					-- Country must have at least this many times extra PP to get new admirals or army leaders #Was 2.0
+	NEW_LEADER_EXTRA_PP_FACTOR = 1,					-- Country must have at least this many times extra PP to get new admirals or army leaders #Was 2.0
 	ATTACK_HEAVILY_DEFENDED_LIMIT = 0.7,				-- AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%) #was 0.5
-	HOUR_BAD_COMBAT_REEVALUATE = 48,                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
+	HOUR_BAD_COMBAT_REEVALUATE = 24,                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
 	
 	PRODUCTION_LINE_SWITCH_SURPLUS_NEEDED_MODIFIER = 0.1,	-- Is modified by efficency modifiers.
 	PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 2.0,			-- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
@@ -467,16 +499,105 @@ NAI = {
 	
 	ALLY_SUPPLY_RATIO_FOR_UNIT_PRODUCTION = 0.00,		-- supply ratio of ally supply chunks will be added to our own supply chunks (since we will fight around allies as well) modified by produce_unit_for_ally_supply_chunks strat
 	
-	INVASION_DISTANCE_RANDOMNESS = 245,					-- This higher the value, the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
 	
 	XP_RATIO_REQUIRED_TO_RESEARCH_WITH_XP = 1.5,		-- AI will at least need this amount of xp compared to cost of a tech to reserch it with XP #BASE WAS 2.0	
 	
-	FRONT_EVAL_UNIT_ACCURACY = 0.9,                          -- scale how stupid ai will act on fronts. 0 is potato #BASE WAS 0.7
+	FRONT_EVAL_UNIT_ACCURACY = 1.0,                          -- scale how stupid ai will act on fronts. 0 is potato #BASE WAS 0.7
 	
 	MIN_NUM_CONQUERED_PROVINCES_TO_DEPRIO_NAVAL_INVADED_FRONTS = 35,	-- if you conquer this amount of provinces after a naval invasion, it will lose its prio status and will act as a regular front	
-	NAVY_PREFERED_MAX_SIZE = 50.0, -- Upgraded from 20.0
 
 	GARRISON_FRACTION = 0.01, 					-- How large part of a front should always be holding the line rather than advancing at the enemy
+
+--------------------------------------------------------------------------------------------------------------
+-- NAVY
+--------------------------------------------------------------------------------------------------------------
+	NAVY_PREFERED_MAX_SIZE = 50.0, -- Upgraded from 20.0
+	MAX_SCREEN_TASKFORCES_FOR_MINE_SWEEPING = 0.10, -- maximum ratio of screens forces to be used in mine sweeping
+	MISSING_CONVOYS_BOOST_FACTOR = 0.0,
+	CAPITAL_TASKFORCE_MAX_CAPITAL_COUNT = 6, 		-- optimum capital count for capital taskforces
+	SCREEN_TASKFORCE_MAX_SHIP_COUNT = 8,			-- optimum screen count for screen taskforces
+	SUB_TASKFORCE_MAX_SHIP_COUNT = 10, 				-- optimum sub count for sub taskforces	
+
+	MIN_NAVAL_MISSION_PRIO_TO_ASSIGN = {  -- priorities for regions to get assigned to a mission
+		0, -- HOLD (consumes fuel HOLD_MISSION_MOVEMENT_COST fuel while moving)
+		200, -- PATROL		
+		200, -- STRIKE FORCE 
+		200, -- CONVOY RAIDING
+		100, -- CONVOY ESCORT
+		200, -- MINES PLANTING	
+		100, -- MINES SWEEPING	
+		0, -- TRAIN
+		0, -- RESERVE_FLEET
+		100, -- NAVAL INVASION SUPPORT
+	},
+	
+	HIGH_PRIO_NAVAL_MISSION_SCORES = {  -- priorities for regions to get assigned to a mission
+		0, -- HOLD (consumes fuel HOLD_MISSION_MOVEMENT_COST fuel while moving)
+		3800, -- PATROL - 100000	
+		1000, -- STRIKE FORCE 
+		1500, -- CONVOY RAIDING
+		3000, -- CONVOY ESCORT - 1000
+		-1, -- MINES PLANTING	
+		300, -- MINES SWEEPING	
+		0, -- TRAIN
+		0, -- RESERVE_FLEET
+		1000, -- NAVAL INVASION SUPPORT
+	},
+
+	MAX_MISSION_PER_TASKFORCE = {  -- max mission region/taskforce ratio
+		0, -- HOLD (consumes fuel HOLD_MISSION_MOVEMENT_COST fuel while moving)
+		1.5, -- PATROL		
+		6, -- STRIKE FORCE 
+		1.5, -- CONVOY RAIDING
+		2, -- CONVOY ESCORT
+		2, -- MINES PLANTING
+		2, -- MINES SWEEPING
+		0, -- TRAIN
+		0, -- RESERVE_FLEET
+		10, -- NAVAL INVASION SUPPORT
+	},
+
+-------------------------
+-- NAVAL INVASIONS
+-------------------------
+	ENEMY_NAVY_STRENGTH_DONT_BOTHER = 5,		
+	RELATIVE_STRENGTH_TO_INVADE = 0, --0.08			-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend.
+	RELATIVE_STRENGTH_TO_INVADE_DEFENSIVE = 0, --0.4	-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend, but while being a defensive country.
+	INVASION_DISTANCE_RANDOMNESS = 300,					-- This higher the value, the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
+	INVASION_COASTAL_PROVS_PER_ORDER = 12,				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
+	MAX_DISTANCE_NAVAL_INVASION = 600.0,				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
+	MAX_INVASION_SIZE = 18, --24									-- max invasion group size
+	
+-------------------------
+-- AIR AI
+-------------------------
+	PRODUCTION_CARRIER_PLANE_BUFFER_RATIO = 0.75, --1.5				-- in additiona to total deck size of carriers, we want at list this ratio to buffer it
+	MAX_FUEL_CONSUMPTION_RATIO_FOR_AIR_TRAINING = 1,
+	LAND_COMBAT_OUR_COMBATS_AIR_IMPORTANCE = 1000,		-- Strategic importance of our armies in the combats
+	LAND_DEFENSE_INTERSEPTORS_PER_BOMBERS = 1,		-- Amount of air interceptor planes requested per enemy bomber
+	LAND_DEFENSE_CIVIL_FACTORY_IMPORTANCE = 800, -- 50			-- Strategic importance of civil factories
+	LAND_DEFENSE_MILITARY_FACTORY_IMPORTANCE = 880, -- 70		-- Strategic importance of military factories
+	LAND_DEFENSE_NAVAL_FACTORY_IMPORTANCE = 420, -- 30			-- Strategic importance of naval factories
+
+	STR_BOMB_PLANES_PER_CIV_FACTORY = 200,				-- Amount of planes requested per enemy civ factory
+	STR_BOMB_PLANES_PER_MIL_FACTORY = 200,				-- Amount of planes requested per enemy military factory
+	STR_BOMB_PLANES_PER_NAV_FACTORY = 100,				-- Amount of planes requested per enemy naval factory
+	STR_BOMB_PLANES_PER_SUPPLY_HUB = 30,                 -- Amount of planes requested per enemy supply node
+
+	NAVAL_STRIKE_PLANES_PER_SHIP = 40,					-- Amount of bombers requested per enemy ship
+	NAVAL_SHIP_AIR_IMPORTANCE = 10000, --2.0					-- Naval ship air importance
+	NAVAL_IMPORTANCE_SCALE = 2, --0.65						-- Naval total importance scale (every naval score get's multiplied by it)
+
+	NAVAL_PATROL_PLANES_PER_SHIP_PATROLLING = 20, --10.0		-- Amount of naval patrol planes per ship on a patrol mission
+	NAVAL_PATROL_PLANES_PER_SHIP_RAIDING = 40, --10.0		-- Amount of naval patrol planes per ship on a convoy raid mission
+	NAVAL_PATROL_PLANES_PER_SHIP_ESCORTING = 20, --10.0		-- Amount of naval patrol planes per ship on a convoy escort mission
+
+--------------------------------------------------------------------------------------------------------------
+-- PP
+--------------------------------------------------------------------------------------------------------------
+	
+	COMMAND_POWER_BEFORE_SPEND_ON_TRAITS = 65.0,
+
 },
 
 NFocus = {
