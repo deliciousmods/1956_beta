@@ -35,7 +35,7 @@
 
 	NDefines.NPolitics.ARMY_LEADER_MAX_COST = 75				-- max cost BEFORE modifiers
 	NDefines.NPolitics.NAVY_LEADER_MAX_COST = 75		
-	NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 1
+	NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 4
 
 	NDefines.NMilitary.SUPPLY_GRACE = 84 -- 72 3 days as they say and remain hungry for another 12
 	
@@ -481,7 +481,7 @@
 	
 	NDefines.NAI.NEW_LEADER_EXTRA_PP_FACTOR = 1					-- Country must have at least this many times extra PP to get new admirals or army leaders #Was 2.0
 	NDefines.NAI.ATTACK_HEAVILY_DEFENDED_LIMIT = 0.7				-- AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%) #was 0.5
-	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 24                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
+	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 48                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
 	
 	NDefines.NAI.PRODUCTION_LINE_SWITCH_SURPLUS_NEEDED_MODIFIER = 0.1	-- Is modified by efficency modifiers.
 	NDefines.NAI.PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 2.0			-- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
@@ -493,7 +493,7 @@
 	
 	NDefines.NAI.XP_RATIO_REQUIRED_TO_RESEARCH_WITH_XP = 1.5		-- AI will at least need this amount of xp compared to cost of a tech to reserch it with XP #BASE WAS 2.0	
 	
-	NDefines.NAI.FRONT_EVAL_UNIT_ACCURACY = 1.0                          -- scale how stupid ai will act on fronts. 0 is potato #BASE WAS 0.7
+	NDefines.NAI.FRONT_EVAL_UNIT_ACCURACY = 0.95                          -- scale how stupid ai will act on fronts. 0 is potato #BASE WAS 0.7
 	
 	NDefines.NAI.MIN_NUM_CONQUERED_PROVINCES_TO_DEPRIO_NAVAL_INVADED_FRONTS = 35	-- if you conquer this amount of provinces after a naval invasion it will lose its prio status and will act as a regular front	
 
