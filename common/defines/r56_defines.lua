@@ -12,7 +12,13 @@
 	NDefines.NDiplomacy.VERY_GOOD_OPINION = 100								-- Vanilla is 50
 	NDefines.NDiplomacy.VERY_BAD_OPINION = -100								-- Vanilla is -50
 	NDefines.NDiplomacy.FRONT_IS_DANGEROUS = 0									-- Vanilla is -100	
-	
+	NDefines.NDiplomacy.TENSION_VOLUNTEER_FORCE_DIVISION = 0.1
+	NDefines.NDiplomacy.MAX_REMEMBERED_LEASED_IC = 2000,				-- Maximum of leased equipment value that is remembered for opinion bonus
+	NDefines.NDiplomacy.MAX_OPINION_FOR_LEASED_IC = 50,					-- Positive opinion when remembering the MAX_REMEMBERED_LEASED_IC equipment
+	NDefines.NDiplomacy.MONTHLY_LEASED_IC_DECAY = 35,					-- How much of leased equipment is being "forgot" each month
+	NDefines.NDiplomacy.OPINION_PER_VOLUNTEER = 3,						-- Opinion bonus per one sent volunteer division
+	NDefines.NDiplomacy.MAX_OPINION_FROM_VOLUNTEERS = 50,				-- Opinion bonus per one sent volunteer division
+	NDefines.NDiplomacy.OPINION_FOR_DEMO_FROM_WT_GENERATION = -1.0,		-- How much less do democracies like us if we generate world tension
 	
 	
 	NDefines.NCountry.SPECIAL_FORCES_CAP_BASE = 0.1
@@ -481,7 +487,7 @@
 	
 	NDefines.NAI.NEW_LEADER_EXTRA_PP_FACTOR = 1					-- Country must have at least this many times extra PP to get new admirals or army leaders #Was 2.0
 	NDefines.NAI.ATTACK_HEAVILY_DEFENDED_LIMIT = 0.7				-- AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%) #was 0.5
-	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 48                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
+	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 72                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
 	
 	NDefines.NAI.PRODUCTION_LINE_SWITCH_SURPLUS_NEEDED_MODIFIER = 0.1	-- Is modified by efficency modifiers.
 	NDefines.NAI.PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 2.0			-- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
