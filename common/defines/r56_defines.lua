@@ -13,12 +13,12 @@
 	NDefines.NDiplomacy.VERY_BAD_OPINION = -100								-- Vanilla is -50
 	NDefines.NDiplomacy.FRONT_IS_DANGEROUS = 0									-- Vanilla is -100	
 	NDefines.NDiplomacy.TENSION_VOLUNTEER_FORCE_DIVISION = 0.1
-	NDefines.NDiplomacy.MAX_REMEMBERED_LEASED_IC = 2000,				-- Maximum of leased equipment value that is remembered for opinion bonus
-	NDefines.NDiplomacy.MAX_OPINION_FOR_LEASED_IC = 50,					-- Positive opinion when remembering the MAX_REMEMBERED_LEASED_IC equipment
-	NDefines.NDiplomacy.MONTHLY_LEASED_IC_DECAY = 35,					-- How much of leased equipment is being "forgot" each month
-	NDefines.NDiplomacy.OPINION_PER_VOLUNTEER = 3,						-- Opinion bonus per one sent volunteer division
-	NDefines.NDiplomacy.MAX_OPINION_FROM_VOLUNTEERS = 50,				-- Opinion bonus per one sent volunteer division
-	NDefines.NDiplomacy.OPINION_FOR_DEMO_FROM_WT_GENERATION = -1.0,		-- How much less do democracies like us if we generate world tension
+	NDefines.NDiplomacy.MAX_REMEMBERED_LEASED_IC = 2000				-- Maximum of leased equipment value that is remembered for opinion bonus
+	NDefines.NDiplomacy.MAX_OPINION_FOR_LEASED_IC = 50					-- Positive opinion when remembering the MAX_REMEMBERED_LEASED_IC equipment
+	NDefines.NDiplomacy.MONTHLY_LEASED_IC_DECAY = 35					-- How much of leased equipment is being "forgot" each month
+	NDefines.NDiplomacy.OPINION_PER_VOLUNTEER = 3						-- Opinion bonus per one sent volunteer division
+	NDefines.NDiplomacy.MAX_OPINION_FROM_VOLUNTEERS = 50				-- Opinion bonus per one sent volunteer division
+	NDefines.NDiplomacy.OPINION_FOR_DEMO_FROM_WT_GENERATION = -1.0		-- How much less do democracies like us if we generate world tension
 	
 	
 	NDefines.NCountry.SPECIAL_FORCES_CAP_BASE = 0.1
@@ -41,7 +41,6 @@
 
 	NDefines.NPolitics.ARMY_LEADER_MAX_COST = 75				-- max cost BEFORE modifiers
 	NDefines.NPolitics.NAVY_LEADER_MAX_COST = 75		
-	NDefines.NPolitics.DEFAULT_OCCUPATION_POLICY = 4
 
 	NDefines.NMilitary.SUPPLY_GRACE = 84 -- 72 3 days as they say and remain hungry for another 12
 	
@@ -96,7 +95,7 @@
 	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.60
 	
 	-- Addition with 1.3.2
-	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 15.0		-- increased from 12.0 ; Added importance for area defense province with a port
+	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 18.0		-- increased from 12.0 ; Added importance for area defense province with a port
 	NDefines.NMilitary.PLAN_PORVINCE_PORT_LEVEL_FACTOR = 0.5			-- Bonus factor for port level
 	NDefines.NMilitary.PLAN_PORVINCE_AIRFIELD_BASE_IMPORTANCE = 3.0	-- Added importance for area defense province with air field
 	NDefines.NMilitary.PLAN_PORVINCE_AIRFIELD_POPULATED_FACTOR = 1.5	-- Bonus factor when an airfield has planes on it
@@ -562,7 +561,7 @@
 	NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 5		
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE = 0 --0.08			-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend.
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE_DEFENSIVE = 0 --0.4	-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend but while being a defensive country.
-	NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 300					-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
+	NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 240					-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
 	NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 12				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
 	NDefines.NAI.MAX_DISTANCE_NAVAL_INVASION = 600.0				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
 	NDefines.NAI.MAX_INVASION_SIZE = 18 --24									-- max invasion group size
@@ -650,10 +649,10 @@
 	NDefines.NSupply.CAPITAL_SUPPLY_MILITARY_FACTORIES = 0.7 -- 0.6
 	NDefines.NSupply.CAPITAL_SUPPLY_DOCKYARDS = 0.6 -- 0.4
 	
-	NDefines.NSupply.CAPITAL_INITIAL_SUPPLY_FLOW = 10.0 -- 5.0
+	NDefines.NSupply.CAPITAL_INITIAL_SUPPLY_FLOW = 8.0 -- 5.0
 	NDefines.NSupply.CAPITAL_STARTING_PENALTY_PER_PROVINCE = 0.5 -- 0.5
-	NDefines.NSupply.CAPITAL_ADDED_PENALTY_PER_PROVINCE = 1.8 -- 1.2
-	NDefines.NSupply.NODE_INITIAL_SUPPLY_FLOW = 4.0 -- 2.8
+	NDefines.NSupply.CAPITAL_ADDED_PENALTY_PER_PROVINCE = 1.2 -- 1.2
+	NDefines.NSupply.NODE_INITIAL_SUPPLY_FLOW = 3.6 -- 2.8
 	NDefines.NSupply.NODE_STARTING_PENALTY_PER_PROVINCE = 0.50 -- 0.50
 	NDefines.NSupply.NODE_ADDED_PENALTY_PER_PROVINCE = 1.0 -- 0.70
 	NDefines.NSupply.NAVAL_BASE_INITIAL_SUPPLY_FLOW = 4.0 -- 3.5
@@ -662,8 +661,8 @@
 	
 	NDefines.NSupply.FLOATING_HARBOR_BASE_SUPPLY = 20 -- 15
 	NDefines.NSupply.FLOATING_HARBOR_BASE_DURATION = 30 -- 21
-	NDefines.NSupply.FLOATING_HARBOR_INITIAL_SUPPLY_FLOW = 5 -- 2.6
-	NDefines.NSupply.FLOATING_HARBOR_STARTING_PENALTY_PER_PROVINCE = 1.6 -- 0.8
+	NDefines.NSupply.FLOATING_HARBOR_INITIAL_SUPPLY_FLOW = 3.9 -- 2.6
+	NDefines.NSupply.FLOATING_HARBOR_STARTING_PENALTY_PER_PROVINCE = 0.8 -- 0.8
 	NDefines.NSupply.FLOATING_HARBOR_ADDED_PENALTY_PER_PROVINCE = 0.8 -- 0.8
 	
 	
