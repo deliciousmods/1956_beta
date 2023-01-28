@@ -1,11 +1,61 @@
 ﻿#### NAMESPACES ####
 
 add_namespace = persia
+add_namespace = persia.news
 add_namespace = persia.navy
 add_namespace = persia.railway
 add_namespace = persia.balance
 add_namespace = persia.influence
 add_namespace = persia.invasion
+
+#################################
+#### ALL NEWS EVENTS GO HERE ####
+#################################
+
+news_event = {
+	id = persia.news.1
+	title = persia.news.1.t
+	desc = persia.news.1.desc
+	picture = GFX_news_event_PER_anglo_soviet_invasion
+	
+	major = yes
+	
+	is_triggered_only = yes
+	
+	option = { #SOV/ENG
+		name = persia.news.1.a
+
+		trigger = {
+			OR = {
+				tag = SOV
+				tag = ENG
+			}
+		}
+	}
+
+	option = { #Axis aligned countries
+		name = persia.news.1.b
+		trigger = {
+			NOT = {
+				original_tag = PER
+			}
+			OR = {
+				has_war_with = ENG
+				has_war_with = SOV
+			}
+		}
+	}
+
+	option = { #Bystanders
+		name = persia.news.1.c
+		trigger = {
+			NOT = {
+				tag = SOV
+				tag = ENG
+			}
+		}
+	}
+}
 
 ###############################
 #### ANGLO SOVIET INVASION ####
@@ -30,8 +80,6 @@ country_event = { ## Anglo-Soviet invasion first event (ENG)
 		}
 		PER = {
 			has_completed_focus = PER_trade_with_germany
-			has_completed_focus = PER_steel_deals_focus
-			has_completed_focus = PER_invite_wehrmacht_support
 			NOT = {
 				has_completed_focus = PER_expel_german_nationals
 			}
@@ -134,30 +182,7 @@ country_event = { ## British ask Soviets for assistance; Iran notified
 			original_tag = SOV
 		}
 		ai_chance = {
-			base = 10
-			modifier = {
-				add = 75
-				is_historical_focus_on = yes
-			}
-			modifier = {
-				add = 20
-				has_war_with = GER
-			}
-			modifier = {
-				add = 5
-				is_in_faction_with = FROM
-			}
-			modifier = {
-				add = 5
-				has_government = FROM
-			}
-			modifier = {
-				add = 5
-				has_opinion = {
-					target = FROM
-					value > 24
-				}
-			}
+			base = 50
 		}
 		PER = {
 			country_event = { id = persia.invasion.3 hours = 12 }
@@ -172,37 +197,11 @@ country_event = { ## British ask Soviets for assistance; Iran notified
 		name = persia.invasion.2.c
 		trigger = {
 			original_tag = SOV
+			##### FOR TESTING ONLY!
+			is_ai = no
 		}
 		ai_chance = {
 			base = 5
-			modifier = {
-				add = 150
-				has_civil_war = yes
-			}
-			modifier = {
-				add = 30
-				is_in_faction_with = PER
-			}
-			modifier = {
-				add = 20
-				PER = {
-					has_government = SOV
-				}
-			}
-			modifier = {
-				add = 20
-				has_opinion = {
-					target = ENG
-					value < 24
-				}
-			}
-			modifier = {
-				add = 20
-				has_opinion = {
-					target = PER
-					value > 49
-				}
-			}
 		}
 		PER = {
 			country_event = { id = persia.invasion.9 hours = 12 }
@@ -246,16 +245,31 @@ country_event = { ### SCRIPTED PEACE OFFER
 
 	is_triggered_only = yes
 
+	fire_only_once = yes
+
 	option = { ### (war with ENG+SOV) Iran AGREES
 		name = persia.invasion.4.a
 		trigger = {
 			has_war_with = ENG
 			has_war_with = SOV
 		}
+		set_country_flag = PER_invasion_defeated_flag
+		PER_clear_german_influence = yes
+		set_country_flag = PER_cant_increase_german_influence_flag
 		white_peace = SOV
 		give_military_access = SOV
 		white_peace = ENG
 		give_military_access = ENG
+		swap_ideas = {
+			remove_idea = PER_anglo_soviet_invasion_PER
+			add_idea = PER_after_invasion_occupation
+		}
+		ENG = {
+
+		}
+		SOV = {
+			
+		}
 	}
 
 	option = { ### (war with ENG+SOV) Iran REFUSES
@@ -264,7 +278,7 @@ country_event = { ### SCRIPTED PEACE OFFER
 			has_war_with = ENG
 			has_war_with = SOV
 		}
-		
+		set_country_flag = PER_no_surrender_flag
 	}
 
 	option = { ### (war with EN only) Iran AGREES
@@ -337,9 +351,13 @@ country_event = { ### Invasion starts; IRAN
 
 	option = { 
 		name = persia.invasion.6.a
-		activate_mission = PER_invasion_mission
+		activate_mission = PER_invasion_underway_mission
 		add_war_support = 0.1
 		add_stability = -0.05
+		hidden_effect = {
+			ENG = { country_event = { id = persia.invasion.7 hours = 2 } }
+			SOV = { country_event = { id = persia.invasion.8 hours = 2 } }
+		}
 	}
 }
 
@@ -401,6 +419,94 @@ country_event = { ### Soviets DECLINE; Iran/Britain notified
 	option = { 
 		name = persia.invasion.9.b
 		
+	}
+}
+
+country_event = { ### British concessions post-abdication
+	id = persia.invasion.10
+	title = persia.invasion.10.t
+	desc = persia.invasion.10.desc
+	picture = GFX_report_event_generic_conference
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	option = { 
+		name = persia.invasion.10.a
+		hidden_effect = {
+			country_event = {
+				id = persia.invasion.11
+				days = 3
+				hours = 1
+				random_days = 3
+				random_hours = 16
+			}
+			country_event = {
+				id = persia.invasion.12
+				days = 700
+				hours = 8
+				random_days = 20
+				random_hours = 18
+			}
+		}
+		custom_effect_tooltip = PER_ENG_influence_to_80
+		set_variable = { PER_british_influence_var = 80 }
+		set_country_flag = PER_historical_iran_side_with_allies
+		unlock_decision_tooltip = PER_occupied_historical_declare_on_GER
+		every_owned_state = {
+			limit = {
+				OR = {
+					state = 413
+					state = 421
+				}
+			}
+			set_demilitarized_zone = yes
+		}
+		give_resource_rights = { receiver = ENG state = 413 }
+		give_resource_rights = { receiver = ENG state = 981 }
+	}
+
+}
+
+country_event = { ### Soviet concessions post-abdication
+	id = persia.invasion.11
+	title = persia.invasion.11.t
+	desc = persia.invasion.11.desc
+	picture = GFX_report_event_generic_conference
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	option = { 
+		name = persia.invasion.11.a
+		custom_effect_tooltip = PER_SOV_influence_to_80
+		set_variable = { PER_soviet_influence_var = 80 }
+		every_owned_state = {
+			limit = {
+				OR = {
+					state = 419
+					state = 988
+					state = 987
+					state = 420
+					state = 984
+					state = 983
+				}
+			}
+			set_demilitarized_zone = yes
+		}
+		give_resource_rights = { receiver = SOV state = 419 }
+		hidden_effect = {
+			SOV = {
+				country_event = {
+					id = persia.invasion.13
+					days = 35
+					hours = 8
+					random_hours = 8
+				}
+			}
+		}
 	}
 }
 
@@ -757,7 +863,7 @@ country_event = {
 	
 	option = {
 		trigger = {
-			is_ai = no
+			is_ai = yes
 		}
 		name = persia.navy.2.b
 		FROM = {
@@ -999,12 +1105,7 @@ country_event = {
 			is_ai = no
 		}
 		name = persia.7.b
-		FROM = {
-			country_event = {
-				id = persia.9
-				random_hours = 8
-			}
-		}
+
 	}
 	
 }
@@ -1096,12 +1197,24 @@ country_event = { ### Random communist activity
 
 	trigger = {
 		NOT = {
-			has_country_flag = PER_communist_activity_banned
+			OR = {
+				has_country_flag = PER_communist_activity_banned
+				has_decision = PER_anti_communist_raids
+				has_decision = PER_police_raid_communist_supporters
+			}
 		}
 	}
 	
 	option = {
 		name = persia.9.a
+		if = {
+			limit = {
+				NOT = {
+					has_idea = PER_communist_opposition_idea
+				}
+			}
+			add_idea = PER_communist_opposition_idea
+		}
 		random_list = {
 			50 = {
 				add_popularity = {
@@ -1129,7 +1242,7 @@ country_event = { ### swap to high literacy
 	id = persia.10
 	title = persia.10.t
 	desc = persia.10.desc
-	picture = GFX_report_event_soviet_purge_politicians
+	picture = GFX_report_event_gathering_protest
 
 	is_triggered_only = yes
 
@@ -1140,6 +1253,8 @@ country_event = { ### swap to high literacy
 			compare = greater_than_or_equals
 		}
 	}
+
+	fire_only_once = yes
 	
 	option = {
 		name = persia.10.a
@@ -1148,6 +1263,37 @@ country_event = { ### swap to high literacy
 			PER_literacy_change_02 = yes
 			remove_dynamic_modifier = { modifier = PER_low_literacy_dynamic_modifier }
 			add_dynamic_modifier = { modifier = PER_high_literacy_dynamic_modifier }
+		}
+	}
+	
+}
+
+country_event = { ### Shah abdicates, Mohammad Reza steps in (invasion)
+	id = persia.11
+	title = persia.11.t
+	desc = persia.11.desc
+	picture = GFX_report_event_fascist_militia
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+	
+	option = {
+		name = persia.11.a
+		custom_effect_tooltip = PER_swap_to_high_literacy_tt
+		retire_ideology_leader = neutrality
+		clr_country_flag = PER_young_shah_advisor_enable
+		add_country_leader_role = {
+			character = PER_mohammad_reza_pahlavi
+			promote_leader = yes
+			country_leader = {
+				ideology= absolute_monarchism
+				expire = "1965.1.1.1"
+				traits = { PER_shah_of_iran_trait }
+			}
+		}
+		hidden_effect = {
+			news_event = { id = persia.news.2 hours = 4 }
 		}
 	}
 	
