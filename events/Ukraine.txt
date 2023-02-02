@@ -561,3 +561,170 @@ country_event = { #UKR integrated army command
 		add_political_power = -10
 	}
 }
+
+# UKR demands Romanian claims
+country_event = {
+	id = ukraine.7
+	title = ukraine.7.t
+	desc = ukraine.7.d
+	picture = GFX_report_event_generic_read_write
+	
+	is_triggered_only = yes
+	
+	option = { # Accept demands
+		name = ukraine.7.a
+		save_event_target_as = bessarabia_ultimatum_victim
+		set_country_flag = bessarabia_ultimatum_victim		
+		ai_chance = {
+			factor = 70
+			modifier = { # Don't accept if in a faction that can protect them
+				factor = 0
+				NOT = { is_in_faction_with = FROM }
+				any_other_country = {
+					is_major = yes
+					NOT = { tag = UKR }
+					OR = {
+						is_in_faction_with = ROOT
+						has_guaranteed = ROOT
+					}
+				}
+
+			}
+			modifier = {
+				factor = 0.3
+				is_historical_focus_on = no #Romania will still cede on historical
+			}
+		}
+		FROM = {
+			country_event = { days = 1 id = ukraine.8 }	
+		}
+		#set_country_flag = bessarabia_ceded
+	}
+
+	option = { # Refuse
+		name = ukraine.7.b
+		ai_chance = {
+			base = 0
+			modifier = {
+				add = 10
+				is_in_faction = yes
+				NOT = { is_in_faction_with = FROM }
+			}
+			modifier = {
+				is_historical_focus_on = yes
+				factor = 0
+			}
+			modifier = {
+				factor = 0
+				is_in_faction_with = FROM
+			}
+		}
+		FROM = {
+			country_event = { days = 1 id = ukraine.9 }
+			effect_tooltip = {
+				create_wargoal = {
+					type = take_state
+					target = ROM
+					generator = { 80 766 834 }
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = ukraine.8
+	title = ukraine.8.t
+	desc = ukraine.8.d
+	picture = GFX_report_event_soviet_army_greeted
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = ukraine.8.a
+		if = {
+			limit = {
+				FROM = {
+					controls_state = 80	#Bucovina
+				}
+			}
+			UKR = { 
+				transfer_state = 80
+			}
+			hidden_effect = {
+				UKR = { #if those territories were claimed, perhaps one should core them too?
+					remove_state_claim = 80
+					add_state_core = 80
+				}
+			}
+		}
+		if = {
+			limit = {
+				FROM = {
+					controls_state = 766	#Southern Bessarabia
+				}
+			}
+			UKR = { 
+				transfer_state = 766
+			}
+			hidden_effect = {
+				set_province_name = { id = 6727 name = "Bilhorod-Dnistrovskyi"} #russification of names
+				UKR = { #if those territories were claimed, perhaps one should core them too?
+					remove_state_claim = 766
+					add_state_core = 766
+				}
+			}
+		}
+		if = {
+			limit = {
+				FROM = {
+					controls_state = 834
+				}
+			}
+			UKR = { 
+				transfer_state = 834
+			}
+			hidden_effect = {
+				UKR = { #if those territories were claimed, perhaps one should core them too?
+					remove_state_claim = 834
+					add_state_core = 834
+				}
+			}
+		}		
+		hidden_effect = {
+		#	news_event = { id = news.10 days = 1 }
+		}
+	}
+}
+
+# Bessarabian controller (one of three states) refuses to surrender Bessarabia
+country_event = {
+	id = ukraine.9
+	title = ukraine.9.t
+	desc = ukraine.9.d
+	picture = GFX_report_event_stalin_02
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = ukraine.9.a
+		ROOT = {
+			create_wargoal = {
+				target = FROM
+				type = take_state
+				generator = { 80 766 }
+				expire = 0
+			}
+		}
+		hidden_effect = {	#Only triggers once since otherwise strange
+			if = {
+				limit = {
+					FROM = {
+						controls_state = 766
+					}
+				}
+				news_event = { id = news.11 days = 1 }
+			}
+		}
+	}
+}
