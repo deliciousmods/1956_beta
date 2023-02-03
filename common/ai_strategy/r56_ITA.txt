@@ -45,26 +45,6 @@ ITA_naval_bombers = {
 	}
 }
 
-ITA_garrison_home = {
-	allowed = { tag = ITA }
-	enable = {
-		has_war = yes
-	}
-	abort_when_not_enabled = yes
-
-	ai_strategy = {
-		type = put_unit_buffers
-		ratio = 0.15
-		states = { 
-			451
-			663
-			450
-		}
-		subtract_invasions_from_need = no
-		subtract_fronts_from_need = no
-	}
-}
-
 ITA_garrison_north_africa = {
 	allowed = { tag = ITA }
 	enable = {
@@ -74,7 +54,7 @@ ITA_garrison_north_africa = {
 
 	ai_strategy = {
 		type = put_unit_buffers
-		ratio = 0.15
+		ratio = 0.1
 		states = { 
 			115
 			156
@@ -133,6 +113,41 @@ ITA_north_africa_east = {
 			NOT = { any_neighbor_state = { CONTROLLER = { original_tag = FRA } } }
 		}
 		value = 125
+	}
+}
+
+ITA_garrison_east_africa = {
+	allowed = { tag = ITA }
+	enable = {
+		is_historical_focus_on = yes
+		country_exists = AOI
+		AOI = {
+			is_puppet = yes
+		}
+	}
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = force_defend_ally_borders
+		id = "AOI"
+		value = 100
+	}
+	
+	ai_strategy = {
+		type = front_unit_request
+		state_trigger = {
+			OR = {
+				state = 843
+				state = 835
+				state = 559
+				state = 837
+				state = 271
+				state = 840
+				state = 836
+				state = 837
+			}
+		}
+		value = 10
 	}
 }
 
@@ -228,6 +243,11 @@ crush_ethiopia = {
         value = 500
 	}
 	ai_strategy = {
+		type = consider_weak
+		id = "ETH"
+		value = 50
+	}
+	ai_strategy = {
         type = ignore_army_incompetence
         id = "ITA"
         value = 500
@@ -241,8 +261,8 @@ crush_ethiopia = {
 		type = put_unit_buffers
 		ratio = 0.1
 		order_id = 2
-		subtract_invasions_from_need = yes
-		subtract_fronts_from_need = yes
+		subtract_invasions_from_need = no
+		subtract_fronts_from_need = no
 		states = { 
 			550
 			559
@@ -366,39 +386,168 @@ ITA_hesitate_to_join_wars_becuase_we_need_more_time_or_we_will_get_crushed = {#t
 	}
 }
 
-ITA_MIN_convoy_building = {
+ITA_extra_min_convoy_building = {
 	enable = {
 		original_tag = ITA
 	}
-
 	ai_strategy = {
 		type = equipment_production_min_factories
 		id = convoy
-		value = 3
+		value = 2
 	}
 }
 
-ITA_convoy_hungry = {
+
+ITA_protect_your_convoys = {
 	enable = {
 		original_tag = ITA
 	}
 
 	enable = {
-		date < 1940.1.1
-		has_equipment = {
-  			convoy < 200 #MODDED
-  		}
-		#MODDED
+		OR = {
+			has_war_with = ENG
+			has_war_with = FRA
+		}
 	}
 	abort_when_not_enabled = yes
 
 	ai_strategy = {
-		type = unit_ratio
-		id = convoy
-		value = 40 #MODDED
+		type = naval_mission_threshold
+		id = MISSION_CONVOY_ESCORT
+		value = 300
 	}
 }
 
 
+ITA_close_up_on_suez_if_at_war_with_ENG  = {
+	allowed = {
+		original_tag = ITA
+	}
 
+	enable = {
+		date < 1942.1.1
+		has_war_with = ENG
+		NOT = { has_full_control_of_state = 995 }
+		NOT = { has_full_control_of_state = 911 }
+	}
 
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = front_control
+
+		state = 911 # close up suez
+
+		ratio = 0.6
+
+		priority = 200
+		ordertype = front
+		execution_type = rush
+		execute_order = yes
+	}
+	
+	ai_strategy = {
+		type = front_control
+
+		state = 995 # close up suez
+
+		ratio = 0.6
+
+		priority = 200
+		ordertype = front
+		execution_type = rush
+		execute_order = yes
+	}	
+	
+	ai_strategy = {
+		type = front_control
+
+		state = 118 # close up suez
+
+		ratio = 0.6
+
+		priority = 200
+		ordertype = front
+		execution_type = rush
+		execute_order = yes
+	}		
+
+	ai_strategy = {
+		type = front_unit_request
+
+		state = 661
+
+		value = 20 # lets put more units, should be safe
+	}
+	
+	ai_strategy = {
+		type = front_armor_score
+		id = EGY
+		value = 100
+	}
+}
+
+ITA_hold_suez_if_you_got_it = {
+	allowed = {
+		original_tag = ITA
+	}
+	
+	enable = {
+		AND = {
+			has_full_control_of_state = 995
+			has_full_control_of_state = 991
+		}
+	}
+	
+	abort_when_not_enabled = yes
+	
+	ai_strategy = {
+		type = put_unit_buffers
+		states = {
+			995
+			991
+			447
+			452
+		}
+		ratio = 0.1
+		area = suez
+		subtract_invasions_from_need = yes
+		subtract_fronts_from_need = yes	
+	}
+}
+
+ITA_ethiopian_theatre_air_supremacy = {
+	allowed = {
+		original_tag = ITA
+	}
+
+	enable = {
+		has_war_with = ETH
+	}
+
+	abort = {
+		OR = {
+			NOT = { country_exists = ETH }
+			date > 1936.12.1
+			any_enemy_country = {
+				is_major = yes
+				capital_scope = { is_on_continent = europe }
+			}
+		}
+	}
+	
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = strategic_air_importance
+		id = 273
+		value = 45000
+	}
+	
+	ai_strategy = {
+		type = strategic_air_importance
+		id = 274
+		value = 45000
+	}	
+}
+ 
