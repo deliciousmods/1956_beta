@@ -1,0 +1,320 @@
+#### Contains examples and documentation of how to use the AI strategies. ####
+## Try to keep this reasonably up-to-date, please.
+
+# -----------------------------------------
+
+### List of available strategy tokens (updated 2021-09) ###
+
+## related to diplomacy
+# alliance
+# antagonize
+# avoid_starting_wars
+# asking_foreign_garrison
+# befriend
+# conquer
+# consider_weak
+# contain
+# declare_war
+# diplo_action_acceptance
+# diplo_action_desire
+# dont_join_wars_with
+# ignore
+# ignore_claim
+# influence
+# invade
+# prepare_for_war
+# protect
+# send_lend_lease_desire
+# send_volunteers_desire
+# support
+
+## related to fronts and armies
+# area_priority
+# dont_defend_ally_borders
+# force_defend_ally_borders
+# front_armor_score
+# front_control
+# front_unit_request
+# garrison
+# garrison_reinforcement_priority
+# ignore_army_incompetence
+# invasion_unit_request
+# occupation_policy
+# put_unit_buffers
+# scorched_earth_prio
+# spare_unit_factor
+# theatre_distribution_demand_increase
+
+## related to navies
+# naval_avoid_region
+# naval_convoy_raid_region
+# naval_invasion_focus
+# naval_mission_threshold
+# strike_force_home_base
+
+## related to intelligence
+# activate_crypto
+# agency_ai_base_num_factories_factor
+# agency_ai_per_upgrade_factories_factor
+# decrypt_target
+# intelligence_agency_branch_desire_factor
+# intelligence_agency_usable_factories
+# operation_equipment_priority
+# operative_mission
+# operative_operation
+
+## related to production and resources
+# added_military_to_civilian_factory_ratio
+# air_factory_balance
+# build_airplane
+# build_army
+# build_building
+# build_ship
+# building_target
+# convoy_efficiency_to_cancel_trades
+# dockyard_to_military_factory_ratio
+# equipment_production_factor
+# equipment_production_min_factories
+# equipment_stockpile_surplus_ratio
+# equipment_variant_production_factor
+# factory_build_score_factor
+# force_build_armies
+# fuel_buffer
+# min_convoy_efficiency_factor_for_war_support_hit
+# production_upgrade_desire_offset
+# railway_gun_divisions_ratio
+# research_tech
+# role_ratio
+# save_equipment
+# template_prio
+# unit_ratio
+# land_xp_spend_priority
+# air_xp_spend_priority
+# navy_xp_spend_priority
+# pp_spend_amount
+# pp_spend_priority
+# min_wanted_supply_trucks
+# wanted_supply_trucks
+# min_wanted_supply_trains
+# wanted_supply_trains
+
+## Related to airforce
+# strategic_air_importance
+
+# -----------------------------------------
+
+### UNIT RATIOS
+# AIR
+# For air types unit_ratio strategy values behave like weights. If no value is set it defaults to 0. If a plane type is DLC locked its set ratio is ignored and 0 is used instead.
+# 
+# Land-based and carrier plane types are handled completely separate.
+# 
+# First we calculate the total number of planes that the AI want to produce:
+# 
+# For land-based planes:
+# - Sum up the total air base capacity (excluding carriers), and multiply it by WANTED_LAND_PLANES_PER_BASE_CAPACITY_FACTOR.
+# - Add the number of divisions the AI wants multiplied by WANTED_LAND_PLANES_PER_DIVISION.
+# - Subtract the number of planes in airwings.
+# - Clamp the value between 0 and the number of wanted divisions multiplied by WANTED_LAND_PLANES_TOTAL_MAX_PER_DIVISION.
+# - The result is then multiplied by hardcoded value AI_FOCUS_AVIATION, which beforehand has been multiplied by modifier ai_focus_aviation_factor.
+# 
+# For carrier planes:
+# - Sum up the total carrier deck capacity, and multiply it by WANTED_CARRIER_PLANES_PER_CARRIER_CAPACITY_FACTOR.
+# - Sum up the total deck capacity of carriers in production, where the carrier will be done in no more than CARRIER_CAPACITY_IN_PRODUCTION_MAX_DAYS_LEFT_TO_INCLUDE_FACTOR days, and multiply it by WANTED_CARRIER_PLANES_PER_CARRIER_CAPACITY_IN_PRODUCTION_FACTOR.
+# - Subtract the number of carrier planes in airwings.
+# - Clamp the value to minimum 0.
+# - The result is then multiplied by hardcoded value AI_FOCUS_NAVAL_AIR, which beforehand has been multiplied by modifier ai_focus_naval_air_factor.
+# 
+# Finally we calculate and set the build_airplane strategy values:
+# - For each land-based type we take the unit_ratio, divide it by the sum of all land-based unit_ratio values, and multiply it by the above calculated number of wanted land-based planes.
+# - We do the same for carrier planes.
+# 
+# ALL BUT AIR
+# Unit ratios are calculated as a base of 100 plus the value indicated in the strategy.
+# A unit type ratio of -40 would result in only 60% of the wanted number being set as a goal
+# how the AI meets its goals thereafter can also be altered by other factors.
+
+### EQUIPMENT PRODUCTION FACTOR
+# Same as above, with the percentage of calculated factories to meet need added to by the strategy
+
+### Examples of AI strategy usage ###
+
+# Example of strategy for intelligence agency
+#example_strategy = {
+#
+#	enable = {
+#		original_tag = FRA
+#	}
+#
+#	ai_strategy = {
+#		type = intelligence_agency_usable_factories
+#		# no need of id for this one
+#		value = 10
+#	}
+#
+#	ai_strategy = {
+#		type = intelligence_agency_branch_desire_factor
+#		id = branch_defense
+#		value = -50    # -50% on the AI weight
+#	}
+#}
+
+# Example of strategy for avoid_starting_wars
+#example_strategy = {
+#
+#	enable = {
+#		original_tag = FRA
+#	}
+#
+#	ai_strategy = {
+#		type = avoid_starting_wars
+#		# no need of id for this one
+#		value = -200 # this value is additive with the 'conquer' strategy, and is targetless. It is meant for very specific situations, and should not be used widely.
+#	}
+#
+#	ai_strategy = {
+#		type = conquer
+#		id = GER
+#		value = 200 # This would therefore stack with the above value to reach a conquer weight of 0 for targeting Germany, and -200 for everyone else.
+#	}
+#}
+
+
+# example unit buffer strategy. this strategy will make ai buffer/garrison some units in a target area  which can be used in orders that is in target areas
+#
+# ai_strategy = {
+# 	type = put_unit_buffers
+#
+#	# ratio of total armeis in country to be buffered
+# 	ratio = 0.4
+#
+#	# you can specify an order id. ratio of same orders ids will be share same ratio
+# 	order_id = 2
+#
+# 	# states to put garrison orders (if no state is friendly, strat is invalid)
+# 	states = {
+# 		125
+# 		126
+# 		127
+# 		128
+# 		129
+# 		338
+# 		123
+# 		122
+# 	}
+#
+#	# ai areas that the orders will use these buffers in
+# 	area = europe
+# 	area = asia
+#
+# 	# by default if you have orders in target areas, the buffer will request less units.
+#	# you can override this to disable the feature
+# 	subtract_invasions_from_need = yes
+# 	subtract_fronts_from_need = yes
+# }
+
+
+#used for controlling invasion or regular fronts
+#ai_strategy = {
+# 	type = front_control
+#
+#	#you can define a target in following ways. you can define more than one
+#
+#	tag = GER 				# target against a specific country
+#	state = 42 				# target on a state
+#	strategic_region = 65	# target on a strategic region
+#	area = europe			# target on a specific ai area
+#	country_trigger = { always = no } 	# a trigger to check agaisnt a specific country. scope is enemy country from scope is our country
+#	state_trigger = { always = no } 	# a trigger to check agaisnt a state. scope is state. from scope is enemy country from.from scope is our country
+#
+#	ratio = 0.0 # the strategy is enabled only if ratio of the front covered by this strat's targets greater than this ratio
+#
+#	priority = 0 # default 0, higher prio strats will override lower
+#	ordertype = front # front or invasion. if set this strategy will only apply to that specific order type
+#	execution_type = careful # one of careful balanced rush rush_weak. if set will override the execution type of front (only for front orders)
+#	execute_order = yes # yes or no. if set will override execute or not decision of front
+#	manual_attack = yes # default yes. if no ai will not do manual pokes at enemy (only for front orders)
+#}
+
+#used for increasing/decreasing unit requests for invasions or fronts
+#ai_strategy = {
+#	# use one of them
+# 	type = front_unit_request
+# 	type = invasion_unit_request
+#
+#	#invasions will check invasion target, fronts will check provinces at front
+#
+#	tag = GER 				# province of a specific country
+#	state = 42 				# province on a state
+#	strategic_region = 65	# province on a strategic region
+#	area = europe			# province on a specific ai area
+#	country_trigger = { always = no } 	# a trigger to check agaisnt a specific country. scope is enemy country from scope is our country
+#	state_trigger = { always = no } 	# a trigger to check agaisnt a state. scope is state. from scope is enemy country from.from scope is our country
+#
+#	value = 40				# will be added as a factor over regular requests
+#}
+
+# makes ai do an operation
+# ai_strategy = {
+# 	type = operative_operation
+# 	operation = operation_id
+# 	value = 900 # score compared to other operations & missions
+# 	operation_target = GER # target
+#	state = 1 # if specified ai will prefer this states for targeted operations assuming they are valid target
+#	state = 2
+#	region = 1 # if specified ai will prefer this regions for targeted operations assuming they are valid
+#	region = 2
+#	priority = 100 # ai will prefer state/region of the highest prio strategy
+# }
+
+# ai_strategy = {
+# 	type = operative_mission
+# 	mission = build_intel_network # mission token
+# 	value = 800 # score compared to other operations & missions
+# 	mission_target = GER # target
+#	state = 1 # if specified ai will prefer this states for targeted operations assuming they are valid target
+#	state = 2
+#	priority = 100 # ai will prefer state of the highest prio strategy
+# }
+
+# Makes AI ignore frontlines belonging to a specific ally
+# ai_strategy = {
+#	type = dont_defend_ally_borders
+#	id = ITA
+#	value = 100 # This strategy is binary, any value > 0 activates it, while <= 0 deactivates it.
+# }
+
+# Low-level frontline control. Good for example to force the AI to blitz an area.
+# ai_strategy = {
+#	type = front_control
+#
+#	tag = HOL  # Can also target country, state, strategic_region, area. Can also specify multiple targets, each on its own line
+#
+#	ratio = 0.25  # At least this ratio of the frontline provinces need to be targeted for the AI strat to apply
+#
+#	priority = 100  # Higher prio strats will override lower
+#	ordertype = front  # Can be either {front, invasion}
+#	execution_type = rush  # Can be either {careful, balanced, rush, rush_weak}
+#	execute_order = yes  # If set, will force activate/deactivate execution
+#	manual_attack = yes  # If set the AI will try manual poke attacks (for front orders)
+# }
+
+# Makes AI increase unit demand for the war fronts and area defense fronts belonging to the theatre that contains the specified state
+# ai_strategy = {
+#	type = theatre_distribution_demand_increase
+#	id = 447 # State ID for Alexandria, so will target the theatre where Alexandria belongs
+#	value = 10 # Increase desired unit demand by 10
+# }
+
+# Negative value makes AI not guarantee independence on target country.
+# ai_strategy = {
+#	type = protect
+#	id = "CZE"
+#	value = 200
+#}
+
+#ai_strategy = {
+#	type = strategic_air_importance
+#	id = 1 #Strategic Region ID - Southern England
+#	value = 10000 #value of stocked main front in active combat is usually around 35,000
+#}	

@@ -1364,7 +1364,6 @@ SOV_scorched_earth_german_front_stalingrad = {
 }
 
 SOV_dont_do_so_many_naval_invasions_please = {
-
 	allowed = { original_tag = SOV }
 
 	enable = {
@@ -1934,7 +1933,7 @@ SOV_wants_civ = {
 
 
 ###########################
-### avoid attacking the Baltic countries until we have sent ultimatums
+### avoid attacking the baltics until we have sent ultimatums
 ###########################
 SOV_ultimatum_LIT = {
 	allowed = {
@@ -2029,6 +2028,28 @@ SOV_ultimatum_EST = {
 	}
 }
 
+SOV_nothing_bad_could_possibly_happen_now = {
+	allowed = {
+		original_tag = SOV
+	}
+	enable = {
+		always = no #No longer necessary
+		is_historical_focus_on = yes
+		NOT = { has_war_with = GER }
+		date < 1942.2.1
+	}
+
+	abort_when_not_enabled = yes
+
+	ai_strategy = {
+		type = front_unit_request
+
+		tag = GER
+
+		value = -30 # we have a lovely non-aggression pact, so there's no reason to be worried. At all.
+	}
+}
+
 ###########################
 ### avoid attacking Romania until we have sent ultimatum
 ###########################
@@ -2039,50 +2060,58 @@ SOV_ultimatum_ROM = {
 	}
 	enable = {
 		is_historical_focus_on = yes
-		78 = {
-			controller = {
-				NOT = { has_country_flag = SOV_added_claimed_bessarabia } #Added via focus Claim Bessarabia
+		OR = {
+			AND = {
+				NOT = { has_government = communism } #Non-commies don't have access to focus Claim in Bessarabia
+				date < 1940.1.31 #Do not do it too early buddy
+			}
+			NOT = { has_completed_focus = SOV_claim_on_bessarabia }
+		}
+		ROM = {
+			NOT = { has_country_flag = SOV_added_claimed_bessarabia } #Added via focus Claim Bessarabia
+		}
+		OR = {
+			NOT = { owns_state = 78 } #Bessarabia
+			78 = {
+				owner = { NOT = { is_in_faction_with = ROOT } }
 			}
 		}
-		78 = { #Bessarabia
-			NOT = {
-				is_controlled_by = ROOT
-				controller = { is_in_faction_with = ROOT }
+		OR = {
+			NOT = { owns_state = 80 } #Bucovina
+			80 = {
+				owner = { NOT = { is_in_faction_with = ROOT } }
 			}
 		}
-		80 = { #Bessarabia
-			NOT = {
-				is_controlled_by = ROOT
-				controller = { is_in_faction_with = ROOT }
-			}
-		}
-		766 = { #Bessarabia
-			NOT = {
-				is_controlled_by = ROOT
-				controller = { is_in_faction_with = ROOT }
+		OR = {
+			NOT = { owns_state = 766 } #Southern Bessarabia
+			766 = {
+				owner = { NOT = { is_in_faction_with = ROOT } }
 			}
 		}
 	}
 	abort = {
 		OR = {
+			ROM = {
+				has_country_flag = { flag = SOV_added_claimed_bessarabia value = 1 days > 15 }
+			}
 			date > 1941.12.31 #If it's late then it's fine
 			AND = {
 				OR = {
-					controls_state = 78 #Bessarabia
+					owns_state = 78 #Bessarabia
 					78 = {
-						controller = { is_in_faction_with = ROOT }
+						owner = { is_in_faction_with = ROOT }
 					}
 				}
 				OR = {
-					controls_state = 80 #Bucovina
+					owns_state = 80 #Bucovina
 					80 = {
-						controller = { is_in_faction_with = ROOT }
+						owner = { is_in_faction_with = ROOT }
 					}
 				}
 				OR = {
-					controls_state = 766 #Southern Bessarabia
+					owns_state = 766 #Southern Bessarabia
 					766 = {
-						controller = { is_in_faction_with = ROOT }
+						owner = { is_in_faction_with = ROOT }
 					}
 				}
 			}
@@ -2090,13 +2119,19 @@ SOV_ultimatum_ROM = {
 	}
 
 	ai_strategy = {
+		type = ignore
+		id = "ROM"
+		value = 100
+	}
+
+	ai_strategy = {
 		type = antagonize
-		id = ROM
-		value = -30
+		id = "ROM"
+		value = -10
 	}
 	ai_strategy = {
 		type = conquer
-		id = ROM
+		id = "ROM"
 		value = -200
 	}
 }
