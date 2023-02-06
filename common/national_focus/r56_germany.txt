@@ -927,7 +927,7 @@ focus_tree = {
 			add_political_power = 50
 			army_experience = 5
 			add_named_threat = {
-				threat = 2
+				threat = 3
 				name = GER_rhineland
 			}
 			42 = {
@@ -1087,6 +1087,7 @@ focus_tree = {
 				limit = {
 					country_exists = AUS
 					AUS = {
+						has_civil_war = no
 						OR = {
 							owns_state = 4
 							owns_state = 152
@@ -1094,9 +1095,90 @@ focus_tree = {
 							owns_state = 848
 						}
 					}
+					ITA = {		#from vanilla - if Italy protects Austria
+						NOT = {
+							has_completed_focus = ITA_guarantee_austrian_independence
+						}
+					}
 				}
 				AUS = {
-					country_event = erwache.8
+					country_event = {
+						id = erwache.8
+						days = 1 
+						random_days = 1	#a bit randomness
+					}
+				}				
+				custom_effect_tooltip = anschluss_mefo_bills_tt
+			}
+			if = {		#vanilla effect
+				limit = {
+					country_exists = AUS
+					AUS = {
+						has_civil_war = no
+						OR = {
+							owns_state = 4
+							owns_state = 152
+							owns_state = 153
+							owns_state = 848 #Vorarlberg 
+						}
+					}
+					ITA = {
+						has_completed_focus = ITA_guarantee_austrian_independence
+					}
+				}
+ 
+				ITA = {
+					country_event = {
+						id = BBA_italy_interaction_events.24
+						days = 1
+					}
+				}
+			}
+			if = {
+				limit = {
+					any_other_country = {
+						original_tag = AUS
+						has_civil_war = yes
+						OR = {
+							owns_state = 4
+							owns_state = 152
+							owns_state = 153
+							owns_state = 848
+						}
+					}
+					ITA = {
+						NOT = {
+							has_completed_focus = ITA_guarantee_austrian_independence
+						}
+					}
+				}
+				custom_effect_tooltip = germany.126.warning
+				random_other_country = {
+					limit = {
+						original_tag = AUS
+						OR = {
+							has_government = fascism
+							AND = {
+								has_government = neutrality
+								NOT = {
+									any_other_country = {
+										original_tag = AUS
+										has_government = fascism
+									}
+								}
+							}
+							NOT = {
+								any_other_country = {
+									original_tag = AUS
+									OR = {
+										has_government = fascism
+										has_government = neutrality
+									}
+								}
+							}							
+						}
+					}
+					country_event = { id = germany.126 days = 1 }
 				}
 			}
 			if = {
@@ -1176,6 +1258,14 @@ focus_tree = {
 		relative_position_id = GER_begin_depression_recovery
 		ai_will_do = {
 			factor = 10
+		}
+		bypass = {
+			amount_taken_ideas = {
+				amount > 2
+				slots = {
+					political_advisor
+				}
+			}
 		}
 		completion_reward = {
 			country_event = {
@@ -5862,6 +5952,9 @@ focus_tree = {
 				}
 			}
 		}
+
+		will_lead_to_war_with = YUG
+
 		available = {
 			has_war_with_major = yes
 			r56_script_i_am_sane = yes
@@ -5869,19 +5962,33 @@ focus_tree = {
 			controls_state = 152
 			is_neighbor_of = YUG
 			has_army_manpower = {
-				size > 849999  
+				size > 874999 
 			}
 			YUG = {
 				r56_script_target_is_sane = yes
 			}
+			hidden_trigger = {
+				if = {
+					limit = {
+						ROOT = {
+							is_ai = yes
+						}
+					}
+					ROOT = {
+						surrender_progress < 0.01
+					}
+				}
+			}
 		}
+
 		bypass = {
 			YUG = {
 				r56_script_standard_bypass = yes
 			}
-			
 		}
+
 		will_lead_to_war_with = YUG
+
 		completion_reward = {
 			if = {
 				limit = {
@@ -5904,9 +6011,11 @@ focus_tree = {
 					}
 				}
 				add_named_threat = { threat = 2 name = GER_fate_of_yugoslavia }
-				YUG = {
-					country_event = generic.20
-				}
+				create_wargoal = {
+					type = puppet_wargoal_focus
+					target = YUG
+					expire = 0
+				}	
 			}
 			else_if = {
 				limit = { #You've been a bad boy
@@ -5926,16 +6035,16 @@ focus_tree = {
 						}
 					}
 				}
-				country_event = {
+				country_event = { #Fate of Yugo
 					id = germany.98
 				}
 			}
-			else = {
+			else = { #Fallback reward
 				create_wargoal = {
-					type = puppet_wargoal_focus
+					type = annex_everything
 					target = YUG
 					expire = 0
-				}	
+				}
 			}
 		}
 		search_filters = {
@@ -8254,6 +8363,15 @@ focus_tree = {
 		}
 		ai_will_do = {
 			factor = 10
+			modifier = {
+				factor = 0
+				NOT = {
+					is_neighbor_of = IRQ
+					any_allied_country = {
+						is_neighbor_of = IRQ
+					}
+				}
+			}
 		}
 		completion_reward = {
 			create_wargoal = {
@@ -8818,7 +8936,7 @@ focus_tree = {
 					set_province_controller = 6513
 					set_province_controller = 526
 					set_province_controller = 3522
-					set_province_controller = 3526
+					#set_province_controller = 3526 #this is in Greece, idk which tile I intended
 					set_province_controller = 6298
 					set_politics = {
 						ruling_party = communism
@@ -9235,19 +9353,9 @@ focus_tree = {
 				GER_erwin_von_witzleben={
 					promote_leader = yes
 					add_unit_leader_trait = offensive_doctrine
-					add_advisor_role = {
-						advisor = {
-							slot = army_chief
-							cost = 100
-							idea_token = GER_erwin_von_witzleben
-							traits = {
-								army_chief_offensive_1
-							}
-							allowed = {
-								always = yes
-							}
-						}
-					  	activate = no
+					add_trait = {						#vanilla does it now - Fantom
+						trait = army_chief_offensive_1
+						slot = army_chief
 					}
 					remove_country_leader_role = {
 						ideology = conservatism
@@ -9270,19 +9378,9 @@ focus_tree = {
 				GER_erwin_von_witzleben={
 					promote_leader = yes
 					add_unit_leader_trait = offensive_doctrine
-					add_advisor_role = {
-						advisor = {
-							slot = army_chief
-							cost = 100
-							idea_token = GER_erwin_von_witzleben
-							traits = {
-								army_chief_offensive_1
-							}
-							allowed = {
-								always = yes
-							}
-						}
-					  	activate = yes
+					add_trait = {						#vanilla does it now - Fantom
+						trait = army_chief_offensive_1
+						slot = army_chief
 					}
 					remove_country_leader_role = {
 						ideology = conservatism
@@ -9521,6 +9619,10 @@ focus_tree = {
 			unlock_decision_tooltip = GER_reichskommissariat_belgien_nordfrankreich
 			unlock_decision_tooltip = GER_reichskommissariat_ostland
 			unlock_decision_tooltip = GER_reichskommissariat_ukraine
+			unlock_decision_tooltip = GER_reichskommissariat_moskowien
+			unlock_decision_tooltip = GER_reichskommissariat_kaukasien
+			unlock_decision_tooltip = GER_reichskommissariat_turkestan
+			unlock_decision_tooltip = GER_generalgouvernement
 		}
 
 	}
@@ -11376,6 +11478,15 @@ focus_tree = {
 		y = 1
 		ai_will_do = {
 			factor = 10
+			modifier = {
+				factor = 0
+				NOT = {
+					is_neighbor_of = PER
+					any_allied_country = {
+						is_neighbor_of = PER
+					}
+				}
+			}
 		}
 		available = {
 			r56_script_i_am_sane = yes
@@ -13098,6 +13209,7 @@ focus_tree = {
 				NOT = {
 					has_government = democratic
 					is_in_faction_with = ROOT
+					has_war_with = ROOT
 				}
 			}
 		}
@@ -13568,6 +13680,7 @@ focus_tree = {
 				OR = {
 					exists = no
 					is_subject = yes #baltics might want protection even more
+					is_in_faction_with = ROOT
 				}
 			}
 		}
@@ -13802,6 +13915,7 @@ focus_tree = {
 					exists = no
 					is_subject = yes
 					has_government = communism
+					is_in_faction_with = ROOT
 				}
 			}
 		}
