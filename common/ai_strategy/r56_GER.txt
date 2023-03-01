@@ -23,10 +23,13 @@ GER_we_dont_really_need_those = {
 	}
 	enable = {
 		date > 1936.1.1
+		exists = yes
 	}
 	abort = {
 		date > 1944.1.1 
 	}
+
+	abort_when_not_enabled = yes
 
 	ai_strategy = {
 		type = equipment_variant_production_factor
@@ -108,10 +111,10 @@ GER_build_800k_army_first = {
 		value = 100
 	}
 
-	ai_strategy = { #Dont upgrade the line right away under 800K. Over come the -25
+	ai_strategy = { #Dont upgrade the line right away under 800K. Over come the -15
 		type = production_upgrade_desire_offset
 		id = medium_tank_chassis_1
-		value = -25
+		value = -15
 	}	
 
 	ai_strategy = { #If we're going to switch, start saving
@@ -344,21 +347,135 @@ GER_for_the_love_of_god_start_world_war_2 = {
 	}
 }
 
-GER_after_poland_falls_we_want_more_suppression_units_for_france = {
-	enable = {
-		tag = GER
-		POL = { has_capitulated = yes }
-		has_war = yes
+r56_GER_prepare_weserubung = {
+	allowed = {
+		original_tag = GER
 	}
+
+	enable = {
+		date < 1941.01.01 #Date check in case this enables during the wrong time
+		is_historical_focus_on = yes
+		ROOT = { #Basic sanity checks
+			has_government = fascism
+			is_major = yes
+			surrender_progress < 0.04 #War is not going poorly enough so I can use troops for this strat
+			has_country_flag = r56_GER_prepare_weserubung_strat_is_a_go
+		}
+		if = { #Poland front check
+			limit = {
+				ROOT = {
+					has_war_with = POL
+				}
+			}
+			POL = { #Poland is on the way out or dead
+				OR = {
+					exists = no
+					has_capitulated = yes
+					surrender_progress > 0.70
+				}
+			}
+		}
+		OR = { #The targets exists
+			DEN = {
+				exists = yes
+				has_capitulated = no
+			}
+			NOR = {
+				exists = yes
+				has_capitulated = no
+			}
+		}
+	}
+	
 	abort = {
-		has_war = no
+		GER = {
+			surrender_progress > 0.04
+		}
+		AND = { #The targets died
+			DEN = {
+				exists = no
+				has_capitulated = yes
+			}
+			NOR = {
+				exists = no
+				has_capitulated = yes
+			}
+		}
+	}
+
+	abort_when_not_enabled = yes
+
+	#Danish Front Control
+	ai_strategy = {
+		type = prepare_for_war
+		id = DEN
+		value = 250
+	}
+
+	ai_strategy = { 
+		type = front_armor_score
+		id = DEN
+		value = 100
 	}
 
 	ai_strategy = {
-		type = role_ratio
-		id = suppression
-		value = 5
+		type = front_control
+		tag = DEN
+		ratio = 0.20
+		ordertype = front
+		execution_type = rush
 	}
+
+	ai_strategy = {
+		type = front_control
+		state = 37
+		ratio = 0.01
+		ordertype = invasion
+		execute_order = yes
+	}
+
+	
+	#Norway Front Control
+	ai_strategy = {
+		type = prepare_for_war
+		id = NOR
+		value = 250
+	}
+
+	ai_strategy = { 
+		type = front_armor_score
+		id = NOR
+		value = 100
+	}
+
+	ai_strategy = {
+		type = front_control
+		tag = NOR
+		ratio = 0.15
+		ordertype = front
+		execution_type = rush
+	}
+
+	ai_strategy = {
+		type = front_control
+		state = 110
+		ratio = 0.15
+		ordertype = invasion
+		execute_order = yes
+	}
+
+	ai_strategy = {
+		type = invasion_unit_request
+		state = 110
+		value = 250
+	}
+
+	ai_strategy = {
+		type = invade
+		id = NOR
+		value = 750
+	}
+	
 }
 
 GER_finish_Weserubung = {
@@ -370,18 +487,22 @@ GER_finish_Weserubung = {
 		has_government = fascism
 		AND = {
 			ROOT = {
-				surrender_progress < 0.02
+				surrender_progress < 0.03
 				is_major = yes
 				OR = {
 					has_completed_focus = GER_weserubung
 					has_completed_focus = GER_weserubung_vanilla
 				}
-				OR = {
-					AND = { #Holding the line and killed Poland
-						POL = {
+			}
+			OR = {
+				AND = { #Holding the line and killed Poland
+					POL = {
+						OR = {
 							has_capitulated = yes
 							exists = no
 						}
+					}
+					ROOT = {
 						#West Germany
 						has_full_control_of_state = 42
 						has_full_control_of_state = 923
@@ -392,7 +513,9 @@ GER_finish_Weserubung = {
 						#Denamrk aint doing funny stuff
 						has_full_control_of_state = 998
 						has_full_control_of_state = 58
-					}
+					}	
+				}
+				ROOT = {	
 					AND = { #Killed France
 						#French Coast
 						has_full_control_of_state = 29
@@ -401,8 +524,8 @@ GER_finish_Weserubung = {
 						has_full_control_of_state = 30
 						has_full_control_of_state = 23
 						has_full_control_of_state = 19
-					}
-				}
+					}	
+				}	
 			}
 		}	
 		NOR = {
@@ -481,6 +604,7 @@ GER_navy_dont_kill_yourself = {
 		has_government = fascism
 		GER = {
 			OR = {
+				has_war_with = ENG
 				has_completed_focus = GER_danzig_or_war
 				has_completed_focus = GER_danzig_or_war_vanilla
 			}
@@ -570,6 +694,72 @@ GER_navy_dont_kill_yourself = {
 		id = 16 
 		value = 800
 	}		
+
+}
+
+r56_GER_navy_ww2_logic = {
+	allowed = {
+		original_tag = GER
+	}
+
+	enable = {
+		has_government = fascism
+		ROOT = {
+			is_major = yes
+			OR = {
+				has_war_with = ENG
+				has_war_with = USA
+			}
+			
+		}
+	}
+
+	abort_when_not_enabled = yes
+
+
+	
+	ai_strategy = { #Not a great place to be
+		type = naval_avoid_region
+		id = 43 
+		value = 100
+	}
+
+	ai_strategy = {
+		type = naval_convoy_raid_region
+		id = 49
+		value = 100
+	}
+
+	ai_strategy = {
+		type = naval_convoy_raid_region
+		id = 47
+		value = 100
+	}
+
+	ai_strategy = {
+		type = naval_convoy_raid_region
+		id = 48
+		value = 100
+	}	
+
+	ai_strategy = {
+		type = naval_mission_threshold
+		id = MISSION_CONVOY_RAIDING
+		value = 100
+	}
+
+	ai_strategy = {
+		type = naval_mission_threshold
+		id = MISSION_MINES_PLANTING
+		value = 100
+	}
+
+	#We don't play ball with better navies
+	ai_strategy = {
+		type = naval_mission_threshold
+		id = MISSION_STRIKE_FORCE
+		value = -100
+	}
 
 }
 
@@ -788,7 +978,13 @@ GER_avoid_africa_at_all_cost = {
 			}
 		}
 		ITA = { #dumbasscheck
-			has_full_control_of_state = 159
+			OR = {
+				surrender_progress > 0.03
+				NOT = {
+					has_full_control_of_state = 159
+				}
+			
+			}
 		}
 	}
 		
@@ -1727,7 +1923,7 @@ GER_hunker_down_now_and_crush_poland = {
 		priority = 100
 		ordertype = front
 		execute_order = yes
-		execution_type = weak
+		execution_type = rush
 	}
 
 	ai_strategy = {
