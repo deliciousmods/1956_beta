@@ -3887,8 +3887,11 @@ focus_tree = {
 		id = AUS_propose_the_alps_defence_pact
 		icon = GFX_goal_generic_befriend_italy
 		prerequisite = { focus = AUS_repeal_the_abolition_of_nobility }
-		x = 44
-		y = 2
+		x = -1
+		y = 1
+		relative_position_id = AUS_repeal_the_abolition_of_nobility
+
+		mutually_exclusive = { focus = AUS_bolster_nations_defences }
 		cost = 5
 		ai_will_do = {
 			factor = 4
@@ -3897,23 +3900,136 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 		available = {
-			NOT = { has_war_with = ITA }
 			OR = {
 				has_government = fascism
 				has_government = neutrality
 			}
 			ITA = { 
+				has_completed_focus = ITA_foreign_affairs		#fascist or monarchist branch
 				NOT = {
+					has_war_with = ROOT
 					is_in_faction_with = GER
+				}
+			}
+		}
+
+		bypass = {
+			if = {
+				limit = {
+					has_dlc = "By Blood Alone"
+				}
+				ITA = {		#you are on your own, bud, we are not interested in fascist Austria anymore
+					OR = {
+						has_completed_focus = ITA_unite_the_opposition
+						has_completed_focus = ITA_defy_the_duce
+					}
 				}
 			}
 		}
 		
 		completion_reward = {
-			custom_effect_tooltip = AUS_propose_the_alps_defence_pact_tt
 			ITA = { country_event = { id = austria.5000 days = 1 } }
+			# IF THEY ACCEPT
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = {
+				ITA = {
+					add_opinion_modifier = { target = AUS modifier = alps_defence_member }
+					complete_national_focus = ITA_guarantee_austrian_independence		#can intervene in Anschluss from now on
+				}
+				AUS = {
+					add_opinion_modifier = { target = ITA modifier = alps_defence_member }
+					give_guarantee = ITA
+					add_equipment_to_stockpile = {
+						type = light_tank_chassis
+						amount = 300
+						producer = ITA
+					}
+				}
+			}
+			# IF THEY REFUSE
+			custom_effect_tooltip = if_they_refuse_tt
+			effect_tooltip = {
+				add_political_power = 120
+				add_war_support = 0.1
+			}
+			custom_effect_tooltip = backslashn
 			custom_effect_tooltip = available_chief_of_army
 			show_ideas_tooltip = AUS_alfred_jansa
+		}
+	}
+
+	
+	focus = {
+		id = AUS_bolster_nations_defences
+		icon = GFX_goal_our_fate_is_our_own
+		prerequisite = { focus = AUS_repeal_the_abolition_of_nobility }
+		x = 1
+		y = 1
+		relative_position_id = AUS_repeal_the_abolition_of_nobility
+
+		mutually_exclusive = { focus = AUS_propose_the_alps_defence_pact }
+		cost = 7.2
+		ai_will_do = {
+			factor = 4
+		}
+		
+		available_if_capitulated = yes
+		
+		available = {
+			OR = {
+				has_government = fascism
+				has_government = neutrality
+			}
+		}
+		select_effect = {
+			add_timed_idea = {
+				idea = RAJ_Running_Fort_Construction
+				days = 50
+			}
+		}
+
+		completion_reward = {
+			custom_effect_tooltip = SOV_focus_select_effect_tt
+			effect_tooltip = {
+				add_timed_idea = {
+					idea = RAJ_Running_Fort_Construction
+					days = 50
+				}
+			}
+			custom_effect_tooltip = backslashn
+			add_country_leader_trait = anti_german_personality
+			GER = { 
+				custom_effect_tooltip = SWI_add_forts_bordering
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = large_decrease
+				}
+				add_ai_strategy = {
+					type = antagonize
+					id = ROOT
+					value = 100
+				}
+			}
+			hidden_effect = {
+				every_controlled_state = {
+					limit = {
+						any_neighbor_state = {
+							controller = {
+								original_tag = GER
+							}
+						}
+					}
+					add_building_construction = {
+						type = bunker
+						level = 2
+						instant_build = yes
+						province = {
+							all_provinces = yes
+							limit_to_border = yes
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -3942,20 +4058,60 @@ focus_tree = {
 		}
 		
 		bypass = {
-			OR = {
-				NOT = { country_exists = GER }
-				GER = {
+			GER = {
+				OR = {
+					exists = no
 					NOT = {
 						has_government = fascism
 					}
 				}
 			}
-			
 		}
 		
 		completion_reward = {
-			custom_effect_tooltip = AUS_the_austrian_compromise_tt
 			GER = { country_event = { id = austria.1111 days = 1 } }
+			# IF THEY ACCEPT
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = {
+				GER = {
+					if = {
+						limit = { 
+							NOT = { has_dlc = "Together for Victory" }
+							NOT = { has_dlc = "Death or Dishonor" }
+						}
+						puppet = ROOT
+					}
+					if = {
+						limit = { 
+							has_dlc = "Together for Victory"
+							NOT = { has_dlc = "Death or Dishonor" } 
+						}
+						set_autonomy = { target = ROOT autonomy_state = autonomy_dominion freedom_level = 0.75 }
+					}
+					if = {
+						limit = {
+							has_dlc = "Death or Dishonor" 
+						}
+						set_autonomy = { target = ROOT autonomy_state = autonomy_satellite freedom_level = 0.75 }
+					}
+				}
+				if = {
+					limit = {
+						has_idea = AUS_austrian_neutrality
+					}
+					remove_ideas = AUS_austrian_neutrality
+				}
+				add_ideas = AUS_nationalist_sentiment
+			}
+			# IF THEY REFUSE
+			custom_effect_tooltip = if_they_refuse_tt
+			effect_tooltip = {
+				effect_tooltip = {
+					ROOT = {
+						add_ideas = AUS_austrian_resistance
+					}
+				}
+			}
 		}
 	}
 	focus = {
@@ -4034,6 +4190,29 @@ focus_tree = {
 		
 		completion_reward = {
 			ITA = { country_event = { id = austria.5000 days = 1 } }
+			# IF THEY ACCEPT
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = {
+				ITA = {
+					add_opinion_modifier = { target = AUS modifier = alps_defence_member }
+				}
+				AUS = {
+					add_opinion_modifier = { target = ITA modifier = alps_defence_member }
+					give_guarantee = ITA
+					add_equipment_to_stockpile = {
+						type = light_tank_chassis
+						amount = 300
+						producer = ITA
+					}
+				}
+			}
+			# IF THEY REFUSE
+			custom_effect_tooltip = if_they_refuse_tt
+			effect_tooltip = {
+				add_political_power = 120
+				add_war_support = 0.1
+			}
+			custom_effect_tooltip = backslashn
 			custom_effect_tooltip = available_chief_of_army
 			show_ideas_tooltip = AUS_alfred_jansa
 		}
@@ -4152,9 +4331,10 @@ focus_tree = {
 	focus = {
 		id = AUS_repeal_ban_on_political_parties
 		icon = GFX_goal_generic_election_chaos
-		prerequisite = { focus = AUS_propose_the_alps_defence_pact }
-		x = 38
-		y = 3
+		prerequisite = { focus = AUS_propose_the_alps_defence_pact focus = AUS_bolster_nations_defences }
+		x = 1
+		y = 1
+		relative_position_id = AUS_propose_the_alps_defence_pact
 		cost = 10
 		ai_will_do = {
 			factor = 0
@@ -4171,7 +4351,7 @@ focus_tree = {
 	
 	focus = {
 		id = AUS_liechtenstein_treaty
-		icon = GFX_goal_AUS_liechtenstein_treaty
+		icon = GFX_goal_LIE_swiss_cooperation
 		prerequisite = { focus = AUS_repeal_ban_on_political_parties }
 		x = 40
 		y = 4 
@@ -4191,19 +4371,53 @@ focus_tree = {
 					}
 				}
 			}
-			SWI = {
-				exists = yes
-				is_subject = no
-				NOT = {
-					has_government = fascism #was ROOT which makes no sense, description is specifically anti-fascist, other check already checks German ideology
+			OR = {
+				SWI = {
+					exists = yes
+					is_subject = no
+					NOT = {
+						has_government = fascism #was ROOT which makes no sense, description is specifically anti-fascist, other check already checks German ideology
+					}
+				}
+				LIE = {
+					exists = yes
+					is_subject = no
+					NOT = {
+						has_government = fascism
+					}
 				}
 			}
 			threat > 0.15
 		}
 		
 		completion_reward = {
-			SWI = {
-				country_event = { id = austria.5006 days = 1 }
+			if = {
+				limit = {
+					SWI = {
+						exists = yes
+						is_subject = no
+						NOT = {
+							has_government = fascism #was ROOT which makes no sense, description is specifically anti-fascist, other check already checks German ideology
+						}
+					}
+				}
+				SWI = {
+					country_event = { id = austria.5006 days = 1 }
+				}
+			}
+			if = {
+				limit = {
+					LIE = {
+						exists = yes
+						is_subject = no
+						NOT = {
+							has_government = fascism #was ROOT which makes no sense, description is specifically anti-fascist, other check already checks German ideology
+						}
+					}
+				}
+				LIE = {
+					country_event = { id = austria.5006 days = 1 }
+				}
 			}
 		}
 	}
@@ -5875,9 +6089,6 @@ focus_tree = {
 		ai_will_do = {
 			factor = 10
 		}
-		available = {
-			is_subject = no
-		}
 		
 		available_if_capitulated = yes
 		
@@ -5891,7 +6102,7 @@ focus_tree = {
 		id = AUS_establish_the_frontmilliz
 		icon = GFX_goal_generic_army_mobilization
 		prerequisite = { focus = AUS_past_glories }
-		x = -5
+		x = -4
 		y = 1
 		relative_position_id = AUS_past_glories
 		cost = 10
@@ -6078,18 +6289,22 @@ focus_tree = {
 		}
 		
 		available = {
-			NOT = { has_war_with = YUG }
+			any_other_country = {
+				controls_state = 102
+				NOT = { has_war_with = ROOT }
+			}
 			controls_state = 155
 			controls_state = 4
 			controls_state = 152
-			YUG = {
-				controls_state = 102
-				controls_state = 956
-				controls_state = 853
+			102 = {
+				controller = {
+					OR = {
+						original_tag = YUG
+						is_subject_of = YUG
+					}
+				}
 			}
-			AUS = {
-				has_army_manpower = { size > 174999 }
-			}
+			has_army_manpower = { size > 174999 }
 		}
 		
 		bypass = {
@@ -6097,19 +6312,18 @@ focus_tree = {
 				controls_state = 102
 				controls_state = 956
 				controls_state = 853
-				NOT = { country_exists = YUG }
-				YUG = { is_in_faction_with = AUS }
+				any_other_country = {
+					controls_state = 102
+					is_in_faction_with = ROOT
+				}
 			}
 		}
-		
-		
-		
 		
 
 		completion_reward = {
 			random_country = {
 				limit = {
-					owns_state = 102
+					controls_state = 102
 				}
 				custom_effect_tooltip = AUS_pressure_for_slovenia_tt
 				country_event = { id = austria.1125 days = 1 }
@@ -6174,13 +6388,53 @@ focus_tree = {
 			}
 		}
 	}
+
+	focus = {
+		id = AUS_restore_the_liechtenstein_potectorate
+		icon = GFX_goal_generic_attack_liechtenstein
+		prerequisite = { focus = AUS_past_glories }
+		relative_position_id = AUS_past_glories
+		x = 2
+		y = 1
+		cost = 5
+		ai_will_do = {
+			factor = 0.5
+		}
+		
+		available = {
+			LIE = {
+				NOT = { is_in_faction_with = AUS is_subject_of = ROOT }
+			}
+		}
+		
+		bypass = {
+			OR = {
+				has_war_with = LIE
+				NOT = { country_exists = LIE }
+				is_in_faction_with = AUS 
+				is_subject_of = ROOT
+			}
+		}
+		
+		
+		
+		
+		
+		completion_reward = {
+			add_state_claim = 997
+			create_wargoal = { type = puppet_wargoal_focus target = LIE
+				expire = 0}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
 	
 	focus = {
 		id = AUS_the_way_to_france
 		icon = GFX_focus_attack_switzerland
-		prerequisite = { focus = AUS_past_glories }
-		x = 51
-		y = 4
+		prerequisite = { focus = AUS_restore_the_liechtenstein_potectorate }
+		relative_position_id = AUS_restore_the_liechtenstein_potectorate
+		x = 0
+		y = 1
 		cost = 5
 		ai_will_do = {
 			factor = 0.5
@@ -6219,9 +6473,10 @@ focus_tree = {
 		id = AUS_our_oldest_enemy
 		icon = GFX_focus_attack_france
 		prerequisite = { focus = AUS_the_way_to_france }
-		x = 51
-		y = 5
-		cost = 5
+		relative_position_id = AUS_the_way_to_france
+		x = 0
+		y = 1
+		cost = 10
 		ai_will_do = {
 			factor = 0.1
 		}
@@ -6297,7 +6552,7 @@ focus_tree = {
 		icon = GFX_goal_generic_military_deal
 		prerequisite = { focus = AUS_request_slovakia }
 		x = 53
-		y = 6
+		y = 5
 		cost = 5
 		ai_will_do = {
 			factor = 4
@@ -6555,25 +6810,11 @@ focus_tree = {
 			create_faction = austria_fascist_faction
 			if = {
 				limit = {
-					has_idea = AUS_german_overseers
+					has_idea = AUS_nationalist_sentiment
 				}
-				remove_ideas = AUS_german_overseers
+				remove_ideas = AUS_nationalist_sentiment
 			}
 			add_research_slot = 1
-			every_state = {
-				limit = {
-					is_core_of = GER
-					NOT = { is_controlled_by = ROOT }
-				}
-				add_core_of = ROOT
-			}
-			every_state = {
-				limit = {
-					is_claimed_by = GER
-					NOT = { is_controlled_by = ROOT }
-				}
-				add_claim_by = ROOT
-			}
 		}
 		search_filters = { FOCUS_FILTER_ANNEXATION FOCUS_FILTER_RESEARCH FOCUS_FILTER_POLITICAL }
 	}
@@ -6936,10 +7177,10 @@ focus_tree = {
 		completion_reward = {
 			if = {
 				limit = {
-					has_idea = AUS_german_overseers
+					has_idea = AUS_nationalist_sentiment
 				}
 				swap_ideas = {
-					remove_idea = AUS_german_overseers
+					remove_idea = AUS_nationalist_sentiment
 					add_idea = AUS_germanic_brotherhood
 				}
 				GER = {
@@ -7045,7 +7286,7 @@ focus_tree = {
 		prerequisite = { focus = AUS_start_the_uprising }
 		mutually_exclusive = { focus = AUS_the_kiev_annex }
 		x = 47
-		y = 12
+		y = 11
 		cost = 10
 		ai_will_do = {
 			factor = 5
@@ -7072,7 +7313,7 @@ focus_tree = {
 		prerequisite = { focus = AUS_start_the_uprising }
 		mutually_exclusive = { focus = AUS_strengthen_ties_with_ukraine }
 		x = 49
-		y = 12
+		y = 11
 		cost = 10
 		ai_will_do = {
 			factor = 2
@@ -7116,9 +7357,6 @@ focus_tree = {
 		cost = 10
 		ai_will_do = {
 			factor = 1
-		}
-		available = {
-			is_subject = no
 		}
 		
 		available_if_capitulated = yes
@@ -7180,8 +7418,8 @@ focus_tree = {
 		
 		available = {
 			OR = {
-				GER = { NOT = { has_government = fascism } }
-				GER = { is_in_faction = no }
+				is_subject_of = GER
+				is_in_faction = no
 				AND = {
 					is_in_faction_with = GER
 					GER = {
@@ -7276,9 +7514,9 @@ focus_tree = {
 				}
 				if = {
 					limit = {
-						has_idea = AUS_german_overseers
+						has_idea = AUS_nationalist_sentiment
 					}
-					remove_ideas = AUS_german_overseers
+					remove_ideas = AUS_nationalist_sentiment
 				}
 			}
 		}
@@ -7563,13 +7801,8 @@ focus_tree = {
 		ai_will_do = {
 			factor = 0
 		}
-		available = {
-			is_subject = no
-		}
 		
 		available_if_capitulated = yes
-		
-		
 		
 		completion_reward = {
 			add_ideas = AUS_raterepubliks
@@ -7957,9 +8190,9 @@ focus_tree = {
 				leave_faction = yes
 				if = {
 					limit = {
-						has_idea = AUS_german_overseers
+						has_idea = AUS_nationalist_sentiment
 					}
-					remove_ideas = AUS_german_overseers
+					remove_ideas = AUS_nationalist_sentiment
 				}
 				
 
