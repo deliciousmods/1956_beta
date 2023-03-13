@@ -55,6 +55,37 @@ focus_tree = {
 	focus = {
 		id = USA_continue_the_new_deal
 		icon = GFX_Goal_USA_new_deal
+		allow_branch = {
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = {
+					has_completed_focus = USA_reestablish_the_gold_standard
+				}
+			}
+		}
+		offset = {
+			x = -12
+			y = 0
+			trigger = {
+				OR = {
+					NOT = { has_dlc = "Man the Guns" }
+					if = {
+						limit = {
+							has_game_rule = {
+								rule = obsolete_focus_branches_visibility
+								option = HIDE
+							}
+						}
+						has_completed_focus = USA_reestablish_the_gold_standard
+					}
+				}
+			}
+		}
 		x = 14
 		y = 0
 		offset = {
@@ -79,6 +110,7 @@ focus_tree = {
 		search_filters = {FOCUS_FILTER_POLITICAL}
 		completion_reward = {
 			add_political_power = 150
+			mark_focus_tree_layout_dirty = yes
 		}
 	}
 
@@ -150,6 +182,17 @@ focus_tree = {
 
 		allow_branch = {
 			has_government = democratic
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = {
+					has_completed_focus = USA_reestablish_the_gold_standard
+				}
+			}
 		}
 
 		available = {
@@ -211,6 +254,10 @@ focus_tree = {
 		relative_position_id = USA_continue_the_new_deal
 		cost = 5
 
+		available = { 
+			congress_low_support_trigger = yes
+		}
+
 		ai_will_do = {
 			factor = 1
 			modifier = { #Always one commie threat there is
@@ -223,8 +270,20 @@ focus_tree = {
 				}
 			}
 		}
+
 		allow_branch = {
 			has_dlc = "Man the Guns"
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = {
+					has_completed_focus = USA_reestablish_the_gold_standard
+				}
+			}
 		}
 		
 		search_filters = {FOCUS_FILTER_POLITICAL}
@@ -262,6 +321,7 @@ focus_tree = {
 					remove_ideas = rt56_far_left_suppression
 				}
 			}
+			USA_congress_small_opposition = yes #Making rushing alt USA a little harder in Rt56
 		}
 	}
 	focus = {
@@ -690,7 +750,7 @@ focus_tree = {
 		y = 1
 		prerequisite = { focus = USA_suspend_the_presecution }
 		relative_position_id = USA_suspend_the_presecution
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
@@ -1794,6 +1854,15 @@ focus_tree = {
 		}
 		search_filters = {FOCUS_FILTER_USA_CONGRESS}
 		completion_reward = {
+			if = {
+				limit = {
+					ROOT = {
+						is_major = yes
+						has_government = democratic
+					}
+				}
+				add_threat = -5 #Congrats. You played yourself
+			}
 			hidden_effect = {
 				every_other_country = {
 					limit = {
@@ -2392,15 +2461,15 @@ focus_tree = {
 			factor = 1
 			modifier = {
 				factor = 3
-				num_of_military_factories > 200
+				num_of_military_factories > 185
 			}
 			modifier = {
 				factor = 5
-				num_of_military_factories > 250
+				num_of_military_factories > 200
 			}
 			modifier = {
 				factor = 10
-				num_of_military_factories > 300
+				num_of_military_factories > 250
 			}						
 		}
 
@@ -2438,11 +2507,11 @@ focus_tree = {
 			OR = {
 				AND = {
 					has_war = yes
-					num_of_factories > 200
+					num_of_factories > 185
 				}
 				AND = {
 					has_war = no
-					num_of_factories > 250
+					num_of_factories > 200
 				}
 			}
 		}
@@ -2463,7 +2532,55 @@ focus_tree = {
 				add_political_power = 75
 			#}
 			add_ideas = rt56_office_of_econimic_warfare_idea
-			
+			if = {
+				limit = {
+					has_dlc = "By Blood Alone"
+					ROOT = {
+						has_government = democratic
+						is_major = yes
+						#diplomatic_relation = { 
+						#	country = JAP
+						#	relation = embargo
+						#	active = no
+						#}
+					}
+					JAP = {
+						has_war_with = CHI
+						has_government = fascism
+						is_major = yes
+						NOT = {
+							is_in_faction_with = ROOT
+						}
+					}
+				}
+				send_embargo = JAP
+			}
+			if = {
+				limit = {
+					has_dlc = "By Blood Alone"
+					ROOT = {
+						has_government = democratic
+						is_major = yes
+						#diplomatic_relation = { 
+						#	country = GER
+						#	relation = embargo
+						#	active = no
+						#}
+					}
+					GER = {
+						OR = {
+							has_war_with = FRA
+							has_war_with = ENG
+						}
+						has_government = fascism
+						is_major = yes
+						NOT = {
+							is_in_faction_with = ROOT
+						}
+					}
+				}
+				send_embargo = GER
+			}
 			if = {
 				limit = {
 					has_war_support > 0.4
@@ -3022,9 +3139,17 @@ focus_tree = {
 				add_ideas = civilian_economy
 				set_country_flag = USA_the_giant_wakes_added_civ_eco
 			}
-			add_timed_idea = {
-				idea = rt56_the_gaint_wakes_idea
-				days = 30
+			#Only Democratic USA should have the op timed idea
+			if = { 
+				limit = {
+					ROOT = {
+						has_government = democratic
+					}
+				}
+				add_timed_idea = {
+					idea = rt56_the_gaint_wakes_idea
+					days = 70
+				}
 			}
 			random_owned_controlled_state = {
 				prioritize = { 360 }
@@ -3091,7 +3216,12 @@ focus_tree = {
 				add_extra_state_shared_building_slots = 1
 				set_state_flag = USA_gaint_wakes_state_flag
 			}
-
+			if = {
+				limit = {
+					has_idea = rt56_naval_funding_favoritism
+				}
+				remove_ideas = rt56_naval_funding_favoritism
+			}
 		}
 	}
 	focus = {
@@ -3363,12 +3493,12 @@ focus_tree = {
 		x = 0
 		y = 4
 		relative_position_id = USA_military_construction
-		cost = 10
+		cost = 5
 		#ai_will_do = {
 		#	factor = 1
 		#}
 		completion_reward = {
-			navy_experience = 10
+			#navy_experience = 10
 			463 = {
 				add_extra_state_shared_building_slots = 1
 				if = {
@@ -5811,6 +5941,19 @@ focus_tree = {
 	focus = {
 		id = USA_reestablish_the_gold_standard
 		icon = GFX_focus_usa_reestablish_the_gold_standard
+		allow_branch = {
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = {
+					has_completed_focus = USA_continue_the_new_deal
+				}
+			}
+		}
 		x = 6
 		y = 0
 		relative_position_id = USA_continue_the_new_deal
@@ -5831,13 +5974,11 @@ focus_tree = {
 			}
 		}
 
-		
-		
-		
 		search_filters = {FOCUS_FILTER_INDUSTRY FOCUS_FILTER_STABILITY FOCUS_FILTER_USA_CONGRESS}
 		completion_reward = {
 			add_ideas = USA_gold_standard
 			USA_congress_small_opposition = yes
+			mark_focus_tree_layout_dirty = yes
 		}
 	}
 	focus = {
@@ -6015,11 +6156,26 @@ focus_tree = {
 		relative_position_id = USA_reestablish_the_gold_standard
 		cost = 5
 
+		available = {
+			congress_low_support_trigger = yes
+		}
+
 		ai_will_do = {
 			factor = 1
 		}
 		allow_branch = {
 			has_dlc = "Man the Guns"
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = {
+					has_completed_focus = USA_continue_the_new_deal
+				}
+			}			
 		}
 		
 		search_filters = {FOCUS_FILTER_POLITICAL}
@@ -6046,6 +6202,7 @@ focus_tree = {
 		    	}
 		    	add_ideas = charles_coughlin
 		    }
+			USA_congress_small_opposition = yes #Making rushing alt USA a little harder in Rt56
 		}
 	}
 	focus = {
@@ -6165,7 +6322,7 @@ focus_tree = {
 		y = 1
 		prerequisite = { focus = USA_america_first }
 		relative_position_id = USA_america_first
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
@@ -6310,7 +6467,7 @@ focus_tree = {
 		y = 1
 		prerequisite = { focus = USA_ally_with_the_silver_shirts }
 		relative_position_id = USA_ally_with_the_silver_shirts
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
@@ -6425,6 +6582,17 @@ focus_tree = {
 				country_exists = CSA
 			}
 			has_dlc = "Man the Guns"
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = {
+					has_completed_focus = USA_continue_the_new_deal
+				}
+			}
 		}
 
 		available = {
@@ -7476,9 +7644,33 @@ focus_tree = {
 		x = 49
 		y = 0
 		offset = {
-			x = -30
+			x = -40
 			y = 0
 			trigger = {
+				not = { has_dlc = "Man the Guns" }
+			}
+		}
+		offset = {
+			x = -18
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = USA_continue_the_new_deal
+				not = { has_dlc = "Man the Guns" }
+			}
+		}
+		offset = {
+			x = -10
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = USA_reestablish_the_gold_standard
 				not = { has_dlc = "Man the Guns" }
 			}
 		}
@@ -7490,6 +7682,10 @@ focus_tree = {
 
 		ai_will_do = {
 			factor = 1
+			modifier = {
+				surrender_progress > 0.01
+				factor = 250 #oh shit, oh shit, oh shit.
+			}
 		}
 
 		completion_reward = {
@@ -7500,6 +7696,120 @@ focus_tree = {
 			custom_effect_tooltip = available_chief_of_army
 			show_ideas_tooltip = walter_krueger
 			unlock_decision_category_tooltip = USA_war_plans
+		}
+	}
+	focus = {
+		id = USA_homeland_security
+		icon = GFX_goal_generic_defence
+		x = -7
+		y = 1
+		prerequisite = { focus = USA_war_plans_division }
+		relative_position_id = USA_war_plans_division
+		cost = 5
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				surrender_progress > 0.01
+				factor = 250 #oh shit, oh shit, oh shit.
+			}
+		}
+
+		available = {
+			if = { #Makes it so it can be put at the top of the focus list without the AI taking it when it's not needed
+				limit = {
+					is_ai = yes
+				}
+				ROOT = {
+					surrender_progress > 0.01
+				}
+			}
+			if = {
+				limit = {
+					ROOT = {
+						surrender_progress < 0.01
+					}
+				}
+				congress_low_support_trigger = yes
+			}
+			ROOT = {
+				has_defensive_war = yes
+				has_war_support > 0.20
+			}
+		}
+		
+
+		completion_reward = {
+			if = {
+				limit = {
+					AND = {
+						has_intelligence_agency = no
+						has_dlc = "La Resistance"
+					}
+				}
+				add_command_power = 5
+				create_intelligence_agency = {
+					name = "Federal Bureau of Investigation"
+					icon = GFX_intelligence_agency_logo_usa_fbi
+				}
+			}
+			else = {
+				add_command_power = 25
+			}
+			add_ideas = rt56_USA_homeland_secuirty
+			custom_effect_tooltip = available_political_advisor
+		    show_ideas_tooltip = rt56_j_edgar_hoover
+			if = {
+				limit = {
+					ROOT = {
+						surrender_progress < 0.01
+					}
+				}
+				USA_congress_small_opposition = yes
+			}
+		}
+	}
+
+	focus = {
+		id = USA_war_plan_blue
+		icon = GFX_goal_USA_over_there
+		x = -7
+		y = 2
+		prerequisite = { focus = USA_homeland_security }
+		relative_position_id = USA_war_plans_division
+		cost = 10
+
+		allow_branch = {
+			CSA = {
+				exists = no
+			}
+		}
+
+		cancel_if_invalid = no
+		continue_if_invalid = yes	
+
+		available = {
+			ROOT = {
+				surrender_progress > 0.02
+				has_defensive_war = yes
+				has_war_support > 0.25
+				NOT = {
+					has_government = fascism
+				}
+			}
+		}
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				surrender_progress > 0.01
+				factor = 250 #oh shit, oh shit, oh shit.
+			}
+		}
+
+		completion_reward = {
+			add_command_power = 25
+			unlock_decision_category_tooltip = USA_war_plan_blue_cat
 		}
 	}
 	focus = {
@@ -7794,7 +8104,7 @@ focus_tree = {
 				every_country = {
 					limit = {
 						is_in_faction = no
-						has_government = ROOT
+						#has_government = ROOT
 						not = { has_war_with = ROOT }
 						OR = {
 							original_tag = CUB
@@ -8450,9 +8760,33 @@ focus_tree = {
 		x = 74
 		y = 0
 		offset = {
-			x = -30
+			x = -40
 			y = 0
 			trigger = {
+				not = { has_dlc = "Man the Guns" }
+			}
+		}
+		offset = {
+			x = -18
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = USA_continue_the_new_deal
+				not = { has_dlc = "Man the Guns" }
+			}
+		}
+		offset = {
+			x = -10
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = USA_reestablish_the_gold_standard
 				not = { has_dlc = "Man the Guns" }
 			}
 		}
@@ -8521,6 +8855,12 @@ focus_tree = {
 			add_timed_idea = {
 				idea = rt56_USA_mobilize_the_national_guard
 				days = 365
+			}
+			if = {
+				limit = {
+					has_country_flag = r56_usa_desperate_measures_flag
+				}
+				unlock_decision_tooltip = { decision = USA_raise_new_national_guard_units show_effect_tooltip = yes } 
 			}
 			if = {
 				limit = {
@@ -8897,7 +9237,7 @@ focus_tree = {
 					}
 				}
 				divisions_in_state = {
-					size > 2
+					size > 1
 					state = 371
 				}
 
@@ -8913,16 +9253,15 @@ focus_tree = {
 		
 		completion_reward = {
 			army_experience = 25
+			custom_effect_tooltip = r56_USA_louisiana_maneuvers_oob_tt
+			hidden_effect = {
+				load_oob = "USA_louisiana_reward_oob"
+			}
 			add_doctrine_cost_reduction = {
 				name = USA_louisiana_maneuvers
 				cost_reduction = 0.75
 				uses = 1
 				category = land_doctrine
-			}
-			
-			custom_effect_tooltip = UNLOCK_DIVISION_TEMPLATE
-			hidden_effect = {
-				load_oob = "USA_louisiana_reward_oob"
 			}
 			if = { #Not the best fit but best one given I'd have to check for other techs and I'm lazy
 				limit = {
@@ -9007,6 +9346,12 @@ focus_tree = {
 				category = land_doctrine
 			}
 			add_ideas = USA_army_of_the_united_states
+			if = {
+				limit = {
+					has_idea = rt56_naval_funding_favoritism
+				}
+				remove_ideas = rt56_naval_funding_favoritism
+			}
 		}
 	}
 	focus = {
@@ -9079,8 +9424,6 @@ focus_tree = {
 					add_extra_state_shared_building_slots = 1
 				}
 			}
-			#custom_effect_tooltip = USA_build_the_pentagon_tt
-			#hidden_effect = { country_event = { id = r56_usa_pentagon.1 days = 730 } }
 		}
 	}
 	focus = {
@@ -10454,6 +10797,12 @@ focus_tree = {
 				remove_idea = USA_war_department
 				add_idea = USA_department_of_defense
 			}
+			if = {
+				limit = {
+					has_idea = rt56_naval_funding_favoritism
+				}
+				remove_ideas = rt56_naval_funding_favoritism
+			}
 		}
 	}
 
@@ -10918,6 +11267,7 @@ focus_tree = {
 		available_if_capitulated = yes
 
 		completion_reward = {
+			navy_experience = 25
 			add_ideas = liberty_ships_focus
 		}
 	}
@@ -11391,7 +11741,7 @@ focus_tree = {
 		x = 3
 		y = 1
 		relative_position_id = USA_two_ocean_navy_act
-		cost = 10
+		cost = 5
 		prerequisite = { focus = USA_two_ocean_navy_act }
 		ai_will_do = {
 			factor = 1
@@ -11403,7 +11753,7 @@ focus_tree = {
 		completion_reward = {
 			add_doctrine_cost_reduction = {
 				name = USA_fund_the_navy
-				uses = 3
+				uses = 2
 				cost_reduction = 0.5
 				category = naval_doctrine
 			}

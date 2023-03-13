@@ -463,7 +463,19 @@ focus_tree = {
 				has_government = communism
 			}
 			OR = {
-				has_country_flag = winterwarlost
+				has_country_flag = winterwarlost 
+				AND = { #Don't blocked path if we long hauled the winter war
+					ROOT = {
+						has_war_with = SOV #Just double checking
+						surrender_progress < 0.05
+					}
+					SOV = {
+						casualties_inflicted_by = {
+							opponent = FIN
+							thousands > 250
+						}
+					}
+				}
 				AND = { #Don't blocked path if event chain was bypassed
 					SOV = {
 						has_full_control_of_state = 146
@@ -481,8 +493,10 @@ focus_tree = {
 		bypass = {
 			OR = {
 				has_idea = FIN_revenge
-				is_in_faction_with = GER
-				has_war_with = GER
+				AND = { #No stuff for a proactive bad boy
+					is_in_faction_with = GER
+					has_war_with = GER
+				}
 				NOT = { country_exists = GER }
 			}
 		}
@@ -491,7 +505,14 @@ focus_tree = {
 	completion_reward = {
 			add_war_support = 0.1
 			add_ideas = FIN_wepon
-			add_ideas = fin_revenge
+			if = {
+				limit = {
+					ROOT = {
+						has_country_flag = winterwarlost 
+					}
+				}
+				add_ideas = fin_revenge
+			}
 			swap_ideas = { remove_idea = fin_freedom_focus add_idea = fin_freedom_focus2 }
 			hidden_effect = {
 				news_event = { id = fin_news.1 days = 3 } 
@@ -656,6 +677,12 @@ focus_tree = {
 		completion_reward = {
 			if = {
 				limit = {
+					ROOT = { #If you long haul the winter war and won you can still do this branch. Just less rewards
+						#has_country_flag = winterwarlost 
+						NOT = {
+							has_war_with = SOV
+						}
+					}
 					GER = {
 						NOT = {
 							has_war_with = SOV
@@ -666,11 +693,17 @@ focus_tree = {
 					country_event = { id = finland.84 days = 1 }
 				}
 				set_country_flag = r56_finnish_proposal_was_sent
+				custom_effect_tooltip = FIN_stabinthefront_tt
 				custom_effect_tooltip = FIN_GER_agreement
 			}
 			if = {
 				limit = {
 					has_country_flag = r56_finnish_proposal_was_sent
+					GER = {
+						NOT = {
+							has_military_access_to = FIN
+						}
+					}
 				}
 				effect_tooltip = {
 					if = {
@@ -752,7 +785,7 @@ focus_tree = {
 				path = { 11125 3193 11115 11130 }				
 			}
 			build_railway = { 
-				path = { 11130 30 3026 3153 6045 }				
+				path = { 11130 3026 3153 6045 }				
 			}
 			hidden_effect = {
 				FIN = {
@@ -799,7 +832,7 @@ focus_tree = {
 			add_ideas = FIN_stopai
 			add_equipment_to_stockpile = {
 				type = infantry_equipment_1 
-				amount = 1000 
+				amount = 1250 
 				producer = GER 
 			}
 			add_equipment_to_stockpile = {
@@ -809,16 +842,16 @@ focus_tree = {
 			}
 			add_equipment_to_stockpile = {
 				type = artillery_equipment_1 
-				amount = 100 
+				amount = 250 
 				producer = GER 
 			}
 			add_equipment_to_stockpile = {
 				type = motorized_equipment
-				amount = 25
+				amount = 250
 				producer = GER
 			}
 			hidden_effect = {
-				add_manpower = 10000
+				add_manpower = 10000 #Fills divisions. Incase of manpower squeeze 
 				load_oob = "FIN_GER"
 			}
 		}	
@@ -844,14 +877,19 @@ focus_tree = {
 			has_war_with = SOV
 			is_subject = no
 			is_in_faction = no
-			GER = {
-				exists = yes
-				has_offensive_war_with = SOV
+			OR = {	
+				GER = {
+					exists = yes
+					has_offensive_war_with = SOV
+				}
+				GER = {
+					exists = no
+				}
 			}
 			OR = {
-				surrender_progress > 0.20
+				surrender_progress > 0.15
 				AND = {
-					surrender_progress > 0.07
+					surrender_progress > 0.05
 					NOT = {
 						ROOT = {
 							AND = {
@@ -862,9 +900,9 @@ focus_tree = {
 					}
 				}
 				AND = {
-					date > 1944.7.1
+					date > 1942.7.1
 					SOV = {
-						surrender_progress < 0.15
+						surrender_progress < 0.10
 					}
 				}
 			}
@@ -877,7 +915,7 @@ focus_tree = {
 		y = 1
 		
 		ai_will_do = {
-			factor = 8
+			factor = 9
 			modifier = {
 				is_historical_focus_on = yes
 				factor = 100
@@ -888,6 +926,7 @@ focus_tree = {
 			if = {
 				limit = {
 					GER ={
+						exists = yes
 						has_war_with = SOV
 					}
 				}
@@ -957,7 +996,7 @@ focus_tree = {
 				if = {
 					limit = {
 						FIN = {
-							gives_military_access_to = FIN
+							gives_military_access_to = GER
 						}
 					}
 					GER = {
@@ -983,6 +1022,7 @@ focus_tree = {
 					limit = {
 						is_ai = yes
 						GER = {
+							exists = yes
 							has_war_with = SOV
 						}
 					}
@@ -993,7 +1033,9 @@ focus_tree = {
 				}
 				else_if = {
 					limit = {
+						is_ai = no
 						GER = {
+							exists = yes
 							has_war_with = SOV
 						}
 					}
@@ -3156,12 +3198,13 @@ focus_tree = {
 			focus = fin_salpa
 			focus = fin_mannherimline
 		}
+
 		bypass = {
 			OR = {
 				AHV = { exists = yes }
-				NOT = { owns_state = 145 }
-				FIN = { is_subject = yes }
-				}
+				ROOT = { NOT = { owns_state = 145 } }
+				ROOT = { is_subject = yes }
+			}
 		}
 		
 		x = 40
@@ -3170,8 +3213,7 @@ focus_tree = {
 		
 		
 		completion_reward = {
-				country_event = finland.69
-		
+			country_event = finland.69
 		}
 
 	}
@@ -3232,7 +3274,7 @@ focus_tree = {
 	completion_reward = {
 			add_tech_bonus = {
 				name = special_bonus
-				bonus = 1
+				bonus = 3
 				uses = 1
 				category = engineers_tech
 			}
@@ -3336,7 +3378,7 @@ focus_tree = {
 		completion_reward = {
 			add_tech_bonus = {
 				name = special_bonus
-				bonus = 1
+				bonus = 3
 				uses = 1
 				category = logistics_tech
 			}
@@ -3733,7 +3775,7 @@ focus_tree = {
 		
 		
 		available = {
-			HOL = { has_tech = early_fighter }
+			#HOL = { has_tech = early_fighter }
 			HOL = { exists = yes }
 		}
 
@@ -3744,51 +3786,123 @@ focus_tree = {
 		completion_reward ={
 			
 			custom_effect_tooltip = HOL_fokkers
-
 			if = {
-	            limit = {
-	                HOL = { has_tech = fighter1 }
-	            }
-	            add_equipment_to_stockpile = {
-	                type = fighter_equipment_1
-	                amount = 41
-	                producer = HOL
-	            }
-	            else = {
-	                add_equipment_to_stockpile = {
-	                    type = fighter_equipment_0
-	                    amount = 41
-	                    producer = HOL
-					}   
+				limit = {
+					NOT = {
+						has_dlc = "By Blood Alone"
+					}
 				}
-			}
-			HOL = {					
 				if = {
 					limit = {
-						has_tech = fighter1
-						NOT = { has_tech = fighter2 }
+						HOL = { has_tech = fighter1 }
 					}
-					create_production_license = {
-						target = FIN 
-						equipment = {
-							type = fighter_equipment_1
-						}
-						cost_factor = 0
+					add_equipment_to_stockpile = {
+						type = fighter_equipment_1
+						amount = 41
+						producer = HOL
+					}
+					else = {
+						add_equipment_to_stockpile = {
+							type = fighter_equipment_0
+							amount = 41
+							producer = HOL
+						}   
 					}
 				}
-				else_if = {
+				HOL = {					
+					if = {
+						limit = {
+							HOL = {
+								has_tech = fighter1
+								NOT = { has_tech = fighter2 }								
+							}
+						}
+						HOL = {
+							create_production_license = {
+								target = FIN 
+								equipment = {
+									type = fighter_equipment_1
+								}
+								cost_factor = 0
+							}							
+						}
+
+					}
+					else_if = {
+
+						limit = {
+							HOL = {
+								has_tech = fighter2
+							}
+						}
+						HOL = {
+							create_production_license = {
+								target = FIN 
+								equipment = {
+									type = fighter_equipment_2
+								}
+								cost_factor = 0
+							}							
+						}
+					}
+				}								
+			}
+			else = {
+				if = {
 					limit = {
-						has_tech = fighter2
+						HOL = { has_tech = small_plane_airframe_1 }
 					}
-					create_production_license = {
-						target = FIN 
-						equipment = {
-							type = fighter_equipment_2
-						}
-						cost_factor = 0
+					add_equipment_to_stockpile = {
+						type = small_plane_airframe_1
+						amount = 41
+						producer = HOL
+					}
+					else = {
+						add_equipment_to_stockpile = {
+							type = small_plane_airframe_0
+							amount = 41
+							producer = HOL
+						}   
 					}
 				}
-			}				
+				HOL = {					
+					if = {
+						limit = {
+							HOL = {
+								has_tech = small_plane_airframe_1
+								NOT = { has_tech = small_plane_airframe_2 }								
+							}
+						}
+						HOL = {
+							create_production_license = {
+								target = FIN 
+								equipment = {
+									type = small_plane_airframe_2
+								}
+								cost_factor = 0
+							}							
+						}
+
+					}
+					else_if = {
+
+						limit = {
+							HOL = {
+								has_tech = small_plane_airframe_2
+							}
+						}
+						HOL = {
+							create_production_license = {
+								target = FIN 
+								equipment = {
+									type = small_plane_airframe_2
+								}
+								cost_factor = 0
+							}							
+						}
+					}
+				}				
+			}	
 		}
 	}	
 	
@@ -3826,13 +3940,11 @@ focus_tree = {
 		available_if_capitulated = yes
 		
 			completion_reward = {
-			add_tech_bonus = {
-				name = fighter_bonus
-				bonus = 1
-				uses = 1
-				technology = fighter1
-				technology = fighter2
-				technology = fighter3
+				add_tech_bonus = {
+					name = fighter_bonus
+					bonus = 1
+					uses = 1
+					category = light_fighter
 				}
 		
 			}
@@ -4032,27 +4144,51 @@ focus_tree = {
 		
 		completion_reward ={
 			custom_effect_tooltip = FIN_bristol_research
-			add_equipment_to_stockpile = {
-            	type = heavy_fighter_equipment_1 #type of equipment, from file
-            	amount = 75 #amount
-            	producer = ENG #Name of country that "built" the equipment
-        	}
+			if = {
+				limit = {
+					NOT = {
+						has_dlc = "By Blood Alone"
+					}
+				}
+				add_equipment_to_stockpile = {
+            		type = heavy_fighter_equipment_1 #type of equipment, from file
+            		amount = 75 #amount
+            		producer = ENG #Name of country that "built" the equipment
+        		}
+				ENG = {
+					create_production_license = {
+						target = FIN 
+						equipment = {
+							type = heavy_fighter_equipment_1
+						}
+						cost_factor = 0
+					}
+				}				
+			}
+			else = {
+				add_equipment_to_stockpile = {
+            		type = medium_plane_airframe_1 #type of equipment, from file
+            		amount = 75 #amount
+            		producer = ENG #Name of country that "built" the equipment
+					variant_name = "Bristol Blenheim"
+        		}
+				ENG = {
+					create_production_license = {
+						target = FIN 
+						equipment = {
+							type = medium_plane_airframe_1
+						}
+						cost_factor = 0
+					}
+				}				
+			}
 			add_tech_bonus = {	
 				name =  fighter_bonus
 				bonus = 1
 				uses = 1
-				technology = heavy_fighter1
-				technology = heavy_fighter2
+				category = cat_heavy_fighter
 			}
-			ENG = {
-				create_production_license = {
-					target = FIN 
-					equipment = {
-						type = heavy_fighter_equipment_1
-					}
-					cost_factor = 0
-				}
-			}							
+							
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -4075,32 +4211,60 @@ focus_tree = {
 				exists = yes
 			}
 			NOT = { has_war_with = GER }
+			if = {
+				limit ={
+					has_dlc = "By Blood Alone"
+				}
+				GER = {
+					has_tech = basic_large_airframe
+				}
+			}
 		}
 		
 		completion_reward ={
-			add_equipment_to_stockpile = {
-            	type = strat_bomber_equipment_1 #type of equipment, from file
-            	amount = 35 #amount
-            	producer = GER #Name of country that "built" the equipment
-        	}
-		
+			if = {
+				limit = {
+					NOT = {
+						has_dlc = "By Blood Alone"
+					}
+				}
+				add_equipment_to_stockpile = {
+					type = strat_bomber_equipment_1 #type of equipment, from file
+					amount = 50 #amount
+					producer = GER #Name of country that "built" the equipment
+				}
+				GER = {
+					create_production_license = {
+					target = FIN 
+					equipment = {
+						type = strat_bomber_equipment_1
+						}
+						cost_factor = 0
+					}
+				}				
+			}
+			else = {
+				add_equipment_to_stockpile = {
+            		type = large_plane_airframe_1 #type of equipment, from file
+            		amount = 50 #amount
+            		producer = GER #Name of country that "built" the equipment
+        		}
+				GER = {
+					create_production_license = {
+						target = FIN 
+						equipment = {
+							type = large_plane_airframe_1
+						}
+						cost_factor = 0
+					}
+				}				
+			}
 			add_tech_bonus = {	
 				name =  bomber_bonus
 				bonus = 1
 				uses = 1
-				technology = strategic_bomber1
-				technology = strategic_bomber2
-				technology = strategic_bomber3
+				category = heavy_air
 				category = tactical_bomber
-			}
-			GER = {
-				create_production_license = {
-				target = FIN 
-				equipment = {
-					type = strat_bomber_equipment_1
-					}
-					cost_factor = 0
-				}
 			}	
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
@@ -4733,7 +4897,6 @@ focus_tree = {
 		}
 		
 		
-		
 		completion_reward = {
 			custom_effect_tooltip = FIN_Nordicunion
 			custom_effect_tooltip = FIN_acceptance
@@ -5228,17 +5391,30 @@ focus_tree = {
 			focus = fin_alandquestion
 		}
 
-		available = {
-			
-			145 = { is_demilitarized_zone = no }
-			owns_state = 145
-		}
-		
 		x = 40
 		y = 4
-		
-		
-		
+
+		available = {
+			145 = { is_demilitarized_zone = no }
+			OR = {
+				ROOT = {
+					owns_state = 145
+				}
+				SWE = {
+					owns_state = 145
+				}
+			}
+
+		}
+
+		bypass = {
+			OR = {
+				AHV = { exists = yes }
+				ROOT = { NOT = { owns_state = 145 } }
+				ROOT = { is_subject = yes }
+			}
+		}
+
 		completion_reward = {
 				145 = {
 					add_building_construction = {
