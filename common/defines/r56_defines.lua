@@ -300,7 +300,7 @@
 	NDefines.NAI.DIPLOMACY_FACTION_SAME_IDEOLOGY_MAJOR = 50 -- (Original value: 15) AI bonus acceptance when being asked about faction is a major of the same ideology
 	NDefines.NAI.DIPLOMACY_FACTION_NEUTRALITY_PENALTY = 50	-- Neutral nations have a separate penalty not wanting to get involved at all rather than caring much about the difference in ideology
 	NDefines.NAI.DIPLOMACY_FACTION_GLOBAL_TENSION_FACTOR = 0.2-- How much the AI takes global tension into account when considering faction actions
-	NDefines.NAI.TENSION_DECAY = 0.25							-- (Original value: 0.15) Each months tension decays this much. Base was 0.1
+	NDefines.NAI.TENSION_DECAY = 0.20						-- (Original value: 0.15) Each months tension decays this much. Base was 0.1
 	NDefines.NAI.DIPLOMACY_FACTION_WAR_RELUCTANCE = -50		-- Penalty to desire to enter a faction with a country that we are not fighting wars together with.
 	NDefines.NAI.DIPLOMACY_FACTION_TAKE_OVER_RELUCTANCE_VERSUS_HUMAN = 2.0	-- Multiplier penalty for how much stronger than a human faction member an AI country must be to choose to assume faction leadership.
 	NDefines.NAI.DIPLOMACY_SCARED_MINOR_EXTRA_RELUCTANCE = -50 -- extra reluctance to join stuff as scared minor
@@ -561,9 +561,9 @@
 	NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 5		
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE = 0 --0.08			-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend.
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE_DEFENSIVE = 0 --0.4	-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend but while being a defensive country.
-	NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 240					-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
+	NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 150					-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
 	NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 12				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
-	NDefines.NAI.MAX_DISTANCE_NAVAL_INVASION = 600.0				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
+	NDefines.NAI.MAX_DISTANCE_NAVAL_INVASION = 400.0				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
 	NDefines.NAI.MAX_INVASION_SIZE = 18 --24									-- max invasion group size
 	
 -------------------------
