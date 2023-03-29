@@ -422,6 +422,40 @@ focus_tree = {
 				add_to_variable = { PAL_the_palestinian_army_conscription = 0.01 }
             	add_to_variable = { PAL_the_palestinian_army_heat_attrition_factor = -0.1 }
             	custom_effect_tooltip = PAL_integrate_militias_tt
+				custom_effect_tooltip = PAL_raise_the_pdf
+				hidden_effect = {
+			    division_template = {
+					name = "Quwat Al Fidaiyyun"
+					priority = 1	
+	
+					regiments = {
+						infantry = { x = 0 y = 0 }
+						infantry = { x = 0 y = 1 }
+						infantry = { x = 0 y = 2 }
+                        infantry = { x = 1 y = 0 }
+						infantry = { x = 1 y = 1 }
+						infantry = { x = 1 y = 2 }
+					}
+				}
+				454 = {
+					create_unit = {
+						division = "name = \"Jaysh Al Harb Al-Muqaddas\" division_template = \"Quwat Al Fidaiyyun\" start_experience_factor = 0.1 start_equipment_factor = 0.75 force_equipment_variants = { infantry_equipment_0 = { owner = PAL } }" 
+						owner = PAL
+					}
+				}
+				966 = {
+					create_unit = {
+						division = "name = \"Quwat Al-Najjada\" division_template = \"Quwat Al Fidaiyyun\" start_experience_factor = 0.1 start_equipment_factor = 0.75 force_equipment_variants = { infantry_equipment_0 = { owner = PAL } }" 
+						owner = PAL
+					}
+				}
+				949 = {
+					create_unit = {
+						division = "name = \"Dhubbat Gaza\" division_template = \"Quwat Al Fidaiyyun\" start_experience_factor = 0.1 start_equipment_factor = 0.75 force_equipment_variants = { infantry_equipment_0 = { owner = PAL } }" 
+						owner = PAL
+					}
+				}
+            }
 			}
 			ai_will_do = {
 			}
@@ -801,6 +835,7 @@ focus_tree = {
 						add_equipment_to_stockpile = { type = small_plane_airframe_1 variant_name = "Al-Khawarizmi" amount = 40 }
 					}
 	
+					custom_effect_tooltip = PAL_aircraft_stockpile_tt
        	 		}    
 				ai_will_do = {			
 				}
@@ -1219,19 +1254,79 @@ focus_tree = {
 		available = {
 		}
 		bypass = { 
-			NOT = {
-				ENG = {
-					controls_state = 455
-				}
-			}
 		}
 
 		completion_reward = {
 			PAL = { add_state_claim = 455 }
 
-			ENG = {
-				country_event = palestine.5
-			}
+			if = {
+                limit = {
+                    NOT = {
+                        country_exists = JOR
+                    }
+                }
+                every_other_country = {
+                    limit = {
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = JOR
+                            }
+                            CONTROLLER = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                    is_in_faction_with = ROOT
+                                }
+                            }
+                        }
+                    }
+                    country_event = { id = palestine.33 }
+                }
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        AND = {
+                            country_exists = JOR
+                            JOR = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                }
+                            }
+                        }
+                    }
+                }
+                JOR = {
+                    country_event = { id = palestine.33 }
+                }
+            }
+            else = {
+                every_state = {
+                    limit = {
+                        OR = {
+                            is_core_of = JOR
+                        }
+                    }
+                    add_claim_by = ROOT
+                }
+                every_other_country = {
+                    limit = {
+                        NOT = { is_in_faction_with = ROOT }
+                        NOT = { is_subject_of = ROOT }
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = JOR
+                            }
+                        }
+                    }
+                    ROOT = {
+                        create_wargoal = {
+                            target = PREV
+                            type = take_state_focus
+                            expire = 0
+                        }
+                    }
+                }
+            }
 		}
 		
 	}
@@ -1378,20 +1473,25 @@ focus_tree = {
         available = {
         }
 		bypass = {
-			SAU = {
-				OR = {
-					is_subject_of = PAL
-					exists = no
-					has_subject = PAL
-				}
-			}
+			owns_state = 679
 		}
 
         completion_reward = {
-			create_wargoal = {
-			type = take_state_focus
-			target = SAU
-			generator = { 856 }
+			  every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_owned_state = {
+                        state = 679
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = take_state_focus
+						expire = 0
+					}
+				}
 			}
         }
         
@@ -1532,6 +1632,10 @@ focus_tree = {
 				type = infantry_equipment
 				amount = 1500
 				} 
+				add_popularity = {
+					ideology = fascism
+					popularity = 0.15
+				}
 			}
 			PAL = {
 				add_equipment_to_stockpile = {
@@ -1599,16 +1703,17 @@ focus_tree = {
         available = {
         }
 		bypass = {
-			OR = {
-				PAL = { 
+			
+			PAL = { 
+				OR = {
 					controls_state = 448 
 					controls_state = 449
 					controls_state = 662
 					controls_state = 663
 					controls_state = 450
 					controls_state = 451 
-				}	
-			}
+				}
+			}	
 		}
 
         completion_reward = {
@@ -1622,7 +1727,7 @@ focus_tree = {
                     limit = {
                         any_owned_state = {
                             is_core_of = LBA
-                            OWNER = {
+                            CONTROLLER = {
                                 NOT = {
                                     is_subject_of = ROOT
                                     is_in_faction_with = ROOT
@@ -2566,12 +2671,11 @@ focus_tree = {
         available = {
         }
 		bypass = {
-			OR = {	
-				JOR = {
-					is_subject = yes
-				}
+			OR = {		
 				PAL = {
 					has_war_with = JOR
+					controls_state = 455
+					is_ally_with = JOR
 				}
 			}
 		}
@@ -2696,7 +2800,7 @@ focus_tree = {
                     limit = {
                         any_owned_state = {
                             state = 554
-                            OWNER = {
+                            CONTROLLER = {
                                 NOT = {
                                     is_subject_of = ROOT
                                     is_in_faction_with = ROOT
@@ -4422,15 +4526,77 @@ focus = {
         available = {
         }
 		bypass = {
-			NOT = {
-				ENG = {
-					controls_state = 455
-				}
-			}
 		}
 
         completion_reward = {
-			ENG = { country_event = palestine.33 }
+			if = {
+                limit = {
+                    NOT = {
+                        country_exists = JOR
+                    }
+                }
+                every_other_country = {
+                    limit = {
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = JOR
+                            }
+                            CONTROLLER = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                    is_in_faction_with = ROOT
+                                }
+                            }
+                        }
+                    }
+                    country_event = { id = palestine.33 }
+                }
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        AND = {
+                            country_exists = JOR
+                            JOR = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                }
+                            }
+                        }
+                    }
+                }
+                JOR = {
+                    country_event = { id = palestine.33 }
+                }
+            }
+            else = {
+                every_state = {
+                    limit = {
+                        OR = {
+                            is_core_of = JOR
+                        }
+                    }
+                    add_claim_by = ROOT
+                }
+                every_other_country = {
+                    limit = {
+                        NOT = { is_in_faction_with = ROOT }
+                        NOT = { is_subject_of = ROOT }
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = JOR
+                            }
+                        }
+                    }
+                    ROOT = {
+                        create_wargoal = {
+                            target = PREV
+                            type = take_state_focus
+                            expire = 0
+                        }
+                    }
+                }
+            }
 		}
 																																																														
 	}
@@ -4833,7 +4999,7 @@ focus = {
 				create_unit = {
 					division = "name = \"Martyr Brigade\" division_template = \"Martyr Brigade\" start_experience_factor = 0.05 start_equipment_factor = 1 start_manpower_factor = 1"
 					owner = ROOT
-					count = 1
+					count = 5
 				}
 			}			
 		}
@@ -4957,6 +5123,7 @@ focus = {
 
         completion_reward = {
 			add_ideas = PAL_true_islamic_democracy
+			remove_ideas = PAL_jewish_settlements
 		}
 																																																														
 	}
@@ -5241,15 +5408,78 @@ focus = {
         available = {
         }
 		bypass = {
-			NOT = {
-				ENG = { controls_state = 455 }
-			}
+			
 		}
 
         completion_reward = {
-			ENG = {
-			country_event = palestine.33
-			}
+			if = {
+                limit = {
+                    NOT = {
+                        country_exists = JOR
+                    }
+                }
+                every_other_country = {
+                    limit = {
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = JOR
+                            }
+                            CONTROLLER = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                    is_in_faction_with = ROOT
+                                }
+                            }
+                        }
+                    }
+                    country_event = { id = palestine.33 }
+                }
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        AND = {
+                            country_exists = JOR
+                            JOR = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                }
+                            }
+                        }
+                    }
+                }
+                JOR = {
+                    country_event = { id = palestine.33 }
+                }
+            }
+            else = {
+                every_state = {
+                    limit = {
+                        OR = {
+                            is_core_of = JOR
+                        }
+                    }
+                    add_claim_by = ROOT
+                }
+                every_other_country = {
+                    limit = {
+                        NOT = { is_in_faction_with = ROOT }
+                        NOT = { is_subject_of = ROOT }
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = JOR
+                            }
+                        }
+                    }
+                    ROOT = {
+                        create_wargoal = {
+                            target = PREV
+                            type = take_state_focus
+                            expire = 0
+                        }
+                    }
+                }
+            }
 		}
 																																																														
 	}
@@ -5433,26 +5663,88 @@ focus = {
 		}
 
         completion_reward = {
-				if = {
-                	limit = {
-                	    NOT = {
-                 	       country_exists = SYR
-                  	  	}
-               	 	}
-                	every_other_country = {
-                    	limit = {
-                      	  	any_owned_state = {
-                         	   is_core_of = SYR
-                           		OWNER = {
-                                	NOT = {
-                                    	is_subject_of = ROOT
-                                    	is_in_faction_with = ROOT
-                                	}
-                            	}
-                        	}
-                    	}
-                    	country_event = { id = palestine.44 }
-                	}
+			if = {
+                limit = {
+                    NOT = {
+                        country_exists = SYR
+                        country_exists = LEB
+                    }
+                }
+                every_other_country = {
+                    limit = {
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = SYR
+                                is_core_of = LEB
+                            }
+                            CONTROLLER = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                    is_in_faction_with = ROOT
+                                }
+                            }
+                        }
+                    }
+                    country_event = { id = egypt.50 }
+                }
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        AND = {
+                            country_exists = SYR
+                            SYR = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                }
+                            }
+                        }
+                        AND = {
+                            country_exists = LEB
+                            LEB = {
+                                NOT = {
+                                    is_subject_of = ROOT
+                                }
+                            }
+                        }
+                    }
+                }
+                SYR = {
+                    country_event = { id = egypt.55 }
+                }
+                LEB = {
+                    country_event = { id = egypt.55 }
+                }
+            }
+            else = {
+                every_state = {
+                    limit = {
+                        OR = {
+                            is_core_of = SYR
+                            is_core_of = LEB
+                        }
+                    }
+                    add_claim_by = ROOT
+                }
+                every_other_country = {
+                    limit = {
+                        NOT = { is_in_faction_with = ROOT }
+                        NOT = { is_subject_of = ROOT }
+                        any_owned_state = {
+                            OR = {
+                                is_core_of = SYR
+                                is_core_of = LEB
+                            }
+                        }
+                    }
+                    ROOT = {
+                        create_wargoal = {
+                            target = PREV
+                            type = take_state_focus
+                            expire = 0
+                        }
+                    }
+                }
             }
 		}
 																																																														
@@ -5502,7 +5794,7 @@ focus = {
         id = PAL_the_capital_question
         icon = GFX_focus_generic_treaty
 
-        x = 20
+        x = 15
         y = 0
 
 		relative_position_id = PAL_the_united_palestinian_army
