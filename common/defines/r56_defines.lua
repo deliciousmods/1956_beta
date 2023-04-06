@@ -32,7 +32,7 @@
 			0.6, -- operatives
 	}
 	NDefines.NCountry.STARTING_COMMAND_POWER = 10.0					-- starting command power for every country
-	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 3	--Starting level for exile leader
+	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 1	--Starting level for exile leader  -- why 3?!
 	--NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Claimed to be the same as vanilla previously but BBA changed this value so commented this out
 
 
