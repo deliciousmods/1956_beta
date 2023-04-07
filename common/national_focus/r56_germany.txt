@@ -52,7 +52,6 @@ focus_tree = {
 					level = 1
 					instant_build = yes
 				}
-				set_state_flag = FRA_metropolitan_civilian_factory_2
 			}
 			random_owned_controlled_state = {
 				prioritize = { 59 }
@@ -70,7 +69,6 @@ focus_tree = {
 					level = 1
 					instant_build = yes
 				}
-				set_state_flag = FRA_metropolitan_civilian_factory_2
 			}
 			hidden_effect = {
 				if = {
@@ -905,6 +903,7 @@ focus_tree = {
 		}
 
 		completion_reward = {
+			add_threat = 1
 			add_ideas = GER_denounce_versailles_idea
 			custom_effect_tooltip = available_political_advisor
 			show_ideas_tooltip = GER_baldur_von_schirach
@@ -3792,10 +3791,11 @@ focus_tree = {
 			custom_effect_tooltip = GER_build_panzer_quality_tt
 			add_ideas = GER_tank_quality
 			add_tech_bonus = {
-				name = GER_build_panzer_army
+				name = SOV_the_iron_wall_of_russian_resolve
+				ahead_reduction = 1
 				bonus = 1.0
 				uses = 1
-				category = armor
+				technology = super_heavy_tank_chassis
 			}
 		}
 		search_filters = {
@@ -5885,7 +5885,7 @@ focus_tree = {
 						AND = { #fallback check #1
 							is_puppet_of = ROOT
 							has_country_leader = {
-								name = "Philippe Pétain"
+								character = FRA_philippe_petain
 								ruling_only = yes
 							}
 							controls_state = 26
@@ -5893,7 +5893,7 @@ focus_tree = {
 						AND = { #fallback check #2
 							is_guaranteed_by = ROOT
 							has_country_leader = {
-								name = "Philippe Pétain"
+								character = FRA_philippe_petain
 								ruling_only = yes
 							}
 							controls_state = 26
@@ -5913,7 +5913,7 @@ focus_tree = {
 						is_puppet_of = ROOT
 						controls_state = 26
 						has_country_leader = {
-							name = "Philippe Pétain"
+							character = FRA_philippe_petain
 							ruling_only = yes
 						}
 					}
@@ -9609,7 +9609,10 @@ focus_tree = {
 						has_government = ROOT
 					}
 					NOT = {
-						has_country_leader = { ruling_only = yes name = "Miklós Horthy" }
+						has_country_leader = { 
+							character = HUN_miklos_horthy
+							ruling_only = yes
+						}
 					}
 				}
 			}
@@ -9736,7 +9739,7 @@ focus_tree = {
 									AND = {
 										has_government = neutrality
 										has_country_leader = {
-											name = "Miklos Horthy"
+											character = HUN_miklos_horthy
 											ruling_only = yes
 										}
 									}
@@ -11859,7 +11862,7 @@ focus_tree = {
 				limit = {
 					NOT = {
 						has_country_leader = {
-							name = "Heinrich Himmler"
+							character = GER_heinrich_himmler
 						}
 					}
 				}
@@ -12041,10 +12044,7 @@ focus_tree = {
 			NOT = { has_war_with = ITA }
 			ITA = {
 				neutrality > 0.35 
-				OR = {
-					has_country_leader = { ruling_only = yes name = "Benito Mussolini" }
-					has_country_leader = { ruling_only = yes name = "Augustus Mussolini" }
-				}				 
+				has_country_leader = { ruling_only = yes character = ITA_benito_mussolini }		 
 			}
 		}
 
@@ -14241,15 +14241,98 @@ focus_tree = {
 		}
 	}
 	focus = {
+		id = GER_join_allies
+		icon = GFX_focus_chi_british_cooperation
+		cost = 5
+		prerequisite = {
+			focus = GER_expansionism_light
+		}
+		mutually_exclusive = {
+			focus = GER_lead_democracies
+		}
+		available = {
+			is_subject = no
+			is_faction_leader = no #unlikely to be empty at this time
+		}
+		x = 1
+		y = 1
+		relative_position_id = GER_expansionism_light
+		ai_will_do = {
+			factor = 10
+		}
+		completion_reward = {
+			if = {
+				limit = {
+					ENG = {
+						has_government = democratic
+						is_faction_leader = yes
+						NOT = { has_war_with = ROOT }
+					}
+				}
+				ENG = { country_event = { id = generic.2 } }
+			}
+			else_if = {
+				limit = {
+					FRA = {
+						has_government = democratic
+						is_faction_leader = yes
+						NOT = { has_war_with = ROOT }
+					}
+				}
+				FRA = { country_event = { id = generic.2 } }			
+			}
+			else = {
+				get_best_alliance_match_democratic_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}				
+			}
+		}
+		search_filters = {
+			FOCUS_FILTER_ALLIANCE
+		}
+	}
+	focus = {
+		id = GER_lead_democracies
+		icon = GFX_goal_support_democracy
+		cost = 10.00
+		#prerequisite = {
+		#	focus = GER_anti_expansionism
+		#}
+		prerequisite = {
+			#focus = GER_defense_and_deterence
+			focus = GER_anti_expansionism # is anti expansionism planned?
+			focus = GER_expansionism_light #gets some more agressive options but doesnt get to safeguard neutrality
+		}
+		mutually_exclusive = {
+			focus = GER_join_allies
+		}
+		available={
+			is_subject = no
+			is_in_faction = no
+			has_government = democratic
+		}
+		bypass = {
+			is_in_faction = yes #ideally make own faction, but should allow some focuses if impossible anyway
+		}
+		relative_position_id = GER_anti_expansionism
+		x = 7
+		y = 1
+		ai_will_do = {
+			factor = 10
+		}
+		completion_reward = {
+			create_faction = "European Alliance" #bit generic, chose "alliance" because its close to its German word
+		}
+		search_filters = {
+			FOCUS_FILTER_ALLIANCE
+		}
+	}
+	focus = {
 		id = GER_renegotiate_versailles
 		icon = GFX_allies
 		cost = 5
 		prerequisite = {
-			focus = GER_expansionism_light
-			focus = GER_anti_expansionism
-		}
-		mutually_exclusive = {
-			focus = GER_lead_democracies
 			focus = GER_join_allies
 		}
 		available = {
@@ -14280,9 +14363,9 @@ focus_tree = {
 				}
 			}
 		}
-		x = -4
+		x = 3
 		y = 1
-		relative_position_id = GER_expansionism_light
+		relative_position_id = GER_join_allies
 		ai_will_do = {
 			factor = 10
 		}
@@ -14416,15 +14499,13 @@ focus_tree = {
 		icon = GFX_goal_generic_education
 		cost = 10
 		prerequisite = {
-			focus = GER_western_science_funding
-		}
-		prerequisite = {
 			focus = GER_legacy_of_gluckliche_zwanziger_jahre
 		}
 		available = {
 			is_subject = no
 			has_war = no
 			has_idea = GER_treaty_of_versailles_2
+			has_completed_focus = GER_western_science_funding
 		}
 		x = 0
 		y = 1
@@ -14444,102 +14525,12 @@ focus_tree = {
 		}
 	}
 	focus = {
-		id = GER_join_allies
-		icon = GFX_focus_chi_british_cooperation
-		cost = 5
-		prerequisite = {
-			focus = GER_expansionism_light
-		}
-		mutually_exclusive = {
-			focus = GER_lead_democracies
-			focus = GER_renegotiate_versailles
-		}
-		available = {
-			is_subject = no
-			is_faction_leader = no #unlikely to be empty at this time
-		}
-		x = 1
-		y = 1
-		relative_position_id = GER_expansionism_light
-		ai_will_do = {
-			factor = 10
-		}
-		completion_reward = {
-			if = {
-				limit = {
-					ENG = {
-						has_government = democratic
-						is_faction_leader = yes
-						NOT = { has_war_with = ROOT }
-					}
-				}
-				ENG = { country_event = { id = generic.2 } }
-			}
-			else_if = {
-				limit = {
-					FRA = {
-						has_government = democratic
-						is_faction_leader = yes
-						NOT = { has_war_with = ROOT }
-					}
-				}
-				FRA = { country_event = { id = generic.2 } }			
-			}
-			else = {
-				get_best_alliance_match_democratic_effect = yes
-				var:best_leader = {
-					country_event = generic.2
-				}				
-			}
-		}
-		search_filters = {
-			FOCUS_FILTER_ALLIANCE
-		}
-	}
-	focus = {
-		id = GER_lead_democracies
-		icon = GFX_goal_support_democracy
-		cost = 10.00
-		#prerequisite = {
-		#	focus = GER_anti_expansionism
-		#}
-		prerequisite = {
-			#focus = GER_defense_and_deterence
-			focus = GER_anti_expansionism # is anti expansionism planned?
-			focus = GER_expansionism_light #gets some more agressive options but doesnt get to safeguard neutrality
-		}
-		mutually_exclusive = {
-			focus = GER_join_allies
-			focus = GER_renegotiate_versailles
-		}
-		available={
-			is_subject = no
-			is_in_faction = no
-			has_government = democratic
-		}
-		bypass = {
-			is_in_faction = yes #ideally make own faction, but should allow some focuses if impossible anyway
-		}
-		relative_position_id = GER_anti_expansionism
-		x = 7
-		y = 1
-		ai_will_do = {
-			factor = 10
-		}
-		completion_reward = {
-			create_faction = "European Alliance" #bit generic, chose "alliance" because its close to its German word
-		}
-		search_filters = {
-			FOCUS_FILTER_ALLIANCE
-		}
-	}
-	focus = {
 		id = GER_western_science_funding
 		icon = GFX_goal_research_silver
 		cost = 10.00
 		prerequisite = {
-			focus = GER_lead_democracies #move down but in an appropriate spot as much as possible, can be 7th research slot
-			focus = GER_renegotiate_versailles
+			focus = GER_lead_democracies
+			#focus = GER_renegotiate_versailles	#moved under join allies
 			focus = GER_join_allies
 		}
 		relative_position_id = GER_lead_democracies
@@ -15096,7 +15087,7 @@ focus_tree = {
 				if = {
 					limit = {
 						has_country_leader = {
-							name = "Kurt Schuschnigg"
+							character = AUS_kurt_schuschnigg
 							ruling_only = yes
 						}
 					}
