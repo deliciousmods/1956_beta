@@ -140,18 +140,18 @@ SOV_paranoia_system = {
 		ai_will_do = {
 			base = 0
 			modifier = {
-				add = 1
-				check_variable = { SOV_paranoia > 35 }
+				add = 5
+				check_variable = { SOV_paranoia > 25 }
 			}
 			modifier = {
 				add = 0.1
-				check_variable = { SOV_paranoia > 40 }
+				check_variable = { SOV_paranoia > 20 }
 			}
 			modifier = {
-				add = 10
+				add = 600
 				AND = {
 					has_completed_focus = SOV_beaten_but_not_defeated
-					check_variable = { SOV_paranoia > 40 }
+					check_variable = { SOV_paranoia > 20 }
 				}
 			}
 			modifier = {
@@ -5704,16 +5704,16 @@ SOV_diplomacy_baltic_decision_category = {
 		}
 	}
 
-	SOV_send_ultimatum_to_country_baltic = {
+	SOV_send_ultimatum_to_baltic_countries = {
 		priority = 50
 
 		icon = eng_trade_unions_demand
 
 		ai_will_do = {
-			base = 200
+			base = 400
 			modifier = {
 				factor = 10
-				has_political_power > 160
+				has_political_power > 100
 			}
 			modifier = {
 				factor = 10
@@ -5721,22 +5721,8 @@ SOV_diplomacy_baltic_decision_category = {
 			}
 			modifier = {
 				factor = 0
-				OR = {
-					is_in_faction_with = FROM
-					surrender_progress > 0.15
-				}
+				surrender_progress > 0.15
 			}
-		}
-
-		targets = { EST LAT LIT }
-
-		target_trigger = {
-			SOV_basic_ultimatum_triggers = yes
-		}
-
-		target_root_trigger = {
-			has_completed_focus = SOV_claims_in_baltic
-			is_subject = no
 		}
 
 		allowed = {
@@ -5744,10 +5730,19 @@ SOV_diplomacy_baltic_decision_category = {
 		}
 
 		available = {
-			FROM = {
+			any_other_country = {
+				OR = {
+					original_tag = EST
+					original_tag = LAT
+					original_tag = LIT
+				}
 				NOT = { has_war_with = ROOT }
 				is_subject = no
 			}
+		}
+
+		visible = {
+			has_completed_focus = SOV_claims_in_baltic
 		}
 
 		days_remove = SOV_ultimatum_days
@@ -5755,30 +5750,38 @@ SOV_diplomacy_baltic_decision_category = {
 		cost = SOV_send_ultimatum_to_country_cost
 
 		remove_effect = {
-			if = {
+			every_other_country = {
 				limit = {
-					FROM = { tag = EST }
+					OR = {
+						original_tag = EST
+						original_tag = LAT
+						original_tag = LIT
+					}
+					NOT = { has_war_with = ROOT }		#from scripted triggers
+					NOT = { is_in_faction_with = ROOT } #CAN'T SEND ULTIMATUMS TO ALLIES OR SUBJECTS
+					#OR = { #Can send Ultimatum to non-allies or puppets (but not to faction allies)
+					#	NOT = { is_in_faction_with = ROOT }
+					#	is_Subject_of = ROOT
+					#}
+					NOT = { has_country_flag = SOV_ultimatum_sent_flag }
 				}
-				EST = {
-					set_country_flag = SOV_ultimatum_sent_flag
+				set_country_flag = SOV_ultimatum_sent_flag
+				if = {
+					limit = {
+						original_tag = EST
+					}
 					country_event = { id = baltic.1 hours = 16 random_hours = 8 }
 				}
-			}
-			else_if = {
-				limit = {
-					FROM = { tag = LAT }
-				}
-				LAT = {
-					set_country_flag = SOV_ultimatum_sent_flag
+				if = {
+					limit = {
+						original_tag = LAT
+					}
 					country_event = { id = baltic.2 hours = 16 random_hours = 8 }
 				}
-			}
-			else_if = {
-				limit = {
-					FROM = { tag = LIT }
-				}
-				LIT = {
-					set_country_flag = SOV_ultimatum_sent_flag
+				if = {
+					limit = {
+						original_tag = LIT
+					}
 					country_event = { id = baltic.3 hours = 16 random_hours = 8 }
 				}
 			}
@@ -14689,7 +14692,7 @@ SOV_soviet_civil_war_dec_cat = {
 			base = 1
 			modifier = {
 				factor = 200
-				check_variable = { ROOT.SOV_paranoia > 65 } # Do if Paranoia too high
+				check_variable = { ROOT.SOV_paranoia > 40 } # Do if Paranoia too high
 			}
 		}
 
@@ -17593,6 +17596,22 @@ SOV_soviet_civil_war_dec_cat = {
 			else = {
 				SOV_add_random_character_to_purge_targets_effect = yes
 			}
+
+			#Historical	- more comrades of Tukhachevsky getting purged...
+			if = {
+				limit = {
+					has_character = SOV_iona_yakir
+					SOV_iona_yakir = {
+						SOV_character_can_be_purged = yes
+					}
+				}
+				SOV_iona_yakir = {
+					set_character_flag = SOV_targeted_for_purge_flag
+				}
+			}
+			else = {
+				SOV_add_random_character_to_purge_targets_effect = yes
+			}
 			#NOT-SO-HISTORICAL
 			#Removed Yegorov, since he was purged in 1939 and was marked as "non-historical" - Fantom
 			#Blyukher
@@ -18159,21 +18178,23 @@ political_actions = {
 					owns_state = 947
 				}
 				AND = {
-					MAN = { is_puppet_of = SOV }
-					owns_state = 610
-					owns_state = 716
-					owns_state = 328
-					owns_state = 715
-					owns_state = 714
-					owns_state = 717
-					owns_state = 761
-					owns_state = 941
-					owns_state = 942
-					owns_state = 943
-					owns_state = 944
-					owns_state = 945
-					owns_state = 946
-					owns_state = 947
+					MAN = { 
+						is_subject_of = SOV
+						owns_state = 610
+						owns_state = 716
+						owns_state = 328
+						owns_state = 715
+						owns_state = 714
+						owns_state = 717
+						owns_state = 761
+						owns_state = 941
+						owns_state = 942
+						owns_state = 943
+						owns_state = 944
+						owns_state = 945
+						owns_state = 946
+						owns_state = 947
+					}
 				}
 			}
 		}
@@ -18720,6 +18741,314 @@ SOV_panslavic_nationalism = {
 		complete_effect = {
 			set_cosmetic_tag = SOV_PANSLAVIC
 			news_event = { id = nsb_news.405 hours = 12 }
+		}
+	}
+}
+
+# American/British arms purchase
+
+SOV_weapons_purchases_category = {
+	SOV_order_weapons_in_USA = {
+		icon = generic_prepare_civil_war
+		available = {
+
+		}
+		visible = {
+			has_defensive_war = yes
+			any_other_country = {
+				is_major = yes
+				has_war_with = ROOT
+			}
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 25
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				has_equipment = {
+					infantry_equipment < 1
+				}
+				factor = 50
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 2 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				producer = USA
+				amount = 5000
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -2 }
+			}
+		}
+	}
+	SOV_order_support_equipment_in_USA = {
+		icon = generic_prepare_civil_war
+		available = {
+
+		}
+		visible = {
+			has_defensive_war = yes
+			any_other_country = {
+				is_major = yes
+				has_war_with = ROOT
+			}
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 25
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				has_equipment = {
+					support_equipment < 1
+				}
+				factor = 50
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 2 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = support_equipment
+				producer = USA
+				amount = 150
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -2 }
+			}
+		}
+	}
+	SOV_order_artillery_in_USA = {
+		icon = ger_military_buildup
+		available = {
+
+		}
+		visible = {
+			has_defensive_war = yes
+			any_other_country = {
+				is_major = yes
+				has_war_with = ROOT
+			}
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 25
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				has_equipment = {
+					artillery_equipment < 1
+				}
+				factor = 50
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 2 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = artillery_equipment
+				producer = USA
+				amount = 250
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -2 }
+			}
+		}
+	}
+	SOV_order_tanks_in_USA = {
+		icon = generic_tank
+		visible = {
+			has_defensive_war = yes
+			any_other_country = {
+				is_major = yes
+				has_war_with = ROOT
+			}
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 50
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				has_equipment = {
+					light_tank_chassis < 10
+				}
+				factor = 5
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		modifier = {
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 5 }
+			}
+		}
+		remove_effect = {
+			if = {
+				limit = {
+					USA = { 
+						OR = {
+							has_tech = basic_light_tank 
+							has_tech = basic_light_tank_chassis
+						}
+						NOT = { 
+							has_tech = basic_medium_tank 
+							has_tech = improved_medium_tank #needed because basic can be bypassed
+							has_tech = basic_medium_tank_chassis
+							has_tech = improved_medium_tank_chassis
+						}
+					}
+				}
+				add_equipment_to_stockpile = {
+					type = light_tank_chassis
+					producer = USA
+					amount = 100
+				}
+			}
+			else_if = {
+				limit = {
+					USA = {
+						OR = {
+							has_tech = basic_medium_tank
+							has_tech = improved_medium_tank #needed because basic can be bypassed
+							has_tech = basic_medium_tank_chassis
+							has_tech = improved_medium_tank_chassis
+						}
+					}
+				}
+				add_equipment_to_stockpile = {
+					type = medium_tank_chassis
+					producer = USA
+					amount = 100
+				}
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -5 }
+			}
+		}
+	}
+	SOV_order_fighters_in_ENG = {
+		icon = generic_air
+		available = {
+
+		}
+		visible = {
+			has_defensive_war = yes
+			any_other_country = {
+				is_major = yes
+				has_war_with = ROOT
+			}
+			has_country_flag = SOV_arms_purchases_permitted
+			ENG_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 50
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				has_equipment = {
+					fighter_equipment < 1
+				}
+				factor = 5
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		modifier = {
+		}
+		complete_effect = {
+			ENG = {
+				add_offsite_building = { type = industrial_complex level = 5 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = small_plane_airframe
+				producer = ENG
+				amount = 100
+			}
+			ENG = {
+				add_offsite_building = { type = industrial_complex level = -5 }
+			}
+		}
+	}
+	SOV_order_bombers_in_ENG = {
+		icon = generic_air
+		available = {
+
+		}
+		visible = {
+			has_defensive_war = yes
+			any_other_country = {
+				is_major = yes
+				has_war_with = ROOT
+			}
+			has_country_flag = SOV_arms_purchases_permitted
+			ENG_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 50
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				has_equipment = {
+					tac_bomber_equipment < 1
+				}
+				factor = 5
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		modifier = {
+
+		}
+		complete_effect = {
+			ENG = {
+				add_offsite_building = { type = industrial_complex level = 5 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = medium_plane_airframe
+				producer = ENG
+				amount = 50
+			}
+			ENG = {
+				add_offsite_building = { type = industrial_complex level = -5 }
+			}
 		}
 	}
 }

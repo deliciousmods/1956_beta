@@ -91,7 +91,7 @@ on_actions = {
 						tag = ECU
 					}
 				}
-				add_ideas = league_of_nations_member_idea
+				set_country_flag = league_of_nations_member_flag
 			}
 		}
 	}
@@ -463,11 +463,11 @@ on_actions = {
 					NOT = { has_global_flag = LoN_disbanded_flag }
 					FROM = {
 						# is_major = yes
-						has_idea = league_of_nations_member_idea
+						has_country_flag = league_of_nations_member_flag
 					}
 					ROOT = {
 						is_major = yes
-						has_idea = league_of_nations_member_idea
+						has_country_flag = league_of_nations_member_flag
 					}
 				}
 				set_global_flag = LoN_disbanded_flag
@@ -1047,7 +1047,7 @@ on_actions = {
 						}
 					}
 					else = { #Further cores lost will not trigger event
-						ITA_bop_high_decrease_effect = yes
+						ITA_bop_medium_decrease_effect = yes
 						ITA_bop_increase_lost_core_modifier = yes
 					}
 					#log = "-20% BoP due to losing core [FROM.FROM.GetName]"
@@ -1062,10 +1062,19 @@ on_actions = {
 							country_event = { id = BBA_italy_bop.2 hours = 1 }
 						}
 					}
-					else = {
+					if = {
+						limit = {
+							power_balance_value = {
+								id = ITA_power_balance
+								value > -0.3 # accepts <, > or =
+							}
+						}
 						ITA_bop_very_low_decrease_effect = yes
+						#log = "-5% BoP due to losing colony [FROM.FROM.GetName]"
 					}
-					#log = "-5% BoP due to losing colony [FROM.FROM.GetName]"
+					#else = {
+					#	log = "Lost colony but no BoP impact"
+					#}
 				}
 			}
 			else_if = { #Italy gets a core state back
@@ -1080,53 +1089,30 @@ on_actions = {
 					}
 					FROM.FROM = {
 						is_owned_by = ITA
-						is_core_of = ITA
 					}
 				}
-				ROOT = { #This event is fired only once, condition set in the actual event
+				if = {
+					limit = {
+						FROM.FROM = {
+							is_core_of = ITA
+						}
+					}
+					if = { #FIRST TIME LOSING A CORE PLAYER GETS EVENT (Effects are handled there)
+						limit = {
+							check_variable = { ITA_reclaimed_core = 0 }
+						}
+						#This event is fired only once, condition set in the actual event
 						set_variable = { ITA_reclaimed_core = FROM.FROM }
 						country_event = { id = BBA_italy_bop.3 hours = 1 }
 					}
-				ITA_bop_high_increase_effect = yes
-				ITA_bop_decrease_lost_core_modifier = yes
-				#log = "Reducing BoP modifier penalty due to getting back core [FROM.FROM.GetName]"
-			}
-			if = {
-				limit = { #Losing a core State
-					FROM = { original_tag = SWI }
-					FROM.FROM = { is_core_of = SWI }
-				}
-				FROM.FROM = {
-					if = {
-						limit = { #Destroys infra and railways on lost states
-					 		has_dynamic_modifier = { modifier = SWI_infrastructure_rigged_to_blow }
-						}
-						damage_building = {
-							type = rail_way
-							damage = 5
-						}
-						damage_building = {
-							type = infrastructure
-							damage = 5
-						}
-						damage_building = {
-							type = arms_factory
-							damage = 2
-						}
-						damage_building = {
-							type = industrial_complex
-							damage = 2
-						}
-						damage_building = {
-							type = bunker
-							damage = 10
-						}
-						damage_building = {
-							type = supply_node
-							damage = 1
-						}
-						remove_dynamic_modifier = { modifier = SWI_infrastructure_rigged_to_blow }
+					else = {
+						ITA_bop_medium_increase_effect = yes
+						ITA_bop_decrease_lost_core_modifier = yes
+						#log = "Reducing BoP modifier penalty due to getting back core [FROM.FROM.GetName]"
 					}
+				}
+				else = {
+					ITA_bop_very_low_increase_effect = yes
 				}
 			}
 		}
@@ -1259,7 +1245,7 @@ on_actions = {
 					has_government = democratic
 					NOT = {
 						has_country_leader = {
-							name = "Syngman Rhee"
+							character = KOR_syngman_rhee
 							ruling_only = no
 						}
 					}
@@ -1269,7 +1255,7 @@ on_actions = {
 					limit = {
 						original_tag = KOR
 						has_country_leader = {
-							name = "Syngman Rhee"
+							character = KOR_syngman_rhee
 							ruling_only = no
 						}
 						NOT = { has_government = democratic }

@@ -4793,62 +4793,28 @@ country_event = {
 		}
 	}
 
+
 	# Lucky bois
 	option = { 
 		name = BBA_italy_air_accident.12.a
 
-		if = { #Upgrade trait and re-hire him
+		if = { #Upgrade trait
 			limit = {	
-				has_idea = ITA_aldo_pellegrini
+				has_character = ITA_aldo_pellegrini
 			}
 			ITA_aldo_pellegrini = {
 				custom_effect_tooltip = ITA_pellegrini_promotion_tt
 			}
 			hidden_effect = {
 				ITA_aldo_pellegrini = {
-					remove_advisor_role = { slot = air_chief }
-					add_advisor_role = {
-						advisor = {
-							slot = air_chief
-							idea_token = ITA_aldo_pellegrini
-							allowed = {
-								original_tag = ITA
-							}
-							traits = {
-								air_chief_ground_support_2
-							}
-							cost = 100
-							ai_will_do = {
-								factor = 1.000
-							}
-						}
-						activate = yes
+					remove_trait = {
+						trait = air_chief_ground_support_1
+						slot = air_chief
 					}
-				}
-			}
-		}
-		else = { #Just upgrade the trait
-			ITA_aldo_pellegrini = {
-				custom_effect_tooltip = ITA_pellegrini_promotion_tt
-			}
-			hidden_effect = {
-				ITA_aldo_pellegrini = {
-					remove_advisor_role = { slot = air_chief }
-					add_advisor_role = {
-						advisor = {
-							slot = air_chief
-							idea_token = ITA_aldo_pellegrini
-							allowed = {
-								original_tag = ITA
-							}
-							traits = {
-								air_chief_ground_support_2
-							}
-							cost = 100
-							ai_will_do = {
-								factor = 1.000
-							}
-						}
+
+					add_trait = {
+						trait = air_chief_ground_support_2
+						slot = air_chief
 					}
 				}
 			}
@@ -10956,7 +10922,6 @@ country_event = {
 		}
 		annex_country = { target = AUS transfer_troops = yes }
 		add_political_power = 75
-		set_country_flag = AUS_annexed
 		add_war_support = 0.1
 		add_stability = 0.05
 		USA = {
@@ -12724,17 +12689,19 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		if = {
-			limit = {
-				ROOT = {
-					is_faction_leader = yes
-				}
-			}
-			every_other_country = {
+		hidden_effect = {
+			if = {
 				limit = {
-					is_in_faction_with = ROOT
+					ROOT = {
+						is_faction_leader = yes
+					}
 				}
-				set_country_flag = ITA_add_to_the_stresa_front
+				every_other_country = {
+					limit = {
+						is_in_faction_with = ROOT
+					}
+					set_country_flag = ITA_add_to_the_stresa_front
+				}
 			}
 		}
 	}
@@ -12747,28 +12714,57 @@ country_event = {
 			base = 100
 		}
 
-		if = {
+		every_country = { #If Italy has any wargoal on other countries, remove them so they can join the faction
 			limit = {
-				ENG = {
-					is_faction_leader = yes
+				OR = {
+					is_in_faction_with = ROOT
+					tag = ROOT
+				}
+				FROM = {
+					has_wargoal_against = PREV
 				}
 			}
-			ENG = { add_to_faction = FRA }
-			ENG = { add_to_faction = ITA }
+			FROM = {
+				remove_wargoal = {
+					type = all
+					target = PREV
+				}
+			}
 		}
-		else = {
-			ROOT = {
-				create_faction = stresa_front_ita
-				ROOT = { add_to_faction = ITA }
-				ROOT = { add_to_faction = ENG }
-			}
-			every_other_country = {
+
+		effect_tooltip = {
+			if = {
 				limit = {
-					has_country_flag = ITA_add_to_the_stresa_front
+					ENG = {
+						is_faction_leader = yes
+					}
 				}
+				ENG = { add_to_faction = FRA }
+				ENG = { add_to_faction = ITA }
+			}
+			else = {
 				ROOT = {
-					add_to_faction = PREV #Add already existing faction members to the new faction
+					create_faction = stresa_front_ita
+					ROOT = { add_to_faction = ITA }
+					ROOT = { add_to_faction = ENG }
 				}
+				every_other_country = {
+					limit = {
+						NOT = {
+							original_tag = ENG
+						}
+						has_country_flag = ITA_add_to_the_stresa_front
+					}
+					ROOT = {
+						add_to_faction = PREV #Add already existing faction members to the new faction
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = BBA_italy_interaction_events.411
+				days = 2
 			}
 		}
 	}
@@ -12782,6 +12778,7 @@ country_event = {
 		}
 
 		add_war_support = -0.3
+
 	}
 }
 
