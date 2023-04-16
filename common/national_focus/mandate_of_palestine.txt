@@ -843,7 +843,7 @@ focus_tree = {
 	}
 	focus = {
 		id = MPL_two_people_union 
-		icon = GFX_goal_generic_freedom
+		icon = GFX_goal_MPL_union
 		relative_position_id = MPL_develop_arab_communities
 		x = 1
 		y = 1
@@ -1105,11 +1105,10 @@ focus_tree = {
 	focus = {
 		id = MPL_start_military_industry
 		icon = GFX_goal_generic_construct_mil_factory
-		relative_position_id = MPL_two_people_union
-		x = -14
-		y = 1
-		prerequisite = {
-			focus = MPL_two_people_union
+		x = 12
+		y = 0
+		available = {
+			has_completed_focus = MPL_two_people_union
 		}
 		cost = 10 
 		completion_reward = {
@@ -1703,7 +1702,7 @@ focus_tree = {
 		ai_will_do = {
 			factor = 100
 		}
-		cost = 5 
+		cost = 10
 		completion_reward = {
 			country_event = {
 				id = mandate_palestine.30
@@ -2105,6 +2104,11 @@ focus_tree = {
 			focus = MPL_land_reforms
 		}
 		completion_reward = {
+			set_party_name = {
+				ideology = communism
+				long_name = "Levant Communist Party"
+				name = "LCP"
+			}
 			add_ideas = MPL_unite_levant
 			add_war_support = 0.2
 			455 = {
@@ -2459,11 +2463,7 @@ focus_tree = {
 			add_state_core = 677
 			add_state_core = 553
 			add_state_claim = 453
-			set_party_name = {
-				ideology = communism
-				long_name = "Levant Communist Party"
-				name = "LCP"
-			}
+			
 		}
 		search_filters = {
 			FOCUS_FILTER_POLITICAL
@@ -2651,6 +2651,10 @@ focus_tree = {
 		}
 		cost = 10
 		completion_reward = {
+			remove_trait = {
+				character = MPL_divided_government
+				trait = MPL_divided_government_trait
+			}
 			if = {
 				limit = {
 					has_idea = MPL_two_people_union_1
@@ -2799,23 +2803,60 @@ focus_tree = {
 			focus = MPL_middle_east_accords
 		}
 		completion_reward = {
-			random_country = {
+			if = {
 				limit = {
-					is_major = yes
-					has_government = democratic
-					is_faction_leader = yes
-					NOT = {
-						TAG = ENG
-					}
-					NOT = {
-						has_war_with = MPL
+					any_other_country = {
+						is_faction_leader = yes
+						is_major = yes
+						has_government = democratic
+						NOT = { TAG = ENG }
+						not = { has_war_with = ROOT }
+						set_temp_variable = { ROOT.best_leader = this }
+						set_temp_variable = { ROOT.best_leader_score = 0 }
 					}
 				}
-				country_event = {
-					id = generic.2
-					days = 1
-					random_hours = 12
+			}
+			if = {
+				limit = {
+					all_other_country = {
+						is_faction_leader = yes
+						is_major = yes
+						has_government = democratic
+						NOT = { TAG = ENG }
+						not = { has_war_with = ROOT }
+						set_temp_variable = { this.leader_score = num_of_factories }
+						add_to_temp_variable = { this.leader_score = num_battalions }
+						all_of_scopes = {
+							array = allies
+							add_to_temp_variable = { PREV.leader_score = num_of_factories }
+							add_to_temp_variable = { PREV.leader_score = num_battalions }
+						}
+						if = {
+							limit = {
+								capital_scope = {
+									is_on_continent = ROOT
+								}
+							}
+							multiply_temp_variable = { leader_score = 2 }
+						}
+						if = {
+							limit = {
+								any_neighbor_country = { tag = ROOT }
+							}
+							multiply_temp_variable = { leader_score = 1.25 }
+						}
+						if = {
+							limit = {
+								check_variable = { ROOT.best_leader_score < leader_score }
+								set_temp_variable = { ROOT.best_leader = this }
+								set_temp_variable = { ROOT.best_leader_score = leader_score }
+							}
+						}
+					}
 				}
+			}
+			var:best_leader = {
+				country_event = generic.2
 			}
 		}
 		search_filters = {
