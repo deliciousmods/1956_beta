@@ -2,6 +2,24 @@
 on_actions = {
 	on_create_faction = {
 		effect = {
+			if = {				#from Polish decision where Lithuania reconciled the Wilno issue
+				limit = { 
+					original_tag = POL
+					is_faction_leader = yes
+					has_capitulated = no
+
+					LIT = {
+						is_subject = no
+						is_in_faction = no
+						has_capitulated = no
+						exists = yes
+						has_country_flag = LIT_resolved_crisis
+					}
+				}
+				POL = {
+					country_event = { id = poland.133 days = 2 }
+				}
+			}
 			if = {
 				limit = { is_ai = yes }
 				if = {
@@ -118,6 +136,108 @@ on_actions = {
 	#ROOT is winner #FROM gets annexed - For civil wars on_civil_war_end is also fired
 	on_annex = {
 		effect = {
+			FROM = {
+				if = {
+					limit = {
+						tag = DEN
+					}
+					den_become_generic = yes
+				}
+			}
+			FROM = {
+				if = {
+					limit = {
+						tag = RAJ
+					}
+					if = {
+						limit = {
+							has_dlc = "Together for Victory"
+						}
+						load_focus_tree = indian_focus
+						remove_ideas = {			
+							RAJ_agrarian_Economy
+							RAJ_agrarian_economy_famine 
+							RAJ_agrarian_economy_recovery 
+							RAJ_agrarian_economy_1 
+							RAJ_agrarian_economy_2 
+							RAJ_Caste_Debuff_3
+							RAJ_Caste_Debuff_2
+							RAJ_Caste_Debuff_1
+						}
+						add_ideas = {
+							RAJ_princely_states
+							RAJ_marginalized_muslim_community
+							RAJ_agrarian_society
+							RAJ_risk_of_famine
+						}
+					}
+					else = {
+						load_focus_tree = r56_india_generic
+						remove_ideas = {			
+							RAJ_Agrarian_Economy
+							RAJ_agrarian_economy_famine 
+							RAJ_agrarian_economy_recovery 
+							RAJ_agrarian_economy_1 
+							RAJ_agrarian_economy_2 
+						}
+					}
+					clr_country_flag = election_enabled
+					clr_country_flag = raj_election_over
+					clr_country_flag = army_research_decision
+					clr_country_flag = RAJ_rail_act_support
+					clr_country_flag = RAJ_agri_act_support
+					clr_country_flag = RAJ_war_act_support
+					clr_country_flag = ilp_conference_concluded
+					clr_country_flag = independence_granted 
+					clr_country_flag = ilp_south_asian_liberation
+					clr_country_flag = integration_of_india
+					clr_country_flag = ILP_victory 
+					clr_country_flag = UP_victory
+					clr_country_flag = INC_victory
+					remove_ideas_with_trait = militiant_independence_activist
+					set_country_flag = RAJ_famine_manual_trigger 	#Prevents Famine, which is hard to deal with without the focus tree
+					drop_cosmetic_tag = yes
+					retire_ideology_leader = neutrality
+					set_party_name = {
+						ideology = neutrality
+						name = "AIFB"
+						long_name = "All India Forward Bloc"
+					}
+					create_country_leader = {
+						name = "Subhas Chandra Bose"
+						desc = " "
+						picture = "gfx/leaders/RAJ/r56_portrait_RAJ_Subhas_Chadra_Bose.dds"
+						expire = "1965.1.1"
+						ideology = despotism
+						traits = {
+							indomitable_perseverance
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						tag = ENG
+					}
+					if = {
+						limit = {
+							RAJ = {
+								has_cosmetic_tag = RAJ_UK
+							}
+						}
+						drop_cosmetic_tag = yes
+						retire_character = RAJ_lord_linlithgow
+						retire_character = RAJ_lord_willingdon
+						retire_character = RAJ_archibald_wavell
+						retire_character = RAJ_louis_mountbatten
+						set_party_name = {
+							ideology = neutrality
+							name = "UP"
+							long_name = "Unionist Party"
+						}
+					}
+				}
+			}
+
 			if = {
 				limit = {
 					tag = CAN
@@ -397,6 +517,56 @@ on_actions = {
 					}
 				}
 			}
+			if = {
+				limit = {
+					tag = event_target:den_scw_volunteers_received
+					original_tag = SPR
+				}
+				DEN = {
+					add_manpower = 400 #TODO EVENT
+				}
+
+			}
+			if = {
+				limit = {
+					tag = DEN
+					is_in_faction = yes	#don't fire the event if Denmark was alone and will be handled in the peace deal in a second - Illya
+					FROM = {
+						NOT = {
+							has_government = democratic
+						}
+					}
+				}
+				FROM = {
+					DEN = {
+						set_variable = {
+							occupation_target = PREV
+						}
+					}
+					country_event = {
+						id = denmark.101
+					}
+				}
+			}
+			if = {
+				limit = {
+					original_tag = DEN
+					OR = {
+						ICE = { is_subject_of = DEN }
+						DEN = { owns_state = 100 }
+						ICE = { owns_state = 100 }
+					}
+					NOR = {
+						NOT = {
+							has_completed_focus = NOR_reclaim_the_islands
+							has_completed_focus = NOR_icelandic-faroese_revolt
+							has_completed_focus = NOR_reclaim_danish
+							has_completed_focus = NOR_unite_the_scandinavian_workers
+						}
+					}
+				}
+				country_event = { id = wtt_denmark.1 days = 1 }
+			}
 
 			every_state = {
 				limit = { has_state_flag = r56_aluminium_collection }
@@ -409,13 +579,13 @@ on_actions = {
 			if = {	#moved from Belgian events	-	event about king Leopold Surrender
 				limit = {
 					original_tag = BEL
-					has_idea = tblra_leopold3
+					has_idea = BEL_leopold3
 					OR = {
 						has_government = democratic
 						has_government = fascism
 					}
 				}
-				country_event = { id = tblra.62 hours = 12 }
+				country_event = { id = belgium.62 hours = 12 }
 
 			}
 			if = { #
@@ -965,6 +1135,103 @@ on_actions = {
 
 	on_civil_war_end_before_annexation = {
 		effect = {
+			#Release BHU and NEP
+			if = {	#AH won over RAJ
+				limit = {
+					ROOT = {
+						original_tag = RAJ			
+						OR = {
+							has_government = fascism
+							has_government = communism
+						}	
+					}
+					FROM = {
+						is_subject_of = ENG
+					}
+				}
+				NEP = {
+					if = {
+						limit = {
+							is_subject_of = ENG
+						}
+						ENG = {
+							set_autonomy = {
+								target = PREV
+								autonomy_state = autonomy_free
+							}
+						}
+						leave_faction = yes
+					}
+				}
+				BHU = {
+					if = {
+						limit = {
+							is_subject_of = ENG
+						}
+						ENG = {
+							set_autonomy = {
+								target = PREV
+								autonomy_state = autonomy_free
+							}
+						}
+						leave_faction = yes
+					}
+				}
+				ENG = {
+					if = {
+						limit = {
+							owns_state = 422
+							controls_state = 422
+						}
+						422 = {
+							set_compliance = 15	#Inspiration 
+						}
+					}
+				}
+				POR = {
+					if = {
+						limit = {
+							owns_state = 321
+							controls_state = 321
+						}
+						321 = {
+							set_compliance = 15	#Inspiration 
+						}
+					}
+				}
+				FRA = {
+					if = {
+						limit = {
+							owns_state = 320
+							controls_state = 320
+						}
+						320 = {
+							set_compliance = 15	#Inspiration 
+						}
+					}
+				}
+				if = {
+					limit = {
+						640 = {
+							is_controlled_by = ROOT
+						}
+						288 = {
+							is_controlled_by = ROOT
+						}
+						BRM = {
+							exists = no
+						}
+						OR = {
+							has_government = fascism
+							has_government = communism
+						}
+					}
+					country_event = {
+						id = r56_raj.7
+						days = 14
+					}
+				}
+			}
 			if = {
 				limit = {
 					FROM = {
@@ -2633,6 +2900,17 @@ on_actions = {
 #					remove_ideas = generic_can_only_join_factions_same_ideology
 #				}
 #			}
+			if = {	#Polish falangists were very autarcic
+				limit = {
+					original_tag = POL
+					has_government = fascism
+					has_completed_focus = POL_The_National_Radical_Camp
+					is_subject = no
+				}
+				country_event = {
+					id = poland.125 days = 5 random_days = 5
+				}
+			}
 			if = {	#Replaced trigger from one event in r56_canada
 				limit = {
 					original_tag = CAN
@@ -2810,10 +3088,10 @@ on_actions = {
 				limit = {
 					original_tag = BEL
 					has_government = communism
-					has_idea = tblra_leopold3
+					has_idea = BEL_leopold3
 				}
 				country_event = {
-					id = tblra.85
+					id = belgium.85
 					days = 2
 				}
 			}
@@ -3176,6 +3454,158 @@ on_actions = {
 ###---> On Puppet <><> <><> <><>
 	on_puppet = {
 		effect = {
+			if = {
+				limit = {
+					tag = DEN
+					if = {
+						limit = {
+							has_completed_focus = DEN_An_Appeal_to_the_Proletariat
+						}
+						has_government = communism
+					}
+					else_if = {
+						limit = {
+							has_completed_focus = DEN_Galvanise_the_German_Minority
+						}
+						has_government = fascism
+					}
+					else_if = {
+						limit = {
+							OR = {
+								has_completed_focus = DEN_Initiate_Economic_Reforms
+								has_completed_focus = DEN_Strengthen_the_Labour_Unions
+							}
+						}
+						has_government = democratic
+					}
+					else_if = {
+						limit = {
+							has_completed_focus = DEN_King_Christian_Coup
+						}
+						has_government = neutrality
+					}
+				}
+				#Continue on
+			}
+			else_if = {
+				limit = {
+					tag = DEN
+				}
+				den_become_generic = yes
+			}
+			# The Father shall free Denmark
+			if = {
+				limit = {
+					original_tag = DEN
+					FROM = {
+						original_tag = SOV
+					}
+					SOV = { 
+						has_government = neutrality
+						has_completed_focus = SOV_the_third_rome
+					}
+				}
+				set_cosmetic_tag = DEN_RUS
+				if = {
+					limit = {
+						has_government = neutrality
+					}
+					retire_ideology_leader = neutrality
+					create_country_leader = {
+						name = "Tsarin Olga Alexandrovna"
+						desc = ""
+						picture = "gfx/leaders/LUX/r56_portrait_LUX_Duchess_Charlotte.dds"	#literally no female generic
+						expire = "1965.1.1"
+						ideology = absolute_monarchism
+					}
+				}
+			}
+			if = {
+				limit = {
+					original_tag = RAJ
+					FROM = {
+						NOT = {
+							original_tag = ENG
+						}
+					}
+				}
+				if = {
+					limit = {
+						has_dlc = "Together for Victory"
+					}
+					load_focus_tree = indian_focus
+					remove_ideas = {			
+						RAJ_Agrarian_Economy
+						RAJ_agrarian_economy_famine 
+						RAJ_agrarian_economy_recovery 
+						RAJ_agrarian_economy_1 
+						RAJ_agrarian_economy_2 
+						RAJ_Caste_Debuff_3
+						RAJ_Caste_Debuff_2
+						RAJ_Caste_Debuff_1
+					}
+					add_ideas = {
+						RAJ_princely_states
+						RAJ_marginalized_muslim_community
+						RAJ_agrarian_society
+						RAJ_risk_of_famine
+					}
+				}
+				else = {
+					load_focus_tree = r56_india_generic
+					remove_ideas = {			
+						RAJ_agrarian_Economy
+						RAJ_agrarian_economy_famine 
+						RAJ_agrarian_economy_recovery 
+						RAJ_agrarian_economy_1 
+						RAJ_agrarian_economy_2 
+					}
+				}
+				clr_country_flag = election_enabled
+				clr_country_flag = raj_election_over
+				clr_country_flag = army_research_decision
+				clr_country_flag = RAJ_rail_act_support
+				clr_country_flag = RAJ_agri_act_support
+				clr_country_flag = RAJ_war_act_support
+				clr_country_flag = ilp_conference_concluded
+				clr_country_flag = independence_granted 
+				clr_country_flag = ilp_south_asian_liberation
+				clr_country_flag = integration_of_india
+				clr_country_flag = ILP_victory 
+				clr_country_flag = UP_victory
+				clr_country_flag = INC_victory
+				remove_ideas_with_trait = militiant_independence_activist
+				set_country_flag = RAJ_famine_manual_trigger 	#Prevents Famine, which is hard to deal with without the focus tree
+				drop_cosmetic_tag = yes
+				retire_ideology_leader = neutrality
+				set_party_name = {
+					ideology = neutrality
+					name = "AIFB"
+					long_name = "All India Forward Bloc"
+				}
+				create_country_leader = {
+					name = "Subhas Chandra Bose"
+					desc = "POLITICS_BOSE_DESC"
+					picture = "gfx/leaders/RAJ/r56_portrait_RAJ_Subhas_Chadra_Bose.dds"
+					expire = "1965.1.1"
+					ideology = despotism
+					traits = {
+						indomitable_perseverance
+					}
+				}
+			}
+
+			if = {			#add this to prevent released countries from disobeying game rules		-	check for other game rules too! - Fantom
+				limit = {	#added for BBA peace deals
+					has_game_rule = {
+						rule = ideology_join_faction
+						option = EVENTS_ONLY
+					}
+				}
+				set_rule = {
+					can_join_factions = no
+				}
+			}
 
 			## Add flag so USA can warn Germany if it rushes puppet/annex the netherlands/indonesia
 			if = { #MOD. Compressed
@@ -3563,6 +3993,7 @@ on_actions = {
 							ideology = absolute_monarchism
 							traits = {
 								controversial_figurehead
+								anti_communist
 							}
 						}
 					}
@@ -4357,7 +4788,7 @@ on_actions = {
 						desc = " "
 						picture = "gfx/leaders/ROM/r56_portrait_ROM_Alexandru_Draghici.dds"
 						expire = "1965.1.1"
-						ideology = nazism
+						ideology = marxism
 						traits = {
 							r56_trait_opposed_to_fascism
 							baron_of_terror
@@ -4905,11 +5336,62 @@ on_actions = {
 #ROOT = nation being released, FROM = overlord
 	on_release_as_puppet = {
 		effect = {
+			if = {			#add this to prevent released countries from disobeying game rules		-	check for other game rules too! - Fantom
+				limit = {
+					has_game_rule = {
+						rule = ideology_join_faction
+						option = EVENTS_ONLY
+					}
+				}
+				set_rule = {
+					can_join_factions = no
+				}
+			}
 			if = {	#French Lebanon gets French puppet tag
 				limit = {
 					tag = LEB
+					is_puppet_of = FRA
 				}
 				set_cosmetic_tag = LEB_FRA
+			}
+			if = {
+				limit = {
+					tag = DEN
+					if = {
+						limit = {
+							has_completed_focus = DEN_An_Appeal_to_the_Proletariat
+						}
+						has_government = communism
+					}
+					else_if = {
+						limit = {
+							has_completed_focus = DEN_Galvanise_the_German_Minority
+						}
+						has_government = fascism
+					}
+					else_if = {
+						limit = {
+							OR = {
+								has_completed_focus = DEN_Initiate_Economic_Reforms
+								has_completed_focus = DEN_Strengthen_the_Labour_Unions
+							}
+						}
+						has_government = democratic
+					}
+					else_if = {
+						limit = {
+							has_completed_focus = DEN_King_Christian_Coup
+						}
+						has_government = neutrality
+					}
+				}
+				#Continue on
+			}
+			else_if = {
+				limit = {
+					tag = DEN
+				}
+				den_become_generic = yes
 			}
 			#grants political power to compensate for the nonexistence of a country
 			if = {
@@ -6975,6 +7457,118 @@ on_actions = {
 				}
 			}
 
+
+			if = {
+				limit = {
+					FROM = {
+						has_government = neutrality
+						OR = {
+							original_tag = FRA
+							original_tag = AUS
+							original_tag = HUN
+							original_tag = PER
+							original_tag = BEL
+							AND = {
+								original_tag = SPR
+								NOT = {
+									has_country_leader = {
+										name = "Anarchist Commune"
+										ruling_only = yes
+									}
+								}
+							}
+							original_tag = JAP
+							original_tag = ROM
+							original_tag = BUL
+							original_tag = GER
+							original_tag = PRE
+							original_tag = BAY
+							original_tag = BAD
+							original_tag = WUR
+							original_tag = MEK
+							original_tag = SHL
+							original_tag = SAX
+							original_tag = HAN
+							original_tag = DEN
+							original_tag = SWE
+							original_tag = NOR
+							original_tag = CAN
+							original_tag = JOR
+							original_tag = IRQ
+							original_tag = GRE
+							original_tag = YUG
+							original_tag = HOL
+							original_tag = MAN
+							original_tag = ARM
+							original_tag = EGY
+							original_tag = SAU
+							original_tag = ITA
+
+							AND = {
+								original_tag = POR
+								has_country_leader = {
+									name = "Dom Duarte Nuno"
+									ruling_only = yes
+								}
+							}
+							AND = {
+								original_tag = BRA
+								has_country_leader = {
+									name = "Pedro III"
+									ruling_only = yes
+								}
+							}
+							AND = {
+								original_tag = USA
+								has_country_leader = {
+									name = "Wallis I"
+									ruling_only = yes
+								}
+							}
+							AND = {
+								original_tag = HON
+								has_country_leader = {
+									name = "Juan III"
+									ruling_only = yes
+								}
+							}
+						}						
+					}
+
+					original_tag = KOR
+					NOT = {
+						any_other_country = {
+							original_tag = KOR
+							has_country_leader = {
+								name = KOR_yi_un
+								ruling_only = no
+							}
+						}
+					}
+				}
+				#the generic portrait is actually him
+				add_country_leader_role = {
+					Character = KOR_yi_un
+					Promote_leader = yes
+					Country_leader = {
+						 ideology = absolute_monarchism
+						 expire = "1965.1.1"
+						 traits = { eager_collaborator army_connections
+							r56_trait_opposed_to_communism
+
+						}
+					}
+				}
+				KOR_yi_un = {
+					promote_character = {
+						ideology = absolute_monarchism
+					}
+				}
+				set_cosmetic_tag = KOR_EMPIRE		
+				#set_party_name = { ideology = fascism long_name = HUN_arrow_cross_party_long name = HUN_arrow_cross_party }
+			}
+
+
 			if = { #MOD. Compressed
 				limit = { tag = POL }
 				if = {
@@ -7318,6 +7912,17 @@ on_actions = {
 #ROOT = nation being released, FROM = overlord
 	on_release_as_free = {
 		effect = {
+			if = {			#add this to prevent released countries from disobeying game rules		-	check for other game rules too! - Fantom
+				limit = {
+					has_game_rule = {
+						rule = ideology_join_faction
+						option = EVENTS_ONLY
+					}
+				}
+				set_rule = {
+					can_join_factions = no
+				}
+			}
 			if = {	#French Lebanon gets a proper name
 				limit = {
 					tag = LEB
@@ -8258,6 +8863,10 @@ on_actions = {
 					}
 				}
 			}
+			DEN = {
+				den_calculate_eqilibirum_monthly = yes
+				remove_ideas = DEN_Disarmed_Military
+			}
 			FRI = {
 				#tried to idea...
 				set_division_template_lock = {
@@ -8281,6 +8890,68 @@ on_actions = {
 					}
 				#}
 				#country_event = poland.69 #MOD. Moved here, as the limitation no longer applies, deactivated and put into the file itself.
+			}
+			
+			RAJ = {	#from raj_on_actions, lets keep it together!
+				if = {
+					limit = {
+						has_game_rule = {
+							rule = asia_colonization_status
+							option = ASIA_DECOLONIZED
+						}
+					}
+					RAJ_create_INA_generals = yes
+				}
+				every_owned_state = {
+					limit = {
+						OR = {
+							state = 444
+							state = 787
+							state = 441
+							state = 427
+							state = 433
+							state = 428
+							state = 425
+							state = 426
+							state = 437
+							state = 434
+						}
+					}
+					set_state_flag = princely_state
+					add_dynamic_modifier = { modifier = princely_state_mod }
+				}
+				every_owned_state = {
+					limit = {
+						is_core_of = PAK
+						NOT = {
+							state = 441
+						}
+					}
+					set_state_flag = muslim_state
+					add_dynamic_modifier = { 
+						modifier = marginalized_muslims 
+						scope = RAJ
+					}
+				}	
+				every_owned_state = {
+					limit = {
+						OR = {
+							state = 441
+							state = 439
+							state = 431
+							state = 432
+							state = 434
+						}
+					}
+					add_dynamic_modifier = { 
+						modifier = slight_religious_minority 
+						scope = RAJ
+					}
+				}
+				add_ideas = {
+					RAJ_Princely_States
+					RAJ_Indian_Ai_Strategies
+				}
 			}
 
 			if = {
@@ -9459,73 +10130,43 @@ on_actions = {
 				country_event = { id = r56.startup.event.01 }
 			}
 
-			# Game Rules - Annexations
-			if = {
+			if = { # Micronations annexation
 				limit = {
-					NOT = {
-						has_game_rule = {
-							rule = micronation_annexation_status
-							option = ANNEX_MICRONATIONS
-						}
+					has_game_rule = {
+						rule = micronation_annexation_status
+						option = ANNEX_MICRONATIONS
 					}
 				}
-				FRA = {
-					release = MNC
-				}
 				SPR = {
-					release = ADR
-				}
-				SWI = {
-					release = LIE
-				}
-				FRA = {	#given at game start to avoid error of too many buildings
-					remove_state_core = 1012
-				}
-			}
-			else = {
-				# FRA = {	#done at game start to avoid error
-				# 	add_state_core = 1012
-				# }
-				SPR = {
+					annex_country = {
+					    target = ADR
+					    transfer_troops = no
+					}
 					add_state_core = 973
 				}
 				SWI = {
+					annex_country = {
+					    target = LIE
+					    transfer_troops = no
+					}
 					add_state_core = 997
 				}
-			}
-			if = {	#change to the respective country from Yemen (because almost nobody played Yemen, right?)
-				limit = {
-					has_game_rule = {
-						rule = micronation_annexation_status
-						option = PLAY_MICRONATION_ADR
+				FRA = {
+					annex_country = {
+					    target = MNC
+					    transfer_troops = no
 					}
+					add_state_core = 1012
 				}
-				ADR = {
-					change_tag_from = YEM
-				}
-			}
-			if = {
-				limit = {
-					has_game_rule = {
-						rule = micronation_annexation_status
-						option = PLAY_MICRONATION_MNC
+				ITA = {
+					annex_country = {
+					    target = SAN
+					    transfer_troops = no
 					}
-				}
-				MNC = {
-					change_tag_from = YEM
+					add_state_core = 1015
 				}
 			}
-			if = {
-				limit = {
-					has_game_rule = {
-						rule = micronation_annexation_status
-						option = PLAY_MICRONATION_LIE
-					}
-				}
-				LIE = {
-					change_tag_from = YEM
-				}
-			}
+
 			# Game Rules - Fragmentation
 			if = { #SOP
 				limit = {
@@ -13619,6 +14260,7 @@ on_actions = {
 					release = SEN
 					release = NGR
 					release = MRT
+					release = COM
 				}
 				ITA = {
 					release = LBA
@@ -13641,6 +14283,7 @@ on_actions = {
 					release = SIE
 					release = GAM
 					release = SEY
+					release = MAU
 				}
 				BEL = {
 					end_puppet = COG
@@ -13658,6 +14301,8 @@ on_actions = {
 					release = MZB
 					release = ANG
 					release = GNB
+					release = SAO
+					release = CAP
 				}
 				SPR = {
 					release = WES
@@ -15442,7 +16087,7 @@ on_actions = {
 								has_global_flag = fall_of_london_bel
 							}
 						}
-						news_event = { id = tblra.30 }
+						news_event = { id = belgium.30 }
 					}
 					if = {	#Fall of London - USA
 						limit = {
@@ -15590,7 +16235,7 @@ on_actions = {
 								has_global_flag = fall_of_berlin_bel
 							}
 						}
-						news_event = { id = tblra.29 }
+						news_event = { id = belgium.29 }
 					}
 					if = {
 						limit = {
@@ -15825,7 +16470,7 @@ on_actions = {
 							}
 							NOT = { has_global_flag = fall_of_moscow_bel }
 						}
-						news_event = { id = tblra.31 }
+						news_event = { id = belgium.31 }
 					}
 					if = {	#France
 						limit = {
@@ -16053,11 +16698,11 @@ on_actions = {
 							ROOT = {
 								original_tag = BEL
 								has_government = fascism
-								NOT = { has_completed_focus = tblra_choose_Verdinaso }
+								NOT = { has_completed_focus = BEL_choose_Verdinaso }
 							}
 							NOT = { has_global_flag = fall_of_paris_bel }
 						}
-						news_event = { id = tblra.33 }
+						news_event = { id = belgium.33 }
 					}
 					if = {
 						limit = {
@@ -16067,7 +16712,7 @@ on_actions = {
 							}
 							NOT = { has_global_flag = fall_of_paris_bel }
 						}
-						news_event = { id = tblra.34 }
+						news_event = { id = belgium.34 }
 					}
 				}
 				# Bangkok
@@ -16602,7 +17247,7 @@ on_actions = {
 								has_global_flag = fall_of_amsterdam_bel
 							}
 						}
-						news_event = { id = tblra.32 }
+						news_event = { id = belgium.32 }
 					}
 				}
 				# Beijing
@@ -17281,6 +17926,34 @@ on_actions = {
 			}
 		}
 	}
+	
+	on_leave_faction = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = RAJ
+				}
+				mark_focus_tree_layout_dirty = yes
+			}
+			if = {
+				limit = {
+					tag = RAJ
+					NOT = { is_subject_of = ENG }
+					has_cosmetic_tag = RAJ_UK
+				}
+				drop_cosmetic_tag = yes
+				retire_character = RAJ_lord_linlithgow
+				retire_character = RAJ_lord_willingdon
+				retire_character = RAJ_archibald_wavell
+				retire_character = RAJ_louis_mountbatten
+				set_party_name = {
+					ideology = neutrality
+					name = "UP"
+					long_name = "Unionist Party"
+				}
+			}
+		}
+	}
 
 	###---> On Uncapitulation <><> <><> <><>
 	on_uncapitulation = {
@@ -17413,9 +18086,9 @@ on_actions = {
 				limit = {
 					tag = BEL
 					has_government = democratic
-					NOT = {has_idea = tblra_national_union}
+					NOT = {has_idea = BEL_national_union}
 				}
-				country_event = { id = tblra.27 hours = 12 }
+				country_event = { id = belgium.27 hours = 12 }
 			}
 			if = {
 				limit = {
@@ -17787,6 +18460,17 @@ on_actions = {
 	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
 	on_war_relation_added = {
 		effect = {
+			if = {			#add this to prevent released countries from disobeying game rules		-	check for other game rules too! - Fantom
+				limit = {	#should hopefully work for rebels and random nation released via events
+					has_game_rule = {
+						rule = ideology_join_faction
+						option = EVENTS_ONLY
+					}
+				}
+				set_rule = {
+					can_join_factions = no
+				}
+			}
 			if = {		#Danzig can join Germany - from Polish tree
 				limit = {
 					OR = {	#Germany and Poland warring with each other
@@ -18377,6 +19061,42 @@ on_actions = {
 		}
 	}
 
+    on_daily_RAJ = {
+		effect = {
+			if = {
+				limit = {
+					has_country_flag = raj_election_over
+					NOT = { has_country_flag = independence_granted }
+					tag = RAJ
+					exists = yes
+					is_subject = yes
+				}
+				add_to_variable = {
+					pak_influence = pak_influence_daily
+				}
+				add_to_variable = {
+					ind_influence = ind_influence_daily
+				}
+				if = {
+					limit = {
+						check_variable = {
+							pak_influence_daily < 0
+						}
+						check_variable = {
+							pak_influence < 1
+						}
+					}
+					set_variable = {
+						pak_influence_daily = 0
+					}
+					set_variable = {
+						pak_influence = 0
+					}
+				}
+			}
+		}
+	}
+
 	on_weekly_IRQ = {	#was daily, changed to weekly, doesn't have to be checked thaaaat often
 		effect = {
 			if = {	### British peace offer
@@ -18941,6 +19661,23 @@ on_actions = {
 				}
 			}
 			
+		}
+	}
+	
+	on_monthly_DEN = {
+		effect = {
+			#
+			# (E-L)/4 ~ diff/month
+			# (50-75)/4 = -6.25 ~ -6
+			# (50-20)/4 = 7.5 ~ 8
+			#
+			if = {
+				limit = {
+					tag = DEN
+					den_stratas_enabled = yes
+				}
+				den_calculate_eqilibirum_monthly = yes
+			}
 		}
 	}
 }
