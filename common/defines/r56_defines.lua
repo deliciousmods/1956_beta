@@ -332,6 +332,8 @@
 	NDefines.NAI.COMMUNISTS_ALLY_DEMOCRACIES = -75
 	
 	NDefines.NAI.PRODUCTION_EQUIPMENT_SURPLUS_FACTOR = 0.15	-- Base value for how much of currently used equipment the AI will at least strive to have in stock
+
+	NDefines.NAI.GENERATE_WARGOAL_ANTAGONIZE_SCALE = 0.25 -- (Original value: 0.35) How likely the AI acts on claims to generated war goals. Baseline is 'min_threat - antagonize * scale.' So don't lower it below 0.25! 
 	
 --------------------------------------------------------------------------------------------------------------
 -- ECONOMY
@@ -680,7 +682,7 @@
 	NDefines.NSupply.NODE_FLOW_BONUS_PER_RAIL_LEVEL = 0.8 -- 0.34
 	
 	
-	NDefines.NSupply.NAVAL_FLOW_PER_LEVEL = 15.0 -- 15.0
+	NDefines.NSupply.NAVAL_BASE_FLOW = 15.0 -- 15.0 --used to also be NAVAL_FLOW_PER_LEVEL, presumed intended to be this
 	NDefines.NSupply.NAVAL_FLOW_PER_LEVEL = 5.0 --5.0
 	
 	
