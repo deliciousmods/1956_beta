@@ -682,7 +682,7 @@
 	NDefines.NSupply.NODE_FLOW_BONUS_PER_RAIL_LEVEL = 0.8 -- 0.34
 	
 	
-	NDefines.NSupply.NAVAL_FLOW_PER_LEVEL = 15.0 -- 15.0
+	NDefines.NSupply.NAVAL_BASE_FLOW = 15.0 -- 15.0 --used to also be NAVAL_FLOW_PER_LEVEL, presumed intended to be this
 	NDefines.NSupply.NAVAL_FLOW_PER_LEVEL = 5.0 --5.0
 	
 	
