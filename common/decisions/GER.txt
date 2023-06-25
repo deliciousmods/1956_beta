@@ -3,9 +3,9 @@ GER_partisan_category = {
 
 	GER_partisan_growth_mission = {
 
-		icon = GFX_decision_generic_spy
+		icon = GFX_decision_revolt
         
-		days_mission_timeout = 60
+		days_mission_timeout = 40
 		is_good = no
         
         activation = {
@@ -148,9 +148,9 @@ GER_partisan_category = {
         }
     }
     
-    GER_remove_partisan_activity = {
+    GER_attack_partisan_activity = {
     
-		icon = GFX_decision_court
+		icon = GFX_decision_generic_police_action
         
         state_target = yes
         on_map_mode = map_and_decisions_view
@@ -174,20 +174,36 @@ GER_partisan_category = {
                 has_dynamic_modifier = {
                     modifier = r56_GER_partisan_activity_state_modifier 
                 }
+                owner = {
+                    has_war_with = ROOT
+                }
             }
         }
         
         cancel_trigger = {
-            divisions_in_state = {
-                size < 1
-                state = FROM
+            IF = {
+                limit = { 
+                    is_ai = no
+                }
+                divisions_in_state = {
+                    size < 1
+                    state = FROM
+                }
+            }
+            ELSE = {
+                always = no
             }
         }
         
 		available = {
-            divisions_in_state = {
-                size > 0
-                state = FROM
+            IF = {
+                limit = { 
+                    is_ai = no
+                }
+                divisions_in_state = {
+                    size > 0
+                    state = FROM
+                }
             }
 		}
         
@@ -199,11 +215,11 @@ GER_partisan_category = {
                             NOT = {
                                 has_template = Partisans
                             }
-                        }
+                        }   
                         division_template = {
                             name = "Partisans"
                             #division_names_group = USA_INF_01
-                            #template_counter = 0
+                            template_counter = 5
                             
                             is_locked = yes
                             force_allow_recruiting = no
@@ -228,13 +244,64 @@ GER_partisan_category = {
                             }
                         }
                     }
-                
+                }
+                IF = {
+                    limit = {
+                        resistance > 80
+                    }
                     FROM = {
                         create_unit = {
-                            division = "name = \"Partisan Fighters\" division_template = \"Partisans\" start_experience_factor = 0.3 start_equipment_factor = 0.4 start_manpower_factor  = 0.7"
+                            division = "name = \"Partisan Fighters\" division_template = \"Partisans\" start_experience_factor = 1.0 start_equipment_factor = 1.0 start_manpower_factor  = 1.0"
                             owner = owner
                             allow_spawning_on_enemy_provs = yes
                         }
+                        create_unit = {
+                            division = "name = \"Partisan Fighters\" division_template = \"Partisans\" start_experience_factor = 1.0 start_equipment_factor = 1.0 start_manpower_factor  = 1.0"
+                            owner = owner
+                            allow_spawning_on_enemy_provs = yes
+                        }
+                    }
+                }
+                else_if = {
+                    limit = {
+                        resistance > 60
+                    }
+                    FROM = {
+                        create_unit = {
+                            division = "name = \"Partisan Fighters\" division_template = \"Partisans\" start_experience_factor = 0.6 start_equipment_factor = 0.8 start_manpower_factor  = 0.9"
+                            owner = owner
+                            allow_spawning_on_enemy_provs = yes
+                        }
+                    }
+                }
+                else_if = {
+                    limit = {
+                        resistance > 40
+                    }
+                    FROM = {
+                        create_unit = {
+                            division = "name = \"Partisan Fighters\" division_template = \"Partisans\" start_experience_factor = 0.4 start_equipment_factor = 0.6 start_manpower_factor  = 0.7"
+                            owner = owner
+                            allow_spawning_on_enemy_provs = yes
+                        }
+                    }
+                }
+                else_if  = {
+                    limit = {
+                        resistance > 30
+                    }
+                    FROM = {
+                        create_unit = {
+                            division = "name = \"Partisan Fighters\" division_template = \"Partisans\" start_experience_factor = 0.3 start_equipment_factor = 0.4 start_manpower_factor  = 0.5"
+                            owner = owner
+                            allow_spawning_on_enemy_provs = yes
+                        }
+                    }
+                }
+                else = {
+                    FROM = {
+                        add_resistance = 5
+                        add_compliance = -5
                     }
                 }
             }
@@ -242,6 +309,7 @@ GER_partisan_category = {
         
         remove_effect = {
             FROM = {
+                add_resistance = -15
                 remove_dynamic_modifier = {
                     modifier = r56_GER_partisan_activity_state_modifier 
                 }
@@ -253,27 +321,156 @@ GER_partisan_category = {
         }
 
 		ai_will_do = {
-			factor = 25
+			base = 40
 			modifier = {
-				factor = 2
+				add = 40
 				FROM = { 	
                     resistance > 25
                 }
 			}
 			modifier = {
-				factor = 3
+				factor = 2
 				FROM = { 	
                     resistance > 50
                 }
 			}
 			modifier = {
-				factor = 4
+				factor = 2
 				FROM = { 	
                     resistance > 75
                 }
 			}
 		}
+    }
+    GER_negotiate_partisan_activity = {
+    
+		icon = GFX_decision_hol_exchange_intelligence_data
         
+        state_target = yes
+        on_map_mode = map_and_decisions_view
+        
+		allowed = { always = yes }
+        
+		fire_only_once = no
+
+		visible = {
+            always = yes
+		}
+        
+        targets_dynamic = yes
+        
+        target_array = GER.controlled_states
+        
+        days_remove = 30
+        
+        cost = 25
+        
+        target_trigger = {
+            FROM = {
+                has_dynamic_modifier = {
+                    modifier = r56_GER_partisan_activity_state_modifier 
+                }
+                OR = {
+                    ROOT = {
+                        is_ai = no
+                    }
+                    NOT = {
+                        owner = {
+                            has_war_with = ROOT
+                        }
+                    }
+                }
+            }
+        }
+        
+        cancel_trigger = {
+        }
+        
+		available = {
+		}
+        
+        complete_effect = {
+            FROM = {
+                IF = {
+                    limit = {
+                        resistance > 80
+                    }
+                    ROOT = {
+                        add_stability = -0.040
+                        add_war_support = -0.040
+                    }
+                }
+                else_if = {
+                    limit = {
+                        resistance > 60
+                    }
+                    ROOT = {
+                        add_stability = -0.030
+                        add_war_support = -0.030
+                    }
+                }
+                else_if = {
+                    limit = {
+                        resistance > 40
+                    }
+                    ROOT = {
+                        add_stability = -0.025
+                        add_war_support = -0.025
+                    }
+                }
+                else_if  = {
+                    limit = {
+                        resistance > 30
+                    }
+                    ROOT = {
+                        add_stability = -0.020
+                        add_war_support = -0.020
+                    }
+                }
+                else = {
+                    ROOT = {
+                        add_stability = -0.015
+                        add_war_support = -0.015
+                    }
+                }
+            }
+        }
+        
+        remove_effect = {
+            FROM = {
+                add_resistance = -10
+                add_compliance =  5
+                remove_dynamic_modifier = {
+                    modifier = r56_GER_partisan_activity_state_modifier 
+                }
+            }
+        }
+
+		ai_will_do = {
+			base = 30
+			modifier = {
+				add = 30
+				FROM = { 	
+                    resistance > 25
+                }
+			}
+			modifier = {
+				factor = 2
+				FROM = { 	
+                    resistance > 50
+                }
+			}
+			modifier = {
+				factor = 2
+				FROM = { 	
+                    resistance > 75
+                }
+			}
+			modifier = {
+				factor = 4
+                has_war = no
+			}
+		}
     }
 }
 GER_mefo_bills_category = {
