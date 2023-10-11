@@ -1,0 +1,252 @@
+#	Example:
+# 
+#	example_trigger = {
+#		tag = GER
+#		is_ai = no
+#	}
+#
+#
+#	In a script file:
+#
+#	trigger = {
+#		exampel_trigger = yes
+#	}
+# 
+
+FIN_state_is_european_and_on_the_atlantic = {
+	is_on_continent = europe
+	is_fully_controlled_by = ROOT
+	is_coastal = yes
+	state_is_in_the_mediterranean_sea = no
+	BUL_state_is_in_the_black_sea = no
+	OR = {
+		state_is_in_the_baltic_sea = no
+		#States in both Baltic and Atlantic (Dannish area)
+		state = 37
+		state = 1025 #Fyn
+		state = 99 #Northern Denmark not considered in the Baltic for now but just in case
+		state = 964 #Sønderjylland aka Northern Schleswig
+		state = 998 #Schleswig aka Southern Schleswig
+		state = 58
+		state = 138
+	}
+	#states in the Arctic
+	NOT = {
+		state = 722 #PETSAMO
+		state = 213 #MURMANSK
+		state = 215 #ONEGA
+	}
+}
+
+FIN_state_is_valid_for_motti_tactics = {
+	OR = {
+		state = 150 #KUOPIO
+		state = 1039 #OULU
+		state = 147 #SALLA
+		state = 148 #LAPPI
+		state = 722 #PETSAMO
+		state = 149 #VAASA
+		state = 1040 #MIKKELI
+	}
+}
+
+FIN_is_lone_wolf_finland = {
+	original_tag = FIN
+	has_idea = FIN_the_lone_wolf
+}
+
+FIN_country_can_be_invited_into_faction_socialist = {
+	exists = yes
+	is_subject = no
+	NOT = { has_war_with = ROOT }
+	is_in_faction = no
+}
+
+#Used to change name of States and VPs when appropriate. Expected to be used inside on_state_control_changed. FROM.FROM is state / ROOT is new controller / FROM is former controller
+FIN_state_or_vp_name_should_change = {
+	OR = {
+		AND = {
+			ROOT = { original_tag = FIN }
+			NOT = { FROM = { original_tag = FIN } } #Not civil wars
+			NOT = { FROM = { original_tag = KAR } } #Not if already Finnish
+		}
+		AND = {
+			ROOT = { original_tag = KAR }
+			NOT = { FROM = { original_tag = KAR } } #Not civil wars
+			NOT = { FROM = { original_tag = FIN } } #Not if already Finnish
+		}
+		AND = {
+			FROM = { original_tag = FIN }
+			NOT = { ROOT = { original_tag = FIN } } #Not civil wars
+			NOT = { ROOT = { original_tag = KAR } } #Not already Finnish
+		}
+		AND = {
+			FROM = { original_tag = KAR }
+			NOT = { ROOT = { original_tag = KAR } } #Not civil wars
+			NOT = { ROOT = { original_tag = FIN } } #Not already Finnish
+		}
+	}
+	OR = {
+		FROM.FROM = { state = 216 } # OLONETS (Petrozavodsk / Äänislinna)
+		FROM.FROM = { state = 213 } # MURMANSK / KUOLAN NIEMIMAA // (Murmansk / Muurmanski) (Kandalaksha / Kantalahti)
+	}
+}
+
+#Used inside a country TAG - FIN is assumed to be ROOT
+FIN_can_purchase_equipment_from_country = {
+	exists = yes
+	has_capitulated = no
+	NOT = { has_war_with = ROOT }
+	ROOT = {
+		OR = {
+			is_in_faction_with = PREV #Ally
+			AND = { #Neutral - acceptable ideology difference
+				is_in_faction = no
+				PREV = {
+					OR = {
+						is_in_faction = no
+						all_allied_country = {
+							NOT = { has_war_with = ROOT }
+						}
+					}
+				}
+				OR = {
+					has_government = PREV
+					AND = {
+						has_government = neutrality
+						PREV = {
+							NOT = { has_government = communism }
+						}
+					}
+					AND = {
+						has_government = democratic
+						PREV = {
+							has_government = neutrality
+						}
+					}
+				}
+			}
+			AND = { #In another ideologically friendly faction - no conflict between factions
+				is_in_faction = yes
+				OR = {
+					has_government = PREV
+				}
+				all_allied_country = {
+					NOT = { has_war_with = PREV }
+				}
+			}
+		}
+	}
+}
+
+
+###################################
+### DEMAND TERRITORIES TRIGGERS ###
+###################################
+
+#Valid Finnish puppet or independent ally - ROOT is FIN // THIS is target country
+FIN_is_valid_root_puppet_or_independent_ally = {
+	exists = yes
+	has_civil_war = no
+	OR = {
+		is_subject_of = ROOT
+		AND = {
+			is_subject = no
+			is_in_faction_with = ROOT
+		}
+	}
+}
+
+#Ally's puppet and AI - ROOT is FIN // THIS is target country
+FIN_is_valid_allied_puppet_ai = {
+	exists = yes
+	has_civil_war = no
+	is_subject = yes
+	NOT = { is_subject_of = ROOT }
+	overlord = {
+		is_in_faction_with = ROOT
+	}
+	is_ai = yes
+}
+
+#Neutral or enemy country - ROOT is FIN // THIS is target country
+FIN_is_valid_neutral_or_enemy = {
+	exists = yes
+	NOT = { is_in_faction_with = ROOT }
+	OR = {
+		is_subject = no
+		AND = {
+			is_subject = yes
+			overlord = {
+				NOT = { is_in_faction_with = ROOT }
+			}
+		}
+	}
+}
+
+#Someone else controls target country's states - ROOT is FIN // PREV.PREV is target country // PREV is core state of target country
+FIN_is_valid_occupier_country = {
+	controller = {
+		NOT = { original_tag = PREV.PREV }
+		NOT = { is_in_faction_with = ROOT }
+	}
+}
+
+
+
+   ###    ####    ########  ##          ###    ##    ##  ######  
+  ## ##    ##     ##     ## ##         ## ##   ###   ## ##    ## 
+ ##   ##   ##     ##     ## ##        ##   ##  ####  ## ##       
+##     ##  ##     ########  ##       ##     ## ## ## ##  ######  
+#########  ##     ##        ##       ######### ##  ####       ## 
+##     ##  ##     ##        ##       ##     ## ##   ### ##    ## 
+##     ## ####    ##        ######## ##     ## ##    ##  ######  
+
+
+
+FIN_is_historical_ai = {
+	OR = {
+		AND = {
+			is_historical_focus_on = yes
+			has_game_rule = {
+				rule = FIN_ai_behavior
+				option = DEFAULT
+			}
+		}
+		has_country_flag = FIN_AI_RANDOM_HISTORICAL
+		has_game_rule = {
+			rule = FIN_ai_behavior
+			option = NON_ALIGNED_HISTORICAL
+		}
+	}
+}
+
+FIN_is_fascist_ai = {
+	OR = {
+		has_country_flag = FIN_AI_RANDOM_FASCIST_PLAN
+		has_game_rule = {
+			rule = FIN_ai_behavior
+			option = FASCIST
+		}
+	}
+}
+
+FIN_is_communist_ai = {
+	OR = {
+		has_country_flag = FIN_AI_RANDOM_COMMUNIST_PLAN
+		has_game_rule = {
+			rule = FIN_ai_behavior
+			option = COMMUNIST
+		}
+	}
+}
+
+FIN_is_democratic_ai = {
+	OR = {
+		has_country_flag = FIN_AI_RANDOM_DEMOCRATIC_PLAN
+		has_game_rule = {
+			rule = FIN_ai_behavior
+			option = DEMOCRATIC
+		}
+	}
+}
