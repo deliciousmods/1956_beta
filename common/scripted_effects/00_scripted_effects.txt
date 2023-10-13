@@ -5398,3 +5398,239 @@ remove_any_country_role_from_character = { #Expected to be used inside the chara
 		remove_advisor_role = { slot = political_advisor }
 	}
 }
+
+###########################################################################################
+###########################################################################################
+###########################################################################################
+
+							########    ###       ###    ######## 
+							   ##      ## ##     ## ##      ##    
+							   ##     ##   ##   ##   ##     ##    
+							   ##    ##     ## ##     ##    ##    
+							   ##    ######### #########    ##    
+							   ##    ##     ## ##     ##    ##    
+							   ##    ##     ## ##     ##    ##    
+
+###########################################################################################
+###########################################################################################
+###########################################################################################
+
+find_global_platonic_countries = { # Look for the countries that meet the best criteria for the different platonic countries we expect in HoI 
+	find_biggest_fascist = yes
+	find_biggest_democrat = yes
+	find_biggest_communist = yes
+	find_biggest_non_aligned = yes
+	find_biggest_fascist_bully = yes
+	find_best_democratic_ally_leader = yes
+	find_democratic_sleeping_giant = yes
+	find_local_dangerous_fascist = yes 
+}
+
+
+find_biggest_fascist_bully = { # Finds the biggest and/or meanest fascist country 
+	get_highest_scored_country = {
+		var = GLOBAL.platonic_fascist_bully
+		scorer = fascist_bully_scorer
+	}
+}
+
+find_best_democratic_ally_leader = { # Finds the most suitable democratic country to lead a faction
+	get_highest_scored_country = {
+		var = GLOBAL.platonic_democratic_ally_leader
+		scorer = democratic_faction_leader_scorer
+	}
+}
+
+find_democratic_sleeping_giant = { # Finds biggest desarmed democratic nation. Expected to be USA 
+	get_highest_scored_country = {
+		var = GLOBAL.platonic_democratic_sleeping_giant
+		scorer = democratic_sleeping_giant_scorer
+	}
+}
+
+find_biggest_fascist = { # Finds Nazi Germany, or the closest to it 
+	get_highest_scored_country = {
+		var = GLOBAL.platonic_big_fascist
+		scorer = fascist_major_scorer
+	}
+}
+
+find_biggest_democrat = { # Finds biggest Democratic Nation
+	get_highest_scored_country = {
+		var = GLOBAL.platonic_big_democratic
+		scorer = democratic_major_scorer
+	}
+}
+
+find_biggest_communist = { # Finds biggest Communist
+	get_highest_scored_country = {
+		var = GLOBAL.platonic_big_communist
+		scorer = communist_major_scorer
+	}
+}
+
+find_biggest_non_aligned = { # Finds biggest... anything else
+	get_highest_scored_country = {
+		var = GLOBAL.platonic_big_non_aligned
+		scorer = non_aligned_major_scorer
+	}
+}
+# There are ideology scorers for each continent. If you need more check the generic_platonic_scorers file and make a new scripted effect 
+
+find_local_dangerous_fascist = {
+	get_highest_scored_country = {
+		var = platonic_local_dangerous_fascist
+		scorer = local_fascist_country
+	}
+}
+
+
+# The idea is that you can use these effects to store the party popularities (and, if desired, the ruling party) when puppeting or possibly when starting civil wars, and then use the "restore" effects to reset it after the puppeting has happened, so that you don't have to use the overlord's ideology if you don't want to. 
+get_current_ideology_popularities = {
+	set_variable = { ROOT.communist_support_before_change = ROOT.party_popularity_100@communism }
+	set_variable = { ROOT.democratic_support_before_change = ROOT.party_popularity_100@democratic }
+	set_variable = { ROOT.fascist_support_before_change = ROOT.party_popularity_100@fascism }
+	set_variable = { ROOT.neutrality_support_before_change = ROOT.party_popularity_100@neutrality }
+}
+get_current_ruling_party = {
+	set_variable = { ROOT.ruling_ideology_before_change = ROOT.current_party_ideology_group }
+}
+restore_ideology_popularities = {
+	hidden_effect = {
+		# Reset popluarities to what they were before puppeting 
+		set_popularities = {
+			communism = ROOT.communist_support_before_change
+			democratic = ROOT.democratic_support_before_change
+			fascism = ROOT.fascist_support_before_change
+			neutrality = ROOT.neutrality_support_before_change
+		}
+		clear_variable = ROOT.communist_support_before_change
+		clear_variable = ROOT.democratic_support_before_change
+		clear_variable = ROOT.fascist_support_before_change
+		clear_variable = ROOT.neutrality_support_before_change
+	}
+}
+restore_ruling_party = {
+	ROOT = {
+		set_politics = {
+			ruling_party = var:ROOT.ruling_ideology_before_change
+		}
+	}
+}
+
+
+#Upgrades state cat to the next valid level. Called from state scope
+
+###kaas - Although this can be substituted with a pre-existing Road to 56 one, the effect tooltips would be good to port
+
+increase_state_category = {
+	if = {
+		limit = {
+			has_state_category = tiny_island
+		}
+		set_state_category = small_island
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 1
+		}
+	}
+
+	if = {
+		limit = {
+			OR = {
+				has_state_category = wasteland
+				has_state_category = enclave
+			}
+		}
+		set_state_category = pastoral
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 1
+		}
+	}
+	else_if = {
+		limit = {
+			has_state_category = pastoral
+		}
+		set_state_category = rural
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 1
+		}
+	}
+	else_if = {
+		limit = {
+			has_state_category = rural
+		}
+		set_state_category = town
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 2
+		}
+	}
+	else_if = {
+		limit = {
+			has_state_category = town
+		}
+		set_state_category = large_town
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 1
+		}
+	}
+	else_if = {
+		limit = {
+			has_state_category = large_town
+		}
+		set_state_category = city
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 1
+		}
+	}
+	else_if = {
+		limit = {
+			has_state_category = city
+		}
+		set_state_category = metropolis
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 4
+		}
+	}
+
+	else_if = {
+		limit = {
+			has_state_category = metropolis
+		} 
+		set_state_category = megalopolis
+		effect_tooltip = {
+			add_extra_state_shared_building_slots = 2
+		}
+	}
+}
+
+add_potential_special_forces_tree = {
+	custom_effect_tooltip = add_potential_special_forces_tree_tt
+	if = {
+		limit = { NOT = { has_variable = sf_trees } }
+		set_variable = { sf_trees = 2 }
+	}
+	else = {
+		add_to_variable = { sf_trees = 1 }
+	}
+}
+
+remove_potential_special_forces_tree = {
+	if = {
+		limit = { NOT = { has_variable = sf_trees } }
+		set_variable = { sf_trees = 0 }
+	}
+	else = {
+		subtract_from_variable = { sf_trees = 1 }
+	}
+}
+
+store_core_states_on_game_start = { #Should be called from history file
+	every_core_state = {
+		ROOT = {
+			add_to_array = {
+				array = core_states_at_game_start
+				value = PREV
+			}
+		}
+	}
+}
