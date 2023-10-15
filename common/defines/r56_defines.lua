@@ -412,75 +412,76 @@
 	
 	NDefines.NAI.WANTED_UNITS_MANPOWER_DIVISOR = 22000
 	
-	NDefines.NAI.DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
-		--Army Values
-		0.5, -- default_morale
-		1.0, -- defense
-		1.0, -- breakthrough
-		1.0, -- hardness
-		1.3, -- soft_attack #was 1.2 should build better divs.
-		0.01, -- hard_attack #was 0. Experiment so AI base vaules anti-tank and tanks more - SpicyAlfrdo
-		0.0, -- recon
-		0.0, -- entrenchment
-		0.0, -- initiative
-		0.0, -- casualty_trickleback 
-		-1.0, -- supply_consumption_factor
-		-0.25, -- supply_consumption
-		0.0, -- suppression
-		0.0, -- suppression_factor
-		0.0, -- experience_loss_factor
-		0.0, -- equipment_capture_factor
-		0.0, -- fuel_capacity
-		--Navy Values
-		0.0, -- surface_detection
-		0.01, -- sub_detection Experimental nudge for the ai to not build DD's that let Subs massacre them - SpicyAlfrdo
-		0.0, -- surface_visibility
-		0.0, -- sub_visibility
-		0.0, -- lg attack
-		0.0, -- lg piercing
-		0.0, -- hg attack
-		0.0, -- hg piercing
-		0.0, -- torpedo
-		0.0, -- sub attack
-		0.0, -- anti air attack
-		0.0, -- amphibious_defense
-		0.0, -- naval_speed
-		0.0, -- range
-		0.0, -- mine plant
-		0.0, -- mine sweep
-		0.0, -- raiding coordination
-		0.0, -- patrol coordination
-		0.0, -- search and destroy coordination
-		--Air Values
-		0.0, -- air_range
-		0.0, -- air_defence
-		0.0, -- air_attack
-		0.0, -- air_agility
-		0.0, -- air_bombing
-		0.01, -- air_superiority #ai nudge for the most important air stat bar none - Spicyalfredo
-		0.0, -- naval_strike_attack
-		0.0, -- naval_strike_targetting
-		0.0, -- air_ground_attack
-		0.0, -- air_visibility_factor
-		--Common Values
-		1.0, -- max_organisation
-		1.0, -- max_strength
-		1.0, -- maximum_speed
-		1.0, -- armor_value
-		0.5, -- ap_attack
-		0.0, -- reliability
-		0.0, -- reliability_factor
-		-0.25, -- weight
-		0.0, -- fuel_consumption
-		0.0, -- fuel_consumption_factor
-		--Special Values
-		0.0, -- strategic_attack
-		0.0, -- carrier_size
-		0.0, -- acclimatization hot gain
-		0.0, -- acclimatization cold gain
-		0.0, -- night_penalty
-		-0.5, -- build_cost_ic
-	}
+	-- seems to not be based on the right number of entries even before AAT
+	-- NDefines.NAI.DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
+	-- 	--Army Values
+	-- 	0.5, -- default_morale
+	-- 	1.0, -- defense
+	-- 	1.0, -- breakthrough
+	-- 	1.0, -- hardness
+	-- 	1.3, -- soft_attack #was 1.2 should build better divs.
+	-- 	0.01, -- hard_attack #was 0. Experiment so AI base vaules anti-tank and tanks more - SpicyAlfrdo
+	-- 	0.0, -- recon
+	-- 	0.0, -- entrenchment
+	-- 	0.0, -- initiative
+	-- 	0.0, -- casualty_trickleback 
+	-- 	-1.0, -- supply_consumption_factor
+	-- 	-0.25, -- supply_consumption
+	-- 	0.0, -- suppression
+	-- 	0.0, -- suppression_factor
+	-- 	0.0, -- experience_loss_factor
+	-- 	0.0, -- equipment_capture_factor
+	-- 	0.0, -- fuel_capacity
+	-- 	--Navy Values
+	-- 	0.0, -- surface_detection
+	-- 	0.01, -- sub_detection Experimental nudge for the ai to not build DD's that let Subs massacre them - SpicyAlfrdo
+	-- 	0.0, -- surface_visibility
+	-- 	0.0, -- sub_visibility
+	-- 	0.0, -- lg attack
+	-- 	0.0, -- lg piercing
+	-- 	0.0, -- hg attack
+	-- 	0.0, -- hg piercing
+	-- 	0.0, -- torpedo
+	-- 	0.0, -- sub attack
+	-- 	0.0, -- anti air attack
+	-- 	0.0, -- amphibious_defense
+	-- 	0.0, -- naval_speed
+	-- 	0.0, -- range
+	-- 	0.0, -- mine plant
+	-- 	0.0, -- mine sweep
+	-- 	0.0, -- raiding coordination
+	-- 	0.0, -- patrol coordination
+	-- 	0.0, -- search and destroy coordination
+	-- 	--Air Values
+	-- 	0.0, -- air_range
+	-- 	0.0, -- air_defence
+	-- 	0.0, -- air_attack
+	-- 	0.0, -- air_agility
+	-- 	0.0, -- air_bombing
+	-- 	0.01, -- air_superiority #ai nudge for the most important air stat bar none - Spicyalfredo
+	-- 	0.0, -- naval_strike_attack
+	-- 	0.0, -- naval_strike_targetting
+	-- 	0.0, -- air_ground_attack
+	-- 	0.0, -- air_visibility_factor
+	-- 	--Common Values
+	-- 	1.0, -- max_organisation
+	-- 	1.0, -- max_strength
+	-- 	1.0, -- maximum_speed
+	-- 	1.0, -- armor_value
+	-- 	0.5, -- ap_attack
+	-- 	0.0, -- reliability
+	-- 	0.0, -- reliability_factor
+	-- 	-0.25, -- weight
+	-- 	0.0, -- fuel_consumption
+	-- 	0.0, -- fuel_consumption_factor
+	-- 	--Special Values
+	-- 	0.0, -- strategic_attack
+	-- 	0.0, -- carrier_size
+	-- 	0.0, -- acclimatization hot gain
+	-- 	0.0, -- acclimatization cold gain
+	-- 	0.0, -- night_penalty
+	-- 	-0.5, -- build_cost_ic
+	-- }
 	
 	
 	NDefines.NAI.MAX_UNITS_FACTOR_INVASION_ORDER = 1.0				-- Factor for max number of units to assign to naval invasion orders
@@ -697,9 +698,6 @@
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_HEIGHT = 8196
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_WIDTH = 41
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_HEIGHT = 24000
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_AFTER = {0, 20} -- After this amount of VP the map icon becomes bigger dot.
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {200, 500, 750} -- At what camera distance the VP name text disappears.
-	NDefines_Graphics.NGraphics.VICTORY_POINTS_DISTANCE_CUTOFF = {300, 750, 1000} -- At what distance VPs are hidden
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_COLOR_DEFAULT = { 0, 128, 0, 1.0 } -- green default railway maparrow color
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_THIN_LEVEL_THRESHOLD = 1 -- Railway level 1 uses thin map arrow in supply map mode
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_MEDIUM_LEVEL_THRESHOLD = 5 -- Railway level 2-3 uses medium map arrow in supply map mode
