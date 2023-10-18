@@ -55,7 +55,7 @@ focus_tree = {
 		icon = GFX_goal_generic_education
 		x = 1
 		y = 1
-		cost = 10
+		cost = 8
 		ai_will_do = {
 			factor = 40
 			modifier = {
@@ -182,6 +182,10 @@ focus_tree = {
 		cost = 10
 		ai_will_do = {
 			factor = 1
+		}
+
+		available = {
+			has_idea = AFG_illiteracy_2
 		}
 		
 		prerequisite = { focus = AFG_rural_schools }
@@ -613,12 +617,14 @@ focus_tree = {
 		
 		prerequisite = { focus = AFG_rural_development focus = AFG_railroad_development }
 		
-		mutually_exclusive = { focus = AFG_ban_opium }
+		mutually_exclusive = { focus = AFG_bolster_opium }
 		
 		relative_position_id = AFG_rural_development
 		
 		completion_reward = {
-			add_ideas = AFG_banned_opium
+			add_dynamic_modifier = {
+				modifier = AFG_banned_opium_modifier
+			}
 			unlock_decision_category_tooltip = AFG_opium_crackdown
 		}
 		search_filters = { FOCUS_FILTER_STABILITY }
@@ -794,7 +800,7 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 	focus = {
-		id = AFG_free_trade
+		id = AFG_free_trade_focus
 		icon = GFX_goal_generic_positive_trade_relations_gold
 		x = -1
 		y = 1
@@ -903,9 +909,9 @@ focus_tree = {
 		}
 		
 		prerequisite = { focus = AFG_khyber_arms }
-		prerequisite = { focus = AFG_free_trade }
+		prerequisite = { focus = AFG_free_trade_focus }
 		
-		relative_position_id = AFG_free_trade
+		relative_position_id = AFG_free_trade_focus
 		
 		completion_reward = {
 			random_owned_controlled_state = {
@@ -2755,10 +2761,8 @@ focus_tree = {
 					amount = 80
 					producer = ENG
 				}
-				else = {
-					custom_effect_tooltip = available_materiel_manufacturer
-					show_ideas_tooltip = AFG_rsaf
-				}
+				custom_effect_tooltip = available_materiel_manufacturer
+				show_ideas_tooltip = AFG_rsaf
 				add_tech_bonus = {
 					name = POL_light_bomber_focus
 					bonus = 1
@@ -3605,18 +3609,20 @@ focus_tree = {
 
 		available = {
 			has_government = neutrality
-			OR = {
+			is_subject = no
+			any_country = {
 				NOT = {
-					is_in_faction_with = RAJ
-					is_in_faction_with = PAK
+					has_war_with = AFG
+					is_in_faction_with = AFG
+					is_subject_of = AFG
 				}
-			}
-			NOT = {
-				RAJ = {
-					is_subject_of = ROOT
-				}
-				PAK = {
-					is_subject_of = ROOT
+				AND = {
+					owns_state = 442
+					controls_state = 442
+					owns_state = 444
+					controls_state = 444
+					owns_state = 445
+					controls_state = 445
 				}
 			}
 		}
@@ -4616,6 +4622,16 @@ focus_tree = {
 				last_election = "1936.12.14"
 				election_frequency = 48
 			}
+			custom_effect_tooltip = MPL_newline
+			add_country_leader_role = {
+				character = AFG_mohammed_zahir_shah
+				promote_leader = yes
+				country_leader = {
+					ideology = constitutional_monarchy
+					expire = "1965.1.1.1"
+					traits = { AFG_mohammed_zahir_shah_of_afghanistan }
+				}
+			}
 			add_ideas = AFG_constitutional_monarchy_idea
 		}
 		search_filters = { FOCUS_FILTER_STABILITY }
@@ -5122,7 +5138,17 @@ focus_tree = {
 		cost = 5
 
 		available = {
-
+			is_subject = no
+			any_country = {
+				NOT = {
+					has_war_with = AFG
+					is_in_faction_with = AFG
+					is_subject_of = AFG
+				}
+				AND = {
+					owns_state = 442
+				}
+			}
 		}
 
 		prerequisite = {
@@ -5136,22 +5162,22 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			random_owned_controlled_state = {
+			every_other_country = {
 				limit = {
-					free_building_slots = {
-						building = industrial_complex
-						size > 0
-						include_locked = yes
+					NOT = {
+						has_war_with = AFG
+						is_in_faction_with = AFG
+						is_subject_of = AFG
+					}
+					AND = {
+						owns_state = 442
+						controls_state = 442
 					}
 				}
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = industrial_complex
-					level = 1
-					instant_build = yes
-				}
+				country_event = { id = afghanistan.64 hours = 6 }
+				custom_effect_tooltip = if_they_accept_tt
+				unlock_decision_category_tooltip = AFG_north_frontier_province
 			}
-			add_ideas = AFG_banks_nationalized
 		}
 		search_filters = { FOCUS_FILTER_STABILITY }
 	}
@@ -5991,9 +6017,29 @@ focus_tree = {
 		cost = 8
 
 		available = {
+			has_war = no
+			is_in_faction = no
+			is_subject = no
 			threat > 0.80
-			date > 1941.1.1
 			has_idea = neutrality_idea
+			any_other_country = {
+				has_war = no
+				is_in_faction = no
+				is_subject = no
+				OR = {
+                    has_government = neutrality
+                    has_government = democratic
+                }
+                capital_scope = {
+                    NOT = {
+                        is_on_continent = europe
+                    }
+                }
+                NOT = {
+                    has_added_tension_amount > 3
+					original_tag = USA
+                }
+            }
 		}
 
 		prerequisite = {
@@ -6007,20 +6053,41 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			create_faction = "Non-Aligned Movement"
-			every_other_country = {
+			if = {
 				limit = {
-					is_subject = no
-					has_war = no
-					NOT = { 
-						is_in_faction_with = ROOT
+					EGY = {
+						has_completed_focus = EGY_the_non_alligned_movement
+						is_in_faction = yes
+						is_faction_leader = yes
 					}
-					is_major = no
-					has_government = neutrality
-					is_in_faction = no
-					has_capitulated = no
 				}
-				country_event = { id = generic.5 hours = 6 }
+				EGY = { 
+					add_to_faction = AFG 
+				}
+			}
+			else = {
+				create_faction = the_non_alligned_movement
+				every_other_country = {
+					limit = {
+						has_war = no
+						is_subject = no
+						is_in_faction = no
+						OR = {
+							has_government = neutrality
+							has_government = democratic
+						}
+						capital_scope = {
+							NOT = {
+								is_on_continent = europe 
+							}
+						}
+						NOT = {
+							has_added_tension_amount > 3
+							original_tag = USA
+						}
+					}
+					country_event = { id = generic.5 }
+				}
 			}
 		}
 		search_filters = { FOCUS_FILTER_STABILITY }
@@ -8623,60 +8690,6 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_MILITARY_EQUIPMENT }
 	}
 	focus = {
-		id = AFG_tunganistan
-		icon = GFX_goal_generic_attack_sinkiang
-		x = -1
-		y = 1
-
-		cost = 5
-
-		available = {
-			any_country = {
-				NOT = {
-					is_in_faction_with = ROOT
-					is_subject_of = ROOT
-				}
-				owns_state = 619
-			}
-			is_subject = no
-		}
-
-		bypass = {
-			is_in_faction_with = ROOT
-			ROOT = {
-				OR = {
-					exists = no
-					is_subject_of = AFG
-				}
-			}
-		}
-
-		prerequisite = { focus = AFG_mirzali_as_emir }
-
-		relative_position_id = AFG_mirzali_as_emir
-
-        completion_reward = {
-			every_other_country = {
-				limit = {
-					OR = {
-						owns_state = 619
-						controls_state = 619
-					}
-					has_capitulated = no
-					exists = yes
-				}
-				AFG = {
-					create_wargoal = {
-						type = take_state_focus
-						target = PREV
-						expire = 0
-					}
-				}
-			}
-		}
-		search_filters = { FOCUS_FILTER_ANNEXATION }
-	}
-	focus = {
 		id = AFG_ministry_for_propogation_of_virtue #believe it or not it wasnt actually introduced by the taliban that nor was the islamic emirate model, they were first adopted by the saqqawists in 1933
 		icon = GFX_goal_AFG_ministry_of_propagation
 		x = -3
@@ -9032,6 +9045,7 @@ focus_tree = {
 		
 
 		completion_reward = {
+			create_faction = "Ittihad e-Islami"
 			add_ideas = AFG_peace_through_islam_idea
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_STABILITY }
@@ -9063,6 +9077,60 @@ focus_tree = {
 			add_ideas = AFG_global_islamic_revolution_idea
 		}
 		search_filters = { FOCUS_FILTER_WAR_SUPPORT }
+	}
+	focus = {
+		id = AFG_tunganistan
+		icon = GFX_goal_generic_attack_sinkiang
+		x = 1
+		y = 1
+
+		cost = 5
+
+		available = {
+			any_country = {
+				NOT = {
+					is_in_faction_with = ROOT
+					is_subject_of = ROOT
+				}
+				owns_state = 619
+			}
+			is_subject = no
+		}
+
+		bypass = {
+			is_in_faction_with = ROOT
+			ROOT = {
+				OR = {
+					exists = no
+					is_subject_of = AFG
+				}
+			}
+		}
+
+		prerequisite = { focus = AFG_global_islamic_revolution }
+
+		relative_position_id = AFG_global_islamic_revolution
+
+        completion_reward = {
+			every_other_country = {
+				limit = {
+					OR = {
+						owns_state = 619
+						controls_state = 619
+					}
+					has_capitulated = no
+					exists = yes
+				}
+				AFG = {
+					create_wargoal = {
+						type = take_state_focus
+						target = PREV
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 	focus = {
 		id = AFG_approach_pakistani_resistance
@@ -9227,7 +9295,7 @@ focus_tree = {
 	focus = {
 		id = AFG_enforce_the_pashtunwali
 		icon = GFX_goal_AFG_enforce_the_pashtunwali
-		x = 1
+		x = -1
 		y = 1
 
 		cost = 8
@@ -9237,10 +9305,10 @@ focus_tree = {
 		}
 
 		prerequisite = {
-			focus = AFG_global_islamic_revolution
+			focus = AFG_mirzali_as_emir
 		}
 
-		relative_position_id = AFG_global_islamic_revolution
+		relative_position_id = AFG_mirzali_as_emir
 
 		ai_will_do = {
 			factor = 50
@@ -9326,10 +9394,10 @@ focus_tree = {
 			focus = AFG_end_the_revolution
 		}
 		prerequisite = {
-			focus = AFG_enforce_the_pashtunwali
+			focus = AFG_tunganistan
 		}
 
-		relative_position_id = AFG_enforce_the_pashtunwali
+		relative_position_id = AFG_tunganistan
 
 		ai_will_do = {
 			factor = 50
@@ -9371,6 +9439,35 @@ focus_tree = {
 
 		completion_reward = {
 			add_ideas = AFG_pillars_of_islam_idea
+		}
+		search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_STABILITY FOCUS_FILTER_WAR_SUPPORT }
+	}
+	focus = {
+		id = AFG_bury_the_hatchet
+		icon = GFX_goal_AFG_bury_the_hatchet
+		x = -1
+		y = 1
+
+		cost = 5
+
+		available = {
+			has_government = fascism
+		}
+
+		prerequisite = {
+			focus = AFG_pillars_of_islam
+		}
+
+		relative_position_id = AFG_pillars_of_islam
+
+		ai_will_do = {
+			factor = 50
+		}
+
+		completion_reward = {
+			PER = {
+				country_event = generic.5
+			}
 		}
 		search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_STABILITY FOCUS_FILTER_WAR_SUPPORT }
 	}
