@@ -1415,12 +1415,21 @@ country_event = {
 		}
 	}
 
-	option = {	#Polish-Soviet war alternate scenario:, state CONTROL is tranferred
+	option = {	#Polish-Soviet war alternate scenario: original MR pact followed, Germany to receive Lithuania but the Soviets more Poland, state CONTROL is tranferred
 		name = germany.14.d
 		trigger = {
 			has_global_flag = SOV_complied_MR
 			SOU = {
 				has_war_with = POL
+			}
+			NOT = {	#if Lithuania can not be in Germany's zone, dont do this MR
+				LIT = {
+					OR = {
+						exists = no
+						is_in_faction_with = SOV
+						is_subject_of = SOV
+					}
+				}
 			}
 		}
 		ai_chance = {
@@ -1483,9 +1492,6 @@ country_event = {
 		create_wargoal = {
 			type = annex_everything
 			target = LIT
-		}
-		hidden_effect = {
-			set_global_flag = GER_used_original_MR
 		}
 	}
 
@@ -14498,7 +14504,7 @@ country_event = { #Germany proposes invading communist Yugoslavia with Italy
 country_event = { #Germany proposes to aid Britain in exchange for some colonies
 	id = r56.ger.29
 	title = r56.ger.29.t
-	desc = r56.ger.29.desc
+	desc = r56.ger.29.d
 	picture = GFX_report_event_generic_sign_treaty2
 
 	fire_only_once = yes
@@ -14572,110 +14578,106 @@ country_event = { #Germany proposes to aid Britain in exchange for some colonies
 	}
 }
 
-country_event = { #Germany proposes economic integration
-	id = r56.ger.34
-	title = r56.ger.34.t
-	desc = r56.ger.34.desc
+country_event = { #Contact Ludendorff
+	id = r56.ger.30
+	title = r56.ger.30.t
+	desc = r56.ger.30.d
+	picture = GFX_report_event_GER_ludendorff_gathering
 
-	is_triggered_only = yes
-
-	option = {	#yippie!
-		name = r56.ger.34.a
-		ai_chance = {
-			factor = 1
-		}
-		FROM = {
-			country_event = r56.ger.35
-		}
-		effect_tooltip = {
-			FROM = {
-				set_autonomy = {
-					target = ROOT
-					autonomy_state = autonomy_dominion
-					end_wars = no
-					end_civil_wars = no
-				}
-			}
-		}
-		# modifier = { #we can handle this
-		# 	add = 10
-		# 	NOT = {
-		# 		any_country = {
-		# 			has_war_with = ROOT
-		# 			is_major = no
-		# 		}
-		# 	}
-		# }
-	}
-	option = {	#no!
-		name = r56.ger.34.b
-		ai_chance = {
-			factor = 1
-		}
-		FROM = {
-			country_event = r56.ger.36
-		}
-		# modifier = { #we can handle this
-		# 	add = 10
-		# 	NOT = {
-		# 		any_country = {
-		# 			has_war_with = ROOT
-		# 			is_major = no
-		# 		}
-		# 	}
-		# }
-	}
-}
-
-country_event = { #Integration accepted
-	id = r56.ger.35
-	title = r56.ger.35.t
-	desc = r56.ger.35.desc
-	
-	is_triggered_only = yes
-
-	option = {
-		name = r56.ger.35.a
-		set_autonomy = {
-			target = FROM
-			autonomy_state = autonomy_dominion
-			end_wars = no
-			end_civil_wars = no
-		}
-	}
-}
-
-country_event = { #Integration refused
-	id = r56.ger.36
-	title = r56.ger.36.t
-	desc = r56.ger.36.desc
+	fire_only_once = yes
 
 	is_triggered_only = yes
 
 	option = {
-		name = r56.ger.35.a
-		#nothing
-	}
-	option = {	#embargo
-		name = r56.ger.36.b
-		send_embargo = FROM
-	}
-	option = {	#war/overthrow
-		name = r56.ger.36.c
-		send_embargo = FROM
-		if = {	#undemocratic behaviour - ofc actually acting upon this will give more tension
-			limit = {
-				has_government = democratic
-			}
-			add_threat = 0.3
-		}
-		hidden_effect = {
-			FROM = {
-				set_country_flag = GER_target_for_hostile_trade_influence
-			}
-		}
+		name = r56.ger.30.a
+		add_stability = 0.05
+		custom_effect_tooltip = GER_ludendorff_will_join
 	}
 }
+
+country_event = { #Ludendorff's health worsens
+	id = r56.ger.31
+	title = r56.ger.31.t
+	desc = r56.ger.31.d
+	picture = GFX_report_event_GER_ludendorff_gathering
+
+	trigger = {
+		date > 1937.3.1
+		has_completed_focus = GER_contact_ludendorff
+	}
+
+	mean_time_to_happen = {
+		days = 90
+	}
+
+	fire_only_once = yes
+
+	option = { # Give him all the healthcare he needs - he lives longer
+		name = r56.ger.31.a
+		GER_erich_ludendorff = {
+			remove_unit_leader = yes
+		}
+	}
+	option = { # Give him all the healthcare he needs - he lives longer
+		name = r56.ger.31.b
+		GER_erich_ludendorff = {
+			add_unit_leader_trait = sick
+		}
+		add_ideas = GER_medical_costs
+	}
+}
+
+country_event = { #Ludendorff dies (field marshal) 
+	id = r56.ger.32
+	title = r56.ger.32.t
+	desc = r56.ger.32.d
+	picture = GFX_report_event_europe_funeral
+
+	trigger = {
+		date > 1938.7.1 # Let's just say he gets some good healthcare and lives another 8 months or so
+		has_completed_focus = GER_contact_ludendorff
+		has_idea = GER_medical_costs
+	}
+
+	mean_time_to_happen = {
+		days = 90
+	}
+
+	fire_only_once = yes
+
+	option = { # Oh dear
+		name = r56.ger.32.a
+		retire_character = GER_erich_ludendorff
+		remove_ideas = GER_medical_costs
+	}
+}
+
+country_event = { #Ludendorff dies (retired) 
+	id = r56.ger.33
+	title = r56.ger.33.t
+	desc = r56.ger.33.d
+	picture = GFX_report_event_europe_funeral
+
+	trigger = {
+		date > 1937.10.1 # Died 1937.12.20
+		has_completed_focus = GER_contact_ludendorff
+		NOT = {
+			has_idea = GER_medical_costs
+		}
+	}
+
+	mean_time_to_happen = {
+		days = 70
+	}
+
+	fire_only_once = yes
+
+	option = { # Oh dear
+		name = r56.ger.33.a
+		retire_character = GER_erich_ludendorff
+	}
+}
+
 
 add_namespace = ger.civil_war
 
