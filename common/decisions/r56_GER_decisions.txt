@@ -385,42 +385,51 @@ GER_trade_influence_decisions = {
 		#Poland: weak economy and limited trade
 		#Latvia: Food exporter and self-sustainable
 		available = {
-			FROM = {
-				ic_ratio = {
-					tag = ROOT
-					ratio < 0.3
-				}
-				OR = {
-					AND = {	#hostile takeover - put indicators here of very heavy reliance/exerted pressure even if not too friendly
-						ic_ratio = {
-							tag = ROOT
-							ratio < 0.2
-						}
-						NOT = {
-							is_in_faction = yes
-							has_war = yes
-						}
-						if = {
-							limit = {
-								original_tag = LIT
-							}
+			OR = {
+				FROM = {	#this double FROM seperates puppeting of Allies and puppeting of others
+					ic_ratio = {
+						tag = ROOT
+						ratio < 0.3
+					}
+					is_in_faction_with = ROOT
+					NOT = {	#if someone is conquering your faction member you dont get to puppet them without joining that war (pretty sure thatd cancel it)
+						any_enemy_country = {
 							NOT = {
-								owns_state = 188
-							}
-							OR = {
-								NOT = {
-									has_completed_focus = GER_mol_rib_pact #just to make clear what this below is about
-								}
-								NOT = {
-									has_global_flag = sov_yes_pact
-								}
-								has_global_flag = GER_used_original_MR
+								has_war_with = ROOT
 							}
 						}
 					}
-					#friendly takeover - put indicators of being an ally here
-					#has_government = ROOT
-					is_in_faction_with = ROOT
+				}
+				FROM = {
+					ic_ratio = {
+						tag = ROOT
+						ratio < 0.2
+					}
+					OR = {
+						AND = {	#hostile takeover - put indicators here of very heavy reliance/exerted pressure even if not too friendly
+							NOT = {
+								is_in_faction = yes
+								has_war = yes
+							}
+							if = {
+								limit = {
+									original_tag = LIT
+								}
+								NOT = {
+									owns_state = 188
+								}
+								OR = {
+									NOT = {
+										has_completed_focus = GER_mol_rib_pact #just to make clear what this below is about
+									}
+									NOT = {
+										has_global_flag = sov_yes_pact
+									}
+									has_global_flag = GER_used_original_MR
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -446,6 +455,74 @@ GER_trade_influence_decisions = {
 		complete_effect = {
 			FROM = {
 				country_event = r56.ger.34
+			}
+		}
+	}
+
+	GER_coup_nation = {	#probably use to unlock spy mission for LaR users and event chain for non-LaR (or hide)
+		allowed = {
+			original_tag = GER
+		}
+		fire_only_once = yes #once per country
+		targets = { LIT AUS HUN YUG ITA }
+		available = {
+			FROM = {
+				has_country_flag = GER_target_for_hostile_trade_influence
+				OR = {	#ideologies suitable for influential business overthrow
+					neutrality > 0.3
+					fascism > 0.3
+				}
+			}
+		}
+		visible = {
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				has_country_flag = GER_target_for_hostile_trade_influence
+				NOT = {	#country can take decently small penalty to avoid government influence
+					has_country_flag = GER_country_cut_all_ties
+				}
+			}
+		}
+		cost = 25
+		complete_effect = {
+			FROM = {
+				country_event = r56.ger.34
+			}
+		}
+	}
+
+	GER_protect_interests_nation = {	#probably use to unlock spy mission for LaR users and event chain for non-LaR (or hide)
+		allowed = {
+			original_tag = GER
+		}
+		fire_only_once = yes #once per country
+		targets = { LIT AUS HUN YUG ITA }
+		available = {
+			FROM = {
+				has_country_flag = GER_target_for_hostile_trade_influence
+			}
+		}
+		visible = {
+			NOT = {
+				has_wargoal_against = FROM
+				is_in_faction_with = ROOT
+				is_subject_of = ROOT
+			}
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				has_country_flag = GER_target_for_hostile_trade_influence
+			}
+		}
+		cost = 25
+		complete_effect = {
+			create_wargoal = {
+				type = puppet_wargoal_focus
+				target = FROM
+				expire = 90
 			}
 		}
 	}
