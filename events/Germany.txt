@@ -1415,12 +1415,21 @@ country_event = {
 		}
 	}
 
-	option = {	#Polish-Soviet war alternate scenario:, state CONTROL is tranferred
+	option = {	#Polish-Soviet war alternate scenario: original MR pact followed, Germany to receive Lithuania but the Soviets more Poland, state CONTROL is tranferred
 		name = germany.14.d
 		trigger = {
 			has_global_flag = SOV_complied_MR
 			SOU = {
 				has_war_with = POL
+			}
+			NOT = {	#if Lithuania can not be in Germany's zone, dont do this MR
+				LIT = {
+					OR = {
+						exists = no
+						is_in_faction_with = SOV
+						is_subject_of = SOV
+					}
+				}
 			}
 		}
 		ai_chance = {
@@ -11717,17 +11726,18 @@ country_event = { #Wilhelm III dies
 	picture = GFX_report_event_europe_funeral
 
 	fire_only_once = yes
-	trigger = {
-		OR = {
-			has_idea = GER_wilhelm_iii
-			has_country_leader = { character = GER_wilhelm_iii  }
-		}
-		
-		date > 1951.04.03
-	}
-	mean_time_to_happen = {
-		days = 42
-	}
+	#trigger = {
+	#	OR = {
+	#		has_idea = GER_wilhelm_iii
+	#		has_country_leader = { character = GER_wilhelm_iii  }
+	#	}
+	#	
+	#	date > 1951.04.03
+	#}
+	#mean_time_to_happen = {
+	#	days = 42
+	#}
+	is_triggered_only = yes # Obsolete event, replaced by another
 
 	option = { 
 		name = r56.ger.4.a
@@ -11740,19 +11750,19 @@ country_event = { #Wilhelm III dies
 					has_country_leader = { character = GER_wilhelm_iii  }
 				}
 				kill_ideology_leader = neutrality
-				add_ideas = GER_wilhelm_iv
+				#add_ideas = GER_wilhelm_iv
 			}
 
 		}
 		if = {
 			limit = {
-				has_idea = GER_wilhelm_iii
+				has_idea = GER_wilhelm_iii_idea
 			}
 			every_country = {
 				limit ={
 					has_country_leader = { character = GER_wilhelm_iii  }
 				}
-				swap_ideas = { remove_idea = GER_wilhelm_iii add_idea = GER_wilhelm_iv }
+				#swap_ideas = { remove_idea = GER_wilhelm_iii add_idea = GER_wilhelm_iv }
 			}
 			
 		}		
@@ -14605,12 +14615,28 @@ country_event = { #Ludendorff's health worsens
 
 	option = { # Give him all the healthcare he needs - he lives longer
 		name = r56.ger.31.a
+		if = {
+			limit = {
+				has_power_balance = {
+					id = GER_monarchist_power_balance
+				}
+			}
+			GER_monarchist_bop_low_decrease_effect = yes
+		}
 		GER_erich_ludendorff = {
 			remove_unit_leader = yes
 		}
 	}
 	option = { # Give him all the healthcare he needs - he lives longer
 		name = r56.ger.31.b
+		if = {
+			limit = {
+				has_power_balance = {
+					id = GER_monarchist_power_balance
+				}
+			}
+			GER_monarchist_bop_very_low_increase_effect = yes
+		}
 		GER_erich_ludendorff = {
 			add_unit_leader_trait = sick
 		}
@@ -14666,6 +14692,252 @@ country_event = { #Ludendorff dies (retired)
 	option = { # Oh dear
 		name = r56.ger.33.a
 		retire_character = GER_erich_ludendorff
+	}
+}
+
+country_event = { #Germany proposes economic integration
+	id = r56.ger.34
+	title = r56.ger.34.t
+	desc = r56.ger.34.desc
+
+	is_triggered_only = yes
+
+	option = {	#yippie!
+		name = r56.ger.34.a
+		ai_chance = {
+			factor = 1
+		}
+		FROM = {
+			country_event = r56.ger.35
+		}
+		effect_tooltip = {
+			FROM = {
+				set_autonomy = {
+					target = ROOT
+					autonomy_state = autonomy_dominion
+					end_wars = no
+					end_civil_wars = no
+				}
+			}
+		}
+	}
+	option = {	#no!
+		name = r56.ger.34.b
+		ai_chance = {
+			factor = 1
+		}
+		trigger = {	#LIT cant be couped so has to cut ties
+			NOT = {
+				original_tag = LIT
+			}
+		}
+		FROM = {
+			country_event = r56.ger.36
+		}
+	}
+	option = {	#we must purge their influence
+		name = r56.ger.34.c
+		ai_chance = {
+			factor = 1
+		}
+		FROM = {
+			country_event = r56.ger.36
+		}
+		custom_effect_tooltip = GER_cannot_influence_us_anymore_tt
+		set_country_flag = GER_country_cut_all_ties	#has no tooltip
+		#downgrade any German-inherited MIO's
+		add_timed_idea = { idea = GER_cut_german_trade_ties days = 450 }
+	}
+}
+
+country_event = { #Integration accepted
+	id = r56.ger.35
+	title = r56.ger.35.t
+	desc = r56.ger.35.desc
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56.ger.35.a
+		set_autonomy = {
+			target = FROM
+			autonomy_state = autonomy_dominion
+			end_wars = no
+			end_civil_wars = no
+		}
+	}
+}
+
+country_event = { #Integration refused
+	id = r56.ger.36
+	title = r56.ger.36.t
+	desc = r56.ger.36.desc
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56.ger.36.a
+		#nothing
+	}
+	option = {	#embargo
+		name = r56.ger.36.b
+		send_embargo = FROM
+	}
+	option = {	#war/overthrow
+		name = r56.ger.36.c
+		send_embargo = FROM
+		# if = {	#undemocratic behaviour - ofc actually acting upon this will give more tension
+		# 	limit = {
+		# 		has_government = democratic
+		# 	}
+		# 	add_threat = 0.3	#amount too small to show up, instead link to action on threats
+		# }
+		custom_effect_tooltip = GER_hostile_trade_decisions_tt
+		hidden_effect = {	#flag setting doesnt have loc anyway
+			FROM = {
+				set_country_flag = GER_target_for_hostile_trade_influence
+			}
+		}
+	}
+}
+
+country_event = { #The military seizes power from Kaiser
+	id = r56.ger.37
+	title = r56.ger.37.t
+	desc = r56.ger.37.d
+	picture = GFX_report_event_bul_military_parade_vidin
+
+	is_triggered_only = yes
+
+	option = { # A bloody outrage, that!
+		name = r56.ger.37.a
+		add_stability = -0.05
+		set_party_name = { ideology = neutrality long_name = "Oberste Heeresleitung" name = "Oberste Heeresleitung" }
+		if = {
+			limit = {
+				has_country_leader = {
+					character = GER_wilhelm_ii
+					ruling_only = yes
+				}
+			}
+			add_ideas = GER_wilhelm_ii_idea
+		}
+		else_if = {
+			limit = {
+				has_country_leader = {
+					character = GER_wilhelm_iii
+					ruling_only = yes
+				}
+			}
+			add_ideas = GER_wilhelm_iii_idea
+		}
+		else_if = {
+			limit = {
+				has_country_leader = {
+					character = GER_wilhelm_iv
+					ruling_only = yes
+				}
+			}
+			add_ideas = GER_wilhelm_iv_idea
+		}
+		GER_kurt_von_hammerstein_equord = {
+			add_country_leader_role = {
+				promote_leader = yes
+				country_leader = {
+					ideology = oligarchism
+					expire = "1965.1.1"
+					traits = { SWE_conservatist }
+				}
+			}
+		}
+	}
+}
+
+country_event = { #Kaiser takes power back
+	id = r56.ger.38
+	title = r56.ger.38.t
+	desc = r56.ger.38.d
+	picture = GFX_report_event_royal_parade
+
+	is_triggered_only = yes
+
+	option = { # Can't keep me away bud
+		name = r56.ger.38.a
+		add_stability = 0.05
+		set_party_name = { ideology = neutrality long_name = "Haus Hohenzollern" name = "Haus Hohenzollern" }
+		remove_country_leader_role = {
+			character = GER_kurt_von_hammerstein_equord
+			ideology = oligarchism
+		}
+		if = {
+			limit = {
+				has_idea = GER_wilhelm_ii_idea
+			}
+			remove_ideas = GER_wilhelm_ii_idea
+			GER_wilhelm_ii = {
+				add_country_leader_role = {
+					country_leader = {
+						expire = "1965.1.1"
+						ideology = absolute_monarchism
+						traits = {
+							anti_democrat
+							#imperial_connections
+						}
+					}
+					promote_leader = yes
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_idea = GER_wilhelm_iii_idea
+			}
+			remove_ideas = GER_wilhelm_iii_idea
+			set_power_balance_gfx = { # If not done already
+				id = GER_monarchist_power_balance
+				side = GER_wilhelm_ii_side
+				gfx = GFX_bop_GER_wilhelm_iii
+			}
+			GER_wilhelm_iii = {
+				set_character_name = { # If not done already
+					name = "Wilhelm III" 
+				}
+				add_country_leader_role = {
+					country_leader = {
+						expire = "1965.1.1"
+						ideology = absolute_monarchism
+						traits = {
+							popular_figurehead2
+						}
+					}
+					promote_leader = yes
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_idea = GER_wilhelm_iv_idea
+			}
+			remove_ideas = GER_wilhelm_iv_idea
+			set_power_balance_gfx = { # If not done already
+				id = GER_monarchist_power_balance
+				side = GER_wilhelm_ii_side
+				gfx = GFX_bop_GER_wilhelm_iv
+			}
+			GER_wilhelm_iv = {
+				add_country_leader_role = {
+					country_leader = {
+						expire = "1965.1.1"
+						ideology = absolute_monarchism
+						traits = {
+							fierce_patriot
+							nationalistic_tendencies
+						}
+					}
+					promote_leader = yes
+				}
+			}
+		}
 	}
 }
 
