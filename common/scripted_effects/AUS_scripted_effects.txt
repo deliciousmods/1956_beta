@@ -3,17 +3,6 @@ r56_bundeslaender_civil_war_outbreak = {
 		modifier = r56_bundeslaender_status
 		target = ROOT
 	}
-	set_variable = { burgenland_dyn = 10 }
-	set_variable = { kaernten_dyn = 10 }
-	set_variable = { niederoesterreich_dyn = 10 }
-	set_variable = { oberoesterreich_dyn = 10 }
-	set_variable = { salzburg_dyn = 10 }
-	set_variable = { steiermark_dyn = 10 }
-	set_variable = { steiermark_dyn_aat = 10 }
-	set_variable = { suedtirol_dyn = 10 }
-	set_variable = { tirol_dyn = 10 }
-	set_variable = { vorarlberg_dyn = 10 }
-	set_variable = { wien_dyn = 10 }
 	load_oob = AUS_heimwehr
 	r56_bundeslaender_burgenland_outbreak = yes
 	r56_bundeslaender_kaernten_outbreak = yes
@@ -24,28 +13,34 @@ r56_bundeslaender_civil_war_outbreak = {
 	r56_bundeslaender_tirol_outbreak = yes
 	r56_bundeslaender_vorarlberg_outbreak = yes
 	r56_bundeslaender_wien_outbreak = yes
-	set_variable = { r56_bundeslaender_current = 0 }
-	r56_bundeslaender_dynamic_modifier_calculation = yes
+	for_loop_effect = {
+		end = 9
+		value = temp
+		if = {
+			limit = { 
+				OR = {
+					NOT = { check_variable = { temp = 6 } }
+					owns_state = 39
+				}
+			}
+			set_variable = { r56_bundeslaender_current = temp }
+			r56_bundeslaender_dynamic_modifier_calculation = yes
+			clear_variable = r56_bundeslaender_current 
+		}
+	}
 }
-#
-# calculations for factory output
-# range -0.2 - 0.2
-# increments 8
-# increment 0.05
-# loyalty = 35
-#
-# loyalty * increments / 100 = 2.8 #increment value between 0 and 8
-# round_variable(2.8) = 3 #third increment to be used
-# 3 * increment - range / 2 = value = -0.05 #value of the third increment
-#
-
+r56_bundeslaender_amplitude_calculation = {
+	set_variable = {
+		r56_bundeslaender_amplitude = r56_bundeslaender_balance
+	}
+	multiply_variable = {
+		r56_bundeslaender_amplitude = -0.01
+	}
+}	#-0.75	#on a scale from -1 to 0; 0 meaning no negative effects; 1 meaning maximum negative effects GLOBAL
 r56_bundeslaender_dynamic_modifier_calculation = {
-	meta_effect = { # The actual meta effect. This can go anywhere you need it: in a decision, in a scripted effect, in a scripted GUI click effect, etc...
+	meta_effect = { # calculation for r56_bundeslaender_current bundesland
 		debug = yes 
 		text = {
-			set_variable = {
-				r56_bundeslaender_amplitude = -0.75	#on a scale from -1 to 0; 0 meaning no negative effects; 1 meaning maximum negative effects GLOBAL
-			}
 			if = {
 				limit = { check_variable = { r56_[BNDLND]_loyalty > 0 } }
 				add_to_variable = { r56_bundeslaender_val = 1 }	#if loyalty is positive add 1 (from -0.75 to 0.25 of a modifier)
@@ -61,8 +56,8 @@ r56_bundeslaender_dynamic_modifier_calculation = {
 			}	
 			clear_variable = r56_bundeslaender_current 
 		}
-		BNDLND = "[?r56_bundeslaender_current.r56_bundeslaender_index]" # Gets the string for the selected bundesland
-		LNDMAX = "[?r56_bundeslaender_current.r56_bundeslaender_max]"	# Gets the maximum value the modifier of the selected bundesland can be
+		BNDLND = "[r56_bundeslaender_index]" # Gets the string for the selected bundesland
+		LNDMAX = "[r56_bundeslaender_max]"	# Gets the maximum value the modifier of the selected bundesland can be
 	}
 }
 r56_bundeslaender_burgenland_outbreak = {
