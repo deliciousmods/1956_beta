@@ -62,19 +62,19 @@ CHI_improve_the_army_situation = {
 
 		custom_cost_text = chi_improve_the_nra_decision	
 		custom_cost_trigger = {
-			has_army_experience > 100
+			has_army_experience > 99
 		}
 
 		available = {
-			has_army_experience > 100
+			has_army_experience > 99
 		}
 
 		cost = 0
 
-		days_remove = 45
+		days_remove = 90
 		
 		ai_will_do = {
-			factor = 5000 #do it cause we need it!
+			factor = 500 #do it cause we need it!
 		}
 
 		visible = {
@@ -275,7 +275,7 @@ CHI_war_of_resistance = {
 		}
 
 		modifier = {
-			consumer_goods_factor = 0.10
+			consumer_goods_factor = 0.2
 			
 		}
 		complete_effect = {
@@ -394,7 +394,6 @@ CHI_war_of_resistance = {
 				news_event = { id = news.409 } 
 				set_global_flag = chi_yellow_river_blown
 			}
-			set_global_flag = huayuankou_destroyed
 		}
 	}
 
@@ -472,7 +471,6 @@ CHI_war_of_resistance = {
 					damage = 1
 				}
 				set_state_flag = scorched
-				set_state_flag = scorched_tt
 			}
 		}
 	}
@@ -497,10 +495,10 @@ CHI_war_of_resistance = {
 		}
 
 		visible = {
-			#focus_progress = {
-			#	focus = KMT_improve_burma_road
-			#	progress > 0
-			#}
+			focus_progress = {
+				focus = KMT_improve_burma_road
+				progress > 0
+			}
 		}
 
 		cost = 10
@@ -514,7 +512,7 @@ CHI_war_of_resistance = {
 		days_remove = 15
 
 		modifier = {
-			consumer_goods_factor = 0.02
+			consumer_goods_factor = 0.04
 		}
 		complete_effect = {
 			set_country_flag = KMT_burma_rd_forts
@@ -524,6 +522,127 @@ CHI_war_of_resistance = {
 		remove_effect = {
 			army_experience = 5
 			add_war_support = 0.03
+		}
+	}
+
+	CHI_join_united_front = {
+		icon = icon_kuomintang
+		available = {
+			is_literally_china = yes
+			CHI = {
+				is_in_faction_with = PRC
+			}
+			OR = {
+				PRC = {
+					is_faction_leader = yes
+				}
+				CHI = {
+					is_faction_leader = yes
+				}
+			}
+			NOT = {
+				OR = {
+					has_war_with = CHI
+					has_war_with = PRC
+				}
+			}
+			is_in_faction = no
+			if = {
+				limit = {
+					has_dlc = "Waking the Tiger"
+				}
+				NOT = {
+					has_completed_focus = CHI_opposition
+				}
+			}
+			OR = {
+				is_subject = no
+				OVERLORD = {
+					is_in_faction_with = event_target:WTT_current_china_leader
+				}
+			}
+			if = {			#sort out your differences first, buddeis
+				limit = {
+					OR = {
+						original_tag = SIK
+						original_tag = TNG
+					}
+				}
+				NOT = {
+					has_idea = GEN_personal_affair
+				}
+			}
+		}
+		visible = {
+			is_literally_china = yes
+			CHI = {
+				is_in_faction_with = PRC
+			}
+			is_in_faction = no
+			NOT = {							#sanity check - if event about China uniting has fired and you picked other option, you have sealed your fate
+				has_country_flag = popular_front_fired
+			}
+			NOT = {							#you tried once, this will not work again
+				has_country_flag = ROOT_tried_to_join_united_front
+			}
+		}
+		cost = 25
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				CHI = {
+					has_war_with = JAP 
+					has_defensive_war = yes
+				}
+				factor = 10
+			}
+			modifier = {
+				PRC = {
+					has_war_with = JAP 
+					has_defensive_war = yes
+				}
+				factor = 10
+			}
+			modifier = {
+				has_war_with = JAP
+				factor = 500
+			}
+		}
+
+		fire_only_once = yes
+
+		complete_effect = {
+			set_country_flag = ROOT_tried_to_join_united_front
+			If = {
+				limit = {
+					CHI = {
+						is_faction_leader = yes
+					}
+				}
+				CHI = {
+					country_event = china.106
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = "CHI"
+					value = 200
+				}
+			}
+			else_if = {
+				limit = {
+					PRC = {
+						is_faction_leader = yes
+					}
+				}
+				PRC = {
+					country_event = china.106
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = "PRC"
+					value = 200
+				}
+			}
 		}
 	}
 
@@ -1348,13 +1467,13 @@ economy_decisions = {
 		}
 
 		ai_will_do = {
-			factor = 500	#of course we want to have better industry!
+			factor = 750 #of course we want to have better industry!
 		}
 
 		days_remove = 30
 
 		modifier = {
-			consumer_goods_factor = 0.05
+			consumer_goods_factor = 0.1
 			political_power_gain = 0.15
 		}
 
@@ -1459,14 +1578,7 @@ war_measures = {
 					type = infrastructure
 					damage = 3
 				}
-			}
-			random_country = {
-				limit = {
-					PRC_has_low_popular_support = yes
-				}
-				#TODO_WTT_CD maybe notification event?
-				PRC_low_popular_support_level_down = yes
-			}			
+			}		
 		}
 	}
 }
@@ -1489,6 +1601,30 @@ CHI_industrial_evacuations = {
 					arms_factory > 0
 					industrial_complex > 0
 				}
+			}
+		}
+		highlight_states = {
+			highlight_state_targets = {
+				state = 283
+				state = 591
+				state = 592
+				state = 593
+				state = 594
+				state = 595
+				state = 596
+				state = 597
+				state = 598
+				state = 599
+				state = 600
+				state = 602
+				state = 606
+				state = 607
+				state = 608
+				state = 613
+				state = 614
+				state = 616
+				state = 620
+				state = 743			
 			}
 		}
 		on_map_mode = map_and_decisions_view
@@ -2694,96 +2830,6 @@ political_actions = {
 			add_ideas = CHI_inter_party_coordination_council
 		}
 	}
-
-	CHI_join_united_front = {
-		icon = icon_kuomintang
-		available = {
-			is_literally_china = yes
-			CHI = {
-				is_in_faction_with = PRC
-			}
-			OR = {
-				PRC = {
-					is_faction_leader = yes
-				}
-				CHI = {
-					is_faction_leader = yes
-				}
-			}
-			NOT = {
-				OR = {
-					has_war_with = CHI
-					has_war_with = PRC
-				}
-			}
-			is_in_faction = no
-			NOT = {
-				has_completed_focus = CHI_opposition
-			}
-			OR = {
-				is_subject = no
-				OVERLORD = {
-					is_in_faction_with = event_target:WTT_current_china_leader
-				}
-			}
-		}
-		visible = {
-			is_literally_china = yes
-			CHI = {
-				is_in_faction_with = PRC
-			}
-			is_in_faction = no
-		}
-		cost = 25
-		ai_will_do = {
-			factor = 1
-			modifier = {
-				JAP = {
-					OR = {
-						has_war_with = CHI
-						has_war_with = PRC
-					}
-				}
-				factor = 10
-			}
-			modifier = {
-				has_war_with = JAP
-				factor = 500
-			}
-		}
-		complete_effect = {
-			If = {
-				limit = {
-					CHI = {
-						is_faction_leader = yes
-					}
-				}
-				CHI = {
-					country_event = generic.2
-				}
-				add_ai_strategy = {
-					type = alliance
-					id = "CHI"
-					value = 200
-				}
-			}
-			else_if = {
-				limit = {
-					PRC = {
-						is_faction_leader = yes
-					}
-				}
-				PRC = {
-					country_event = generic.2
-				}
-				add_ai_strategy = {
-					type = alliance
-					id = "PRC"
-					value = 200
-				}
-			}
-		}
-	}
 	CHI_move_the_capital = {
 		allowed = {
 			is_literally_china = yes
@@ -2861,7 +2907,47 @@ CHI_weapons_purchases_category = {
 		remove_effect = {
 			add_equipment_to_stockpile = {
 				type = infantry_equipment
+				producer = USA
 				amount = 2500
+			}
+			USA = {
+				add_offsite_building = { type = industrial_complex level = -2 }
+			}
+		}
+	}
+	CHI_order_support_equipment_in_USA = {
+		icon = generic_prepare_civil_war
+		available = {
+
+		}
+		visible = {
+			USA_can_sell_weapons_trigger = yes
+		}
+		days_remove = 60
+		cost = 25
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				has_equipment = {
+					support_equipment < 1
+				}
+				factor = 50
+			}
+			modifier = {
+				has_manpower < 10000
+				factor = 0 #need to up conscription laws
+			}
+		}
+		complete_effect = {
+			USA = {
+				add_offsite_building = { type = industrial_complex level = 2 }
+			}
+		}
+		remove_effect = {
+			add_equipment_to_stockpile = {
+				type = support_equipment
+				producer = USA
+				amount = 75
 			}
 			USA = {
 				add_offsite_building = { type = industrial_complex level = -2 }
@@ -2899,15 +2985,16 @@ CHI_weapons_purchases_category = {
 		remove_effect = {
 			add_equipment_to_stockpile = {
 				type = artillery_equipment
-				amount = 75
+				producer = USA
+				amount = 100
 			}
 			USA = {
-				add_offsite_building = { type = industrial_complex level = 2 }
+				add_offsite_building = { type = industrial_complex level = -2 }
 			}
 		}
 	}
 	CHI_order_tanks_in_USA = {
-		icon = generic_air
+		icon = generic_tank
 		visible = {
 			USA_can_sell_weapons_trigger = yes
 		}
@@ -2951,6 +3038,7 @@ CHI_weapons_purchases_category = {
 				}
 				add_equipment_to_stockpile = {
 					type = light_tank_chassis
+					producer = USA
 					amount = 50
 				}
 			}
@@ -2967,6 +3055,7 @@ CHI_weapons_purchases_category = {
 				}
 				add_equipment_to_stockpile = {
 					type = medium_tank_chassis
+					producer = USA
 					amount = 50
 				}
 			}
@@ -3007,7 +3096,8 @@ CHI_weapons_purchases_category = {
 		}
 		remove_effect = {
 			add_equipment_to_stockpile = {
-				type = fighter_equipment
+				type = small_plane_airframe
+				producer = USA
 				amount = 50
 			}
 			USA = {
@@ -3048,7 +3138,8 @@ CHI_weapons_purchases_category = {
 		}
 		remove_effect = {
 			add_equipment_to_stockpile = {
-				type = tac_bomber_equipment
+				type = medium_plane_airframe
+				producer = USA
 				amount = 25
 			}
 			USA = {

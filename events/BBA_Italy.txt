@@ -4493,8 +4493,12 @@ country_event = {
 				progress > 0
 			}
 		}
-		any_enemy_country = {
-			is_major = yes
+		# any_enemy_country = { #extra check below so lets make it a bit simpler to trigger when it actually should
+		# 	is_major = yes
+		# }
+		any_controlled_state = { #r56 - although crashes for ahistorical could be created, this event makes no sense if Libya isnt under attack
+			is_core_of = LBA
+			days_since_last_strategic_bombing < 22 #triggers are checked every 20 days
 		}
 	}
 
@@ -4793,62 +4797,28 @@ country_event = {
 		}
 	}
 
+
 	# Lucky bois
 	option = { 
 		name = BBA_italy_air_accident.12.a
 
-		if = { #Upgrade trait and re-hire him
+		if = { #Upgrade trait
 			limit = {	
-				has_idea = ITA_aldo_pellegrini
+				has_character = ITA_aldo_pellegrini
 			}
 			ITA_aldo_pellegrini = {
 				custom_effect_tooltip = ITA_pellegrini_promotion_tt
 			}
 			hidden_effect = {
 				ITA_aldo_pellegrini = {
-					remove_advisor_role = { slot = air_chief }
-					add_advisor_role = {
-						advisor = {
-							slot = air_chief
-							idea_token = ITA_aldo_pellegrini
-							allowed = {
-								original_tag = ITA
-							}
-							traits = {
-								air_chief_ground_support_2
-							}
-							cost = 100
-							ai_will_do = {
-								factor = 1.000
-							}
-						}
-						activate = yes
+					remove_trait = {
+						trait = air_chief_ground_support_1
+						slot = air_chief
 					}
-				}
-			}
-		}
-		else = { #Just upgrade the trait
-			ITA_aldo_pellegrini = {
-				custom_effect_tooltip = ITA_pellegrini_promotion_tt
-			}
-			hidden_effect = {
-				ITA_aldo_pellegrini = {
-					remove_advisor_role = { slot = air_chief }
-					add_advisor_role = {
-						advisor = {
-							slot = air_chief
-							idea_token = ITA_aldo_pellegrini
-							allowed = {
-								original_tag = ITA
-							}
-							traits = {
-								air_chief_ground_support_2
-							}
-							cost = 100
-							ai_will_do = {
-								factor = 1.000
-							}
-						}
+
+					add_trait = {
+						trait = air_chief_ground_support_2
+						slot = air_chief
 					}
 				}
 			}
@@ -10924,65 +10894,11 @@ country_event = {
 	# alright.. on to the next one I guess
 	option = { 
 		name = BBA_italy_interaction_events.26.a 
-
-		4 = {
-			if = {
-				limit = { is_owned_by = AUS }
-				add_core_of = GER
-			}
-		}
-		152 = {
-			if = {
-				limit = { is_owned_by = AUS }
-				add_core_of = GER
-			}
-		}
-		153 = {
-			if = {
-				limit = { is_owned_by = AUS }
-				add_core_of = GER
-			}
-		}
-		848 = {
-			if = {
-				limit = { is_owned_by = AUS }
-				add_core_of = GER
-			}
-		}
 		AUS = {
-			every_unit_leader = {
-				set_nationality = GER
-			}
-		}
-		annex_country = { target = AUS transfer_troops = yes }
-		add_political_power = 75
-		set_country_flag = AUS_annexed
-		add_war_support = 0.1
-		add_stability = 0.05
-		USA = {
-			set_country_flag = { flag = USA_anschluss_window days = 60 value = 1 }
-		}
-		custom_effect_tooltip = anschluss_mefo_bills_tt
-		hidden_effect = { # Having it appear twice might be confusing
-			GER_mefo_bills_level_down = yes
-			GER_mefo_bills_level_down = yes
-		}
-		custom_effect_tooltip = anschluss_mefo_bills_double_reduction
-		add_to_variable = { var = GER_mefo_bill_counter value = -10 }
-
-		if = {
-			limit = {
-				has_dlc = "Death or Dishonor"
-				country_exists = YUG
-				YUG = { has_war = no }
-			}
 			country_event = {
-				id = DOD_yugoslavia.30
-				days = 4
+				id = germany.28	
+				days = 1
 			}
-		}
-		hidden_effect = {
-			news_event = { hours = 6 id = news.36 }
 		}
 	}
 }
@@ -12724,17 +12640,19 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		if = {
-			limit = {
-				ROOT = {
-					is_faction_leader = yes
-				}
-			}
-			every_other_country = {
+		hidden_effect = {
+			if = {
 				limit = {
-					is_in_faction_with = ROOT
+					ROOT = {
+						is_faction_leader = yes
+					}
 				}
-				set_country_flag = ITA_add_to_the_stresa_front
+				every_other_country = {
+					limit = {
+						is_in_faction_with = ROOT
+					}
+					set_country_flag = ITA_add_to_the_stresa_front
+				}
 			}
 		}
 	}
@@ -12747,6 +12665,87 @@ country_event = {
 			base = 100
 		}
 
+		every_country = { #If Italy has any wargoal on other countries, remove them so they can join the faction
+			limit = {
+				OR = {
+					is_in_faction_with = ROOT
+					tag = ROOT
+				}
+				FROM = {
+					has_wargoal_against = PREV
+				}
+			}
+			FROM = {
+				remove_wargoal = {
+					type = all
+					target = PREV
+				}
+			}
+		}
+
+		effect_tooltip = {
+			if = {
+				limit = {
+					ENG = {
+						is_faction_leader = yes
+					}
+				}
+				ENG = { add_to_faction = FRA }
+				ENG = { add_to_faction = ITA }
+			}
+			else = {
+				ROOT = {
+					create_faction = stresa_front_ita
+					ROOT = { add_to_faction = ITA }
+					ROOT = { add_to_faction = ENG }
+				}
+				every_other_country = {
+					limit = {
+						NOT = {
+							original_tag = ENG
+						}
+						has_country_flag = ITA_add_to_the_stresa_front
+					}
+					ROOT = {
+						add_to_faction = PREV #Add already existing faction members to the new faction
+					}
+				}
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = BBA_italy_interaction_events.411
+				days = 2
+			}
+		}
+	}
+
+	# No thank you
+	option = { 
+		name = BBA_italy_interaction_events.40.b 
+
+		ai_chance = {
+			base = 0
+		}
+
+		add_war_support = -0.3
+
+	}
+}
+
+country_event = { #Hidden event
+	id = BBA_italy_interaction_events.411
+	
+	hidden = yes
+	is_triggered_only = yes
+	fire_only_once = no
+
+	#Italy joins the faction
+	option = { 
+		name = BBA_italy_interaction_events.41.a 
+		ai_chance = {
+			base = 100
+		}
 		if = {
 			limit = {
 				ENG = {
@@ -12764,6 +12763,9 @@ country_event = {
 			}
 			every_other_country = {
 				limit = {
+					NOT = {
+						original_tag = ENG
+					}
 					has_country_flag = ITA_add_to_the_stresa_front
 				}
 				ROOT = {
@@ -12771,17 +12773,6 @@ country_event = {
 				}
 			}
 		}
-	}
-
-	# No thank you
-	option = { 
-		name = BBA_italy_interaction_events.40.b 
-
-		ai_chance = {
-			base = 0
-		}
-
-		add_war_support = -0.3
 	}
 }
 
@@ -13289,6 +13280,8 @@ country_event = {
 		name = BBA_italy_interaction_events.667.a 
 
 		transfer_state = 454 #PALESTINE
+		transfer_state = 1016
+		transfer_state = 1017
 		add_opinion_modifier = {
 			target = FROM
 			modifier = ITA_complied_to_church_demands
@@ -13338,7 +13331,7 @@ country_event = {
 		create_wargoal = {
 			type = take_state
 			target = FROM
-			generator = { 454 } 
+			generator = { 454 1016 1017 1016 1017 } 
 		}
 	}
 }
