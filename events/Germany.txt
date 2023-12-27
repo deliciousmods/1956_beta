@@ -1488,6 +1488,7 @@ country_event = {
 			set_province_controller = 12562
 			set_province_controller = 524
 		}
+		set_global_flag = GER_used_original_MR	#allow Germany to influence Lituania only if the Soviets are not to be ceded it
 		create_wargoal = {
 			type = annex_everything
 			target = LIT
@@ -13485,6 +13486,10 @@ country_event = { #Germany civil war
 						is_character = GER_franz_jacob
 						is_character = GER_Franz_Dahlem
 						is_character = GER_Bernhard_Bastlein
+						is_character = GER_hans_kahle
+						is_character = GER_hans_beimler
+						is_character = GER_johannes_becher
+						is_character = GER_rudolf_hernnstadt
 					}
 				}
 				set_nationality = event_target:communist_germany
@@ -14735,13 +14740,54 @@ country_event = { #Germany proposes economic integration
 	id = r56.ger.34
 	title = r56.ger.34.t
 	desc = r56.ger.34.desc
+	picture = GFX_report_event_generic_construction_site
 
 	is_triggered_only = yes
 
 	option = {	#yippie!
 		name = r56.ger.34.a
 		ai_chance = {
-			factor = 1
+			factor = 10
+			modifier = {
+				add = 5
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio > 1.7
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				ROOT = {
+					NOT = {
+						is_in_faction_with = FROM
+					}
+					has_opinion = {
+						target = FROM
+						value > 40
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				ROOT = {
+					is_in_faction_with = FROM
+					has_opinion = {
+						target = FROM
+						value > 80
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				any_neighbor_country = {
+					limit = {
+						NOT = { tag = FROM }
+					}
+					has_added_tension_amount > 10
+				}
+			}
 		}
 		FROM = {
 			country_event = r56.ger.35
@@ -14760,7 +14806,35 @@ country_event = { #Germany proposes economic integration
 	option = {	#no!
 		name = r56.ger.34.b
 		ai_chance = {
-			factor = 1
+			factor = 10
+			modifier = {
+				add = 5
+				FROM = {
+					has_added_tension_amount > 45
+				}
+			}
+			modifier = {
+				add = 5
+				FROM = {
+					has_war = yes
+				}
+			}
+			modifier = {
+				add = 5
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio < 1.2
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				has_opinion = {
+					target = FROM
+					value < 10
+				}
+			}
 		}
 		trigger = {	#LIT cant be couped so has to cut ties
 			NOT = {
@@ -14773,8 +14847,38 @@ country_event = { #Germany proposes economic integration
 	}
 	option = {	#we must purge their influence
 		name = r56.ger.34.c
+		trigger = {
+			NOT = {
+				is_in_faction_with = FROM
+				has_war_together_with = FROM
+			}
+		}
 		ai_chance = {
-			factor = 1
+			factor = 10
+			modifier = {
+				factor = 0
+				is_in_faction_with = FROM
+			}
+			modifier = {
+				add = 5
+				has_added_tension_amount > 90
+			}
+			modifier = {
+				add = 5 
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio < 0.7
+					}
+				}
+			}
+			modifier = {
+				add = 5 
+				has_opinion = {
+					target = FROM
+					value < -50
+				}
+			}
 		}
 		FROM = {
 			country_event = r56.ger.36
@@ -14790,16 +14894,37 @@ country_event = { #Integration accepted
 	id = r56.ger.35
 	title = r56.ger.35.t
 	desc = r56.ger.35.desc
+	picture = GFX_report_event_generic_sign_treaty3
 
 	is_triggered_only = yes
 
 	option = {
 		name = r56.ger.35.a
-		set_autonomy = {
-			target = FROM
-			autonomy_state = autonomy_dominion
-			end_wars = no
-			end_civil_wars = no
+		if = {
+			limit = {
+				has_dlc = "Death or Dishonor"
+				has_government = fascism
+			}
+			set_autonomy = {
+				target = FROM
+				autonomy_state = autonomy_satellite
+				end_wars = no
+				end_civil_wars = no
+			}
+		}
+		else_if = {
+			limit = {
+				has_dlc = "Together for Victory"
+			}
+			set_autonomy = {
+				target = FROM
+				autonomy_state = autonomy_dominion
+				end_wars = no
+				end_civil_wars = no
+			}
+		}
+		else = {
+			puppet = FROM
 		}
 	}
 }
@@ -14808,6 +14933,7 @@ country_event = { #Integration refused
 	id = r56.ger.36
 	title = r56.ger.36.t
 	desc = r56.ger.36.desc
+	picture = GFX_report_event_generic_read_write
 
 	is_triggered_only = yes
 
@@ -14818,6 +14944,13 @@ country_event = { #Integration refused
 	option = {	#embargo
 		name = r56.ger.36.b
 		send_embargo = FROM
+		if = {
+			limit = {
+				is_in_faction_with = FROM
+				is_faction_leader = yes
+			}
+			remove_from_faction = FROM
+		}
 	}
 	option = {	#war/overthrow
 		name = r56.ger.36.c
@@ -14827,6 +14960,13 @@ country_event = { #Integration refused
 		# 		has_government = democratic
 		# 	}
 		# 	add_threat = 0.3	#amount too small to show up, instead link to action on threats
+		# }
+		# if = {
+		# 	limit = {
+		# 		is_in_faction_with = FROM
+		# 		is_faction_leader = yes
+		# 	}
+		# 	remove_from_faction = FROM
 		# }
 		custom_effect_tooltip = GER_hostile_trade_decisions_tt
 		hidden_effect = {	#flag setting doesnt have loc anyway
@@ -14977,16 +15117,232 @@ country_event = { #Kaiser takes power back
 	}
 }
 
-country_event = { #Germany sends military advisors
+country_event = { #Germany succeeds coup attempt on us
 	id = r56.ger.39
 	title = r56.ger.39.t
-	desc = r56.ger.39.d
+	desc = r56.ger.39.desc
+	picture = GFX_report_event_generic_italian_fascists
+
+	option = {
+		name = r56.ger.39.a
+		ai_chance = {
+			factor = 9
+		}
+		if = {
+			limit = {
+				OR = {	#neutrality coup, take priority
+					has_government = fascism
+					AND = {
+						NOT = {
+							has_government = neutrality
+						}
+						neutrality > 0.3
+					}
+				}
+			}
+			GER = {
+				puppet = PREV
+				if = {
+					limit = {
+						has_dlc = "Death or Dishonor"
+						has_government = fascism
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_satellite
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+				else_if = {
+					limit = {
+						has_dlc = "Together for Victory"
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_dominion
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+			}
+			set_politics = {	#after puppeting or ideology taken from Germany
+				ruling_party = neutrality
+				elections_allowed = no
+			}
+		}
+		else = {	#fascist coup
+			GER = {
+				puppet = PREV
+				if = {
+					limit = {
+						has_dlc = "Death or Dishonor"
+						has_government = fascism
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_satellite
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+				else_if = {
+					limit = {
+						has_dlc = "Together for Victory"
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_dominion
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+			}
+			set_politics = {	#after puppeting or ideology taken from Germany
+				ruling_party = fascism
+				elections_allowed = no
+			}
+		}
+	}
+
+	option = {	#civil war
+		name = r56.ger.39.b
+		ai_chance = {
+			factor = 1
+		}
+		if = {
+			limit = {
+				OR = {	#neutrality coup, take priority
+					has_government = fascism
+					AND = {
+						NOT = {
+							has_government = neutrality
+						}
+						neutrality > 0.3
+					}
+				}
+			}
+			start_civil_war = {
+				ideology = neutrality
+				size = 0.4
+				GER = {
+					puppet = PREV
+					if = {
+						limit = {
+							has_dlc = "Together for Victory"
+						}
+						set_autonomy = {
+							target = PREV
+							autonomy_state = autonomy_dominion
+							end_wars = no
+							end_civil_wars = no
+						}
+					}
+				}
+				set_politics = {
+					ruling_party = neutrality
+					elections_allowed = no
+				}
+			}
+		}
+		else = {	#fascist coup
+			start_civil_war = {
+				ideology = fascism
+				size = 0.4
+				GER = {
+					puppet = PREV
+					if = {
+						limit = {
+							has_dlc = "Together for Victory"
+						}
+						set_autonomy = {
+							target = PREV
+							autonomy_state = autonomy_dominion
+							end_wars = no
+							end_civil_wars = no
+						}
+					}
+				}
+				set_politics = {
+					ruling_party = fascism
+					elections_allowed = no
+				}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+}
+
+country_event = { #Germany botches coup attempt on us
+	id = r56.ger.40
+	title = r56.ger.40.t
+	desc = r56.ger.40.desc
+	picture = GFX_report_event_generic_soldiers_surrendering
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56.ger.40.a
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			if = {
+				limit = {
+					is_in_faction_with = GER
+					NOT = {
+						has_war_together_with = GER
+					}
+				}
+				leave_faction = yes
+			}
+		}
+		add_opinion_modifier = {
+			target = GER
+			modifier = hostile_status
+		}
+	}
+}
+
+country_event = { #We succeeded in a coup
+	id = r56.ger.41
+	title = r56.ger.41.t
+	desc = r56.ger.41.desc
+	picture = GFX_report_event_generic_italian_fascists
+
+	is_triggered_only = yes
+	
+	option = {
+		name = r56.ger.41.a
+
+	}
+}
+
+country_event = { #We botched a coup
+	id = r56.ger.42
+	title = r56.ger.42.t
+	desc = r56.ger.42.desc
+	picture = GFX_report_event_generic_soldiers_surrendering
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56.ger.42.a
+
+	}
+}
+
+country_event = { #Germany sends military advisors
+	id = r56.ger.43
+	title = r56.ger.43.t
+	desc = r56.ger.43.d
 	picture = GFX_report_event_soviet_german_soldier_handshake
 
 	is_triggered_only = yes
 
 	option = { # Weclome them
-		name = r56.ger.39.a
+		name = r56.ger.43.a
 		add_ideas = GER_military_advisors
 		ai_chance = { 
 			base = 2
@@ -14994,9 +15350,9 @@ country_event = { #Germany sends military advisors
 	}
 
 	option = { # Sorry, no
-		name = r56.ger.39.b
+		name = r56.ger.43.b
 		GER = {
-			country_event = { id = r56.ger.40 days = 1 random_hours = 12 }
+			country_event = { id = r56.ger.44 days = 1 random_hours = 12 }
 		}
 		ai_chance = { 
 			base = 1
@@ -15005,15 +15361,15 @@ country_event = { #Germany sends military advisors
 }
 
 country_event = { #Germany sends military advisors
-	id = r56.ger.40
-	title = r56.ger.40.t
-	desc = r56.ger.40.d
+	id = r56.ger.44
+	title = r56.ger.44.t
+	desc = r56.ger.44.d
 	picture = GFX_report_event_PER_foreign_ministry
 
 	is_triggered_only = yes
 
 	option = { # Alright, their loss
-		name = r56.ger.40.a
+		name = r56.ger.44.a
 		ai_chance = { 
 			base = 2
 		}
