@@ -577,12 +577,7 @@ focus_tree = {
                 uses = 2
                 category = r56_special_forces_training_tech 
             }	
-			add_doctrine_cost_reduction = {
-				name = special_forces_bonus
-				cost_reduction = 0.25
-				uses = 2
-				category = special_forces_doctrine
-			}			
+		
             hidden_effect = {
                 set_country_flag = cite_an_airborne_unit_flag
             }
@@ -615,7 +610,27 @@ focus_tree = {
                 technology = extreme_environment_training
                 technology = survival_training
                 technology = elite_forces
-            }				
+            }
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				add_doctrine_cost_reduction = {
+					name = special_forces_bonus
+					cost_reduction = 0.4
+					uses = 3
+					category = special_forces_doctrine
+				}				
+			}
+			else = {
+				add_tech_bonus = {
+					name = infantry_artillery_bonus
+					bonus = 1
+					uses = 1
+					category = r56_special_forces_training_tech 
+				}				
+			}
+								
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}				
@@ -1261,7 +1276,7 @@ focus_tree = {
 		cost = 10
 
 		ai_will_do = {
-			factor = 8
+			factor = 9
 		}
 		available = {
 			any_state = {
@@ -1860,14 +1875,15 @@ focus_tree = {
 		mutually_exclusive = { focus = SCO_choose_a_monarch }
  		x = -5
 		y = 1
-        cost = 10
+        cost = 5
         available_if_capitulated = yes
         search_filters = {FOCUS_FILTER_POLITICAL}
         ai_will_do = {
             factor = 10
         }
         completion_reward = { 
-            add_political_power = 250
+            add_political_power = 50
+			add_stability = 0.05
 
         }    
     }
@@ -1880,15 +1896,19 @@ focus_tree = {
 		mutually_exclusive = { focus = SCO_favour_republicanism }
  		x = 4
 		y = 1
-        cost = 10
+        cost = 5
         available_if_capitulated = yes
         search_filters = {FOCUS_FILTER_POLITICAL}
         ai_will_do = {
             factor = 10
         }
         completion_reward = { 
-            add_political_power = 250
-
+            add_political_power = 100
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
+			#add events
         }    
     }
 
@@ -1906,8 +1926,15 @@ focus_tree = {
             factor = 10
         }
         completion_reward = { 
-            add_political_power = 250
-
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
+			add_timed_idea = { idea = GEN_Strenghten_Monarchy_I days = 1395 }			
+        #    set_politics = {
+		#		ruling_party = neutrality 
+		#		elections_allowed = no
+		#	}
         }    
     }	
 
@@ -2029,6 +2056,9 @@ focus_tree = {
 						is_in_faction = no
 						is_subject = no
 						NOT = {
+							has_war_with = ROOT
+						}
+						NOT = {
 							has_government = communism
 						}
 						original_tag = FRA
@@ -2101,6 +2131,9 @@ focus_tree = {
 						is_in_faction = no
 						is_subject = no
 						NOT = {
+							has_war_with = ROOT
+						}						
+						NOT = {
 							has_government = communism
 						}
 						original_tag = NOR
@@ -2112,6 +2145,81 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_ALLIANCE }
 	}
 
+
+	focus = {
+		id = SCO_ally_bavaria
+		icon = GFX_goal_generic_major_alliance
+		prerequisite = { focus = SCO_monarchist_officer_corps }
+		#mutually_exclusive = { focus = SWE_the_northern_lights focus = SWE_swedish_french_ties focus = SWE_nordic_solidarity  }
+		relative_position_id = SCO_monarchist_officer_corps
+		x = -2
+		y = 2
+		cost = 5
+
+		available_if_capitulated = yes
+
+		available = {
+			has_government = neutrality
+			BAY = {
+				exists = yes
+				has_government = neutrality
+				is_subject = no
+				OR = {
+					is_faction_leader = yes
+					is_in_faction = no
+				}
+				has_capitulated = no
+			}
+		}
+
+		completion_reward = {
+			add_ai_strategy = {
+				type = build_army
+				id = infantry
+				value = 30
+			}				
+			set_rule = { can_create_factions = yes }
+			if = {
+				limit = {
+					any_country = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = BAY
+					}
+				}
+				random_country = {
+					limit = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = BAY
+					}
+					country_event = generic.2
+				}
+			}
+			else = {
+				create_faction = "Treaty of Castle Rock"
+				every_other_country = {
+					limit = {
+						is_in_faction = no
+						is_subject = no
+						NOT = {
+							has_war_with = ROOT
+						}						
+						NOT = {
+							has_government = communism
+						}
+						original_tag = BAY
+					}
+					country_event = generic.5
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}
 
 	focus = {
 		id = SCO_monarchist_officer_corps
@@ -2180,7 +2288,7 @@ focus_tree = {
 
 		x = -1
 		y = 1
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 2.5
@@ -2214,6 +2322,53 @@ focus_tree = {
 		}
 	}
 
+	focus = {
+		id = SCO_split_germany_with_france
+		icon = GFX_goal_generic_occupy_states_ongoing_war
+		x = 0
+		y = 1
+		prerequisite = {
+			focus = SCO_free_bavaria
+		}
+		relative_position_id = SCO_free_bavaria
+		cost = 10
+
+		ai_will_do = {
+			factor = 3
+		}
+
+		allow_branch = {
+			
+		}
+
+		available = {
+			is_subject = no
+			has_government = neutrality
+			any_state = { 
+				is_core_of = GER
+				OR = {
+					is_controlled_by = ROOT
+					is_controlled_by = FRA
+				}
+			}
+			FRA = {
+				has_government = neutrality
+				is_in_faction_with = ROOT
+			}
+			GER = {
+				OR = {
+					exists = no
+					has_capitulated = yes
+				}
+			}
+		}
+
+		completion_reward = {
+			custom_effect_tooltip = FRA_disunite_germany_tt
+			FRA_SCO_disunite_germany_confederation_borders = yes
+		}
+	}	
+
 
 
     focus = {
@@ -2232,7 +2387,14 @@ focus_tree = {
         }
         completion_reward = { 
 			#2 different effect for constitutional monarchy and republic
-            add_political_power = 250
+			#add a stability boost to monarchs? add_stability = 0.05
+            #add_political_power = 250
+			
+			
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.1
+			}			
 
         }    
     }
@@ -3512,7 +3674,11 @@ focus_tree = {
 					NOT = {
 						any_other_country = {
 							is_in_faction_with = GER
-							has_war_with = ROOT
+							OR = {
+								has_war_with = ROOT
+								tag = ENG
+							}
+							
 						}
 					}					
 				}
@@ -3674,7 +3840,7 @@ focus_tree = {
 			}
 									
 									
-			else = {
+			else = { #add an anti English system?
 				get_best_alliance_match_fascism_effect = yes
 				var:best_leader = {
 					country_event = generic.2
@@ -3856,5 +4022,3 @@ focus_tree = {
 #		search_filters = { FOCUS_FILTER_POLITICAL}
 #	}			
 }
-
-
