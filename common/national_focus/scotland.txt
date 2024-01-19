@@ -1903,12 +1903,11 @@ focus_tree = {
             factor = 10
         }
         completion_reward = { 
-            add_political_power = 100
 			add_popularity = {
 				ideology = neutrality
 				popularity = 0.1
 			}
-			#add events
+			country_event = r56_scotland.1
         }    
     }
 
@@ -1931,10 +1930,10 @@ focus_tree = {
 				popularity = 0.1
 			}
 			add_timed_idea = { idea = GEN_Strenghten_Monarchy_I days = 1395 }			
-        #    set_politics = {
-		#		ruling_party = neutrality 
-		#		elections_allowed = no
-		#	}
+            set_politics = {
+				ruling_party = neutrality 
+				elections_allowed = no
+			}
         }    
     }	
 
@@ -1992,6 +1991,49 @@ focus_tree = {
 					owner = SCO
 				}
 			}
+		}
+	}
+
+	focus = {
+		id = SCO_royal_aeronautical_patronage
+		icon = GFX_focus_NORDIC_mon_airforce
+		prerequisite = { focus = SCO_kings_guard }
+		relative_position_id = SCO_kings_guard
+
+		x = 4
+		y = 1
+		cost = 10
+
+		ai_will_do = {
+			factor = 2.5
+		}
+		
+		bypass = {
+			has_capitulated = yes
+		}
+
+		available = {
+			has_country_leader = { ruling_only = yes name = "Douglas I" }
+		}
+
+		search_filters = { FOCUS_FILTER_MANPOWER }
+		completion_reward = {
+			IF = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+
+				mio:SCO_william_beardmore_organization = {
+					add_mio_size = 1
+					add_mio_funds = 1000
+				}
+				mio:SCO_scottish_aviation_organization = {
+					add_mio_size = 1
+					add_mio_funds = 1000
+				}				
+			}
+			add_ideas = JAP_economy_by_japan_planes	
+
 		}
 	}
 
@@ -2296,9 +2338,22 @@ focus_tree = {
 		
 		available = {
 			#only if a Wittelsbach is in power and Bavaria is "under foreign occupation
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
+			}
+			
+			is_subject = no
 		}
 		
 		bypass = {
+			BAY = {
+				exists = yes
+			}
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
+			}			
 		}
 
 		available_if_capitulated = yes
@@ -2324,8 +2379,8 @@ focus_tree = {
 
 	focus = {
 		id = SCO_split_germany_with_france
-		icon = GFX_goal_generic_occupy_states_ongoing_war
-		x = 0
+		icon = GFX_goal_generic_major_war
+		x = 1
 		y = 1
 		prerequisite = {
 			focus = SCO_free_bavaria
@@ -2342,6 +2397,10 @@ focus_tree = {
 		}
 
 		available = {
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
+			}			
 			is_subject = no
 			has_government = neutrality
 			any_state = { 
@@ -2369,7 +2428,51 @@ focus_tree = {
 		}
 	}	
 
+	focus = {
+		id = SCO_restore_order_in_bavaria
+		icon = GFX_goal_generic_occupy_states_ongoing_war
+		x = -1
+		y = 1
+		prerequisite = {
+			focus = SCO_free_bavaria
+		}
+		relative_position_id = SCO_free_bavaria
+		cost = 10
 
+		ai_will_do = {
+			factor = 3
+		}
+
+		allow_branch = {
+			
+		}
+
+		available = {
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
+			}			
+			is_subject = no
+			has_government = neutrality
+			BAY = {
+				exists = yes
+				NOT = {
+					OR = {
+						has_government = democratic
+						has_government = neutrality
+					}
+				}
+			}
+		}
+
+		completion_reward = {
+			create_wargoal = {
+				target = BAY
+				type = puppet_wargoal_focus
+				expire = 0
+			}		
+		}
+	}
 
     focus = {
         id = SCO_democratic_constitutionalism
@@ -2389,8 +2492,40 @@ focus_tree = {
 			#2 different effect for constitutional monarchy and republic
 			#add a stability boost to monarchs? add_stability = 0.05
             #add_political_power = 250
-			
-			
+			if = {
+				limit = {
+					has_completed_focus = SCO_favour_republicanism
+				}
+				add_ideas = SCO_parliamentarianism
+			}
+			else_if = {
+				limit = {
+					has_completed_focus = SCO_choose_a_monarch
+					has_country_leader = {
+						name = "Rupprecht I" ruling_only = no
+					}
+				}
+				add_ideas = SCO_king_rupprecht				
+			}
+			else_if = {
+				limit = {
+					has_completed_focus = SCO_choose_a_monarch
+					has_country_leader = {
+						name = "Henry I" ruling_only = no
+					}
+				}
+				add_ideas = SCO_king_henry				
+			}
+			else_if = {
+				limit = {
+					has_completed_focus = SCO_choose_a_monarch
+					has_country_leader = { 
+						ruling_only = yes name = "Douglas I" 
+					}
+				}
+				add_ideas = SCO_king_douglas				
+			}						
+			#
 			add_popularity = {
 				ideology = democratic
 				popularity = 0.1
@@ -2634,24 +2769,24 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
-	focus = {
-		id = SCO_the_church_question
-		icon = GFX_goal_christianity_and_state
-		prerequisite = { focus = SCO_democratic_constitutionalism focus = SCO_grant_power_to_the_crown }
-
-		x = 6
-		y = 1
-		relative_position_id = SCO_democratic_constitutionalism
-		cost = 10
-		available = {
-		}
-
-		search_filters = {FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_INDUSTRY}
-
-		completion_reward = {
-			#Wittelsbach are Jacobite claimants for catholic only -> problem?
-		}
-	}
+#	focus = {
+#		id = SCO_the_church_question
+#		icon = GFX_goal_christianity_and_state
+#		prerequisite = { focus = SCO_democratic_constitutionalism focus = SCO_grant_power_to_the_crown }
+#
+#		x = 6
+#		y = 1
+#		relative_position_id = SCO_democratic_constitutionalism
+#		cost = 10
+#		available = {
+#		}
+#
+#		search_filters = {FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_INDUSTRY}
+#
+#		completion_reward = {
+#			#Wittelsbach are Jacobite claimants for catholic only -> problem?
+#		}
+#	}
 
 	focus = {
 		id = SCO_deterrence
@@ -2700,6 +2835,11 @@ focus_tree = {
 
 		x = 1
 		y = 1
+
+		ai_will_do = {
+			factor = 60
+		}
+
 		relative_position_id = SCO_deterrence
 		cost = 10
 		available = {
@@ -2712,6 +2852,95 @@ focus_tree = {
 			upgrade_economy_law = yes
 		}
 	}
+
+	focus = {
+		id = SCO_women_army_service
+		icon = GFX_focus_generic_women_in_military
+		prerequisite = { focus = SCO_economic_mobilization }
+		x = 0
+		y = 1
+		relative_position_id = SCO_economic_mobilization
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 3
+		}
+		
+		available = {
+			NOT = {
+				OR = {
+					has_idea = disarmed_nation
+					has_idea = volunteer_only
+				}
+			}
+			
+		}
+
+		search_filters = { FOCUS_FILTER_MANPOWER }
+
+		completion_reward = {
+			add_ideas = SCO_womens_army_service
+		}
+	}
+
+	focus = {
+		id = SCO_womens_suffrage
+		icon = GFX_goal_womens_rights
+		prerequisite = { focus = SCO_women_army_service }
+		x = 0
+		y = 1
+		relative_position_id = SCO_women_army_service
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 2
+		}
+
+		available = {
+			has_elections = yes
+		}
+
+		available_if_capitulated = yes
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_RESEARCH FOCUS_FILTER_POLITICAL}
+		completion_reward = {
+			add_ideas = MEX_womens_suffrage
+			#change this into a womens rights scripted effect?
+			if = {
+				limit = {
+					has_idea = r56i_laws_gender_traditional
+				}
+				swap_ideas = {
+					remove_idea = r56i_laws_gender_traditional
+					add_idea = r56i_laws_gender_limited
+				}
+			}
+			else_if = {			
+				limit = {
+					has_idea = r56i_laws_gender_patriarchy
+				}
+				swap_ideas = {
+					remove_idea = r56i_laws_gender_patriarchy
+					add_idea = r56i_laws_gender_limited
+				}			
+			}
+			else_if = {
+			
+				limit = {
+					has_idea = r56i_laws_gender_limited
+				}
+				swap_ideas = {
+					remove_idea = r56i_laws_gender_limited
+					add_idea = r56i_laws_gender_equality
+				}			
+			}
+			else = {
+				add_ideas = r56i_laws_gender_limited
+			}			
+		}
+	}
+
 
 	focus = { 
 		id = SCO_resurrect_scottish_workers_republican_party
@@ -2989,13 +3218,11 @@ focus_tree = {
 				has_government = communism
 			}
 			has_navy_size > 9
-			NOT = {
-				has_completed_focus = SCO_celtic_liberation
-			}
 		}	
 		ai_will_do = {
 			factor = 4
 		}
+		will_lead_to_war_with = ENG
 		will_lead_to_war_with = NIR
 		will_lead_to_war_with = IRE
 		will_lead_to_war_with = WLS
@@ -3151,6 +3378,90 @@ focus_tree = {
 
 	### need Britanny ultimatum?
 
+
+	focus = {
+		id = SCO_push_for_brittany
+		icon = GFX_goal_BRI_hermine
+		x = 1
+		y = 1
+		prerequisite = {
+			focus = SCO_celtic_liberation
+		}
+		relative_position_id = SCO_celtic_liberation
+		
+		cost = 5
+		available = {
+			r56_script_i_am_sane = yes
+			is_subject = no
+			has_army_manpower = { size > 89999 }
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+			has_navy_size > 9
+		}	
+		ai_will_do = {
+			factor = 4
+		}
+		will_lead_to_war_with = FRA
+		
+		bypass = {
+			has_war_with = FRA
+		}
+
+		completion_reward = {
+			every_state = {
+				limit = {
+					is_core_of = BRI
+				}
+				
+				add_claim_by = ROOT
+			}
+			if = {
+				limit = {
+					BRI = { # 14
+						exists = yes
+					}
+				}
+				create_wargoal = {
+					target = BRI
+					type = annex_everything
+					expire = 0
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						14 = {
+							OWNER = {
+								NOT = {
+									tag = ROOT
+								}
+							}
+						}
+					}				
+					14 = {
+						OWNER = {
+							ROOT = {
+								create_wargoal = {
+									target = PREV
+									expire = 0
+									type = take_state_focus
+									generator = { 14 }
+								}
+								add_ai_strategy = {
+									type = conquer
+									id = PREV
+									value = 10
+								}
+							}
+						}
+					}
+				}
+			}										
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
 
 	focus = {
 		id = SCO_revolutionary_guards
