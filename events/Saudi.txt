@@ -140,21 +140,121 @@ country_event = {
 
 	option = { # Accept
 		name = arabia.1.a
-		ai_chance = { factor = 80 }
+		ai_chance = {
+			factor = 80
+			modifier = {	#dont let the player be annexed
+				factor = 0
+				MPL = {
+					exists = yes
+					is_subject_of = ROOT
+					is_ai = no
+				}
+			}
+			modifier = {	#Saudi Arabia not a threat? Don't bother
+				factor = 0
+				has_war = no
+				NOT = {
+					is_in_faction_with = FROM
+				}
+				strength_ratio = {
+					tag = FROM
+					ratio < 6	#Since its colonies, even just matching 17% of the countries army will be sufficient
+				}
+			}
+			modifier = {	#Saudi Arabia not a threat? Don't just cave so often
+				factor = 0.5
+				has_war = no
+				NOT = {
+					is_in_faction_with = FROM
+				}
+				has_war_support > 0.5
+				strength_ratio = {
+					tag = FROM
+					ratio < 4	#25% of army means war might not be desirable, but we won't just cede to demands
+				}
+			}
+		}
 		SAU = {
 			country_event = { id = arabia.2 }
+		}
+		effect_tooltip = {
+			every_owned_state = {
+				limit = {
+					NOT = {
+						is_core_of = ROOT
+					}
+					OR = {
+						#Jordan
+						state = 455
+						state = 1021
+						state = 1022
+
+						#Mandate
+						state = 454		#Coastal Plain
+						state = 966		#West Bank
+						state = 949		#Ghaza
+						state = 1016	#Jerusalem
+						state = 1017	#Beersheba
+
+						state = 656		#Kuwait
+						state = 658		#Abu Dhabi
+						state = 765		#Qatar
+						state = 1007	#Bahrain
+						state = 659		#Aden
+					}
+				}
+				transfer_state_to = FROM
+			}
+			every_subject_country = {
+				every_owned_state = {
+					limit = {
+						NOT = {
+							is_core_of = PREV
+						}
+						OR = {
+							#Jordan
+							state = 455
+							state = 1021
+							state = 1022
+
+							#Mandate
+							state = 454		#Coastal Plain
+							state = 966		#West Bank
+							state = 949		#Ghaza
+							state = 1016	#Jerusalem
+							state = 1017	#Beersheba
+
+							state = 656		#Kuwait
+							state = 658		#Abu Dhabi
+							state = 765		#Qatar
+							state = 1007	#Bahrain
+							state = 659		#Aden
+						}
+					}
+					transfer_state_to = FROM
+				}
+			}
 		}
 	}
 	option = { # Refuse
 		name = arabia.1.b
-	  ai_chance = { factor = 20 }
+	  	ai_chance = { factor = 20 }
 		SAU = {
 			country_event = { id = arabia.3 }
+		}
+		effect_tooltip = {
+			FROM = {
+				create_wargoal = {
+					type = take_state
+					target = ROOT
+					generator = { 656 658 659 765 }
+				}
+			}
 		}
 	}
 }
 
-# ENG Accepts
+# Owner Accepts
 country_event = {
 	id = arabia.2
 	title = arabia.2.t
@@ -165,15 +265,46 @@ country_event = {
 
 	option = {
 		name = arabia.2.a
-		add_opinion_modifier = { target = ENG modifier =  accepted_our_demands }
-		transfer_state = 656
-		transfer_state = 658
-		transfer_state = 659
-		transfer_state = 765
+		add_opinion_modifier = { target = FROM modifier =  accepted_our_demands }
+		every_other_country = {
+			limit = {
+				OR = {
+					is_subject_of = FROM
+					tag = FROM
+				}
+			}
+			every_owned_state = {
+				limit = {
+					NOT = {
+						is_core_of = PREV
+					}
+					OR = {
+						#Jordan
+						state = 455
+						state = 1021
+						state = 1022
+
+						#Mandate
+						state = 454		#Coastal Plain
+						state = 966		#West Bank
+						state = 949		#Ghaza
+						state = 1016	#Jerusalem
+						state = 1017	#Beersheba
+
+						state = 656		#Kuwait
+						state = 658		#Abu Dhabi
+						state = 765		#Qatar
+						state = 1007	#Bahrain
+						state = 659		#Aden
+					}
+				}
+				transfer_state_to = ROOT
 			}
 		}
+	}
+}
 
-# ENG declines
+# Owner declines
 country_event = {
 	id = arabia.3
 	title = arabia.3.t
@@ -184,10 +315,10 @@ country_event = {
 
 	option = {
 		name = arabia.3.a
-		add_opinion_modifier = { target = ENG modifier = sau_trade_broken }
+		add_opinion_modifier = { target = FROM modifier = sau_trade_broken }
 		create_wargoal = {
 			type = take_state
-			target = ENG
+			target = FROM
 			generator = { 656 658 659 765 }
 		}
 	}
