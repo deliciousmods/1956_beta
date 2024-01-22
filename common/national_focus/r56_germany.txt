@@ -1146,7 +1146,25 @@ focus_tree = {
 		y = 1
 		
 		completion_reward = {
-			add_political_power = 200
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				create_operative_leader = {
+					name = "Eleysa Bazna"
+					GFX = GFX_portrait_eleysa_bazna
+					traits = {
+						operative_infiltrator
+					}
+					bypass_recruitment = no
+					available_to_spy_master = yes
+					nationalities = {
+						TUR ALB YUG KOS
+					}
+				}
+			}
+			unlock_decision_category_tooltip = GER_middle_eastern_diplomacy_category
+			custom_effect_tooltip = GER_middle_east_diplo_tt
 		}
 	}
 	
@@ -1433,6 +1451,23 @@ focus_tree = {
 	}
 	
 	focus = {
+		id = GER_protect_the_finns
+		icon = GFX_goal_generic_forceful_treaty
+		cost = 5
+		prerequisite = {
+			focus = GER_germanic_brotherhood
+		}
+
+		relative_position_id = GER_germanic_brotherhood
+		x = 0
+		y = 2
+		
+		completion_reward = {
+			add_political_power = 200
+		}
+	}
+	
+	focus = {
 		id = GER_plan_sealion
 		icon = GFX_goal_generic_forceful_treaty
 		cost = 5
@@ -1444,23 +1479,6 @@ focus_tree = {
 		relative_position_id = GER_germanic_brotherhood
 		x = 1
 		y = 1
-		
-		completion_reward = {
-			add_political_power = 200
-		}
-	}
-	
-	focus = {
-		id = GER_protect_the_finns
-		icon = GFX_goal_generic_forceful_treaty
-		cost = 5
-		prerequisite = {
-			focus = GER_germanic_brotherhood
-		}
-
-		relative_position_id = GER_germanic_brotherhood
-		x = 0
-		y = 2
 		
 		completion_reward = {
 			add_political_power = 200
@@ -2389,6 +2407,66 @@ focus_tree = {
 			add_political_power = 200
 		}
 	}
+	
+	focus = {
+		id = GER_improve_national_spirit
+		icon = GFX_goal_GER_european_reich
+		cost = 10.00
+		prerequisite = {
+			focus = GER_denounce_versailles
+		}
+		relative_position_id = GER_denounce_versailles
+		x = 2
+		y = 1
+		ai_will_do = {
+			factor = 10
+		}
+		available = {
+			is_subject = no
+			has_government = fascism
+			OR = {
+				GER = { controls_state = 126 }
+				any_other_country = {
+					is_subject_of = GER
+					controls_state = 126
+				}
+			}
+			OR = {
+				GER = { controls_state = 16 }
+				any_other_country = {
+					is_subject_of = GER
+					controls_state = 16
+				}
+			}
+		}
+		cancel = {
+			AND = {
+				has_war = no
+				126 = {
+					controller = {
+						NOT = { tag = GER }
+						NOT = { is_subject_of = GER }
+					}
+				}
+				16 = {
+					controller = {
+						NOT = { tag = GER }
+						NOT = { is_subject_of = GER }
+					}
+				}
+			}
+		}
+		completion_reward = {
+			swap_ideas = {
+				remove_idea = sour_loser
+				add_idea = triumphant_will
+			}
+			unlock_decision_tooltip = GER_formalize_the_reichskommissariats
+		}
+		search_filters = {
+			FOCUS_FILTER_POLITICAL
+		}
+	}
 
 	focus = {
 		id = GER_rhineland
@@ -2687,27 +2765,155 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			hidden_effect = {
-				SOV = { remove_opinion_modifier = { target = ROOT modifier = pact_against_us } }
+			create_wargoal = {
+				type = annex_everything
+				target = SOV
+				expire = 0
 			}
-			SOV = { add_opinion_modifier = { target = ROOT modifier = worse_pact_against_us } }
-			custom_effect_tooltip = GER_anti_soviet_pact_tt_3
-			custom_effect_tooltip = GER_anti_soviet_pact_tt
-			custom_effect_tooltip = GER_anti_soviet_pact_tt_2
-			every_other_country = {
-				limit = {
-					has_opinion_modifier = anti_comintern_pact_opinion
-					OR = {
-						NOT = { is_in_faction = yes }
-						is_in_faction_with = GER
+			add_ideas = GER_eastern_campaign
+			SOV = { #declare war on civil war's so it doesnt become on big mess
+				if = {
+					limit = {
+						has_civil_war = yes
 					}
-					NOT = { tag = GER }
-					NOT = { has_war_with = GER }
+					every_other_country = {
+						limit = {
+							original_tag = SOV
+						}
+						ROOT = {
+							create_wargoal = {
+								type = annex_everything
+								target = PREV
+								expire = 0
+							}
+						}
+					}
 				}
-				country_event = germany.83
 			}
-			hidden_effect = {
-				news_event = { hours = 12 id = news.215 }
+			hidden_effect = {#Filling some of the supply gaps the ai will have at this point
+				if = {
+					limit = {
+						difficulty > 1
+						GER = {
+							is_ai = yes
+						}
+						NOT = {
+							has_dlc = "No Step Back"
+						}
+					}
+					add_fuel = 3000 #yes the ai needs all this shit
+					add_manpower = 25000
+					add_offsite_building = {
+						type = arms_factory level = 3
+					}
+					add_offsite_building = {
+						type = arms_factory level = 3
+					}
+					add_offsite_building = {
+						type = arms_factory level = 3
+					}
+					add_equipment_to_stockpile = {
+						type = infantry_equipment
+						amount = 1000
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = light_tank_equipment_1
+						amount = 125
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = medium_tank_chassis
+						amount = 750
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = anti_air_equipment
+						amount = 500
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = anti_tank_equipment
+						amount = 500
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = artillery_equipment
+						amount = 500
+						producer = GER
+					}
+					add_equipment_to_stockpile = {#always biggest gap
+						type = support_equipment
+						amount = 1750 #not a typo
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = motorized_equipment
+						amount = 750
+						producer = GER
+					}
+				}
+
+				if = {
+					limit = {
+						difficulty > 1
+						GER = {
+							is_ai = yes
+						}
+						has_dlc = "No Step Back"
+					}
+					add_fuel = 3000 #yes the ai needs all this shit
+					add_manpower = 25000
+					add_offsite_building = {
+						type = arms_factory level = 3
+					}
+					add_offsite_building = {
+						type = arms_factory level = 3
+					}
+					add_offsite_building = {
+						type = arms_factory level = 3
+					}
+					add_equipment_to_stockpile = {
+						type = infantry_equipment
+						amount = 4750
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = light_tank_chassis_1
+						amount = 275
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = medium_tank_chassis
+						amount = 250
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = anti_air_equipment
+						amount = 175
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = anti_tank_equipment
+						amount = 250
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = artillery_equipment
+						amount = 225
+						producer = GER
+					}
+					add_equipment_to_stockpile = {#always biggest gap
+						type = support_equipment
+						amount = 1500 #not a typo
+						producer = GER
+					}
+					add_equipment_to_stockpile = {
+						type = motorized_equipment
+						amount = 750
+						producer = GER
+					}
+				}
 			}
 		}
 	}
@@ -5241,37 +5447,6 @@ focus_tree = {
 		search_filters = {
 			FOCUS_FILTER_RESEARCH 
 		}
-	}
-	focus = {
-		id = GER_train_marines
-		icon = GFX_goal_generic_amphibious_assault
-		cost = 5
-		prerequisite = {
-			focus = GER_landing_craft
-		}
-		prerequisite = {
-			focus = GER_elite_units #focus = GER_train_paratroopers
-		}
-		relative_position_id = GER_landing_craft
-		x = 0
-		y = 1
-		ai_will_do = {
-			factor = 10
-		}
-		completion_reward = {
-			army_experience = 10
-			navy_experience = 10
-			add_tech_bonus = {
-				name = GER_train_marines
-				bonus = 1
-				uses = 2
-				category = marine_tech #applies to both marines and general special forces, more flexible than dedicated buffs
-			}
-		}
-		search_filters = {
-			FOCUS_FILTER_RESEARCH 
-		}
-
 	}
 	focus = {
 		id = GER_prevent_aerial_hegemony
@@ -7914,452 +8089,6 @@ focus_tree = {
 			FOCUS_FILTER_ANNEXATION
 		}
 	}
-	
-	focus = {
-		id = GER_middle_eastern_diplomacy
-		icon = GFX_focus_TUR_treaty_of_saadabad
-		cost = 10
-
-		x = 0
-		y = 1
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		available = {
-			AND = {
-				OR = {
-					has_government = fascism
-					OR = {
-						has_war_with = ENG
-						has_war_with = SOV
-					}
-				}
-				OR = {
-					NOT = {
-						has_war_with = AFG
-					}
-					NOT = {
-						has_war_with = IRQ
-					}
-					NOT = {
-						has_war_with = PER
-					}
-					NOT = {
-						has_war_with = TUR
-					}
-				}
-			}
-		}
-
-		bypass = {
-			OR = {
-				AND = {
-					AFG = {
-						is_in_faction_with = GER
-					}
-					IRQ = {
-						is_in_faction_with = GER
-					}
-					PER = {
-						is_in_faction_with = GER
-					}
-					TUR = {
-						is_in_faction_with = GER
-					}
-				}
-				AND = {
-					NOT = {
-						country_exists = AFG 
-					}
-					NOT = {
-						country_exists = IRQ 
-					}
-					NOT = {
-						country_exists = PER
-					}
-					NOT = {
-						country_exists = TUR
-					}
-				}
-			}
-		}
-
-		completion_reward = {
-			if = {
-				limit = {
-					has_dlc = "La Resistance"
-				}
-				create_operative_leader = {
-					name = "Eleysa Bazna"
-					GFX = GFX_portrait_eleysa_bazna
-					traits = {
-						operative_infiltrator
-					}
-					bypass_recruitment = no
-					available_to_spy_master = yes
-					nationalities = {
-						TUR ALB YUG KOS
-					}
-				}
-			}
-			unlock_decision_category_tooltip = GER_middle_eastern_diplomacy_category
-			custom_effect_tooltip = GER_middle_east_diplo_tt
-		}
-	}
-	focus = {
-		id = GER_soviet_invasion
-		icon = GFX_goal_SOV_trot_destalinization
-		cost = 10.00
-		prerequisite = {
-			focus = GER_danzig_or_war
-			focus = GER_poland_trade
-			focus = GER_poland_war
-		}
-		mutually_exclusive = {
-			focus = GER_help_SOV_revolutionaries_r56_2
-		}
-		mutually_exclusive = {
-			focus = GER_soviet_ally_r56
-		}
-		relative_position_id = GER_mol_rib_pact
-		x = -2
-		y = 1
-		ai_will_do = {
-			factor = 10
-			modifier = {
-				factor = 10
-				is_historical_focus_on = yes
-				date > 1941.4.1
-			}
-		}
-		available = {
-			r56_script_i_am_sane = yes
-			is_neighbor_of = SOV
-			SOV = {
-				exists = yes
-				NOT = {
-					is_subject_of = ROOT
-					is_in_faction_with = ROOT
-				}
-			}
-		}
-		bypass = {
-			SOV = {
-				r56_script_standard_bypass = yes
-			}
-		}
-		will_lead_to_war_with = SOV
-		completion_reward = {
-			create_wargoal = {
-				type = annex_everything
-				target = SOV
-				expire = 0
-			}
-			add_ideas = GER_eastern_campaign
-			SOV = { #declare war on civil war's so it doesnt become on big mess
-				if = {
-					limit = {
-						has_civil_war = yes
-					}
-					every_other_country = {
-						limit = {
-							original_tag = SOV
-						}
-						ROOT = {
-							create_wargoal = {
-								type = annex_everything
-								target = PREV
-								expire = 0
-							}
-						}
-					}
-				}
-			}
-			hidden_effect = {#Filling some of the supply gaps the ai will have at this point
-				if = {
-					limit = {
-						difficulty > 1
-						GER = {
-							is_ai = yes
-						}
-						NOT = {
-							has_dlc = "No Step Back"
-						}
-					}
-					add_fuel = 3000 #yes the ai needs all this shit
-					add_manpower = 25000
-					add_offsite_building = {
-						type = arms_factory level = 3
-					}
-					add_offsite_building = {
-						type = arms_factory level = 3
-					}
-					add_offsite_building = {
-						type = arms_factory level = 3
-					}
-					add_equipment_to_stockpile = {
-						type = infantry_equipment
-						amount = 1000
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = light_tank_equipment_1
-						amount = 125
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = medium_tank_chassis
-						amount = 750
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = anti_air_equipment
-						amount = 500
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = anti_tank_equipment
-						amount = 500
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = artillery_equipment
-						amount = 500
-						producer = GER
-					}
-					add_equipment_to_stockpile = {#always biggest gap
-						type = support_equipment
-						amount = 1750 #not a typo
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = motorized_equipment
-						amount = 750
-						producer = GER
-					}
-				}
-
-				if = {
-					limit = {
-						difficulty > 1
-						GER = {
-							is_ai = yes
-						}
-						has_dlc = "No Step Back"
-					}
-					add_fuel = 3000 #yes the ai needs all this shit
-					add_manpower = 25000
-					add_offsite_building = {
-						type = arms_factory level = 3
-					}
-					add_offsite_building = {
-						type = arms_factory level = 3
-					}
-					add_offsite_building = {
-						type = arms_factory level = 3
-					}
-					add_equipment_to_stockpile = {
-						type = infantry_equipment
-						amount = 4750
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = light_tank_chassis_1
-						amount = 275
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = medium_tank_chassis
-						amount = 250
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = anti_air_equipment
-						amount = 175
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = anti_tank_equipment
-						amount = 250
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = artillery_equipment
-						amount = 225
-						producer = GER
-					}
-					add_equipment_to_stockpile = {#always biggest gap
-						type = support_equipment
-						amount = 1500 #not a typo
-						producer = GER
-					}
-					add_equipment_to_stockpile = {
-						type = motorized_equipment
-						amount = 750
-						producer = GER
-					}
-				}
-			}
-		}
-		search_filters = {
-			FOCUS_FILTER_ANNEXATION FOCUS_FILTER_MILITARY_EQUIPMENT
-		}
-	}
-	focus = {
-		id = GER_help_SOV_revolutionaries_r56_2 #other is democratic side
-		text = GER_help_SOV_revolutionaries
-		icon = GFX_goal_anti_comintern_pact
-		prerequisite = {
-			focus = GER_danzig_or_war
-			focus = GER_poland_friend
-			focus = GER_poland_trade
-			focus = GER_poland_war
-		}
-		mutually_exclusive = {
-			focus = GER_soviet_invasion
-		}
-		mutually_exclusive = {
-			focus = GER_soviet_ally_r56
-		}
-		available = {
-			is_subject = no
-			is_faction_leader = yes
-			custom_trigger_tooltip = {
-				tooltip = intervene_soviet_civil_war_tt		
-				any_country = {
-					original_tag = SOV
-					NOT = {
-						tag = SOV
-					}
-					has_civil_war = yes
-					has_government = communism
-				}
-				SOV = {
-					NOT = {
-						has_government = communism
-						has_war_with = GER
-						is_in_faction_with = GER
-					}
-				}
-			}
-		}
-		bypass = {
-			has_war_together_with = SOV
-			SOV = {
-				has_civil_war = yes
-			}
-		}
-		relative_position_id = GER_poland_friend
-		x = 0
-		y = 1
-		cost = 10
-		ai_will_do = {
-			factor = 1
-		}
-		
-		completion_reward = {
-			add_to_faction = SOV
-			add_to_war = { 
-				targeted_alliance = SOV
-				enemy = SOS
-			}
-			if = {
-				limit = {
-					FRA = { has_government = communism }
-				}
-				add_ai_strategy = {
-					type = antagonize
-					id = "GER"
-					value = 200
-				}
-			}
-		}
-	}
-	# focus = {
-	# 	id = GER_encirclement_doctrine
-	# 	icon = GFX_goal_generic_construct_military
-	# 	cost = 10.00
-	# 	prerequisite = {
-	# 		focus = GER_soviet_invasion
-	# 		focus = GER_help_SOV_revolutionaries_r56_2
-	# 	}
-	# 	relative_position_id = GER_soviet_invasion
-	# 	x = 3
-	# 	y = 1
-	# 	ai_will_do = {
-	# 		factor = 10
-	# 	}
-	# 	completion_reward = {
-	# 		add_doctrine_cost_reduction = {
-	# 			name = GER_encirclement_doctrine
-	# 			cost_reduction = 0.5
-	# 			uses = 2
-	# 			category = land_doctrine
-	# 		}
-	# 	}
-	# 	search_filters = {
-	# 		FOCUS_FILTER_RESEARCH
-	# 	}
-	# }
-	# focus = {
-	# 	id = GER_train_panzergrenadiers
-	# 	icon = GFX_goal_generic_axis_build_infantry
-	# 	cost = 10.00
-	# 	prerequisite = {
-	# 		focus = GER_encirclement_doctrine
-	# 	}
-	# 	relative_position_id = GER_encirclement_doctrine
-	# 	x = -1
-	# 	y = 1
-	# 	ai_will_do = {
-	# 		factor = 10
-	# 	}
-	# 	available = {
-	# 		#date > 1942.1.1
-	# 	}
-	# 	completion_reward = {
-	# 		add_tech_bonus = {
-	# 			name = GER_train_panzergrenadiers
-	# 			bonus = 0.5
-	# 			uses = 2
-	# 			category = cat_mechanized_equipment
-	# 		}
-	# 	}
-	# 	search_filters = {
-	# 		FOCUS_FILTER_RESEARCH
-	# 	}
-
-	# }
-	# focus = {
-	# 	id = GER_seige_fortified_towns
-	# 	icon = GFX_focus_ger_bulwark_against_bolshevism
-	# 	cost = 10.00
-	# 	prerequisite = {
-	# 		focus = GER_encirclement_doctrine
-	# 	}
-	# 	relative_position_id = GER_encirclement_doctrine
-	# 	x = 1
-	# 	y = 1
-	# 	ai_will_do = {
-	# 		factor = 10
-	# 	}
-	# 	available = {
-	# 		#date > 1941.9.8
-	# 	}
-	# 	completion_reward = {
-	# 		add_tech_bonus = {
-	# 			name = GER_seige_fortified_towns
-	# 			bonus = 0.5
-	# 			uses = 2
-	# 			category = artillery
-	# 		}
-	# 	}
-	# 	search_filters = {
-	# 		FOCUS_FILTER_RESEARCH
-	# 	}
-	# }
 	focus = {
 		id = GER_kill_hitler
 		icon = GFX_goal_ger_kill_hitler
@@ -9360,66 +9089,6 @@ focus_tree = {
 		}
 		search_filters = {
 			FOCUS_FILTER_RESEARCH FOCUS_FILTER_ESPIONAGE
-		}
-
-	}
-	focus = {
-		id = GER_improve_national_spirit
-		icon = GFX_goal_GER_european_reich
-		cost = 10.00
-		prerequisite = {
-			focus = GER_war_with_france
-		}
-		relative_position_id = GER_war_with_france
-		x = 2
-		y = 3
-		ai_will_do = {
-			factor = 10
-		}
-		available = {
-			is_subject = no
-			has_government = fascism
-			OR = {
-				GER = { controls_state = 126 }
-				any_other_country = {
-					is_subject_of = GER
-					controls_state = 126
-				}
-			}
-			OR = {
-				GER = { controls_state = 16 }
-				any_other_country = {
-					is_subject_of = GER
-					controls_state = 16
-				}
-			}
-		}
-		cancel = {
-			AND = {
-				has_war = no
-				126 = {
-					controller = {
-						NOT = { tag = GER }
-						NOT = { is_subject_of = GER }
-					}
-				}
-				16 = {
-					controller = {
-						NOT = { tag = GER }
-						NOT = { is_subject_of = GER }
-					}
-				}
-			}
-		}
-		completion_reward = {
-			swap_ideas = {
-				remove_idea = sour_loser
-				add_idea = triumphant_will
-			}
-			unlock_decision_tooltip = GER_formalize_the_reichskommissariats
-		}
-		search_filters = {
-			FOCUS_FILTER_POLITICAL
 		}
 
 	}
