@@ -3,6 +3,7 @@
 ###########################
 
 add_namespace = germany
+add_namespace = ger_brest_litovsk
 
 # Austrian Anschluss Completed
 country_event = {
@@ -96,7 +97,6 @@ country_event = {
 			GER_mefo_bills_level_down = yes
 		}
 		custom_effect_tooltip = anschluss_mefo_bills_double_reduction
-		add_to_variable = { var = GER_mefo_bill_counter value = -10 }
 		
 		if = {
 			limit = {
@@ -1489,6 +1489,7 @@ country_event = {
 			set_province_controller = 12562
 			set_province_controller = 524
 		}
+		set_global_flag = GER_used_original_MR	#allow Germany to influence Lituania only if the Soviets are not to be ceded it
 		create_wargoal = {
 			type = annex_everything
 			target = LIT
@@ -3404,6 +3405,7 @@ country_event = {
 
 		if = {
 			limit = {
+				72 = { is_owned_by = CZE }	#r56
 				88 = { is_owned_by = POL }
 			}
 			POL = {
@@ -3912,7 +3914,6 @@ country_event = {
 		#		has_global_flag = ger_vanilla_focus_tree
 		#	}
 			custom_effect_tooltip = end_of_czechoslovakia_mefo_bills_tt
-			add_to_variable = { var = GER_mefo_bill_counter value = -5 }
 			GER_mefo_bills_level_down = yes
 		#}
 		
@@ -3970,7 +3971,6 @@ country_event = {
 		#		has_global_flag = ger_vanilla_focus_tree
 		#	}
 			custom_effect_tooltip = end_of_czechoslovakia_mefo_bills_tt
-			add_to_variable = { var = GER_mefo_bill_counter value = -5 }
 			GER_mefo_bills_level_down = yes
 		#}
 	}
@@ -4012,7 +4012,6 @@ country_event = {
 		#		has_global_flag = ger_vanilla_focus_tree
 		#	}
 			custom_effect_tooltip = end_of_czechoslovakia_mefo_bills_tt
-			add_to_variable = { var = GER_mefo_bill_counter value = -5 }
 			GER_mefo_bills_level_down = yes
 		#}
 	}
@@ -4037,7 +4036,6 @@ country_event = {
 		#		has_global_flag = ger_vanilla_focus_tree
 		#	}
 			custom_effect_tooltip = end_of_czechoslovakia_mefo_bills_tt
-			add_to_variable = { var = GER_mefo_bill_counter value = -5 }
 			GER_mefo_bills_level_down = yes
 		#}
 	}
@@ -6641,7 +6639,6 @@ country_event = {
 			}
 		}
 		custom_effect_tooltip = yugoslavia_mefo_bills_tt
-		add_to_variable = { var = GER_mefo_bill_counter value = -5 }
 		GER_mefo_bills_level_down = yes
 	}
 
@@ -6731,8 +6728,8 @@ country_event = {
 							limit = { YUG = { owns_state = 952 } }
 							transfer_state = 952
 						}
+					}
 					puppet = CRO #in case Croatia doesn't exist it shall become German puppet
-					}	
 				}
 				every_other_country = { #Making Croatian borders bigger to prevent bordergore 
 					limit = {
@@ -6845,8 +6842,8 @@ country_event = {
 						limit = { YUG = { owns_state = 952 } }
 						transfer_state = 952
 					}
-				puppet = CRO #in case Croatia doesn't exist it shall become German puppet
 				}	
+				puppet = CRO #in case Croatia doesn't exist it shall become German puppet
 			}
 			every_other_country = { #Croatia takes that to prevent border gore
 				limit = {
@@ -6900,7 +6897,6 @@ country_event = {
 			}
 		}
 		custom_effect_tooltip = yugoslavia_mefo_bills_tt
-		add_to_variable = { var = GER_mefo_bill_counter value = -5 }
 		GER_mefo_bills_level_down = yes
 
 	}
@@ -7151,8 +7147,8 @@ country_event = {
 						limit = { YUG = { owns_state = 952 } }
 						transfer_state = 952
 					}
-				puppet = CRO
 				}	
+				puppet = CRO
 			}
 			every_other_country = { #preventing bordergore in Croatian part
 				limit = {
@@ -7265,7 +7261,6 @@ country_event = {
 			}
 		}
 		custom_effect_tooltip = yugoslavia_mefo_bills_tt
-		add_to_variable = { var = GER_mefo_bill_counter value = -5 }
 		GER_mefo_bills_level_down = yes
 	}
 }
@@ -8616,6 +8611,10 @@ country_event = {
 		POL = {
 			if = {
 				limit = {
+					OR = {	#new 11/2023, feel free to remove if theres edge cases where this isnt the case
+						has_war_with = GER
+						is_subject_of = SOV #even if not called in by player (AI always does afaik), give cores for their subject
+					}
 					NOT = {
 						has_completed_focus = POL_accept_border_realignment
 					}
@@ -8625,6 +8624,23 @@ country_event = {
 				add_state_core = 68
 				add_state_core = 63
 				add_state_core = 5
+			}
+			else_if = {	#new 11/2023, feel free to remove if theres problems
+				limit = {
+					NOT = {
+						has_war_with = GER
+					}
+				}
+				DDR = { #east Germany except Prussia cores for DDR
+					add_state_core = 66
+					add_state_core = 67
+					add_state_core = 68
+					add_state_core = 63
+					#add_state_core = 5	#Prussia - Ermland-Masuren
+				}
+				SOV = {
+					add_state_claim = 5	#try get them to not create bordergore one-state Germany
+				}
 			}
 		}
 		hidden_effect = {
@@ -8843,8 +8859,13 @@ country_event = {
 			#Give WGR their cores
 			every_state = {
 				limit = {
-					is_owned_and_controlled_by = GER
 					is_core_of = WGR
+					#is_owned_and_controlled_by = GER
+					any_country_with_original_tag = {	#stupid new peace deals
+						original_tag_to_check = GER
+						owns_state = PREV
+						controls_state = PREV
+					}
 				}
 				WGR = {
 					transfer_state = PREV
@@ -8858,8 +8879,13 @@ country_event = {
 			#Give East Germany their cores
 			every_state = {
 				limit = {
-					is_owned_and_controlled_by = GER
 					is_core_of = DDR
+					#is_owned_and_controlled_by = GER
+					any_country_with_original_tag = {		#stupid new peace deals
+						original_tag_to_check = GER
+						owns_state = PREV
+						controls_state = PREV
+					}
 				}
 				DDR = {
 					transfer_state = PREV
@@ -10753,6 +10779,9 @@ country_event = { #Resolves Europe Post Yalta
 							is_owned_and_controlled_by = SOV
 							is_owned_and_controlled_by = ITA
 							is_owned_and_controlled_by = YUG
+							is_owned_and_controlled_by = ROM #new 11/2023 - please dont bordergore Hungary
+							is_owned_and_controlled_by = CZE #new 11/2023 - please dont bordergore Hungary
+							is_owned_and_controlled_by = AUS #new 11/2023 - please dont bordergore Hungary
 						}
 						NOT = {
 							is_core_of = ROM
@@ -13458,6 +13487,10 @@ country_event = { #Germany civil war
 						is_character = GER_franz_jacob
 						is_character = GER_Franz_Dahlem
 						is_character = GER_Bernhard_Bastlein
+						is_character = GER_hans_kahle
+						is_character = GER_hans_beimler
+						is_character = GER_johannes_becher
+						is_character = GER_rudolf_hernnstadt
 					}
 				}
 				set_nationality = event_target:communist_germany
@@ -13501,6 +13534,12 @@ country_event = { #Germany civil war
 						  	traits = {  }
 						}
 					}
+				}
+				every_unit_leader = {
+					limit = {
+						has_id = 19 #Johannes Blaskowitz
+					}
+					remove_unit_leader_trait = unpopular #Should be less controversial if Germany is being good
 				}
 				division_template = {
 					name = "Landsturmregiment"
@@ -13810,6 +13849,7 @@ country_event = { #Germany civil war
 							mid_1_custom_slot = ship_airplane_launcher_1
 							mid_2_custom_slot = ship_secondaries_1
 							rear_1_custom_slot = ship_torpedo_1
+							rear_2_custom_slot = ship_heavy_battery_2
 						}
 					}
 					create_equipment_variant = {
@@ -14147,7 +14187,6 @@ country_event = { #Germany civil war
 	option = { #Democrats
 		name = r56.ger.25.a
 		hidden_effect = {
-			civil_war_anti_exploiter_punitive_action = yes	#give the nazis free divisions if player deleted army
 			transfer_units_fraction= {
 				target = event_target:communist_germany
 				size = 0.2
@@ -14170,6 +14209,7 @@ country_event = { #Germany civil war
 					always = yes 
 				}
 			}
+			civil_war_anti_exploiter_punitive_action = yes	#give the nazis free divisions if player deleted army
 			#create fascist paramilitaries here, after splitting and after the player can mess with them
 			division_template = {
 				name = "SS-Sturmbrigade"
@@ -14202,7 +14242,6 @@ country_event = { #Germany civil war
 	option = { #Commies
 		name = r56.ger.25.b
 		hidden_effect = {
-			civil_war_anti_exploiter_punitive_action = yes	#give the nazis free divisions if player deleted army
 			transfer_units_fraction= {
 				target = event_target:communist_germany
 				size = 0.2
@@ -14225,6 +14264,7 @@ country_event = { #Germany civil war
 					always = yes 
 				}
 			}
+			civil_war_anti_exploiter_punitive_action = yes	#give the nazis free divisions if player deleted army
 			#create fascist paramilitaries here, after splitting and after the player can mess with them
 			division_template = {
 				name = "SS-Sturmbrigade"
@@ -14626,6 +14666,9 @@ country_event = { #Ludendorff's health worsens
 		GER_erich_ludendorff = {
 			remove_unit_leader = yes
 		}
+		custom_effect_tooltip = available_political_advisor
+		show_ideas_tooltip = GER_erich_ludendorff
+		set_country_flag = GER_ludendorff_political_advisor
 	}
 	option = { # Give him all the healthcare he needs - he lives longer
 		name = r56.ger.31.b
@@ -14699,13 +14742,53 @@ country_event = { #Germany proposes economic integration
 	id = r56.ger.34
 	title = r56.ger.34.t
 	desc = r56.ger.34.desc
+	picture = GFX_report_event_generic_construction_site
 
 	is_triggered_only = yes
 
 	option = {	#yippie!
 		name = r56.ger.34.a
 		ai_chance = {
-			factor = 1
+			factor = 10
+			modifier = {
+				add = 5
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio > 1.7
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				ROOT = {
+					NOT = {
+						is_in_faction_with = FROM
+					}
+					has_opinion = {
+						target = FROM
+						value > 40
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				ROOT = {
+					is_in_faction_with = FROM
+					has_opinion = {
+						target = FROM
+						value > 80
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				any_country = {
+					is_neighbor_of = ROOT
+					NOT = { tag = FROM }
+					has_added_tension_amount > 10
+				}
+			}
 		}
 		FROM = {
 			country_event = r56.ger.35
@@ -14724,7 +14807,35 @@ country_event = { #Germany proposes economic integration
 	option = {	#no!
 		name = r56.ger.34.b
 		ai_chance = {
-			factor = 1
+			factor = 10
+			modifier = {
+				add = 5
+				FROM = {
+					has_added_tension_amount > 45
+				}
+			}
+			modifier = {
+				add = 5
+				FROM = {
+					has_war = yes
+				}
+			}
+			modifier = {
+				add = 5
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio < 1.2
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				has_opinion = {
+					target = FROM
+					value < 10
+				}
+			}
 		}
 		trigger = {	#LIT cant be couped so has to cut ties
 			NOT = {
@@ -14737,8 +14848,38 @@ country_event = { #Germany proposes economic integration
 	}
 	option = {	#we must purge their influence
 		name = r56.ger.34.c
+		trigger = {
+			NOT = {
+				is_in_faction_with = FROM
+				has_war_together_with = FROM
+			}
+		}
 		ai_chance = {
-			factor = 1
+			factor = 10
+			modifier = {
+				factor = 0
+				is_in_faction_with = FROM
+			}
+			modifier = {
+				add = 5
+				has_added_tension_amount > 90
+			}
+			modifier = {
+				add = 5 
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio < 0.7
+					}
+				}
+			}
+			modifier = {
+				add = 5 
+				has_opinion = {
+					target = FROM
+					value < -50
+				}
+			}
 		}
 		FROM = {
 			country_event = r56.ger.36
@@ -14754,16 +14895,37 @@ country_event = { #Integration accepted
 	id = r56.ger.35
 	title = r56.ger.35.t
 	desc = r56.ger.35.desc
+	picture = GFX_report_event_generic_sign_treaty3
 
 	is_triggered_only = yes
 
 	option = {
 		name = r56.ger.35.a
-		set_autonomy = {
-			target = FROM
-			autonomy_state = autonomy_dominion
-			end_wars = no
-			end_civil_wars = no
+		if = {
+			limit = {
+				has_dlc = "Death or Dishonor"
+				has_government = fascism
+			}
+			set_autonomy = {
+				target = FROM
+				autonomy_state = autonomy_satellite
+				end_wars = no
+				end_civil_wars = no
+			}
+		}
+		else_if = {
+			limit = {
+				has_dlc = "Together for Victory"
+			}
+			set_autonomy = {
+				target = FROM
+				autonomy_state = autonomy_dominion
+				end_wars = no
+				end_civil_wars = no
+			}
+		}
+		else = {
+			puppet = FROM
 		}
 	}
 }
@@ -14772,6 +14934,7 @@ country_event = { #Integration refused
 	id = r56.ger.36
 	title = r56.ger.36.t
 	desc = r56.ger.36.desc
+	picture = GFX_report_event_generic_read_write
 
 	is_triggered_only = yes
 
@@ -14782,6 +14945,13 @@ country_event = { #Integration refused
 	option = {	#embargo
 		name = r56.ger.36.b
 		send_embargo = FROM
+		if = {
+			limit = {
+				is_in_faction_with = FROM
+				is_faction_leader = yes
+			}
+			remove_from_faction = FROM
+		}
 	}
 	option = {	#war/overthrow
 		name = r56.ger.36.c
@@ -14791,6 +14961,13 @@ country_event = { #Integration refused
 		# 		has_government = democratic
 		# 	}
 		# 	add_threat = 0.3	#amount too small to show up, instead link to action on threats
+		# }
+		# if = {
+		# 	limit = {
+		# 		is_in_faction_with = FROM
+		# 		is_faction_leader = yes
+		# 	}
+		# 	remove_from_faction = FROM
 		# }
 		custom_effect_tooltip = GER_hostile_trade_decisions_tt
 		hidden_effect = {	#flag setting doesnt have loc anyway
@@ -14941,6 +15118,264 @@ country_event = { #Kaiser takes power back
 	}
 }
 
+country_event = { #Germany succeeds coup attempt on us
+	id = r56.ger.39
+	title = r56.ger.39.t
+	desc = r56.ger.39.desc
+	picture = GFX_report_event_generic_italian_fascists
+
+	option = {
+		name = r56.ger.39.a
+		ai_chance = {
+			factor = 9
+		}
+		if = {
+			limit = {
+				OR = {	#neutrality coup, take priority
+					has_government = fascism
+					AND = {
+						NOT = {
+							has_government = neutrality
+						}
+						neutrality > 0.3
+					}
+				}
+			}
+			GER = {
+				puppet = PREV
+				if = {
+					limit = {
+						has_dlc = "Death or Dishonor"
+						has_government = fascism
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_satellite
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+				else_if = {
+					limit = {
+						has_dlc = "Together for Victory"
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_dominion
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+			}
+			set_politics = {	#after puppeting or ideology taken from Germany
+				ruling_party = neutrality
+				elections_allowed = no
+			}
+		}
+		else = {	#fascist coup
+			GER = {
+				puppet = PREV
+				if = {
+					limit = {
+						has_dlc = "Death or Dishonor"
+						has_government = fascism
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_satellite
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+				else_if = {
+					limit = {
+						has_dlc = "Together for Victory"
+					}
+					set_autonomy = {
+						target = PREV
+						autonomy_state = autonomy_dominion
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+			}
+			set_politics = {	#after puppeting or ideology taken from Germany
+				ruling_party = fascism
+				elections_allowed = no
+			}
+		}
+	}
+
+	option = {	#civil war
+		name = r56.ger.39.b
+		ai_chance = {
+			factor = 1
+		}
+		if = {
+			limit = {
+				OR = {	#neutrality coup, take priority
+					has_government = fascism
+					AND = {
+						NOT = {
+							has_government = neutrality
+						}
+						neutrality > 0.3
+					}
+				}
+			}
+			start_civil_war = {
+				ideology = neutrality
+				size = 0.4
+				GER = {
+					puppet = PREV
+					if = {
+						limit = {
+							has_dlc = "Together for Victory"
+						}
+						set_autonomy = {
+							target = PREV
+							autonomy_state = autonomy_dominion
+							end_wars = no
+							end_civil_wars = no
+						}
+					}
+				}
+				set_politics = {
+					ruling_party = neutrality
+					elections_allowed = no
+				}
+			}
+		}
+		else = {	#fascist coup
+			start_civil_war = {
+				ideology = fascism
+				size = 0.4
+				GER = {
+					puppet = PREV
+					if = {
+						limit = {
+							has_dlc = "Together for Victory"
+						}
+						set_autonomy = {
+							target = PREV
+							autonomy_state = autonomy_dominion
+							end_wars = no
+							end_civil_wars = no
+						}
+					}
+				}
+				set_politics = {
+					ruling_party = fascism
+					elections_allowed = no
+				}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+}
+
+country_event = { #Germany botches coup attempt on us
+	id = r56.ger.40
+	title = r56.ger.40.t
+	desc = r56.ger.40.desc
+	picture = GFX_report_event_generic_soldiers_surrendering
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56.ger.40.a
+		if = {
+			limit = {
+				is_ai = yes
+			}
+			if = {
+				limit = {
+					is_in_faction_with = GER
+					NOT = {
+						has_war_together_with = GER
+					}
+				}
+				leave_faction = yes
+			}
+		}
+		add_opinion_modifier = {
+			target = GER
+			modifier = hostile_status
+		}
+	}
+}
+
+country_event = { #We succeeded in a coup
+	id = r56.ger.41
+	title = r56.ger.41.t
+	desc = r56.ger.41.desc
+	picture = GFX_report_event_generic_italian_fascists
+
+	is_triggered_only = yes
+	
+	option = {
+		name = r56.ger.41.a
+
+	}
+}
+
+country_event = { #We botched a coup
+	id = r56.ger.42
+	title = r56.ger.42.t
+	desc = r56.ger.42.desc
+	picture = GFX_report_event_generic_soldiers_surrendering
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56.ger.42.a
+
+	}
+}
+
+country_event = { #Germany sends military advisors
+	id = r56.ger.43
+	title = r56.ger.43.t
+	desc = r56.ger.43.d
+	picture = GFX_report_event_soviet_german_soldier_handshake
+
+	is_triggered_only = yes
+
+	option = { # Weclome them
+		name = r56.ger.43.a
+		add_ideas = GER_military_advisors
+		ai_chance = { 
+			base = 2
+		}
+	}
+
+	option = { # Sorry, no
+		name = r56.ger.43.b
+		GER = {
+			country_event = { id = r56.ger.44 days = 1 random_hours = 12 }
+		}
+		ai_chance = { 
+			base = 1
+		}
+	}
+}
+
+country_event = { #Germany sends military advisors
+	id = r56.ger.44
+	title = r56.ger.44.t
+	desc = r56.ger.44.d
+	picture = GFX_report_event_PER_foreign_ministry
+
+	is_triggered_only = yes
+
+	option = { # Alright, their loss
+		name = r56.ger.44.a
+		ai_chance = { 
+			base = 2
+		}
+	}
+}
 
 add_namespace = ger.civil_war
 
@@ -15076,5 +15511,395 @@ country_event = { #
 		}
 		name = ger.renegotiate_versailles.3.a
 		add_political_power = 10
+	}
+}
+
+country_event = {
+	id = ger_brest_litovsk.1
+	title = ger_brest_litovsk.1.t
+	desc = ger_brest_litovsk.1.d
+	picture = GFX_report_event_soviet_german_soldier_handshake
+
+	fire_only_once = yes
+
+	is_triggered_only = yes
+
+	option = { # Hell naw
+		name = ger_brest_litovsk.1.a
+		ai_chance = {
+			factor = 10
+			modifier = {
+				add = 10 
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio < 0.7
+					}
+				}
+			}
+			modifier = {
+				add = 5 
+				FROM = {
+					surrender_progress > 0.1
+				}
+			}
+			modifier = {
+				add = 5
+				surrender_progress < 0.3
+			}
+			modifier = {
+				add = 5
+				surrender_progress < 0.15
+			}
+			modifier = {
+				add = 5
+				casualties_k < 700
+			}
+		}
+		news_event = erwache_news.2
+	}
+	option = { # We give up
+		name = ger_brest_litovsk.1.b
+		ai_chance = {
+			factor = 10000
+			modifier = {
+				add = 10
+				FROM = {
+					strength_ratio = {
+						tag = ROOT
+						ratio > 1.5
+					}
+				}
+			}
+			modifier = {
+				add = 5
+				FROM = {
+					surrender_progress < 0.1
+				}
+			}
+			modifier = {
+				add = 5
+				surrender_progress > 0.35
+			}
+			modifier = {
+				add = 5
+				surrender_progress > 0.5
+			}
+			modifier = {
+				add = 5
+				casualties_k > 1200
+			}
+			modifier = {
+				add = 5
+				casualties_k > 2000
+			}
+		}
+		GER = {
+			white_peace = SOV
+		}
+		### Lithuania
+		every_owned_state = {
+			limit = {
+				AND = {
+					is_core_of = LIT
+					is_owned_by = SOV
+				}
+			}
+			transfer_state_to = GER
+		}
+		### Latvia
+		every_owned_state = {
+			limit = {
+				AND = {
+					is_core_of = LAT
+					is_owned_by = SOV
+				}
+			}
+			transfer_state_to = GER
+		}
+		### Estonia
+		every_owned_state = {
+			limit = {
+				AND = {
+					is_core_of = EST
+					is_owned_by = SOV
+				}
+			}
+			transfer_state_to = GER
+		}
+		### Belarus
+		every_owned_state = {
+			limit = {
+				AND = {
+					is_core_of = BLR
+					is_owned_by = SOV
+				}
+			}
+			transfer_state_to = GER
+		}
+		### Ukraine
+		every_owned_state = {
+			limit = {
+				AND = {
+					is_core_of = UKR
+					is_owned_by = SOV
+				}
+			}
+			transfer_state_to = GER
+		}
+		if = {
+			limit = {
+				137 = { is_owned_by = SOV }
+			}
+			GER = {
+				transfer_state = 137
+			}
+		}
+		if = {
+			limit = {
+				ROM = {
+					is_in_faction_with = GER
+				}
+				78 = { is_owned_by = SOV }
+			}
+			ROM = {
+				transfer_state = 78
+			}
+		}
+		else_if = {
+			limit = {
+				78 = { is_owned_by = SOV }
+			}
+			GER = {
+				transfer_state = 78
+			}
+		}
+		if = {
+			limit = {
+				ROM = {
+					is_in_faction_with = GER
+				}
+				80 = { is_owned_by = SOV }
+			}
+			ROM = {
+				transfer_state = 80
+			}
+		}
+		else_if = {
+			limit = {
+				80 = { is_owned_by = SOV }
+			}
+			GER = {
+				transfer_state = 80
+			}
+		}
+		if = {
+			limit = {
+				ROM = {
+					is_in_faction_with = GER
+				}
+				766 = { is_owned_by = SOV }
+			}
+			ROM = {
+				transfer_state = 766
+			}
+		}
+		else_if = {
+			limit = {
+				766 = { is_owned_by = SOV }
+			}
+			GER = {
+				transfer_state = 766
+			}
+		}
+		if = {
+			limit = {
+				UKR = {
+					exists = no
+				}
+			}
+			GER = {
+				release_puppet = UKR
+			}
+		}
+		if = {
+			limit = {
+				137 = {
+					is_owned_by = GER
+				}
+			}
+			UKR = {
+				transfer_state = 137
+			}
+			137 = {
+				add_core_of = UKR
+			}
+		}
+		if = {
+			limit = {
+				ROM = {
+					NOT = {
+						is_in_faction_with = GER
+					}
+				}
+				766 = {
+					is_owned_by = GER
+				}
+				UKR = {
+					is_subject_of = GER
+				}
+			}
+			UKR = {
+				transfer_state = 766
+			}
+			766 = {
+				add_core_of = UKR
+			}
+		}
+		if = {
+			limit = {
+				ROM = {
+					NOT = {
+						is_in_faction_with = GER
+					}
+				}
+				80 = {
+					is_owned_by = GER
+				}
+				UKR = {
+					is_subject_of = GER
+				}
+			}
+			UKR = {
+				transfer_state = 80
+			}
+			80 = {
+				add_core_of = UKR
+			}
+		}
+		if = {
+			limit = {
+				BLR = {
+					exists = no
+				}
+			}
+			GER = {
+				release_puppet = BLR
+			}
+		}
+		if = {
+			limit = {
+				EST = {
+					exists = no
+				}
+			}
+			GER = {
+				release_puppet = EST
+			}
+		}
+		if = {
+			limit = {
+				LAT = {
+					exists = no
+				}
+			}
+			GER = {
+				release_puppet = LAT
+			}
+		}
+		if = {
+			limit = {
+				LIT = {
+					exists = no
+				}
+			}
+			GER = {
+				release_puppet = LIT
+			}
+		}
+		if = {
+			limit = {
+				146 = { is_owned_by = SOV }
+				FIN = {
+					NOT = {
+						is_in_faction_with = SOV
+						has_war_with = GER
+					}
+				}
+			}
+			FIN = {
+				transfer_state = 146
+			}
+		}
+		if = {
+			limit = {
+				147 = { is_owned_by = SOV }
+				FIN = {
+					NOT = {
+						is_in_faction_with = SOV
+						has_war_with = GER
+					}
+				}
+			}
+			FIN = {
+				transfer_state = 147
+			}
+		}
+		if = {
+			limit = {
+				722 = { is_owned_by = SOV }
+				FIN = {
+					NOT = {
+						is_in_faction_with = SOV
+						has_war_with = GER
+					}
+				}
+			}
+			FIN = {
+				transfer_state = 722
+			}
+		}
+		if = {
+			limit = {
+				215 = { is_owned_by = SOV }
+				FIN = {
+					NOT = {
+						is_in_faction_with = SOV
+						has_war_with = GER
+					}
+				}
+			}
+			FIN = {
+				transfer_state = 215
+			}
+		}
+		if = {
+			limit = {
+				213 = { is_owned_by = SOV }
+				FIN = {
+					NOT = {
+						is_in_faction_with = SOV
+						has_war_with = GER
+					}
+				}
+			}
+			FIN = {
+				transfer_state = 213
+			}
+		}
+		if = {
+			limit = {
+				216 = { is_owned_by = SOV }
+				FIN = {
+					NOT = {
+						is_in_faction_with = SOV
+						has_war_with = GER
+					}
+				}
+			}
+			FIN = {
+				transfer_state = 216
+			}
+		}
 	}
 }

@@ -27,17 +27,8 @@ tactic_basic_attack = {
 
 	base =  { 
 		factor = 4
-			modifier = {
-			add = -4
-			AND = {
-				has_global_flag = planned_attack
-				min_planning > .15
-				}
-			}
 	}
 	picture = attack
-	
-	countered_by = tactic_counterattack
 
 	attacker = 0.05
 }
@@ -53,8 +44,6 @@ tactic_basic_defend = {
 	
 	base =  { factor = 4 }
 	picture = defend
-	
-	countered_by = tactic_double_envelopment
 
 	defender = 0.05
 }
@@ -85,6 +74,94 @@ tactic_counterattack = { # counters basic attack, assault
 	defender = 0.25
 }
 
+tactic_basic_false_retreat = { #slighly better version of defend for skill advantage
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = no
+		AND = {
+			skill > 1
+			skill_advantage > 0
+		}
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 1
+		modifier = {
+			add = 4
+			skill_advantage > 0
+		}
+		modifier = {
+			add = 1
+			has_trait = trickster
+		}
+		modifier = {
+			add = 1
+			has_trait = homeland_connoisseur
+		}
+		modifier = {
+			has_trait = unyielding_defender
+			add = -3
+		}
+	}
+
+	picture = defend
+
+	countered_by = tactic_double_envelopment
+
+	attacker_movement_speed = -0.05
+	defender = 0.05
+	
+}
+
+tactic_basic_chase = { #slightly worse version of attack for skill disadvantage. 
+
+	is_attacker = yes
+	trigger = { # combined scope for both country and combatant
+		is_attacker = yes
+		phase = no
+		OR = {
+			skill < 2 #Get baited noob
+			skill_advantage < 1
+		}
+	}
+	
+	active = yes
+
+	base =  { 
+		factor = 0
+		modifier = {
+			add = 4
+			OR = {
+				skill_advantage < 1
+				attack_skill_level < 2
+			}
+		}
+		modifier = {
+			add = 1
+			AND = {
+				skill_advantage < 1
+				planning_skill_level < 2
+			}
+		}
+		modifier = {
+			add = 1
+			AND = {
+				skill_advantage < 1
+				logistics_skill_level < 2
+			}
+		}
+	}
+
+	picture = attack
+
+	countered_by = tactic_basic_false_retreat 
+
+	attacker = 0.05
+	attacker_movement_speed = -0.05
+}
 
 tactic_assault = { 
 	is_attacker = yes
@@ -105,9 +182,10 @@ tactic_assault = {
 
 		modifier = {
 			add = 2
+
 			is_fighting_in_terrain = urban
-			}
 		}
+	}
 	#Revisit ideally this should be more common in urban terrain
 	
 	picture = assault
@@ -1900,13 +1978,14 @@ tactic_extensive_minefields = {
 }
 
 
-############	Blunders ############
+############ Blunders ############
 
 tactic_baited_attacker = {
 	is_attacker = yes
 	trigger = {
 		is_attacker = yes
 		phase = no
+		skill_advantage < 1
 	}
 
 	active = yes
@@ -1917,6 +1996,14 @@ tactic_baited_attacker = {
 		modifier = {
 			add = 1
 			has_trait = old_guard
+		}
+
+		modifier = { #Im new to this
+			add = 1
+			OR = {
+				skill < 2
+				planning_skill_level < 2
+			}
 		}
 	}
 
@@ -1930,6 +2017,7 @@ tactic_baited_defender = {
 	trigger = {
 		is_attacker = no
 		phase = no
+		skill_advantage < 1
 	}
 
 	active = yes
@@ -1940,6 +2028,14 @@ tactic_baited_defender = {
 		modifier = {
 			add = 1
 			has_trait = old_guard
+		}
+
+		modifier = { #Im new to this
+			add = 1
+			OR = {
+				skill < 2
+				planning_skill_level < 2
+			}
 		}
 	}
 
@@ -1953,6 +2049,7 @@ tactic_ammo_attacker = {
 	trigger = {
 		is_attacker = yes
 		phase = no
+		skill_advantage < 1
 	}
 
 	active = yes
@@ -1962,7 +2059,10 @@ tactic_ammo_attacker = {
 		
 		modifier = {
 			add = 1
-			logistics_skill_level < 3
+			OR = {
+				skill < 2
+				logistics_skill_level < 2
+			}
 		}
 	}
 
@@ -1976,6 +2076,7 @@ tactic_ammo_defender = {
 	trigger = {
 		is_attacker = no
 		phase = no
+		skill_advantage < 1
 	}
 
 	active = yes
@@ -1983,9 +2084,13 @@ tactic_ammo_defender = {
 	base = {
 		factor = 1
 
-		modifier = {
+		modifier = { #Im new to this
 			add = 1
-			logistics_skill_level < 3
+			OR = {
+				skill < 2
+				logistics_skill_level < 2
+			}
+			
 		}
 	}
 
@@ -2004,12 +2109,21 @@ tactic_lost_formations = {
 		NOT = {
 			is_fighting_in_terrain = urban
 		}
+		skill_advantage < 1
 	}
 
 	active = yes
 
 	base = {
 		factor = 1
+
+		modifier = { #Im new to this
+			add = 1
+			OR = {
+				skill < 2
+				planning_skill_level < 2
+			}
+		}
 	}
 
 	attacker = -0.05
@@ -2023,12 +2137,21 @@ tactic_poor_fortifications = {
 	trigger = {
 		is_attacker = no
 		phase = no
+		skill_advantage < 1
 	}
 
 	active = yes
 
 	base = {
 		factor = 1
+
+		modifier = { #Im new to this
+			add = 1
+			AND = {
+				skill < 2
+				defense_skill_level < 2
+			}
+		}
 	}
 
 	defender = -0.1
