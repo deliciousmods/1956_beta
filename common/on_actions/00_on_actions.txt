@@ -188,15 +188,6 @@ on_actions = {
 	#on_five_year_pulse = {
 	#
 	#}
-
-	on_border_war_lost = {
-		effect = {
-			owner = {
-				country_event = { id = china.14 }
-				country_event = { id = china.16 }
-			}
-		}
-	}
 	
 	on_leave_faction = {
 		effect = {
@@ -239,12 +230,40 @@ on_actions = {
 					remove_ideas = anti_soviet_pact
 				}
 			}	
+			# Yugoslavia joins axis without solving Anti-German military - coup event
+			if = {
+				limit = {
+					original_tag = GER
+					has_government = fascism
+					FROM = {
+						original_tag = YUG
+						has_idea = anti_german_military
+						NOT = { has_country_flag = has_already_decided_yugo_coup_flag }
+					}
+				}
+				FROM = {
+					country_event = { id = DOD_yugoslavia.1 random_hours = 6 }	#6 hours to simulate fast military preparations and response
+				}
+			}
 		}
 	}
 
 	#FROM is faction leader on join faction requests. THIS DOES NOT FIRE ON ADD_TO_FACTION EFFECT! USE ON_OFFER_JOIN_FACTION!
 	on_join_faction = {
 		effect = {
+			# Yugoslavia joins axis without solving Anti-German military - coup event
+			if = {	
+				limit = {
+					FROM = {
+						original_tag = GER
+						has_government = fascism
+					}
+					original_tag = YUG
+					has_idea = anti_german_military
+					NOT = { has_country_flag = has_already_decided_yugo_coup_flag }
+				}
+				country_event = { id = DOD_yugoslavia.1 random_hours = 6 }	#6 hours to simulate fast military preparations and response
+			}
 			#Remove anti_soviet_pact if joining commie Soviet in faction
 			if = {
 				limit = {
@@ -539,6 +558,18 @@ on_actions = {
 			}
 			
 			if = {
+				limit = {
+					original_tag = FRA
+					has_government = democratic
+					NOT = { has_global_flag = FRA_capitulation_event_fired } #might as well use the achievement flag to check if france.10 fired
+					is_subject = no
+					is_in_faction_with = ENG
+					has_war_with = GER
+				}
+				country_event = france.10
+			}
+
+			if = {
 				limit = { tag = FRA }
 				set_global_flag = FRA_already_surrendered
 				set_variable = { global.FRA_capitulation_days = global.num_days }
@@ -552,28 +583,10 @@ on_actions = {
 			}
 			
 			if = {
-				limit = { 
-					original_tag = POL
-					has_government = neutrality
-				}
-				retire_country_leader = yes
-			}
-			if = {
 				limit = {
 					original_tag = DEN
 				}
 				country_event = { id = wtt_denmark.1 days = 1 }
-			}
-			if = {
-				limit = {
-					original_tag = FRA
-					has_government = democratic
-					NOT = { has_global_flag = achievement_france_surrender } #might as well use the achievement flag to check if france.10 fired
-					is_subject = no
-					is_in_faction_with = ENG
-					has_war_with = GER
-				}
-				country_event = france.10
 			}
 		}
 	}
@@ -1517,14 +1530,14 @@ on_actions = {
 					}
 					
 					random_list = {
-						25 = { EGY = { set_country_flag = ISR_AI_RANDOM_MAPAI } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_HASHOMER } }
-						5 = { EGY = { set_country_flag = ISR_AI_RANDOM_MAKI } }
-						5 = { EGY = { set_country_flag = ISR_AI_RANDOM_PROGRESSIVE } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_GENERAL_ZIONIST } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_HATZOHAR } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_IRGUN } }
-						5 = { EGY = { set_country_flag = ISR_AI_RANDOM_LEHI } }
+						25 = { ISR = { set_country_flag = ISR_AI_RANDOM_MAPAI } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_HASHOMER } }
+						5 = { ISR = { set_country_flag = ISR_AI_RANDOM_MAKI } }
+						5 = { ISR = { set_country_flag = ISR_AI_RANDOM_PROGRESSIVE } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_GENERAL_ZIONIST } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_HATZOHAR } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_IRGUN } }
+						5 = { ISR = { set_country_flag = ISR_AI_RANDOM_LEHI } }
 					}
 					
 				}
@@ -2628,20 +2641,35 @@ on_actions = {
 	# root country that invades
 	# scope state that is invaded
 	# from scope state that the invasion started
-	# on_naval_invasion = {
-	# 	effect = {
-	# 	}
-	# }
+	on_naval_invasion = {
+	 	effect = {
+		 	if = {
+				limit = {
+					ROOT = {
+						divisions_in_state = {
+							 unit = marine_commando
+							 size > 0
+							 state = PREV
+						}
+						 has_tech = marines_commandos_demolition 
+					}
+					NOT = { has_state_flag = marines_commando_effect }
+					OWNER = { NOT = { tag = ROOT } }
+				}
+				SF_marine_demoliton_effect = yes # Note that the state flag condition is not preventing it from doing 1 damage per division 
+			}
+	 	}
+	}
 	
 	
 	# root country that paradrops
 	# scope state that is paradroped into
 	# from scope state that the paradrop started
-	# on_paradrop = { #achievement thing
-	#     effect = {
-	# 	    set_country_flag = has_paradropped_flag
-	# 	}
-	# }
+	#on_paradrop = {
+	#    effect = {
+	#	    ROOT = { set_country_flag = has_paradropped_flag }
+	#	}
+	#}
 	on_ruling_party_change = { 
 		# temp var old_ideology_token is available for effects
 		effect = {
