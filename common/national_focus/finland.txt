@@ -87,6 +87,7 @@ focus_tree = {
 
 		cost = 5
 		available = {
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_POLITICAL_CHARACTER }
@@ -134,6 +135,7 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_POLITICAL_CHARACTER FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY FOCUS_FILTER_WAR_SUPPORT }
@@ -170,6 +172,7 @@ focus_tree = {
 
 		available = {
 			communism > 0.4
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER FOCUS_FILTER_MILITARY_CHARACTER FOCUS_FILTER_ARMY_XP }
@@ -387,6 +390,32 @@ focus_tree = {
 					else = {
 						add_ideas = FIN_sisu_5
 					}
+
+					ROOT = {
+						every_character = {
+							limit = {
+								has_character_flag = FIN_anti_communist_character_flag
+							}
+							set_nationality = PREV.PREV
+						}
+					}
+
+					retire_ideology_leader = fascism
+					retire_ideology_leader = neutrality
+					# SET UP COUNTRY LEADERS
+					if = {
+						limit = {
+							has_character = FIN_carl_mannerheim
+						}
+						promote_character = FIN_carl_mannerheim
+					}
+
+					if = {
+						limit = {
+							has_character = FIN_vilho_annala
+						}
+						promote_character = FIN_vilho_annala
+					}
 				}
 
 				# EFFECTS to Breakaway country from decisions
@@ -479,6 +508,18 @@ focus_tree = {
 								}
 							}
 						}
+					}
+				}
+
+				#Set ideology
+				hidden_effect = {
+					add_popularity = {
+						ideology = democratic
+						popularity = 0.1
+					}
+					add_popularity = {
+						ideology = communism
+						popularity = 0.2
 					}
 				}
 
@@ -1009,15 +1050,18 @@ focus_tree = {
 		relative_position_id = FIN_the_second_finnish_civil_war
 		cost = 5
 
+		bypass = { is_in_faction_with = SOV }
+
 		available = {
+			is_subject = no
+			OR = {
+				has_government = democratic
+				has_government = communism
+			}
 			any_other_country = {
 				original_tag = SOV
 				has_government = communism
 				NOT = { has_war_with = ROOT }
-			}
-			OR = {
-				has_government = democratic
-				has_government = communism
 			}
 			NOT = { has_country_flag = FIN_soviet_refused_finno_soviet_pact_flag }
 		}
@@ -1090,10 +1134,18 @@ focus_tree = {
 				}
 			}
 
-			custom_effect_tooltip = when_civil_war_starts_tt
+			if = {
+				limit = {
+					NOT = { has_completed_focus = FIN_the_second_finnish_civil_war }
+				}
+				custom_effect_tooltip = when_civil_war_starts_tt
+			}
 			show_unit_leaders_tooltip = FIN_emil_vaateri
 			show_unit_leaders_tooltip = FIN_eyolf_mattsson
 			show_unit_leaders_tooltip = FIN_toivo_antikainen
+
+			custom_effect_tooltip = available_chief_of_army
+			show_ideas_tooltip = FIN_toivo_antikainen
 		}
 	}
 	
@@ -1113,6 +1165,8 @@ focus_tree = {
 
 		available = {
 			has_civil_war = no
+			is_subject = no
+			NOT = { is_in_faction_with = SOV }
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL_CHARACTER FOCUS_FILTER_POLITICAL FOCUS_FILTER_WAR_SUPPORT }
@@ -1150,6 +1204,41 @@ focus_tree = {
 						}
 					}
 					country_event = { id = AAT_finland_diplomacy.23 hours = 4 random_hours = 2 }
+				}
+			}
+
+			hidden_effect = {
+				# AI less friendly
+				add_ai_strategy = {
+					type = befriend 
+					id = SOV
+					value = -20
+				}
+				SOV = {
+					add_ai_strategy = {
+						type = befriend 
+						id = ROOT
+						value = -20
+					}
+					add_ai_strategy = {
+						type = send_volunteers_desire 
+						id = ROOT
+						value = -200
+					}
+				}
+
+				#AI less hostile
+				SOV = {
+					add_ai_strategy = {
+						type = antagonize 
+						id = ROOT
+						value = 30
+					}
+					add_ai_strategy = {
+						type = conquer 
+						id = ROOT
+						value = 30
+					}
 				}
 			}
 		}
@@ -1630,34 +1719,41 @@ focus_tree = {
 			}
 		}
 		
-
 		bypass = {
-			NOT = { country_exists = EST }
+			EST = {
+				OR = {
+					AND = {
+						is_subject = yes
+						NOT = { is_subject_of = ROOT }
+					}
+					has_capitulated = yes
+					exists = no
+					all_core_state = {
+						OR = {
+							is_claimed_by = ROOT
+							is_owned_by = ROOT
+							controller = {
+								is_subject_of = ROOT
+							}
+						}
+					}
+				}
+			}
 		}
 
 		available = {
 			is_subject = no
+			OR = {
+				has_war = no
+				surrender_progress < 0.05
+			}
 		}
 
 		search_filters = { FOCUS_FILTER_ANNEXATION }
 
 		completion_reward = {
-			if = {
-				limit = {
-					EST = {
-						OR = {
-							is_subject = no
-							is_subject_of = ROOT
-						}
-						OR = {
-							is_in_faction = no
-							is_in_faction_with = ROOT
-						}
-					}
-				}
-				EST = {
-					country_event = { id = AAT_finland_diplomacy.01 hours = 4 random_hours = 2 }
-				}
+			EST = {
+				country_event = { id = AAT_finland_diplomacy.01 hours = 4 random_hours = 2 }
 			}
 
 			custom_effect_tooltip = if_they_accept_tt
@@ -1685,6 +1781,7 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_POLITICAL_CHARACTER FOCUS_FILTER_STABILITY FOCUS_FILTER_MILITARY_CHARACTER }
@@ -1723,6 +1820,7 @@ focus_tree = {
 
 		available = {
 			democratic > 0.6
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL }
@@ -2121,7 +2219,13 @@ focus_tree = {
 		cost = 10
 
 		bypass = {
-			is_faction_leader = yes
+			OR = {
+				is_faction_leader = yes
+				any_allied_country = {
+					is_faction_leader = yes 
+					NORDIC_is_nordic = yes 
+				}
+			}
 		}
 
 		available = {
@@ -2147,7 +2251,7 @@ focus_tree = {
 
 		completion_reward = {
 			create_faction = FIN_northern_defense_front_faction
-
+			complete_national_focus = NORDIC_form_joint_alliance
 			#Just for tooltip purposes (more compact tooltip)
 			every_other_country = {
 				limit = {
@@ -2523,6 +2627,18 @@ focus_tree = {
 					has_cosmetic_tag = FIN_finnish_democratic_republic
 				}
 				drop_cosmetic_tag = yes
+				if = {
+					limit = {
+						has_country_flag = FIN_formed_nordic_union
+					}
+					set_cosmetic_tag = NDC_UNIFIED
+				}
+				else_if = {
+					limit = {
+						has_completed_focus = FIN_red_finland
+					}
+					set_cosmetic_tag = FIN_red_finland
+				}
 			}
 
 			add_political_power = 170
@@ -2548,6 +2664,7 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_ANNEXATION }
@@ -2607,6 +2724,15 @@ focus_tree = {
 		y = 1
 		relative_position_id = FIN_integrate_kola_and_karelia
 		cost = 10
+
+		available = {
+			is_subject = no
+			country_exists = ENG
+			NOT = { is_in_faction_with = ENG }
+			NOT = { has_non_aggression_pact_with = ENG }
+			NOT = { has_guaranteed = ENG }
+		}
+
 		select_effect = {
 			add_ai_strategy = {
 				type = prepare_for_war
@@ -2671,6 +2797,8 @@ focus_tree = {
 		cost = 10
 
 		available = {
+			has_government = communism
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_ANNEXATION }
@@ -2683,14 +2811,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						EST = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					EST = {
@@ -2700,12 +2821,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						EST = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					EST = {
@@ -2742,11 +2858,21 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						EST = { exists = yes }
+						EST = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
 					EST = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -2779,18 +2905,18 @@ focus_tree = {
 					}
 				}
 			
-				if = { #Someone else controls Estonian states - Demand Estonian states.
+				if = { #Someone else controls core states - Demand Estonian states.
 					limit = {
 						EST = {
 							any_core_state = {
-								NOT = { is_controlled_by = EST }
+								FIN_is_valid_occupier_country = yes
 							}
 						}
 					}
 					EST = {
 						every_core_state = {
 							limit = {
-								NOT = { is_controlled_by = EST }
+								FIN_is_valid_occupier_country = yes
 							}
 							controller = {
 								if = {
@@ -2814,14 +2940,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						LAT = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					LAT = {
@@ -2831,12 +2950,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						LAT = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					LAT = {
@@ -2873,12 +2987,22 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						LAT = { exists = yes }
+						LAT = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
 
 					LAT = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -2911,18 +3035,18 @@ focus_tree = {
 					}
 				}
 			
-				if = { #Someone else controls Estonian states - Demand Estonian states.
+				if = { #Someone else controls core states - Demand Estonian states.
 					limit = {
 						LAT = {
 							any_core_state = {
-								NOT = { is_controlled_by = LAT }
+								FIN_is_valid_occupier_country = yes
 							}
 						}
 					}
 					LAT = {
 						every_core_state = {
 							limit = {
-								NOT = { is_controlled_by = LAT }
+								FIN_is_valid_occupier_country = yes
 							}
 							controller = {
 								if = {
@@ -2946,14 +3070,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						LIT = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					LIT = {
@@ -2963,12 +3080,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						LIT = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					LIT = {
@@ -3005,12 +3117,22 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						LIT = { exists = yes }
+						LIT = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
 
 					LIT = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -3043,18 +3165,18 @@ focus_tree = {
 					}
 				}
 			
-				if = { #Someone else controls Estonian states - Demand Estonian states.
+				if = { #Someone else controls core states - Demand Estonian states.
 					limit = {
 						LIT = {
 							any_core_state = {
-								NOT = { is_controlled_by = LIT }
+								FIN_is_valid_occupier_country = yes
 							}
 						}
 					}
 					LIT = {
 						every_core_state = {
 							limit = {
-								NOT = { is_controlled_by = LIT }
+								FIN_is_valid_occupier_country = yes
 							}
 							controller = {
 								if = {
@@ -3113,6 +3235,8 @@ focus_tree = {
 		will_lead_to_war_with = SOV
 
 		available = {
+			has_government = communism
+			is_subject = no
 			all_core_state = {
 				is_controlled_by = ROOT
 			}
@@ -3230,7 +3354,7 @@ focus_tree = {
 				division_cap = 24 #Starts with 12
 			}
 
-			custom_effect_tooltip = FIN_socialist_wellfare_traits_upgrade_tt
+			custom_effect_tooltip = FIN_socialist_welfare_traits_upgrade_tt
 			if = {
 				limit = {
 					has_country_leader = {
@@ -3259,7 +3383,7 @@ focus_tree = {
 					}
 				}
 				#Too long of a tooltip
-#				custom_effect_tooltip = FIN_socialist_wellfare_if_leino_tt
+#				custom_effect_tooltip = FIN_socialist_welfare_if_leino_tt
 #				FIN_yrjo_leino = {
 #					swap_country_leader_traits = {
 #						remove = veteran_communist
@@ -3267,7 +3391,7 @@ focus_tree = {
 #					}
 #				}
 #
-#				custom_effect_tooltip = FIN_socialist_wellfare_if_kuusinen_tt
+#				custom_effect_tooltip = FIN_socialist_welfare_if_kuusinen_tt
 #				FIN_otto_wille_kuusinen = {
 #					remove_country_leader_trait = FIN_stalins_puppet_kuusinen
 #					swap_country_leader_traits = {
@@ -3291,7 +3415,7 @@ focus_tree = {
 					}
 				}
 				#Too long of a tooltip
-#				custom_effect_tooltip = FIN_socialist_wellfare_if_laaltonen_tt
+#				custom_effect_tooltip = FIN_socialist_welfare_if_laaltonen_tt
 #				if = {
 #					limit = {
 #						has_dlc = "La Resistance"
@@ -3311,7 +3435,7 @@ focus_tree = {
 #						}
 #					}
 #				}
-#				custom_effect_tooltip = FIN_socialist_wellfare_if_kuusinen_tt
+#				custom_effect_tooltip = FIN_socialist_welfare_if_kuusinen_tt
 #				FIN_otto_wille_kuusinen = {
 #					remove_country_leader_trait = FIN_stalins_puppet_kuusinen
 #					swap_country_leader_traits = {
@@ -3330,15 +3454,19 @@ focus_tree = {
 				custom_effect_tooltip = generic_current_effects
 				FIN_otto_wille_kuusinen = {
 					remove_country_leader_trait = FIN_stalins_puppet_kuusinen
-					remove_country_leader_trait = personal_agenda_kuusinen #Necessary to keep the traits order
+					hidden_effect = {
+						remove_country_leader_trait = personal_agenda_kuusinen #Necessary to keep the traits order
+					}
 					swap_country_leader_traits = {
 						remove = comintern_workhorse
 						add = international_communist
 					}
-					add_country_leader_trait = personal_agenda_kuusinen #Necessary to keep the traits order
+					hidden_effect = {
+						add_country_leader_trait = personal_agenda_kuusinen #Necessary to keep the traits order
+					}
 				}
 				#Too long of a tooltip
-#				custom_effect_tooltip = FIN_socialist_wellfare_if_laaltonen_tt
+#				custom_effect_tooltip = FIN_socialist_welfare_if_laaltonen_tt
 #				if = {
 #					limit = {
 #						has_dlc = "La Resistance"
@@ -3358,7 +3486,7 @@ focus_tree = {
 #						}
 #					}
 #				}
-#				custom_effect_tooltip = FIN_socialist_wellfare_if_leino_tt
+#				custom_effect_tooltip = FIN_socialist_welfare_if_leino_tt
 #				FIN_yrjo_leino = {
 #					swap_country_leader_traits = {
 #						remove = veteran_communist
@@ -3367,7 +3495,7 @@ focus_tree = {
 #				}
 			}
 			else = {
-				custom_effect_tooltip = FIN_socialist_wellfare_traits_more_info_tt
+				custom_effect_tooltip = FIN_socialist_welfare_traits_more_info_tt
 			}
 
 			FIN_bop_medium_increase_effect = yes
@@ -3502,14 +3630,17 @@ focus_tree = {
 					EST = {
 						add_opinion_modifier = { target = ROOT modifier = FIN_finnish_influence_in_the_baltic }
 						if = {
-							limit = { ROOT = { has_government = democratic } }
-							add_timed_idea = { idea = democratic_influence days = 1095 }
+							limit = {	NOT = { has_government = ROOT } }
+							if = {
+								limit = { ROOT = { has_government = democratic } }
+								add_timed_idea = { idea = democratic_influence days = 1095 }
+							}
+							if = {
+								limit = { ROOT = { has_government = communism } }
+								add_timed_idea = { idea = communist_influence days = 1095 }
+							}
+							country_event = { id = generic.1 }
 						}
-						if = {
-							limit = { ROOT = { has_government = communism } }
-							add_timed_idea = { idea = communist_influence days = 1095 }
-						}
-						country_event = { id = generic.1 }
 					}
 
 					activate_targeted_decision = { target = EST decision = FIN_pressure_country_government_baltic }
@@ -3542,16 +3673,19 @@ focus_tree = {
 					}
 					else = {
 						LAT = {
-							add_opinion_modifier = { target = ROOT modifier = FIN_finnish_influence_in_the_baltic }
 							if = {
-								limit = { ROOT = { has_government = democratic } }
-								add_timed_idea = { idea = democratic_influence days = 1095 }
+								limit = {	NOT = { has_government = ROOT } }
+								add_opinion_modifier = { target = ROOT modifier = FIN_finnish_influence_in_the_baltic }
+								if = {
+									limit = { ROOT = { has_government = democratic } }
+									add_timed_idea = { idea = democratic_influence days = 1095 }
+								}
+								if = {
+									limit = { ROOT = { has_government = communism } }
+									add_timed_idea = { idea = communist_influence days = 1095 }
+								}
+								country_event = { id = generic.1 }
 							}
-							if = {
-								limit = { ROOT = { has_government = communism } }
-								add_timed_idea = { idea = communist_influence days = 1095 }
-							}
-							country_event = { id = generic.1 }
 						}
 
 						activate_targeted_decision = { target = LAT decision = FIN_pressure_country_government_baltic }
@@ -3587,16 +3721,19 @@ focus_tree = {
 				}
 				else = {
 					LIT = {
-						add_opinion_modifier = { target = ROOT modifier = FIN_finnish_influence_in_the_baltic }
 						if = {
-							limit = { ROOT = { has_government = democratic } }
-							add_timed_idea = { idea = democratic_influence days = 1095 }
+							limit = {	NOT = { has_government = ROOT } }
+							add_opinion_modifier = { target = ROOT modifier = FIN_finnish_influence_in_the_baltic }
+							if = {
+								limit = { ROOT = { has_government = democratic } }
+								add_timed_idea = { idea = democratic_influence days = 1095 }
+							}
+							if = {
+								limit = { ROOT = { has_government = communism } }
+								add_timed_idea = { idea = communist_influence days = 1095 }
+							}
+							country_event = { id = generic.1 }
 						}
-						if = {
-							limit = { ROOT = { has_government = communism } }
-							add_timed_idea = { idea = communist_influence days = 1095 }
-						}
-						country_event = { id = generic.1 }
 					}
 
 					activate_targeted_decision = { target = LIT decision = FIN_pressure_country_government_baltic }
@@ -3632,16 +3769,19 @@ focus_tree = {
 				}
 				else = {
 					POL = {
-						add_opinion_modifier = { target = ROOT modifier = FIN_finnish_influence_in_the_baltic }
 						if = {
-							limit = { ROOT = { has_government = democratic } }
-							add_timed_idea = { idea = democratic_influence days = 1095 }
+							limit = {	NOT = { has_government = ROOT } }
+							add_opinion_modifier = { target = ROOT modifier = FIN_finnish_influence_in_the_baltic }
+							if = {
+								limit = { ROOT = { has_government = democratic } }
+								add_timed_idea = { idea = democratic_influence days = 1095 }
+							}
+							if = {
+								limit = { ROOT = { has_government = communism } }
+								add_timed_idea = { idea = communist_influence days = 1095 }
+							}
+							country_event = { id = generic.1 }
 						}
-						if = {
-							limit = { ROOT = { has_government = communism } }
-							add_timed_idea = { idea = communist_influence days = 1095 }
-						}
-						country_event = { id = generic.1 }
 					}
 
 					activate_targeted_decision = { target = POL decision = FIN_pressure_country_government_baltic }
@@ -3720,12 +3860,6 @@ focus_tree = {
 		cost = 10
 		available = {
 			is_subject = no
-			195 = {
-				is_owned_and_controlled_by = ROOT
-			}
-			219 = {
-				is_owned_and_controlled_by = ROOT
-			}
 		}
 
 		search_filters = {}
@@ -3751,6 +3885,17 @@ focus_tree = {
 			}
 
 			custom_effect_tooltip = FIN_confederated_finno_russian_republics_dec_cat_tt
+
+			if = {
+				limit = {
+					NOT = { has_completed_focus = FIN_approach_the_soviets }
+				}
+				show_unit_leaders_tooltip = FIN_emil_vaateri
+				show_unit_leaders_tooltip = FIN_eyolf_mattsson
+				show_unit_leaders_tooltip = FIN_toivo_antikainen
+				custom_effect_tooltip = available_chief_of_army
+				show_ideas_tooltip = FIN_toivo_antikainen
+			}
 
 			FIN_bop_high_increase_effect = yes
 		}
@@ -3856,6 +4001,15 @@ focus_tree = {
 		y = 1
 		relative_position_id = FIN_finnish_influence_in_the_baltic
 		cost = 10
+
+		available = {
+			is_subject = no
+			country_exists = GER
+			NOT = { is_in_faction_with = GER }
+			NOT = { has_non_aggression_pact_with = GER }
+			NOT = { has_guaranteed = GER }
+		}
+
 		select_effect = {
 			add_ai_strategy = {
 				type = prepare_for_war
@@ -3909,8 +4063,8 @@ focus_tree = {
 	}
 	
 	focus = {
-		id = FIN_socialist_wellfare
-		icon = GFX_focus_FIN_socialist_wellfare
+		id = FIN_socialist_welfare
+		icon = GFX_focus_FIN_socialist_welfare
 		prerequisite = { focus = FIN_secure_the_baltic_sea }
 
 		x = 0
@@ -3923,9 +4077,9 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_STABILITY FOCUS_FILTER_RESEARCH FOCUS_FILTER_WAR_SUPPORT }
 
 		completion_reward = {
-			add_ideas = FIN_socialist_wellfare
+			add_ideas = FIN_socialist_welfare
 
-			custom_effect_tooltip = FIN_socialist_wellfare_compliance_tt
+			custom_effect_tooltip = FIN_socialist_welfare_compliance_tt
 			if = {
 				limit = {
 					any_controlled_state = {
@@ -3982,7 +4136,7 @@ focus_tree = {
 					}
 				}
 				
-				custom_effect_tooltip = FIN_socialist_wellfare_if_leino_tt
+				custom_effect_tooltip = FIN_socialist_welfare_if_leino_tt
 				FIN_yrjo_leino = {
 					swap_country_leader_traits = {
 						remove = veteran_communist
@@ -4003,7 +4157,7 @@ focus_tree = {
 						add = devoted_communist
 					}
 				}
-				custom_effect_tooltip = FIN_socialist_wellfare_if_laaltonen_tt
+				custom_effect_tooltip = FIN_socialist_welfare_if_laaltonen_tt
 				if = {
 					limit = {
 						has_dlc = "La Resistance"
@@ -4025,7 +4179,7 @@ focus_tree = {
 				}
 			}
 			else = {
-				custom_effect_tooltip = FIN_socialist_wellfare_traits_upgrade_tt
+				custom_effect_tooltip = FIN_socialist_welfare_traits_upgrade_tt
 			}
 
 			FIN_bop_low_increase_effect = yes
@@ -4094,6 +4248,7 @@ focus_tree = {
 			is_subject = no
 			country_exists = SOV
 			NOT = { is_in_faction_with = SOV }
+			NOT = { has_non_aggression_pact_with = SOV }
 			NOT = { has_guaranteed = SOV }
 		}
 
@@ -4160,6 +4315,7 @@ focus_tree = {
 		relative_position_id = FIN_approach_major_democracies
 		cost = 10
 		available = {
+			is_subject = no
 			count_triggers = {
 				amount = 6
 				controls_state = 666 #NORRBOTTEN
@@ -4306,6 +4462,7 @@ focus_tree = {
 		cost = 10
 
 		bypass = {
+			is_subject = no
 			controls_state = 666 #NORRBOTTEN
 			controls_state = 1029 #VÄSTERBOTTEN
 			controls_state = 144 #NORDLAND
@@ -4447,6 +4604,7 @@ focus_tree = {
 				has_government = neutrality
 				has_government = democratic #added R56
 			}
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_POLITICAL FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL_CHARACTER FOCUS_FILTER_INDUSTRY }
@@ -4874,20 +5032,41 @@ focus_tree = {
 				}
 			}
 
-			custom_effect_tooltip = FIN_every_finnish_mio_tt
-			every_military_industrial_organization = {
+			if = {
 				limit = {
-					OR = {
-						is_military_industrial_organization = FIN_crichton_vulcan_organization
-						is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
-						is_military_industrial_organization = FIN_valtion_lentokonetehdas_organization
-						is_military_industrial_organization = FIN_valtion_kivaaritehdas_organization
-						is_military_industrial_organization = FIN_valtion_tykkitehdas_organization
-						is_military_industrial_organization = FIN_sisu_auto_organization
-					}
+					has_idea = FIN_national_industry_modernize
 				}
-				add_mio_size = 1
-				add_mio_research_bonus = 0.1
+				swap_ideas = {
+					remove_idea = FIN_national_industry_modernize
+					add_idea = FIN_national_industry_final
+				}
+			}
+			else_if = { #To prevent duplicated NS when debugging etc
+				limit = {
+					NOT = { has_idea = FIN_national_industry_expand }
+				}
+				add_ideas = FIN_national_industry_expand
+			}
+
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				custom_effect_tooltip = FIN_every_finnish_mio_tt
+				every_military_industrial_organization = {
+					limit = {
+						OR = {
+							is_military_industrial_organization = FIN_crichton_vulcan_organization
+							is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
+							is_military_industrial_organization = FIN_valtion_lentokonetehdas_organization
+							is_military_industrial_organization = FIN_valtion_kivaaritehdas_organization
+							is_military_industrial_organization = FIN_valtion_tykkitehdas_organization
+							is_military_industrial_organization = FIN_sisu_auto_organization
+						}
+					}
+					add_mio_size = 1
+					add_mio_research_bonus = 0.1
+				}
 			}
 		}
 	}
@@ -5379,10 +5558,21 @@ focus_tree = {
 			}
 		}
 
+		bypass = {
+			is_faction_leader = yes 
+			any_allied_country = {
+				NORDIC_is_nordic = yes 
+			}
+		}
+
 		search_filters = {}
 
 		completion_reward = {
 			create_faction = FIN_northern_defense_front_faction
+			IF = {
+				limit = { has_dlc = "Arms Against Tyranny" } 
+				complete_national_focus = NORDIC_form_joint_alliance
+			}
 			custom_effect_tooltip = FIN_northern_defense_front_countries_tt
 			every_other_country = {
 				limit = {
@@ -5397,6 +5587,7 @@ focus_tree = {
 							has_war_with = ROOT
 						}
 					}
+					is_subject = no
 				}
 				if = {
 					limit = {
@@ -5459,7 +5650,7 @@ focus_tree = {
 			add_political_power = 100
 			add_stability = 0.05
 			add_war_support = 0.05
-
+			set_country_flag = r56_fin_trigger_con_war_front_control
 			add_ideas = FIN_the_lone_wolf
 		}
 	}
@@ -5710,8 +5901,29 @@ focus_tree = {
 		relative_position_id = FIN_military_aid
 		cost = 5
 		available = {
-			any_other_country = {
-				is_in_faction_with = ROOT
+			any_core_state = {
+				state_is_fully_controlled_by_ROOT_or_subject = yes
+				controller = {
+					NORDIC_is_nordic = yes
+				}
+				OR = {
+					has_resources_amount = {
+						resource = steel
+						amount > 0
+					}
+					has_resources_amount = {
+						resource = chromium
+						amount > 0
+					}
+					has_resources_amount = {
+						resource = tungsten
+						amount > 0
+					}
+					has_resources_amount = {
+						resource = aluminium
+						amount > 0
+					}
+				}
 			}
 		}
 
@@ -5722,15 +5934,7 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			if = {
-				limit = {
-
-				}
-				custom_effect_tooltip = FIN_mineral_wealth_development_states_tt
-			}
-			else = {
-
-			}
+			custom_effect_tooltip = FIN_mineral_wealth_development_states_tt
 
 			every_state = {
 				limit = {
@@ -5823,6 +6027,7 @@ focus_tree = {
 
 			if = {
 				limit = {
+					check_variable = { FIN_faction_leader_recieving_resource_rights = 0 compare = not_equals }
 					var:FIN_faction_leader_recieving_resource_rights = {
 						has_capitulated = no
 						is_in_faction_with = ROOT
@@ -5914,7 +6119,9 @@ focus_tree = {
 		y = 1
 		relative_position_id = FIN_military_aid
 		cost = 10
+
 		available = {
+			exists = yes
 		}
 
 		search_filters = { FOCUS_FILTER_INDUSTRY }
@@ -5996,7 +6203,6 @@ focus_tree = {
 			OR = {
 				is_in_faction_with = GER
 				is_subject_of = GER
-				has_war_with = GER
 				has_subject = SOV
 				has_subject = GER
 				NOT = { country_exists = GER }
@@ -6160,9 +6366,13 @@ focus_tree = {
 		available = {
 		}
 
-		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_INDUSTRY }
+		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_INDUSTRY FOCUS_FILTER_ARMY_XP FOCUS_FILTER_NAVY_XP FOCUS_FILTER_AIR_XP }
 
 		completion_reward = {
+			army_experience = 15
+			navy_experience = 15
+			air_experience = 15
+
 			random_core_state = {
 				limit = {
 					is_fully_controlled_by = ROOT
@@ -6180,17 +6390,22 @@ focus_tree = {
 				}
 			}
 
-			every_military_industrial_organization = {
+			if = {
 				limit = {
-					OR = {
-						is_military_industrial_organization = FIN_crichton_vulcan_organization
-						is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
-						is_military_industrial_organization = FIN_valtion_lentokonetehdas_organization
-						is_military_industrial_organization = FIN_sisu_auto_organization
-					}
+					has_dlc = "Arms Against Tyranny"
 				}
-				add_mio_size = 1
-				unlock_mio_trait_tooltip = FIN_mio_trait_wartsila_engine_production
+				every_military_industrial_organization = {
+					limit = {
+						OR = {
+							is_military_industrial_organization = FIN_crichton_vulcan_organization
+							is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
+							is_military_industrial_organization = FIN_valtion_lentokonetehdas_organization
+							is_military_industrial_organization = FIN_sisu_auto_organization
+						}
+					}
+					add_mio_size = 1
+					unlock_mio_trait_tooltip = FIN_mio_trait_wartsila_engine_production
+				}
 			}
 		}
 	}
@@ -6238,6 +6453,8 @@ focus_tree = {
 		relative_position_id = FIN_wartsila_engine_production
 		cost = 10
 		available = {
+			is_subject = no
+			has_dynamic_modifier = { modifier = FIN_finnish_army }
 			all_core_state = {
 				is_controlled_by = ROOT
 			}
@@ -6340,21 +6557,6 @@ focus_tree = {
 				category = electronics
 			}
 
-			custom_effect_tooltip = FIN_every_finnish_mio_tt
-			every_military_industrial_organization = {
-				limit = {
-					OR = {
-						is_military_industrial_organization = FIN_crichton_vulcan_organization
-						is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
-						is_military_industrial_organization = FIN_valtion_lentokonetehdas_organization
-						is_military_industrial_organization = FIN_valtion_kivaaritehdas_organization
-						is_military_industrial_organization = FIN_valtion_tykkitehdas_organization
-						is_military_industrial_organization = FIN_sisu_auto_organization
-					}
-				}
-				complete_mio_trait = FIN_mio_trait_modernization_program
-			}
-
 			random_core_state = {
 				limit = {
 					is_fully_controlled_by = ROOT
@@ -6371,6 +6573,43 @@ focus_tree = {
 					instant_build = yes
 				}
 			}
+
+			if = {
+				limit = {
+					has_idea = FIN_national_industry_expand
+				}
+				swap_ideas = {
+					remove_idea = FIN_national_industry_expand
+					add_idea = FIN_national_industry_final
+				}
+			}
+			else_if = { #To prevent duplicated NS when debugging etc
+				limit = {
+					NOT = { has_idea = FIN_national_industry_modernize }
+				}
+				add_ideas = FIN_national_industry_modernize
+			}
+
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				custom_effect_tooltip = FIN_every_finnish_mio_tt
+				every_military_industrial_organization = {
+					limit = {
+						OR = {
+							is_military_industrial_organization = FIN_crichton_vulcan_organization
+							is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
+							is_military_industrial_organization = FIN_valtion_lentokonetehdas_organization
+							is_military_industrial_organization = FIN_valtion_kivaaritehdas_organization
+							is_military_industrial_organization = FIN_valtion_tykkitehdas_organization
+							is_military_industrial_organization = FIN_sisu_auto_organization
+						}
+					}
+					complete_mio_trait = FIN_mio_trait_modernization_program
+				}
+			}
+
 		}
 	}
 	
@@ -6510,13 +6749,14 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
 			OR = {
 				has_government = fascism
 				threat > 0.7
 			}
 			OR = {
 				has_war = no
-				surrender_progress < 0
+				surrender_progress < 0.05
 			}
 		}
 
@@ -6582,6 +6822,7 @@ focus_tree = {
 		}
 
 		available = {
+			is_subject = no
 			OR = {
 				NOT = { country_exists = EST }
 				is_in_faction_with = EST
@@ -6593,7 +6834,7 @@ focus_tree = {
 			}
 			OR = {
 				has_war = no
-				surrender_progress < 0
+				surrender_progress < 0.05
 			}
 		}
 
@@ -6849,6 +7090,7 @@ focus_tree = {
 		relative_position_id = FIN_militarized_society
 		cost = 10
 		available = {
+			is_subject = no
 			all_core_state = {
 				is_controlled_by = ROOT
 			}
@@ -6948,6 +7190,10 @@ focus_tree = {
 		mutually_exclusive = { focus = FIN_finnish_neutrality focus = FIN_suomalainen_sosialismi }
 		
 		cost = 5
+
+		available = {
+			is_subject = no
+		}
 		
 		search_filters = { FOCUS_FILTER_BALANCE_OF_POWER FOCUS_FILTER_POLITICAL FOCUS_FILTER_POLITICAL_CHARACTER FOCUS_FILTER_WAR_SUPPORT }
 
@@ -7132,7 +7378,13 @@ focus_tree = {
 		y = 1
 		relative_position_id = FIN_discredit_the_democratic_system
 		cost = 5
+
+		bypass = {
+			has_government = fascism
+		}
+
 		available = {
+			is_subject = no
 			OR = {
 				has_completed_focus = FIN_prepare_a_military_coup
 				AND = {
@@ -7187,7 +7439,7 @@ focus_tree = {
 				limit = {
 					has_completed_focus = FIN_prepare_a_military_coup
 				}
-				#Set basic size based on commie support
+				#Set basic size based on fascist support
 				if = { # 40-49% Support
 					limit = {
 						fascism < 0.5
@@ -7233,12 +7485,29 @@ focus_tree = {
 					#states_filter = { <triggers> } # Optional. States that go to the revolter. Filtering trigger on the states scripted to go to the revolter.
 					#keep_all_characters = no #Optional. Keep all characters on target country side - will ignore all following keep_ parameters - default value = no
 					#keep_unit_leaders = { <unit_leader_ids> } # Optional. specify ID of unit leaders that remain with the original country
-					keep_unit_leaders_trigger = { always = yes } # Optional. Trigger for unit leaders to remain with the original country
+					#keep_unit_leaders_trigger = { always = yes } # Optional. Trigger for unit leaders to remain with the original country
 					#keep_political_leader = no # optional, default is no; If yes, the party leader of the revolting ideology will not join the revolter as its leader.
 					#keep_political_party_members = no # Optional, default is no; If yes, it will keep the non main leaders of the party leaders in original country
 					
-					
+					ROOT = {
+						every_character = {
+							limit = {
+								has_character_flag = FIN_anti_fascist_character_flag
+							}
+							set_nationality = PREV.PREV
+						}
+					}
+
+					retire_ideology_leader = neutrality
+					# SET UP COUNTRY LEADERS
+					if = {
+						limit = {
+							has_character = FIN_kyosti_kallio
+						}
+						promote_character = FIN_kyosti_kallio
+					}
 				}
+
 
 				#custom_effect_tooltip = FIN_the_fascist_side_in_cw_tt #Not necessary
 				hidden_effect = {
@@ -7336,6 +7605,13 @@ focus_tree = {
 		relative_position_id = FIN_a_fascist_regime
 		cost = 10
 		available = {
+			is_subject = no
+			GER = {
+				OR = {
+					has_government = fascism
+					has_government = neutrality
+				}
+			}
 			if = {
 				limit = {
 					has_country_flag = FIN_germans_rejected_to_protect_finland_flag
@@ -7414,6 +7690,9 @@ focus_tree = {
 				is_in_faction_with = GER
 				is_in_faction_with = ITA
 			}
+			is_subject = no
+			has_government = fascism
+			is_in_faction = yes #More generic instead of checking for GER or ITA since there can be scenarios in which FIN goes with someone else like JAP, fascist ENG, etc.
 		}
 
 		available = {
@@ -7938,6 +8217,11 @@ focus_tree = {
 			is_subject = no
 		}
 
+		bypass = {
+			has_government = fascism
+			is_faction_leader = yes
+		}
+
 		search_filters = {}
 
 		completion_reward = {
@@ -8258,6 +8542,7 @@ focus_tree = {
 		relative_position_id = FIN_finnish_legion_of_honor
 		cost = 10
 		available = {
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_POLITICAL_CHARACTER FOCUS_FILTER_POLITICAL FOCUS_FILTER_STABILITY }
@@ -8298,6 +8583,31 @@ focus_tree = {
 		relative_position_id = FIN_finnish_irredentism
 		cost = 10
 		available = {
+			is_subject = no
+		}
+
+		bypass = {
+			#SMI and KAR excluded so that focus can be bypasssed without Kola, which will be cored later.
+			SWE = {
+				all_core_state = {
+					is_core_of = ROOT
+				}
+			}
+			NOR = {
+				all_core_state = {
+					is_core_of = ROOT
+				}
+			}
+			DEN = {
+				all_core_state = {
+					is_core_of = ROOT
+				}
+			}
+			ICE = {
+				all_core_state = {
+					is_core_of = ROOT
+				}
+			}
 		}
 
 		search_filters = { FOCUS_FILTER_ANNEXATION }
@@ -8313,14 +8623,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						SMI = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					SMI = {
@@ -8330,12 +8633,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						SMI = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					SMI = {
@@ -8355,6 +8653,10 @@ focus_tree = {
 												AND = {
 													is_core_of = SMI
 													is_owned_by = SMI
+												}
+												AND = {
+													is_core_of = KAR
+													is_owned_by = KAR
 												}
 												is_core_of = ICE
 												is_core_of = SWE
@@ -8377,12 +8679,131 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						SMI = { exists = yes }
+						SMI = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
 
 					SMI = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
+							add_claim_by = ROOT
+						}
+						ROOT = {
+							create_wargoal = {
+								type = annex_everything
+								target = PREV
+							}
+
+							if = {
+								limit = {
+									has_non_aggression_pact_with = PREV
+								}
+								diplomatic_relation = {
+									country = PREV
+									relation = non_aggression_pact
+									active = no
+								}
+							}
+							if = {
+								limit = {
+									has_guaranteed = PREV
+								}
+								diplomatic_relation = {
+									country = PREV
+									relation = guarantee
+									active = no
+								}
+							}
+						}
+					}
+				}
+
+				### KARELIA ### (Only if country exists)
+
+				if = { #Finnish puppet or independent ally - Annexation
+					limit = {
+						KAR = {
+							FIN_is_valid_root_puppet_or_independent_ally = yes
+						}
+					}
+					KAR = {
+						country_event = { id = AAT_finland_diplomacy.14 hours = 1 }
+					}
+				}
+				else_if = { #Ally's puppet and AI - Request puppet transfer
+					limit = {
+						KAR = {
+							FIN_is_valid_allied_puppet_ai = yes
+						}
+					}
+					KAR = {
+						overlord = {
+							if = {
+								limit = {
+									NOT = { is_in_array = { ROOT.countries_with_nordic_territory_array = THIS } }
+								}
+								#This array will be used at the end of the effect to send ONE SINGLE EVENT to each country with Baltic puppets or states with Finnish demands
+								add_to_array = { ROOT.countries_with_nordic_territory_array = THIS }
+							}
+							PREV = {
+								every_controlled_state = {
+									if = {
+										limit = {
+											OR = {
+												AND = {
+													is_core_of = SMI
+													is_owned_by = SMI
+												}
+												AND = {
+													is_core_of = KAR
+													is_owned_by = KAR
+												}
+												is_core_of = ICE
+												is_core_of = SWE
+												is_core_of = NOR
+												is_core_of = DEN
+												is_owned_by = PREV
+											}
+										}
+										#This array will be used in the ONE event that the country's overlord will receive for transferring the appropriate states
+										add_to_array = { PREV.PREV.FIN_states_requested_by_finland_array = THIS } #store array in overlord
+									}
+									else = {
+										#This array will be used in the ONE event that the country's overlord will receive for transferring states back to the overlord 
+										add_to_array = { PREV.PREV.FIN_states_to_come_back_to_overlord_array = THIS } #store array in overlord
+									}
+								}
+							}
+						}
+					}
+				}
+				else_if = { #Neutral/enemy - Claims and wargoal
+					limit = {
+						KAR = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
+					}
+
+					KAR = {
+						every_core_state = {
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -8420,14 +8841,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						ICE = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					ICE = {
@@ -8437,12 +8851,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						ICE = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					ICE = {
@@ -8462,6 +8871,10 @@ focus_tree = {
 												AND = {
 													is_core_of = SMI
 													is_owned_by = SMI
+												}
+												AND = {
+													is_core_of = KAR
+													is_owned_by = KAR
 												}
 												is_core_of = ICE
 												is_core_of = SWE
@@ -8484,12 +8897,21 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						ICE = { exists = yes }
+						ICE = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
-
 					ICE = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -8526,16 +8948,14 @@ focus_tree = {
 					limit = {
 						ICE = {
 							any_core_state = {
-								NOT = { is_controlled_by = ICE }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 						}
 					}
 					ICE = {
 						every_core_state = {
 							limit = {
-								NOT = { is_controlled_by = ICE }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 							controller = {
 								if = {
@@ -8557,14 +8977,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						SWE = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					SWE = {
@@ -8574,12 +8987,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						SWE = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					SWE = {
@@ -8599,6 +9007,10 @@ focus_tree = {
 												AND = {
 													is_core_of = SMI
 													is_owned_by = SMI
+												}
+												AND = {
+													is_core_of = KAR
+													is_owned_by = KAR
 												}
 												is_core_of = ICE
 												is_core_of = SWE
@@ -8621,11 +9033,21 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						SWE = { exists = yes }
+						SWE = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
 					SWE = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -8662,16 +9084,14 @@ focus_tree = {
 					limit = {
 						SWE = {
 							any_core_state = {
-								NOT = { is_controlled_by = SWE }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 						}
 					}
 					SWE = {
 						every_core_state = {
 							limit = {
-								NOT = { is_controlled_by = SWE }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 							controller = {
 								if = {
@@ -8695,14 +9115,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						NOR = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					#log = "Finnish Puppet or Ally"
@@ -8713,12 +9126,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						NOR = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					#log = "Ally's puppet"
@@ -8739,6 +9147,10 @@ focus_tree = {
 												AND = {
 													is_core_of = SMI
 													is_owned_by = SMI
+												}
+												AND = {
+													is_core_of = KAR
+													is_owned_by = KAR
 												}
 												is_core_of = ICE
 												is_core_of = SWE
@@ -8761,12 +9173,22 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						NOR = { exists = yes }
+						NOR = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
 					#log = "NOR is neutral/enemy"
 					NOR = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -8803,8 +9225,7 @@ focus_tree = {
 					limit = {
 						NOR = {
 							any_core_state = {
-								NOT = { is_controlled_by = NOR }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 						}
 					}
@@ -8812,8 +9233,7 @@ focus_tree = {
 					NOR = {
 						every_core_state = {
 							limit = {
-								NOT = { is_controlled_by = NOR }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 							controller = {
 								if = {
@@ -8837,14 +9257,7 @@ focus_tree = {
 				if = { #Finnish puppet or independent ally - Annexation
 					limit = {
 						DEN = {
-							exists = yes
-							OR = {
-								is_subject_of = ROOT
-								AND = {
-									is_subject = no
-									is_in_faction_with = ROOT
-								}
-							}
+							FIN_is_valid_root_puppet_or_independent_ally = yes
 						}
 					}
 					DEN = {
@@ -8854,12 +9267,7 @@ focus_tree = {
 				else_if = { #Ally's puppet and AI - Request puppet transfer
 					limit = {
 						DEN = {
-							exists = yes
-							is_subject = yes
-							overlord = {
-								is_in_faction_with = ROOT
-							}
-							is_ai = yes
+							FIN_is_valid_allied_puppet_ai = yes
 						}
 					}
 					DEN = {
@@ -8879,6 +9287,10 @@ focus_tree = {
 												AND = {
 													is_core_of = SMI
 													is_owned_by = SMI
+												}
+												AND = {
+													is_core_of = KAR
+													is_owned_by = KAR
 												}
 												is_core_of = ICE
 												is_core_of = SWE
@@ -8901,12 +9313,22 @@ focus_tree = {
 				}
 				else_if = { #Neutral/enemy - Claims and wargoal
 					limit = {
-						DEN = { exists = yes }
+						DEN = {
+							OR = {
+								FIN_is_valid_neutral_or_enemy = yes
+								has_civil_war = yes
+							}
+						}
 					}
 
 					DEN = {
 						every_core_state = {
-							limit = { is_controlled_by = PREV }
+							limit = {
+								controller = {
+									original_tag = PREV.PREV
+									FIN_is_valid_neutral_or_enemy = yes
+								}
+							}
 							add_claim_by = ROOT
 						}
 						ROOT = {
@@ -8943,16 +9365,14 @@ focus_tree = {
 					limit = {
 						DEN = {
 							any_core_state = {
-								NOT = { is_controlled_by = DEN }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 						}
 					}
 					DEN = {
 						every_core_state = {
 							limit = {
-								NOT = { is_controlled_by = DEN }
-								controller = { is_in_faction_with = ROOT }
+								FIN_is_valid_occupier_country = yes
 							}
 							controller = {
 								if = {
@@ -9422,14 +9842,6 @@ focus_tree = {
 						resource = steel
 						amount > 0
 					}
-					NOT = {
-						any_other_country = {
-							has_resources_rights = {
-								state = PREV
-								resources = { steel }
-							}
-						}
-					}
 				}
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
@@ -9811,7 +10223,14 @@ focus_tree = {
 		relative_position_id = FIN_industrial_development
 		cost = 5
 		available = {
-			has_full_control_of_state = 722 #PETSAMO
+			722 = { #PETSAMO
+				OR = {
+					is_controlled_by = ROOT
+					controller = {
+						is_subject_of = ROOT
+					}
+				}
+			}
 		}
 
 		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_INDUSTRY }
@@ -10100,8 +10519,13 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_sisu_auto_organization = {
-				unlock_mio_trait_tooltip  = FIN_mio_trait_recycled_materials
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_sisu_auto_organization = {
+					unlock_mio_trait_tooltip  = FIN_mio_trait_recycled_materials
+				}
 			}
 		}
 	}
@@ -10164,10 +10588,34 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_INDUSTRY }
 
 		completion_reward = {
-			mio:FIN_sisu_auto_organization = {
-				add_mio_size = 1
-				add_mio_funds_gain_factor = 0.35
-				unlock_mio_trait_tooltip = FIN_mio_trait_yhteissisus_modern_premises
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_sisu_auto_organization = {
+					add_mio_size = 1
+					add_mio_funds_gain_factor = 0.35
+					unlock_mio_trait_tooltip = FIN_mio_trait_yhteissisus_modern_premises
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						has_idea = FIN_sisu_auto
+					}
+					swap_ideas = {
+						remove_idea = FIN_sisu_auto
+						add_idea = FIN_sisu_auto_improved
+					}
+				}
+				else = {
+					effect_tooltip = {
+						swap_ideas = {
+							remove_idea = FIN_sisu_auto
+							add_idea = FIN_sisu_auto_improved
+						}
+					}
+				}
 			}
 		}
 	}
@@ -10188,8 +10636,9 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_INDUSTRY }
 
 		completion_reward = {
-			1036 = { #TURKU
-				add_extra_state_shared_building_slots = 2
+			custom_effect_tooltip = available_industrial_concern
+			show_ideas_tooltip = wartsila_company
+			1036 = {
 				add_building_construction = {
 					type = industrial_complex
 					level = 1
@@ -10436,8 +10885,13 @@ focus_tree = {
 		relative_position_id = FIN_outokumpu_for_defence_industry
 		cost = 10
 		available = {
-			mio:FIN_valtion_kivaaritehdas_organization = {
-				has_mio_size > 4
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_valtion_kivaaritehdas_organization = {
+					has_mio_size > 4
+				}
 			}
 		}
 
@@ -10469,12 +10923,36 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_valtion_kivaaritehdas_organization = {
-				add_mio_size = 1
-				add_mio_funds_gain_factor = 0.35
-				add_mio_research_bonus = 0.05
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_valtion_kivaaritehdas_organization = {
+					add_mio_size = 1
+					add_mio_funds_gain_factor = 0.35
+					add_mio_research_bonus = 0.05
 
-				unlock_mio_trait_tooltip = FIN_mio_trait_oy_tikkakoski
+					unlock_mio_trait_tooltip = FIN_mio_trait_oy_tikkakoski
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						has_idea = FIN_valtion_kivaaritehdas
+					}
+					swap_ideas = {
+						remove_idea = FIN_valtion_kivaaritehdas
+						add_idea = FIN_valtion_kivaaritehdas_improved
+					}
+				}
+				else = {
+					effect_tooltip = {
+						swap_ideas = {
+							remove_idea = FIN_valtion_kivaaritehdas
+							add_idea = FIN_valtion_kivaaritehdas_improved
+						}
+					}
+				}
 			}
 		}
 	}
@@ -10489,8 +10967,13 @@ focus_tree = {
 		relative_position_id = FIN_integrate_oy_tikkakoski
 		cost = 10
 		available = {
-			mio:FIN_valtion_tykkitehdas_organization = {
-				has_mio_size > 4
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_valtion_tykkitehdas_organization = {
+					has_mio_size > 4
+				}
 			}
 		}
 
@@ -10522,10 +11005,34 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_valtion_tykkitehdas_organization = {
-				add_mio_size = 1
-				add_mio_research_bonus = 0.1
-				add_mio_funds_gain_factor = 0.35
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_valtion_tykkitehdas_organization = {
+					add_mio_size = 1
+					add_mio_research_bonus = 0.1
+					add_mio_funds_gain_factor = 0.35
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						has_idea = FIN_valtion_tykkitehdas
+					}
+					swap_ideas = {
+						remove_idea = FIN_valtion_tykkitehdas
+						add_idea = FIN_valtion_tykkitehdas_improved
+					}
+				}
+				else = {
+					effect_tooltip = {
+						swap_ideas = {
+							remove_idea = FIN_valtion_tykkitehdas
+							add_idea = FIN_valtion_tykkitehdas_improved
+						}
+					}
+				}
 			}
 		}
 	}
@@ -10837,18 +11344,30 @@ focus_tree = {
 			add_to_variable = { FIN_finnish_army_equipment_conversion_speed = 0.3 tooltip = equipment_conversion_speed_tt }
 			add_to_variable = { FIN_finnish_army_production_lack_of_resource_penalty_factor = -0.15 tooltip = production_lack_of_resource_penalty_factor_tt }
 
-			every_military_industrial_organization = {
+			if = {
 				limit = {
-					OR = {
-						is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
-						is_military_industrial_organization = FIN_valtion_kivaaritehdas_organization
-						is_military_industrial_organization = FIN_valtion_tykkitehdas_organization
-						is_military_industrial_organization = FIN_sisu_auto_organization
-					}
+					has_dlc = "Arms Against Tyranny"
 				}
-				add_mio_design_team_assign_cost = -0.5
-				add_mio_design_team_change_cost = -0.2
-				complete_mio_trait = FIN_mio_trait_salvaged_and_retooled
+				every_military_industrial_organization = {
+					limit = {
+						OR = {
+							is_military_industrial_organization = FIN_valtion_panssaritehdas_organization
+							is_military_industrial_organization = FIN_valtion_kivaaritehdas_organization
+							is_military_industrial_organization = FIN_valtion_tykkitehdas_organization
+							is_military_industrial_organization = FIN_sisu_auto_organization
+						}
+					}
+					add_mio_design_team_assign_cost = -0.5
+					add_mio_design_team_change_cost = -0.2
+					complete_mio_trait = FIN_mio_trait_salvaged_and_retooled
+				}
+			}
+
+			add_tech_bonus = {
+				name = FIN_salvaged_and_retooled
+				bonus = 0.5
+				uses = 1
+				category = cat_mechanized_equipment
 			}
 
 			if = {
@@ -10861,38 +11380,67 @@ focus_tree = {
 					uses = 2
 					category = cat_light_armor
 				}
-				create_equipment_variant = {
-					name = "BT-42"
-					type = light_tank_chassis_2
-					parent_version = 0
-					modules = {
-						main_armament_slot = tank_close_support_gun
-						turret_type_slot = tank_light_two_man_tank_turret
-						suspension_type_slot = tank_christie_suspension
-						armor_type_slot = tank_welded_armor
-						engine_type_slot = tank_gasoline_engine
+				if = {
+					limit = {
+						has_dlc = "Arms Against Tyranny"
 					}
-					upgrades = {
-						tank_nsb_engine_upgrade = 10
-						tank_nsb_armor_upgrade = 2
+					create_equipment_variant = {
+						name = "BT-42"
+						type = light_tank_chassis_2
+						parent_version = 0
+						modules = {
+							main_armament_slot = tank_close_support_gun
+							turret_type_slot = tank_light_two_man_tank_turret
+							suspension_type_slot = tank_christie_suspension
+							armor_type_slot = tank_welded_armor
+							engine_type_slot = tank_gasoline_engine
+						}
+						upgrades = {
+							tank_nsb_engine_upgrade = 10
+							tank_nsb_armor_upgrade = 2
+						}
+						icon = "GFX_FIN_improved_light_art_medium"
+						design_team = mio:FIN_valtion_panssaritehdas_organization
 					}
-					icon = "GFX_FIN_improved_light_art_medium"
-					design_team = mio:FIN_valtion_panssaritehdas_organization
+				}
+				else = {
+					create_equipment_variant = {
+						name = "BT-42"
+						type = light_tank_chassis_2
+						parent_version = 0
+						modules = {
+							main_armament_slot = tank_close_support_gun
+							turret_type_slot = tank_light_two_man_tank_turret
+							suspension_type_slot = tank_christie_suspension
+							armor_type_slot = tank_welded_armor
+							engine_type_slot = tank_gasoline_engine
+						}
+						upgrades = {
+							tank_nsb_engine_upgrade = 10
+							tank_nsb_armor_upgrade = 2
+						}
+						icon = "GFX_FIN_improved_light_art_medium"
+					}
 				}
 			}
 
 			if = {
 				limit = {
-					has_tech = mechanised_infantry3
+					has_dlc = "Arms Against Tyranny"
 				}
-				mio:FIN_sisu_auto_organization = {
-					unlock_mio_trait_tooltip = FIN_mio_trait_repurposed_equipment
+				if = {
+					limit = {
+						has_tech = mechanised_infantry3
+					}
+					mio:FIN_sisu_auto_organization = {
+						unlock_mio_trait_tooltip = FIN_mio_trait_repurposed_equipment
+					}
 				}
-			}
-			else = {
-				custom_effect_tooltip = FIN_salvaged_and_retooled_sisu_trait_repurposed_tt
-				mio:FIN_sisu_auto_organization = {
-					unlock_mio_trait_tooltip = FIN_mio_trait_repurposed_equipment
+				else = {
+					custom_effect_tooltip = FIN_salvaged_and_retooled_sisu_trait_repurposed_tt
+					mio:FIN_sisu_auto_organization = {
+						unlock_mio_trait_tooltip = FIN_mio_trait_repurposed_equipment
+					}
 				}
 			}
 		}
@@ -10972,8 +11520,6 @@ focus_tree = {
 		available = {
 			NOT = {
 				is_justifying_wargoal_against = SWE
-				is_embargoing = SWE
-				is_embargoed_by = SWE
 			}
 			SWE = {
 				exists = yes
@@ -11254,7 +11800,7 @@ focus_tree = {
 								tank_nsb_engine_upgrade = 3
 								tank_nsb_armor_upgrade = 2
 							}
-							model = "FIN_light_sp_anti_air_brigade_0_entity"
+							model = "FIN_light_sp_anti_air_brigade_entity"
 							icon = "GFX_SWE_basic_light_spaa_medium"
 						}
 						add_equipment_to_stockpile = { 
@@ -11506,57 +12052,129 @@ focus_tree = {
 
 			show_unit_leaders_tooltip = FIN_ruben_lagus
 
-			mio:FIN_valtion_panssaritehdas_organization = {
-				add_mio_size = 1
-				add_mio_funds_gain_factor = 0.35
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_valtion_panssaritehdas_organization = {
+					add_mio_size = 1
+					add_mio_funds_gain_factor = 0.35
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						has_idea = FIN_valtion_panssaritehdas
+					}
+					swap_ideas = {
+						remove_idea = FIN_valtion_panssaritehdas
+						add_idea = FIN_valtion_panssaritehdas_improved
+					}
+				}
+				else = {
+					effect_tooltip = {
+						swap_ideas = {
+							remove_idea = FIN_valtion_panssaritehdas
+							add_idea = FIN_valtion_panssaritehdas_improved
+						}
+					}
+				}
 			}
 
 			if = {
 				limit = {
 					has_dlc = "No Step Back"
 				}
-				create_equipment_variant = { #Made-up
-					name = "Pukki"
-					type = light_tank_chassis_3
-					parent_version = 0
-					modules = {
-						main_armament_slot = tank_small_cannon_2
-						turret_type_slot = tank_light_three_man_tank_turret
-						suspension_type_slot = tank_bogie_suspension
-						armor_type_slot = tank_riveted_armor
-						engine_type_slot = tank_gasoline_engine
-						special_type_slot_1 = tank_radio_1
-						special_type_slot_2 = secondary_turret_hmg
-						special_type_slot_3 = additional_machine_guns
-						special_type_slot_4 = additional_machine_guns
+				if = {
+					limit = {
+						has_dlc = "Arms Against Tyranny"
 					}
-					upgrades = {
-						tank_nsb_engine_upgrade = 10
-						tank_nsb_armor_upgrade = 8
+					create_equipment_variant = { #Made-up
+						name = "Pukki"
+						type = light_tank_chassis_3
+						parent_version = 0
+						modules = {
+							main_armament_slot = tank_small_cannon_2
+							turret_type_slot = tank_light_three_man_tank_turret
+							suspension_type_slot = tank_bogie_suspension
+							armor_type_slot = tank_riveted_armor
+							engine_type_slot = tank_gasoline_engine
+							special_type_slot_1 = tank_radio_1
+							special_type_slot_2 = secondary_turret_hmg
+							special_type_slot_3 = additional_machine_guns
+							special_type_slot_4 = additional_machine_guns
+						}
+						upgrades = {
+							tank_nsb_engine_upgrade = 10
+							tank_nsb_armor_upgrade = 8
+						}
+						design_team = mio:FIN_valtion_panssaritehdas_organization
 					}
-					design_team = mio:FIN_valtion_panssaritehdas_organization
+					
+					create_equipment_variant = { #Made-up
+						name = "Sonni"
+						type = medium_tank_chassis_2
+						parent_version = 0
+						modules = {
+							main_armament_slot = tank_medium_cannon
+							turret_type_slot = tank_medium_three_man_tank_turret
+							suspension_type_slot = tank_bogie_suspension
+							armor_type_slot = tank_riveted_armor
+							engine_type_slot = tank_gasoline_engine
+							special_type_slot_1 = tank_radio_1
+							special_type_slot_2 = secondary_turret_small_cannon
+							special_type_slot_3 = additional_machine_guns
+							special_type_slot_4 = additional_machine_guns
+						}
+						upgrades = {
+							tank_nsb_engine_upgrade = 9
+							tank_nsb_armor_upgrade = 6
+						}
+						design_team = mio:FIN_valtion_panssaritehdas_organization
+					}
 				}
-
-				create_equipment_variant = { #Made-up
-					name = "Sonni"
-					type = medium_tank_chassis_2
-					parent_version = 0
-					modules = {
-						main_armament_slot = tank_medium_cannon
-						turret_type_slot = tank_medium_three_man_tank_turret
-						suspension_type_slot = tank_bogie_suspension
-						armor_type_slot = tank_riveted_armor
-						engine_type_slot = tank_gasoline_engine
-						special_type_slot_1 = tank_radio_1
-						special_type_slot_2 = secondary_turret_small_cannon
-						special_type_slot_3 = additional_machine_guns
-						special_type_slot_4 = additional_machine_guns
+				else = {
+					create_equipment_variant = { #Made-up
+						name = "Pukki"
+						type = light_tank_chassis_3
+						parent_version = 0
+						modules = {
+							main_armament_slot = tank_small_cannon_2
+							turret_type_slot = tank_light_three_man_tank_turret
+							suspension_type_slot = tank_bogie_suspension
+							armor_type_slot = tank_riveted_armor
+							engine_type_slot = tank_gasoline_engine
+							special_type_slot_1 = tank_radio_1
+							special_type_slot_2 = secondary_turret_hmg
+							special_type_slot_3 = additional_machine_guns
+							special_type_slot_4 = additional_machine_guns
+						}
+						upgrades = {
+							tank_nsb_engine_upgrade = 10
+							tank_nsb_armor_upgrade = 8
+						}
 					}
-					upgrades = {
-						tank_nsb_engine_upgrade = 9
-						tank_nsb_armor_upgrade = 6
+					
+					create_equipment_variant = { #Made-up
+						name = "Sonni"
+						type = medium_tank_chassis_2
+						parent_version = 0
+						modules = {
+							main_armament_slot = tank_medium_cannon
+							turret_type_slot = tank_medium_three_man_tank_turret
+							suspension_type_slot = tank_bogie_suspension
+							armor_type_slot = tank_riveted_armor
+							engine_type_slot = tank_gasoline_engine
+							special_type_slot_1 = tank_radio_1
+							special_type_slot_2 = secondary_turret_small_cannon
+							special_type_slot_3 = additional_machine_guns
+							special_type_slot_4 = additional_machine_guns
+						}
+						upgrades = {
+							tank_nsb_engine_upgrade = 9
+							tank_nsb_armor_upgrade = 6
+						}
 					}
-					design_team = mio:FIN_valtion_panssaritehdas_organization
 				}
 
 				hidden_effect = {
@@ -11578,7 +12196,7 @@ focus_tree = {
 		x = 0
 		y = 1
 		relative_position_id = FIN_national_armor_focus
-		cost = 35
+		cost = 5
 
 		allow_branch = {
 			has_dlc = "No Step Back"
@@ -12785,30 +13403,65 @@ focus_tree = {
 					limit = {
 						has_tech = basic_small_airframe
 					}
-					create_equipment_variant = {
-						name = "VL Kotka" 
-						type = small_plane_naval_bomber_airframe_1
-						modules = {
-							fixed_main_weapon_slot = torpedo_mounting
-							engine_type_slot = engine_1_1x
-							special_type_slot_1 = empty
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						icon = "GFX_FIN_naval_bomber1_medium"
-						design_team = mio:FIN_valtion_lentokonetehdas_organization
+						create_equipment_variant = {
+							name = "VL Kotka" 
+							type = small_plane_naval_bomber_airframe_1
+							modules = {
+								fixed_main_weapon_slot = torpedo_mounting
+								engine_type_slot = engine_1_1x
+								special_type_slot_1 = empty
+							}
+							icon = "GFX_FIN_naval_bomber1_medium"
+							design_team = mio:FIN_valtion_lentokonetehdas_organization
+						}
+					}
+					else = {
+						create_equipment_variant = {
+							name = "VL Kotka" 
+							type = small_plane_naval_bomber_airframe_1
+							modules = {
+								fixed_main_weapon_slot = torpedo_mounting
+								engine_type_slot = engine_1_1x
+								special_type_slot_1 = empty
+							}
+							icon = "GFX_FIN_naval_bomber1_medium"
+						}
 					}
 				}
 				else = {
-					create_equipment_variant = {
-						name = "VL Kotka" 
-						type = small_plane_naval_bomber_airframe_0
-						allow_without_tech = yes #Tooltip purposes (focus requires tech anyways)
-						modules = {
-							fixed_main_weapon_slot = torpedo_mounting
-							engine_type_slot = engine_1_1x
-							special_type_slot_1 = empty
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						icon = "GFX_FIN_iw_small_naval_bomber_1_medium"
-						design_team = mio:FIN_valtion_lentokonetehdas_organization
+						create_equipment_variant = {
+							name = "VL Kotka" 
+							type = small_plane_naval_bomber_airframe_0
+							allow_without_tech = yes #Tooltip purposes (focus requires tech anyways)
+							modules = {
+								fixed_main_weapon_slot = torpedo_mounting
+								engine_type_slot = engine_1_1x
+								special_type_slot_1 = empty
+							}
+							icon = "GFX_FIN_iw_small_naval_bomber_1_medium"
+							design_team = mio:FIN_valtion_lentokonetehdas_organization
+						}
+					}
+					else = {
+						create_equipment_variant = {
+							name = "VL Kotka" 
+							type = small_plane_naval_bomber_airframe_0
+							allow_without_tech = yes #Tooltip purposes (focus requires tech anyways)
+							modules = {
+								fixed_main_weapon_slot = torpedo_mounting
+								engine_type_slot = engine_1_1x
+								special_type_slot_1 = empty
+							}
+							icon = "GFX_FIN_iw_small_naval_bomber_1_medium"
+						}
 					}
 				}
 			}
@@ -12856,11 +13509,35 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_valtion_lentokonetehdas_organization = {
-				add_mio_size = 1
-				add_mio_funds_gain_factor = 0.35
-				add_mio_research_bonus = 0.1
-				add_mio_design_team_assign_cost = -0.5
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_valtion_lentokonetehdas_organization = {
+					add_mio_size = 1
+					add_mio_funds_gain_factor = 0.35
+					add_mio_research_bonus = 0.1
+					add_mio_design_team_assign_cost = -0.5
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						has_idea = FIN_valtion_lentokonetehdas
+					}
+					swap_ideas = {
+						remove_idea = FIN_valtion_lentokonetehdas
+						add_idea = FIN_valtion_lentokonetehdas_improved
+					}
+				}
+				else = {
+					effect_tooltip = {
+						swap_ideas = {
+							remove_idea = FIN_valtion_lentokonetehdas
+							add_idea = FIN_valtion_lentokonetehdas_improved
+						}
+					}
+				}
 			}
 		}
 	}
@@ -12911,47 +13588,100 @@ focus_tree = {
 					limit = {
 						has_tech = improved_small_airframe
 					}
-					create_equipment_variant = { #Made-up
-						name = "VL Kemi"
-						type = small_plane_cas_airframe_2
-						parent_version = 0
-						modules = {
-							fixed_main_weapon_slot = bomb_locks
-							fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
-							engine_type_slot = engine_2_1x
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						icon = "GFX_FIN_CAS2_medium"
-						design_team = mio:FIN_valtion_lentokonetehdas_organization
+						create_equipment_variant = { #Made-up
+							name = "VL Kemi"
+							type = small_plane_cas_airframe_2
+							parent_version = 0
+							modules = {
+								fixed_main_weapon_slot = bomb_locks
+								fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
+								engine_type_slot = engine_2_1x
+							}
+							icon = "GFX_FIN_CAS2_medium"
+							design_team = mio:FIN_valtion_lentokonetehdas_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "VL Kemi"
+							type = small_plane_cas_airframe_2
+							parent_version = 0
+							modules = {
+								fixed_main_weapon_slot = bomb_locks
+								fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
+								engine_type_slot = engine_2_1x
+							}
+							icon = "GFX_FIN_CAS2_medium"
+						}
 					}
 				}
 				else_if = {
 					limit = {
 						has_tech = basic_small_airframe
 					}
-					create_equipment_variant = { #Made-up
-						name = "VL Kemi"
-						type = small_plane_cas_airframe_1
-						parent_version = 0
-						modules = {
-							fixed_main_weapon_slot = bomb_locks
-							fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
-							engine_type_slot = engine_1_1x
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						icon = "GFX_FIN_CAS1_medium"
-						design_team = mio:FIN_valtion_lentokonetehdas_organization
+						create_equipment_variant = { #Made-up
+							name = "VL Kemi"
+							type = small_plane_cas_airframe_1
+							parent_version = 0
+							modules = {
+								fixed_main_weapon_slot = bomb_locks
+								fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
+								engine_type_slot = engine_1_1x
+							}
+							icon = "GFX_FIN_CAS1_medium"
+							design_team = mio:FIN_valtion_lentokonetehdas_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "VL Kemi"
+							type = small_plane_cas_airframe_1
+							parent_version = 0
+							modules = {
+								fixed_main_weapon_slot = bomb_locks
+								fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
+								engine_type_slot = engine_1_1x
+							}
+							icon = "GFX_FIN_CAS1_medium"
+						}
 					}
 				}
 				else = {
-					create_equipment_variant = { #Made-up
-						name = "VL Kemi"
-						type = small_plane_cas_airframe_0
-						parent_version = 0
-						modules = {
-							fixed_main_weapon_slot = bomb_locks
-							engine_type_slot = engine_1_1x
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						icon = "GFX_FIN_CAS1_medium"
-						design_team = mio:FIN_valtion_lentokonetehdas_organization
+						create_equipment_variant = { #Made-up
+							name = "VL Kemi"
+							type = small_plane_cas_airframe_0
+							parent_version = 0
+							modules = {
+								fixed_main_weapon_slot = bomb_locks
+								engine_type_slot = engine_1_1x
+							}
+							icon = "GFX_FIN_CAS1_medium"
+							design_team = mio:FIN_valtion_lentokonetehdas_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "VL Kemi"
+							type = small_plane_cas_airframe_0
+							parent_version = 0
+							modules = {
+								fixed_main_weapon_slot = bomb_locks
+								engine_type_slot = engine_1_1x
+							}
+							icon = "GFX_FIN_CAS1_medium"
+						}
 					}
 				}
 			}
@@ -12994,67 +13724,131 @@ focus_tree = {
 				limit = {
 					has_dlc = "By Blood Alone"
 				}
-				create_equipment_variant = {
-					name = "VL Pyörremyrsky"
-					type = small_plane_airframe_4
-					parent_version = 0
-					modules = {
-						fixed_main_weapon_slot = heavy_mg_2x
-						fixed_auxiliary_weapon_slot_1 = aircraft_cannon_1_1x
-						fixed_auxiliary_weapon_slot_2 = bomb_locks
-						engine_type_slot = engine_4_1x
+				if = {
+					limit = {
+						has_dlc = "Arms Against Tyranny"
 					}
-					icon = "GFX_FIN_modern_small_fighter_1_medium"
-					design_team = mio:FIN_valtion_lentokonetehdas_organization
-				}
-				create_equipment_variant = {
-					name = "VL Humu"
-					type = small_plane_airframe_3
-					parent_version = 0
-					modules = {
-						fixed_main_weapon_slot = heavy_mg_2x
-						fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
-						engine_type_slot = engine_3_1x
-					}
-					icon = "GFX_FIN_fighter3_medium"
-					design_team = mio:FIN_valtion_lentokonetehdas_organization
-				}
-
-				create_equipment_variant = {
-					name = "VL Myrsky"
-					type = small_plane_airframe_2
-					parent_version = 0
-					modules = {
-						fixed_main_weapon_slot = heavy_mg_2x
-						fixed_auxiliary_weapon_slot_1 = bomb_locks
-						engine_type_slot = engine_2_1x
-					}
-					icon = "GFX_FIN_fighter2_medium"
-					design_team = mio:FIN_valtion_lentokonetehdas_organization
-				}
-
-				create_equipment_variant = { #Made-up
-					name = "IVL Haukka II"
-					type = small_plane_airframe_1
-					parent_version = 0
-					modules = {
+					create_equipment_variant = {
+						name = "VL Pyörremyrsky"
+						type = small_plane_airframe_4
+						parent_version = 0
+						modules = {
 							fixed_main_weapon_slot = heavy_mg_2x
-							engine_type_slot = engine_1_1x
+							fixed_auxiliary_weapon_slot_1 = aircraft_cannon_1_1x
+							fixed_auxiliary_weapon_slot_2 = bomb_locks
+							engine_type_slot = engine_4_1x
 						}
-					icon = "GFX_FIN_fighter1_medium"
-					design_team = mio:FIN_valtion_lentokonetehdas_organization
-				}
+						icon = "GFX_FIN_modern_small_fighter_1_medium"
+						design_team = mio:FIN_valtion_lentokonetehdas_organization
+					}
+					create_equipment_variant = {
+						name = "VL Humu"
+						type = small_plane_airframe_3
+						parent_version = 0
+						modules = {
+							fixed_main_weapon_slot = heavy_mg_2x
+							fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
+							engine_type_slot = engine_3_1x
+						}
+						icon = "GFX_FIN_fighter3_medium"
+						design_team = mio:FIN_valtion_lentokonetehdas_organization
+					}
 
-				create_equipment_variant = {
-					name = "IVL Haukka"
-					type = small_plane_airframe_0
-					parent_version = 0
-					modules = {
-							fixed_main_weapon_slot = light_mg_2x
-							engine_type_slot = engine_1_1x
+					create_equipment_variant = {
+						name = "VL Myrsky"
+						type = small_plane_airframe_2
+						parent_version = 0
+						modules = {
+							fixed_main_weapon_slot = heavy_mg_2x
+							fixed_auxiliary_weapon_slot_1 = bomb_locks
+							engine_type_slot = engine_2_1x
 						}
-					icon = "GFX_FIN_early_fighter_medium"
-					design_team = mio:FIN_valtion_lentokonetehdas_organization
+						icon = "GFX_FIN_fighter2_medium"
+						design_team = mio:FIN_valtion_lentokonetehdas_organization
+					}
+
+					create_equipment_variant = { #Made-up
+						name = "IVL Haukka II"
+						type = small_plane_airframe_1
+						parent_version = 0
+						modules = {
+								fixed_main_weapon_slot = heavy_mg_2x
+								engine_type_slot = engine_1_1x
+							}
+						icon = "GFX_FIN_fighter1_medium"
+						design_team = mio:FIN_valtion_lentokonetehdas_organization
+					}
+
+					create_equipment_variant = {
+						name = "IVL Haukka"
+						type = small_plane_airframe_0
+						parent_version = 0
+						modules = {
+								fixed_main_weapon_slot = light_mg_2x
+								engine_type_slot = engine_1_1x
+							}
+						icon = "GFX_FIN_early_fighter_medium"
+						design_team = mio:FIN_valtion_lentokonetehdas_organization
+					}
+				}
+				else = {
+					create_equipment_variant = {
+						name = "VL Pyörremyrsky"
+						type = small_plane_airframe_4
+						parent_version = 0
+						modules = {
+							fixed_main_weapon_slot = heavy_mg_2x
+							fixed_auxiliary_weapon_slot_1 = aircraft_cannon_1_1x
+							fixed_auxiliary_weapon_slot_2 = bomb_locks
+							engine_type_slot = engine_4_1x
+						}
+						icon = "GFX_FIN_modern_small_fighter_1_medium"
+					}
+					create_equipment_variant = {
+						name = "VL Humu"
+						type = small_plane_airframe_3
+						parent_version = 0
+						modules = {
+							fixed_main_weapon_slot = heavy_mg_2x
+							fixed_auxiliary_weapon_slot_1 = heavy_mg_2x
+							engine_type_slot = engine_3_1x
+						}
+						icon = "GFX_FIN_fighter3_medium"
+					}
+
+					create_equipment_variant = {
+						name = "VL Myrsky"
+						type = small_plane_airframe_2
+						parent_version = 0
+						modules = {
+							fixed_main_weapon_slot = heavy_mg_2x
+							fixed_auxiliary_weapon_slot_1 = bomb_locks
+							engine_type_slot = engine_2_1x
+						}
+						icon = "GFX_FIN_fighter2_medium"
+					}
+
+					create_equipment_variant = { #Made-up
+						name = "IVL Haukka II"
+						type = small_plane_airframe_1
+						parent_version = 0
+						modules = {
+								fixed_main_weapon_slot = heavy_mg_2x
+								engine_type_slot = engine_1_1x
+							}
+						icon = "GFX_FIN_fighter1_medium"
+					}
+
+					create_equipment_variant = {
+						name = "IVL Haukka"
+						type = small_plane_airframe_0
+						parent_version = 0
+						modules = {
+								fixed_main_weapon_slot = light_mg_2x
+								engine_type_slot = engine_1_1x
+							}
+						icon = "GFX_FIN_early_fighter_medium"
+					}
 				}
 			}
 		}
@@ -13335,13 +14129,24 @@ focus_tree = {
 		cost = 10
 		available = {
 			has_war = yes
+			if = {
+				limit = {
+					NOT = { has_dlc = "Man the Guns" }
+				}
+				has_tech = early_destroyer
+			}
 		}
 
 		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_INDUSTRY }
 
 		completion_reward = {
 			custom_effect_tooltip = FIN_modify_finnish_navy_ns_intro
-			add_to_variable = { FIN_finnish_navy_refit_speed = 0.1 tooltip = refit_speed_tt }
+			if = {
+				limit = {
+					has_dlc = "Man the Guns"
+				}
+				add_to_variable = { FIN_finnish_navy_refit_speed = 0.1 tooltip = refit_speed_tt }
+			}
 			custom_effect_tooltip = FIN_conversion_of_civilian_vessels_ns_tt
 
 			hidden_effect = {
@@ -13356,8 +14161,32 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_crichton_vulcan_organization = {
-				add_mio_funds_gain_factor = 0.15
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_crichton_vulcan_organization = {
+					add_mio_funds_gain_factor = 0.15
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						has_idea = FIN_crichton_vulcan
+					}
+					swap_ideas = {
+						remove_idea = FIN_crichton_vulcan
+						add_idea = FIN_crichton_vulcan_improved
+					}
+				}
+				else = {
+					effect_tooltip = {
+						swap_ideas = {
+							remove_idea = FIN_crichton_vulcan
+							add_idea = FIN_crichton_vulcan_improved
+						}
+					}
+				}
 			}
 
 			unlock_decision_category_tooltip = generic_refit_civilian_ships_category
@@ -13439,7 +14268,7 @@ focus_tree = {
 				}
 			}
 			#NO MTG
-			else = {	
+			else = {
 				# DESTROYER	
 				create_equipment_variant = { #Made-up
 					name = "Refitted Destroyer Class"
@@ -13467,6 +14296,16 @@ focus_tree = {
 					industrial_manufacturer = mio:FIN_crichton_vulcan_organization
 				}
 
+				if = {
+					limit = {
+						NOT = { has_tech = early_light_cruiser }
+					}
+					hidden_effect = {
+						set_technology = {
+							early_light_cruiser = 1
+						}
+					}
+				}
 				# CRUISER
 				create_equipment_variant = { #Made-up
 					name = "Refitted Cruiser Class"
@@ -13676,11 +14515,24 @@ focus_tree = {
 			add_to_variable = { FIN_finnish_navy_extra_marine_supply_grace = 48 tooltip = extra_marine_supply_grace_tt }
 			add_to_variable = { FIN_finnish_navy_naval_invasion_capacity = 15 tooltip = naval_invasion_capacity_tt }
 
-			add_doctrine_cost_reduction = {
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				add_doctrine_cost_reduction = {
+					name = FIN_marine_jaeger_divisions
+					cost_reduction = 0.75
+					uses = 2
+					category = cat_marines_doctrine
+				}
+			}
+			
+			add_tech_bonus = {
 				name = FIN_marine_jaeger_divisions
-				cost_reduction = 0.75
-				uses = 2
+				bonus = 1.0
+				uses = 1
 				category = marine_tech
+				category = tp_tech
 			}
 
 			hidden_effect = {
@@ -13776,9 +14628,14 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_crichton_vulcan_organization = {
-				complete_mio_trait = FIN_mio_trait_rapid_raiders
-				add_mio_size = 1 #For Covering Production line below
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_crichton_vulcan_organization = {
+					complete_mio_trait = FIN_mio_trait_rapid_raiders
+					add_mio_size = 1 #For Covering Production line below
+				}
 			}
 
 			if = {
@@ -13789,108 +14646,219 @@ focus_tree = {
 					limit = {
 						has_tech = improved_ship_hull_light
 					}
-					create_equipment_variant = { #Made-up
-						name = "Turku Class"
-						type = ship_hull_light_3
-						name_group = FIN_DD_HISTORICAL
-						parent_version = 0
-						allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
-						modules = {
-							fixed_ship_battery_slot = ship_light_battery_1
-							fixed_ship_anti_air_slot = ship_anti_air_1
-							fixed_ship_fire_control_system_slot = empty
-							fixed_ship_radar_slot = empty
-							fixed_ship_engine_slot = light_ship_engine_3
-							fixed_ship_torpedo_slot = ship_torpedo_2
-							mid_1_custom_slot = ship_torpedo_2
-							rear_1_custom_slot = ship_torpedo_2
-							front_1_custom_slot = ship_anti_air_1
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						design_team = mio:FIN_crichton_vulcan_organization
-					}
-					#Line Production
-					add_equipment_production = {
-						equipment = {
+						create_equipment_variant = { #Made-up
+							name = "Turku Class"
 							type = ship_hull_light_3
-							creator = "FIN"
-							version_name = "Turku Class"
+							name_group = FIN_DD_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_battery_slot = ship_light_battery_1
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = empty
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = light_ship_engine_3
+								fixed_ship_torpedo_slot = ship_torpedo_2
+								mid_1_custom_slot = ship_torpedo_2
+								rear_1_custom_slot = ship_torpedo_2
+								front_1_custom_slot = ship_anti_air_1
+							}
+							design_team = mio:FIN_crichton_vulcan_organization
 						}
-						name = "Turku"
-						requested_factories = 1
-						progress = 0.65
-						amount = 3
-						industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_light_3
+								creator = "FIN"
+								version_name = "Turku Class"
+							}
+							name = "Turku"
+							requested_factories = 1
+							progress = 0.65
+							amount = 3
+							industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "Turku Class"
+							type = ship_hull_light_3
+							name_group = FIN_DD_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_battery_slot = ship_light_battery_1
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = empty
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = light_ship_engine_3
+								fixed_ship_torpedo_slot = ship_torpedo_2
+								mid_1_custom_slot = ship_torpedo_2
+								rear_1_custom_slot = ship_torpedo_2
+								front_1_custom_slot = ship_anti_air_1
+							}
+						}
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_light_3
+								creator = "FIN"
+								version_name = "Turku Class"
+							}
+							name = "Turku"
+							requested_factories = 1
+							progress = 0.65
+							amount = 3
+						}
 					}
 				}
 				else_if = {
 					limit = {
 						has_tech = basic_ship_hull_light
 					}
-					create_equipment_variant = { #Made-up
-						name = "Turku Class"
-						type = ship_hull_light_2
-						name_group = FIN_DD_HISTORICAL
-						parent_version = 0
-						allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
-						modules = {
-							fixed_ship_battery_slot = ship_light_battery_1
-							fixed_ship_anti_air_slot = ship_anti_air_1
-							fixed_ship_fire_control_system_slot = empty
-							fixed_ship_radar_slot = empty
-							fixed_ship_engine_slot = light_ship_engine_2
-							fixed_ship_torpedo_slot = ship_torpedo_2
-							mid_1_custom_slot = ship_torpedo_2
-							rear_1_custom_slot = ship_torpedo_2
-							#front_1_custom_slot = ship_light_battery_2
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						design_team = mio:FIN_crichton_vulcan_organization
-					}
-					#Line Production
-					add_equipment_production = {
-						equipment = {
+						create_equipment_variant = { #Made-up
+							name = "Turku Class"
 							type = ship_hull_light_2
-							creator = "FIN"
-							version_name = "Turku Class"
+							name_group = FIN_DD_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_battery_slot = ship_light_battery_1
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = empty
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = light_ship_engine_2
+								fixed_ship_torpedo_slot = ship_torpedo_2
+								mid_1_custom_slot = ship_torpedo_2
+								rear_1_custom_slot = ship_torpedo_2
+								#front_1_custom_slot = ship_light_battery_2
+							}
+							design_team = mio:FIN_crichton_vulcan_organization
 						}
-						name = "Turku"
-						requested_factories = 1
-						progress = 0.55
-						amount = 3
-						industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_light_2
+								creator = "FIN"
+								version_name = "Turku Class"
+							}
+							name = "Turku"
+							requested_factories = 1
+							progress = 0.55
+							amount = 3
+							industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "Turku Class"
+							type = ship_hull_light_2
+							name_group = FIN_DD_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_battery_slot = ship_light_battery_1
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = empty
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = light_ship_engine_2
+								fixed_ship_torpedo_slot = ship_torpedo_2
+								mid_1_custom_slot = ship_torpedo_2
+								rear_1_custom_slot = ship_torpedo_2
+								#front_1_custom_slot = ship_light_battery_2
+							}
+						}
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_light_2
+								creator = "FIN"
+								version_name = "Turku Class"
+							}
+							name = "Turku"
+							requested_factories = 1
+							progress = 0.55
+							amount = 3
+						}
 					}
 				}
 				else = {
-					create_equipment_variant = { #Made-up
-						name = "Turku Class"
-						type = ship_hull_light_1
-						name_group = FIN_DD_HISTORICAL
-						parent_version = 0
-						allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
-						modules = {
-							fixed_ship_battery_slot = ship_light_battery_1
-							fixed_ship_anti_air_slot = ship_anti_air_1
-							fixed_ship_fire_control_system_slot = empty
-							fixed_ship_radar_slot = empty
-							fixed_ship_engine_slot = light_ship_engine_1
-							fixed_ship_torpedo_slot = ship_torpedo_1
-							mid_1_custom_slot = ship_torpedo_1
-							rear_1_custom_slot = ship_torpedo_1
-							#front_1_custom_slot = ship_light_battery_2
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						design_team = mio:FIN_crichton_vulcan_organization
-					}
-					#Line Production
-					add_equipment_production = {
-						equipment = {
+						create_equipment_variant = { #Made-up
+							name = "Turku Class"
 							type = ship_hull_light_1
-							creator = "FIN"
-							version_name = "Turku Class"
+							name_group = FIN_DD_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_battery_slot = ship_light_battery_1
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = empty
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = light_ship_engine_1
+								fixed_ship_torpedo_slot = ship_torpedo_1
+								mid_1_custom_slot = ship_torpedo_1
+								rear_1_custom_slot = ship_torpedo_1
+								#front_1_custom_slot = ship_light_battery_2
+							}
+							design_team = mio:FIN_crichton_vulcan_organization
 						}
-						name = "Turku"
-						requested_factories = 1
-						progress = 0.45
-						amount = 3
-						industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_light_1
+								creator = "FIN"
+								version_name = "Turku Class"
+							}
+							name = "Turku"
+							requested_factories = 1
+							progress = 0.45
+							amount = 3
+							industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "Turku Class"
+							type = ship_hull_light_1
+							name_group = FIN_DD_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_battery_slot = ship_light_battery_1
+								fixed_ship_anti_air_slot = ship_anti_air_1
+								fixed_ship_fire_control_system_slot = empty
+								fixed_ship_radar_slot = empty
+								fixed_ship_engine_slot = light_ship_engine_1
+								fixed_ship_torpedo_slot = ship_torpedo_1
+								mid_1_custom_slot = ship_torpedo_1
+								rear_1_custom_slot = ship_torpedo_1
+								#front_1_custom_slot = ship_light_battery_2
+							}
+						}
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_light_1
+								creator = "FIN"
+								version_name = "Turku Class"
+							}
+							name = "Turku"
+							requested_factories = 1
+							progress = 0.45
+							amount = 3
+						}
 					}
 				}
 			}
@@ -13952,9 +14920,14 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_crichton_vulcan_organization = {
-				complete_mio_trait = FIN_mio_trait_deep_sea_raiders
-				add_mio_size = 1
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_crichton_vulcan_organization = {
+					complete_mio_trait = FIN_mio_trait_deep_sea_raiders
+					add_mio_size = 1
+				}
 			}
 			
 			if = {
@@ -13969,110 +14942,233 @@ focus_tree = {
 						limit = {
 							has_tech = basic_submarine_snorkel
 						}
-						create_equipment_variant = {
-							name = "Oulu Class"
-							type = ship_hull_submarine_3
-							name_group = FIN_SS_HISTORICAL
-							parent_version = 0
-							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
-							modules = {
-								fixed_ship_torpedo_slot = ship_torpedo_sub_2
-								fixed_ship_engine_slot = sub_ship_engine_2
-								front_1_custom_slot = ship_torpedo_sub_2
-								mid_1_custom_slot = ship_sub_snorkel_1
-								rear_1_custom_slot = ship_torpedo_sub_2
+						if = {
+							limit = {
+								has_dlc = "Arms Against Tyranny"
 							}
-							design_team = mio:FIN_crichton_vulcan_organization
+							create_equipment_variant = {
+								name = "Oulu Class"
+								type = ship_hull_submarine_3
+								name_group = FIN_SS_HISTORICAL
+								parent_version = 0
+								allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+								modules = {
+									fixed_ship_torpedo_slot = ship_torpedo_sub_2
+									fixed_ship_engine_slot = sub_ship_engine_2
+									front_1_custom_slot = ship_torpedo_sub_2
+									mid_1_custom_slot = ship_sub_snorkel_1
+									rear_1_custom_slot = ship_torpedo_sub_2
+								}
+								design_team = mio:FIN_crichton_vulcan_organization
+							}
+						}
+						else = {
+							create_equipment_variant = {
+								name = "Oulu Class"
+								type = ship_hull_submarine_3
+								name_group = FIN_SS_HISTORICAL
+								parent_version = 0
+								allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+								modules = {
+									fixed_ship_torpedo_slot = ship_torpedo_sub_2
+									fixed_ship_engine_slot = sub_ship_engine_2
+									front_1_custom_slot = ship_torpedo_sub_2
+									mid_1_custom_slot = ship_sub_snorkel_1
+									rear_1_custom_slot = ship_torpedo_sub_2
+								}
+							}
 						}
 					}
 					else = {
-						create_equipment_variant = { #Made-up
-							name = "Oulu Class"
-							type = ship_hull_submarine_3
-							name_group = FIN_SS_HISTORICAL
-							parent_version = 0
-							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
-							modules = {
-								fixed_ship_torpedo_slot = ship_torpedo_sub_2
-								fixed_ship_engine_slot = sub_ship_engine_2
-								front_1_custom_slot = ship_torpedo_sub_2
-								mid_1_custom_slot = empty
-								rear_1_custom_slot = ship_torpedo_sub_2
+						if = {
+							limit = {
+								has_dlc = "Arms Against Tyranny"
 							}
-							design_team = mio:FIN_crichton_vulcan_organization
+							create_equipment_variant = { #Made-up
+								name = "Oulu Class"
+								type = ship_hull_submarine_3
+								name_group = FIN_SS_HISTORICAL
+								parent_version = 0
+								allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+								modules = {
+									fixed_ship_torpedo_slot = ship_torpedo_sub_2
+									fixed_ship_engine_slot = sub_ship_engine_2
+									front_1_custom_slot = ship_torpedo_sub_2
+									mid_1_custom_slot = empty
+									rear_1_custom_slot = ship_torpedo_sub_2
+								}
+								design_team = mio:FIN_crichton_vulcan_organization
+							}
+						}
+						else = {
+							create_equipment_variant = { #Made-up
+								name = "Oulu Class"
+								type = ship_hull_submarine_3
+								name_group = FIN_SS_HISTORICAL
+								parent_version = 0
+								allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+								modules = {
+									fixed_ship_torpedo_slot = ship_torpedo_sub_2
+									fixed_ship_engine_slot = sub_ship_engine_2
+									front_1_custom_slot = ship_torpedo_sub_2
+									mid_1_custom_slot = empty
+									rear_1_custom_slot = ship_torpedo_sub_2
+								}
+							}
 						}
 					}
+					
 					#Line Production
-					add_equipment_production = {
-						equipment = {
-							type = ship_hull_submarine_3
-							creator = "FIN"
-							version_name = "Oulu Class"
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						name = "Oulu"
-						requested_factories = 1
-						progress = 0.65
-						amount = 3
-						industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_submarine_3
+								creator = "FIN"
+								version_name = "Oulu Class"
+							}
+							name = "Oulu"
+							requested_factories = 1
+							progress = 0.65
+							amount = 3
+							industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						}
+					}
+					else = {
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_submarine_3
+								creator = "FIN"
+								version_name = "Oulu Class"
+							}
+							name = "Oulu"
+							requested_factories = 1
+							progress = 0.65
+							amount = 3
+						}
 					}
 				}
 				else_if = {
 					limit = {
 						has_tech = basic_ship_hull_submarine
 					}
-					create_equipment_variant = { #Made-up
-						name = "Oulu Class"
-						type = ship_hull_submarine_2
-						name_group = FIN_SS_HISTORICAL
-						parent_version = 0
-						allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
-						modules = {
-							fixed_ship_torpedo_slot = ship_torpedo_sub_2
-							fixed_ship_engine_slot = sub_ship_engine_2
-							rear_1_custom_slot = ship_torpedo_sub_2
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						design_team = mio:FIN_crichton_vulcan_organization
-					}
-					#Line Production
-					add_equipment_production = {
-						equipment = {
+						create_equipment_variant = { #Made-up
+							name = "Oulu Class"
 							type = ship_hull_submarine_2
-							creator = "FIN"
-							version_name = "Oulu Class"
+							name_group = FIN_SS_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_torpedo_slot = ship_torpedo_sub_2
+								fixed_ship_engine_slot = sub_ship_engine_2
+								rear_1_custom_slot = ship_torpedo_sub_2
+							}
+							design_team = mio:FIN_crichton_vulcan_organization
 						}
-						name = "Oulu"
-						requested_factories = 1
-						progress = 0.55
-						amount = 3
-						industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_submarine_2
+								creator = "FIN"
+								version_name = "Oulu Class"
+							}
+							name = "Oulu"
+							requested_factories = 1
+							progress = 0.55
+							amount = 3
+							industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "Oulu Class"
+							type = ship_hull_submarine_2
+							name_group = FIN_SS_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_torpedo_slot = ship_torpedo_sub_2
+								fixed_ship_engine_slot = sub_ship_engine_2
+								rear_1_custom_slot = ship_torpedo_sub_2
+							}
+						}
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_submarine_2
+								creator = "FIN"
+								version_name = "Oulu Class"
+							}
+							name = "Oulu"
+							requested_factories = 1
+							progress = 0.55
+							amount = 3
+						}
 					}
 				}
 				else = {
-					create_equipment_variant = { #Made-up
-						name = "Oulu Class"
-						type = ship_hull_submarine_1
-						name_group = FIN_SS_HISTORICAL
-						parent_version = 0
-						allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
-						modules = {
-							fixed_ship_torpedo_slot = ship_torpedo_sub_1
-							fixed_ship_engine_slot = sub_ship_engine_1
-							rear_1_custom_slot = ship_torpedo_sub_1
+					if = {
+						limit = {
+							has_dlc = "Arms Against Tyranny"
 						}
-						design_team = mio:FIN_crichton_vulcan_organization
-					}
-					#Line Production
-					add_equipment_production = {
-						equipment = {
+						create_equipment_variant = { #Made-up
+							name = "Oulu Class"
 							type = ship_hull_submarine_1
-							creator = "FIN"
-							version_name = "Oulu Class"
+							name_group = FIN_SS_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_torpedo_slot = ship_torpedo_sub_1
+								fixed_ship_engine_slot = sub_ship_engine_1
+								rear_1_custom_slot = ship_torpedo_sub_1
+							}
+							design_team = mio:FIN_crichton_vulcan_organization
 						}
-						name = "Oulu"
-						requested_factories = 1
-						progress = 0.45
-						amount = 3
-						industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_submarine_1
+								creator = "FIN"
+								version_name = "Oulu Class"
+							}
+							name = "Oulu"
+							requested_factories = 1
+							progress = 0.45
+							amount = 3
+							industrial_manufacturer = mio:FIN_crichton_vulcan_organization
+						}
+					}
+					else = {
+						create_equipment_variant = { #Made-up
+							name = "Oulu Class"
+							type = ship_hull_submarine_1
+							name_group = FIN_SS_HISTORICAL
+							parent_version = 0
+							allow_without_tech = yes #Makes no difference since checks for tech, for tooltip purposes only
+							modules = {
+								fixed_ship_torpedo_slot = ship_torpedo_sub_1
+								fixed_ship_engine_slot = sub_ship_engine_1
+								rear_1_custom_slot = ship_torpedo_sub_1
+							}
+						}
+						#Line Production
+						add_equipment_production = {
+							equipment = {
+								type = ship_hull_submarine_1
+								creator = "FIN"
+								version_name = "Oulu Class"
+							}
+							name = "Oulu"
+							requested_factories = 1
+							progress = 0.45
+							amount = 3
+						}
 					}
 				}
 			}
@@ -14292,6 +15388,12 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_HISTORICAL FOCUS_FILTER_INDUSTRY FOCUS_FILTER_RESEARCH }
 
 		completion_reward = {
+			custom_effect_tooltip = FIN_modify_finnish_navy_ns_intro
+			add_to_variable = {
+				FIN_finnish_navy_industrial_capacity_dockyard = 0.05
+				tooltip = industrial_capacity_dockyard_tt
+			}
+
 			if = {
 				limit = {
 					1036 = {
@@ -14310,12 +15412,17 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_crichton_vulcan_organization = {
-				add_mio_size = 1
-				add_mio_funds_gain_factor = 0.15
-				add_mio_research_bonus = 0.05
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_crichton_vulcan_organization = {
+					add_mio_size = 1
+					add_mio_funds_gain_factor = 0.15
+					add_mio_research_bonus = 0.05
 
-				unlock_mio_trait_tooltip = FIN_mio_trait_andros_engines
+					unlock_mio_trait_tooltip = FIN_mio_trait_andros_engines
+				}
 			}
 		}
 	}
@@ -14497,10 +15604,15 @@ focus_tree = {
 				}
 			}
 
-			mio:FIN_crichton_vulcan_organization = {
-				add_mio_size = 1
-				add_mio_research_bonus = 0.1
-				add_mio_design_team_assign_cost = -0.5
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:FIN_crichton_vulcan_organization = {
+					add_mio_size = 1
+					add_mio_research_bonus = 0.1
+					add_mio_design_team_assign_cost = -0.5
+				}
 			}
 
 			every_character = {
