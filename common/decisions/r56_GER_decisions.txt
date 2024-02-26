@@ -2076,16 +2076,14 @@ GER_elections = {
 		days_mission_timeout = 30
 		days_re_enable = 7
 		activation = {
-			has_completed_focus = GER_announce_first_elections
+			has_country_flag = GER_elections_start
 		}
 		available = {
-			OR = {
-				has_completed_focus = GER_sapd_victory
-				has_completed_focus = GER_spd_victory
-				has_completed_focus = GER_dstp_victory
-				has_completed_focus = GER_zentrum_victory
-				has_completed_focus = GER_bvp_victory
-				has_completed_focus = GER_dvp_victory
+			custom_trigger_tooltip = {
+				tooltip = GER_opposition_tick_tt
+				NOT = {
+					has_country_flag = GER_elections_start
+				}
 			}
 		}
 		timeout_effect = {
@@ -2291,14 +2289,16 @@ GER_elections = {
 	GER_upcoming_election = {
 		days_mission_timeout = 180
 		activation = {
-			has_completed_focus = GER_announce_first_elections
+			has_country_flag = GER_elections_start
 		}
 		available = {
-			always = no
+			hidden_trigger = {
+				always = no
+			}
 		}
 		is_good = yes
 		timeout_effect = {
-			country_event = GER_first_elections.1
+			country_event = GER_elections.1
 		}
 	}
 }
@@ -2306,14 +2306,30 @@ GER_politics = {
 	GER_form_government = {
 		days_mission_timeout = 90
 		activation = {
-			has_country_flag = GER_elections_over
+			#has_country_flag = GER_elections_over
 		}
-		cancel_trigger = {
-			
+		is_good = no
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = GER_form_government_check_tt
+				set_temp_variable = { half_support = total_support }
+				divide_temp_variable = { half_support = 2 }
+				check_variable = {
+					var = government_support
+					value = half_support
+					compare = greater_than_or_equals
+				}
+			}
+		}
+		
+		complete_effect = {
+			add_political_power = 50
+			add_stability = 0.02
 		}
 		
 		timeout_effect = {
-			
+			add_political_power = -100
+			add_stability = -0.05
 		}
 	}
 	GER_invite_sapd = {
@@ -2322,14 +2338,20 @@ GER_politics = {
 				OR = {
 					has_country_flag = GER_supported_sapd
 					has_country_flag = GER_supported_zentrum
+					has_country_flag = GER_coalition_zentrum
 					has_country_flag = GER_supported_dvp
+					has_country_flag = GER_coalition_dvp
 				}
 			}
 		}
+		cost = 20
 		days_remove = 7
 		remove_effect = {
 			set_country_flag = GER_coalition_sapd
 			custom_effect_tooltip = GER_invite_sapd_tt
+			add_to_variable = {
+				government_support = sapd_support
+			}
 		}
 	}
 	GER_invite_spd = {
@@ -2338,7 +2360,17 @@ GER_politics = {
 				OR = {
 					has_country_flag = GER_supported_spd
 					has_country_flag = GER_supported_dvp
+					has_country_flag = GER_coalition_dvp
 				}
+			}
+		}
+		cost = 20
+		days_remove = 7
+		remove_effect = {
+			set_country_flag = GER_coalition_spd
+			custom_effect_tooltip = GER_invite_spd_tt
+			add_to_variable = {
+				government_support = spd_support
 			}
 		}
 	}
@@ -2350,15 +2382,35 @@ GER_politics = {
 				}
 			}
 		}
+		cost = 20
+		days_remove = 7
+		remove_effect = {
+			set_country_flag = GER_coalition_dstp
+			custom_effect_tooltip = GER_invite_dstp_tt
+			add_to_variable = {
+				government_support = dstp_support
+			}
+		}
 	}
 	GER_invite_zentrum= {
 		visible = {
 			NOT = {
 				OR = {
 					has_country_flag = GER_supported_sapd
+					has_country_flag = GER_coalition_sapd
 					has_country_flag = GER_supported_zentrum
 					has_country_flag = GER_supported_dvp
+					has_country_flag = GER_coalition_dvp
 				}
+			}
+		}
+		cost = 20
+		days_remove = 7
+		remove_effect = {
+			set_country_flag = GER_coalition_zentrum
+			custom_effect_tooltip = GER_invite_zentrum_tt
+			add_to_variable = {
+				government_support = zentrum_support
 			}
 		}
 	}
@@ -2367,9 +2419,20 @@ GER_politics = {
 			NOT = {
 				OR = {
 					has_country_flag = GER_supported_sapd
+					has_country_flag = GER_coalition_sapd
 					has_country_flag = GER_supported_spd
+					has_country_flag = GER_coalition_spd
 					has_country_flag = GER_supported_dvp
 				}
+			}
+		}
+		cost = 20
+		days_remove = 7
+		remove_effect = {
+			set_country_flag = GER_coalition_dvp
+			custom_effect_tooltip = GER_invite_dvp_tt
+			add_to_variable = {
+				government_support = dvp_support
 			}
 		}
 	}
@@ -2875,6 +2938,7 @@ GER_sapd_test_ubi = {
 		}
 		complete_effect = {
 			FROM = {
+				add_extra_state_shared_building_slots = 2
 				add_dynamic_modifier = {
 					modifier = GER_active_ubi_trial
 					days = 180
