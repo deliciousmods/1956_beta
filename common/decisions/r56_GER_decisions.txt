@@ -1019,104 +1019,6 @@ GER_debug = {
 	}
 }
 
-GER_cw_infiltration = {
-    GER_cw_disrupt_supply = {
-        state_target = yes
-		target_root_trigger = {
-			has_civil_war = yes
-			has_completed_focus = GER_cw_cross_border_resistance
-		}
-        on_map_mode = map_only
-		target_array = ROOT.core_states
-        target_trigger = {
-			FROM = {
-				any_neighbor_state = {
-					is_controlled_by = ROOT
-				}
-				controller = {
-					has_war_with = ROOT
-					has_civil_war = yes
-				}
-			}
-		}
-		highlight_states = {
-			highlight_state_targets = {
-				state = FROM
-			}
-			highlight_color_before_active = 3
-			highlight_color_while_active = 2
-		}
-
-		custom_cost_trigger = {
-			command_power > 19
-		}
-		custom_cost_text = decision_cost_CP_20
-
-		days_remove = 7
-
-		remove_effect = {
-			FROM = {
-				damage_building = {
-					type = supply_node
-					damage = 1
-				}
-				damage_building = {
-					type = rail_way
-					damage = 1
-				}
-			}
-		}
-    }
-
-	GER_cw_destroy_factories = {
-		state_target = yes
-		target_root_trigger = {
-			has_civil_war = yes
-			has_completed_focus = GER_cw_cross_border_resistance
-		}
-        on_map_mode = map_only
-		target_array = ROOT.core_states
-        target_trigger = {
-			FROM = {
-				any_neighbor_state = {
-					is_controlled_by = ROOT
-				}
-				controller = {
-					has_war_with = ROOT
-					has_civil_war = yes
-				}
-			}
-        }
-		highlight_states = {
-			highlight_state_targets = {
-				state = FROM
-			}
-			highlight_color_before_active = 3
-			highlight_color_while_active = 2
-		}
-		
-		custom_cost_trigger = {
-			command_power > 49
-		}
-		custom_cost_text = decision_cost_CP_50
-
-		days_remove = 14
-
-		remove_effect = {
-			FROM = {
-				damage_building = {
-					type = arms_factory
-					damage = 1
-				}
-				damage_building = {
-					type = industrial_complex
-					damage = 1
-				}
-			}
-		}
-	}
-}
-
 GER_cw_infantry_assaults = {
 	GER_cw_organise_assault = {
 		state_target = yes
@@ -1334,6 +1236,108 @@ GER_state_of_the_industry = {
 				add_to_variable = { GER.recon_factory_output = 0.15 }
 				add_to_variable = { GER.recon_production_growth = 0.15 }
 				custom_effect_tooltip = money_for_work_tt
+			}
+		}
+	}
+}
+
+GER_root_out_fascism = {
+	GER_raid_centres = {
+		state_target = yes
+		target_array = ROOT.core_states
+		on_map_mode = map_only
+
+		target_trigger = {
+			FROM = {
+				OR = {
+					has_dynamic_modifier = { modifier = GER_minor_fascist_resistance }
+					has_dynamic_modifier = { modifier = GER_moderate_fascist_resistance }
+					has_dynamic_modifier = { modifier = GER_strong_fascist_resistance }
+					has_dynamic_modifier = { modifier = GER_crippling_fascist_resistance }
+				}
+			}
+		}
+		available = {
+			any_owned_state = {
+				NOT = {
+					has_state_flag = GER_purging_nazis
+				}
+			}
+			has_manpower  > 499
+		}
+
+		days_remove = 20
+		complete_effect = {
+			FROM = {
+				set_state_flag = GER_purging_nazis
+			}
+			add_manpower = -500
+		}
+		remove_effect = {
+			if = {
+				limit = {
+					FROM = {
+						has_dynamic_modifier = {
+							modifier = GER_minor_fascist_resistance
+						}
+					}
+				}
+				FROM = {
+					remove_dynamic_modifier = {
+						modifier = GER_minor_fascist_resistance
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						has_dynamic_modifier = {
+							modifier = GER_moderate_fascist_resistance
+						}
+					}
+				}
+				FROM = {
+					remove_dynamic_modifier = {
+						modifier = GER_moderate_fascist_resistance
+					}
+					add_dynamic_modifier = {
+						modifier = GER_minor_fascist_resistance
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						has_dynamic_modifier = {
+							modifier = GER_strong_fascist_resistance
+						}
+					}
+				}
+				FROM = {
+					remove_dynamic_modifier = {
+						modifier = GER_strong_fascist_resistance
+					}
+					add_dynamic_modifier = {
+						modifier = GER_moderate_fascist_resistance
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						has_dynamic_modifier = {
+							modifier = GER_crippling_fascist_resistance
+						}
+					}
+				}
+				FROM = {
+					remove_dynamic_modifier = {
+						modifier = GER_crippling_fascist_resistance
+					}
+					add_dynamic_modifier = {
+						modifier = GER_strong_fascist_resistance
+					}
+				}
 			}
 		}
 	}
@@ -2298,6 +2302,78 @@ GER_elections = {
 		}
 	}
 }
+GER_politics = {
+	GER_form_government = {
+		days_mission_timeout = 90
+		activation = {
+			has_country_flag = GER_elections_over
+		}
+		cancel_trigger = {
+			
+		}
+		
+		timeout_effect = {
+			
+		}
+	}
+	GER_invite_sapd = {
+		visible = {
+			NOT = {
+				OR = {
+					has_country_flag = GER_supported_sapd
+					has_country_flag = GER_supported_zentrum
+					has_country_flag = GER_supported_dvp
+				}
+			}
+		}
+		days_remove = 7
+		remove_effect = {
+			set_country_flag = GER_coalition_sapd
+			custom_effect_tooltip = GER_invite_sapd_tt
+		}
+	}
+	GER_invite_spd = {
+		visible = {
+			NOT = {
+				OR = {
+					has_country_flag = GER_supported_spd
+					has_country_flag = GER_supported_dvp
+				}
+			}
+		}
+	}
+	GER_invite_dstp = {
+		visible = {
+			NOT = {
+				OR = {
+					has_country_flag = GER_supported_dstp
+				}
+			}
+		}
+	}
+	GER_invite_zentrum= {
+		visible = {
+			NOT = {
+				OR = {
+					has_country_flag = GER_supported_sapd
+					has_country_flag = GER_supported_zentrum
+					has_country_flag = GER_supported_dvp
+				}
+			}
+		}
+	}
+	GER_invite_dvp = {
+		visible = {
+			NOT = {
+				OR = {
+					has_country_flag = GER_supported_sapd
+					has_country_flag = GER_supported_spd
+					has_country_flag = GER_supported_dvp
+				}
+			}
+		}
+	}
+}
 GER_sapd_kpd_balance = {
 	GER_infiltrate_army_kpd = {
 		icon = ger_military_buildup
@@ -2540,6 +2616,8 @@ GER_sapd_ally_european_socialists = {
 		state_target = yes
 		on_map_mode = decision_view_only
 
+		cost = 50
+
 		target_trigger = {
 			FROM = {
 				owner = {
@@ -2567,6 +2645,184 @@ GER_sapd_ally_european_socialists = {
 		}
 	}
 }
+GER_subverting_german_lands = {
+	GER_pressure_government_eupen = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 965 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_luxemburg = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 8 }
+
+		cost = 150
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_alsace = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 28 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_schleswig = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 964 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_danzig = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 85 }
+
+		cost = 150
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_gydnia= {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 807 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_poznan = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 86 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_memel = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 188 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_katowice = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 762 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_sudeten = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 69 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+	GER_pressure_government_east_sudeten = {
+		state_target = yes
+		on_map_mode = map_and_decisions_view
+
+		targets = { 74 }
+
+		cost = 100
+
+		complete_effect = {
+			FROM = {
+				owner = {
+					
+				}
+			}
+		}
+	}
+}
 GER_sapd_test_ubi = {
 	GER_test_ubi = {
 		state_target = yes
@@ -2589,6 +2845,22 @@ GER_sapd_test_ubi = {
 		available = {
 			NOT = {
 				any_owned_state = {
+					has_dynamic_modifier = {
+						modifier = GER_active_ubi_trial
+					}
+				}
+			}
+		}
+		visible = {
+			OR = {
+				NOT = {
+					any_owned_state = {
+						has_dynamic_modifier = {
+							modifier = GER_active_ubi_trial
+						}
+					}
+				}
+				FROM = {
 					has_dynamic_modifier = {
 						modifier = GER_active_ubi_trial
 					}
