@@ -1,4 +1,4 @@
-version="1.13"
+version="13"
 tags={
 	"Alternative History"
 	"Events"
@@ -8,8 +8,8 @@ tags={
 	"National Focuses"
 	"Technologies"
 	"Utilities"
-	"Military"
 	"Ideologies"
+	"Military"
 }
 name="The Road to 56 BETA"
 supported_version="1.14.3"
