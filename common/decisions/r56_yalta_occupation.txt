@@ -8,10 +8,14 @@ CW_occupation_negotations = {
 			}
 			NOT = {
 				has_country_flag = r56_yalta_open_germany_category
+				has_country_flag = r56_yalta_fate_of_germany_decided
 			}
 		}
 		complete_effect = {
 			set_country_flag = r56_yalta_open_germany_category
+		}
+		ai_will_do = {
+			base = 1
 		}
 	}
 	close_the_german_issue = {
@@ -25,6 +29,9 @@ CW_occupation_negotations = {
 		complete_effect = {
 			clr_country_flag = r56_yalta_open_germany_category
 		}
+		ai_will_do = {
+			base = 0
+		}
  	}
 	merge_occupation_zones_germany = {	#is there a point? probably just compliance gain, IRL it helped fix the famine to do economic coop, but you cant assume thered be in with in-game war
 		visible = {
@@ -34,22 +41,51 @@ CW_occupation_negotations = {
 			}
 			has_country_flag = r56_yalta_open_germany_category
 		}
-		target_trigger = {
-			FROM = {
-				any_controlled_state = {
-					is_core_of = GER
+		available = {
+			OR = {
+				FROM = {
+					NOT = {
+						has_government = communism
+					}
 				}
+				NOT = {
+					has_country_flag = TO_joined_brussels_treaty
+				}
+			}
+			FROM = {
 				NOT = {
 					has_war_with = ROOT
 				}
 				OR = {
 					is_ally_with = ROOT
+					AND = {
+						count_triggers = {
+							amount = 2
+							gives_military_access_to = ROOT
+							has_military_access_to = ROOT
+							has_non_aggression_pact_with = ROOT
+							AND = {
+								has_guaranteed = ROOT
+								is_guaranteed_by = ROOT
+							}
+						}
+					}
+				}
+			}
+		}
+		target_trigger = {
+			FROM = {
+				any_controlled_state = {
+					is_core_of = GER
+					NOT = {	#in case of CZE/AUS/POL/BEL owning German land
+						is_core_of = FROM
+					}
 				}
 			}
 		}
 		icon = hol_exchange_intelligence_data
 		complete_effect = { #meta effect to set country flag of name FROM about who to work with?
-
+			custom_effect_tooltip = r56_shared_zone_action_required_tt
 		}
 	}
 	prepare_formation_of_german_state_in_control_zone = {
@@ -59,6 +95,9 @@ CW_occupation_negotations = {
 				is_core_of = GER
 			}
 			has_country_flag = r56_yalta_open_germany_category
+		}
+		available = {
+			#if merged zone, must do some agreement decision first
 		}
 		fire_only_once = yes
 		days_remove = 330
@@ -114,6 +153,66 @@ CW_occupation_negotations = {
 			}
 		}
 	}
+	r56_yalta_propose_neutral_germany = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			has_country_flag = r56_yalta_open_germany_category
+			NOT = {
+				country_exists = GER
+			}
+		}
+		available = {
+			always = yes
+		}
+		days_re_enable = 360
+		cost = 25
+		complete_effect = {
+			country_event = cold_war.39
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1000	#need to be high since it costs pp
+				original_tag = SOV
+				NOT = {	#Soviets get to propose this once
+					has_country_flag = r56_yalta_proposing_undemocratic_germany
+				}
+			}
+		}
+ 	}
+	r56_yalta_neutral_germany_forming = {
+		allowed = {
+			always = no
+		}
+		is_good = yes
+		available = {
+			NOT = {
+				any_owned_state = {
+					is_core_of = GER
+				}
+			}
+		}
+		days_mission_timeout = 100 #a government already existed
+		timeout_effect = {	#probably put the effect on one side, and a tooltip on the rest
+			every_state = {
+				limit = {
+					is_core_of = GER
+					NOT = {
+						owner = {
+							PREV = {
+								is_core_of = PREV
+							}
+						}
+					}
+				}
+				transfer_state_to = GER
+			}
+			#put government in event so it doesnt need to be stored
+		}
+	}
 	dismantle_german_war_industry = {	#every 3 mils becomes 1 civ for GER, and 1 mil for the occupier
 		icon = generic_construction
 		state_target = yes
@@ -127,36 +226,67 @@ CW_occupation_negotations = {
 		target_trigger = {
 			FROM = {
 				is_owned_by = ROOT
+				is_fully_controlled_by = ROOT
 				is_core_of = GER
-				arms_factory > 2
+				arms_factory > 0
 			}
 		}
 		days_remove = 200
 		remove_effect = {
-			FROM = {
-				remove_building = {
-					type = arms_factory
-					level = 3
-				}
-				add_building_construction = {
-					type = industrial_complex
-					level = 1
-					instant_build = yes
-				}
-			}
-			random_owned_controlled_state = {
+			if = {
 				limit = {
-					is_core_of = ROOT
-					free_building_slots = {
-						building = arms_factory
-						size > 0
-						include_locked = no
+					FROM = {
+						arms_factory > 2
 					}
 				}
-				add_building_construction = {
-					type = arms_factory
-					level = 1
-					instant_build = yes
+				FROM = {
+					remove_building = {
+						type = arms_factory
+						level = 3
+					}
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				random_owned_controlled_state = {
+					limit = {
+						is_core_of = ROOT
+						free_building_slots = {
+							building = arms_factory
+							size > 0
+							include_locked = no
+						}
+					}
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+			}
+			else = {
+				FROM = {
+					remove_building = {
+						type = arms_factory
+						level = building_level@arms_factory
+					}
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+			}
+			add_threat = -1
+		}
+		ai_will_do = {
+			base = 1
+			modifier = {
+				factor = 0
+				any_enemy_country = {
+					is_major = yes
 				}
 			}
 		}
@@ -167,9 +297,16 @@ CW_occupation_negotations = {
 			any_controlled_state = {
 				is_core_of = AUS
 			}
+			NOT = {
+				has_country_flag = r56_yalta_open_austria_category
+				has_country_flag = r56_yalta_fate_of_austria_decided
+			}
 		}
 		complete_effect = {
 			set_country_flag = r56_yalta_open_austria_category
+		}
+		ai_will_do = {
+			base = 1
 		}
  	}
 	close_the_austrian_issue = {
@@ -183,7 +320,76 @@ CW_occupation_negotations = {
 		complete_effect = {
 			clr_country_flag = r56_yalta_open_austria_category
 		}
+		ai_will_do = {
+			base = 0
+		}
  	}
+	r56_yalta_propose_neutral_austria = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_austria_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			has_country_flag = r56_yalta_open_austria_category
+			NOT = {
+				country_exists = AUS
+			}
+		}
+		days_re_enable = 360
+		cost = 25
+		complete_effect = {
+			country_event = cold_war.37
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1000	#need to be high since it costs pp
+				original_tag = SOV
+				OR = {
+					date > 1955.06.06
+					AND = {
+						NOT = {
+							has_country_leader = {
+								character = SOV_iosif_stalin
+								ruling_only = yes
+							}
+						}
+						date < 1952.06.06	#other leader before death of Stalin = earlier
+					}
+				}
+			}
+		}
+ 	}
+	r56_yalta_neutral_austria_forming = {
+		allowed = {
+			always = no
+		}
+		is_good = yes
+		available = {
+			NOT = {
+				any_owned_state = {
+					is_core_of = AUS
+				}
+			}
+		}
+		days_mission_timeout = 100 #a government already existed
+		timeout_effect = {	#Iran complains
+			every_state = {
+				limit = {
+					is_core_of = AUS
+					NOT = {
+						owner = {
+							PREV = {
+								is_core_of = PREV
+							}
+						}
+					}
+				}
+				transfer_state_to = AUS
+			}
+			#put government in event so it doesnt need to be stored
+		}
+	}
 	occupation_of_iran_decision = {	#itd be nicer if garrison divisions existed, so the decision below this wouldnt be needed, but no data
 		allowed = {
 			always = no
