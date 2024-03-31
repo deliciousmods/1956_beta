@@ -8413,6 +8413,14 @@ country_event = {
 				}
 			}
 			set_global_flag = r56_DEN_in_yalta
+			if = {
+				limit = {
+					DEN = {
+						has_government = democratic
+					}
+				}
+				set_global_flag = r56_DEN_protectorate_in_yalta
+			}
 		}
 		if = {
 			limit = {
@@ -8576,6 +8584,12 @@ country_event = {
 			factor = 0
 		}
 		set_global_flag = r56_unlocked_fate_of_germany_decisions #unlock decisions that allow DDR/WGR formation
+		if = {
+			limit = {
+				has_global_flag = r56_AUS_in_yalta
+			}
+			set_global_flag = r56_unlocked_fate_of_austria_decisions
+		}
 		custom_effect_tooltip = r56_yalta_decisions_available_2_tt
 	}
 }
@@ -11824,33 +11838,17 @@ country_event = { #Historical post yalta fixing by marijn211
 	fire_only_once = yes
 	
 	hidden = yes
-	
-	trigger = {
-		NOT = {
-			has_global_flag = r56_unlocked_fate_of_germany_decisions #dont trigger if WGR/DDR was formed by decisions after the player refused yalta (only_once blocks if by decisions of this event)
-		}
-		has_global_flag = r56_yalta_peacedeal_over #in case DDR/WGR were released before war's end
-		OR = { #double check
-			country_exists = DDR
-			country_exists = WGR
-		}
-	}
+
+	is_triggered_only = yes
 
 	option = {
 		name = soviet.106.a
 		if = { #Dont bother fixing DDR/GDR fixing if too ahistorical
 			limit = {
 				has_global_flag = r56_historical_occupation_yalta_allowed
-				always = no #DISABLING MEASURE, WIP
 			}
 			news_event = {
 				id = r56.news_event.30
-			}
-			USA = {
-				annex_country = {
-					target = AUS
-					transfer_troops = no
-				}
 			}
 			USA = {
 				annex_country = {
@@ -11874,14 +11872,6 @@ country_event = { #Historical post yalta fixing by marijn211
 				}
 				FRA = { transfer_state = 50 }
 			}
-			if = { #Tyrol - Austria
-				limit = {
-					153 = {  
-						is_owned_by = USA
-					}
-				}
-				FRA = { transfer_state = 153 }
-			}
 			if = { #Baden
 				limit = {
 					923 = {  
@@ -11897,6 +11887,14 @@ country_event = { #Historical post yalta fixing by marijn211
 					}
 				}
 				FRA = { transfer_state = 42 }
+			}
+			if = { #Saarland
+				limit = {
+					1053 = { 
+						is_owned_by = USA
+					}
+				}
+				FRA = { transfer_state = 1053 }
 			}
 			#British occupation zone
 			if = { #Wesser-Ems
@@ -11955,21 +11953,112 @@ country_event = { #Historical post yalta fixing by marijn211
 				}
 				ENG = { transfer_state = 989 }
 			}
-			if = { #Soviet Austria
+			every_state = {
+				remove_claim_by = GER #lets not
+			}
+			every_state = {	#prevent premature WGR/DDR formation, but reinstate GER cores for decisions
 				limit = {
-					4 = { #Lower Austria
-						is_owned_by = USA
+					OR = {
+						is_core_of = DDR
+						is_core_of = WGR
 					}
 				}
-				SOV = { transfer_state = 4 }
-			}
-			every_state = { #prevent premature German formation
-				remove_claim_by = GER #lets not
+				add_core_of = GER	#simplifies occupation decisions, people releasing GER manually should be accounted for in the decisions
 				remove_core_of = DDR
 				remove_core_of = WGR
-				remove_core_of = GER #to prevent player bypassing decision system
 			}
 			set_global_flag = r56_unlocked_fate_of_germany_decisions #unlock decisions that allow DDR/WGR formation
+			if = {
+				limit = {
+					has_global_flag = r56_AUS_in_yalta
+				}
+				USA = {
+					annex_country = {
+						target = AUS
+						transfer_troops = no
+					}
+				}
+				if = { #Tyrol - Austria
+					limit = {
+						153 = {  
+							is_owned_by = USA
+						}
+					}
+					FRA = { transfer_state = 153 }
+				}
+				if = { #Vorarlberg - Austria
+					limit = {
+						848 = {  
+							is_owned_by = USA
+						}
+					}
+					FRA = { transfer_state = 848 }
+				}
+				if = { #Soviet Austria
+					limit = {
+						4 = { #Lower Austria
+							is_owned_by = USA
+						}
+					}
+					SOV = { transfer_state = 4 }
+				}
+				if = { #Bri'ish Austria
+					limit = {
+						1054 = { #Lower Austria
+							is_owned_by = USA
+						}
+					}
+					ENG = { transfer_state = 1054 }
+				}
+				set_global_flag = r56_unlocked_fate_of_austria_decisions
+				every_state = {
+					limit = {
+						OR = {
+							is_owned_by = ENG
+							is_owned_by = FRA
+							is_owned_by = USA
+						}
+						OR = {
+							is_core_of = GER
+							is_core_of = AUS
+						}
+						has_resistance = yes
+						compliance < 20
+					}
+					set_compliance = 20
+				}
+				every_state = {
+					limit = {
+						is_owned_by = SOV
+						OR = {
+							is_core_of = GER
+							is_core_of = AUS
+						}
+						has_resistance = yes
+						compliance < 10
+					}
+					set_compliance = 10
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_global_flag = R56_PER_countenance_has_capitulated_flag
+				PER = {
+					is_subject_of = ENG
+				}
+				SOV = {
+					any_owned_state = {
+						is_core_of = PER
+					}
+				}
+			}
+			SOV = {
+				activate_mission = occupation_of_iran_decision
+			}
+			ENG = {
+				activate_mission = occupation_of_iran_decision
+			}
 		}
 		if = { #Fix Tyrol
 			limit = {
@@ -12004,64 +12093,6 @@ country_event = { #Historical post yalta fixing by marijn211
 				}
 			}
 			AUS = { transfer_state = 153 }
-		}
-		if = { #Dynamic Austria without ENG or USA but with FRA
-			limit = {
-				always = no #DISABLING MEASURE, WIP
-				NOT = {
-					has_global_flag = r56_historical_occupation_yalta_allowed
-				}
-				OR = {
-					has_global_flag = r56_USA_can_occupy_yalta
-					has_global_flag = r56_ENG_can_occupy_yalta
-				}
-				has_global_flag = r56_FRA_can_occupy_yalta
-				has_global_flag = r56_AUS_in_yalta
-			}
-			SOV = {
-				annex_country = {
-					target = AUS
-					transfer_troops = no
-				}
-			}
-			if = { #Tyrol
-				limit = {
-					SOV = {
-						is_ai = yes
-					}
-					153 = {  
-						is_owned_by = SOV
-					}
-				}
-				FRA = { transfer_state = 153 }
-			}
-			if = { #Upper Austria
-				limit = {
-					SOV = {
-						is_ai = yes
-					}
-					has_global_flag = r56_USA_can_occupy_yalta
-					152 = {  
-						is_owned_by = SOV
-					}
-				}
-				USA = { transfer_state = 152 }
-			}
-			if = { #Upper Austria
-				limit = {
-					SOV = {
-						is_ai = yes
-					}
-					NOT = {
-						has_global_flag = r56_USA_can_occupy_yalta
-					}
-					has_global_flag = r56_ENG_can_occupy_yalta
-					1054 = {  
-						is_owned_by = SOV
-					}
-				}
-				ENG = { transfer_state = 1054 }
-			}
 		}
 		if = { #Fix released Lithuania in only Vilnius
 			limit = {
@@ -12122,9 +12153,14 @@ country_event = { #Historical post yalta fixing by marijn211
 		if = { #Fix East Poland-> remove Belarus if allies puppeted
 			limit = {
 				BLR = {
-					is_ai = yes	
-					OVERLORD = {
-						is_ai = yes
+					is_ai = yes
+					if = {
+						limit = {
+							is_subject = yes
+						}
+						OVERLORD = {
+							is_ai = yes
+						}
 					}
 				}
 				has_global_flag = r56_POL_in_yalta
@@ -12302,6 +12338,17 @@ country_event = { #Historical post yalta fixing by marijn211
 					transfer_state = 89
 				}
 			}
+			POL = {	#return Bialystok, which the Soviets take in MolRib
+				if = {
+					limit = {
+						is_subject_of = SOV
+						SOV = {
+							owns_state = 97
+						}
+					}
+					transfer_state = 97
+				}
+			}
 			#Removing cores that are still around
 			if = {
 				limit = {
@@ -12353,7 +12400,19 @@ country_event = { #Historical post yalta fixing by marijn211
 			ITA = {
 				if = {
 					limit = {
-						has_autonomy_state = autonomy_supervised_state
+						OR = {
+							has_autonomy_state = autonomy_supervised_state
+							AND = {	#Italian civil war makes one side a puppet, although its not super far fetched, it makes sense to remove post-war
+								is_subject = yes
+								overlord = {
+									has_government = democratic
+								}
+								OR = {
+									has_government = neutrality
+									has_government = democratic
+								}
+							}
+						}
 					}
 					OVERLORD = { #this function requires a different tag here
 						set_autonomy = { #disable silly nations making a guided gov of Italy, which is really never removed by AI
@@ -12453,6 +12512,26 @@ country_event = { #Historical post yalta fixing by marijn211
 			}
 			every_state = { #remove Italian claims that lead to WW3
 				remove_claim_by = ITA
+			}
+		}
+		if = {	#if Denmark was democratic in WW2, dont puppet them
+			limit = {
+				has_global_flag = r56_DEN_protectorate_in_yalta
+				DEN = {
+					is_subject = yes
+					overlord = {
+						has_government = democratic
+					}
+					has_government = democratic
+				}
+			}
+			DEN = {
+				overlord = {
+					set_autonomy = {
+						target = DEN
+						autonomy_state = autonomy_free
+					}
+				}
 			}
 		}
 		#Below are very rare edge cases that are fixed when found - SpicyAlfredo
