@@ -2,6 +2,30 @@ on_actions = {
 	#ROOT is new controller #FROM is old controller #FROM.FROM is state ID
 	on_state_control_changed = {
 		effect = {
+			IF = {				#Ms. Anderson, welcome to our world! Wojtek can take over too now
+				limit = {
+					FROM.FROM = { 
+						state = 219 
+					}
+					ROOT = {
+						OR = {
+							tag = POL
+							is_in_faction_with = POL
+						}
+					}
+					POL = {
+						has_country_leader  = {
+							character = POL_anna_andersson
+							ruling_only  = yes
+						}
+						has_country_flag = POL_vojtek_commander
+						NOT = { is_in_faction_with = SOV }
+					}
+				}
+				POL = {
+					country_event = { id = NSB_poland_events.8 days = 7 random_days = 1	}	#takes some time to search the archives in captured city
+				}
+			}
 			IF = {
 				limit = {
 					FROM.FROM = { 
@@ -682,6 +706,7 @@ on_actions = {
 					original_tag = LIT
 					NOT = { has_focus_tree = lithuania_tree }
 					has_dlc = "No Step Back"
+					has_global_flag = LIT_vanilla_focus_tree
 				}
 				load_focus_tree = { tree = lithuania_tree keep_completed = yes }
 				if = { #Give Lithuania their focus tree back if the Iron Wolf win the civil war.
@@ -1515,8 +1540,25 @@ on_actions = {
 					FROM = { tag = FIN }
 					NOT = { has_global_flag = SOV_winter_war_flag }
 				}
+				clear_variable = FIN_white_death_target_country
+				set_variable = { FIN_white_death_target_country = ROOT }
 				set_global_flag = SOV_winter_war_flag
-				FIN = { country_event = finland.10 }
+				FIN = {
+					country_event = finland.10
+					set_country_flag = FIN_winter_war_ongoing_flag #Used to prevent Finland from demanding territory from Soviets just by occupying Leningrad, when not in the Winter War
+				}
+				if = {
+					limit = {
+						FIN = {
+							has_country_leader = {
+								ruling_only = yes # default = yes
+								character = FIN_kyosti_kallio # recommended
+							}
+						}
+					}
+					FIN = { set_country_flag = FIN_winter_war_kallio }
+					#Used to flag if Kallio is Finland's leader during the Winter War
+				}
 			}
 		}
 		effect = {
@@ -1891,17 +1933,6 @@ on_actions = {
 		}
 	}
 
-	on_startup = {
-		effect = {
-			#Set Iranian initial states (for Anglo-Soviet invasion of Iran)
-			PER = {
-				every_owned_state = {
-					add_to_array = { SOV_iranian_initial_states = THIS }
-				}
-			}
-		}
-	}
-
 	# ROOT is capitulated country, FROM is winner
 	on_capitulation = {
 		#Soviet / Anglo-Soviet Invasion of Iran
@@ -1921,6 +1952,7 @@ on_actions = {
 							}
 						}
 					}
+					set_global_flag = R56_PER_countenance_has_capitulated_flag
 					FROM = {
 						white_peace = PER
 						puppet = ROOT #SOV puppet Iran
@@ -1948,6 +1980,7 @@ on_actions = {
 					}
 
 					clr_global_flag = SOV_agreed_anglo_soviet_invasion_of_iran_flag
+					set_global_flag = R56_PER_countenance_has_capitulated_flag
 
 					FROM = { country_event = { id = NSB_soviet_foreign_politics_events.157 days = 1 } } #Hidden Effect to transfer states and give resource rights and military access
 				}

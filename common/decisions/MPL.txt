@@ -20,7 +20,7 @@ MPL_arab_revolt_category = {
 	}
 }
 MPL_debug_category = {
-	MPL_trigger_collapse_isr = {
+	MPL_trigger_collapse_isr_debug = {
 		allowed = {
 			TAG = MPL
 		}
@@ -31,7 +31,7 @@ MPL_debug_category = {
 			MPL_trigger_collapse_ISR = yes
 		}
 	}
-	MPL_trigger_collapse_pal = {
+	MPL_trigger_collapse_pal_debug = {
 		allowed = {
 			TAG = MPL
 		}
@@ -959,7 +959,7 @@ MPL_mandate_collapse_PAL_category = {
 	
 	PAL_mandate_collapse_mission = {
 		icon = GFX_decision_revolt
-		days_mission_timeout = 300
+		days_mission_timeout = 250
 		available = {
 			OR = {
 				NOT = {
@@ -1421,8 +1421,8 @@ MPL_foreign_support_category = {
 			GER = {
 				exists = yes
 				NOT = {
-					has_country_flag = MPL_GER_support_ISR
-					has_country_flag = MPL_GER_support_PAL
+					has_country_flag = MPL_support_ISR
+					has_country_flag = MPL_support_PAL
 				}
 			}
 		}
@@ -1607,8 +1607,8 @@ MPL_foreign_support_category = {
 			ITA = {
 				exists = yes
 				NOT = {
-					has_country_flag = MPL_ITA_support_ISR
-					has_country_flag = MPL_ITA_support_PAL
+					has_country_flag = MPL_support_ISR
+					has_country_flag = MPL_support_PAL
 				}
 			}
 		}
@@ -1793,8 +1793,8 @@ MPL_foreign_support_category = {
 			SOV = {
 				exists = yes
 				NOT = {
-					has_country_flag = MPL_SOV_support_ISR
-					has_country_flag = MPL_SOV_support_PAL
+					has_country_flag = MPL_support_ISR
+					has_country_flag = MPL_support_PAL
 				}
 			}
 		}
@@ -1979,8 +1979,8 @@ MPL_foreign_support_category = {
 			ENG = {
 				exists = yes
 				NOT = {
-					has_country_flag = MPL_ENG_support_ISR
-					has_country_flag = MPL_ENG_support_PAL
+					has_country_flag = MPL_support_ISR
+					has_country_flag = MPL_support_PAL
 				}
 			}
 		}
@@ -2165,8 +2165,8 @@ MPL_foreign_support_category = {
 			FRA = {
 				exists = yes
 				NOT = {
-					has_country_flag = MPL_FRA_support_ISR
-					has_country_flag = MPL_FRA_support_PAL
+					has_country_flag = MPL_support_ISR
+					has_country_flag = MPL_support_PAL
 				}
 			}
 		}
@@ -2351,8 +2351,8 @@ MPL_foreign_support_category = {
 			USA = {
 				exists = yes
 				NOT = {
-					has_country_flag = MPL_USA_support_ISR
-					has_country_flag = MPL_USA_support_PAL
+					has_country_flag = MPL_support_ISR
+					has_country_flag = MPL_support_PAL
 				}
 			}
 		}
@@ -3663,10 +3663,12 @@ MPL_union_stabilization_category = {
 						MPL_jewish_support > MPL_arab_support
 					}
 				}
-				MPL_trigger_collapse_ISR = yes
+				set_country_flag = MPL_trigger_collapse_ISR
+				country_event = mandate_palestine.501
 			}
 			else = {
-				MPL_trigger_collapse_PAL = yes
+				set_country_flag = MPL_trigger_collapse_PAL
+				country_event = mandate_palestine.502
 			}
 		}	
 	}
@@ -4023,7 +4025,22 @@ MPL_mandate_resistance_category = {
 						compare = less_than_or_equals
 					}
 				}
-				MPL_trigger_collapse_ISR = yes
+				
+				if = {
+					limit = {
+						has_any_power_balance = yes
+						power_balance_value = {
+							id = MPL_power_balance
+							value < 0
+						}
+					}
+					set_country_flag = MPL_trigger_collapse_PAL
+					country_event = mandate_palestine.502
+				}
+				else = {
+					set_country_flag = MPL_trigger_collapse_ISR
+					country_event = mandate_palestine.501	
+				}
 			}
 		}
 	}
@@ -4333,31 +4350,37 @@ MPL_stabilize_jordan_category = {
 			set_country_flag = ENG_jordan_stabilized
 		}
 		timeout_effect = {
-			every_country = { 
-				if = {
-					limit = {
-						exists = yes
-						has_capitulated = no
-						OR = {
-							TAG = ISR
-							TAG = PAL
-							controls_state = 455
-							is_neighbor_of = JOR
-							capital_scope = {
-								is_on_continent = middle_east
+			hidden_effect = {
+				every_country = { 
+					if = {
+						limit = {
+							exists = yes
+							has_capitulated = no
+							OR = {
+								TAG = ISR
+								TAG = PAL
+								controls_state = 455
+								is_neighbor_of = JOR
+								capital_scope = {
+									is_on_continent = middle_east
+								}
+								is_subject_of = ENG
 							}
-							is_subject_of = ENG
+						}
+						news_event = {
+							id = mandate_palestine.205
+							days = 1
+							random_hours = 12
 						}
 					}
-					news_event = {
-						id = mandate_palestine.205
-						days = 1
-						random_hours = 12
-					}
 				}
+				
+			}
+			effect_tooltip = {
+				news_event = mandate_palestine.205
 			}
 			release = JOR
-			save_event_target_as = MPL_JOR_ruler
+			save_global_event_target_as = MPL_JOR_ruler
 			hidden_effect = {
 				JOR = {
 					load_oob = JOR_1936
@@ -4365,22 +4388,22 @@ MPL_stabilize_jordan_category = {
 				}
 				554 = {
 					controller = {
-						if = {
-							limit = {
-								OR = {
-									is_major = yes
-									capital_scope = {
-										is_on_continent = europe
-									}
-									original_tag = TUR
-								}
-								OR = {
-									controls_state = 553
-									controls_state = 680
-									controls_state = 677
-								}
-							}
-						}
+						#if = {				#no reward? or should the event fire for only this type of controller?
+						#	limit = {
+						#		OR = {
+						#			is_major = yes
+						#			capital_scope = {
+						#				is_on_continent = europe
+						#			}
+						#			original_tag = TUR
+						#		}
+						#		OR = {
+						#			controls_state = 553
+						#			controls_state = 680
+						#			controls_state = 677
+						#		}
+						#	}
+						#}
 						country_event = {
 							id = mandate_palestine.121
 							days = 10
@@ -4400,7 +4423,14 @@ MPL_stabilize_syria_category = {
 	MPL_stabilize_syria_mission = {
 		icon = GFX_decision_generic_civil_support
 		days_mission_timeout = 90
-		cost = 100
+		custom_cost_trigger = {
+			command_power > 29
+			has_equipment = {
+				infantry_equipment > 300
+			}
+			has_political_power > 39
+		}
+		custom_cost_text = MPL_stabilize_syria_cost
 		available = {
 			
 			divisions_in_state = {
@@ -4536,29 +4566,45 @@ MPL_stabilize_syria_category = {
 					}
 				}
 			}
-			every_country = { 
-				if = {
-					limit = {
-						exists = yes
-						has_capitulated = no
-						OR = {
-							TAG = ISR
-							TAG = PAL
-							TAG = JOR
-							TAG = event_target:MPL_syria_war_owner
-							is_neighbor_of = SYR
-							capital_scope = {
-								is_on_continent = middle_east
+			hidden_effect = {
+				every_country = { 
+					if = {
+						limit = {
+							exists = yes
+							has_capitulated = no
+							OR = {
+								TAG = ISR
+								TAG = PAL
+								controls_state = 455
+								is_neighbor_of = SYR
+								capital_scope = {
+									is_on_continent = middle_east
+								}
+								is_subject_of = ENG
 							}
-							is_ally_with = event_target:MPL_syria_war_owner
+						}
+						news_event = {
+							id = mandate_palestine.210
+							days = 1
+							random_hours = 12
 						}
 					}
-					news_event = {
-						id = mandate_palestine.210
-						days = 1
-						random_hours = 12
-					}
 				}
+				
+			}
+			effect_tooltip = {
+				news_event = mandate_palestine.210
+			}
+		}
+		complete_effect = {
+			
+			hidden_effect = {
+				add_command_power = -30
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = -300
+				}
+				add_political_power = -40
 			}
 		}
 		is_good = no

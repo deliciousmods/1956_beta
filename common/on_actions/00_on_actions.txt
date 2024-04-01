@@ -124,11 +124,12 @@ on_actions = {
 	on_nuke_drop = {
 
 		effect = {
-			set_global_flag = first_nuke_dropped
-			if = {
+			if = {		#making sure this triggers
 				limit = { NOT = { has_global_flag = first_nuke_dropped } }
 				country_event = { id = generic.8 }
+				news_event = { id = nuke_dropped.1 days = 1}
 			}
+			set_global_flag = first_nuke_dropped
 			if = {
 				limit = { has_idea = race_for_the_bomb_outclassed }
 				remove_ideas = race_for_the_bomb_outclassed
@@ -175,9 +176,6 @@ on_actions = {
 			news_event = { id = nuke_dropped.12 days = 1}
 			news_event = { id = nuke_dropped.13 days = 1}
 		}
-		random_events = {
-			100 = nuke_dropped.0
-		}
 	}
 
 	# country random events
@@ -188,15 +186,6 @@ on_actions = {
 	#on_five_year_pulse = {
 	#
 	#}
-
-	on_border_war_lost = {
-		effect = {
-			owner = {
-				country_event = { id = china.14 }
-				country_event = { id = china.16 }
-			}
-		}
-	}
 	
 	on_leave_faction = {
 		effect = {
@@ -239,12 +228,40 @@ on_actions = {
 					remove_ideas = anti_soviet_pact
 				}
 			}	
+			# Yugoslavia joins axis without solving Anti-German military - coup event
+			if = {
+				limit = {
+					original_tag = GER
+					has_government = fascism
+					FROM = {
+						original_tag = YUG
+						has_idea = anti_german_military
+						NOT = { has_country_flag = has_already_decided_yugo_coup_flag }
+					}
+				}
+				FROM = {
+					country_event = { id = DOD_yugoslavia.1 random_hours = 6 }	#6 hours to simulate fast military preparations and response
+				}
+			}
 		}
 	}
 
 	#FROM is faction leader on join faction requests. THIS DOES NOT FIRE ON ADD_TO_FACTION EFFECT! USE ON_OFFER_JOIN_FACTION!
 	on_join_faction = {
 		effect = {
+			# Yugoslavia joins axis without solving Anti-German military - coup event
+			if = {	
+				limit = {
+					FROM = {
+						original_tag = GER
+						has_government = fascism
+					}
+					original_tag = YUG
+					has_idea = anti_german_military
+					NOT = { has_country_flag = has_already_decided_yugo_coup_flag }
+				}
+				country_event = { id = DOD_yugoslavia.1 random_hours = 6 }	#6 hours to simulate fast military preparations and response
+			}
 			#Remove anti_soviet_pact if joining commie Soviet in faction
 			if = {
 				limit = {
@@ -416,21 +433,25 @@ on_actions = {
 			}
 
 			#Remove previous ideology civil war faction from Democratic Germany faction and add Democratic civil war faction to Germany's faction
-			if = {
-				limit = {
-					FROM = {
-						is_in_faction_with = GER
-					#	has_civil_war = yes
-						NOT = { has_government = democratic }
-					}
-					has_government = democratic
-					GER = { has_government = democratic }
-				}
-				FROM = { set_country_flag = GER_civil_war_target }
-				GER = { remove_from_faction = FROM }
-				GER = { add_to_faction = ROOT }
-				GER = { country_event = wtt_germany.52 }
-			}
+
+			#r56 fix: disabled, very broken implementation, any time a democratic country declares on Germany's faction member that isnt democratic, the declarer is pulled into Germany's faction
+			#should instead check for both FROM and ROOT that they are fighting a civil war against each other, presumably this wasnt easily possible as the has_civil_war was already commented out
+
+			# if = {
+			# 	limit = {
+			# 		FROM = {
+			# 			is_in_faction_with = GER
+			# 		#	has_civil_war = yes	
+			# 			NOT = { has_government = democratic }
+			# 		}
+			# 		has_government = democratic
+			# 		GER = { has_government = democratic }
+			# 	}
+			# 	FROM = { set_country_flag = GER_civil_war_target }
+			# 	GER = { remove_from_faction = FROM }
+			# 	GER = { add_to_faction = ROOT }
+			# 	GER = { country_event = wtt_germany.52 }
+			# }
 
 			#If prepared by siphoning equipment, receive equipment back
 			if = {
@@ -535,6 +556,18 @@ on_actions = {
 			}
 			
 			if = {
+				limit = {
+					original_tag = FRA
+					has_government = democratic
+					NOT = { has_global_flag = FRA_capitulation_event_fired } #might as well use the achievement flag to check if france.10 fired
+					is_subject = no
+					is_in_faction_with = ENG
+					has_war_with = GER
+				}
+				country_event = france.10
+			}
+
+			if = {
 				limit = { tag = FRA }
 				set_global_flag = FRA_already_surrendered
 				set_variable = { global.FRA_capitulation_days = global.num_days }
@@ -548,28 +581,10 @@ on_actions = {
 			}
 			
 			if = {
-				limit = { 
-					original_tag = POL
-					has_government = neutrality
-				}
-				retire_country_leader = yes
-			}
-			if = {
 				limit = {
 					original_tag = DEN
 				}
 				country_event = { id = wtt_denmark.1 days = 1 }
-			}
-			if = {
-				limit = {
-					original_tag = FRA
-					has_government = democratic
-					NOT = { has_global_flag = achievement_france_surrender } #might as well use the achievement flag to check if france.10 fired
-					is_subject = no
-					is_in_faction_with = ENG
-					has_war_with = GER
-				}
-				country_event = france.10
 			}
 		}
 	}
@@ -1340,6 +1355,36 @@ on_actions = {
 									option = DEFAULT
 								}
 							}
+							AND = {	#DLC tree has no conservative tree
+								has_global_flag = DEN_use_DLC_tree
+								has_game_rule = {
+									rule = DEN_ai_behavior
+									option = CONSERVATIVE
+								}
+							}
+							AND = { #R56 tree has no rearmament plan
+								NOT = {
+									has_global_flag = DEN_use_DLC_tree
+								}
+								has_game_rule = {
+									rule = DEN_ai_behavior
+									option = DEN_REARMAMENT_PLAN
+								}
+							}
+							AND = {	#DLC tree has no communist tree
+								has_global_flag = DEN_use_DLC_tree
+								has_game_rule = {
+									rule = DEN_ai_behavior
+									option = COMMUNIST
+								}
+							}
+							AND = {	#DLC tree has no republic path, questionmark
+								has_global_flag = DEN_use_DLC_tree
+								has_game_rule = {
+									rule = DEN_ai_behavior
+									option = REPUBLIC
+								}
+							}
 							has_game_rule = {
 								rule = DEN_ai_behavior
 								option = RANDOM
@@ -1347,11 +1392,40 @@ on_actions = {
 						}
 					}
 					random_list = {
-						50 = { DEN = { set_country_flag = DEN_AI_RANDOM_SOCIAL_DEMOCRATIC } }
-						30 = { DEN = { set_country_flag = DEN_AI_RANDOM_CONSERVATIVE } }
-						5 = { DEN = { set_country_flag = DEN_AI_RANDOM_FASCIST } }
-						5 = { DEN = { set_country_flag = DEN_AI_RANDOM_COMMUNIST } }
-						10 = { DEN = { set_country_flag = DEN_AI_RANDOM_KING_CHRISTIAN_COUP } }
+						50 = { 
+							set_country_flag = DEN_AI_RANDOM_SOCIAL_DEMOCRATIC
+						}
+						30 = {	#no conservative tree for DLC
+							set_country_flag = DEN_AI_RANDOM_CONSERVATIVE
+							modifier = {
+								factor = 0
+								NOT = {
+									has_global_flag = DEN_use_DLC_tree
+								}
+							}
+						}
+						10 = {	#no rearmement tree for R56
+							set_country_flag = DEN_AI_RANDOM_ALLIANCE_PLAN
+							modifier = {
+								factor = 0
+								NOT = {
+									has_global_flag = DEN_use_DLC_tree
+								}
+							}
+						}
+						5 = {
+							set_country_flag = DEN_AI_RANDOM_FASCIST
+						}
+						5 = {	#no communist tree for DLC
+							set_country_flag = DEN_AI_RANDOM_COMMUNIST
+							modifier = {
+								factor = 0
+								has_global_flag = DEN_use_DLC_tree
+							}
+						}
+						10 = {
+							set_country_flag = DEN_AI_RANDOM_KING_CHRISTIAN_COUP
+						}
 					}
 				}
 			}
@@ -1454,14 +1528,14 @@ on_actions = {
 					}
 					
 					random_list = {
-						25 = { EGY = { set_country_flag = ISR_AI_RANDOM_MAPAI } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_HASHOMER } }
-						5 = { EGY = { set_country_flag = ISR_AI_RANDOM_MAKI } }
-						5 = { EGY = { set_country_flag = ISR_AI_RANDOM_PROGRESSIVE } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_GENERAL_ZIONIST } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_HATZOHAR } }
-						15 = { EGY = { set_country_flag = ISR_AI_RANDOM_IRGUN } }
-						5 = { EGY = { set_country_flag = ISR_AI_RANDOM_LEHI } }
+						25 = { ISR = { set_country_flag = ISR_AI_RANDOM_MAPAI } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_HASHOMER } }
+						5 = { ISR = { set_country_flag = ISR_AI_RANDOM_MAKI } }
+						5 = { ISR = { set_country_flag = ISR_AI_RANDOM_PROGRESSIVE } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_GENERAL_ZIONIST } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_HATZOHAR } }
+						15 = { ISR = { set_country_flag = ISR_AI_RANDOM_IRGUN } }
+						5 = { ISR = { set_country_flag = ISR_AI_RANDOM_LEHI } }
 					}
 					
 				}
@@ -1992,7 +2066,120 @@ on_actions = {
 						15 = { set_country_flag = SWI_AI_RANDOM_FASCIST }
 					}
 				}
-			}					
+			}	
+			SWE = {
+				if = {
+					limit = {
+						has_dlc = "Arms Against Tyranny"
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = SWE_AI_BEHAVIOR
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = SWE_AI_BEHAVIOR
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						15 = { #Go fascist
+							random_list = { #Which type of fascist
+								25 = {
+									modifier = {
+										factor = 0
+										GER = {
+											OR = { #Dont go fascist puppet unless Germany is going fascist 
+												AND = {
+													is_historical_focus_on = yes
+													has_game_rule = {
+														rule = GER_ai_behavior
+														option = DEFAULT
+													}
+												}
+												has_game_rule = {
+													rule = GER_ai_behavior
+													option = FASCIST_PASSIVE
+												}
+												has_country_flag = GER_AI_RANDOM_FASCIST_PASSIVE
+												has_game_rule = {
+													rule = GER_ai_behavior
+													option = FASCIST_AGGRESSIVE
+												}
+												has_country_flag = GER_AI_RANDOM_FASCIST_AGGRESSIVE
+											}
+										}
+									}
+	
+									modifier = {
+										factor = 0.1 #unlikely to become backstabber if GER is Player
+										GER = { is_ai = no }
+									}
+									set_country_flag = SWE_AI_RANDOM_PUPPET_BACKSTABBER
+								}
+	
+								25 = {
+									modifier = { #Dont go fascist puppet unless Germany is going fascist 
+										factor = 0
+										GER = {
+											OR = { #Dont go fascist puppet unless Germany is going fascist 
+												AND = {
+													is_historical_focus_on = yes
+													has_game_rule = {
+														rule = GER_ai_behavior
+														option = DEFAULT
+													}
+												}
+												has_game_rule = {
+													rule = GER_ai_behavior
+													option = FASCIST_PASSIVE
+												}
+												has_country_flag = GER_AI_RANDOM_FASCIST_PASSIVE
+												has_game_rule = {
+													rule = GER_ai_behavior
+													option = FASCIST_AGGRESSIVE
+												}
+												has_country_flag = GER_AI_RANDOM_FASCIST_AGGRESSIVE
+											}
+										}
+									}
+									set_country_flag = SWE_AI_RANDOM_FASCIST_PUPPET
+								}
+	
+								50 = {
+									set_country_flag = SWE_AI_RANDOM_FASCIST_INDEPENDENT
+								}
+							}
+						}
+	
+						55 = { 	
+							random_list = {
+								50 = {
+									set_country_flag = SWE_AI_RANDOM_HISTORICAL
+								}
+	
+								45 = {
+									set_country_flag = SWE_AI_RANDOM_DEMOCRATIC_ALT
+								}
+	
+								15 = {
+									set_country_flag = SWE_AI_RANDOM_DEMOCRATIC_NORDIC_DEFENCE_COUNCIL
+								}
+							}
+	
+						}
+						15 = {
+							set_country_flag = SWE_AI_RANDOM_COMMUNISM
+						}
+						15 = {
+							set_country_flag = SWE_AI_RANDOM_UNALIGNED
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -2212,7 +2399,18 @@ on_actions = {
 					NOT = { has_global_flag = fall_of_berlin_civil_war }
 				}
 				set_global_flag = fall_of_berlin_civil_war
-				country_event = { id = wtt_germany.50 days = 1 random_hours = 3 }
+				if = {
+					limit = {
+						any_other_country = {
+							original_tag = GER
+							has_government = fascism
+							has_civil_war = yes
+							owns_state = 64
+							surrender_progress > 0.6
+						}
+					}
+					country_event = { id = wtt_germany.50 days = 1 random_hours = 3 }
+				}
 			}
 			if = {
 				limit = {
@@ -2452,20 +2650,35 @@ on_actions = {
 	# root country that invades
 	# scope state that is invaded
 	# from scope state that the invasion started
-	# on_naval_invasion = {
-	# 	effect = {
-	# 	}
-	# }
+	on_naval_invasion = {
+	 	effect = {
+		 	if = {
+				limit = {
+					ROOT = {
+						divisions_in_state = {
+							 unit = marine_commando
+							 size > 0
+							 state = PREV
+						}
+						 has_tech = marines_commandos_demolition 
+					}
+					NOT = { has_state_flag = marines_commando_effect }
+					OWNER = { NOT = { tag = ROOT } }
+				}
+				SF_marine_demoliton_effect = yes # Note that the state flag condition is not preventing it from doing 1 damage per division 
+			}
+	 	}
+	}
 	
 	
 	# root country that paradrops
 	# scope state that is paradroped into
 	# from scope state that the paradrop started
-	# on_paradrop = { #achievement thing
-	#     effect = {
-	# 	    set_country_flag = has_paradropped_flag
-	# 	}
-	# }
+	#on_paradrop = {
+	#    effect = {
+	#	    ROOT = { set_country_flag = has_paradropped_flag }
+	#	}
+	#}
 	on_ruling_party_change = { 
 		# temp var old_ideology_token is available for effects
 		effect = {
@@ -2476,6 +2689,95 @@ on_actions = {
 				set_temp_variable = { new_compliance = compliance }
 				multiply_temp_variable = { new_compliance = 0.5 }
 				set_compliance = new_compliance
+			}
+		}
+	}
+	on_unit_leader_promote_from_ranks_veteran = { #Unit leader scope, FROM is unit
+		effect = {
+			FROM = {
+				add_random_valid_trait_from_unit = {
+					character = ROOT
+				}
+			}
+		}
+	}
+	
+	on_add_history = { #Unit Scope
+		effect = {
+			#add_unit_medal_to_latest_entry = {
+			#	unit_medals = iron_cross_second_class
+			#} #This would add a unit medal to the history entry you just received
+		}
+	}
+
+	# on_weekly_GER = {	#currently not implemented
+	# 	effect = {
+	# 		GER = {
+	# 			every_core_state = {
+	# 				limit = {
+	# 					has_dynamic_modifier = {
+	# 						modifier = GER_poor_iron_quality
+	# 					}
+	# 				}
+	# 				SWE_update_iron_ore_calc = yes
+	# 			}
+	# 		}
+	# 	}
+	# }
+	
+	# root is the state that was dropped into
+	# from is the dropping country
+	# this differs from on_paradrop in that it is run once per paradrop, not once per unit dropped
+	on_units_paradropped_in_state = {
+		effect = {
+			if = {
+				limit = { 
+					FROM = { has_tech = paras_dispersed_drop } 
+					NOT = { has_state_flag = para_drop_effect }
+					CONTROLLER = { NOT = { tag = FROM } }
+				}
+				SF_PARA_sabotage_effect = yes
+			}
+			if = {
+				limit = { 
+					FROM = { has_tech = paras_combat_drop } 
+					NOT = { has_state_flag = para_drop_effect }
+				}
+				SF_PARA_combat_effect = yes
+			}
+		}
+	}
+
+	on_monthly_GER = {
+		effect = {
+			if = {
+				limit = {
+					144 = { is_fully_controlled_by = GER }
+					check_variable = { GER_narvik_civs < 8 }
+					
+					666 = {
+						NOT = {
+							has_dynamic_modifier = {
+								modifier = SWE_blown_up_mines
+							}
+						}
+					}
+				}
+
+				add_to_variable = { GER_narvik_shipments = 1 }
+				if = {
+					limit = {
+						check_variable = { GER_narvik_shipments > 5 }
+					}
+
+					add_offsite_building = {
+						type = industrial_complex
+						level = 1
+					}
+
+					set_variable = { GER_narvik_shipments = 0 }
+					add_to_variable = { GER_narvik_civs = 1 }
+				}
 			}
 		}
 	}

@@ -1,0 +1,1474 @@
+#	Example:
+# 
+#	example_effect = {
+#		add_political_power = 66
+#		add_popularity = {
+#			ideology = fascism
+#			popularity = 0.33
+#		}
+#	}
+#
+#
+#	In a script file:
+#
+#	effect = {
+#		example_effect = yes
+#	}
+#
+
+
+SWE_update_iron_ore_calc = {
+	#20% of base iron output needed
+	set_variable = { fraction_of_steel_needed = base_iron_output }
+	multiply_variable = { fraction_of_steel_needed = 0.8 } #This for tweak
+
+	#How much of the fracton of steel import is currently being satisfied  
+	set_variable = { satisfied_by_import_factor = var:GER.resource_imported@steel  }
+	divide_variable = { satisfied_by_import_factor = fraction_of_steel_needed }
+
+	
+
+
+	if = {
+		limit = {
+			check_variable = { satisfied_by_import_factor > 1 } # >100% no malus
+		}
+		set_variable = { iron_ore_result =  0 }
+	}
+	else = {
+
+		#How much of import is missing?
+		set_variable = { iron_ore_result = fraction_of_steel_needed }
+		#convert from factor to raw steel values
+		set_variable = { raw_iron_from_import = satisfied_by_import_factor }
+
+		#get how much of raw steel is missing
+		multiply_variable = { raw_iron_from_import = fraction_of_steel_needed }
+		subtract_from_variable = { fraction_of_steel_needed = raw_iron_from_import }
+		set_variable = { iron_ore_result = fraction_of_steel_needed}
+
+		#invert from positive to negative
+		multiply_variable = { iron_ore_result = -1 }
+
+	}
+
+	set_variable = { iron_ore_scale =  iron_ore_result}
+}
+
+lerp = {
+	
+	# Linearly interpolates between a and b by x.
+	# x is clamped between 0 - 1.
+	# a + (b -a ) * x
+	# The arguments below needs to be set before running the effect. The result is stored in lerp_result, and is in the same scope as the lerp was called from 
+	# lerp_x:  The interpolation value between the two numbers
+	# lerp_b: start value
+	# lerp_a: end value
+
+	set_temp_variable = { x = lerp_x }
+	clamp_temp_variable = { var = x min = 0 max = 1 }
+	set_temp_variable = { a = lerp_a }
+	set_temp_variable = { b = lerp_b }
+
+	set_temp_variable = { b_minus_a = b }
+	subtract_from_temp_variable = { b_minus_a = a }
+	multiply_temp_variable = { b_minus_a = x }
+	add_to_temp_variable = { b_minus_a = a }
+	set_variable = { lerp_result = b_minus_a }
+}
+
+calculate_folkhemmet_none_option = {
+	#WAR SUPPORT
+	set_temp_variable = { lerp_x = tooltip_folkhemmet_intactness }
+	#divide_temp_variable = { lerp_x = folkhemmet_max_intactness }
+	set_variable = { lerp_a = folkhemmet_war_support_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_war_support_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_war_support_result_none = lerp_result }
+
+
+
+	#STABILITY
+	set_variable = { lerp_a = folkhemmet_stability_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_stability_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_stability_result_none = lerp_result }
+
+	#CIV CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_civ_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_civ_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_civ_result_none = lerp_result }
+
+	#MIL CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_mil_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_mil_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_mil_result_none = lerp_result }
+
+	#DOCKYARD CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_dockyard_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_dockyard_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_dockyard_result_none = lerp_result }
+}
+
+calculate_folkhemmet_low_option = {
+	#WAR SUPPORT
+	set_temp_variable = { lerp_x = tooltip_folkhemmet_intactness }
+	#divide_temp_variable = { lerp_x = folkhemmet_max_intactness }
+
+	set_variable = { lerp_a = folkhemmet_war_support_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_war_support_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_war_support_result_low = lerp_result }
+	#log = "[?tooltip_folkhemmet_war_support_result_low]"
+
+
+	#STABILITY
+	set_variable = { lerp_a = folkhemmet_stability_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_stability_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_stability_result_low = lerp_result }
+
+	#CIV CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_civ_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_civ_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_civ_result_low = lerp_result }
+
+	#MIL CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_mil_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_mil_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_mil_result_low = lerp_result }
+
+	#DOCKYARD CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_dockyard_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_dockyard_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_dockyard_result_low = lerp_result }
+}
+
+calculate_folkhemmet_medium_option = {
+	#WAR SUPPORT
+	set_temp_variable = { lerp_x = tooltip_folkhemmet_intactness }
+	#divide_temp_variable = { lerp_x = folkhemmet_max_intactness }
+	set_variable = { lerp_a = folkhemmet_war_support_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_war_support_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_war_support_result_medium = lerp_result }
+	#log = "[?tooltip_folkhemmet_war_support_result_low]"
+
+
+	#STABILITY
+	set_variable = { lerp_a = folkhemmet_stability_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_stability_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_stability_result_medium = lerp_result }
+
+	#CIV CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_civ_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_civ_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_civ_result_medium = lerp_result }
+
+	#MIL CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_mil_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_mil_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_mil_result_medium = lerp_result }
+
+	#DOCKYARD CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_dockyard_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_dockyard_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_dockyard_result_medium = lerp_result }
+}
+
+calculate_folkhemmet_high_option = {
+	#WAR SUPPORT
+	set_temp_variable = { lerp_x = tooltip_folkhemmet_intactness }
+	#divide_temp_variable = { lerp_x = folkhemmet_max_intactness }
+	set_variable = { lerp_a = folkhemmet_war_support_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_war_support_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_war_support_result_high = lerp_result }
+	#log = "[?tooltip_folkhemmet_war_support_result_low]"
+
+
+	#STABILITY
+	set_variable = { lerp_a = folkhemmet_stability_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_stability_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_stability_result_high = lerp_result }
+
+	#CIV CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_civ_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_civ_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_civ_result_high = lerp_result }
+
+	#MIL CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_mil_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_mil_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_mil_result_high = lerp_result }
+
+	#DOCKYARD CONSTRUCTION
+	set_variable = { lerp_a = folkhemmet_dockyard_max_intactness }
+	set_variable = { lerp_b =  folkhemmet_dockyard_min_intactness }
+	lerp = yes
+	set_variable = { tooltip_folkhemmet_dockyard_result_high = lerp_result }
+}
+
+calculate_folkhemmet_no_army_tooltip = {
+
+	#get the values for the air and navy part and simulate what a "low" value would be
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 0 } #none
+	calculate_folkhemmet_none_option = yes
+}
+
+calculate_folkhemmet_low_army_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 1 } #LOW
+	calculate_folkhemmet_low_option = yes
+}
+
+calculate_folkhemmet_medium_army_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 2 } #medium
+	calculate_folkhemmet_medium_option = yes
+}
+
+calculate_folkhemmet_high_army_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 3 } #high
+	calculate_folkhemmet_high_option = yes
+}
+
+
+calculate_folkhemmet_no_navy_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 0 } 
+	calculate_folkhemmet_none_option = yes
+}
+
+calculate_folkhemmet_low_navy_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 1 } #LOW
+	calculate_folkhemmet_low_option = yes
+}
+
+calculate_folkhemmet_medium_navy_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 2 } #medium
+	calculate_folkhemmet_medium_option = yes
+
+}
+
+calculate_folkhemmet_high_navy_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_air_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 3 } #high
+	calculate_folkhemmet_high_option = yes
+}
+
+calculate_folkhemmet_no_air_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 0 } #high
+	calculate_folkhemmet_none_option = yes
+}
+
+calculate_folkhemmet_low_air_tooltip = {
+	#get the values for the air and navy part and simulate what a "low" value would be
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 1 } #LOW
+	calculate_folkhemmet_low_option = yes
+
+}
+
+calculate_folkhemmet_medium_air_tooltip = {
+
+	#get the values for the air and navy part and simulate what a "low" value would be
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 2 } #medium
+	calculate_folkhemmet_medium_option = yes
+
+}
+
+calculate_folkhemmet_high_air_tooltip = {
+	set_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_navy_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = folkhemmet_army_part }
+	add_to_temp_variable = { tooltip_folkhemmet_intactness = 3 } #high
+	calculate_folkhemmet_high_option = yes
+}
+
+
+calculate_folkhemmet = {
+	# war support
+	set_temp_variable = { lerp_x = folkhemmet_intactness }
+	#divide_temp_variable = { lerp_x = folkhemmet_max_intactness }
+	set_variable = { lerp_a = folkhemmet_war_support_min_intactness }
+	set_variable = { lerp_b =  folkhemmet_war_support_max_intactness }
+	lerp = yes
+	set_variable = { folkhemmet_war_support = lerp_result }
+
+	set_variable = { lerp_a = folkhemmet_stability_min_intactness }
+	set_variable = { lerp_b =  folkhemmet_stability_max_intactness }
+	lerp = yes
+	set_variable = { folkhemmet_stability = lerp_result }
+	#tooltip for change here? no doesnt work
+
+	set_variable = { lerp_a = folkhemmet_civ_min_intactness }
+	set_variable = { lerp_b =  folkhemmet_civ_max_intactness }
+	lerp = yes
+	set_variable = { folkhemmet_civ = lerp_result }
+
+	set_variable = { lerp_a = folkhemmet_mil_min_intactness }
+	set_variable = { lerp_b =  folkhemmet_mil_max_intactness }
+	lerp = yes
+	set_variable = { folkhemmet_mil = lerp_result }
+
+	set_variable = { lerp_a = folkhemmet_dockyard_min_intactness }
+	set_variable = { lerp_b =  folkhemmet_dockyard_max_intactness }
+	lerp = yes
+	set_variable = { folkhemmet_dockyard = lerp_result }
+}
+
+SWE_permittentrafiken_set_positive_opinion_modifiers = {
+	IF = {
+		limit = { has_country_flag = GER_want_transit }
+		add_opinion_modifier = {
+			target = SWE
+			modifier = accepted_GER_transit_request
+		}
+		clr_country_flag = GER_want_transit
+	}
+	ELSE_IF = {
+		limit = { has_country_flag = GER_want_communications }
+		add_opinion_modifier = {
+			target = SWE
+			modifier = accepted_GER_communications_request
+		}
+		clr_country_flag = GER_want_communications
+	}
+	ELSE_IF = {
+		limit = { has_country_flag = GER_want_military_access }
+		add_opinion_modifier = {
+			target = SWE
+			modifier = accepted_GER_military_access_request
+		}
+		clr_country_flag = GER_want_military_access
+	}
+}
+
+SWE_permittentrafiken_response_picker = {
+	IF = {
+		limit = {
+			has_country_flag = GER_want_transit
+		}
+		# custom_effect_tooltip = # TODO_ASD: Add TT once reward is decided
+		FROM = {
+			country_event = {
+				id = AAT_Sweden_flashpoints.39
+				days = 3
+			}
+			SWE_permittentrafiken_set_positive_opinion_modifiers = yes
+		}
+		clr_country_flag = GER_want_transit
+	}
+	ELSE_IF = {
+		limit = {
+			has_country_flag = GER_want_communications
+		}
+		# custom_effect_tooltip = # TODO_ASD: Add TT once reward is decided
+		FROM = {
+			country_event = {
+				id = AAT_Sweden_flashpoints.41
+				days = 3
+			}
+			SWE_permittentrafiken_set_positive_opinion_modifiers = yes
+		}
+		clr_country_flag = GER_want_communications
+	}
+	ELSE_IF = {
+		limit = {
+			has_country_flag = GER_want_military_access
+		}
+		custom_effect_tooltip = SWE_GER_military_access_tt
+		FROM = {
+			country_event = {
+				id = AAT_Sweden_flashpoints.43
+				days = 3
+			}
+			SWE_permittentrafiken_set_positive_opinion_modifiers = yes
+		}
+		clr_country_flag = GER_want_military_access
+	}
+}
+
+SWE_add_rationing_modifier = {
+	hidden_effect = {
+		if = {
+			limit = {
+				NOT  = { has_dynamic_modifier = { modifier = SWE_rationing_policies } }
+			}
+			add_dynamic_modifier = { modifier = SWE_rationing_policies }
+		}
+	}
+}
+
+SWE_remove_rationing_modifier = {
+	hidden_effect = {
+		if = {
+			limit = {
+				check_variable = { SWE_rationing_policies_count = 0 }
+			}
+			remove_dynamic_modifier = { modifier = SWE_rationing_policies }
+		}
+	}
+}
+
+SWE_psilander_fleet_creation = {
+	IF = {
+		limit = { 
+			has_dlc = "Man the Guns"
+		}
+		create_equipment_variant = {	
+			name = "Curtatone Class" 		
+			type = ship_hull_light_1
+			#name_group = ITA_DD_HISTORICAL
+			parent_version = 0
+			modules = {
+				fixed_ship_battery_slot = ship_light_battery_1
+				fixed_ship_anti_air_slot = ship_anti_air_1
+				fixed_ship_fire_control_system_slot = ship_fire_control_system_0
+				fixed_ship_radar_slot = empty
+				fixed_ship_engine_slot = light_ship_engine_1
+				fixed_ship_torpedo_slot = ship_torpedo_1
+				mid_1_custom_slot = empty
+				rear_1_custom_slot = empty
+			}
+			obsolete = yes
+		}
+		
+		create_ship = {
+			type = ship_hull_light_1
+			equipment_variant = "Curtatone Class"
+			creator = ITA
+			name = "Psilander"
+		}		
+		create_ship = {
+			type = ship_hull_light_1
+			equipment_variant = "Curtatone Class"
+			creator = ITA
+			name = "Puke"
+		}	
+		create_ship = {
+			type = ship_hull_light_1
+			equipment_variant = "Curtatone Class"
+			creator = ITA
+			name = "Romulus"
+		}	
+		create_ship = {
+			type = ship_hull_light_1
+			equipment_variant = "Curtatone Class"
+			creator = ITA
+			name = "Remus"
+		}	
+	}
+	ELSE = {
+		create_equipment_variant = {
+			name = "Curtatone Class"
+			type = destroyer_1
+			upgrades = {
+				ship_torpedo_upgrade = 1
+				destroyer_engine_upgrade = 1
+				ship_ASW_upgrade = 1
+				ship_anti_air_upgrade = 1
+			}
+			obsolete = yes
+		}
+		create_ship = {
+			type = destroyer_1
+			equipment_variant = "Curtatone Class"
+			creator = "ITA"
+			name = "Psilander"
+		}
+		create_ship = {
+			type = destroyer_1
+			equipment_variant = "Curtatone Class"
+			creator = "ITA"
+			name = "Puke"
+		}
+		create_ship = {
+			type = destroyer_1
+			equipment_variant = "Curtatone Class"
+			creator = "ITA"
+			name = "Romulus"
+		}
+		create_ship = {
+			type = destroyer_1
+			equipment_variant = "Curtatone Class"
+			creator = "ITA"
+			name = "Remus"
+		}
+	}
+}
+
+SWE_scandinavian_defense_union_invite = {
+	IF = {
+		limit = {
+			has_government = FROM
+			NOT = {
+				is_subject = yes
+			}
+		}
+		country_event = {
+			id = AAT_Sweden.21
+			hours = 1
+		}
+	}
+}
+
+SWE_reduce_or_remove_ball_bearing_food_trade_modifier = {
+	SWE = {
+		add_to_variable = { 
+			SWE_ball_bearing_food_exchange_stab_factor = -0.02 
+			tooltip  = stability_factor_negative_tt
+		}
+
+		add_to_variable = { 
+			SWE_ball_bearing_food_exchange_weekly_manpower = -4 
+			tooltip = weekly_manpower_tt 
+		}
+		
+		if = {
+			limit = {
+				check_variable = { SWE_ball_bearing_food_exchange_stab_factor = 0 }
+			}
+
+			remove_dynamic_modifier = { modifier = SWE_ball_bearing_food_exchange }
+		}
+	}
+}
+
+SWE_folkhemmet_70d_swap = {
+	custom_effect_tooltip = SWE_folkhemmet_modification_tt
+	add_to_variable = {
+		folkhemmet_war_support = 0.03
+		tooltip = war_support_factor_tt
+	}
+
+	add_to_variable = {
+		folkhemmet_stability = -0.03
+		tooltip = stability_factor_tt
+	}
+	add_to_variable = { 
+		folkhemmet_mil = 0.03
+		tooltip = production_speed_arms_factory_factor_tt 
+	}
+	add_to_variable = { 
+		folkhemmet_civ = -0.03
+		tooltip = production_speed_industrial_complex_factor_tt 
+	}
+	add_to_variable = { 
+		folkhemmet_dockyard = 0.03
+		tooltip = production_speed_dockyard_factor_tt 
+	}
+}
+
+SWE_folkhemmet_big_swap = {
+	if = {
+		limit = {
+			OR = {
+				has_dynamic_modifier = {
+					modifier = SWE_folkhemmet
+				}
+
+				has_dynamic_modifier = {
+					modifier = SWE_folkhemmet_communism
+				}
+			}
+		}
+
+		custom_effect_tooltip = SWE_folkhemmet_modification_tt
+		add_to_variable = {
+			folkhemmet_war_support = 0.16
+			tooltip = war_support_factor_whitespace_tt
+		}
+
+		add_to_variable = {
+			folkhemmet_stability = -0.16
+			tooltip = stability_factor_whitespace_tt
+		}
+
+		add_to_variable = { 
+			folkhemmet_mil = 0.16
+			tooltip = production_speed_arms_factory_factor_whitespace_tt 
+		}
+
+		add_to_variable = { 
+			folkhemmet_dockyard = 0.16
+			tooltip = production_speed_dockyard_factor_whitespace_tt 
+		}
+
+		add_to_variable = { 
+			folkhemmet_civ = -0.16
+			tooltip = production_speed_industrial_complex_factor_whitespace_tt 
+		}
+
+		add_to_variable = {
+			folkhemmet_infra = -0.16
+			tooltip = production_speed_infrastructure_factor_whitespace_tt
+		}
+	}
+}
+
+SWE_folkhemmet_low_swap = {
+	if = {
+		limit = {
+			OR = {
+				has_dynamic_modifier = {
+					modifier = SWE_folkhemmet
+				}
+
+				has_dynamic_modifier = {
+					modifier = SWE_folkhemmet_communism
+				}
+			}
+		}
+
+		custom_effect_tooltip = SWE_folkhemmet_modification_tt
+		add_to_variable = {
+			folkhemmet_war_support = 0.05
+			tooltip = war_support_factor_whitespace_tt
+		}
+
+		add_to_variable = {
+			folkhemmet_stability = -0.05
+			tooltip = stability_factor_whitespace_tt
+		}
+
+		add_to_variable = { 
+			folkhemmet_mil = 0.05
+			tooltip = production_speed_arms_factory_factor_whitespace_tt 
+		}
+
+		add_to_variable = { 
+			folkhemmet_dockyard = 0.05
+			tooltip = production_speed_dockyard_factor_whitespace_tt 
+		}
+
+		add_to_variable = { 
+			folkhemmet_civ = -0.05
+			tooltip = production_speed_industrial_complex_factor_whitespace_tt 
+		}
+
+		add_to_variable = {
+			folkhemmet_infra = -0.05
+			tooltip = production_speed_infrastructure_factor_whitespace_tt
+		}
+	}
+}
+
+SWE_increase_the_cross_we_bear = {
+	if = {
+		limit = {
+			NOT = { has_country_flag = SWE_already_capped_once }
+		}
+
+		set_country_flag = SWE_already_capped_once 
+		SWE = {
+			subtract_from_variable = { SWE_cross_we_bear_org_loss_at_low_org_factor = SWE_cross_we_bear_org_loss_at_low_org_factor_increase tooltip = org_loss_at_low_org_factor_tt }
+			subtract_from_variable = { SWE_cross_we_bear_org_loss_when_moving = SWE_cross_we_bear_org_loss_when_moving_increase tooltip = org_loss_when_moving_tt }	
+			add_to_variable = { SWE_cross_we_bear_org_special_forces_cap = SWE_cross_we_bear_org_special_forces_cap_increase tooltip = special_forces_cap_tt }
+			add_to_variable = { SWE_cross_we_bear_coordination_bonus = SWE_cross_we_bear_coordination_bonus_increase tooltip = coordination_bonus_tt }
+		}
+	}
+
+}
+
+SWE_reduce_the_cross_we_bear = {
+	SWE = {
+		add_to_variable = { SWE_cross_we_bear_org_loss_at_low_org_factor = SWE_cross_we_bear_org_loss_at_low_org_factor_increase tooltip = org_loss_at_low_org_factor_tt }
+		add_to_variable = { SWE_cross_we_bear_org_loss_when_moving = SWE_cross_we_bear_org_loss_when_moving_increase tooltip = org_loss_when_moving_tt}
+		subtract_from_variable = { SWE_cross_we_bear_org_special_forces_cap = SWE_cross_we_bear_org_special_forces_cap_increase tooltip = special_forces_cap_tt }
+		subtract_from_variable = { SWE_cross_we_bear_coordination_bonus = SWE_cross_we_bear_coordination_bonus_increase tooltip = coordination_bonus_tt }
+	}
+}
+
+SWE_on_freed_cross_we_bear = {
+	if = {
+		limit = {
+			SWE = {
+				has_completed_focus = SWE_the_cross_we_bear
+			}
+			NOT = { has_country_flag = SWE_has_already_uncapped_once }
+			NORDIC_is_nordic = yes
+		}
+		set_country_flag = SWE_has_already_uncapped_once
+		SWE = {
+			add_to_variable = { SWE_cross_we_bear_army_morale_factor = SWE_cross_we_bear_army_morale_factor_increase }
+			add_to_variable = { SWE_cross_we_bear_conscription = SWE_cross_we_bear_conscription_increase }
+		}
+	}
+}
+
+SWE_calc_refugee_from_war = {
+	set_variable = { SWE_refugee_from_war_total_manpower_gained = 0 }
+	set_variable = { SWE_refugee_min_manpower_gained = 1000000 }
+	set_variable = { SWE_refugee_from_war_valid_countries = 0 }
+	set_variable = { SWE_refugee_from_war_average_manpower_per_country = 0 }
+	set_variable = { SWE_refugee_max_manpower_gained = 0 }
+	every_other_country = {
+		limit = {
+			NOT = { has_government = communism }
+			communism > 0.06
+			NOT = { original_tag  = SWE }
+
+
+		}
+		add_to_variable = { ROOT.SWE_refugee_from_war_valid_countries = 1 }
+		set_variable = { SWE_manpower_to_communist_support = party_popularity@communism }
+		if = {
+			limit = {
+				is_major = yes
+				NOT = {
+					original_tag = NOR
+					original_tag = ICE
+					original_tag = DEN
+					original_tag = FIN
+				}
+			}
+			multiply_variable =  { SWE_manpower_to_communist_support =  40000 }
+
+		}
+		else_if = {
+			limit = {
+				is_major = no
+				NOT = {
+					original_tag = NOR
+					original_tag = ICE
+					original_tag = DEN
+					original_tag = FIN
+				}
+			}
+			multiply_variable =  { SWE_manpower_to_communist_support =  3000 }
+		}
+
+		else_if = {
+			limit = {
+				OR = {
+					original_tag = NOR
+					original_tag = ICE
+					original_tag = DEN
+					original_tag = FIN
+				}
+			}
+
+			multiply_variable =  { SWE_manpower_to_communist_support =  50000 }
+		}
+
+
+		add_to_variable = { ROOT.SWE_refugee_from_war_total_manpower_gained = SWE_manpower_to_communist_support }
+
+		if = { 
+			limit = { 
+				check_variable = { SWE_manpower_to_communist_support > ROOT.SWE_refugee_max_manpower_gained } 
+				NOT = { original_tag = SWE } 
+			} 
+			set_variable = { ROOT.SWE_refugee_max_manpower_gained = var:SWE_manpower_to_communist_support }
+			set_variable = { ROOT.SWE_refugee_max_manpower_country = THIS }
+		}
+		
+		if = {
+			limit = { 
+
+				check_variable = { SWE_manpower_to_communist_support < ROOT.SWE_refugee_min_manpower_gained } 
+				NOT = { original_tag = SWE }
+			} 
+			set_variable = { ROOT.SWE_refugee_min_manpower_gained = var:SWE_manpower_to_communist_support }
+			set_variable = { ROOT.SWE_refugee_min_manpower_country = THIS }
+		}
+
+	}
+
+	if = {
+		limit = {
+			NOT = { check_variable = { SWE_refugee_from_war_valid_countries = 0 } }
+		}
+		set_variable = { SWE_refugee_from_war_average_manpower_per_country = SWE_refugee_from_war_total_manpower_gained }
+		divide_variable = { SWE_refugee_from_war_average_manpower_per_country = SWE_refugee_from_war_valid_countries }
+		round_variable =  SWE_refugee_from_war_average_manpower_per_country
+	}
+}
+
+
+SWE_calc_communist_folkhemmet = {
+	set_temp_variable = { SWE_cg = modifier@consumer_goods_expected_value }
+	add_to_temp_variable = { SWE_cg = modifier@consumer_goods_factor }
+	clamp_temp_variable = { var = SWE_cg min = 0 max = 100 }
+	multiply_temp_variable = { SWE_cg = 0.5 }
+	set_variable = { folkhemmet_max_cap = var:SWE_cg }
+	multiply_temp_variable = { SWE_cg = 0.5 }
+ 	set_variable = { folkhemmet_research_speed = var:SWE_cg }
+}
+
+SWE_is_norway_mostly_occupied = {
+	if = {
+		limit = {
+			NOR = { NOT = { has_country_flag = SWE_already_capped_once } }
+		}
+		set_temp_variable = { occupation_counter = 0 }
+		if = {
+			limit = {
+				110 = {    #Oslofjord
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1032 = {    ##Telemarkor - R56 note: I assume this is Telemark, was 921 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		
+		if = {
+			limit = {
+				967 = {    #Agder - R56 note: Sørlandet for us, was 922 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				142 = {    ##Vestlandet
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1031 = {    #Opplande - R56 note: was 920 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				143 = {    #Trondelag
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1033 = {    #Helgeland - R56 note: was 923 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				144 = {    #Oslofjord - R56 note: actually Nord-Norge
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1034 = {    #Oslofjord - R56 note: actually Troms, 924 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1035 = {  #Finnland - R56 note: Acutally Finnmark, 925 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				check_variable = {
+					occupation_counter > 2
+				}
+			}
+
+			NOR = { SWE_increase_the_cross_we_bear = yes }
+		}
+	}
+}
+
+						
+
+SWE_is_finland_mostly_occupied = {
+	if = {
+		limit = {
+			FIN = { NOT = { has_country_flag = SWE_already_capped_once }}
+		}
+		set_temp_variable = { occupation_counter = 0 }
+		if = {
+			limit = {
+				148 = {    #Lappi
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				722 = {    ##Petsamo
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		
+		if = {
+			limit = {
+				1039 = {    #Wololo Oulolo - R56 note: bless you, actually Oulu, 929 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				150 = {    ##Kuopio
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				149 = {    #Vaasa
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1036 = {    #Turku - R56 note: 926 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1037 = {    #Häme - R56 note: 927 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1040 = {    #Milelli - R56 note: 930 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1038 = {    #Kymi - R56 note: 928 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				111 = {  #Uusima
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				check_variable = {
+					occupation_counter > 2
+				}
+			}
+
+			FIN = { SWE_increase_the_cross_we_bear = yes }
+		}
+	}
+}
+
+
+SWE_is_denmark_mostly_occupied = {
+	if = {
+		limit = {
+			DEN = { NOT = { has_country_flag = SWE_already_capped_once }}
+		}
+
+		set_temp_variable = { occupation_counter = 0 }
+		if = {
+			limit = {
+				37 = {    #Lappi - R56 note: no its not, this is Sjaelland
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				1025 = {    #Sjaelland - R56 note: no its not, this is probably Fyn, vanilla num was 911
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+
+		if = {
+			limit = {
+				99 = {    #Jylland
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		if = {
+			limit = {
+				964 = {    #Söndejylland - R56 aka (more accurate name) Nordslesvig, 912 in vanilla
+					SWE_the_cross_we_bear_am_i_occupied_by_fascists_or_communists = yes
+				}
+			}
+
+					#log = "dwadw [?var:occupation_counter]"	#r56 change, disabled
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}
+
+		
+
+		if = {
+			limit = {
+				check_variable = {
+					occupation_counter > 1
+				}
+			}
+
+			DEN = { SWE_increase_the_cross_we_bear = yes }
+		}
+	}
+}
+
+SWE_is_ice_mostly_occupied = {
+	if = {
+		limit = {
+			ICE = { NOT = { has_country_flag = SWE_already_capped_once }}
+		}
+		set_temp_variable = { occupation_counter = 0 }
+		if = {
+			limit = {
+				100 = {    #Iceland
+					controller = {
+								
+						OR = {
+							AND = {
+								is_subject_of = DEN 
+								DEN = {
+									OR = {
+										has_government = communism
+										has_government = fascism
+										AND = {
+											DEN = {
+												is_subject = yes
+												OVERLORD = {
+													OR = {
+														has_government = fascism
+														has_government = communism
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+
+							has_government = fascism
+							has_government = communism
+						}
+					}
+				}
+				1043 = {    #Extra R56 Iceland state
+					controller = {
+								
+						OR = {
+							AND = {
+								is_subject_of = DEN 
+								DEN = {
+									OR = {
+										has_government = communism
+										has_government = fascism
+										AND = {
+											DEN = {
+												is_subject = yes
+												OVERLORD = {
+													OR = {
+														has_government = fascism
+														has_government = communism
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+
+							has_government = fascism
+							has_government = communism
+						}
+					}
+				}
+			}
+
+			add_to_temp_variable = { occupation_counter = 1 }
+		}		
+
+		if = {
+			limit = {
+				check_variable = {
+					occupation_counter > 0
+				}
+			}
+
+			ICE = { SWE_increase_the_cross_we_bear = yes }
+		}
+	}
+}
+#Change name of States and VPs when appropriate. Expected to be used inside on_state_control_changed. FROM.FROM is state / ROOT is new controller / FROM is former controller
+SWE_change_name_of_state_or_vp = {
+	if = { # LAPPI / LAPPLAND (Tornio / Torneå) (Inari / Enare)
+		limit = {
+			FROM.FROM = {
+				state = 148 #LAPPI
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_148_SWE } #Lappland
+			set_province_name = { id = 11125 name = VICTORY_POINTS_11125_SWE } #Torneå
+			set_province_name = { id = 6142 name = VICTORY_POINTS_6142_SWE } #Enare
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 11125
+			reset_province_name = 6142
+		}
+	}
+	else_if = { # OULU / ULEÅBORG // (Oulu / Uleåborg)
+		limit = {
+			FROM.FROM = {
+				state = 1039 #OULU (r56 adjusted)
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_929_SWE } #Uleåborg
+			set_province_name = { id = 158 name = VICTORY_POINTS_158_SWE } #Uleåborg
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 158
+		}
+	}
+	else_if = { # VAASA / VASA // (Vaasa / Vasa) (Kokkola / Karleby) (Seinäjoki / Östermyra)
+		limit = {
+			FROM.FROM = {
+				state = 149 #VAASA
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_149_SWE } #Vasa
+			set_province_name = { id = 3122 name = VICTORY_POINTS_3122_SWE } #Vasa
+			set_province_name = { id = 66 name = VICTORY_POINTS_66_SWE } #Karleby
+			set_province_name = { id = 6013 name = VICTORY_POINTS_6013_SWE } #Östermyra
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 3122
+			reset_province_name = 66
+			reset_province_name = 6013
+		}
+	}
+	else_if = { # TURKU / ÅBO // (Turku / Åbo) (Pori / Björneborg) (Rauma / Raumo)
+		limit = {
+			FROM.FROM = {
+				state = 1036 #TURKU (r56 adjusted, was 926)
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_926_SWE } #Åbo
+			set_province_name = { id = 3083 name = VICTORY_POINTS_3083_SWE } #Åbo
+			set_province_name = { id = 3117 name = VICTORY_POINTS_3117_SWE } #Björneborg
+			set_province_name = { id = 169 name = VICTORY_POINTS_169_SWE } #Raumo
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 3083
+			reset_province_name = 3117
+			reset_province_name = 169
+		}
+	}
+	else_if = { # HÄME / TAMMERFORS // (Tampere / Tammerfors) (Hämeenlinna / Tavastehus) (Lahti / Lahtis)
+		limit = {
+			FROM.FROM = {
+				state = 1037 #HÄME (r56 adjusted, was 927)
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_927_SWE } #Tammerfors
+			set_province_name = { id = 3137 name = VICTORY_POINTS_3137_SWE } #Tammerfors
+			set_province_name = { id = 9167 name = VICTORY_POINTS_9167_SWE } #Tavastehus
+			set_province_name = { id = 67 name = VICTORY_POINTS_67_SWE } #Lahtis
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 3137
+			reset_province_name = 9167
+			reset_province_name = 67
+		}
+	}
+	else_if = { # UUSIMAA / NYLAND // (Helsinki / Helsingfors) (Hanko / Hangö) (Porvoo / Borgå)
+		limit = {
+			FROM.FROM = {
+				state = 111 #UUSIMAA
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_111_SWE } #Nyland
+			set_province_name = { id = 11105 name = VICTORY_POINTS_11105_SWE } #Helsingfors
+			set_province_name = { id = 11211 name = VICTORY_POINTS_11211_SWE } #Hangö
+			set_province_name = { id = 6009 name = VICTORY_POINTS_6009_SWE } #Borgå
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 11105
+			reset_province_name = 11211
+			reset_province_name = 6009
+		}
+	}
+	else_if = { # KARJALA / KARELEN (Viipuri / Viborg)
+		limit = {
+			FROM.FROM = {
+				state = 146 #KARJALA
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_146_SWE } #Karelen
+			set_province_name = { id = 9206 name = VICTORY_POINTS_9206_SWE } #Viborg
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 9206
+		}
+	}
+	else_if = { # KYMI / VILLMANSTRAND (Lappeenranta / Villmanstrand)
+		limit = {
+			FROM.FROM = {
+				state = 1038 #KYMI (r56 adjusted, was 928)
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_928_SWE } #Villmanstrand
+			set_province_name = { id = 6082 name = VICTORY_POINTS_6082_SWE } #Villmanstrand
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 6082
+		}
+	}
+	else_if = { # MIKKELI / ST MICHEL (Mikkeli / St Michel) (Savonlinna / Nyslott)
+		limit = {
+			FROM.FROM = {
+				state = 1040 #MIKKELI (r56 adjusted, was 930)
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			FROM.FROM = { set_state_name = STATE_930_SWE } #St Michel
+			set_province_name = { id = 165 name = VICTORY_POINTS_165_SWE } #St Michel
+			set_province_name = { id = 37 name = VICTORY_POINTS_37_SWE } #Nyslott
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 165
+			reset_province_name = 37
+		}
+	}
+	else_if = { # KUOPIO / KUOPIO (Kajaani / Kajana)
+		limit = {
+			FROM.FROM = {
+				state = 150 #KUOPIO
+			}
+		}
+		if = { #SWEDEN CONTROLLER
+			limit = {
+				ROOT = { original_tag = SWE }
+			}
+			set_province_name = { id = 3125 name = VICTORY_POINTS_3125_SWE } #Kajana
+		}
+		else_if = { #OTHER CONTROLLER
+			limit = {
+				FROM = { original_tag = SWE }
+			}
+			FROM.FROM = { reset_state_name = yes }
+			reset_province_name = 3125
+		}
+	}
+}
+
+SWE_increase_stormtrupper_cap = {
+	effect_tooltip = {
+		set_temp_variable = { SWE_new_militia_cap_for_tooltip = SWE_stormtrupper_division_cap }
+		add_to_temp_variable = { SWE_new_militia_cap_for_tooltip = 4 }
+		set_division_template_cap = { 
+			division_template = "Stormtrupper" 
+			division_cap = SWE_new_militia_cap_for_tooltip   
+		}
+	}
+
+	hidden_effect = {
+		add_to_variable = { SWE_stormtrupper_division_cap = 4 }
+		clamp_variable = {
+			var = SWE_stormtrupper_division_cap
+			min = 0 
+			max = SWE_max_stormtrupper_division_cap
+		}  
+		set_division_template_cap = { 
+			division_template = "Stormtrupper" 
+			division_cap = SWE_stormtrupper_division_cap  
+		}
+	}
+}
