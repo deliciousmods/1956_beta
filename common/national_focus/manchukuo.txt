@@ -6,7 +6,6 @@
 		modifier = {
 			add = 20
 			tag = MAN
-			has_dlc = "Waking the Tiger"
 		}
 	}
 	
@@ -19,7 +18,7 @@
 	focus = {
 		id = MAN_pacify_the_countryside
 		icon = GFX_goal_MAN_confront_gorillas
-		x = 14
+		x = 12
 		y = 0
 
 		cost = 5
@@ -393,12 +392,10 @@
 	focus = {
 		id = MAN_obedience
 		icon = GFX_focus_jap_manchurian_project
-		#GFX_focus_CZE_german_puppet
-		prerequisite = { focus = MAN_army_modernization }
 		mutually_exclusive = { focus = MAN_assertiveness }
-		x = -3
-		y = 4
-		relative_position_id = MAN_army_modernization
+		x = -20
+		y = 0
+		relative_position_id = MAN_pacify_the_countryside
 
 		cost = 10
 
@@ -441,6 +438,12 @@
 					has_intelligence_agency = no
 				}
 				create_intelligence_agency = yes
+			}
+			add_tech_bonus = {
+				name = MAN_hoankyoku
+				bonus = 1
+				uses = 2
+				category = military_police_tech
 			}
 		}
 	}
@@ -3105,11 +3108,10 @@
 	focus = {
 		id = MAN_assertiveness
 		icon = GFX_goal_MAN_assertiveness
-		prerequisite = { focus = MAN_trade_delegation }
 		mutually_exclusive = { focus = MAN_obedience }
-		x = 3
-		y = 4
-		relative_position_id = MAN_trade_delegation
+		x = 10
+		y = 0
+		relative_position_id = MAN_obedience
 
 		cost = 10
 
@@ -3425,6 +3427,10 @@
 
 		search_filters = { FOCUS_FILTER_MANPOWER }
 		completion_reward = {
+			add_popularity = {
+				ideology = JAP
+				popularity = -0.1
+			}
 			MAN_low_legitimacy_level_down = yes
 			add_ideas = MAN_bolster_nationalism
 			unlock_decision_tooltip = MAN_recruit_bandits_generic
@@ -3800,33 +3806,66 @@
 	}
 
 	focus = {
-		id = MAN_imperial_divinity
-		icon = GFX_goal_MAN_the_empire_returns
+		id = MAN_destroy_opium_plantations
+		icon = GFX_goal_MAN_destroy_opium
 		prerequisite = { focus = MAN_independence_war }
-		x = -1
+		x = 0
+		y = 1
+		relative_position_id = MAN_independence_war
+		cost = 10
+		available = {
+			is_subject = no
+		}
+		completion_reward = {
+			add_stability = 0.05
+			if = {
+				limit = {
+					has_idea = MAN_opium_plantation
+				}
+				remove_ideas = MAN_opium_plantation
+			}
+			if = {
+				limit = {
+					has_idea = MAN_opium_plantation2
+				}
+				remove_ideas = MAN_opium_plantation2
+			}
+		}
+		search_filters = { FOCUS_FILTER_STABILITY }
+	}
+
+	focus = {
+		id = MAN_move_capitals
+		icon = GFX_goal_MAN_restore_the_empire
+		prerequisite = { focus = MAN_independence_war }
+		x = -2
 		y = 1
 		relative_position_id = MAN_independence_war
 
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 10
 		}
-		
-		available_if_capitulated = yes
+
+		available = {
+			608 = { is_fully_controlled_by = ROOT }
+		}
 
 		completion_reward = {
+			set_capital = { state = 608 }
 			MAN_low_legitimacy_level_down = yes
 		}
 	}
 
+
 	focus = {
 		id = MAN_imperial_university
 		icon = GFX_focus_research
-		prerequisite = { focus = MAN_imperial_divinity }
+		prerequisite = { focus = MAN_move_capitals }
 		x = -1
-		y = 1
-		relative_position_id = MAN_imperial_divinity
+		y = 2
+		relative_position_id = MAN_move_capitals
 
 		cost = 10
 
@@ -3843,37 +3882,108 @@
 	}
 
 	focus = {
-		id = MAN_move_capitals
-		icon = GFX_goal_MAN_restore_the_empire
-		prerequisite = { focus = MAN_imperial_divinity }
-		prerequisite = { focus = MAN_reclaim_the_empire }
-		x = 5
+		id = MAN_revive_zongli_yamen
+		icon = GFX_goal_research_silver
+		prerequisite = { focus = MAN_move_capitals }
+		x = 2
 		y = 1
-		relative_position_id = MAN_imperial_divinity
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
+		relative_position_id = MAN_move_capitals
+		cost = 5
+		available = {
+			has_government = neutrality
 		}
+		completion_reward = {
+			add_ideas = MAN_zongli_yamen
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
+	}
+
+	
+	focus = {
+		id = MAN_enforce_the_tributary_system
+		icon = GFX_goal_generic_forceful_treaty
+		prerequisite = { focus = MAN_revive_zongli_yamen }
+		mutually_exclusive = {
+			focus = MAN_qing_romanov_alliance
+		}
+		x = -1
+		y = 1
+		relative_position_id = MAN_revive_zongli_yamen
+		cost = 15
 
 		available = {
-			608 = { is_fully_controlled_by = ROOT }
+			has_government = neutrality
+			custom_trigger_tooltip = {
+				tooltip = MAN_vassal_tt
+				own_china_proper = yes
+			}
 		}
-
 		completion_reward = {
-			set_capital = { state = 608 }
-			MAN_low_legitimacy_level_down = yes
+			every_country = {
+				limit = {
+					capital_scope = {
+						is_on_continent = asia
+					}
+					is_puppet = no
+					exists = yes
+					NOT = {
+						has_war_with = MAN
+					}
+					OR = {
+						AND = {
+							is_neighbor_of = ROOT
+							is_major = no
+						}
+						tag = SIA
+						tag = TIB
+						tag = BHU
+						tag = NEP
+						tag = SIK
+						tag = TAN
+						tag = CAM
+						tag = VIN
+						tag = INS
+						tag = MAL
+						tag = LAO
+					}
+				}
+				country_event = {
+					id = nippon_events.28
+					days = 1
+				}
+			}
+			set_rule = {
+				can_create_factions = yes
+			}
+			create_faction = qing_dynasty
 		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 
 	focus = {
-		id = MAN_claim_the_mandate_of_heaven
-		icon = GFX_focus_man_claim_the_mandate_of_heaven
+		id = MAN_revive_the_grand_council
+		icon = GFX_goal_generic_army_doctrines
 		prerequisite = { focus = MAN_move_capitals }
 		x = 0
 		y = 1
 		relative_position_id = MAN_move_capitals
+		cost = 10
+		available = {
+			has_government = neutrality
+		}
+		completion_reward = {
+			MAN_low_legitimacy_level_down = yes
+			add_ideas = MAN_grand_council_idea
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = MAN_claim_the_mandate_of_heaven
+		icon = GFX_focus_man_claim_the_mandate_of_heaven
+		prerequisite = { focus = MAN_revive_the_grand_council }
+		x = 0
+		y = 2
+		relative_position_id = MAN_revive_the_grand_council
 
 		cost = 10
 
@@ -3938,10 +4048,47 @@
 	}
 
 	focus = {
+		id = MAN_subjugate_japan
+		icon = GFX_focus_attack_japan
+		prerequisite = { focus = MAN_claim_the_mandate_of_heaven }
+		x = 1
+		y = 1
+		relative_position_id = MAN_claim_the_mandate_of_heaven
+		cost = 5
+
+		available = {
+			is_subject = no
+			any_other_country = {
+				original_tag = JAP
+				is_subject = no
+				NOT = {
+					is_in_faction_with = ROOT
+				}
+			}
+		}
+
+		bypass = {
+			JAP = {
+				exists = no
+				has_war_with = ROOT
+				is_subject_of = ROOT
+			}
+		}
+		
+		completion_reward = {
+			create_wargoal = {
+				target = JAP
+				expire = 0
+				type = puppet_wargoal_focus
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+	focus = {
 		id = MAN_reclaim_the_empire
 		icon = GFX_goal_MAN_spread_restorationist_propaganda
 		prerequisite = { focus = MAN_independence_war }
-		x = 1
+		x = 3
 		y = 1
 		relative_position_id = MAN_independence_war
 
@@ -3956,7 +4103,7 @@
 			add_war_support = 0.1
 			set_rule = { can_create_factions = yes }
 			every_state = {
-				limit = { is_core_of = CHI }
+				limit = { is_core_of = PRC }			#not so fast, little imperialist!
 				add_core_of = ROOT
 			}
 		}
@@ -3964,13 +4111,14 @@
 	focus = {
 		id = MAN_qing_romanov_alliance
 		icon = GFX_focus_SOV_third_rome
-		prerequisite = {  focus = MAN_reclaim_the_empire }
-		relative_position_id = MAN_reclaim_the_empire
+		prerequisite = { focus = MAN_revive_zongli_yamen }
+		relative_position_id = MAN_revive_zongli_yamen
 		mutually_exclusive = {
-			focus = MAN_reclaim_the_entierty_of_manchuria
-		}		
-		x = -2
-		y = 2
+			focus = MAN_restore_the_old_frontier
+			focus = MAN_enforce_the_tributary_system
+		}	
+		x = 1
+		y = 1
 		cost = 5
 
 		ai_will_do = {
@@ -4051,24 +4199,89 @@
 
 		cost = 10
 
-		ai_will_do = {
-			factor = 1
-		}
-
-		search_filters = { FOCUS_FILTER_ANNEXATION }
-		completion_reward = {
-			every_country = {
-				limit = {
-					is_independent_china_or_warlord = yes
+		available = {
+			has_government = neutrality
+			any_state = {
+				custom_trigger_tooltip = {
+					tooltip = state_in_central_plain_no_mengukou_tt
+					OR = {
+						region = 165
+						region = 164
+						region = 144
+						region = 200
+						state = 615
+						state = 597
+						state = 743
+						state = 614
+						state = 608
+					}
 				}
-				ROOT = {
-					create_wargoal = {
-						type = annex_everything
-						target = PREV
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
 					}
 				}
 			}
 		}
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = {
+						custom_trigger_tooltip = {
+							tooltip = state_in_central_plain_no_mengukou_tt
+							OR = {
+								region = 165
+								region = 164
+								region = 144
+								region = 200
+								state = 615
+								state = 597
+								state = 743
+								state = 614
+								state = 608
+							}
+						}
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}
+
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_owned_state = {
+						OR = {
+							region = 165
+							region = 164
+							region = 144
+							region = 200
+							state = 615
+							state = 597
+							state = 743
+							state = 614
+							state = 608
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = take_state_focus
+						expire = 0
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 
 	focus = {
@@ -4097,16 +4310,94 @@
 			}
 		}
 	}
+	
 	focus = {
-		id = MAN_reclaim_the_entierty_of_manchuria
-		icon = GFX_goal_generic_occupy_states_ongoing_war
+		id = MAN_restore_the_old_frontier
+		icon = GFX_goal_generic_more_territorial_claims
 		prerequisite = {  focus = MAN_offer_vassalization focus = MAN_assert_our_authority }
 		mutually_exclusive = {
 			focus = MAN_qing_romanov_alliance
 		}
-		relative_position_id = MAN_offer_vassalization
-		x = -1
+		x = 1
 		y = 1
+		relative_position_id = MAN_assert_our_authority
+		cost = 10
+
+		available = {
+			has_government = neutrality
+			custom_trigger_tooltip = {
+				tooltip = MAN_vassal_tt
+				own_china_proper = yes
+			}
+			any_state = {
+				custom_trigger_tooltip = {
+					tooltip = state_in_soviet_far_east_mongolia_sinkiang_tibet_tt
+					OR = {
+						region = 148
+						region = 149
+						region = 152
+						region = 145
+					}
+				}
+				custom_trigger_tooltip = {
+					tooltip = ROOT_is_not_controlled_by_root_or_ally_tt
+					NOT = {
+						is_controlled_by_ROOT_or_ally = yes
+					}
+				}
+			}
+		}
+
+		bypass = {
+			all_state = {
+				OR = {
+					NOT = {
+						custom_trigger_tooltip = {
+							tooltip = state_in_soviet_far_east_mongolia_sinkiang_tibet_tt
+							OR = {
+								region = 148
+								region = 149
+								region = 152
+								region = 145
+							}
+						}
+					}
+					is_controlled_by_ROOT_or_ally = yes
+				}
+			}
+		}
+
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_owned_state = {
+						OR = {
+							region = 148
+							region = 149
+							region = 152
+							region = 145
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = take_state_focus
+						expire = 0
+					}
+				}
+			}
+		}
+	}
+	focus = {
+		id = MAN_reclaim_the_entierty_of_manchuria
+		icon = GFX_goal_generic_occupy_states_ongoing_war
+		prerequisite = {  focus = MAN_restore_the_old_frontier }
+		x = 0
+		y = 1
+		relative_position_id = MAN_restore_the_old_frontier
 		cost = 10
 		ai_will_do = {
 			factor = 1
