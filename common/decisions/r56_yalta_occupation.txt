@@ -1,0 +1,695 @@
+CW_occupation_negotations = {
+	#opening decisions - I might regret this later, but there seems little need to make this dynamic
+	discuss_the_german_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			NOT = {
+				has_country_flag = r56_yalta_open_germany_category
+				has_country_flag = r56_yalta_fate_of_germany_decided
+			}
+		}
+		complete_effect = {
+			set_country_flag = r56_yalta_open_germany_category
+		}
+		ai_will_do = {
+			base = 1
+		}
+	}
+	close_the_german_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+		}
+		complete_effect = {
+			clr_country_flag = r56_yalta_open_germany_category
+		}
+		ai_will_do = {
+			base = 0
+		}
+ 	}
+	merge_occupation_zones_germany = {	#is there a point? probably just compliance gain, IRL it helped fix the famine to do economic coop, but you cant assume thered be in with in-game war
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+		}
+		available = {
+			has_country_flag = WIP_flag
+			if = {			#dont allow sending to commie as NATO member
+				limit = {
+					NOT = {
+						has_government = communism
+					}
+				}
+				OR = {
+					FROM = {
+						NOT = {
+							has_government = communism
+						}
+					}
+					NOT = {
+						has_country_flag = TO_joined_brussels_treaty
+					}
+				}
+				else = {	#dont allow sending to NATO member as commie
+					FROM = {
+						NOT = {
+							has_country_flag = TO_joined_brussels_treaty
+						}
+					}
+				}
+			}
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				OR = {
+					is_ally_with = ROOT
+					AND = {
+						count_triggers = {
+							amount = 2
+							gives_military_access_to = ROOT
+							has_military_access_to = ROOT
+							has_non_aggression_pact_with = ROOT
+							AND = {
+								has_guaranteed = ROOT
+								is_guaranteed_by = ROOT
+							}
+						}
+					}
+				}
+			}
+		}
+		target_trigger = {
+			FROM = {
+				any_controlled_state = {
+					is_core_of = GER
+					NOT = {	#in case of CZE/AUS/POL/BEL owning German land
+						is_core_of = FROM
+					}
+				}
+			}
+		}
+		icon = hol_exchange_intelligence_data
+		complete_effect = { #meta effect to set country flag of name FROM about who to work with?
+			custom_effect_tooltip = r56_shared_zone_action_required_tt
+		}
+	}
+	prepare_formation_of_german_state_in_control_zone = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+		}
+		available = {
+			if = {
+				limit = {
+					NOT = {
+						original_tag = SOV
+					}
+				}
+				has_country_flag = WIP_flag
+			}
+			#if merged zone, must do some agreement decision first
+		}
+		fire_only_once = yes
+		days_remove = 330
+		remove_effect = {
+			set_country_flag = r56_yalta_prepared_german_state
+		}
+	}
+	approve_form_german_state_in_control_zone = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+			has_country_flag = r56_yalta_prepared_german_state
+			if = {
+				limit = {
+					original_tag = SOV
+				}
+				DDR = {
+					exists = no
+				}
+			}
+		}
+		fire_only_once = yes
+		available = {
+			#will only have an effect if all countries in shared zone do this
+		}
+		days_remove = 30
+		remove_effect = {
+			if = {
+				limit = {
+					#USA FRA ENG have merged zones and all approved, then form WGR
+				}
+			}
+			if = {
+				limit = {
+					original_tag = SOV
+				}
+				every_owned_state = {
+					limit = {
+						is_core_of = GER
+					}
+					add_core_of = DDR
+					transfer_state_to = DDR
+				}
+				set_autonomy = {
+					target = DDR
+					autonomy_state = autonomy_puppet
+					end_wars = no
+					end_civil_wars = no
+				}
+			}
+		}
+	}
+	r56_yalta_propose_neutral_germany = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			has_country_flag = r56_yalta_open_germany_category
+			NOT = {
+				country_exists = GER
+			}
+		}
+		available = {
+			always = yes
+		}
+		days_re_enable = 360
+		cost = 25
+		complete_effect = {
+			country_event = cold_war.39
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1000	#need to be high since it costs pp
+				original_tag = SOV
+				NOT = {	#Soviets get to propose this once
+					has_country_flag = r56_yalta_proposing_undemocratic_germany
+				}
+			}
+		}
+ 	}
+	r56_yalta_neutral_germany_forming = {
+		allowed = {
+			always = no
+		}
+		is_good = yes
+		available = {
+			NOT = {
+				any_owned_state = {
+					is_core_of = GER
+				}
+			}
+		}
+		days_mission_timeout = 100 #a government already existed
+		timeout_effect = {	#probably put the effect on one side, and a tooltip on the rest
+			every_state = {
+				limit = {
+					is_core_of = GER
+					NOT = {
+						owner = {
+							PREV = {
+								is_core_of = PREV
+							}
+						}
+					}
+				}
+				transfer_state_to = GER
+			}
+			#put government in event so it doesnt need to be stored
+		}
+	}
+	dismantle_german_war_industry = {	#every 3 mils becomes 1 civ for GER, and 1 mil for the occupier
+		icon = generic_construction
+		state_target = yes
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+		}
+		target_trigger = {
+			FROM = {
+				is_owned_by = ROOT
+				is_fully_controlled_by = ROOT
+				is_core_of = GER
+				arms_factory > 0
+			}
+		}
+		days_remove = 200
+		remove_effect = {
+			if = {
+				limit = {
+					FROM = {
+						arms_factory > 2
+					}
+				}
+				FROM = {
+					remove_building = {
+						type = arms_factory
+						level = 3
+					}
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				random_owned_controlled_state = {
+					limit = {
+						is_core_of = ROOT
+						free_building_slots = {
+							building = arms_factory
+							size > 0
+							include_locked = no
+						}
+					}
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+			}
+			else = {
+				FROM = {
+					remove_building = {
+						type = arms_factory
+						level = building_level@arms_factory
+					}
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+			}
+			add_threat = -1
+		}
+		ai_will_do = {
+			base = 1
+			modifier = {
+				factor = 0
+				any_enemy_country = {
+					is_major = yes
+				}
+			}
+		}
+	}
+ 	discuss_the_austrian_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_austria_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			NOT = {
+				has_country_flag = r56_yalta_open_austria_category
+				has_country_flag = r56_yalta_fate_of_austria_decided
+			}
+		}
+		complete_effect = {
+			set_country_flag = r56_yalta_open_austria_category
+		}
+		ai_will_do = {
+			base = 1
+		}
+ 	}
+	close_the_austrian_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_austria_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			has_country_flag = r56_yalta_open_austria_category
+		}
+		complete_effect = {
+			clr_country_flag = r56_yalta_open_austria_category
+		}
+		ai_will_do = {
+			base = 0
+		}
+ 	}
+	r56_yalta_propose_neutral_austria = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_austria_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			has_country_flag = r56_yalta_open_austria_category
+			NOT = {
+				country_exists = AUS
+			}
+		}
+		days_re_enable = 360
+		cost = 25
+		complete_effect = {
+			country_event = cold_war.37
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1000	#need to be high since it costs pp
+				original_tag = SOV
+				OR = {
+					date > 1955.06.06
+					AND = {
+						NOT = {
+							has_country_leader = {
+								character = SOV_iosif_stalin
+								ruling_only = yes
+							}
+						}
+						date < 1952.06.06	#other leader before death of Stalin = earlier
+					}
+				}
+			}
+		}
+ 	}
+	r56_yalta_neutral_austria_forming = {
+		allowed = {
+			always = no
+		}
+		is_good = yes
+		available = {
+			NOT = {
+				any_owned_state = {
+					is_core_of = AUS
+				}
+			}
+		}
+		days_mission_timeout = 100 #a government already existed
+		timeout_effect = {	#Iran complains
+			every_state = {
+				limit = {
+					is_core_of = AUS
+					NOT = {
+						owner = {
+							PREV = {
+								is_core_of = PREV
+							}
+						}
+					}
+				}
+				transfer_state_to = AUS
+			}
+			#put government in event so it doesnt need to be stored
+		}
+	}
+	occupation_of_iran_decision = {	#itd be nicer if garrison divisions existed, so the decision below this wouldnt be needed, but no data
+		allowed = {
+			always = no
+		}
+		is_good = no
+		days_mission_timeout = 142
+		available = {
+			NOT = {
+				#has_subject = PER
+				any_owned_state = {
+					is_core_of = PER
+				}
+				any_subject_country = {	#includes Soviet puppets
+					any_owned_state = {
+						is_core_of = PER
+					}
+				}
+			}
+		}
+		timeout_effect = {	#Iran complains
+			add_threat = 5
+		}
+	}
+	withdraw_occupation_of_iran_decision = {
+		allowed = {
+			OR = {
+				original_tag = SOV
+				original_tag = ENG
+			}
+		}
+		icon = generic_prepare_civil_war
+		fire_only_once = yes	#this is so the category does not reappear if Iran is puppeted later
+		available = {
+			# if = {	#Ive made some scoping mistakes
+			# 	limit = {
+			# 		has_subject = PER
+			# 	}
+			# 	PER = {
+			# 		NOT = {
+			# 			any_owned_state = {
+			# 				ROOT = {
+			# 					divisions_in_state = {
+			# 						size < 1
+			# 						state = PREV
+			# 					}
+			# 				}
+			# 			}
+			# 		}
+			# 	}
+			# }
+			# else = {
+			# 	NOT = {
+			# 		any_owned_state = {
+			# 			is_core_of = PER
+			# 			PREV = {
+			# 				divisions_in_state = {
+			# 					size < 1
+			# 					state = PREV
+			# 				}
+			# 			}
+			# 		}
+			# 	}
+			# }
+		}
+		visible = {
+			PER = {
+				exists = yes
+			}
+			OR = {
+				has_subject = PER
+				any_owned_state = {
+					is_core_of = PER
+				}
+			}
+		}
+		remove_effect = {
+			every_owned_state = {
+				limit = {
+					is_core_of = PER
+				}
+				transfer_state_to = PER
+			}
+			if = {
+				limit = {
+					has_subject = PER
+				}
+				set_autonomy = {
+					target = PER
+					autonomous_state = autonomy_free
+					end_wars = no
+					end_civil_wars = no
+				}
+				PER = {
+					add_ideas = PER_anglo_iranian_oil_company
+				}
+			}
+			#if they dont have the mission that pressures for withdrawing, they failed it, so remove some of the tension they caused
+			if = {
+				limit = {
+					NOT = {
+						has_active_mission = occupation_of_iran_decision
+					}
+				}
+				add_threat = -3
+			}
+		}
+		ai_will_do = {	#UK should historically retreat from Germany
+			base = 0
+			modifier = {	#dont withdraw from Iran during WW2
+				add = 1
+				OR = {
+					has_war = no
+					has_active_mission = occupation_of_iran_decision
+				}
+			}			
+			modifier = {	#if UK is agressive ideology but got yalta, keep Iran
+				factor = 0
+				OR = {
+					has_government = neutrality
+					has_government = fascism
+				}
+			}
+			modifier = {	#Soviets shouldnt withdraw from Iran for a while, but do it later
+				factor = 0
+				original_tag = SOV
+				has_active_mission = occupation_of_iran_decision	#Soviets historically let it expire, then did it later anyway
+			}
+		}
+	}
+	SOV_release_AZE_puppet = {
+
+		icon = generic_nationalism
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		available = {
+			owns_state = 419
+			owns_state = 987
+			NOT = {
+				AZR = {
+					country_exists = yes
+				}
+			}
+		}
+
+		visible = {
+			any_controlled_state = {
+				is_core_of = PER
+			}
+		}
+
+		days_remove = 45
+		
+		fire_only_once = yes
+
+		remove_effect = {
+			AZR = {
+				transfer_state = 419
+				transfer_state = 987
+			}
+			if = {
+				limit = {
+					has_dlc = "Together for Victory"
+				}
+				set_autonomy = {
+					target = AZR
+					autonomy_state = autonomy_dominion
+					end_wars = no
+					end_civil_wars = no
+				}
+			}
+			else = {
+				puppet = AZR
+			}
+		}			
+		ai_will_do = {
+			factor = 50
+		}
+	}
+	SOV_release_KUR_puppet = {
+
+		icon = generic_nationalism
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		available = {
+			owns_state = 988
+			NOT = {
+				KUR = {
+					country_exists = yes
+				}
+			}
+		}
+
+		visible = {
+			any_controlled_state = {
+				is_core_of = PER
+			}
+		}
+
+		days_remove = 45
+		
+		fire_only_once = yes
+
+		remove_effect = {
+			KUR = {
+				transfer_state = 988
+			}
+			if = {
+				limit = {
+					has_dlc = "Together for Victory"
+				}
+				set_autonomy = {
+					target = KUR
+					autonomy_state = autonomy_dominion
+					end_wars = no
+					end_civil_wars = no
+				}
+			}
+			else = {
+				puppet = KUR
+			}
+		}			
+		ai_will_do = {
+			factor = 50
+		}
+	}
+	SOV_withdraw_from_puppets_in_iran = {
+		allowed = {
+			original_tag = SOV
+		}
+		visible = {
+			OR = {
+				has_subject = AZR
+				has_subject = KUR
+			}
+		}
+		remove_effect = {
+			if = {
+				limit = {
+					has_subject = AZR
+				}
+				end_puppet = AZR
+				PER = {
+					create_wargoal = {
+						type = annex_everything
+						target = AZR
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_subject = KUR
+				}
+				end_puppet = KUR
+				PER = {
+					create_wargoal = {
+						type = annex_everything
+						target = KUR
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1
+				NOT = {
+					any_owned_state = {
+						is_core_of = PER
+					}
+				}
+			}
+		}
+	}
+}
