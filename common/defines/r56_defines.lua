@@ -11,7 +11,7 @@
 	NDefines.NDiplomacy.MIN_OPINION_VALUE = -200								-- Vanilla is -100
 	NDefines.NDiplomacy.VERY_GOOD_OPINION = 100								-- Vanilla is 50
 	NDefines.NDiplomacy.VERY_BAD_OPINION = -100								-- Vanilla is -50
-	NDefines.NDiplomacy.FRONT_IS_DANGEROUS = 0									-- Vanilla is -100	
+	NDefines.NDiplomacy.FRONT_IS_DANGEROUS = -1						        -- Vanilla is -100	
 	NDefines.NDiplomacy.TENSION_VOLUNTEER_FORCE_DIVISION = 0.1
 	NDefines.NDiplomacy.MAX_REMEMBERED_LEASED_IC = 2000				-- Maximum of leased equipment value that is remembered for opinion bonus
 	NDefines.NDiplomacy.MAX_OPINION_FOR_LEASED_IC = 50					-- Positive opinion when remembering the MAX_REMEMBERED_LEASED_IC equipment
@@ -34,6 +34,7 @@
 	NDefines.NCountry.STARTING_COMMAND_POWER = 10.0					-- starting command power for every country
 	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 1	--Starting level for exile leader  -- why 3?!
 	--NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Claimed to be the same as vanilla previously but BBA changed this value so commented this out
+	NDefines.NCountry.EVENT_PROCESS_OFFSET = 30 -- Vanilla is 20. Increased slightly to help aide with lag since we have alot more events with 'naked' checks compared to Vanilla. Slight downside is some events with naked checks will be a bit more delayed then Vanila. +2 Days. - SpicyAlfredo. Events are checked every X day per country or state (1 is ideal, but CPU heavy)
 
 
 	NDefines.NResistance.GARRISON_MANPOWER_LOST_BY_ATTACK = 0.005 	--WAS 0.018 Ratio of manpower lost by garrison at each attack on garrison (this number will be reduced by the hardness of garrison template)	
@@ -73,7 +74,7 @@
 	NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances to gain a personality trait for new generals
 		0.80, --50% for first trait
 		0.40, --15% for second trait after that
-		0.05, 
+		0.03, 
 		0.01,
 	}
 	
@@ -183,7 +184,7 @@
 --------------------------------------------------------------------------------------------------------------
 -- RESEARCH
 --------------------------------------------------------------------------------------------------------------
-	NDefines.NAI.RESEARCH_DAYS_BETWEEN_WEIGHT_UPDATE = 1
+	NDefines.NAI.RESEARCH_DAYS_BETWEEN_WEIGHT_UPDATE = 7		-- DO NOT CHANGE TO A LOWER VALUE - SpicyAlfredo
 	NDefines.NAI.RESEARCH_LAND_DOCTRINE_NEED_GAIN_FACTOR = 0	-- Multiplies value based on relative military industry size / country size.
 	NDefines.NAI.RESEARCH_NAVAL_DOCTRINE_NEED_GAIN_FACTOR = 0	-- Multiplies value based on relative naval industry size / country size.
 	NDefines.NAI.RESEARCH_AIR_DOCTRINE_NEED_GAIN_FACTOR = 0		-- Multiplies value based on relative number of air base / country size.
@@ -244,9 +245,9 @@
 	NDefines.NAI.DESIRE_USE_XP_TO_UNLOCK_NAVY_SPIRIT = 0.4   -- How quickly is desire to unlock naval spirits accumulated?
 	NDefines.NAI.DESIRE_USE_XP_TO_UNLOCK_AIR_SPIRIT = 0.4    -- How quickly is desire to unlock air spirits accumulated?
 	
-	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_DOCTRINE = 7       -- Recalculate desired best doctrine to unlock with this many days inbetween.
-	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_TEMPLATE = 7       -- Recalculate desired best template to upgrade with this many days inbetween.
-	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_EQUIPMENT = 7      -- Recalculate desired best equipment to upgrade with this many days inbetween.
+	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_DOCTRINE = 30       -- 7 in Vanilla. Recalculate desired best doctrine to unlock with this many days inbetween.
+	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_TEMPLATE = 30       -- 7 in Vanilla. Recalculate desired best template to upgrade with this many days inbetween. Checking more often is better idea in theory then in reality.
+	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_EQUIPMENT = 30      -- 7 in Vanilla. Recalculate desired best equipment to upgrade with this many days inbetween.
 	
 	NDefines.NAI.GARRISON_TEMPLATE_SCORE_IC_FACTOR = 1.0 -- ai uses these defines while calculating garrison template score of a template.
 	NDefines.NAI.GARRISON_TEMPLATE_SCORE_MANPOWER_FACTOR = 0.05 -- formula is (template_ic * ic_factor + template_manpower * manpower_factor ) / template_supression (lower is better)	
@@ -338,7 +339,6 @@
 
 	NDefines.NAI.BUILDING_TARGETS_BUILDING_PRIORITIES = {				-- buildings in order of pirority when considering building targets strategies. First has the greatest priority omitted has the lowest. NOTE: not all buildings are supported by building targets strategies.
 		'synthetic_refinery',
-		'fuel_silo',
 		'industrial_complex',
 		'arms_factory',
 		'infrastructure',
@@ -346,19 +346,27 @@
 		'air_base',
 		'radar_station',
 		'nuclear_reactor',
+		'fuel_silo',
 	}
 	
 --------------------------------------------------------------------------------------------------------------
 -- FRONT CONTROL/ARMY
 --------------------------------------------------------------------------------------------------------------	
 
-	NDefines.NAI.MIN_AI_UNITS_PER_TILE_FOR_STANDARD_COHESION = 2.0	-- How many units should we have for each tile along a front in order to switch to standard cohesion (less moving around)
+	NDefines.NAI.MIN_AI_UNITS_PER_TILE_FOR_STANDARD_COHESION = 1.4	-- Vanilla 1.5, How many units should we have for each tile along a front in order to switch to standard cohesion (less moving around)
 	NDefines.NAI.MIN_FRONT_SIZE_TO_CONSIDER_STANDARD_COHESION = 2000	-- How long should fronts be before we consider switching to standard cohesion (under this standard cohesion fronts will switch back to relaxed)
 
+	NDefines.NAI.ARMY_LEADER_ASSIGN_FIELD_MARSHAL_TO_ARMY = -600           -- Score for assigning a field marshal to a normal army (want to use them for army groups) #was -500
+	NDefines.NAI.ARMY_LEADER_ASSIGN_KEEP_LEADER = 600                       -- Score for keeping the leader if already assigned #was 500
+	NDefines.NAI.ARMY_LEADER_ASSIGN_OVERCAPACITY = -1                     -- Score for assigning leader to a too large army #was -200, don't care about over stacking. Aslong as the AI armies have a general it's good to go. 
+
+	NDefines.NAI.MIN_UNITS_FACTOR_FRONT_ORDER = 2.0
+	NDefines.NAI.MIN_UNITS_FACTOR_INVASION_ORDER = 2.0
+
 	NDefines.NAI.ASSIGN_TANKS_TO_WAR_FRONT = 8.0 --4.0
-	NDefines.NAI.ASSIGN_TANKS_TO_NON_WAR_FRONT = 0.2 --0.4
+	NDefines.NAI.ASSIGN_TANKS_TO_NON_WAR_FRONT = 0.1 --0.4
 	
-	NDefines.NAI.PLAN_EXECUTE_RUSH = -10
+	NDefines.NAI.PLAN_EXECUTE_RUSH = -9
 	NDefines.NAI.PLAN_ATTACK_MIN_ORG_FACTOR_LOW = 0.85							-- Minimum org % for a unit to actively attack an enemy unit when executing a plan
 	NDefines.NAI.PLAN_ATTACK_MIN_STRENGTH_FACTOR_LOW = 0.85						-- Minimum strength for a unit to actively attack an enemy unit when executing a plan
 	NDefines.NAI.PLAN_ATTACK_MIN_ORG_FACTOR_MED = 0.65							-- (LOWMEDHIGH) corresponds to the plan execution agressiveness level.
@@ -487,9 +495,9 @@
 	
 	NDefines.NAI.NEW_LEADER_EXTRA_PP_FACTOR = 1					-- Country must have at least this many times extra PP to get new admirals or army leaders #Was 2.0
 	NDefines.NAI.ATTACK_HEAVILY_DEFENDED_LIMIT = 0.7				-- AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%) #was 0.5
-	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 72                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
+	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 100                  -- if we are in combat for this amount and it goes shitty then try skipping it #was 100
 	
-	NDefines.NAI.PRODUCTION_LINE_SWITCH_SURPLUS_NEEDED_MODIFIER = 0.1	-- Is modified by efficency modifiers.
+	NDefines.NAI.PRODUCTION_LINE_SWITCH_SURPLUS_NEEDED_MODIFIER = 0.2	-- Is modified by efficency modifiers.
 	NDefines.NAI.PLAN_ACTIVATION_MAJOR_WEIGHT_FACTOR = 2.0			-- AI countries will hold on activating plans if stronger countries have plans in the same location. Majors count extra (value of 1 will negate this)
 	NDefines.NAI.PLAN_ACTIVATION_PLAYER_WEIGHT_FACTOR = 2.0		-- AI countries will hold on activating plans if player controlled countries have plans in the same location. Majors count extra (value of 1 will negate this)
 	NDefines.NAI.AREA_DEFENSE_BASE_IMPORTANCE = 4					-- Area defense order base importance value (used for determining order of troop selections)
@@ -499,7 +507,7 @@
 	
 	NDefines.NAI.XP_RATIO_REQUIRED_TO_RESEARCH_WITH_XP = 1.5		-- AI will at least need this amount of xp compared to cost of a tech to reserch it with XP #BASE WAS 2.0	
 	
-	NDefines.NAI.FRONT_EVAL_UNIT_ACCURACY = 0.95                          -- scale how stupid ai will act on fronts. 0 is potato #BASE WAS 0.7
+	NDefines.NAI.FRONT_EVAL_UNIT_ACCURACY = 0.99                          -- scale how stupid ai will act on fronts. 0 is potato #BASE WAS 1
 	
 	NDefines.NAI.MIN_NUM_CONQUERED_PROVINCES_TO_DEPRIO_NAVAL_INVADED_FRONTS = 35	-- if you conquer this amount of provinces after a naval invasion it will lose its prio status and will act as a regular front	
 
@@ -590,6 +598,15 @@
 	NDefines.NAI.NAVAL_PATROL_PLANES_PER_SHIP_PATROLLING = 20 --10.0		-- Amount of naval patrol planes per ship on a patrol mission
 	NDefines.NAI.NAVAL_PATROL_PLANES_PER_SHIP_RAIDING = 40 --10.0		-- Amount of naval patrol planes per ship on a convoy raid mission
 	NDefines.NAI.NAVAL_PATROL_PLANES_PER_SHIP_ESCORTING = 20 --10.0		-- Amount of naval patrol planes per ship on a convoy escort mission
+
+	NDefines.NAI.DAYS_BETWEEN_AIR_PRIORITIES_UPDATE = 7				-- Vanilla 4, Amount of days between air ai updates priorities for air wings ( from 1 to N )
+
+-------------------------
+-- AI OTHER
+-------------------------
+
+	NDefines.NAI.AI_UPDATE_ROLES_FREQUENCY_HOURS = 72 -- Vanilla 48, update the roles for a country AI this often (affects performance) 
+	NDefines.NAI.EQUIPMENT_MARKET_UPDATE_FREQUENCY_DAYS = 14 -- Vanilla 11, How often the AI runs its market logic
 
 --------------------------------------------------------------------------------------------------------------
 -- PP
@@ -704,4 +721,9 @@
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MAX = 800.0-- Max range for victory point text 
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0  -- Max range for victory point text 
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MIN = 100.0 -- Min range for victory point text
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point text
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point text 
+
+	NDefines_Graphics.MAX_DOGFIGHTS_SCENARIOS = 2 -- Vanilla was 3
+	NDefines_Graphics.MAX_TRAINING_SCENARIOS = 1 -- Vanilla was 2
+
+	NDefines_Graphics.MAPICON_GROUP_PASSES = 16 -- Vanilla was 20
