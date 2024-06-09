@@ -6,7 +6,7 @@ Road to 56 Beta Build
 
 This is the Readme guide for using Github with Road to 56.
 
-### Guide: Using github to contribute to Road to 56.
+### Guide: Using GitHub to contribute to Road to 56.
 
 1. Sign up with Github if you haven't already, and request membership/team assignment from Greatexperiment via Discord.
 2. Download the desktop client from Github.
@@ -26,7 +26,7 @@ If, for some reason, you need greater access rights to the Git, or don't underst
 
 ### IMPORTANT: Contributor & Developer Agreement
 * If a contributor or developer creates either original[^2] assets, code, or localization for 'Road to 56' and that work is published,[^1] 'Road to 56' retains the right to use that material even if said contributor or developer no longer wishes to be or have said work affiliated with 'Road to 56' under opensource development principles.
-* Once said assets, code, or localization is published,[1] the contributor or developer cannot invoke Hearts of Iron 4 Modding Community guidelines as a basis for removal of work.
+* Once said assets, code, or localization is published,[^1] the contributor or developer cannot invoke Hearts of Iron 4 Modding Community guidelines as a basis for removal of work.
 * The above stipulations do not apply to code or assets that have been made for other Hearts of Iron 4 Modifications, other forms of media, or work that derives from copyrighted material as defined by either United States or European Union law that is included in 'Road to 56.'[^3]
 * The contributor or developer may ask to withdraw work if said work isn't published[^1] yet. 
 * To reiterate: 'Road to 56' retains the right to use all original contributor and developer work made for 'Road to 56.' Even if said contributor and developer wishes to be no longer affiliated with Road to 56 and asks for removal of assets, code, or localization made by them. Such requests are considered meritless under this agreement.
