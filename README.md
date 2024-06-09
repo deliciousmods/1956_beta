@@ -1,5 +1,5 @@
 # Road to 56 Beta Build
-## 1956_Gunnerside [1.13.* Compatibility]
+## 1956_Gunnerside [1.14.* Compatibility]
 
 This is the Readme guide for using Github with Road to 56.
 
@@ -10,7 +10,7 @@ This is the Readme guide for using Github with Road to 56.
 3. In the program, File &rarr; Clone &rarr; URL &rarr; deliciousmods/1956_beta.
 4. Set the local directory as your documents &rarr; Paradox Interactive &rarr; Hearts of Iron IV &rarr; mod folder.
 5. Clone the project and download.
-6. Be sure to create a .mod file or use the one included in the 1956_beta folder.
+6. Be sure to create a .mod file, one can be found inside the coding channel of the Discord server.
 7. Create a personal branch of the mod via Branch &rarr; New branch in the client.
 8. Be sure to periodically go to 'Branch &rarr; Update from beta-edits' to keep your files up to date.
 9. All edits you make will automatically display in the client. If you are sure of your changes, put your handle in the summary box and a summary of your work in the description section.
