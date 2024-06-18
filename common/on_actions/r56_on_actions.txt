@@ -380,13 +380,6 @@ on_actions = {
 							}
 						}
 					}
-					NOT = {
-						AND = {
-							original_tag = MAN
-							has_country_flag = MAN_r56_focus_tree
-							has_country_flag = MAN_reliant_flag
-						}
-					}
 					NOT = {	#no special things for anarchists
 						AND = {
 							original_tag = HON
@@ -954,13 +947,15 @@ on_actions = {
 						}
 					}
 					kill_ideology_leader = fascism
-					create_country_leader = { #more of a easter egg since at this point Germany can't come back from Yalta
-						name = "Karl Donitz"
-						picture = "Portrait_Germany_Karl_Donitz.dds"
-						expire = "1965.1.1"
-						ideology = nazism
-						traits = {
-							retired_admiral
+					add_country_leader_role = {		#more of a easter egg since at this point Germany can't come back from Yalta
+						character = GER_karl_donitz
+						promote_leader = yes
+						country_leader = {
+							ideology = nazism
+							expire = "1965.1.1"
+							traits = {
+								retired_admiral
+							}
 						}
 					}
 				}
@@ -1465,10 +1460,10 @@ on_actions = {
 					name = "PSD"
 				}
 				set_province_name = { id = 12206 name = "Oecussi"}
-				if = {
-					limit = { has_cosmetic_tag = TML_POR }
-					drop_cosmetic_tag = yes
-				}
+				#if = {										#unassigned so far
+				#	limit = { has_cosmetic_tag = TML_POR }
+				#	drop_cosmetic_tag = yes
+				#}
 				if = {
 					limit = { date > 1936.01.01 }
 					retire_ideology_leader = neutrality
@@ -1998,29 +1993,6 @@ on_actions = {
 				}
 			}
 
-			#Drop cosmetic tag (MAN)
-			if = {
-				limit = {
-					FROM = { original_tag = MAN }
-					ROOT = { original_tag = MAN }
-				}
-				if = {
-					limit = { ROOT = { has_government = neutrality } }
-					drop_cosmetic_tag = yes
-				}
-				if = {
-					limit = {
-						FROM = { has_government = neutrality }
-						ROOT = { has_government = fascism }
-					}
-					set_country_flag = RFP_wins
-					create_wargoal = {
-						target = SOV
-						type = annex_everything
-					}
-				}
-			}
-
 			#These are a little weird. Seem to be repeats of previous ones, with the added "controls_state" caveat.
 			if = {
 				limit = {
@@ -2076,6 +2048,43 @@ on_actions = {
 ###---> On Declare War <><> <><> <><>
 	on_declare_war = {
 		effect = {
+			if = {	# Little Entente - Hungary war against
+				limit = {
+					ROOT = {
+						tag = HUN
+					}
+					FROM = {
+						has_idea = r56_YUG_little_entente
+						OR = {
+							original_tag = CZE
+							original_tag = ROM
+							original_tag = YUG
+						}
+					}
+				}
+				ROOT = {
+					custom_effect_tooltip = r56_HUN_if_we_go_to_war
+				}
+				FROM = {
+					if = {
+						limit = {
+							is_in_faction = no
+						}
+						create_faction = "Little Entente"
+					}
+					every_other_country = {
+						limit = {
+							has_idea = r56_YUG_little_entente
+							OR = {
+								original_tag = CZE
+								original_tag = ROM
+								original_tag = YUG
+							}
+						}
+						country_event = { id = yugoslavia.25 hours = 12 }
+					}
+				}
+			}
 			if = { # BELGIAN event to arrest fascists after the invasion
 				limit = {
 					tag = GER
@@ -2087,8 +2096,7 @@ on_actions = {
 					}
 				}
 				FROM = {
-	                news_event = { id = belgium.131 hours = 18 random = 5 }
-
+	                country_event = { id = belgium.131 hours = 18 random_hours = 5 }
 				}
 			}
 			if = {# NEWS EVENT - Norwegian Neutrality violated by Germany, initial event #
@@ -2821,100 +2829,6 @@ on_actions = {
 				POL = { remove_ideas = POL_Ribbentrop_Beck_Pact }
 			}
 
-			if = {
-				limit = {
-					OR = {
-						AND = { FROM = { tag = JAP } tag = USA }
-						AND = { FROM = { tag = USA } tag = JAP }
-					}
-					has_global_flag = MAN_will_join_usa
-					MAN = {
-						is_subject_of = JAP
-					}
-				}
-				MAN = {
-					overlord = {
-						set_autonomy = {
-							target = MAN
-							autonomy_state = autonomy_free
-						}
-					}
-				}
-				USA = {
-					set_autonomy = {
-						target = MAN
-						autonomy_state = autonomy_puppet
-					}
-					set_autonomy = {
-						target = MAN
-						autonomy_state = autonomy_free
-					}
-					if = {
-						limit = {
-							is_in_faction = no
-						}
-						create_faction = mck_liberate
-						add_to_faction = MAN
-						else = {
-							random_country = {
-								limit = {
-									OR = {
-										is_in_faction_with = USA
-										tag = USA
-									}
-									is_faction_leader = yes
-								}
-								add_to_faction = MAN
-							}
-						}
-					}
-				}
-				MAN = {
-					declare_war_on = {
-						target = JAP
-						type = annex_everything
-					}
-					hidden_effect = {
-						set_politics = {
-							ruling_party = democratic
-							elections_allowed = no
-						}
-						set_political_party = {
-							ideology = communism
-							popularity = 0
-						}
-						set_political_party = {
-							ideology = fascism
-							popularity = 5
-						}
-						set_political_party = {
-							ideology = neutrality
-							popularity = 20
-						}
-						set_political_party = {
-							ideology = democratic
-							popularity = 80
-						}
-					}
-					add_to_war = {
-						targeted_alliance = USA
-						enemy = JAP
-					}
-					if = {
-						limit = {
-							has_idea = MAN_dongbei_partisan
-						}
-						remove_ideas = MAN_dongbei_partisan
-					}
-					if = {
-						limit = {
-							has_idea = MAN_dongbei_partisan_pacified
-						}
-						remove_ideas = MAN_dongbei_partisan_pacified
-					}
-				}
-			}
-
 			#Iraq declares their golden square coup war
 			if = {
 				limit = {
@@ -2923,7 +2837,7 @@ on_actions = {
 						has_country_flag = IRQ_historical_golden_square_coup
 					}
 					tag = ENG # only if UK declares once
-					NOT ={
+					NOT = {
 						has_global_flag = R56_this_event_fire_flag #make better later on -  Fantom
 					}
 				}
@@ -2992,72 +2906,6 @@ on_actions = {
 					remove_opinion_modifier = {
 						target = CHI
 						modifier = more_sino_german_coop
-					}
-				}
-			}
-
-			#gain buff when against commie - f
-			if = {
-				limit = {
-					FROM = {
-						has_idea = KMT_resist_the_reds
-						NOT = { has_idea = KMT_anti_communism_sentiment }
-					}
-					ROOT = { has_government = communism }
-				}
-				FROM = {
-					add_ideas = KMT_anti_communism_sentiment
-				}
-			}
-
-			#gain buff when against commie - r
-			if = {
-				limit = {
-					ROOT = {
-						has_idea = KMT_resist_the_reds
-						NOT = { has_idea = KMT_anti_communism_sentiment }
-					}
-					FROM = { has_government = communism }
-				}
-				ROOT = {
-					add_ideas = KMT_anti_communism_sentiment
-				}
-			}
-
-			#russian civil war
-			if = {
-				limit = {
-					ROOT = {
-						original_tag = MAN
-						has_country_flag = RFP_wins
-					}
-					FROM = {
-						tag = SOV
-					}
-				}
-				SOV = {
-					start_civil_war = {
-						ideology = fascism
-						capital = 408
-						states = { 408 409 560 657 655 537 561 563 }
-					}
-				}
-				random_country = {
-					limit = {
-						original_tag = SOV
-						has_government = fascism
-					}
-					create_faction = rfp_white_movement
-					add_timed_idea = {
-						idea = MAN_RFP_white_movement
-						days = 1700
-					}
-					hidden_effect = {
-						load_oob = "RFP_anti_bolshelvik"
-					}
-					annex_country = {
-						target = ROOT
-						transfer_troops = yes
 					}
 				}
 			}
@@ -3188,6 +3036,16 @@ on_actions = {
 			#		remove_ideas = generic_can_only_join_factions_same_ideology
 			#	}
 			#}
+			if = {	# communists first congress
+				limit = {
+					original_tag = BUL
+					has_government = communism
+				}
+				country_event = {
+					id = axis_minors_bulgaria.57 days = 14 random_days = 7			#will take some time to organize
+				}
+			}
+
 			if = {	# communist takeover queen reacts
 				limit = {
 					original_tag = HOL
@@ -3399,19 +3257,7 @@ on_actions = {
 					}
 				}
 			}
-			if = {
-				limit = {
-					original_tag = FRA
-					has_government = neutrality
-				}
-				every_owned_state = {
-					limit = {
-						NOT = { is_on_continent = Europe }
-						has_resistance = yes				#making sure that non-resistance states don't get compliance
-					}
-					add_compliance = 30
-				}
-			}
+			
 
 			#ensure that concessions are removed in Albania if fascist regime collapse
 			if = {
@@ -3483,25 +3329,6 @@ on_actions = {
 						}
 					}
 				}
-			}
-
-			if = { #//MOD. The event jap.57 does not exist. I'll comment this out for now.
-				#limit = {
-				#	tag = MAN
-				#	NOT = {
-				#		has_government = fascism
-				#		OR = {
-				#			has_global_flag = JAP_grant_MAN_independence
-				#			has_completed_focus = MAN_call_usa_to_act
-				#			has_completed_focus = MAN_coronation
-				#			has_completed_focus = MAN_independence_war
-				#		}
-				#	}
-				#	is_puppet_of = JAP
-				#}
-				#overlord = {
-				#	country_event = { id = jap.57 }
-				#}
 			}
 
 			if = { # MOD. Compressed.
@@ -3630,49 +3457,6 @@ on_actions = {
 ###---> On Join Allies <><> <><> <><>
 	on_join_allies = {
 		effect = {
-			#gain buff when against commie - f
-			if = {
-				limit = {
-					any_country = {
-						has_idea = KMT_resist_the_reds
-						has_war_with = ROOT
-						has_war_with = FROM
-					}
-					ROOT = {
-						has_government = communism
-					}
-				}
-				every_other_country = {
-					limit = {
-						has_idea = KMT_resist_the_reds
-						NOT = {
-							has_idea = KMT_anti_communism_sentiment
-						}
-						has_war_with = ROOT
-						has_war_with = FROM
-					}
-					add_ideas = KMT_anti_communism_sentiment
-				}
-			}
-
-			#gain buff when against commie - r
-			if = {
-				limit = {
-					ROOT = {
-						has_idea = KMT_resist_the_reds
-						NOT = {
-							has_idea = KMT_anti_communism_sentiment
-						}
-					}
-					any_country = {
-						has_government = communism
-						has_war_with = ROOT
-						has_war_with = FROM
-					}
-				}
-				add_ideas = KMT_anti_communism_sentiment
-			}
-
 			#change to wartime corruption
 			if = {
 				limit = {
@@ -4174,9 +3958,6 @@ on_actions = {
 					picture = "r56_portrait_EST_Hjalmar_Mae.dds"
 					expire = "1959.1.1"
 					ideology = nazism
-					traits = {
-
-					}
 				}
 			}
 
@@ -4362,7 +4143,6 @@ on_actions = {
 							picture = "r56_portrait_SOV_Grigory_semenov.dds"
 							expire = "1965.1.1"
 							ideology = oligarchism
-							traits = { }
 						}
 					}
 				}
@@ -4414,7 +4194,6 @@ on_actions = {
 							picture = "r56_portrait_SOV_Grigory_semenov.dds"
 							expire = "1965.1.1"
 							ideology = fascism_ideology
-							traits = { }
 						}
 					}
 
@@ -4435,11 +4214,9 @@ on_actions = {
 							}
 							create_country_leader = {
 								name = "Bronislav Kaminsky"
-								desc = " "
 								picture = "r56_portrait_SOV_Bronislav_Kaminsky.dds"
 								expire = "1965.1.1"
 								ideology = fascism_ideology
-								traits = { }
 							}
 						}
 					}
@@ -4581,23 +4358,6 @@ on_actions = {
 						picture = "r56_portrait_POL_Provisional_Government_of_National_Unity.dds"
 						expire = "1965.1.1"
 						ideology = stalinism
-					}
-					if = {
-						limit = {
-							NOT = { has_unit_leader = 3179 }
-							SOV = { NOT = { has_country_flag = purge_1_group_b } }
-						}
-						create_field_marshal = {
-							name = "Konstanty Rokossowski"
-							picture = "r56_portrait_POL_Konstanty_Rokossowski.dds"
-							traits = { politically_connected panzer_leader panzer_expert offensive_doctrine thorough_planner aggressive_assaulter }
-							id = 3179
-							skill = 5
-							attack_skill = 5
-							defense_skill = 2
-							planning_skill = 5
-							logistics_skill = 4
-						}
 					}
 					if = {
 						limit = { NOT = { has_unit_leader = 3156 } }
@@ -6247,18 +6007,6 @@ on_actions = {
 							has_government = fascism
 						}
 					}
-					#the generic portrait is actually him
-					#create_country_leader = {
-					#	name = "Vilmos Rőder"
-					#	desc = " "
-					#	picture = "gfx/leaders/Europe/portrait_europe_generic_6.dds"
-					#	expire = "1965.1.1"
-					#	ideology = fascism_ideology
-					#	traits = {
-					#		r56_trait_opposed_to_communism
-					#		rearmer
-					#	}
-					#}
 					#set_party_name = { ideology = fascism long_name = HUN_arrow_cross_party_long name = HUN_arrow_cross_party }
 					add_country_leader_role = {
 						Character = HUN_vilmos_roder
@@ -7382,9 +7130,6 @@ on_actions = {
 					picture = "r56_portrait_EST_Hjalmar_Mae.dds"
 					expire = "1959.1.1"
 					ideology = nazism
-					traits = {
-
-					}
 				}
 			}
 
@@ -7922,25 +7667,6 @@ on_actions = {
 						picture = "r56_portrait_POL_Provisional_Government_of_National_Unity.dds"
 						expire = "1965.1.1"
 						ideology = stalinism
-						traits = {
-						}
-					}
-					if = {
-						limit = {
-							NOT = { has_unit_leader = 3179 }
-							SOV = { NOT = { has_country_flag = purge_1_group_b } }
-						}
-						create_field_marshal = {
-							name = "Konstanty Rokossowski"
-							picture = "r56_portrait_POL_Konstanty_Rokossowski.dds"
-							traits = { politically_connected panzer_leader panzer_expert offensive_doctrine thorough_planner aggressive_assaulter }
-							id = 3179
-							skill = 5
-							attack_skill = 5
-							defense_skill = 2
-							planning_skill = 5
-							logistics_skill = 4
-						}
 					}
 					if = {
 						limit = { NOT = { has_unit_leader = 3156 } }
@@ -9434,8 +9160,10 @@ on_actions = {
 							state = 425
 							state = 426
 							state = 437
-							state = 434
 							state = 1013
+							state = 442
+							state = 1018
+							state = 640
 						}
 					}
 					set_state_flag = princely_state
@@ -9450,7 +9178,7 @@ on_actions = {
 					}
 					set_state_flag = muslim_state
 					add_dynamic_modifier = { 
-						modifier = marginalized_muslims 
+						modifier = marginalized_muslims
 					}
 				}	
 				every_owned_state = {
@@ -9460,7 +9188,12 @@ on_actions = {
 							state = 439
 							state = 431
 							state = 432
-							state = 434
+							state = 1019
+							state = 288
+							state = 640
+							state = 1018
+							state = 1020
+							state = 1013
 						}
 					}
 					add_dynamic_modifier = { 
@@ -9965,27 +9698,21 @@ on_actions = {
 					}
 				}
 				AFG = {
-					add_equipment_to_stockpile = { #gift for potential export contract
-						type = gw_tank_equipment
-						amount = 1
+					add_equipment_to_stockpile = {
+						type = light_tank_equipment_1
+						amount = 5
 						producer = ITA
 					}
-					add_equipment_to_stockpile = { #captured by the USSR and gifted to Afghanistan in 1921 (4 according to one source and 8 according to another)
-						type = gw_tank_equipment
-						amount = 8
-						producer = POL
-					}
-					add_equipment_to_stockpile = { #crappy Disston tank + 3 for parts
-						type = gw_tank_equipment
+					add_equipment_to_stockpile = {
+						type = light_tank_equipment_1
 						amount = 9
 						producer = USA
 					}
-					add_equipment_to_stockpile = { #just a guess to reach 24 (but with other estimation now we have those), 5 were sold to Afghanistan in 1937
+					add_equipment_to_stockpile = {
 						type = gw_tank_equipment
-						amount = 5
+						amount = 10
 						producer = FRA
 					}
-					## some Lancia armored cars from Italy
 				}
 				ALB = {
 					add_equipment_to_stockpile = {
@@ -10114,27 +9841,23 @@ on_actions = {
 					has_dlc = "No Step Back"
 				}
 				AFG = {
-					add_equipment_to_stockpile = { #gift for potential export contract
-						type = light_tank_chassis_0
-						amount = 1
-						producer = ITA
-					}
-					add_equipment_to_stockpile = { #captured by the USSR and gifted to Afghanistan in 1921 (4 according to one source and 8 according to another)
-						type = light_tank_chassis_0
-						amount = 8
-						producer = POL
-					}
-					add_equipment_to_stockpile = { #crappy Disston tank + 3 for parts
-						type = light_tank_chassis_0
-						amount = 9
-						producer = USA
-					}
-					add_equipment_to_stockpile = { #just a guess to reach 24 (but with other estimation now we have those), 5 were sold to Afghanistan in 1937
-						type = light_tank_chassis_0
+					add_equipment_to_stockpile = {
+						type = light_tank_chassis_1
 						amount = 5
-						producer = FRA
+						producer = ITA
+						variant_name = "L3/35"
 					}
-					## some Lancia armored cars from Italy
+					add_equipment_to_stockpile = {
+						type = light_tank_chassis_1
+						amount = 9
+						producer = AFG
+					}
+					add_equipment_to_stockpile = {
+						type = light_tank_chassis_0
+						amount = 10
+						producer = FRA
+						variant_name = "FT Char Cannon"
+					}
 				}
 				ALB = {
 					add_equipment_to_stockpile = {
@@ -10890,16 +10613,6 @@ on_actions = {
 							communism = 2
 							neutrality = 83
 						}
-
-						create_country_leader = {
-							name = "Pierre Ryckmans"
-							desc = "Pierre Ryckmans, Governor General of the Belgian Congo"
-							picture = "gfx/leaders/COG/Pierre_Ryckmans.dds"
-							expire = "1965.1.1"
-							ideology = despotism
-							traits = {
-							}
-						}
 					}
 				}
 			}
@@ -10997,16 +10710,6 @@ on_actions = {
 							fascism = 5
 							communism = 2
 							neutrality = 83
-						}
-
-						create_country_leader = {
-							name = "Pierre Ryckmans"
-							desc = "Pierre Ryckmans, Governor General of the Belgian Congo"
-							picture = "gfx/leaders/COG/Pierre_Ryckmans.dds"
-							expire = "1965.1.1"
-							ideology = despotism
-							traits = {
-							}
 						}
 					}
 				}
@@ -12260,6 +11963,7 @@ on_actions = {
 					add_state_core = 5
 					add_state_core = 763
 					add_state_core = 989
+					add_state_core = 1053
 
 					transfer_state = 42
 					transfer_state = 51
@@ -12275,6 +11979,7 @@ on_actions = {
 					transfer_state = 5
 					transfer_state = 763
 					transfer_state = 989
+					transfer_state = 1053
 
 					change_tag_from = GER
 				}
@@ -13227,6 +12932,8 @@ on_actions = {
 					add_state_core = 5
 					add_state_core = 763
 					add_state_core = 989
+					add_state_core = 1053
+
 					transfer_state = 42
 					transfer_state = 51
 					transfer_state = 55
@@ -13241,6 +12948,7 @@ on_actions = {
 					transfer_state = 5
 					transfer_state = 763
 					transfer_state = 989
+					transfer_state = 1053
 
 					division_template = {
 						name = "Infanterie-Division"
@@ -16953,6 +16661,21 @@ on_actions = {
 			#	}
 			if = {				#famine in henan, replaced manual trigger
 				limit = {
+					ROOT = {
+						has_country_flag = SAU_dammam_interrupted
+						original_tag = SAU
+					}
+					FROM.FROM = {
+						state = 859
+					}
+				}
+				SAU = {
+					clr_country_flag = SAU_dammam_interrupted
+					activate_mission = SAU_oil_production_increases
+				}
+			}
+			if = {				#famine in henan, replaced manual trigger
+				limit = {
 					OR = {
 						original_tag = CHI
 						original_tag = PRC
@@ -17006,16 +16729,15 @@ on_actions = {
 						controls_state = 735
 						has_government = fascism
 						NOT = {
-							OR = {
-								is_ally_with = MNC
-								MNC = {
-									is_subject_of = ITA
-								}
+							is_ally_with = MNC
+							MNC = {
+								is_subject_of = ITA
 							}	
 						}
 					}
 					MNC = {
 						has_war = no
+						exists = yes
 					}
 				}
 				country_event = { id = monaco.12 random_days = 360 }
@@ -17028,11 +16750,9 @@ on_actions = {
 						has_government = fascism
 						controls_state = 735
 						NOT = {
-							OR = {
-								is_ally_with = MNC
-								MNC = {
-									is_subject_of = GER
-								}
+							is_ally_with = MNC
+							MNC = {
+								is_subject_of = GER
 							}	
 						}
 					}
@@ -18382,6 +18102,7 @@ on_actions = {
 									tag = FRA
 									original_tag = SOV
 									original_tag = ITA
+									original_tag = PAP
 								}
 							}
 						}
@@ -19619,12 +19340,10 @@ on_actions = {
 			}
 			if = {
 				limit = {
-					ROOT = { 
-						NOT = { 
-							tag = RAJ 
-							tag = PAK
-							tag = BAN
-						} 
+					ROOT = {
+						NOT = {
+							tag = RAJ
+						}
 					}
 					FROM.FROM = {
 						has_dynamic_modifier = { modifier = marginalized_muslims }
@@ -19637,11 +19356,9 @@ on_actions = {
 			}
 			if = {
 				limit = {
-					ROOT = { 
+					ROOT = {
 						OR = {
-							tag = RAJ 
-							tag = PAK
-							tag = BAN 
+							tag = RAJ
 						}
 					}
 					FROM.FROM = {
@@ -20853,67 +20570,7 @@ on_actions = {
 					}
 				}
 				country_event = r56.ger.5	#second yalta fixing event
-			}
-
-#			### if you own tripolitania you should gain Lybian desert, should work but doesn't should be moved elsewhere
-#				
-#			any_country = {
-#				limit = {
-#					owns_state = 661
-#				}
-#				transfer_state = 273
-#			}
-# 			
-#			### tlemcen, get the desert
-#			
-#			any_country = {
-#				limit = {
-#					owns_state = 513
-#				}
-#				transfer_state = 514
-#			}
-#
-#
-#			 ### Mali to get Tombouctou
-#			
-#			any_country = {
-#				limit = {
-#					owns_state = 898
-#				}
-#				transfer_state = 782
-#			}				
-#
-#			### Niger
-#			any_country = {
-#				limit = {
-#					owns_state = 781
-#				}
-#				transfer_state = 515
-#			}
-#
-#			### Tchad
-#			any_country = {
-#				limit = {
-#					owns_state = 774
-#				}
-#				transfer_state = 775
-#			}
-#	
-#			### Mauritania
-#			any_country = {
-#				limit = {
-#					owns_state = 557
-#				}
-#				transfer_state = 786
-#			}
-#
-#			### Darfur
-#			any_country = {
-#				limit = {
-#					owns_state = 551
-#				}
-#				transfer_state = 767
-#			}			
+			}		
 		}
 	}
 
@@ -21741,18 +21398,7 @@ on_actions = {
 		}
 	}
 
-	on_peaceconference_ended = {
-		effect = {
-			if = {
-				limit = {
-					tag = PAL
-					FROM = { tag = ISR }
-					controls_state = 454
-				}
-				country_event = palestine.61
-			}
-		}
-	}
+	
 	on_monthly_MPL = {
 		effect = {
 			if = {
