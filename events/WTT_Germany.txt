@@ -74,7 +74,7 @@ country_event = {
 			add_country_leader_role = {
 				country_leader = {
 					expire = "1965.1.1"
-					ideology = despotism
+					ideology = military_junta
 					traits = {
 						great_war_hero
 					}
@@ -352,7 +352,7 @@ country_event = {
 		}
 		GER_wilhelm_iii = {
 			set_character_name = {
-				name = "Wilhlem III"
+				name = GER_wilhelm_iii_idea
 			}
 			add_country_leader_role = {
 				country_leader = {
@@ -385,7 +385,7 @@ country_event = {
 		set_country_flag = kaiser_wilhelm_ii
 		GER_wilhelm_iii = {
 			set_character_name = {
-				name = "Wilhlem III"
+				name = GER_wilhelm_iii_idea
 			}
 			add_country_leader_role = {
 				country_leader = {
@@ -1051,19 +1051,14 @@ country_event = {
 	picture = GFX_report_event_generic_funeral
 
 	fire_only_once = yes
+	is_triggered_only = yes
 	
 	trigger = {
-		original_tag = GER
 		has_government = neutrality
-		date > 1939.1.1
 		OR = {
 			has_country_leader = { ruling_only = yes character = GER_wilhelm_ii }
 			has_idea = GER_wilhelm_ii_idea
 		}
-	}
-
-	mean_time_to_happen = {
-		days = 900 # Died in 1941
 	}
 	
 	#ok I guess
@@ -1081,7 +1076,7 @@ country_event = {
 			}
 			GER_wilhelm_iii = {
 				set_character_name = {
-					name = "Wilhlem III"
+					name = GER_wilhelm_iii_idea
 				}
 				add_country_leader_role = {
 					country_leader = {
@@ -1144,7 +1139,7 @@ country_event = {
 			}
 			GER_wilhelm_iii = {
 				set_character_name = {
-					name = "Wilhlem III"
+					name = GER_wilhelm_iii_idea
 				}
 				add_country_leader_role = {
 					country_leader = {
@@ -1692,13 +1687,12 @@ country_event = {
 			}
 			GER_wilhelm_iii = {
 				set_character_name = {
-					name = "Wilhlem III"
+					name = GER_wilhelm_iii_idea
 				}
 				add_country_leader_role = {
 					country_leader = {
 						expire = "1965.1.1"
 						ideology = absolute_monarchism
-						traits = {}
 					}
 					promote_leader = yes
 				}
@@ -1788,7 +1782,6 @@ country_event = {
 					country_leader = {
 						expire = "1965.1.1"
 						ideology = absolute_monarchism
-						traits = {}
 					}
 					promote_leader = yes
 				}
@@ -2342,22 +2335,53 @@ country_event = {
 	picture = GFX_report_event_german_reichstag_bombed
 
 	is_triggered_only = yes
+	fire_only_once = yes
+
+	immediate = {
+		hidden_effect = {
+			random_country = {
+				limit = {
+					original_tag = GER
+					has_government = fascism
+				}
+				save_event_target_as = ger_cw_fascist_country
+
+				var:country_leader = {
+					save_event_target_as = ger_cw_old_fascist_leader
+				}
+	
+				if = {
+					limit = {
+						has_country_leader = {
+							character = GER_heinrich_himmler
+							ruling_only = yes
+						}
+					}
+					GER_hermann_goring = {
+						save_event_target_as = ger_cw_new_fascist_leader
+					}
+				
+				}
+				else = {
+					GER_heinrich_himmler = {
+						save_event_target_as = ger_cw_new_fascist_leader
+					}
+				}
+			}
+		}
+	}
 	
 	option = {
 		name = wtt_germany.50.a
-		random_other_country = {
-			limit = {
-				original_tag = GER
-				has_government = fascism
-			}
+		
+		event_target:ger_cw_fascist_country = {
 			kill_country_leader = yes
-			GER_heinrich_himmler = {
+			event_target:ger_cw_new_fascist_leader = {
 				add_country_leader_role = {
 					promote_leader = yes
 					country_leader = {
 						ideology = nazism
 						expire = "1965.1.1.1"
-						traits = {}
 					}
 				}		
 			}
@@ -2687,6 +2711,12 @@ country_event = {
 				add_core_of = GER
 			}
 		}
+		1054 = { #Styria
+			if = {
+				limit = { is_owned_by = AUS }
+				add_core_of = GER
+			}
+		}
 		AUS = {
 			every_unit_leader = {
 				set_nationality = GER
@@ -2842,170 +2872,22 @@ country_event = {
 	mean_time_to_happen = {
 		days = 2
 	}
+
+	immediate = {
+		set_variable = { GER_paying_for_mefo_pp_cost = GER_mefo_bills_political_power_cost }
+		set_variable = { GER_paying_for_mefo_consumer_goods_debuff_duration = GER_mefo_bills_political_power_cost }
+		multiply_variable = {
+			GER_paying_for_mefo_pp_cost = -100		#a bit simplified calculations
+		}
+		multiply_variable = {
+			GER_paying_for_mefo_consumer_goods_debuff_duration = 200
+		}
+	}
 	
 	option = {
 		name = wtt_germany.62.a
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 15 compare = less_than }
-			}
-			add_political_power = -20
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 60 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 15 compare = equals }
-			}
-			add_political_power = -30
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 70 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 20 compare = equals }
-			}
-			add_political_power = -40
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 80 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 25 compare = equals }
-			}
-			add_political_power = -50
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 90 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 30 compare = equals }
-			}
-			add_political_power = -60
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 100 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 35 compare = equals }
-			}
-			add_political_power = -70
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 110 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 40 compare = equals }
-			}
-			add_political_power = -80
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 120 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 45 compare = equals }
-			}
-			add_political_power = -90
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 130 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 50 compare = equals }
-			}
-			add_political_power = -100
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 140 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 55 compare = equals }
-			}
-			add_political_power = -110
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 150 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 60 compare = equals }
-			}
-			add_political_power = -120
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 160 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 65 compare = equals }
-			}
-			add_political_power = -130
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 170 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 70 compare = equals }
-			}
-			add_political_power = -140
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 180 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 75 compare = equals }
-			}
-			add_political_power = -150
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 190 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 80 compare = equals }
-			}
-			add_political_power = -160
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 200 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 85 compare = equals }
-			}
-			add_political_power = -170
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 210 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 90 compare = equals }
-			}
-			add_political_power = -180
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 220 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 95 compare = equals }
-			}
-			add_political_power = -190
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 230 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 100 compare = equals }
-			}
-			add_political_power = -200
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 240 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 105 compare = equals }
-			}
-			add_political_power = -210
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 250 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 110 compare = equals }
-			}
-			add_political_power = -220
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 260 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 115 compare = equals }
-			}
-			add_political_power = -230
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 270 }
-		}
-		if = {
-			limit = {
-				check_variable = { var = GER_mefo_bill_counter value = 115 compare = greater_than }
-			}
-			add_political_power = -240
-			add_timed_idea = { idea = GER_mefo_bills_ended days = 280 }
-		}
+		add_political_power = var:GER_paying_for_mefo_pp_cost
+		add_timed_idea = { idea = GER_mefo_bills_ended days = var:GER_paying_for_mefo_consumer_goods_debuff_duration }
 		clr_country_flag = mefo_bills_removed_through_war
 	}
 }
@@ -3291,7 +3173,6 @@ country_event = {
 		}
 		create_country_leader = {
 			name = "Otto von Habsburg"
-			desc = "POLITICS_OTTO_VON_HABSBURG_DESC"
 			picture = GFX_Portrait_hungary_otto_von_hapsburg
 			expire = "1965.1.1"
 			ideology = absolute_monarchism
@@ -3335,6 +3216,8 @@ country_event = {
 			152 = { add_core_of = ROOT }
 			153 = { add_core_of = ROOT }
 			4 = { add_core_of = ROOT }
+			848 = { add_core_of = ROOT }	#Voralberg, seemingly missing
+			1054 = { add_core_of = ROOT }	#Styria
 			69 = { add_core_of = ROOT }
 			9 = { add_core_of = ROOT }
 			75 = { add_core_of = ROOT }
@@ -3358,6 +3241,8 @@ country_event = {
 			152 = { add_core_of = ROOT }
 			153 = { add_core_of = ROOT }
 			4 = { add_core_of = ROOT }
+			848 = { add_core_of = ROOT }	#Voralberg, seemingly missing
+			1054 = { add_core_of = ROOT }	#Styria
 			154 = { add_core_of = ROOT }
 			913 = { add_core_of = ROOT }
 			155 = { add_core_of = ROOT }
@@ -3464,33 +3349,12 @@ country_event = {
 			}
 			if = {
 				limit = {
-					has_dlc = "Death or Dishonor" 
 					is_in_faction_with = FROM
 					FROM = { is_subject = no }
 				}
 				FROM = {
 					set_autonomy = { target = ROOT autonomy_state = autonomy_satellite }
 				}
-			}
-			if = {
-				limit = { 
-					has_dlc = "Together for Victory"
-					NOT = { has_dlc = "Death or Dishonor" } 
-					is_in_faction_with = FROM
-					FROM = { is_subject = no }
-				}
-				FROM = {
-					set_autonomy = { target = ROOT autonomy_state = autonomy_dominion }
-				}
-			}
-			if = {
-				limit = { 
-					NOT = { has_dlc = "Together for Victory" }
-					NOT = { has_dlc = "Death or Dishonor" }
-					is_in_faction_with = FROM
-					FROM = { is_subject = no }
-				}
-				FROM = { puppet = ROOT }
 			}
 		}
 		custom_effect_tooltip = wtt_germany.72_tt
@@ -3590,7 +3454,6 @@ country_event = {
 		}
 		if = {
 			limit = {
-				has_dlc = "Death or Dishonor" 
 				is_subject = no
 			}
 			every_country = {
@@ -3600,34 +3463,6 @@ country_event = {
 				ROOT = { set_autonomy = { target = PREV autonomy_state = autonomy_satellite } }
 			}
 			set_autonomy = { target = FROM autonomy_state = autonomy_satellite }
-		}
-		if = {
-			limit = { 
-				has_dlc = "Together for Victory"
-				NOT = { has_dlc = "Death or Dishonor" } 
-				is_subject = no
-			}
-			every_country = {
-				limit = {
-					is_subject_of = FROM
-				}
-				ROOT = { set_autonomy = { target = PREV autonomy_state = autonomy_dominion } }
-			}
-			set_autonomy = { target = FROM autonomy_state = autonomy_dominion }
-		}
-		if = {
-			limit = { 
-				NOT = { has_dlc = "Together for Victory" }
-				NOT = { has_dlc = "Death or Dishonor" }
-				is_subject = no
-			}
-			every_country = {
-				limit = {
-					is_subject_of = FROM
-				}
-				ROOT = { puppet = PREV }
-			}
-			puppet = FROM
 		}
 	}
 }
@@ -3922,7 +3757,7 @@ country_event = {
 			add_country_leader_role = {
 				country_leader = {
 					expire = "1965.1.1"
-					ideology = despotism
+					ideology = constitutional_monarchy
 					traits = {
 						kaiserin_of_the_people
 						victoria_iii # Third Victoria counting from Queen Victoria hurr durr
