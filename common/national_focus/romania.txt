@@ -7,8 +7,6 @@ focus_tree = {
 		modifier = {
 			add = 10
 			tag = ROM
-			#always = no
-			has_dlc = "Death or Dishonor"
 		}
 	}
 	
@@ -2178,7 +2176,19 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			BUL = { country_event = DOD_romania.40 }
+			BUL = {
+				if = {
+					limit = {
+						is_subject = yes
+					}
+					overlord = {
+						country_event = DOD_romania.40
+					}
+				}
+				else = {
+					country_event = DOD_romania.40
+				}
+			}
 		}
 	}
 
@@ -3385,6 +3395,23 @@ focus_tree = {
 			modifier = {
 				factor = 0
 				has_completed_focus = ROM_iron_guard
+				NOT = {	#required here as well a factor = 0 means everything below isnt evaluated
+					AND = {
+						surrender_progress > 0.05
+						casualties_inflicted_by = {
+							opponent = SOV
+							thousands > 200
+						}
+					}
+				}
+			}
+			modifier = {
+				factor = 10
+				surrender_progress > 0.05
+				casualties_inflicted_by = {
+					opponent = SOV
+					thousands > 200
+				}
 			}
 		}
 
@@ -3525,17 +3552,28 @@ focus_tree = {
 			factor = 0
 			modifier = {
 				add = 100
-				NOT = {
-					is_in_faction = yes
-				}
 				OR = {
-					has_government = neutrality
-					has_government = democratic
-				}				
-				any_other_country = {
-					has_war_together_with = ROOT
-					has_government = democratic
-					is_faction_leader = yes	
+					AND = {	#original check
+						NOT = {
+							is_in_faction = yes
+						}
+						OR = {
+							has_government = neutrality
+							has_government = democratic
+						}				
+						any_other_country = {
+							has_war_together_with = ROOT
+							has_government = democratic
+							is_faction_leader = yes	
+						}
+					}
+					AND = {	#side switching check - partially copied from Micheals coup
+						surrender_progress > 0.05
+						casualties_inflicted_by = {
+							opponent = SOV
+							thousands > 200
+						}
+					}
 				}
 			}
 		}
@@ -3545,7 +3583,18 @@ focus_tree = {
 			any_other_country = {
 				is_faction_leader = yes
 				has_government = democratic
-				NOT = { has_war_with = ROM }
+				OR = {
+					NOT = { has_war_with = ROM }
+					ROOT = {							#required for side switching...
+						has_government = democratic		#...but require coup by Micheal first
+						surrender_progress > 0.05
+						faction_leader = {
+							NOT = {
+								has_government = democratic
+							}
+						}
+					}
+				}
 				has_capitulated = no
 				num_of_factories > 60				
 			}
@@ -4292,7 +4341,7 @@ focus_tree = {
 				}				
 			}			
 			random_owned_controlled_state = {
-				prioritize = { 46 79 }
+				prioritize = { 79 }
 				limit = {
 					ROOT = { has_full_control_of_state = PREV }
 					free_building_slots = {
@@ -4307,7 +4356,7 @@ focus_tree = {
 				}
 			}
 			random_owned_controlled_state = {
-				prioritize = { 46 79 }
+				prioritize = { 46 }
 				limit = {
 					ROOT = { has_full_control_of_state = PREV }
 					free_building_slots = {
