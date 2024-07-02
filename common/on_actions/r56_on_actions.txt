@@ -1153,6 +1153,282 @@ on_actions = {
 		}
 	}
 
+	on_peaceconference_started = {
+		effect = {
+			FROM = {
+				if = {	#colonial uprisings if Japan capped in a somewhat historical manner
+					limit = {
+						original_tag = JAP
+						OR = {
+							has_government = fascism
+							has_government = neutrality
+							#communist could have colonial uprisings but would need different ideology in Indonesia
+						}
+					}
+					every_state = {
+						if = {
+							limit = {
+								is_fully_controlled_by = JAP
+							}
+							set_state_flag = r56_postwar_uprising_target
+						}
+					}
+					#restore FRI before peacedeal
+					if = {
+						limit = {
+							FRA = {
+								has_war_with = JAP
+								has_civil_war = no	#vichy
+							}
+							any_owned_state = {
+								is_core_of = FRI
+							}
+							FRI = {
+								exists = no
+							}
+						}
+						every_owned_state = {
+							limit = {
+								is_core_of = FRI
+							}
+							if = {
+								limit = {
+									is_fully_controlled_by = CHI
+								}
+								set_state_flag = r56_postwar_chi_liberated_state
+							}
+							if = {	#yun historically attacked into Indochina but was then absorbed post-war
+								limit = {
+									is_fully_controlled_by = YUN
+								}
+								set_state_flag = r56_postwar_yun_liberated_state
+							}
+							set_state_flag = r56_postwar_transfer_to_fri
+						}
+					}
+				}
+				set_global_flag = r56_lategame_fire_uprisings
+			}
+		}
+	}
+	on_peaceconference_ended = {
+		effect = {
+			if = {
+				limit = {
+					has_global_flag = r56_lategame_fire_uprisings
+				}
+				clr_global_flag = r56_lategame_fire_uprisings
+				every_state = {
+					limit = {
+						has_state_flag = r56_postwar_transfer_to_fri
+					}
+					transfer_state_to = FRI
+				}
+				FRA = {
+					set_autonomy = {
+						target = FRI
+						autonomous_state = autonomy_integrated_puppet
+						end_wars = no
+						end_civil_wars = no
+					}
+				}
+				#uprisings in FRI areas controlled by Japan
+				random_state = {
+					limit ={
+						has_state_flag = r56_postwar_uprising_target
+						is_core_of = VIN
+						NOT = {
+							state = 286		#because of the structure of French Indochina, this wasnt designated as Vietnam
+						}
+						VIN = {
+							exists = no
+						}
+					}
+					transfer_state_to = VIN
+					VIN = {
+						set_politics = {
+							ruling_party = communism
+							elections_allowed = no				
+						}
+						declare_war_on = {
+							target = FRI
+							type = civil_war
+						}
+					}
+					every_state = {
+						limit = {
+							NOT = {
+								state = PREV
+							}
+							is_core_of = VIN
+							NOT = {
+								state = 286		#because of the structure of French Indochina, this wasnt designated as Vietnam
+							}
+							has_state_flag = r56_postwar_uprising_target
+						}
+						set_state_controller_to = VIN
+					}
+				}
+				#uprising Indonesia
+				random_state = {
+					limit ={
+						has_state_flag = r56_postwar_uprising_target
+						is_core_of = INS
+						INS = {
+							is_subject = yes
+						}
+					}
+					transfer_state_to = INS
+					INS = {
+						set_politics = {
+							ruling_party = fascism
+							elections_allowed = no
+						}
+						overlord = {
+							set_autonomy = {
+								target = INS
+								autonomy_state = autonomy_free
+								end_wars = no
+								end_civil_wars = no
+							}
+						}
+						leave_faction = yes
+						drop_cosmetic_tag = yes
+						set_cosmetic_tag = INS_neutrality
+						every_country = {
+							limit = {
+								OR = {
+									tag = ENG
+									tag = HOL
+									AND = {
+										is_subject_of = ENG
+										NOT = {
+											has_autonomy_state = autonomy_military_occupation
+										}
+									}
+								}
+							}
+							PREV = {
+								declare_war_on = {
+									target = PREV
+									type = independence_wargoal
+								}
+							}
+						}
+						remove_ideas = {
+							INS_army_idea
+							INS_political_idea
+							INS_economy_idea
+						}
+						unlock_national_focus = INS_kebangkitan
+						unlock_national_focus = INS_PNI
+						unlock_national_focus = INS_favour_the_radicals
+						unlock_national_focus = INS_the_coup
+						unlock_national_focus = INS_the_agreement
+						complete_national_focus = INS_koninklijk_nederlands_indisch_leger
+						unlock_national_focus = INS_form_the_home_guard
+						unlock_national_focus = INS_interventionism
+						unlock_national_focus = INS_ambonese_auxilaries
+						unlock_national_focus = INS_expand_the_officers_corps
+					
+						INS_sukarno = {
+							add_country_leader_role = {
+								promote_leader = yes
+								country_leader = {
+									ideology = marhaenism_f
+									expire = "1965.1.1.1"
+									traits = { r56_trait_opposed_to_democracy }
+								}
+							}
+						}
+					
+						#some were cut from focuses
+						create_corps_commander = {
+							name = "Moestopo"
+							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Moestopo.dds"
+							traits = { jungle_rat }
+							skill = 2
+							attack_skill = 2
+							defense_skill = 2
+							planning_skill = 3
+							logistics_skill = 3
+						}
+						create_corps_commander = {
+							name = "Suharto"
+							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Suharto.dds"
+							traits = { politically_connected meticulous harsh_leader }
+							skill = 2
+							attack_skill = 2
+							defense_skill = 2
+							planning_skill = 3
+							logistics_skill = 3
+						}
+						create_corps_commander = {
+							name = "Achmad Yani"
+							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Achmad_Yani.dds"
+							traits = { artillerist }
+							skill = 3
+							attack_skill = 4
+							defense_skill = 2
+							planning_skill = 3
+							logistics_skill = 3
+						}
+						create_corps_commander = {
+							name = "Abdul Harris Nasution"
+							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Abdul_Harris_Nasution.dds"
+							traits = { politically_connected brilliant_strategist }
+							skill = 3
+							attack_skill = 3
+							defense_skill = 3
+							planning_skill = 3
+							logistics_skill = 3
+						}
+						create_field_marshal = {
+							name = "Alexander Evert Kawilarang"
+							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Alexander_Evert_Kawilarang.dds"
+							traits = { commando }
+							skill = 3
+							attack_skill = 4
+							defense_skill = 3
+							planning_skill = 3
+							logistics_skill = 3
+						}
+						create_field_marshal = {
+							name = "Soedirman"
+							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Soedirman.dds"
+							traits = { trickster guerilla_fighter }
+							skill = 3
+							attack_skill = 3
+							defense_skill = 3
+							planning_skill = 3
+							logistics_skill = 4
+						}
+						create_navy_leader = {
+							name = "Yos Sudarso"
+							portrait_path = "gfx/leaders/Asia/Portrait_Asia_Generic_navy_1.dds"
+							traits = { inshore_fighter }
+							skill = 2
+							attack_skill = 2
+							defense_skill = 2
+							maneuvering_skill = 2
+							coordination_skill = 2
+						}
+					}
+					every_state = {
+						limit = {
+							NOT = {
+								state = PREV
+							}
+							is_core_of = INS
+							has_state_flag = r56_postwar_uprising_target
+						}
+						set_state_controller_to = INS
+					}
+				}
+			}
+		}
+	}
+
 	on_civil_war_end_before_annexation = {
 		effect = {
 			#Afghanistan transfer all characters
