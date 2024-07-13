@@ -1196,6 +1196,9 @@ on_actions = {
 								limit = {
 									controller = {
 										owns_state = 592
+										NOT = {
+											has_war_with = FRA
+										}
 										728 = {
 											is_core_of = PREV
 											is_owned_by = JAP
@@ -1255,16 +1258,6 @@ on_actions = {
 						}
 					}
 					transfer_state_to = VIN
-					VIN = {
-						set_politics = {
-							ruling_party = communism
-							elections_allowed = no				
-						}
-						declare_war_on = {
-							target = FRI
-							type = civil_war
-						}
-					}
 					every_state = {
 						limit = {
 							NOT = {
@@ -1278,6 +1271,49 @@ on_actions = {
 						}
 						set_state_controller_to = VIN
 					}
+					VIN = {
+						set_politics = {
+							ruling_party = communism
+							elections_allowed = no				
+						}
+						declare_war_on = {
+							target = FRI
+							type = civil_war
+						}
+						division_template = {
+							name = "Viet Minh Partisan"
+						
+							regiments = {
+								infantry = { x = 0 y = 0 }
+								infantry = { x = 0 y = 1 }
+								infantry = { x = 0 y = 2 }
+								infantry = { x = 0 y = 3 }
+							}
+						}
+						division_template = {
+							name = "Viet Minh Irregular"
+						
+							regiments = {
+								jungletroop = { x = 0 y = 0 }
+								jungletroop = { x = 0 y = 1 }
+								jungletroop = { x = 0 y = 2 }
+								jungletroop = { x = 0 y = 3 }
+							}
+							priority = 0
+						}
+						every_controlled_state = {	#max 3 states, irl they had 8~ units and 2 states, so they can be slightly stronger/weaker if China pushes into FRI
+							create_unit = {
+								division = "name = \"Viet Minh Partisan\" division_template = \"Viet Minh Partisan\" start_experience_factor = 0.1"
+								owner = VIN
+								count = 2
+							}
+							create_unit = {
+								division = "name = \"Viet Minh Irregular\" division_template = \"Viet Minh Irregular\" start_experience_factor = 0"
+								owner = VIN
+								count = 2
+							}
+						}
+					}
 				}
 				#uprising Indonesia
 				random_state = {
@@ -1289,20 +1325,16 @@ on_actions = {
 							is_ai = yes			#just in case
 						}
 					}
-					# if = {	#if any part of Indonesia has a KNIL or Dutch unit, a civil war happens
-					# 	limit = {
-					# 		any_core_state = {
-					# 			PREV = {
-					# 				divisions_in_state = {
-					# 					size > 1
-					# 					state = PREV
-					# 				}
-					# 			}
-					# 		}
-					# 	}
-					# }
 					transfer_state_to = INS
 					INS = {
+						transfer_units_fraction= {	#includes commanders
+							target = HOL
+							size = 1
+							stockpile_ratio = 0.5
+							keep_unit_leaders = {
+								2000 2001
+							}
+						}
 						set_politics = {
 							ruling_party = fascism
 							elections_allowed = no
@@ -1337,7 +1369,7 @@ on_actions = {
 						unlock_national_focus = INS_form_the_home_guard
 						unlock_national_focus = INS_interventionism
 						unlock_national_focus = INS_ambonese_auxilaries
-						unlock_national_focus = INS_expand_the_officers_corps
+						complete_national_focus = INS_expand_the_officers_corps
 					
 						INS_sukarno = {
 							add_country_leader_role = {
@@ -1347,6 +1379,23 @@ on_actions = {
 									expire = "1965.1.1.1"
 									traits = { r56_trait_opposed_to_democracy }
 								}
+							}
+						}
+
+						division_template = {
+							name = "Divisi Infanteri"		# full Colonial Divisions (old equipment, low experience)
+							division_names_group = INS_INF_01
+						
+							regiments = {
+								infantry = { x = 0 y = 0 }
+								infantry = { x = 0 y = 1 }
+								infantry = { x = 0 y = 2 }
+								infantry = { x = 1 y = 0 }
+								infantry = { x = 1 y = 1 }
+								infantry = { x = 1 y = 2 }
+								infantry = { x = 2 y = 0 }
+								infantry = { x = 2 y = 1 }
+								infantry = { x = 2 y = 2 }
 							}
 						}
 					
@@ -1381,26 +1430,6 @@ on_actions = {
 							planning_skill = 3
 							logistics_skill = 3
 						}
-						create_corps_commander = {
-							name = "Abdul Harris Nasution"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Abdul_Harris_Nasution.dds"
-							traits = { politically_connected brilliant_strategist }
-							skill = 3
-							attack_skill = 3
-							defense_skill = 3
-							planning_skill = 3
-							logistics_skill = 3
-						}
-						create_field_marshal = {
-							name = "Alexander Evert Kawilarang"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Alexander_Evert_Kawilarang.dds"
-							traits = { commando }
-							skill = 3
-							attack_skill = 4
-							defense_skill = 3
-							planning_skill = 3
-							logistics_skill = 3
-						}
 						create_field_marshal = {
 							name = "Soedirman"
 							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Soedirman.dds"
@@ -1421,18 +1450,25 @@ on_actions = {
 							maneuvering_skill = 2
 							coordination_skill = 2
 						}
-					}
-					every_state = {	#all states are automatically given to INS, return allied-occupied ones to HOL
-						limit = {
-							NOT = {
-								state = PREV
+						every_state = {	#all states are automatically given to INS, return allied-occupied ones to HOL
+							limit = {
+								NOT = {
+									state = PREV.PREV
+								}
+								is_core_of = INS
+								NOT = {
+									has_state_flag = r56_postwar_uprising_target
+								}
 							}
-							is_core_of = INS
-							NOT = {
-								has_state_flag = r56_postwar_uprising_target
+							set_state_controller_to = HOL
+						}
+						every_controlled_state = {
+							create_unit = {
+								division = "name = \"Divisi Infanteri\" division_template = \"Divisi Infanteri\" start_experience_factor = 0 start_equipment_factor = 0.6"
+								owner = INS
+								count = 2
 							}
 						}
-						set_state_controller_to = HOL
 					}
 				}
 				#china takes Indochina temporarily to demand Guangzhouwan
