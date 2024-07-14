@@ -32,8 +32,10 @@ CW_occupation_negotations = {
 		ai_will_do = {
 			base = 0
 		}
- 	}
+	}
 	merge_occupation_zones_germany = {	#is there a point? probably just compliance gain, IRL it helped fix the famine to do economic coop, but you cant assume thered be in with in-game war
+		icon = hol_exchange_intelligence_data
+		days_re_enable = 30	#prevent request spam
 		visible = {
 			has_global_flag = r56_unlocked_fate_of_germany_decisions
 			any_controlled_state = {
@@ -89,6 +91,9 @@ CW_occupation_negotations = {
 		}
 		target_trigger = {
 			FROM = {
+				NOT = {	#when in group, let group approach this country instead
+					has_variable = r56_yalta_occupation_group
+				}
 				any_controlled_state = {
 					is_core_of = GER
 					NOT = {	#in case of CZE/AUS/POL/BEL owning German land
@@ -100,9 +105,52 @@ CW_occupation_negotations = {
 				}
 			}
 		}
-		icon = hol_exchange_intelligence_data
 		complete_effect = { #set a variable that indicates which group the country is trying to form?
+			if = {
+				limit = {
+					OR = {
+						NOT = {
+							has_variable = r56_yalta_occupation_group
+						}
+						#all other nations in group have approved
+						NOT = {
+							any_other_country = {
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+								NOT = {
+									is_in_array = {
+										array = r56_yalta_approved_zone_occupation_merger
+										value = FROM.id
+									}
+								}
+							}
+						}
+					}
+				}
+				FROM = {
+					country_event = cold_war.41
+				}
+			}
+			else = {
+				add_to_array = {
+					array = r56_yalta_approved_zone_occupation_merger
+					value = FROM.id
+				}
+			}
 			custom_effect_tooltip = r56_shared_zone_action_required_tt
+			custom_effect_tooltip = r56_shared_zone_effect_tt
+		}
+		ai_will_do = {
+			base = 1
+			modifier = {
+				add = 0
+				FROM = {
+					NOT = {
+						has_government = ROOT
+					}
+				}
+			}
 		}
 	}
 	prepare_formation_of_german_state_in_control_zone = {
@@ -112,13 +160,16 @@ CW_occupation_negotations = {
 				is_core_of = GER
 			}
 			has_country_flag = r56_yalta_open_germany_category
+			NOT = {
+				has_country_flag = r56_yalta_prepared_german_state
+			}
 		}
 		available = {
 		}
 		fire_only_once = yes
-		days_remove = 330
 		remove_effect = {
 			set_country_flag = r56_yalta_prepared_german_state
+			custom_effect_tooltip = r56_shared_zone_action_required_tt
 		}
 	}
 	approve_form_german_state_in_control_zone = {
@@ -133,8 +184,45 @@ CW_occupation_negotations = {
 		fire_only_once = yes
 		available = {
 			#will only have an effect if all countries in shared zone do this
+			OR = {
+				custom_trigger_tooltip = {
+					tooltip = r56_not_in_yalta_group_tt
+					NOT = {
+						has_variable = r56_yalta_occupation_group
+					}
+				}
+				AND = {
+					NOT = {		#all in group approved
+						any_other_country = {
+							custom_trigger_tooltip = {
+								tooltip = r56_merged_with_roots_occupation_zone_tt
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+							}
+							NOT = {
+								has_country_flag = r56_yalta_prepared_german_state
+							}
+						}
+					}
+					NOT = {		#strongest in group
+						any_other_country = {
+							custom_trigger_tooltip = {
+								tooltip = r56_merged_with_roots_occupation_zone_tt
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+							}
+							ic_ratio = {
+								tag = ROOT
+								ratio > 1
+							}
+						}
+					}
+				}
+			}
 		}
-		days_remove = 30
+		days_remove = 360
 		remove_effect = {
 			if = {
 				limit = {
@@ -143,8 +231,17 @@ CW_occupation_negotations = {
 						exists = no
 					}
 				}
-				every_owned_state = {
+				every_state = {
 					limit = {
+						OR = {
+							is_owned_by = ROOT
+							owner = {
+								has_variable = r56_yalta_occupation_group
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+							}
+						}
 						is_core_of = GER
 					}
 					add_core_of = DDR
@@ -166,7 +263,15 @@ CW_occupation_negotations = {
 					copy_tag = ROOT
 					every_state = {
 						limit = {
-							is_owned_by = ROOT
+							OR = {
+								is_owned_by = ROOT
+								owner = {
+									has_variable = r56_yalta_occupation_group
+									check_variable = {
+										r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+									}
+								}
+							}
 							is_core_of = GER
 						}
 						transfer_state_to = PREV
@@ -181,8 +286,17 @@ CW_occupation_negotations = {
 						exists = no
 					}
 				}
-				every_owned_state = {
+				every_state = {
 					limit = {
+						OR = {
+							is_owned_by = ROOT
+							owner = {
+								has_variable = r56_yalta_occupation_group
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+							}
+						}
 						is_core_of = GER
 					}
 					add_core_of = WGR
@@ -201,7 +315,15 @@ CW_occupation_negotations = {
 					copy_tag = ROOT
 					every_state = {
 						limit = {
-							is_owned_by = ROOT
+							OR = {
+								is_owned_by = ROOT
+								owner = {
+									has_variable = r56_yalta_occupation_group
+									check_variable = {
+										r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+									}
+								}
+							}
 							is_core_of = GER
 						}
 						transfer_state_to = PREV
