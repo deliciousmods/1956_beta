@@ -5,7 +5,7 @@ This is the Readme guide for using Github with Road to 56.
 
 ### Guide: Using GitHub to contribute to Road to 56.
 
-1. Sign up with Github if you haven't already, and request membership/team assignment from Greatexperiment via Discord.
+1. Sign up with Github if you haven't already, and request membership/team assignment from an active lead via Discord.
 2. Download the desktop client from Github.
 3. In the program, File &rarr; Clone &rarr; URL &rarr; deliciousmods/1956_beta.
 4. Set the local directory as your documents &rarr; Paradox Interactive &rarr; Hearts of Iron IV &rarr; mod folder.
