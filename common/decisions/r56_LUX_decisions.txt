@@ -4,12 +4,21 @@ debug_decisions = {
 			is_debug = yes
 			original_tag = LUX
 		}
+		visible = { NOT = { has_power_balance = { id = LUX_neutrality_balance } } }
 		complete_effect = {
 			set_power_balance = {
 				id = LUX_neutrality_balance
 				set_default = yes
 			}
 		}
+	}
+	LUX_stop_bop = {
+		allowed = {
+			is_debug = yes
+			original_tag = LUX
+		}
+		visible = { has_power_balance = { id = LUX_neutrality_balance } }
+		complete_effect = { remove_power_balance = { id = LUX_neutrality_balance } }
 	}
 }
 
@@ -174,6 +183,333 @@ LUX_ministries = {
 			add_political_power = 20
 			unlock_decision_tooltip = LUX_maintain_governmental_positions
 			set_country_flag = LUX_negotiated_with_former_ministers
+		}
+	}
+}
+economy_decisions = {
+	LUX_gain_new_iron_sources = {
+		icon = generic_shovels
+		cost = 50
+
+		visible = { has_completed_focus = LUX_renegotiate_trade_agreements }
+
+		days_remove = 30
+		modifier = {
+			improve_relations_maintain_cost_factor = 0.25
+		}
+
+		remove_effect = {
+			swap_ideas = {
+				remove_idea = r56_LUX_economic_dependence_2
+				add_idea = r56_LUX_economic_dependence_3
+			}
+			unlock_decision_tooltip = LUX_find_new_export_partners
+			unlock_decision_tooltip = LUX_import_belgian_raw_materials
+			set_country_flag = LUX_gained_new_iron_sources
+		}
+	}
+	LUX_find_new_export_partners = {
+		icon = GFX_decision_generic_factory
+		cost = 50
+
+		visible = { has_country_flag = LUX_gained_new_iron_sources }
+
+		days_remove = 45
+		modifier = {
+			political_power_cost = 0.20
+		}
+
+		remove_effect = {
+			if = {
+				limit = { has_idea = r56_LUX_economic_dependence_5 }
+				remove_ideas = r56_LUX_economic_dependence_5
+			}
+			else = {
+				swap_ideas = {
+					remove_idea = r56_LUX_economic_dependence_3
+					add_idea = r56_LUX_economic_dependence_4
+				}
+			}
+			reverse_add_opinion_modifier = {
+				target = GER
+				modifier = small_decrease
+			}
+		}
+	}
+	LUX_import_belgian_raw_materials = {
+		icon = GFX_decision_concessions
+		cost = 30
+
+		visible = { has_country_flag = LUX_gained_new_iron_sources }
+
+		days_remove = 20
+		modifier = {
+			trade_opinion_factor = -0.35
+		}
+
+		remove_effect = {
+			if = {
+				limit = { has_idea = r56_LUX_economic_dependence_4 }
+				remove_ideas = r56_LUX_economic_dependence_4
+			}
+			else = {
+				swap_ideas = {
+					remove_idea = r56_LUX_economic_dependence_3
+					add_idea = r56_LUX_economic_dependence_5
+				}
+			}
+			reverse_add_opinion_modifier = {
+				target = BEL
+				modifier = small_increase
+			}
+		}
+	}
+}
+LUX_neutrality_balance_decision_category = {
+	LUX_neutrality_balance_convert_civilian_factory = {
+		icon = GFX_decision_generic_merge_plant_materiel
+
+		custom_cost_text = decision_cost_ST_5
+		custom_cost_trigger = { has_stability > 4.99 }
+
+		available = {
+			industrial_complex > 0
+			OR = {
+				has_completed_focus = LUX_abandon_neutrality
+				has_war = yes
+			}
+		}
+		days_re_enable = 60
+
+		complete_effect = {
+			random_owned_controlled_state = {
+				add_building_construction = {
+					type = industrial_complex
+					level = -1
+				}
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+				}
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.10
+			}
+		}
+	}
+	LUX_neutrality_balance_divert_workers = {
+		icon = GFX_decision_generic_industry
+
+		cost = 50
+
+		days_re_enable = 30
+		days_remove = 20
+
+		available = {
+			OR = {
+				has_completed_focus = LUX_abandon_neutrality
+				has_war = yes
+			}
+		}
+
+		modifier = {
+			industrial_capacity_factory = -0.10
+			consumer_goods_factor = 0.15
+		}
+
+		remove_effect = {
+			add_manpower = 1000
+			army_experience = 15
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.10
+			}
+		}
+	}
+	LUX_neutrality_balance_prepare_defenses = {
+		icon = GFX_decision_hol_draw_up_staff_plans
+
+		custom_cost_text = decision_cost_cp_50_ArmXp_20
+		custom_cost_trigger = {
+			command_power > 49.99
+			has_army_experience > 19.99
+		}
+
+		days_re_enable = 60
+		days_remove = 60
+
+		available = {
+			any_controlled_state = { bunker < 11 }
+			OR = {
+				has_completed_focus = LUX_abandon_neutrality
+				has_war = yes
+			}
+		}
+
+		modifier = {
+			consumer_goods_factor = 0.10
+			production_speed_buildings_factor = -0.15
+		}
+
+		remove_effect = {
+			random_owned_controlled_state = {
+				add_building_construction = {
+					type = bunker
+					level = 2
+					instant_build = yes
+					province = {
+						all_provinces = yes
+						limit_to_border = yes
+						level < 5
+					}
+				}
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.10
+			}
+		}
+	}
+	LUX_neutrality_balance_prepare_for_war = {
+		icon = GFX_decision_generic_civil_support
+		cost = 20
+
+		days_re_enable = 20
+		days_remove = 30
+
+		available = {
+			has_war_support < 1.00
+			has_stability > 0.00
+			OR = {
+				has_completed_focus = LUX_abandon_neutrality
+				has_war = yes
+			}
+		}
+
+		modifier = {
+			war_support_weekly = 0.003
+			stability_weekly = -0.001
+		}
+
+		remove_effect = {
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	LUX_neutrality_balance_convert_factories = {
+		icon = GFX_decision_generic_merge_plant_materiel
+
+		custom_cost_text = decision_cost_WS_5
+		custom_cost_trigger = { has_war_support > 4.99 }
+
+		available = {
+			arms_factory > 0
+			has_completed_focus = LUX_another_declaration_of_neutrality
+		}
+		days_re_enable = 60
+
+		complete_effect = {
+			random_owned_controlled_state = {
+				add_building_construction = {
+					type = arms_factory
+					level = -1
+				}
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+				}
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = 0.10
+			}
+		}
+	}
+	LUX_neutrality_balance_continue_disarmament = {
+		icon = GFX_decision_eng_blackshirt_march
+
+		custom_cost_text = decision_cost_MP_1000_IE_100
+		custom_cost_trigger = {
+			has_manpower > 999
+			has_equipment = { infantry_equipment > 99 }
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				add_manpower = -1000
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = -100
+				}
+			}
+		}
+
+		days_remove = 60
+		days_re_enable = 20
+
+		available = { has_completed_focus = LUX_another_declaration_of_neutrality }
+
+		modifier = {
+			production_speed_buildings_factor = 0.15
+			industrial_capacity_factory = 0.10
+			stability_weekly = 0.002
+		}
+
+		remove_effect = {
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = 0.10
+			}
+		}
+	}
+	LUX_neutrality_balance_promise_peace = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		cost = 25
+
+		available = {
+			has_stability < 0.95
+			has_completed_focus = LUX_another_declaration_of_neutrality
+		}
+		days_re_enable = 20
+
+		complete_effect = {
+			add_stability = 0.05
+			add_war_support = -0.10
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = 0.05
+			}
+		}
+	}
+	LUX_neutrality_balance_strengthen_foreign_office = {
+		icon = GFX_decision_hol_exchange_intelligence_data
+		cost = 15
+
+		days_remove = 20
+		days_re_enable = 7
+
+		available = { has_completed_focus = LUX_another_declaration_of_neutrality }
+
+		modifier = {
+			improve_relations_maintain_cost_factor = -0.30
+			guarantee_tension = -0.05
+			enemy_declare_war_tension = 0.10
+			enemy_justify_war_goal_time = 0.10
+		}
+
+		remove_effect = {
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = 0.05
+			}
 		}
 	}
 }
