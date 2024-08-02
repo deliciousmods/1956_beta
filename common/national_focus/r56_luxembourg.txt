@@ -799,7 +799,7 @@ focus_tree = {
 		}
 		available = {
 			has_country_flag = LUX_elections_over
-			NOT = { has_country_flag = LUX_maulkuerfgesetz_passed }
+			#NOT = { has_country_flag = LUX_maulkuerfgesetz_passed }
 		}
 		allow_branch = {
 			NOT = {
@@ -948,7 +948,8 @@ focus_tree = {
 			focus = LUX_first_social_democratic_government
 			focus = LUX_begin_workers_revolution
 		}
-		available = { has_country_flag = LUX_elections_PD_winner }
+		available = { hidden_trigger = { always = no } }
+		bypass = { has_country_flag = LUX_elections_PD_winner }
 		completion_reward = {
 			
 		}
@@ -958,7 +959,7 @@ focus_tree = {
 		id = LUX_abandon_neutrality
 		icon = GFX_focus_generic_support_the_left_right
 		cost = 10
-		x = 1
+		x = 2
 		y = 2
 		relative_position_id = LUX_liberal_victory
 		prerequisite = {
@@ -972,7 +973,690 @@ focus_tree = {
 				threat > 0.20
 			}
 		}
+		completion_reward = {
+			remove_ideas = r56_legacy_of_luxembourg_crisis_1
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.10
+			}
+		}
+	}
+	focus = {
+		id = LUX_begin_rearmament
+		icon = GFX_focus_secret_rearmament
+		cost = 5
+		x = 1
+		y = 1
+		relative_position_id = LUX_abandon_neutrality
+		prerequisite = { focus = LUX_abandon_neutrality }
+		completion_reward = {
+			add_ideas = r56_LUX_initial_rearmament
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_seek_protection
+		icon = GFX_goal_generic_defence
+		cost = 10
+		x = -1
+		y = 1
+		relative_position_id = LUX_abandon_neutrality
+		prerequisite = { focus = LUX_abandon_neutrality }
+		bypass = {
+			all_country = {
+				OR = {
+					original_tag = FRA
+					original_tag = ENG
+					original_tag = BEL
+					original_tag = HOL
+					original_tag = GER
+				}
+				OR = {
+					NOT = { has_government = democratic }
+					exists = no
+				}
+			}
+		}
+		completion_reward = {
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = FRA
+						original_tag = ENG
+						original_tag = BEL
+						original_tag = HOL
+						original_tag = GER
+					}
+					has_government = democratic
+				}
+				country_event = {
+					id = luxembourg.230
+					hours = 4
+					random_hours = 2
+				}
+			}
+		}
+	}
+	focus = {
+		id = LUX_join_allies
+		icon = GFX_goal_generic_join_allies
+		cost = 10
+		x = -2
+		y = 2
+		relative_position_id = LUX_abandon_neutrality
+		prerequisite = {
+			focus = LUX_seek_protection
+			focus = LUX_begin_rearmament
+		}
+		mutually_exclusive = { focus = LUX_benelux_alliance }
+		available = {
+			any_country = {
+				has_government = democratic
+				is_faction_leader = yes
+			}
+		}
+		completion_reward = { 
+			if = {
+				limit = {
+					any_other_country = {
+						original_tag = ENG
+						has_government = democratic
+						is_faction_leader = yes
+					}
+				}
+				every_other_country = {
+					limit = {
+						original_tag = ENG
+						has_government = democratic
+						is_faction_leader = yes
+					}
+					country_event = generic.2
+				}
+			}
+			else = {
+				random_other_country = {
+					limit = {
+						has_government = democratic
+						is_faction_leader = yes
+					}
+					country_event = generic.2
+				}
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		 }
+	}
+	focus = {
+		id = LUX_research_cooperation
+		icon = GFX_focus_NORDIC_com_research
+		cost = 5
+		x = 4
+		y = 1
+		relative_position_id = LUX_benelux_alliance
+		prerequisite = {
+			focus = LUX_benelux_alliance
+			focus = LUX_join_allies
+		}
+		available = { is_in_faction = yes }
+		completion_reward = {
+			if = {
+				limit = { has_completed_focus = LUX_benelux_alliance }
+				add_to_tech_sharing_group = benelux_research
+				modify_tech_sharing_bonus = {
+					id = benelux_research
+					bonus = 0.25
+				}
+			}
+			else = {
+				add_to_tech_sharing_group = commonwealth_research
+				modify_tech_sharing_bonus = {
+					id = commonwealth_research
+					bonus = 0.25
+				}
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_extend_maginot
+		icon = GFX_goal_fortify_the_westwall
+		cost = 8
+		x = -1
+		y = 1
+		relative_position_id = LUX_join_allies
+		prerequisite = { focus = LUX_join_allies }
+		available = {
+			is_in_faction_with = FRA
+			has_war = no
+			NOT = { GER = { has_government = democratic } }
+		}
+		completion_reward = {
+			every_controlled_state = {
+				limit = { any_neighbor_state = { controller = { NOT = { has_government = democratic } } } }
+				set_building_level = {
+					type = bunker
+					level = 10
+					province = {
+						all_provinces = yes
+						limit_to_border = yes
+						level < 10
+					}
+				}
+			}
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					is_neighbor_of = ROOT
+				}
+				reverse_add_opinion_modifier = {
+					target = THIS
+					modifier = FRA_extend_the_maginot_line_focus_neg
+				}
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_british_funding
+		icon = GFX_focus_chi_british_cooperation
+		cost = 5
+		x = 1
+		y = 1
+		relative_position_id = LUX_join_allies
+		prerequisite = { focus = LUX_join_allies }
+		available = {
+			is_in_faction_with = ENG
+		}
+		completion_reward = {
+			add_tech_bonus = {
+				name = LUX_british_funding
+				category = infantry_weapons
+				bonus = 1.00
+			}
+			add_tech_bonus = {
+				name = LUX_british_funding
+				category = radar_tech
+				bonus = 0.50
+			}
+			add_doctrine_cost_reduction = {
+				name = LUX_british_funding
+				cost_reduction = 0.50
+				category = cat_grand_battle_plan
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_arms_purchases
+		icon = GFX_focus_generic_commonwealth_build_infantry
+		cost = 5
+		x = 0
+		y = 2
+		relative_position_id = LUX_join_allies
+		prerequisite = {
+			focus = LUX_extend_maginot
+			focus = LUX_british_funding
+		}
+		available = { is_in_faction = yes }
+		completion_reward = {
+			if = {
+				limit = { is_in_faction = yes }
+				create_purchase_contract = {
+					seller = faction_leader
+					buyer = ROOT
+					civilian_factories = 5
+					equipment = {
+						type = infantry_equipment
+						amount = 2000
+					}
+					equipment = {
+						type = artillery_equipment
+						amount = 200
+					}
+				}
+			}
+			else = {
+				create_purchase_contract = {
+					seller = ENG
+					buyer = ROOT
+					civilian_factories = 5
+					equipment = {
+						type = infantry_equipment
+						amount = 2000
+					}
+					equipment = {
+						type = artillery_equipment
+						amount = 200
+					}
+				}
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_preventive_intervention
+		icon = GFX_goal_generic_occupy_states_ongoing_war
+		cost = 10
+		x = 0
+		y = 1
+		relative_position_id = LUX_arms_purchases
+		prerequisite = { focus = LUX_arms_purchases }
+		available = {
+			is_in_faction = yes
+			has_war = no
+			is_subject = no
+			threat > 0.25
+		}
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					is_major = yes
+					if = {
+						limit = { ROOT = { is_in_faction = yes } }
+						is_neighbor_of = faction_members
+					}
+					else = { is_neighbor_of = ROOT }
+					OR = {
+						has_government = fascism
+						has_government = communism
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = topple_government
+					}
+				}
+			}
+		}
+	}
+	focus = {
+		id = LUX_benelux_alliance
+		icon = GFX_goal_benelux
+		cost = 10
+		x = -8
+		y = 0
+		relative_position_id = LUX_join_allies
+		prerequisite = {
+			focus = LUX_seek_protection
+			focus = LUX_begin_rearmament
+		}
+		mutually_exclusive = { focus = LUX_join_allies }
+		completion_reward = {
+			set_rule = { can_create_factions = yes }
+			create_faction = "Benelux"
+			every_other_country = {
+				limit = {
+					OR = {
+						original_tag = HOL
+						original_tag = BEL
+						original_tag = WLL
+						original_tag = FLA
+					}
+				}
+				country_event = generic.5
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_dreams_of_federation
+		icon = GFX_focus_SWE_the_nordic_centralized_nordic_army_command			# request new gfx
+		cost = 5
+		x = -2
+		y = 1
+		relative_position_id = LUX_benelux_alliance
+		prerequisite = { focus = LUX_benelux_alliance }
+		mutually_exclusive = { focus = LUX_decentralised_alliance }
 		completion_reward = { }
+	}
+	focus = {
+		id = LUX_decentralised_alliance
+		icon = GFX_focus_SWE_the_nordic_decentralized_nordic_army_command		# request new gfx
+		cost = 5
+		x = 2
+		y = 1
+		relative_position_id = LUX_benelux_alliance
+		prerequisite = { focus = LUX_benelux_alliance }
+		mutually_exclusive = { focus = LUX_dreams_of_federation }
+		available = {
+			is_in_faction = no
+			is_subject = no
+			has_government = democratic
+		}
+		completion_reward = {
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = ROOT
+						is_in_faction_with = ROOT
+					}
+				}
+				add_ideas = r56_LUX_benelux_alliance
+			}
+		}
+	}
+	focus = {
+		id = LUX_unified_command
+		icon = GFX_focus_generic_military_mission
+		cost = 5
+		x = 2
+		y = 1
+		relative_position_id = LUX_dreams_of_federation
+		prerequisite = {
+			focus = LUX_dreams_of_federation
+			focus = LUX_decentralised_alliance
+		}
+		available = {
+			is_faction_leader = yes
+		}
+		completion_reward = {
+			army_experience = 50
+			if = {
+				limit = { has_dlc = "No Step Back" }
+				add_ideas = best_of_the_best_spirit
+			}
+			else = { add_ideas = r56_LUX_unified_command }
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_liberate_lowlands
+		icon = GFX_focus_ARG_defense_and_democracy
+		cost = 10
+		x = 0
+		y = 1
+		relative_position_id = LUX_unified_command
+		prerequisite = { focus = LUX_unified_command }
+		available = {
+			any_other_country = {
+				if = {
+					limit = { has_completed_focus = LUX_dreams_of_federation }
+					OR = {
+						original_tag = HOL
+						original_tag = BEL
+						original_tag = FLA
+						original_tag = WLL
+					}
+					exists = yes
+				}
+				else = {
+					OR = {
+						original_tag = HOL
+						original_tag = BEL
+						original_tag = FLA
+						original_tag = WLL
+					}
+					NOT = {
+						AND = {
+							has_government = democratic
+							is_in_faction_with = ROOT
+						}
+					}
+				}
+				is_subject = no
+				is_faction_leader = yes
+			}
+		}
+		completion_reward = {
+			if = {
+				limit = { has_completed_focus = LUX_dreams_of_federation }
+				every_other_country = {
+					limit = {
+						OR = {
+							original_tag = HOL
+							original_tag = BEL
+							original_tag = FLA
+							original_tag = WLL
+						}
+						exists = yes
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = annex_everything
+						}
+					}
+				}
+			}
+			else = {
+				every_other_country = {
+					limit = {
+						OR = {
+							original_tag = HOL
+							original_tag = BEL
+							original_tag = FLA
+							original_tag = WLL
+						}
+						NOT = {
+							has_government = democratic
+							is_in_faction_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = puppet_wargoal_focus
+						}
+					}
+				}
+			}
+		}
+	}
+	focus = {
+		id = LUX_expand_the_customs_union
+		icon = GFX_goal_generic_trade
+		cost = 5
+		x = 0
+		y = 1
+		relative_position_id = LUX_decentralised_alliance
+		prerequisite = { focus = LUX_decentralised_alliance }
+		available = {
+			is_faction_leader = yes
+		}
+		completion_reward = {
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = LUX
+						original_tag = BEL
+						original_tag = HOL
+					}
+					OR = {
+						is_in_faction_with = ROOT
+						original_tag = LUX
+					}
+				}
+				if = {
+					limit = { has_idea = r56_LUX_uebl_2 }
+					swap_ideas = {
+						remove_idea = r56_LUX_uebl_2
+						add_idea = r56_LUX_benelux_customs_union
+					}
+				}
+				else_if = {
+					limit = { has_idea = BEL_LUX_BEL_customs_union }
+					swap_ideas = {
+						remove_idea = BEL_LUX_BEL_customs_union
+						add_idea = r56_LUX_benelux_customs_union
+					}
+				}
+				else_if = {
+					limit = { has_idea = BEL_BEL_LUX_customs_union }
+					swap_ideas = {
+						remove_idea = BEL_BEL_LUX_customs_union
+						add_idea = r56_LUX_benelux_customs_union
+					}
+				}
+				else_if = {
+					limit = { has_idea = r56_BEL_uebl_2 }
+					swap_ideas = {
+						remove_idea = r56_BEL_uebl_2
+						add_idea = r56_LUX_benelux_customs_union
+					}
+				}
+				else = { add_ideas = r56_LUX_benelux_customs_union }
+			}
+			if = {
+				limit = { has_idea = r56_LUX_economic_dependence_1 }
+				swap_ideas = {
+					remove_idea = r56_LUX_economic_dependence_1
+					add_idea = r56_LUX_economic_dependence_3
+				}
+			}
+			else_if = {
+				limit = { has_idea = r56_LUX_economic_dependence_2 }
+				swap_ideas = {
+					remove_idea = r56_LUX_economic_dependence_2
+					add_idea = r56_LUX_economic_dependence_4
+				}
+			}
+			else_if = {
+				limit = { has_idea = r56_LUX_economic_dependence_3 }
+				remove_ideas = r56_LUX_economic_dependence_3
+			}
+			else = { remove_ideas = r56_LUX_economic_dependence_4 }
+		}
+	}
+	focus = {
+		id = LUX_joint_economic_development
+		icon = GFX_focus_generic_industry_3
+		cost = 8
+		x = 2
+		y = 1
+		relative_position_id = LUX_decentralised_alliance
+		prerequisite = { focus = LUX_decentralised_alliance }
+		available = {
+			any_other_country = { is_in_faction_with = ROOT }
+			is_faction_leader = yes
+		}
+		completion_reward = {
+			every_state = {
+				limit = {
+					controller = {
+						OR = {
+							is_in_faction_with = ROOT
+							original_tag = ROOT
+						}
+					}
+					is_on_continent = europe
+				}
+				add_building_construction = {
+					type = industrial_complex
+					instant_build = yes
+					level = 1
+				}
+				add_extra_state_shared_building_slots = 2
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_united_and_ready
+		icon = GFX_goal_generic_national_unity
+		cost = 10
+		x = 0
+		y = 2
+		relative_position_id = LUX_decentralised_alliance
+		prerequisite = { focus = LUX_unified_command }
+		prerequisite = { focus = LUX_expand_the_customs_union }
+		prerequisite = { focus = LUX_joint_economic_development }
+		available = {
+			is_faction_leader = yes
+		}
+		completion_reward = {
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = ROOT
+						is_in_faction_with = ROOT
+					}
+				}
+				add_ideas = r56_LUX_united_and_ready
+			}
+			custom_effect_tooltip = r56_newline
+			add_power_balance_value = {
+				id = LUX_neutrality_balance
+				value = -0.05
+			}
+		}
+	}
+	focus = {
+		id = LUX_strike_the_german_threat
+		icon = GFX_focus_attack_germany
+		cost = 5
+		x = 0
+		y = 1
+		relative_position_id = LUX_united_and_ready
+		prerequisite = { focus = LUX_united_and_ready }
+		available = {
+			is_faction_leader = yes
+			is_subject = no
+			any_other_country = {
+				original_tag = GER
+				NOT = { has_government = democratic }
+			}
+		}
+		completion_reward = {
+			every_other_country = {
+				limit = { original_tag = GER }
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = puppet_wargoal_focus
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = ROOT
+						is_in_faction_with = ROOT
+					}
+				}
+				add_timed_idea = {
+					idea = r56_LUX_beating_the_giant
+					days = 180
+				}
+			}
+		}
 	}
 	focus = {
 		id = LUX_another_declaration_of_neutrality
@@ -1069,7 +1753,10 @@ focus_tree = {
 		x = -2
 		y = 1
 		relative_position_id = LUX_policy_of_free_hands
-		prerequisite = { focus = LUX_policy_of_free_hands }
+		prerequisite = {
+			focus = LUX_policy_of_free_hands
+			focus = LUX_begin_rearmament
+		}
 		completion_reward = {
 			add_ideas = r56_LUX_motto
 		}
@@ -1078,7 +1765,7 @@ focus_tree = {
 	focus = {
 		id = LUX_commemorate_independence
 		icon = GFX_goal_support_democracy
-		cost = 10
+		cost = 7.2
 		x = 1
 		y = 1
 		relative_position_id = LUX_demonstrate_our_will
@@ -1093,7 +1780,7 @@ focus_tree = {
 	focus = {
 		id = LUX_oust_socialists
 		icon = GFX_focus_generic_anti_fascist_diplomacy
-		cost = 10
+		cost = 7.2
 		x = -1
 		y = 1
 		relative_position_id = LUX_demonstrate_our_will
@@ -1105,6 +1792,7 @@ focus_tree = {
 				check_variable = { num_of_LSAP_ministers = 0 }
 				check_variable = { num_of_KPL_ministers = 0 }
 			}
+			NOT = { has_completed_focus = LUX_socialist_victory }
 		}
 		completion_reward = {
 			swap_ideas = {
@@ -1246,7 +1934,7 @@ focus_tree = {
 	}
 	focus = {
 		id = LUX_peace_in_our_times
-		icon = GFX_goal_support_democracy
+		icon = GFX_goal_generic_peaceful_diplomacy
 		cost = 10
 		x = 2
 		y = 3
@@ -1300,6 +1988,7 @@ focus_tree = {
 		}
 		completion_reward = {
 			add_ideas = r56_LUX_capital_of_europe
+			set_rule = { can_create_factions = yes }
 			create_faction = "European Union"
 			set_major = yes
 			every_country = {
@@ -1334,6 +2023,11 @@ focus_tree = {
 		y = 1
 		relative_position_id = LUX_the_dupong_ministry
 		prerequisite = { focus = LUX_the_dupong_ministry }
+		available = {
+			NOT = {
+				has_completed_focus = LUX_privatisation_drive
+			}
+		}
 		completion_reward = {
 			random_owned_controlled_state = {
 				add_building_construction = {
@@ -1433,10 +2127,129 @@ focus_tree = {
 			focus = LUX_first_social_democratic_government
 			focus = LUX_begin_workers_revolution
 		}
-		available = { has_country_flag = LUX_elections_PRL_winner }
+		available = { hidden_trigger = { always = no } }
+		bypass = { has_country_flag = LUX_elections_PRL_winner }
 		completion_reward = {
 
 		}
+	}
+	focus = {
+		id = LUX_privatisation_drive
+		icon = GFX_focus_mex_privatisation
+		cost = 10
+		x = -1
+		y = 1
+		relative_position_id = LUX_liberal_victory
+		prerequisite = {
+			focus = LUX_liberal_victory
+			focus = LUX_the_dupong_ministry
+		}
+		mutually_exclusive = { focus = LUX_fair_economy }
+		available = {
+			NOT = {
+				has_completed_focus = LUX_expand_farm_subsidies
+			}
+		}
+		completion_reward = {
+			random_owned_controlled_state = {
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+				}
+			}
+			add_timed_idea = {
+				idea = r56_LUX_privatising_industry
+				days = 365
+			}
+		}
+	}
+	focus = {
+		id = LUX_expand_social_net
+		icon = GFX_focus_ICE_embrace_the_workers_revolution
+		cost = 5
+		x = 0
+		y = 1
+		relative_position_id = LUX_fair_economy
+		prerequisite = {
+			focus = LUX_fair_economy
+			focus = LUX_privatisation_drive
+		}
+		completion_reward = { }
+	}
+	focus = {
+		id = LUX_open_border_agreements
+		icon = GFX_goal_generic_positive_trade_relations
+		cost = 5
+		x = -1
+		y = 1
+		relative_position_id = LUX_privatisation_drive
+		prerequisite = {
+			focus = LUX_privatisation_drive
+			focus = LUX_fair_economy
+		}
+		completion_reward = {
+			add_political_power = 25
+			unlock_decision_tooltip = LUX_open_border_agreement_france
+			unlock_decision_tooltip = LUX_open_border_agreement_belgium
+			unlock_decision_tooltip = LUX_open_border_agreement_netherlands
+		}
+	}
+	focus = {
+		id = LUX_lower_taxes
+		icon = GFX_focus_usa_reestablish_the_gold_standard
+		cost = 5
+		x = 1
+		y = 1
+		relative_position_id = LUX_privatisation_drive
+		prerequisite = { focus = LUX_privatisation_drive }
+		completion_reward = {
+			add_ideas = r56_LUX_lowered_taxes
+		}
+	}
+	focus = {
+		id = LUX_promote_small_businesses
+		icon = GFX_focus_generic_industry_2
+		cost = 5
+		x = -1
+		y = 2
+		relative_position_id = LUX_fair_economy
+		prerequisite = { focus = LUX_fair_economy }
+		prerequisite = { focus = LUX_expand_social_net }
+		completion_reward = { }
+	}
+	focus = {
+		id = LUX_ensure_minimum_wage
+		icon = GFX_focus_generic_workers_and_farmers_rise
+		cost = 5
+		x = 1
+		y = 1
+		relative_position_id = LUX_expand_social_net
+		prerequisite = { focus = LUX_expand_social_net }
+		completion_reward = { }
+	}
+	focus = {
+		id = LUX_academy_of_science
+		icon = GFX_focus_ARG_universidad_de_buenos_aires		# request new gfx
+		cost = 8
+		x = 0
+		y = 1
+		relative_position_id = LUX_open_border_agreements
+		prerequisite = { focus = LUX_open_border_agreements }
+		completion_reward = { add_research_slot = 1 }
+	}
+	focus = {
+		id = LUX_fair_economy
+		icon = GFX_goal_generic_soviet_construction
+		cost = 10
+		x = 1
+		y = 1
+		relative_position_id = LUX_first_social_democratic_government
+		prerequisite = {
+			focus = LUX_first_social_democratic_government
+			focus = LUX_liberal_victory
+		}
+		mutually_exclusive = { focus = LUX_privatisation_drive }
+		completion_reward = { }
 	}
 	# social democrats
 	focus = {
@@ -1456,7 +2269,8 @@ focus_tree = {
 			focus = LUX_liberal_victory
 			focus = LUX_begin_workers_revolution
 		}
-		available = { has_country_flag = LUX_elections_LSAP_winner }
+		available = { hidden_trigger = { always = no } }
+		bypass = { has_country_flag = LUX_elections_LSAP_winner }
 		completion_reward = {}
 	}
 	# communist
@@ -1476,7 +2290,8 @@ focus_tree = {
 		allow_branch = {
 			NOT = { has_country_flag = LUX_maulkuerfgesetz_passed }
 		}
-		available = { has_country_flag = LUX_elections_KPL_winner }
+		available = { hidden_trigger = { always = no } }
+		bypass = { has_country_flag = LUX_elections_KPL_winner }
 		completion_reward = {}
 	}
 
