@@ -1060,7 +1060,7 @@ focus_tree = {
 
 		completion_reward = {
 			# idea: Subsidy Program (10% consumer goods, -50% cost for trade laws and industrial companies) for 185 days
-			
+			add_timed_idea = { idea = MAL_subsidy_program days = 180 }
 		}
 
 		search_filters = { FOCUS_FILTER_ }
@@ -1173,8 +1173,8 @@ focus_tree = {
 	}
 	
 	focus = {
-		id = MAL_commonwealth_oil_agreements
-		icon = GFX_
+		id = MAL_british_oil_agreements
+		icon = GFX_focus_chi_british_cooperation
 		x = -1
 		y = 1
 		cost = 0
@@ -1193,25 +1193,37 @@ focus_tree = {
 		}
 
 		completion_reward = {
-		
+			# gives all oil in brunei and sarawak to the uk in exchange for 4 mils
+			give_resource_rights = {
+				receiver = ENG
+				state = 1014
+				resources = { oil }
+			}
+			give_resource_rights = {
+				receiver = ENG
+				state = 333
+				resources = { oil }
+			}
+			add_offsite_building = { type = arms_factory level = 2 }
+			add_offsite_building = { type = industrial_complex level = 2 }
 		}
 
-		search_filters = { FOCUS_FILTER_ }
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 	
 	focus = {
 		id = MAL_industrialize_steel_refinement
-		icon = GFX_
+		icon = GFX_focus_generic_steel
 		x = 2
 		y = 1
-		cost = 0
+		cost = 8
 		relative_position_id = MAL_fighting_for_the_commonwealth
 		prerequisite = { focus = MAL_fighting_for_the_commonwealth focus = MAL_compensation }
 		
 		available_if_capitulated = yes
 
 		available = {
-		
+			has_full_control_of_state = 951
 		}
 
 		ai_will_do = {
@@ -1220,7 +1232,25 @@ focus_tree = {
 
 		completion_reward = {
 			# steel mills
+			951 = {
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = steel_mill
+					level = 2
+					instant_build = yes
+				}
+			}
 			# more steel
+			if = {
+				limit = {
+					has_full_control_of_state = 951
+				}
+				add_resource = {
+					type = steel
+					amount = 24
+					state = 951
+				}
+			}	
 		}
 
 		search_filters = { FOCUS_FILTER_INDUSTRY }
@@ -1228,7 +1258,7 @@ focus_tree = {
 	
 	focus = {
 		id = MAL_guns_for_rubber
-		icon = GFX_
+		icon = GFX_focus_generic_rubber
 		x = 0
 		y = 1
 		cost = 0
@@ -1248,9 +1278,21 @@ focus_tree = {
 
 		completion_reward = {
 			# idea, resource and industry exchange: the us gives mils in exchange for them getting rubber, and also 10% more mil construction
+			add_ideas = MAL_rubber_industry_exchange
+			give_resource_rights = {
+				receiver = USA
+				state = 951
+				resources = { rubber }
+			}
+			give_resource_rights = {
+				receiver = USA
+				state = 333
+				resources = { rubber }
+			}
+			add_offsite_building = { type = arms_factory level = 3 }
 		}
 
-		search_filters = { FOCUS_FILTER_ }
+		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
 	
 	focus = {
@@ -1308,7 +1350,7 @@ focus_tree = {
 	
 	focus = {
 		id = MAL_anti_western_policy
-		icon = GFX_
+		icon = GFX_focus_usa_focus_on_europe
 		x = 3
 		y = 1
 		cost = 0
@@ -1329,7 +1371,7 @@ focus_tree = {
 		
 		}
 
-		search_filters = { FOCUS_FILTER_ }
+		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
 	
 	focus = {
@@ -2653,7 +2695,7 @@ focus_tree = {
 	
 	focus = {
 		id = MAL_learn_from_the_sino_japanese_war
-		icon = GFX_
+		icon = GFX_focus_generic_provoke_border_clashes
 		x = 1
 		y = 2
 		cost = 0
@@ -2665,6 +2707,17 @@ focus_tree = {
 		available = {
 			# Japan has attacked China
 			# bypass if Japan isnt fascist
+			JAP = {
+				has_war_with = CHI
+			}
+		}
+		
+		bypass = {
+			JAP = {
+				NOT = {
+					has_government = fascism
+				}
+			}
 		}
 
 		ai_will_do = {
@@ -2674,14 +2727,21 @@ focus_tree = {
 		completion_reward = {
 			# 25 army xp
 			# 50% doctrine cost
+			army_experience = 25
+			add_doctrine_cost_reduction = {
+				name = land_doc_bonus
+				cost_reduction = 0.5
+				uses = 2
+				category = land_doctrine
+			}
 		}
 
-		search_filters = { FOCUS_FILTER_ }
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 	
 	focus = {
 		id = MAL_prepare_for_another_great_war
-		icon = GFX_
+		icon = GFX_focus_jap_strike_south
 		x = 0
 		y = 2
 		cost = 0
@@ -2692,6 +2752,7 @@ focus_tree = {
 
 		available = {
 			# 25% WT
+			threat > 0.25
 		}
 
 		ai_will_do = {
@@ -2702,9 +2763,38 @@ focus_tree = {
 			# 5% war sup
 			# 1 mil
 			# create 3 2-batallion inf
+			add_war_support = 0.05
+			random_owned_controlled_state = {
+				prioritize = { 915 }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+			custom_effect_tooltip = MAL_prepare_for_another_great_war_tooltip
+			hidden_effect = {
+				random_controlled_state = {
+					limit = {
+						is_core_of = MAL
+						is_fully_controlled_by = ROOT
+					}
+					create_unit = {
+						division = "division_template = \"Briged Infantri Malaya\" start_experience_factor = 0.0 start_equipment_factor = 1.0"
+						owner = ROOT
+						count = 1
+					}
+					create_unit = {
+						division = "division_template = \"Briged Infantri Malaya\" start_experience_factor = 0.0 start_equipment_factor = 1.0"
+						owner = ROOT
+						count = 1
+					}
+				}
+			}
 		}
 
-		search_filters = { FOCUS_FILTER_ }
+		search_filters = { FOCUS_FILTER_WAR_SUPPORT }
 	}
 	
 	focus = {
@@ -3184,7 +3274,7 @@ focus_tree = {
 	}
 	focus = {
 		id = MAL_defend_our_right_to_existence
-		icon = GFX_
+		icon = GFX_goal_generic_defence
 		x = 2
 		y = 2
 		cost = 0
@@ -3206,9 +3296,44 @@ focus_tree = {
 			# 10 xp
 			# 1 mil
 			# 2 3-batallion inf
+			army_experience = 10
+			add_doctrine_cost_reduction = {
+				name = land_doc_bonus
+				cost_reduction = 0.5
+				uses = 2
+				category = land_doctrine
+			}
+			random_owned_controlled_state = {
+				prioritize = { 915 }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+			custom_effect_tooltip = MAL_prepare_for_another_great_war_tooltip
+			hidden_effect = {
+				random_controlled_state = {
+					limit = {
+						is_core_of = MAL
+						is_fully_controlled_by = ROOT
+					}
+					create_unit = {
+						division = "division_template = \"Briged Infantri Malaya\" start_experience_factor = 0.0 start_equipment_factor = 1.0"
+						owner = ROOT
+						count = 1
+					}
+					create_unit = {
+						division = "division_template = \"Briged Infantri Malaya\" start_experience_factor = 0.0 start_equipment_factor = 1.0"
+						owner = ROOT
+						count = 1
+					}
+				}
+			}
 		}
 
-		search_filters = { FOCUS_FILTER_ }
+		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 	
 	focus = {
