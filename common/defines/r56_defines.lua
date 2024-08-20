@@ -93,6 +93,8 @@
 	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_FRONT = 8.0
 	NDefines.NMilitary.PLAN_AREA_DEFENSE_ENEMY_CONTROLLER_SCORE = 30.0
 	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.60
+	NDefines.NMilitary.PEN_VS_AVERAGE = 0.9
+	NDefines.NMilitary.ARMOR_VS_AVERAGE = 0.2
 	
 	-- Addition with 1.3.2
 	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 18.0		-- increased from 12.0 ; Added importance for area defense province with a port
