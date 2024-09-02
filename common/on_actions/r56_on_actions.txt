@@ -24,6 +24,40 @@ on_actions = {
 				limit = { is_ai = yes }
 				if = {
 					limit = {
+						original_tag = ROM
+						has_completed_focus = ROM_balkans_dominance
+					}
+					if = {
+						limit = {
+							has_country_leader = {
+								character = ROM_corneliu_codreanu
+								ruling_only = yes
+							}
+							has_government = fascism
+							is_ai = yes
+						}
+						set_faction_name = "Legionary Blood Oath"
+						#news_event = { id = news.159 }
+					}
+					if = {
+						limit = {
+							has_government = democratic
+							is_ai = yes
+						}
+						set_faction_name = "League of Balkanic Cooperation"
+						#news_event = { id = news.159 }
+					}
+					if = {
+						limit = {
+							has_government = neutrality
+							is_ai = yes
+						}
+						set_faction_name = "Treaty of Bucharest"
+						#news_event = { id = news.159 }
+					}
+				}
+				else_if = {
+					limit = {
 						original_tag = GRE
 						owns_state = 797
 						controls_state = 797
@@ -218,6 +252,30 @@ on_actions = {
 					limit = { FROM = { tag = ENG } }
 					USA = {
 						set_country_flag = { flag = USA_british_window days = 120 value = 1 }
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						tag = AUS
+						NOT = { has_cosmetic_tag = HUN_EMPIRE }
+					}
+				}
+				AUS = {
+					set_politics = { ruling_party = democratic elections_allowed = yes }
+					add_popularity = {
+						ideology = democratic
+						popularity = 0.45
+					}
+					load_focus_tree = generic_focus
+					if = {
+						limit = {
+							NOT = {
+								has_idea = AUS_austrian_neutrality
+							}
+						}
+						add_ideas = AUS_austrian_neutrality
 					}
 				}
 			}
@@ -949,8 +1007,6 @@ on_actions = {
 									state = 67
 									state = 68
 									state = 69
-									state = 1078
-									state = 74
 									state = 85
 									state = 86
 									state = 152
@@ -973,16 +1029,6 @@ on_actions = {
 						}
 						GER = {
 							remove_state_claim = 69
-						}
-					}
-					if = {
-						limit = {
-							1078 = {
-								is_claimed_by = GER
-							}
-						}
-						GER = {
-							remove_state_claim = 1078
 						}
 					}
 					if = {
@@ -1141,396 +1187,6 @@ on_actions = {
 		}
 	}
 
-	on_capitulation_immediate = {
-		effect = {
-			if = {
-				limit = {
-					original_tag = ENG
-					NOT = {
-						controls_state = 126
-					}
-					126 = {
-						controller = {
-							NOT = {
-								has_government = democratic
-							}
-						}
-					}
-					has_civil_war = no
-					has_government = democratic
-					any_subject_country = {
-						OR = {
-							original_tag = CAN
-							original_tag = AST
-							original_tag = NZL
-							original_tag = SAF
-						}
-					}
-				}
-				ENG = {
-					country_event = {
-						id = r56_eng.11
-					}
-				}
-			}
-		}
-	}
-
-	on_peaceconference_started = {
-		effect = {
-			FROM = {
-				if = {	#colonial uprisings if Japan capped in a somewhat historical manner
-					limit = {
-						original_tag = JAP
-						OR = {
-							has_government = fascism
-							has_government = neutrality
-							#communist could have colonial uprisings but would need different ideology in Indonesia
-						}
-					}
-					every_state = {
-						if = {
-							limit = {
-								is_fully_controlled_by = JAP
-							}
-							set_state_flag = r56_postwar_uprising_target
-						}
-					}
-					#restore FRI, cannot be done before peacedeal, but save states for afterwards
-					if = {
-						limit = {
-							FRA = {
-								has_war_with = JAP
-								has_civil_war = no	#vichy
-							}
-							any_owned_state = {
-								is_core_of = FRI
-							}
-							FRI = {
-								exists = no
-							}
-						}
-						every_owned_state = {
-							limit = {
-								is_core_of = FRI
-							}
-							set_state_flag = r56_postwar_transfer_to_fri
-							if = {
-								limit = {
-									controller = {
-										owns_state = 592
-										NOT = {
-											has_war_with = FRA
-										}
-										728 = {
-											is_core_of = PREV
-											is_owned_by = JAP
-										}
-										PREV = {
-											is_fully_controlled_by = PREV
-										}
-									}
-								}
-								set_state_flag = r56_postwar_chi_liberated_state
-							}
-						}
-					}
-					set_global_flag = r56_lategame_fire_uprisings
-				}
-			}
-		}
-	}
-	on_peaceconference_ended = {
-		effect = {
-			if = {
-				limit = {
-					has_global_flag = r56_lategame_fire_uprisings
-				}
-				clr_global_flag = r56_lategame_fire_uprisings
-				every_state = {
-					limit = {
-						has_state_flag = r56_postwar_transfer_to_fri
-					}
-					transfer_state_to = FRI
-				}
-				FRA = {
-					set_autonomy = {
-						target = FRI
-						autonomous_state = autonomy_integrated_puppet
-						end_wars = no
-						end_civil_wars = no
-					}
-				}
-				FRI = {
-					set_politics = {
-						ruling_party = neutrality
-						elections_allowed = no
-					}
-					retire_character = FRI_jean_decoux	#I guess
-				}
-				#uprisings in FRI areas controlled by Japan
-				random_state = {
-					limit ={
-						has_state_flag = r56_postwar_uprising_target
-						is_core_of = VIN
-						NOT = {
-							state = 286		#because of the structure of French Indochina, this wasnt designated as Vietnam
-						}
-						VIN = {
-							exists = no
-						}
-					}
-					transfer_state_to = VIN
-					every_state = {
-						limit = {
-							NOT = {
-								state = PREV
-							}
-							is_core_of = VIN
-							NOT = {
-								state = 286		#because of the structure of French Indochina, this wasnt designated as Vietnam
-							}
-							has_state_flag = r56_postwar_uprising_target
-						}
-						set_state_controller_to = VIN
-					}
-					VIN = {
-						set_politics = {
-							ruling_party = communism
-							elections_allowed = no				
-						}
-						declare_war_on = {
-							target = FRI
-							type = civil_war
-						}
-						division_template = {
-							name = "Viet Minh Partisan"
-						
-							regiments = {
-								infantry = { x = 0 y = 0 }
-								infantry = { x = 0 y = 1 }
-								infantry = { x = 0 y = 2 }
-								infantry = { x = 0 y = 3 }
-							}
-						}
-						division_template = {
-							name = "Viet Minh Irregular"
-						
-							regiments = {
-								jungletroop = { x = 0 y = 0 }
-								jungletroop = { x = 0 y = 1 }
-								jungletroop = { x = 0 y = 2 }
-								jungletroop = { x = 0 y = 3 }
-							}
-							priority = 0
-						}
-						every_controlled_state = {	#max 3 states, irl they had 8~ units and 2 states, so they can be slightly stronger/weaker if China pushes into FRI
-							create_unit = {
-								division = "name = \"Viet Minh Partisan\" division_template = \"Viet Minh Partisan\" start_experience_factor = 0.1"
-								owner = VIN
-								count = 2
-							}
-							create_unit = {
-								division = "name = \"Viet Minh Irregular\" division_template = \"Viet Minh Irregular\" start_experience_factor = 0"
-								owner = VIN
-								count = 2
-							}
-						}
-					}
-				}
-				#uprising Indonesia
-				random_state = {
-					limit ={
-						has_state_flag = r56_postwar_uprising_target
-						is_core_of = INS
-						INS = {
-							is_subject = yes
-							is_ai = yes			#just in case
-						}
-					}
-					transfer_state_to = INS
-					INS = {
-						transfer_units_fraction = {	#includes commanders
-							target = HOL
-							size = 1
-							stockpile_ratio = 0.5
-						}
-						set_politics = {
-							ruling_party = neutrality
-							elections_allowed = no
-						}
-						overlord = {
-							set_autonomy = {
-								target = INS
-								autonomy_state = autonomy_free
-								end_wars = no
-								end_civil_wars = no
-							}
-						}
-						leave_faction = yes
-						drop_cosmetic_tag = yes
-						set_cosmetic_tag = INS_neutrality
-						declare_war_on = {
-							target = HOL
-							type = independence_wargoal
-						}
-						#give de-facto controllers (military unit presence) of Indonesian states the option to keep it for themselves, return it to HOL, or give it to Indonesia
-						remove_ideas = {
-							INS_army_idea
-							INS_political_idea
-							INS_economy_idea
-						}
-						unlock_national_focus = INS_kebangkitan
-						unlock_national_focus = INS_PNI
-						unlock_national_focus = INS_favour_the_radicals
-						unlock_national_focus = INS_the_coup
-						unlock_national_focus = INS_the_agreement
-						complete_national_focus = INS_koninklijk_nederlands_indisch_leger
-						unlock_national_focus = INS_form_the_home_guard
-						unlock_national_focus = INS_interventionism
-						unlock_national_focus = INS_ambonese_auxilaries
-						complete_national_focus = INS_expand_the_officers_corps
-					
-						INS_sukarno = {
-							add_country_leader_role = {
-								promote_leader = yes
-								country_leader = {
-									ideology = marhaenism
-									expire = "1965.1.1.1"
-									traits = { r56_trait_opposed_to_democracy }
-								}
-							}
-						}
-
-						division_template = {
-							name = "Divisi Infanteri"		# full Colonial Divisions (old equipment, low experience)
-							division_names_group = INS_INF_01
-						
-							regiments = {
-								infantry = { x = 0 y = 0 }
-								infantry = { x = 0 y = 1 }
-								infantry = { x = 0 y = 2 }
-								infantry = { x = 1 y = 0 }
-								infantry = { x = 1 y = 1 }
-								infantry = { x = 1 y = 2 }
-								infantry = { x = 2 y = 0 }
-								infantry = { x = 2 y = 1 }
-								infantry = { x = 2 y = 2 }
-							}
-						}
-					
-						#some were cut from focuses
-						create_corps_commander = {
-							name = "Moestopo"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Moestopo.dds"
-							traits = { jungle_rat }
-							skill = 2
-							attack_skill = 2
-							defense_skill = 2
-							planning_skill = 3
-							logistics_skill = 3
-						}
-						create_corps_commander = {
-							name = "Suharto"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Suharto.dds"
-							traits = { politically_connected meticulous harsh_leader }
-							skill = 2
-							attack_skill = 2
-							defense_skill = 2
-							planning_skill = 3
-							logistics_skill = 3
-						}
-						create_corps_commander = {
-							name = "Achmad Yani"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Achmad_Yani.dds"
-							traits = { artillerist }
-							skill = 3
-							attack_skill = 4
-							defense_skill = 2
-							planning_skill = 3
-							logistics_skill = 3
-						}
-						create_field_marshal = {
-							name = "Soedirman"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Soedirman.dds"
-							traits = { trickster guerilla_fighter }
-							skill = 3
-							attack_skill = 3
-							defense_skill = 3
-							planning_skill = 3
-							logistics_skill = 4
-						}
-						create_navy_leader = {
-							name = "Yos Sudarso"
-							portrait_path = "gfx/leaders/Asia/Portrait_Asia_Generic_navy_1.dds"
-							traits = { inshore_fighter }
-							skill = 2
-							attack_skill = 2
-							defense_skill = 2
-							maneuvering_skill = 2
-							coordination_skill = 2
-						}
-						create_corps_commander = {
-							name = "Abdul Haris Nasution"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Abdul_Harris_Nasution.dds"
-							traits = { politically_connected infantry_officer }
-							skill = 1
-							attack_skill = 1
-							defense_skill = 1
-							planning_skill = 1
-							logistics_skill = 1
-						}
-						create_corps_commander = {
-							name = "Alexander Evert Kawilarang"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Alexander_Evert_Kawilarang.dds"
-							traits = { guerilla_fighter }
-							skill = 2
-							attack_skill = 2
-							defense_skill = 2
-							planning_skill = 1
-							logistics_skill = 2
-						}
-						every_state = {	#all states are automatically given to INS, return allied-occupied ones to HOL
-							limit = {
-								NOT = {
-									state = PREV.PREV
-								}
-								is_core_of = INS
-								NOT = {
-									has_state_flag = r56_postwar_uprising_target
-								}
-							}
-							set_state_controller_to = HOL
-						}
-						every_controlled_state = {
-							create_unit = {
-								division = "name = \"Divisi Infanteri\" division_template = \"Divisi Infanteri\" start_experience_factor = 0 start_equipment_factor = 0.4"
-								owner = INS
-								count = 2
-							}
-						}
-					}
-				}
-				#china takes Indochina temporarily to demand Guangzhouwan
-				every_state = {
-					limit = {
-						has_state_flag = r56_postwar_chi_liberated_state
-					}
-					592 = {
-						owner = {
-							transfer_state = PREV.PREV
-						}
-					}
-					FRA = {
-						country_event = cold_war.9
-					}
-				}
-			}
-		}
-
-		
-	}
-
 	on_civil_war_end_before_annexation = {
 		effect = {
 			#Afghanistan transfer all characters
@@ -1545,37 +1201,6 @@ on_actions = {
 					every_character = {
 						set_nationality = ROOT
 					}
-				}
-			}
-			if = {
-				limit = {
-					FROM = {
-						original_tag = AUS
-					}
-				}
-				FROM = {
-					every_character = {
-						set_nationality = ROOT
-					}
-					every_core_state = {
-						remove_core_of = FROM
-					}
-				}
-				ROOT = {
-					
-					if = {
-						limit = {
-							tag = ANZ
-						}
-						retire_ideology_leader = democratic
-						retire_ideology_leader = communism
-						retire_ideology_leader = neutrality
-					}
-					set_capital = {
-						state = 4
-					}
-					
-					
 				}
 			}
 			#Release BHU and NEP
@@ -1750,48 +1375,6 @@ on_actions = {
 						set_unit_leader_flag = hungarian_rebel
 						set_nationality = FAK
 					}
-				}
-			}
-			else_if = {
-				limit = {
-					FROM = { original_tag = GER }
-					ROOT = { original_tag = GER }
-				}
-				
-				if = {
-					limit = {
-						FROM = {
-							has_government = fascism
-						}
-					}
-					FROM = {
-						save_global_event_target_as = GER_cw_fascist_loser
-					}
-					# if = {
-					# 	limit = {
-					# 		AUS = {
-					# 			has_civil_war = yes
-					# 		}
-					# 	}
-					# 	ANZ = {
-					# 		country_event = {
-					# 			id = austria.71
-					# 			days = 5
-					# 			random_days = 3
-					# 			random_hours = 24
-					# 		}
-					# 	}
-					# }
-					# else = {
-					# 	AUS = {
-					# 		country_event = {
-					# 			id = austria.71
-					# 			days = 5
-					# 			random_days = 3
-					# 			random_hours = 24
-					# 		}
-					# 	}
-					# }
 				}
 			}
 		}
@@ -2080,6 +1663,18 @@ on_actions = {
 						division_template = "Sentinel of the Motherland"
 					}
 					news_event = { id = r56.news_event.25 days = 2 random_days = 2 }
+				}
+				if = {
+					limit = {
+						OR = {
+							has_government = neutrality
+							has_government = democratic
+						}
+						has_focus_tree = generic_focus
+					}
+					load_focus_tree = { tree = romanian_focus keep_completed = yes }
+					complete_national_focus = ROM_institute_royal_dictatorship
+					complete_national_focus = ROM_preserve_greater_romania
 				}
 			}
 			#YUG DOD specific as the BFTB rework of YUG was a bit unsatisfactory
@@ -2415,7 +2010,6 @@ on_actions = {
 						drop_cosmetic_tag = yes
 					}
 				}
-				
 			}
 
 			#These are a little weird. Seem to be repeats of previous ones, with the added "controls_state" caveat.
@@ -2476,17 +2070,7 @@ on_actions = {
 			if = {	# Little Entente - Hungary war against
 				limit = {
 					ROOT = {
-						OR = {
-							original_tag = HUN
-							AND = {
-								original_tag = AUS
-								OR = {
-									is_ally_with = HUN
-									owns_state = 43 #budapest
-								
-								}
-							}
-						}
+						tag = HUN
 					}
 					FROM = {
 						has_idea = r56_YUG_little_entente
@@ -2499,11 +2083,7 @@ on_actions = {
 				}
 				ROOT = {
 					custom_effect_tooltip = r56_HUN_if_we_go_to_war
-					save_event_target_as = little_entente_attacker
-					
 				}
-				log = "ROOT [ROOT.GetNameDef]"
-				log = "FROM [FROM.GetNameDef]"
 				FROM = {
 					if = {
 						limit = {
@@ -2511,7 +2091,6 @@ on_actions = {
 						}
 						create_faction = "Little Entente"
 					}
-					
 					every_other_country = {
 						limit = {
 							has_idea = r56_YUG_little_entente
@@ -2520,56 +2099,11 @@ on_actions = {
 								original_tag = ROM
 								original_tag = YUG
 							}
-							NOT = {
-								has_war_with = PREV
-							}
 						}
 						country_event = { id = yugoslavia.25 hours = 12 }
 					}
 				}
 			}
-			if = {	# Balkan Pact - Bulgaria war against
-				limit = {
-					ROOT = {
-						tag = BUL
-					}
-					FROM = {
-						has_idea = r56_ROM_balkan_pact
-						OR = {
-							original_tag = GRE
-							original_tag = ROM
-							original_tag = TUR
-							original_tag = YUG
-						}
-					}
-				}
-				ROOT = {
-					custom_effect_tooltip = r56_BUL_if_we_go_to_war
-				}
-				FROM = {
-					if = {
-						limit = {
-							is_in_faction = no
-						}
-						create_faction = "Balkan Pact"
-					}
-					every_other_country = {
-						limit = {
-							has_idea = r56_ROM_balkan_pact
-							OR = {
-								original_tag = GRE
-								original_tag = ROM
-								original_tag = TUR
-								original_tag = YUG
-							}
-							NOT = {
-								has_war_with = PREV
-							}
-						}
-						country_event = { id = yugoslavia.27 hours = 12 }
-					}
-				}
-			}			
 			if = { # BELGIAN event to arrest fascists after the invasion
 				limit = {
 					tag = GER
@@ -3016,7 +2550,7 @@ on_actions = {
 						name = "Li Jishen"
 						picture = "gfx/leaders/JAP/Portrait_Japan_Generic_land_4.dds"
 						expire = "1965.1.1"
-						ideology = military_junta
+						ideology = moderatism
 					}
 				}
 			}
@@ -3568,7 +3102,7 @@ on_actions = {
 					has_completed_focus = POL_The_National_Radical_Camp
 					is_subject = no
 				}
-				news_event = {
+				country_event = {
 					id = poland.125 days = 5 random_days = 5
 				}
 			}
@@ -3816,8 +3350,6 @@ on_actions = {
 				}
 			}
 
-			
-
 			if = { # MOD. Compressed.
 				limit = { original_tag = CHI }
 				if = {
@@ -4025,19 +3557,6 @@ on_actions = {
 						id = france.35
 					}
 				}
-			}
-			if = {
-				limit = {
-					original_tag = GER
-					has_government = democratic
-					if = {
-						limit = {
-							has_completed_focus = GER_restore_weimar
-						}
-						has_completed_focus = GER_establish_bundesrepublik
-					}
-				}
-				country_event = r56.ger.60
 			}
 		}
 	}
@@ -4392,7 +3911,7 @@ on_actions = {
 					name = "Andrija Hebrang"
 					picture = "gfx/leaders/YUG/r56_portrait_YUG_Andrija_Hebrang.dds"
 					expire = "1965.1.1"
-					ideology = social_nationalism
+					ideology = moderatism
 				}
 			}
 			if = {
@@ -4802,7 +4321,7 @@ on_actions = {
 					name = "Stefan Fentsyk"
 					picture = "gfx/leaders/Europe/r56_portrait_generic_europe_augustyn_czartoryski.dds"
 					expire = "1965.1.1"
-					ideology = oligarchism
+					ideology = moderatism
 					traits = {
 						silent_workhorse
 					}
@@ -4946,12 +4465,7 @@ on_actions = {
 				}
 
 				if = { #GER
-					limit = { 
-						is_puppet_of = GER 
-						GER = {
-							has_government = fascism
-						}
-					}
+					limit = { is_puppet_of = GER }
 					POL = { set_cosmetic_tag = POLG }
 					POL = { set_party_name = { ideology = fascism long_name = GER_fascism_party_long name = GER_fascism_party } }
 					create_country_leader = {
@@ -4964,29 +4478,6 @@ on_actions = {
 							governor_general
 						}
 					}
-				}
-				if = { #GER
-					limit = { 
-						is_puppet_of = GER 
-						GER = {
-							has_government = neutrality
-						}
-						POL = {
-							NOT = {
-								has_completed_focus = POL_assemble_the_regency_council
-							}
-						}
-					}
-					if = {
-						limit = {
-							tag = POL
-							NOT = {
-								has_cosmetic_tag = PLC_UNIFIED
-								has_cosmetic_tag = PLC_UNIFIED_RUS
-							}
-						}
-						set_cosmetic_tag = POLG
-					}
 					create_country_leader = {
 						name = "Fryderyk Krystian Wettyn"
 						picture = "r56_portrait_POL_Fryderyk_Krystian_Wettyn.dds"
@@ -4997,7 +4488,7 @@ on_actions = {
 							POL_german_origins
 							r56_trait_opposed_to_communism
 						}
-					}					
+					}
 				}
 			}
 
@@ -5673,20 +5164,21 @@ on_actions = {
 					NOT = {
 						any_other_country = {
 							has_country_leader = {
-								character = ENG_charles_edward_of_albany
+								name = "Charles Edward of Albany"
 								ruling_only = no
 							}
 						}
 					}
 				}
-				add_country_leader_role = {	#pro nazi prince, should appear if there are 2 british collaboration governements
-					character = ENG_charles_edward_of_albany
-					country_leader = {
-						ideology = nazism
-						traits = { r56_trait_opposed_to_communism eager_collaborator }
-						expire = "1965.3.1.1"
+				create_country_leader = { #pro nazi prince, should appear if there are 2 british collaboration governements
+					name = "Charles Edward of Albany"
+					picture = "gfx/leaders/ENG/r56_portrait_ENG_Charles_Edward.dds"
+					expire = "1965.1.1"
+					ideology = nazism
+					traits = {
+						r56_trait_opposed_to_communism
+						eager_collaborator
 					}
-					promote_leader = yes 
 				}
 			}
 			if = {
@@ -5709,7 +5201,7 @@ on_actions = {
 					name = "Osman Kemal"
 					picture = "gfx/leaders/kr_generic/Portrait_Europe_Generic_new_13.dds"
 					expire = "1965.1.1"
-					ideology = conservatism_n
+					ideology = moderatism
 					traits = {
 						r56_trait_opposed_to_communism
 						eager_collaborator
@@ -6309,7 +5801,7 @@ on_actions = {
 					name = "Deiva Zivarattinam"
 					picture = "gfx/leaders/kr_generic/Portrait_America_Generic_land_6.dds"
 					expire = "1965.1.1"
-					ideology = controlled_democracy
+					ideology = centrism
 				}
 			}
 			if = {
@@ -6413,7 +5905,7 @@ on_actions = {
 					desc = " "
 					picture = "gfx/leaders/r56_generic/r56_portrait_ITA_generic_land_2.dds"
 					expire = "1965.1.1"
-					ideology = oligarchism
+					ideology = moderatism
 					traits = {
 						committed_colonialist
 					}
@@ -6603,20 +6095,17 @@ on_actions = {
 					NOT = {
 						any_other_country = {
 							has_country_leader = {
-								character = ENG_charles_edward_of_albany
+								name = "Charles Edward of Albany"
 								ruling_only = no
 							}
 						}
 					}
 				}
-				add_country_leader_role = {	#pro nazi prince, should appear if there are 2 british collaboration governements
-					character = ENG_charles_edward_of_albany
-					country_leader = {
-						ideology = nazism
-						traits = { r56_trait_opposed_to_communism eager_collaborator }
-						expire = "1965.3.1.1"
-					}
-					promote_leader = yes 
+				create_country_leader = { #pro nazi prince, should appear if there are 2 british collaboration governements
+					name = "Charles Edward of Albany"
+					picture = "gfx/leaders/ENG/Portrait_Britain_Generic_3.dds"
+					expire = "1965.1.1"
+					ideology = nazism
 				}
 			}
 			#### Trying to fix puppet communist Hungary
@@ -6733,7 +6222,7 @@ on_actions = {
 					name = "Edgar Sander"
 					picture = "gfx/leaders/kr_generic/Portrait_Europe_Generic_new_11.dds"
 					expire = "1965.1.1"
-					ideology = oligarchism
+					ideology = moderatism
 					traits = {
 						eager_collaborator
 					}
@@ -6762,7 +6251,7 @@ on_actions = {
 					name = "Simon Frederiks"
 					picture = "gfx/leaders/kr_generic/Portrait_Africa_Generic_new_4.dds"
 					expire = "1965.1.1"
-					ideology = oligarchism
+					ideology = moderatism
 					traits = {
 						fierce_patriot
 					}
@@ -6819,28 +6308,6 @@ on_actions = {
 					GER = { transfer_state = 69 }
 					74 = { add_core_of = GER }
 					GER = { transfer_state = 74 }
-					if = {
-						limit = {
-							AUS = {
-								OR = {
-									is_puppet_of = GER
-									is_in_faction_with = GER
-								}
-							}
-						}
-						1078 = { add_core_of = AUS }
-						AUS = { transfer_state = 1078 }
-					}
-					else_if = {
-						limit = {
-							GER = {
-								controls_state = 4
-								controls_state = 152
-							}
-						}
-						1078 = { add_core_of = GER }
-						GER = { transfer_state = 1078 }
-					}
 				}
 				if = {
 					limit = {
@@ -6924,8 +6391,6 @@ on_actions = {
 					}
 					69 = { add_core_of = PRE }
 					PRE = { transfer_state = 69 }
-					1078 = { add_core_of = PRE }
-					PRE = { transfer_state = 1078 }
 					74 = { add_core_of = PRE }
 					PRE = { transfer_state = 74 }
 				}
@@ -7004,7 +6469,6 @@ on_actions = {
 					is_puppet_of = AUS
 
 					controls_state = 69
-					controls_state = 1075
 					controls_state = 74
 					AUS = {
 						controls_state = 65
@@ -7013,8 +6477,6 @@ on_actions = {
 				}
 				69 = { add_core_of = AUS }
 				AUS = { transfer_state = 69 }
-				1075 = { add_core_of = AUS }
-				AUS = { transfer_state = 1075 }
 				74 = { add_core_of = AUS }
 				AUS = { transfer_state = 74 }
 			}
@@ -9572,8 +9034,6 @@ on_actions = {
 				}
 			}
 
-			
-
 			#Egyptian resistance buff
 			if = {
 				limit = {
@@ -10194,15 +9654,6 @@ on_actions = {
 					cost_factor = 0
 				}
 			}
-			FRA = {
-				create_production_license = {
-					target = ROM
-					equipment = {
-						type = light_tank_chassis_0
-					}
-					cost_factor = 0
-				}
-			}
 
 			# Remove Egyptian bookmark idea - dynamic modifers don't show there
 			EGY = {
@@ -10624,128 +10075,13 @@ on_actions = {
 							}
 						}
 					}
-					if = { 
-						limit = {
-							HUN = {
-								is_ai = yes
-							}
-						}
-						random_list = {
-							15 = { set_country_flag = AUS_AI_RANDOM_AUSTROFASCIST }
-							10 = { set_country_flag = AUS_AI_RANDOM_HEIMWEHR }
-							5 = { set_country_flag = AUS_AI_RANDOM_LEOPOLD }
-							10 = { set_country_flag = AUS_AI_RANDOM_INQUART }
-							10 = { set_country_flag = AUS_AI_RANDOM_EMPIRE }
-							10 = { set_country_flag = AUS_AI_RANDOM_AUSHUN }
-							10 = { set_country_flag = AUS_AI_RANDOM_MODERATE_RESTORATION }
-							5 = { set_country_flag = AUS_AI_RANDOM_SCHUSCHNIGG_REFORM }
-							10 = { set_country_flag = AUS_AI_RANDOM_FIGL }
-							10 = { set_country_flag = AUS_AI_RANDOM_RENNER }
-							5 = { set_country_flag = AUS_AI_RANDOM_BAUER }
-						}
+					random_list = {
+						60 = { set_country_flag = AUS_AI_RANDOM_AUTHORITARIAN_HISTORICAL }
+						5 = { set_country_flag = AUS_AI_RANDOM_COMMUNIST }
+						10 = { set_country_flag = AUS_AI_RANDOM_FASCIST }
+						10 = { set_country_flag = AUS_AI_RANDOM_DEMOCRATIC }
+						15 = { set_country_flag = AUS_AI_RANDOM_AUSTRIA_HUNGARY }
 					}
-					else = { #Austria will not go Austria-Hungary if Hungary is a player to avoid cucking them
-						random_list = {
-							15 = { set_country_flag = AUS_AI_RANDOM_AUSTROFASCIST }
-							10 = { set_country_flag = AUS_AI_RANDOM_HEIMWEHR }
-							5 = { set_country_flag = AUS_AI_RANDOM_LEOPOLD }
-							10 = { set_country_flag = AUS_AI_RANDOM_INQUART }
-							5 = { set_country_flag = AUS_AI_RANDOM_SCHUSCHNIGG_REFORM }
-							10 = { set_country_flag = AUS_AI_RANDOM_FIGL }
-							10 = { set_country_flag = AUS_AI_RANDOM_RENNER }
-							5 = { set_country_flag = AUS_AI_RANDOM_BAUER }
-						}
-					}
-				}
-				if = {
-					limit = {
-						OR = {
-							AND = {
-								is_historical_focus_on = yes
-								has_game_rule = {
-									rule = AUS_ai_behavior
-									option = DEFAULT
-								}
-							}
-							has_country_flag = AUS_AI_RANDOM_AUSTROFASCIST
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_AUSTROFASCIST
-							}
-						}
-					}
-					set_country_flag = AUS_go_alone_ai
-				}
-				else_if = {
-					limit = {
-						OR = {
-							has_country_flag = AUS_AI_RANDOM_HEIMWEHR
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_HEIMWEHR
-							}
-							has_country_flag = AUS_AI_RANDOM_EMPIRE
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_DESTROY_COMPROMISE
-							}
-							has_country_flag = AUS_AI_RANDOM_AUSHUN
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_AUSTRIA_HUNGARY
-							}
-						}
-					}
-					set_country_flag = AUS_ally_italy_ai
-				}
-				else_if = {
-					limit = {
-						OR = {
-							has_country_flag = AUS_AI_RANDOM_INQUART
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_INQUART_NAZI
-							}
-							has_country_flag = AUS_AI_RANDOM_LEOPOLD
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_LEOPOLD_NAZI
-							}
-						}
-					}
-					set_country_flag = AUS_ally_germany_ai
-				}
-				else_if = {
-					limit = {
-						OR = {
-							has_country_flag = AUS_AI_RANDOM_MODERATE_RESTORATION
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_MODERATE_HABSBURG
-							}
-							has_country_flag = AUS_AI_RANDOM_SCHUSCHNIGG_REFORM
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_SCHUSCHNIGG_REFORM
-							}
-							has_country_flag = AUS_AI_RANDOM_FIGL
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_FIGL
-							}
-							has_country_flag = AUS_AI_RANDOM_RENNER
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_RENNER
-							}
-							has_country_flag = AUS_AI_RANDOM_BAUER
-							has_game_rule = {
-								rule = AUS_ai_behavior
-								option = AUS_BAUER
-							}
-						}
-					}
-					set_country_flag = AUS_ally_west_ai
 				}
 			}
 			CHI = {
@@ -11219,7 +10555,14 @@ on_actions = {
 					}
 				}
 				BEL = {
-					BEL_send_characters_towards_FLA_WLL = yes
+					every_unit_leader = {
+						limit = { has_trait = flemish }
+						set_nationality = FLA
+					}
+					every_unit_leader = {
+						limit = { has_trait = walloon }
+						set_nationality = WLL
+					}
 					transfer_units_fraction = {
 						target = FLA
 						size = 0.5
@@ -11300,7 +10643,14 @@ on_actions = {
 					}
 				}
 				BEL = {
-					BEL_send_characters_towards_FLA_WLL = yes
+					every_unit_leader = {
+						limit = { has_trait = flemish }
+						set_nationality = FLA
+					}
+					every_unit_leader = {
+						limit = { has_trait = walloon }
+						set_nationality = WLL
+					}
 				}
 				FAK = {
 					annex_country = {
@@ -20142,6 +19492,7 @@ on_actions = {
 					ROOT = { tag = EGY }
 					FROM.FROM = {
 						NOT = {
+							has_country_flag = EGY_sudan_was_pacified
 							has_state_flag = EGY_mild_sudanese_separatism_flag
 						}
 						has_state_flag = EGY_sudanese_state_not_egypt
@@ -20172,6 +19523,7 @@ on_actions = {
 					ROOT = { tag = EGY }
 					FROM.FROM = {
 						NOT = {
+							has_country_flag = EGY_sudan_was_pacified
 							has_state_flag = EGY_mild_sudanese_separatism_flag
 						}
 						has_state_flag = EGY_sudanese_state_not_egypt
@@ -20202,6 +19554,7 @@ on_actions = {
 					ROOT = { tag = EGY }
 					FROM.FROM = {
 						NOT = {
+							has_country_flag = EGY_sudan_was_pacified
 							has_state_flag = EGY_mild_sudanese_separatism_flag
 						}
 						has_state_flag = EGY_sudanese_state_not_egypt
@@ -20312,13 +19665,6 @@ on_actions = {
 					long_name = "Unionist Party"
 				}
 			}
-			if = {
-				limit = {
-					original_tag = ROM
-					has_country_flag = ROM_bound_to_comintern_flag
-				}
-				clr_country_flag = ROM_bound_to_comintern_flag
-			}
 		}
 	}
 
@@ -20360,7 +19706,6 @@ on_actions = {
 			}
 			if = {
 				limit = {
-					original_tag = RUT
 					RUT = {
 						has_cosmetic_tag = RUT3
 					}
@@ -20368,16 +19713,6 @@ on_actions = {
 				RUT = {
 					drop_cosmetic_tag = yes
 				}
-			}
-			if = {
-				limit = {
-					original_tag = ENG
-					has_country_leader = {
-						name = "Fallen Government"
-					}
-				}
-				promote_character = ENG_clement_attlee
-
 			}
 		}
 	}
@@ -21148,100 +20483,7 @@ on_actions = {
 					}
 				}
 			}
-			
-			if = {
-				limit = {
-					OR = {
-						AND = {
-							FROM = {
-								original_tag = AUS
-							}
-							ROOT = {
-								owns_state = 9
-								controls_state = 69
-							}
-						}
-						AND = {
-							FROM = {
-								owns_state = 9
-								controls_state = 69
-							}
-							ROOT = {
-								original_tag = AUS
-							}
-						}
-					}
-					AUS = {
-						has_completed_focus = AUS_arm_sudeten_germans
-						NOT = {
-							has_country_flag = AUS_sudeten_risen
-						}
-					}
-					
-				}
-				AUS = {
-					hidden_effect = {
-						
-						division_template = {
-							name = "Sudeten Rebels"
-							division_names_group = AUS_INF_01
-							priority = 1
-		
-							regiments = {
-								infantry = { x = 0 y = 0 }
-								infantry = { x = 0 y = 1 }
-								infantry = { x = 0 y = 2 }
-								infantry = { x = 0 y = 3 }
-								infantry = { x = 1 y = 0 }
-								infantry = { x = 1 y = 1 }
-							}
-						}
-					}
-					69 = {
-						log = "sus"
-						create_unit = {
-							division = "name = \"Sudeten Rebels\" division_template = \"Sudeten Rebels\" start_experience_factor = 0.05 start_equipment_factor = 0.9" 
-							owner = AUS
-							count = 1
-							allow_spawning_on_enemy_provs = yes
-							prioritize_location = 6470
-						}
-						create_unit = {
-							division = "name = \"Sudeten Rebels\" division_template = \"Sudeten Rebels\" start_experience_factor = 0.05 start_equipment_factor = 0.9" 
-							owner = AUS
-							count = 1
-							allow_spawning_on_enemy_provs = yes
-							prioritize_location = 11401
-						}
-						create_unit = {
-							division = "name = \"Sudeten Rebels\" division_template = \"Sudeten Rebels\" start_experience_factor = 0.05 start_equipment_factor = 0.9" 
-							owner = AUS
-							count = 1
-							allow_spawning_on_enemy_provs = yes
-							prioritize_location = 11432
-						}
-					}
-					if = {
-						limit = {
-							74 = {
-								is_controlled_by = 9.owner
-							}
-						}
-						74 = {
-							create_unit = {
-								division = "name = \"Sudeten Rebels\" division_template = \"Sudeten Rebels\" start_experience_factor = 0.05 start_equipment_factor = 0.9" 
-								owner = AUS
-								count = 1
-								allow_spawning_on_enemy_provs = yes
-								prioritize_location = 6485
-							}
-						}
-					}
-					set_country_flag = AUS_sudeten_risen
-				}
-			}
 		}
-		
 	}
 	#ROOT - country that just went to peace
 	on_peaceconference_ended = {
@@ -21693,7 +20935,6 @@ on_actions = {
 				}
 				set_country_flag = den_has_joined_faction
 			}
-			
 		}
 	}
 
@@ -22297,32 +21538,6 @@ on_actions = {
 					den_stratas_enabled = yes
 				}
 				den_calculate_eqilibirum_monthly = yes
-			}
-		}
-	}
-	on_monthly_LIE = {
-		effect = {
-			if = {
-				limit = {
-					tag = LIE
-					has_power_balance = {
-						id = LIE_landtag_balance_of_power
-					}
-				}
-				random_list = {
-					70 = {
-
-					}
-					10 = {
-						country_event = { id = liechtenstein.bop.1 }
-					}
-					10 = {
-						country_event = { id = liechtenstein.bop.2 }
-					}
-					10 = {
-						country_event = { id = liechtenstein.bop.3 }
-					}
-				}
 			}
 		}
 	}
