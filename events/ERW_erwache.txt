@@ -624,36 +624,47 @@ country_event = {
 	id = erwache.8
 	title = germany.28.t
 	desc = germany.28.d
-	picture = GFX_report_event_hitler_parade
+	picture = GFX_report_event_GER_hitler_anschluss
 
 	is_triggered_only = yes
 
 	option = { # Accept
 		name = germany.28.a
 		ai_chance = {
-			base = 30
-			modifier = {
-				add = -25
-				GER = { has_army_size = { size < 40 } }
-			}
-			modifier = {
-				add = 100
-				GER = { has_army_size = { size > 39 } }
-			}
+			base = 50
 			modifier = {	#sabotage then, so the chance is lower
 				factor = 0.05
 				has_global_flag = CZE_anschluss_sabotage_flag
 			}
-			modifier = {	#why accept if Italy loves us?
+			modifier = {
 				factor = 0
-				AUS = {
-					is_in_faction_with = ITA
+				strength_ratio = {
+					tag = GER
+					ratio > 0.75
 				}
+			}
+			modifier = {
+				factor = 0.2
+				strength_ratio = {
+					tag = GER
+					ratio > 0.5
+				}
+			}
+			modifier = {
+				factor = 2
+				has_idea = AUS_july_agreement
 			}
 			modifier = {	#shall always refuse Anschluss then!
 				factor = 0
 				AUS = {
 					has_country_flag = protected_by_the_stresa_front_flag
+				}
+			}
+			modifier = {
+				factor = 0
+				OR = {
+					has_country_flag = AUS_west_allied
+					has_country_flag = AUS_italy_allied
 				}
 			}
 		}
@@ -662,8 +673,66 @@ country_event = {
 		}
 		custom_effect_tooltip = GAME_OVER_TT
 	}
-	option = { # Refuse
+	option = { # Refuse 
 		name = germany.28.b
+		trigger = {
+			OR = {
+				has_government = fascism
+				AND = {
+					has_government = democratic
+					NOT = {
+						has_completed_focus = AUS_fall_from_grace
+					}
+				}
+				has_government = communism
+			}
+		}
+		ai_chance = {
+			base = 50
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+			modifier = {	#adds a degree of randomness, but will not push over the top
+				add = 80
+				ITA = {
+					OR = {
+						has_completed_focus = ITA_guarantee_austrian_independence
+						is_in_faction_with = AUS
+					}
+				}
+			}
+		}
+		GER = {
+			add_opinion_modifier = { target = ROOT modifier = GER_anschluss_rejected }
+			country_event = { hours = 2 id = erwache.9 }
+			if = { limit = { is_in_faction_with = AUS }
+				remove_from_faction = AUS
+			}
+		}
+		
+		hidden_effect = {
+			set_country_flag = AUS_anschluss_rejected
+		}
+
+		custom_effect_tooltip = AUS_germany_back_down_maybe
+	}
+	option = { # Refuse Empire
+		name = germany.28.c
+		trigger = {
+			OR = {
+				AND = {
+					has_cosmetic_tag = AUS_EMPIRE
+					has_government = democratic 
+				}
+				AND = {
+					has_government = neutrality
+					NOT = {
+						has_cosmetic_tag = AUS_REPUBLIC
+					}
+				}
+			}
+		}
 		ai_chance = {
 			base = 10
 			modifier = {
@@ -723,6 +792,37 @@ country_event = {
 			target = AUS
 			generator = { 4 152 153 848 1054 }
 		}
+		add_stability = -0.05
+		ai_chance = {
+			base = 60
+			modifier = {
+				factor = 0
+				has_war_with_major = yes
+			}
+			modifier = {
+				factor = 0
+				AUS = {
+					OR = {
+						has_country_flag = AUS_italy_allied
+						has_country_flag = AUS_west_allied
+					}
+				}
+			}
+		}
+		news_event = {
+			id = austria.134
+			days = 1
+			random_hours = 12
+		}
+	}
+	option = {
+		name = germany.29.b
+		set_country_flag = GER_backed_down_anschluss
+		news_event = {
+			id = austria.134
+			days = 1
+			random_hours = 12
+		}
 	}
 }
 
@@ -731,7 +831,7 @@ country_event = {
 	id = erwache.10
 	title = germany.4.t
 	desc = germany.4.d
-	picture = GFX_report_event_german_speech
+	picture = GFX_report_event_GER_hitler_anschluss
 
 	is_triggered_only = yes
 
@@ -774,13 +874,12 @@ country_event = {
 			every_unit_leader = {
 				limit = {
 					OR = {
-						has_id = 1224
-						has_id = 1226
-						has_id = 1227
-						has_id = 1228
-						has_id = 1234	
+						has_trait = AUS_nazi_loyalties
+						is_character = AUS_karl_eglseer
 					}
-					
+				}
+				remove_trait = {
+					trait = AUS_nazi_loyalties
 				}
 				set_nationality = GER
 			}
