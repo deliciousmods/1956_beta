@@ -310,7 +310,7 @@ country_event = { #Resolves Europe Post Yalta
 						is_government_in_exile = yes
 						is_ai = yes
 					}
-					end_exile = yes
+					end_exile = GER
 				}
 			}
 			if = {
@@ -937,6 +937,9 @@ country_event = { #Resolves Europe Post Yalta
 			if = {
 				limit = {
 					has_global_flag = r56_AUS_in_yalta
+					NOT = {
+						has_global_flag = r56_historical_occupation_yalta_allowed
+					}
 				}
 				if = {
 					limit = {
@@ -947,34 +950,33 @@ country_event = { #Resolves Europe Post Yalta
 					SOV = {
 						end_puppet = AUS
 					}
-					if = {
-						limit = {
-							AUS = {
-								is_in_faction_with = SOV
-							}
+				}
+				if = {
+					limit = {
+						AUS = {
+							is_in_faction_with = SOV
 						}
-						SOV = { remove_from_faction = AUS }
 					}
-					if = {
-						limit = {
-							has_global_flag = r56_AUS_in_yalta
-							NOT = {
-								has_global_flag = r56_yalta_origin_is_communism
-								has_global_flag = r56_yalta_origin_is_fascism
-								has_global_flag = r56_yalta_origin_is_neutrality
-							}
-							AUS = {
-								NOT = {
-									has_government = democratic
-								}
-							}
+					SOV = { remove_from_faction = AUS }
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_global_flag = r56_yalta_origin_is_communism
+							has_global_flag = r56_yalta_origin_is_fascism
+							has_global_flag = r56_yalta_origin_is_neutrality
 						}
 						AUS = {
-							set_politics = { ruling_party = democratic elections_allowed = yes }
-							add_popularity = {
-								ideology = democratic
-								popularity = 0.5
+							NOT = {
+								has_government = democratic
 							}
+						}
+					}
+					AUS = {
+						set_politics = { ruling_party = democratic elections_allowed = yes }
+						add_popularity = {
+							ideology = democratic
+							popularity = 0.5
 						}
 					}
 				}
@@ -1187,7 +1189,7 @@ country_event = { #Resolves Europe Post Yalta
 							popularity = 0.55
 						}
 						set_politics = { ruling_party = communism elections_allowed = no }
-						if = {
+						if = {		#2024 note: this is silly but is more interesting for SOV, should be cut if east europe gets post-war mini trees
 							limit = {
 								NOT = {
 									has_completed_focus = YUG_join_comintern
@@ -2386,10 +2388,15 @@ country_event = { #Historical post yalta fixing by marijn211
 				limit = {
 					has_global_flag = r56_AUS_in_yalta
 				}
-				USA = {
-					annex_country = {
-						target = AUS
-						transfer_troops = no
+				every_country = {
+					limit = {
+						original_tag = AUS
+					}
+					USA = {
+						annex_country = {
+							target = PREV
+							transfer_troops = no
+						}
 					}
 				}
 				if = { #Tyrol - Austria
@@ -2415,6 +2422,14 @@ country_event = { #Historical post yalta fixing by marijn211
 						}
 					}
 					SOV = { transfer_state = 4 }
+				}
+				if = { #Soviet Austria
+					limit = {
+						1086 = { #Burgenland
+							is_owned_by = USA
+						}
+					}
+					SOV = { transfer_state = 1086 }
 				}
 				if = { #Bri'ish Austria
 					limit = {
@@ -2472,6 +2487,21 @@ country_event = { #Historical post yalta fixing by marijn211
 			}
 			ENG = {
 				activate_mission = occupation_of_iran_decision
+			}
+		}
+		if = {
+			limit = {
+				has_global_flag = r56_AUS_in_yalta
+			}
+			every_state = {
+				limit = {
+					is_core_of = AUS
+					is_core_of = GER
+					NOT = {	#just in case a puppet Germany slips through
+						is_owned_by = GER
+					}
+				}
+				remove_core_of = GER
 			}
 		}
 		if = { #Fix Tyrol
@@ -2751,6 +2781,17 @@ country_event = { #Historical post yalta fixing by marijn211
 					}
 					transfer_state = 89
 				}
+				if = {
+					limit = {
+						784 = { #Wilno
+							is_owned_by = POL
+							owner = {
+								is_ai = yes
+							}
+						}
+					}
+					transfer_state = 784
+				}
 			}
 			POL = {	#return Bialystok, which the Soviets take in MolRib
 				if = {
@@ -2761,6 +2802,25 @@ country_event = { #Historical post yalta fixing by marijn211
 						}
 					}
 					transfer_state = 97
+				}
+				if = {	#hopefully fix Danzig enclave
+					limit = {
+						5 = {
+							is_owned_by = PREV
+						}
+						807 = {
+							is_owned_by = PREV
+						}
+						85 = {
+							owner = {
+								NOT = {
+									original_tag = DNZ
+									is_ai = no
+								}
+							}
+						}
+					}
+					transfer_state = 85
 				}
 			}
 			#Removing cores that are still around
@@ -3331,7 +3391,7 @@ country_event = { #Give Hungary Southern Slovakia?
 			}
 		}		
 		ai_chance = {
-			factor = 80
+			base = 80
 		}
 		if = {
 			limit = {
@@ -3377,7 +3437,7 @@ country_event = { #Give Hungary Southern Slovakia?
 		}
 
 		ai_chance = {
-			factor = 20
+			base = 20
 			modifier = {
 				factor = 0
 				is_historical_focus_on = yes
@@ -3399,7 +3459,7 @@ country_event = { #Give Hungary Southern Slovakia?
 		}
 
 		ai_chance = {
-			factor = 20
+			base = 20
 			modifier = {
 				factor = 0
 				is_historical_focus_on = yes
@@ -3569,8 +3629,8 @@ country_event = { #Germany offers to "protect Poland"
 		FROM = {
 			country_event = {
 				id = r56.ger.19
-				hours = 2
-				random = 20
+				days = 1
+				random_hours = 6
 			}
 		}
 		if = {
@@ -3634,8 +3694,8 @@ country_event = { #Germany offers to "protect Poland"
 		FROM = {
 			country_event = {
 				id = r56.ger.18
-				hours = 2
-				random = 20
+				days = 1
+				random_hours = 6
 			}
 		}
 	}
@@ -3688,7 +3748,7 @@ country_event = { #Democratic anschluss
 	option = { #Yes
 		name = r56.ger.20.a
 		trigger = {
-			communism < 0.3
+			fascism < 0.3
 		}
 		ai_chance = {
 			base = 10
@@ -3703,15 +3763,16 @@ country_event = { #Democratic anschluss
 			add_state_core = 153
 			add_state_core = 848
 			add_state_core = 1054
+			add_state_core = 1086
 			#AI would probably do stupid things with a claim on South Tyrol, perhaps something for a future focus
 			set_country_flag = GER_dem_anschluss_accepted
 		}
 		country_event = r56.ger.26 #world event
 	}
-	option = { #Yes, except the referendum doesnt pass because of commies
+	option = { #Yes, except the referendum doesnt pass because of fascists
 		name = r56.ger.20.a
 		trigger = {
-			communism > 0.3
+			fascism > 0.3
 		}
 		ai_chance = {
 			base = 10
@@ -3727,7 +3788,7 @@ country_event = { #Democratic anschluss
 			base = 3
 			modifier = {
 				factor = 0
-				communism > 0.3 #take the other option, but keep it available for players
+				fascism > 0.3 #take the other option, but keep it available for players
 			}
 			modifier = {
 				factor = 8
@@ -3811,7 +3872,7 @@ country_event = { #Trade Oberschlesien for Gdynia
 	option = { #Yes
 		name = r56.ger.22.a
 		ai_chance = { 
-			factor = 75
+			base = 75
 			modifier = { #were kinda busy
 				factor = 0
 				has_war = yes
@@ -3848,7 +3909,7 @@ country_event = { #Trade Oberschlesien for Gdynia
 	option = { #No
 		name = r56.ger.22.b
 		ai_chance = { 
-			factor = 25
+			base = 25
 		}
 		set_global_flag = GER_dem_poland_trade_failed
 		GER = {
@@ -3920,7 +3981,7 @@ country_event = { #Trade Lithuania for Gdynia (allows forming Poland-Lithuania)
 	option = { #Yes
 		name = r56.ger.24.a
 		ai_chance = { 
-			factor = 75
+			base = 75
 			modifier = { #we're kinda busy
 				factor = 0
 				has_war = yes
@@ -3946,7 +4007,7 @@ country_event = { #Trade Lithuania for Gdynia (allows forming Poland-Lithuania)
 	option = { #No
 		name = r56.ger.22.b
 		ai_chance = { 
-			factor = 25
+			base = 25
 		}
 		set_global_flag = GER_dem_poland_trade_failed
 		GER = {
@@ -4292,7 +4353,7 @@ country_event = { #Germany proposes invading communist Yugoslavia with Italy
 	option = { #Yes
 		name = r56.ger.28.a
 		ai_chance = { 
-			factor = 80
+			base = 80
 			modifier = { #we're kinda busy
 				factor = 0
 				any_home_area_neighbor_country = {
@@ -4319,7 +4380,7 @@ country_event = { #Germany proposes invading communist Yugoslavia with Italy
 	option = { #No
 		name = r56.ger.28.b
 		ai_chance = { 
-			factor = 20
+			base = 20
 		}
 	}
 }
@@ -4337,7 +4398,7 @@ country_event = { #Germany proposes to aid Britain in exchange for some colonies
 	option = { #Yes
 		name = r56.ger.29.a
 		ai_chance = { 
-			factor = 10
+			base = 10
 			modifier = {
 				add = 8
 				any_country = { #at some risk
@@ -4390,7 +4451,7 @@ country_event = { #Germany proposes to aid Britain in exchange for some colonies
 	option = { #No
 		name = r56.ger.29.b
 		ai_chance = { 
-			factor = 0
+			base = 0
 			modifier = { #we can handle this
 				add = 10
 				NOT = {
@@ -4448,9 +4509,7 @@ country_event = { #Ludendorff's health worsens
 			}
 			GER_monarchist_bop_low_decrease_effect = yes
 		}
-		GER_erich_ludendorff = {
-			remove_unit_leader = yes
-		}
+		remove_unit_leader_role = GER_erich_ludendorff
 		custom_effect_tooltip = available_political_advisor
 		show_ideas_tooltip = GER_erich_ludendorff
 		set_country_flag = GER_ludendorff_political_advisor
@@ -4526,7 +4585,7 @@ country_event = { #Ludendorff dies (retired)
 country_event = { #Germany proposes economic integration
 	id = r56.ger.34
 	title = r56.ger.34.t
-	desc = r56.ger.34.desc
+	desc = r56.ger.34.d
 	picture = GFX_report_event_generic_construction_site
 
 	is_triggered_only = yes
@@ -4534,7 +4593,7 @@ country_event = { #Germany proposes economic integration
 	option = {	#yippie!
 		name = r56.ger.34.a
 		ai_chance = {
-			factor = 10
+			base = 10
 			modifier = {
 				add = 5
 				FROM = {
@@ -4592,7 +4651,7 @@ country_event = { #Germany proposes economic integration
 	option = {	#no!
 		name = r56.ger.34.b
 		ai_chance = {
-			factor = 10
+			base = 10
 			modifier = {
 				add = 5
 				FROM = {
@@ -4640,7 +4699,7 @@ country_event = { #Germany proposes economic integration
 			}
 		}
 		ai_chance = {
-			factor = 10
+			base = 10
 			modifier = {
 				factor = 0
 				is_in_faction_with = FROM
@@ -4795,16 +4854,7 @@ country_event = { #The military seizes power from Kaiser
 			}
 			add_ideas = GER_wilhelm_iv_idea
 		}
-		GER_kurt_von_hammerstein_equord = {
-			add_country_leader_role = {
-				promote_leader = yes
-				country_leader = {
-					ideology = military_junta
-					expire = "1965.1.1"
-					traits = { SWE_conservatist }
-				}
-			}
-		}
+		promote_character = GER_kurt_von_hammerstein_equord
 	}
 }
 
@@ -4899,13 +4949,13 @@ country_event = { #Kaiser takes power back
 country_event = { #Germany succeeds coup attempt on us
 	id = r56.ger.39
 	title = r56.ger.39.t
-	desc = r56.ger.39.desc
+	desc = r56.ger.39.d
 	picture = GFX_report_event_generic_italian_fascists
 
 	option = {
 		name = r56.ger.39.a
 		ai_chance = {
-			factor = 9
+			base = 9
 		}
 		if = {
 			limit = {
@@ -4979,7 +5029,7 @@ country_event = { #Germany succeeds coup attempt on us
 	option = {	#civil war
 		name = r56.ger.39.b
 		ai_chance = {
-			factor = 1
+			base = 1
 		}
 		if = {
 			limit = {
@@ -5145,13 +5195,11 @@ country_event = { #Commie German
 	desc = ger.civil_war.2.desc
 	picture = GFX_report_event_generic_sign_treaty2
 
-	fire_only_once = no
-
 	is_triggered_only = yes
 
 	option = { #Yes
 		ai_chance = { 
-			factor = 10
+			base = 10
 		}
 		name = ger.civil_war.2.a
 		hidden_effect={
@@ -5179,7 +5227,7 @@ country_event = { #Commie German
 	option = { #No
 		name = ger.civil_war.2.b
 		ai_chance = { 
-			factor = 1
+			base = 1
 		}
 	}
 }
@@ -5192,13 +5240,11 @@ country_event = { # Democratic Germany offers to renegotiate the treaty of Versa
 	desc = ger.renegotiate_versailles.1.d
 	picture = GFX_report_event_gre_allied_diplomacy
 
-	fire_only_once = no
-
 	is_triggered_only = yes
 
 	option = { # Sure, why not?
 		ai_chance = { 
-			factor = 10
+			base = 10
 		}
 		name = ger.renegotiate_versailles.1.a
 		diplomatic_relation = {
@@ -5221,7 +5267,7 @@ country_event = { # Democratic Germany offers to renegotiate the treaty of Versa
 	option = { # You wot mate?
 		name = ger.renegotiate_versailles.1.b
 		ai_chance = { 
-			factor = 1
+			base = 1
 		}
 		FROM = {
 			country_event = { id = ger.renegotiate_versailles.3 hours = 6 }
@@ -5235,14 +5281,9 @@ country_event = { #
 	desc = ger.renegotiate_versailles.2.d
 	picture = GFX_report_event_generic_sign_treaty3
 
-	fire_only_once = no
-
 	is_triggered_only = yes
 
 	option = { # Sure, why not?
-		ai_chance = { 
-			factor = 10
-		}
 		name = ger.renegotiate_versailles.2.a
 		if = {
 			limit = {
@@ -5266,9 +5307,6 @@ country_event = { #
 	is_triggered_only = yes
 
 	option = { # Sure, why not?
-		ai_chance = { 
-			factor = 10
-		}
 		name = ger.renegotiate_versailles.3.a
 		add_political_power = 10
 	}
@@ -5287,7 +5325,7 @@ country_event = {
 	option = { # Hell naw
 		name = ger_brest_litovsk.1.a
 		ai_chance = {
-			factor = 10
+			base = 10
 			modifier = {
 				add = 10 
 				FROM = {
@@ -5321,7 +5359,7 @@ country_event = {
 	option = { # We give up
 		name = ger_brest_litovsk.1.b
 		ai_chance = {
-			factor = 10000
+			base = 10000
 			modifier = {
 				add = 10
 				FROM = {
@@ -5666,7 +5704,7 @@ country_event = {
 	option = { #Let's be historical
 		name = r56.ger.45.a
 		ai_chance = {
-			factor = 0
+			base = 0
 			modifier = {
 				is_historical_focus_on = yes
 				add = 1000
@@ -5686,7 +5724,7 @@ country_event = {
 	option = { #Let's do what they said
 		name = r56.ger.45.b
 		ai_chance = {
-			factor = 0
+			base = 0
 			modifier = {
 				is_historical_focus_on = no
 				add = 10
