@@ -1188,6 +1188,12 @@ focus_tree = {
 
 		x = 10
 		y = 4
+		offset = {
+			x = 1
+			trigger = {
+				has_country_flag = yalta_unlock_focuses
+			}
+		}
 		cost = 5
 
 		completion_reward = {
@@ -1289,9 +1295,16 @@ focus_tree = {
 		prerequisite = { focus = CZKE_new_tanks }
 		prerequisite = { focus = CZKE_artillery_focus }
 
-		x = 7
-		y = 7
-		cost = 14.3
+		relative_position_id = CZKE_new_tanks
+		x = 1
+		y = 1
+		offset = {
+			x = -2
+			trigger = {
+				has_country_flag = yalta_unlock_focuses
+			}
+		}
+		cost = 10	#reduced from 14.3 (100 days)
 
 		completion_reward = {
 			#custom_effect_tooltip = new_research
@@ -1306,13 +1319,151 @@ focus_tree = {
 	}
 
 	focus = {
+        id = CZKE_finish_the_tvp_project
+        icon = GFX_goal_tank_offensive
+
+		relative_position_id =  CZKE_new_tanks
+        x = 1
+        y = 1
+        cost = 5
+
+		allow_branch = {
+			has_country_flag = yalta_unlock_focuses
+		}
+
+		prerequisite = { focus = CZKE_new_tanks }
+		prerequisite = { focus = CZKE_artillery_focus }
+
+		mutually_exclusive = {
+			focus = CZKE_acquire_soviet_tanks
+		}
+
+        available = {
+            is_subject = no
+            if = {
+                limit = {
+                    has_dlc = "No Step Back"
+                }
+                has_tech = advanced_medium_tank_chassis
+                else = {
+                    has_tech = advanced_medium_tank
+                }
+            }
+        }
+
+        search_filters = { FOCUS_FILTER_POLITICAL }
+        completion_reward = {
+            if = {
+                limit = {
+                    has_dlc = "No Step Back"
+                }
+                create_equipment_variant = {	#very expensive, so needs to give some free tanks to compensate
+                    name = "TVP 50/51"
+                    type = medium_tank_chassis_3
+                    parent_version = 0
+                    modules = {
+                        main_armament_slot = r56_tank_medium_cannon_3    #either advanced medium or heavy
+                        turret_type_slot = tank_medium_three_man_tank_turret
+                        suspension_type_slot = tank_christie_suspension
+                        armor_type_slot = tank_cast_armor   #technically same as T-34, only turret
+                        engine_type_slot = tank_diesel_engine
+                        special_type_slot_1 = sloped_armor
+                    }
+                    upgrades = {
+                        tank_nsb_engine_upgrade = 10
+                        tank_nsb_armor_upgrade = 7
+                    }
+                    icon = "GFX_SOV_improved_medium_tank_medium"
+                }
+				add_equipment_to_stockpile = {
+					type = medium_tank_chassis_3
+					amount = 150
+					variant_name = "TVP 50/51"
+				}
+            }
+			else = {
+				create_equipment_variant = {
+					name = "TVP 50/51"
+					type = medium_tank_equipment_3
+					parent_version = 0
+					upgrades = {
+						tank_reliability_upgrade = 2
+						tank_engine_upgrade = 3
+						tank_armor_upgrade = 3			#nice cast/angled armor probably
+						tank_gun_upgrade = 2			#kinda low power but solid nonetheless		
+					}
+					icon = "GFX_SOV_improved_medium_tank_medium"
+				}
+				add_equipment_to_stockpile = {
+					type = medium_tank_equipment_3
+					amount = 150
+					variant_name = "medium_tank_equipment_3"
+				}
+			}
+        }
+    }
+
+	focus = {
+		id = CZKE_acquire_soviet_tanks
+		icon = GFX_focus_SOV_the_glory_of_the_red_army_communism
+		x = 2
+		y = 0
+		relative_position_id = CZKE_finish_the_tvp_project
+		cost = 5
+
+		allow_branch = {
+			has_country_flag = yalta_unlock_focuses
+		}
+
+		prerequisite = { focus = CZKE_new_tanks }
+		prerequisite = { focus = CZKE_artillery_focus }
+
+		mutually_exclusive = {
+			focus = CZKE_finish_the_tvp_project
+		}
+
+		available = {
+			has_government = SOV
+			NOT = {
+				has_war_with = SOV
+				has_global_flag = CZE_revolted_against_soviets
+			}
+			SOV = {
+				if = {
+					limit = {
+						has_dlc = "No Step Back"
+					}
+					has_equipment = {
+						medium_tank_chassis > 300
+					}
+				}
+				else = {
+					has_equipment = {
+						medium_tank_equipment > 300
+					}
+				}
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			SOV = {
+				country_event = cold_war.44
+			}
+			custom_effect_tooltip = if_they_accept
+			event_option_tooltip = cold_war.44.a
+		}
+	}
+
+	focus = {
 		id = CZKE_armoured_cars
 		icon = GFX_goal_generic_armored_car_offensive
 
 		prerequisite = { focus = CZKE_armament_2b }
 
-		x = 10
-		y = 6
+		x = 0
+		y = 2
+		relative_position_id = CZKE_armament_2b
 		cost = 10
 
 		completion_reward = {
@@ -1344,9 +1495,10 @@ focus_tree = {
 		icon = GFX_goal_mechanized_offensive
 		prerequisite = { focus = CZKE_armoured_cars }
 
-		x = 10
-		y = 7
-		cost = 14.3
+		x = 0
+		y = 1
+		relative_position_id = CZKE_armoured_cars
+		cost = 10	#shortened from 14.3 (100 days)
 
 		completion_reward = {
 			#custom_effect_tooltip = new_research
@@ -1547,6 +1699,84 @@ focus_tree = {
 							icon = "GFX_CZE_CAS3_medium"
 						}
 					}
+				}
+			}
+		}
+	}
+
+	focus = {   #around 1948
+		id = CZKE_continue_producing_german_designs
+		icon = GFX_goal_multiple_bombers
+
+		allow_branch = {
+			has_global_flag = end_of_czechoslovakia
+			has_country_flag = hide_interwar_diplomacy
+		}
+
+		prerequisite = {
+			focus = CZKE_air_modernization
+		}
+
+		x = 1
+		y = 1
+		relative_position_id = CZKE_air_modernization
+
+		bypass = {
+			if = {
+				limit = {
+					NOT = {
+						has_dlc = "By Blood Alone"
+					}
+				}
+				has_tech = fighter2
+			}
+			else = {
+				hidden_trigger = {
+					always = no
+				}
+			}
+		}
+
+		cost = 5
+
+		search_filters = { FOCUS_FILTER_RESEARCH }
+		completion_reward = {
+			if = {
+				limit = {
+					has_dlc = "By Blood Alone"
+				}
+				set_technology = {
+					basic_small_airframe = 1
+					improved_small_airframe = 1
+				}
+				# create_equipment_variant = {    #copy of Bf 109 G with original engine, due to lack of engine should be limited
+				#     name = "Avia S-99"
+				#     type = small_plane_airframe_2
+				#     modules = {
+				#         fixed_main_weapon_slot = aircraft_cannon_1_1x
+				#         fixed_auxiliary_weapon_slot_1 = light_mg_2x
+				#         engine_type_slot = engine_3_1x
+				#         special_type_slot_1 = empty
+				#     }
+				#     icon = "GFX_GER_fighter1_medium"
+				#     design_team = mio:CZE_avia_organization
+				# }
+				create_equipment_variant = {    #copy of Bf 109 G with inferior more available engine
+					name = "Avia S-199"
+					type = small_plane_airframe_2
+					modules = {
+						fixed_main_weapon_slot = aircraft_cannon_1_1x
+						fixed_auxiliary_weapon_slot_1 = light_mg_2x
+						engine_type_slot = engine_2_1x
+						special_type_slot_1 = empty
+					}
+					icon = "GFX_GER_fighter1_medium"
+					design_team = mio:CZE_avia_organization
+				}
+			}
+			else = {
+				set_technology = {
+					fighter2 = 1
 				}
 			}
 		}
@@ -2268,6 +2498,12 @@ focus_tree = {
 
 		prerequisite = { focus = CZKE_intelligence_service_offense }
 
+		allow_branch = {
+			NOT = {
+				has_country_flag = hide_interwar_diplomacy
+			}
+		}
+
 		available = { 
 			GER = { 
 				exists = yes
@@ -2608,11 +2844,7 @@ focus_tree = {
 			#custom_effect_tooltip = report_reward
 			#custom_effect_tooltip = CZKE_soviet_treaties_tooltip_reward_1
 			custom_effect_tooltip = diplomatic_reward	
-			effect_tooltip = {
-				CZE = {
-					set_technology = { tactical_bomber1 = 1 }
-				}
-			}
+			event_option_tooltip = czke.318.a
 		}
 	}
 
@@ -2671,13 +2903,17 @@ focus_tree = {
 		icon = GFX_goal_cze_revive_the_little_entente
 		prerequisite = { focus = CZKE_france_alliance }
 		mutually_exclusive = { focus = CZKE_soviet_treaties }
+		allow_branch = {
+			NOT = {
+				has_country_flag = hide_interwar_diplomacy
+			}
+		}
 		available = {
-			 NOT = {
-			 	OR = {
-			 		has_government = communism has_government = fascism
-			 	} 
-			 }
-			is_puppet = no
+			NOT = {
+				has_government = communism
+				has_government = fascism
+			}
+			is_subject = no
 			is_in_faction = no
 			country_exists = ROM
 			country_exists = YUG	
@@ -2714,7 +2950,7 @@ focus_tree = {
 		y = 4
 		cost = 10
 		available = {
-			is_puppet = no
+			is_faction_leader = yes
 			has_war = no
 			YUG = { exists = yes OR = { has_government = neutrality has_government = democratic } }
 		}
@@ -2749,10 +2985,15 @@ focus_tree = {
 		cost = 10
 
 		available = {
-			is_puppet = no
+			is_faction_leader = yes
 			has_war = no
-		    ROM = { exists = yes OR = { has_government = neutrality has_government = democratic } }
-
+		    ROM = {
+				exists = yes
+				OR = {
+					has_government = neutrality
+					has_government = democratic
+				}
+			}
 		}
 
 		bypass = {
@@ -2777,7 +3018,7 @@ focus_tree = {
 	}
 
 	focus = {
-		id = CZKE_hungary_intervention 
+		id = CZKE_hungary_intervention
 		icon = GFX_goal_generic_attack_hungary
 		prerequisite = { focus = CZKE_invite_romania }
 		prerequisite = { focus = CZKE_invite_yugoslavia }
@@ -2815,18 +3056,17 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
 	focus = {
-		id = CZKE_hungarian_alliance 
+		id = CZKE_hungarian_alliance
 		mutually_exclusive = { focus = CZKE_hungary_intervention }
 		available = {
-			
+			is_faction_leader = yes
 			HUN = {
 				has_government = democratic
+				NOT = {
+					has_war_with = ROOT
+				}
 			}
-		}	
-		
-		bypass = {
-			
-		}	
+		}
 		
 		icon = GFX_goal_generic_befriend_hungary
 		prerequisite = { focus = CZKE_invite_romania }
@@ -3223,9 +3463,15 @@ focus_tree = {
 		prerequisite = { focus = CZKE_empower_internationalism focus = CZKE_sokol_movement }
 		mutually_exclusive = { focus = CZKE_state_defense_law focus = CZKE_boycott_press_law }
 
+		allow_branch = {
+			NOT = {
+				has_country_flag = hide_interwar_diplomacy
+			}
+		}
+
 		available = { 
 			has_government = democratic 
-			NOT = { 
+			NOT = {
 				has_country_flag = czke_karlsbad_program 
 			} 
 		}
@@ -3296,6 +3542,26 @@ focus_tree = {
 	}
 
 	focus = {
+		id = CZKE_collectivize_key_industries    #mines, banks
+		icon = GFX_goal_generic_commie_investments
+
+		x = 1
+		y = 1
+		relative_position_id = CZKE_boycott_press_law
+
+		prerequisite = {
+			focus = CZKE_boycott_press_law
+		}
+
+		cost = 5
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			add_ideas = GER_collectivize_industry_idea
+		}
+	}
+
+	focus = {
 		id = CZKE_state_defense_guard
 		icon = GFX_goal_crush_resistance
 
@@ -3330,6 +3596,12 @@ focus_tree = {
 		icon = GFX_goal_morale_bonus
 
 		prerequisite = { focus = CZKE_state_defense_law focus = CZKE_democratic_reforms }
+
+		allow_branch = {
+			NOT = {	#already happened irl
+				has_country_flag = yalta_unlock_focuses
+			}
+		}
 
 		available = { 
 			GER = { 
@@ -3473,6 +3745,12 @@ focus_tree = {
 
 		mutually_exclusive = { focus = CZKE_czech_fascism_onrise }
 
+		allow_branch = {
+			NOT = {
+				has_country_flag = hide_interwar_diplomacy
+			}
+		}
+
 		available = {
 			GER = {
 				if = {
@@ -3554,6 +3832,12 @@ focus_tree = {
 
 		prerequisite = { focus = CZKE_partial_mobilization focus = CZKE_czech_fascism_onrise }
      	mutually_exclusive = { focus = CZKE_soviet_intelligence focus = CZKE_ban_communism }
+
+		allow_branch = {
+			NOT = {	#more of a pre-war thing to do
+				has_country_flag = yalta_unlock_focuses
+			}
+		}
 
 		available = {
 			custom_trigger_tooltip = { 
@@ -3639,17 +3923,26 @@ focus_tree = {
 		prerequisite = { focus = CZKE_military_coup focus = CZKE_ban_communism }
   		mutually_exclusive = { focus = CZKE_join_axis }
 
+		allow_branch = {
+			NOT = {
+				has_country_flag = hide_interwar_diplomacy
+			}
+		}
+
 		available = {
-				CZE = { is_puppet = no
-						has_war = no
-						NOT = { is_in_faction_with = GER }
+			is_subject = no
+			has_war = no
+			NOT = {
+				is_in_faction_with = GER
+			}
+			POL = {
+				exists = yes
+				is_subject = no
+				has_war = no
+				NOT = {
+					is_in_faction_with = GER
 				}
-				POL = {	exists = yes
-						is_puppet = no
-						has_war = no
-						NOT = { has_war_with = CZE }
-						NOT = { is_in_faction_with = GER }
-				}
+			}
 		}
 
 		x = 27
@@ -3800,6 +4093,12 @@ focus_tree = {
 		y = 6
 		cost = 10
 
+		allow_branch = {
+			NOT = {
+				has_country_flag = hide_interwar_diplomacy
+			}
+		}
+
 		available = {
 			country_exists = GER
 			is_in_faction = no
@@ -3833,6 +4132,12 @@ focus_tree = {
 		x = 31
 		y = 6
      	cost = 10
+
+		allow_branch = {
+			NOT = {
+				has_country_flag = hide_interwar_diplomacy
+			}
+		}
 
      	available = {
 			is_in_faction = no
@@ -4004,10 +4309,23 @@ focus_tree = {
 		icon = GFX_goal_support_communism
 
 		prerequisite = { focus = CZKE_boycott_press_law }
+		mutually_exclusive = {
+			focus = CZKE_handle_the_communist_power_grab
+		}
 
 		x = 34
 		y = 4
 		cost = 10
+
+		available = {
+			if = {
+				limit = {
+					has_country_flag = yalta_unlock_focuses
+					is_subject_of = SOV
+				}
+				has_government = communism
+			}
+		}
 
 		completion_reward = {
  
@@ -4029,6 +4347,178 @@ focus_tree = {
 					add_ideas = CZKE_klement_gottwald
 				} 
 			}
+		}
+	}
+
+	focus = {
+		id = CZKE_collectivize_farms
+		icon = GFX_focus_POL_agrarian_reform
+		x = 1
+		y = 1
+		relative_position_id = CZKE_strengthen_communism
+		cost = 10
+
+		prerequisite = {
+			focus = CZKE_strengthen_communism
+		}
+
+		available = {
+			has_government = communism
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			add_timed_idea = {
+				idea = POL_the_Agrarian_Reform_Focus
+				days = 365
+			}
+		}
+	}
+
+	focus = {   #1949
+		id = CZKE_suppress_the_church
+		icon = GFX_focus_mex_triumph_over_the_cristeros
+		x = 0
+		y = 1
+		relative_position_id = CZKE_collectivize_farms
+		cost = 10
+
+		prerequisite = {
+			focus = CZKE_collectivize_farms
+		}
+
+		available = {
+			has_government = communism
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			add_ideas = ETH_secular_education
+		}
+	}
+
+	focus = {   #1949
+		id = CZKE_five_year_plan
+		icon = GFX_five_year_plan_continue
+		x = -1
+		y = 1
+		relative_position_id = CZKE_strengthen_communism
+		cost = 10
+
+		allow_branch = {
+			has_country_flag = yalta_unlock_focuses
+		}
+
+		prerequisite = {
+			focus = CZKE_strengthen_communism
+		}
+
+		available = {
+			has_government = communism
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			random_owned_state = {
+				limit = {
+					free_building_slots = {
+						building = steel_mill
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = steel_mill
+					level = 2
+					instant_build = yes
+				}
+			}
+			random_owned_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				prioritize = { 70 71 }	#Slovakia
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}
+			add_tech_bonus = {
+				name = industrial_bonus
+				bonus = 1
+				uses = 3
+				category = excavation_tech
+			}
+			add_ideas = CZE_inflation
+			set_country_flag = CZE_started_five_year_plan
+		}
+	}
+	focus = {   #1953
+		id = CZKE_currency_reform
+		icon = GFX_goal_generic_financial_markets
+		x = 0
+		y = 1
+		relative_position_id = CZKE_five_year_plan
+		cost = 5
+
+		prerequisite = {
+			focus = CZKE_five_year_plan
+		}
+
+		available = {
+			has_country_flag = {
+				flag = CZE_started_five_year_plan
+				days > 365
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			add_popularity = {
+				ideology = ROOT
+				popularity = -0.1
+			}
+			remove_ideas = CZE_inflation
+		}
+	}
+
+	focus = {   #February 1948
+		id = CZKE_handle_the_communist_power_grab
+		icon = GFX_focus_usa_voter_registration_act
+		x = 2
+		y = 2
+		relative_position_id = CZKE_boycott_press_law
+		cost = 10
+
+		allow_branch = {
+			has_country_flag = yalta_unlock_focuses
+		}
+
+		prerequisite = {
+			focus = CZKE_boycott_press_law
+		}
+
+		mutually_exclusive = {
+			focus = CZKE_strengthen_communism
+		}
+
+		available = {
+			is_subject_of = SOV
+			NOT = {
+				has_government = communism
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			country_event = cold_war.6
 		}
 	}
 
