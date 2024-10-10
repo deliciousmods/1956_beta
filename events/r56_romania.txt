@@ -503,6 +503,115 @@ country_event = {
     }   
 }
 country_event = {
+    id = rt56.romania.9
+    title = generic.2.t
+    desc = generic.2.d.b
+
+    picture = GFX_report_event_generic_read_write
+
+	immediate = {
+		hidden_effect = {
+			save_event_target_as = alliance_inviter
+			FROM = {
+				save_event_target_as = alliance_applicant
+			}
+		}
+	}
+	is_triggered_only = yes
+	
+    
+	option = { #Agree / Both Fascist
+		name = generic.2.b
+		trigger = {
+			FROM = {
+				has_government = fascism
+			}
+			has_government = fascism
+		}
+        ai_chance = {
+            base = 100
+        }
+		add_to_faction = FROM
+		FROM = { country_event = { id = generic.3 hours = 6 } }
+		hidden_effect = {
+			set_country_flag = alliance_inviter@ROOT
+			FROM = { set_country_flag = alliance_applicant@ROOT }
+			news_event = { id = news.289 hours = 12 }
+		}
+	}
+    option = { #Reject
+		name = generic.2.f
+		ai_chance = {
+			base = 50
+			
+            
+			modifier = {
+				factor = 0.5
+				has_opinion = {
+					target = FROM
+					value > 65
+				}
+			}
+			
+			modifier = {
+				factor = 0.5
+				has_opinion = {
+					target = FROM
+					value > 35
+				}
+			}
+			
+			modifier = {
+				factor = 0.5
+				has_opinion = {
+					target = FROM
+					value > 5
+				}
+			}
+			
+			modifier = {
+				factor = 2.0
+				has_opinion = {
+					target = FROM
+					value < 35
+				}
+			}
+			
+			modifier = {
+				factor = 2.0
+				has_opinion = {
+					target = FROM
+					value < 65
+				}
+			}
+			
+			modifier = {
+				factor = 0.1
+				has_war = yes
+				FROM = {
+					has_war = no
+				}
+			}
+			
+			modifier = {
+				factor = 0.1
+				FROM = {
+					is_major = yes
+				}
+			}
+
+            modifier = {
+                factor = 0
+                is_historical_focus_on = yes
+            }
+			
+		}
+		FROM = { 
+			country_event = { id = generic.4 hours = 6 }
+		}
+	}   
+}
+country_event = {
     id = rt56.balkan_pact.1
     title = rt56.balkan_pact.1.t
     desc = rt56.balkan_pact.1.d
@@ -1598,6 +1707,8 @@ country_event = { # Civil War event
                         46 955 77 76 84 83 82 81
                     }
                 }
+                
+			    activate_mission = ROM_soviet_intervention
             }
             random_other_country = {
                 limit = {
@@ -1607,6 +1718,18 @@ country_event = { # Civil War event
                 save_event_target_as = democratic_romania_civil_war
                 every_unit_leader = {
                     set_nationality = ROM
+                }
+                
+                set_politics = {
+                    ruling_party = democratic
+                    elections_allowed = yes
+                    long_name = "Partidul National Taranesc"
+                    name = "PNT"
+                }
+                
+                promote_character = {
+                    character = ROM_iuliu_maniu
+                    ideology = liberalism
                 }
             }
             ROM = {
@@ -1878,6 +2001,17 @@ country_event = { # Civil War event
                     can_join_factions = no
                     can_create_factions = no
                 }
+                set_politics = {
+                    ruling_party = democratic
+                    elections_allowed = yes
+                    long_name = "Partidul National Taranesc"
+                    name = "PNT"
+                }
+                
+                promote_character = {
+                    character = ROM_iuliu_maniu
+                    ideology = liberalism
+                }
                 start_civil_war = {
                     ideology = communism
                     size = 0.3
@@ -1888,6 +2022,7 @@ country_event = { # Civil War event
                         80 79 78 766
                     }
                 }
+			    activate_mission = ROM_soviet_intervention
             }
             random_other_country = {
                 limit = {
@@ -2287,6 +2422,67 @@ country_event = { # Emergency Election Event
         complete_national_focus = ROM_oppose_the_royal_dictatorship
     }
 }
+country_event = { # Soviets Intervene
+    id = rt56.rom_general_election.9
+    title = rt56.rom_general_election.9.t
+    desc = rt56.rom_general_election.9.d
+
+    picture = GFX_report_event_generic_read_write
+	
+	is_triggered_only = yes
+    
+    option = {
+        name = rt56.rom_general_election.9.a
+        ROM = {
+            
+            country_event = rt56.rom_general_election.7
+			set_country_flag = ROM_soviets_intervened_in_civil_war
+        }
+        effect_tooltip = {
+            
+            SOV = {
+                set_autonomy = {
+                    target = ROM
+                    autonomous_state = autonomy_dominion
+                    end_civil_wars = no
+                }
+                add_to_war = {
+                    targeted_alliance = ROM
+                    enemy = RCW
+                }
+            }
+        }
+        
+        ai_chance = {
+            base = 1
+            modifier = {
+                add = -1
+                OR = {
+                    has_civil_war = yes
+                    NOT = {
+                        has_government = communism
+                    }
+                }
+            }
+        }
+    }
+    option = {
+        name = rt56.rom_general_election.9.b
+        ai_chance = {
+            base = 0
+            modifier = {
+                add = 1
+                OR = {
+                    has_civil_war = yes
+                    NOT = {
+                        has_government = communism
+                    }
+                }
+            }
+        }
+    }
+}
+
 country_event = {
     id = rt56.rom_abdicate.1
     title = rt56.rom_abdicate.1.t
@@ -2301,7 +2497,16 @@ country_event = {
         retire_character = ROM_king_carol_ii
         promote_character = {
             character = ROM_king_michael
-            ideology = despotism 
+            ideology = constitutional_monarchy 
+        }
+        if = {
+            limit = {
+                has_idea = r56_ROM_carol_idea
+            } 
+            swap_ideas = {
+                remove_idea = r56_ROM_carol_idea
+                add_idea = r56_ROM_michael_idea
+            }
         }
         add_timed_idea = {
             idea = r56_ROM_carol_emptied_coffers
@@ -3471,7 +3676,21 @@ country_event = { # Demand Hungary become puppet
     option = { # Yes answer
         name = rt56.rom_hun_submission.1.a
         ai_chance = {
-            base = 2        
+            base = 50 
+            modifier = {
+                OR = {
+                    is_subject = yes
+                    is_in_faction = yes
+                }
+                factor = 0
+            }
+            modifier = {
+                strength_ratio = {
+                    tag = ROM
+                    ratio < 0.5
+                }
+                factor = 2
+            }
         }
         FROM = {
             country_event = { id = rt56.rom_hun_submission.2 days = 3 }
@@ -3480,7 +3699,7 @@ country_event = { # Demand Hungary become puppet
     option = { # No answer
         name = rt56.rom_hun_submission.1.b
         ai_chance = {
-            base = 2           
+            base = 50        
         }
         FROM = {
             country_event = { id = rt56.rom_hun_submission.3 days = 3 }
