@@ -1,12 +1,81 @@
-political_actions = {
-	POR_become_portugal = {
+form_nation_mod_category = {
+	POR_unshackle_galicia = {
+		icon = generic_form_nation
+		fire_only_once = yes	
+		allowed = { original_tag = POR }
+		visible = {
+			has_focus_tree = r56_portuguese_focus
+			NOT = {
+				171 = { is_core_of = POR }
+				171 = { is_claimed_by = POR }
+			}
+		}
+		highlight_states = {
+			highlight_state_targets = { 
+			   state = 171
+		   	} 
+	   	}
+		available = { controls_state = 171 }
+		complete_effect = {
+			add_political_power = 25
+			add_war_support = 0.02
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			add_state_claim = 171
+			unlock_decision_tooltip = POR_integrate_galicia
+			hidden_effect = { 
+				remove_dynamic_modifier = { modifier = autonomous_state }
+			}
+		}
+	}
 
-		icon = generic_nationalism
-
-		allowed = {
-			original_tag = POR
+	POR_integrate_galicia = {
+		icon = generic_form_nation
+		fire_only_once = yes	
+		cost = 60
+		allowed = { original_tag = POR }
+		visible = {
+			171 = { is_claimed_by = POR }
+			NOT = { 
+				171 = { is_core_of = POR }
+			}
 		}
 
+		highlight_states = {
+			highlight_state_targets = { 
+			   state = 171
+		    } 
+		}
+
+		available = {
+			171 = {
+				is_fully_controlled_by = POR
+				compliance > 35
+				resistance < 3
+			}
+		}
+
+		days_remove = 90
+		modifier = {
+     		political_power_gain = -0.15
+		}
+
+		remove_effect = {
+			add_popularity = { 
+				ideology = ROOT 
+				popularity = 0.05
+			}
+			add_war_support = 0.03
+			add_state_core = 171
+		}
+	}
+}
+
+political_actions = {
+	POR_become_portugal = {
+		icon = generic_nationalism
+		fire_only_once = yes	
+		allowed = { original_tag = POR }
+		visible = { has_cosmetic_tag = POR_AZORES }
 		available = {
 			OR = {
 				owns_state = 179
@@ -16,19 +85,1015 @@ political_actions = {
 				owns_state = 180
 			}
 		}
-		
-		fire_only_once = yes	
-		visible = {
-			has_cosmetic_tag = POR_AZORES
-		}
-
 		complete_effect = {				
 			drop_cosmetic_tag = yes		
 			add_political_power = 25
 			add_stability = 0.03					
 		}			
+		ai_will_do = { base = 50 }
+	}
+}
+
+POR_deus_patria_e_familia = {
+	POR_support_the_spanish_nationalists_r56 = {
+		icon = generic_nationalism
+		fire_only_once = yes
+		cost = 40
+		visible = {
+			NOT = { has_global_flag = scw_over }
+		}
+		available = {
+			country_exists = SPA
+			SPR_scw_in_progress = yes
+			has_completed_focus = POR_continue_salazars_policies
+		}
+		complete_effect = {	
+			add_relation_rule_override = {
+                target = SPA
+                can_send_volunteers = yes 
+            }
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			add_ideas = POR_supporting_the_spanish_nationalists
+			add_ai_strategy = {
+				type = send_volunteers_desire
+				id = "SPA"
+				value = 200
+			}							
+		}			
+		ai_will_do = { base = 500 }
+	}
+
+	POR_seek_peace_with_the_new_spain = {
+		icon = generic_nationalism
+		fire_only_once = yes
+		visible = {
+			has_war = no
+			has_completed_focus = POR_address_european_affairs
+			has_global_flag = scw_over
+			is_subject = no
+			OR = {
+				SPR = {
+				 	has_completed_focus = SPR_maintain_the_second_republic
+				    has_government = democratic
+				}
+				SPD = {
+					has_completed_focus = SPR_maintain_the_second_republic
+					has_government = democratic
+				}
+				SPA = {
+					NOT = { has_completed_focus = SPA_the_iberian_pact }
+				}
+			}
+		}
+		complete_effect = {							
+		}			
+		ai_will_do = { base = 500 }
+	}
+
+	POR_come_to_britains_aid = {
+		icon = generic_nationalism
+		fire_only_once = yes
+		visible = {
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+			ENG = { is_in_faction = yes }
+			has_completed_focus = POR_address_european_affairs
+		}
+		targets = { ENG }
+		complete_effect = {				
+			ENG = {
+				country_event = { id = portugal.30 }
+			}					
+		}			
 		ai_will_do = {
-			factor = 50
+			base = 0
+			modifier = {
+				add = 500
+				OR = {
+					ENG = { is_in_faction_with = GER }
+					ENG = { is_in_faction_with = WGR }
+					NOT = {
+						GER = { has_government = fascism }	 
+					}
+				}
+			}
+		}
+	}
+
+	POR_promote_catholic_social_values = {
+		icon = GFX_decision_eng_trade_unions_support
+		fire_only_once = no
+		cost = 50
+		visible = { has_completed_focus = POR_expand_the_propaganda_ministry }
+		days_remove = 30
+		remove_effect = { add_stability = 0.03 }
+		ai_will_do = { base = 500 }
+	}
+}
+
+POR_the_path_to_economic_progress = {
+	POR_sell_off_seized_assets = {
+		icon = generic_scales
+		fire_only_once = no
+		days_re_enable = 90
+		ai_will_do = { base = 500 }
+		visible = { 
+			OR = {
+				has_idea = POR_heavy_handed_central_planning
+				has_idea = POR_looming_economic_disaster
+			}
+		}
+		days_remove = 100
+		modifier = {
+			political_power_factor = 0.1
+			consumer_goods_factor = -0.05
+		}
+		remove_effect = {
+			if = {
+				limit = { 
+					has_idea = POR_looming_economic_disaster
+				}
+				swap_ideas = {
+					remove_idea = POR_looming_economic_disaster
+					add_idea = POR_heavy_handed_central_planning
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_heavy_handed_central_planning
+				}
+				swap_ideas = {
+					remove_idea = POR_heavy_handed_central_planning
+					add_idea = POR_slow_collectivization
+				}
+			}
+			else = {
+				swap_ideas = {
+					remove_idea = POR_slow_collectivization
+					add_idea = POR_transitioning_to_a_mixed_economy
+				}
+			}
+		}
+	}
+
+	POR_subsidize_rolling_stock_production = {
+		icon = ger_mefo_bills
+		fire_only_once = no
+		cost = 40
+		ai_will_do = { base = 50 }
+		visible = { has_completed_focus = POR_support_an_industrial_expansion }
+		days_remove = 120
+		modifier = {
+			production_speed_buildings_factor = 0.1
+			industry_repair_factor = 0.15
+		}
+	}
+
+	POR_factory_recruitment_drive = {
+		icon = generic_military
+		fire_only_once = no
+		days_re_enable = 75
+		cost = 45
+		ai_will_do = { base = 50 }
+		visible = {
+			OR = {
+				has_completed_focus = POR_exasperate_the_industrialization 
+				has_completed_focus = POR_expand_support_for_fascist_trade_unions
+			} 
+		}
+		available = {
+			NOT = {
+				has_idea = POR_heavy_handed_central_planning
+				has_idea = POR_looming_economic_disaster
+			}
+		}
+		days_remove = 105
+		modifier = {
+			industrial_capacity_factory = 0.1
+			production_factory_efficiency_gain_factor = 0.15
+		}
+	}
+
+	POR_subsidize_rural_farming = {
+		icon = ger_mefo_bills
+		fire_only_once = no
+		cost = 45
+		ai_will_do = { base = 25 }
+		visible = { 
+			OR = {
+				has_completed_focus = POR_restore_the_social_state
+				has_completed_focus = POR_reforge_the_social_state
+				has_completed_focus = POR_assistance_for_the_countryside
+			}
+		}
+		days_remove = 120
+		modifier = { consumer_goods_factor = 0.15 }
+		remove_effect = {
+			add_political_power = 50
+			add_stability = 0.02
+			add_popularity = {
+				ideology = ROOT
+				popularity = 0.02
+			}
+		}
+	}
+
+	POR_invest_in_public_education = {
+		icon = GFX_decision_generic_book
+		fire_only_once = no
+		cost = 50
+		ai_will_do = { base = 25 }
+		visible = {
+			OR = {
+				has_completed_focus = POR_restore_the_social_state
+				has_completed_focus = POR_eradicate_rural_illiteracy	
+				has_completed_focus = POR_plan_for_popular_education
+			} 
+		}
+		days_remove = 150
+		modifier = {
+			research_speed_factor = 0.05
+			stability_weekly = 0.001
+		}
+	}
+
+	POR_support_private_collectives = {
+		icon = generic_political_discourse
+		fire_only_once = no
+		cost = 60
+		ai_will_do = { base = 90 }
+		visible = { 
+			OR = {
+				has_completed_focus = POR_forge_a_republic_worth_defending
+				has_completed_focus = POR_expand_support_for_fascist_trade_unions
+			}
+		}
+		days_remove = 95
+		days_re_enable = 190
+		modifier = {
+			political_power_gain = -0.15
+			consumer_goods_factor = -0.1
+		}
+		remove_effect = {
+			if = {
+				limit = { 
+					has_idea = POR_the_question_of_nationalization_idea
+				}
+				swap_ideas = {
+					remove_idea = POR_the_question_of_nationalization_idea
+					add_idea = POR_transitioning_to_a_mixed_economy
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_slow_collectivization
+				}
+				swap_ideas = {
+					remove_idea = POR_slow_collectivization
+					add_idea = POR_transitioning_to_a_mixed_economy
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_heavy_handed_central_planning
+				}
+				swap_ideas = {
+					remove_idea = POR_heavy_handed_central_planning
+					add_idea = POR_slow_collectivization
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_looming_economic_disaster
+				}
+				swap_ideas = {
+					remove_idea = POR_looming_economic_disaster
+					add_idea = POR_heavy_handed_central_planning
+				}
+			}
+			else = {
+				add_stability = 0.03
+				add_popularity = {
+					ideology = ROOT
+					popularity = 0.02
+				}
+			}
+		}
+	}
+
+	POR_land_redistribution = {
+		icon = GFX_decision_eng_trade_unions_support
+		fire_only_once = no
+		days_re_enable = 365
+		cost = 60
+		ai_will_do = { base = 50 }
+		visible = { has_completed_focus = POR_forge_a_republic_worth_defending }
+		days_remove = 125
+		modifier = {
+			stability_weekly = 0.003
+			civilian_factory_use = 1
+			political_power_factor = -0.1
+		}
+		remove_effect = {
+			if = {
+				limit = { 
+					has_idea = POR_the_question_of_nationalization_idea
+				}
+				swap_ideas = {
+					remove_idea = POR_the_question_of_nationalization_idea
+					add_idea = POR_slow_collectivization
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_transitioning_to_a_mixed_economy
+				}
+				swap_ideas = {
+					remove_idea = POR_transitioning_to_a_mixed_economy
+					add_idea = POR_slow_collectivization
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_slow_collectivization
+				}
+				swap_ideas = {
+					remove_idea = POR_slow_collectivization
+					add_idea = POR_heavy_handed_central_planning
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_heavy_handed_central_planning
+				}
+				swap_ideas = {
+					remove_idea = POR_heavy_handed_central_planning
+					add_idea = POR_looming_economic_disaster
+				}
+			}
+			else = {
+				add_stability = -0.05
+				add_popularity = {
+					ideology = ROOT
+					popularity = 0.02
+				}
+			}
+		}
+	}
+
+	POR_maternalistic_welfare = {
+		icon = GFX_decision_generic_welfare
+		fire_only_once = no
+		days_re_enable = 220
+		cost = 60
+		ai_will_do = { base = 50 }
+		visible = {
+			OR = {
+				has_completed_focus = POR_reforge_the_social_state 
+				has_completed_focus = POR_restore_the_social_state
+				has_completed_focus = POR_seek_urban_working_class_support
+			} 
+		}
+		days_remove = 180
+		modifier = {
+			civilian_factory_use = 1
+			stability_weekly = 0.002
+			monthly_population = 0.2
+		}
+		remove_effect = {
+			add_popularity = {
+				ideology = ROOT
+				popularity = 0.02
+			}
+		}
+	}
+
+	POR_direct_farmland_to_industrial_projects = {
+		icon = eng_trade_unions_demand
+		fire_only_once = no
+		days_re_enable = 365
+		cost = 75
+		ai_will_do = { base = 10 }
+		visible = {
+			OR = {
+				has_completed_focus = POR_exasperate_the_industrialization 
+				has_completed_focus = POR_heavy_handed_development
+			} 
+		}
+		days_remove = 120
+		remove_effect = {
+			if = {
+				limit = { 
+					has_idea = POR_the_question_of_nationalization_idea
+				}
+				swap_ideas = {
+					remove_idea = POR_the_question_of_nationalization_idea
+					add_idea = POR_slow_collectivization
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_transitioning_to_a_mixed_economy
+				}
+				swap_ideas = {
+					remove_idea = POR_transitioning_to_a_mixed_economy
+					add_idea = POR_slow_collectivization
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_slow_collectivization
+				}
+				swap_ideas = {
+					remove_idea = POR_slow_collectivization
+					add_idea = POR_heavy_handed_central_planning
+				}
+			}
+			else_if = {
+				limit = { 
+					has_idea = POR_heavy_handed_central_planning
+				}
+				swap_ideas = {
+					remove_idea = POR_heavy_handed_central_planning
+					add_idea = POR_looming_economic_disaster
+				}
+			}
+			else = {
+				add_stability = -0.05
+				add_popularity = {
+					ideology = ROOT
+					popularity = -0.02
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					OR = {
+						state = 179
+						state = 795
+						state = 181
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+		}
+	}
+
+	POR_support_food_exporters = {
+		icon = ger_mefo_bills
+		fire_only_once = no
+		days_re_enable = 365
+		cost = 80
+		ai_will_do = { base = 50 }
+		visible = { has_completed_focus = POR_modernize_the_countryside }
+		days_remove = 140
+		modifier = { production_factory_efficiency_gain_factor = 0.15 }
+		remove_effect = {
+			random_owned_state = {
+				limit = {
+					is_fully_controlled_by = ROOT 
+					is_core_of = ROOT 
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex 
+					level = 1
+					instant_build = yes
+				}
+			}
+		}
+	}
+}
+
+POR_together_against_salazar = {
+	POR_request_soviet_assistance = {
+		icon = eng_trade_unions_support
+		fire_only_once = yes
+		ai_will_do = { base = 200 }
+		visible = { has_completed_focus = POR_seek_international_support }
+		available = {
+			SOV = { has_completed_focus = SOV_the_path_of_marxism_leninism }
+		}
+		complete_effect = {
+			SOV = { 
+				country_event = { id = portugal.46 } 
+			}
+		}
+	}
+
+	POR_battle_nationalist_paramilitaries = {
+		icon = generic_prepare_civil_war
+		fire_only_once = no
+		days_re_enable = 80
+		ai_will_do = { base = 15 }
+		days_remove = 50
+		remove_effect = {
+			add_political_power = 50
+			add_stability = -0.03
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			add_popularity = {
+				ideology = communism
+				popularity = 0.025
+			}
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.02
+			}
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.02
+			}
+		}
+	}
+
+	POR_call_for_general_strike = {
+		icon = eng_trade_unions_demand
+		fire_only_once = no
+		ai_will_do = { base = 5 }
+		available = { communism > 0.2 }
+		cancel_trigger = { has_completed_focus = POR_storm_the_national_assembly }
+		days_remove = -1
+		modifier = {
+			political_power_factor = 0.15
+			communism_drift = 0.02
+			democratic_drift = 0.02
+			stability_weekly = -0.001
+			production_speed_buildings_factor = -0.12
+			industrial_capacity_factory = -0.12
+		}
+	}
+
+	POR_join_forces_with_the_spanish_popular_front = {
+		icon = eng_trade_unions_support
+		fire_only_once = yes
+		ai_will_do = { base = 100 }
+		cost = 45
+		visible = { has_completed_focus = POR_seek_international_support }
+		available = {
+			country_exists = SPR
+			NOT = { has_global_flag = scw_over }
+		}
+		complete_effect = {
+			set_country_flag = POR_join_forces_with_the_spanish_popular_front_flag
+			custom_effect_tooltip = POR_join_forces_with_the_spanish_popular_front_tt
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			effect_tooltip = {
+				every_country = {
+					limit = {
+						OR = { 
+							original_tag = POR
+							original_tag = SPD
+							AND = {
+								original_tag = SPR
+								OR = {
+									has_government = democratic
+									has_government = communism
+								}
+							}
+						}
+					}
+					add_timed_idea = { idea = POR_iberian_workers_united days = 730 }
+				}
+			}
+		}
+	}
+
+	POR_distribute_propaganda_pamphlets = {
+		icon = eng_propaganda_campaigns
+		fire_only_once = no
+		ai_will_do = { base = 5 }
+		cost = 55
+		days_remove = 115
+		modifier = {
+			communism_drift = 0.03
+			democratic_drift = 0.02
+			political_power_gain = -0.12
+		}
+	}
+}
+
+POR_securing_the_revolution = {
+	POR_join_the_global_fight_against_fascism = {
+		icon = generic_form_nation
+		fire_only_once = yes	
+		targets = { ENG }
+		visible = {
+			has_completed_focus = POR_accomodate_europes_balance_of_power
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+		}
+		complete_effect = {	
+			every_other_country = {
+				limit = {
+					is_major = yes
+					OR = {
+						has_government = democratic
+						has_government = communism
+					}
+				}
+				PREV = {
+					add_opinion_modifier = { 
+						target = ROOT
+						modifier = huge_increase
+					}
+				}
+			}
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			custom_effect_tooltip = POR_join_the_global_fight_against_fascism_tt
+			hidden_effect = {
+				every_other_country = {
+					limit = { has_government = fascism }
+					ROOT = { send_embargo = PREV }
+				}
+			}						
+		}		
+		ai_will_do = { 
+			base = 0 
+			modifier = {
+				add = 500
+				NOT = {
+					any_other_country = {
+						has_government = communism
+						is_faction_leader = yes
+					}
+				}
+			}
+		}
+	}
+	POR_contain_the_bolshevik_menace = {
+		icon = generic_form_nation
+		fire_only_once = yes	
+		targets = { ENG }
+		visible = {
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+			has_completed_focus = POR_accomodate_europes_balance_of_power
+		}
+		complete_effect = {	
+			ENG = {
+				country_event = { id = generic.2 }
+			}						
+		}		
+		ai_will_do = { 
+			base = 0 
+			modifier = {
+				add = 500
+				NOT = {
+					any_other_country = {
+						has_government = communism
+						is_faction_leader = yes
+					}
+				}
+			}
+		}
+	}
+	POR_align_the_british_communist_alternative = {
+		icon = generic_form_nation
+		fire_only_once = yes
+		targets = { ENG }
+		visible = {
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+			has_completed_focus = POR_defang_the_liberals
+			ENG = { 
+				is_faction_leader = yes
+				has_government = communism 
+			}
+		}
+		complete_effect = {	
+			ENG = {
+				country_event = { id = generic.2 }
+			}						
+		}			
+		ai_will_do = { base = 90 }
+	}
+
+	POR_align_with_moscow = {
+		icon = generic_form_nation
+		fire_only_once = yes	
+		targets = { SOV }
+		visible = {
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+			has_completed_focus = POR_defang_the_liberals
+		}
+		available = {
+			SOV = {
+				is_faction_leader = yes 
+				has_government = communism 
+			}
+		}
+		complete_effect = {	
+			SOV = {
+				country_event = { id = generic.2 }
+			}						
+		}		
+		ai_will_do = { base = 25 }
+	}
+
+	POR_support_the_spanish_republic_r56 = {
+		icon = generic_nationalism
+		fire_only_once = yes
+		visible = {
+			has_war = no
+			NOT = { has_global_flag = scw_over }
+		}
+		available = {
+			country_exists = SPR
+			SPR_scw_in_progress = yes
+		}
+		complete_effect = {	
+			add_relation_rule_override = {
+                target = SPR
+                can_send_volunteers = yes 
+            }
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			add_ideas = POR_supporting_the_spanish_republic
+			add_ai_strategy = {
+				type = send_volunteers_desire
+				id = "SPR"
+				value = 200
+			}							
+		}			
+		ai_will_do = { base = 500 }
+	}
+
+	POR_end_the_popular_front = {
+		icon = generic_speech
+		fire_only_once = yes
+		visible = { 
+			has_completed_focus = POR_restore_civil_liberties
+			NOT = { has_completed_focus = POR_hold_fair_elections } 
+		}
+		complete_effect = {
+			add_political_power = 50
+			add_stability = 0.02
+			add_popularity = {
+				ideology = communism
+				popularity = -0.1
+			}
+			add_popularity = {
+				ideology = democratic
+				popularity = -0.06
+			}
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			custom_effect_tooltip = POR_end_the_popular_front_tt
+		}	
+		ai_will_do = { 
+			base = 100 		#Give an AI factor for their focus path
+		}
+	}
+
+	POR_end_the_polticial_trials = {
+		icon = generic_arrest
+		fire_only_once = yes
+		ai_will_do = { base = 400 }
+		visible = { has_completed_focus = POR_unity_and_reconciliation }
+		complete_effect = {
+			add_political_power = 40
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.05
+			}
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
+		}
+	}
+
+	POR_grant_womens_suffrage = {
+		icon = GFX_decision_eng_trade_unions_support
+		fire_only_once = yes
+		visible = { has_completed_focus = POR_advance_the_cause_for_equality }
+		available = { has_completed_focus = POR_restore_civil_liberties }	
+		complete_effect = {
+			add_political_power = 50
+		}
+		complete_effect = {
+			add_stability = -0.03
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.05
+			}
+		}
+		ai_will_do = { base = 200 }
+	}
+
+	POR_create_a_constitutional_judiciary = {
+		icon = generic_scales
+		cost = 60
+		fire_only_once = yes
+		visible = { has_completed_focus = POR_restore_civil_liberties }	
+		days_remove = 120
+		modifier = {
+			stability_weekly = 0.005
+			neutrality_drift = -0.01
+			fascism_drift = -0.01
+		}
+		remove_effect = { set_country_flag = POR_create_a_constitutional_judiciary_flag }	
+		ai_will_do = { base = 500 }
+	}
+
+	POR_loosen_censorship_policies = {
+		icon = generic_research
+		cost = 60
+		fire_only_once = yes
+		visible = { has_completed_focus = POR_restore_civil_liberties }	
+		days_remove = 150
+		modifier = {
+			political_power_factor = -0.15
+			fascism_drift = 0.01
+			democratic_drift = 0.02
+		}
+		remove_effect = { 
+			add_stability = 0.05
+			set_country_flag = POR_loosen_censorship_policies_flag 
+		}	
+		ai_will_do = { base = 500 }
+	}
+}
+
+POR_restoring_valiance_to_portugal = {
+	POR_rally_the_monarchists_of_porto = {
+		icon = GFX_decision_CHL_carabineros
+		fire_only_once = no
+		days_re_enable = 40
+		cost = 65
+		visible = { 
+			has_completed_focus = POR_seek_restorationist_support
+			NOT = { has_completed_focus = POR_unlatch_salazars_grip }
+		}
+		highlight_states = {
+			highlight_state_targets = {
+				state = 180
+			}
+		}
+		days_remove = 80
+		remove_effect = {
+			if = {
+				limit = { 
+					NOT = { has_country_flag = POR_expand_pro_monarchist_rally_flag }
+				}
+				add_stability = -0.025
+				add_popularity = {
+					ideology = fascism
+					popularity = 0.04
+				}
+				set_country_flag = POR_expand_pro_monarchist_rally_flag
+				custom_effect_tooltip = CHL_skip_one_line_tt
+				unlock_decision_tooltip = POR_spread_monarchist_propaganda
+			}
+			else = {
+				add_political_power = 30
+				add_popularity = {
+					ideology = fascism
+					popularity = 0.05
+				}
+			}
+		}
+		ai_will_do = { base = 10 }
+	}
+
+	POR_spread_monarchist_propaganda = {
+		icon = generic_operation
+		fire_only_once = no
+		cost = 40
+		visible = { has_country_flag = POR_expand_pro_monarchist_rally_flag }
+		days_remove = 65
+		remove_effect = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.035
+			}
+		}
+		ai_will_do = { base = 10 }
+	}
+
+	POR_antagonize_socialist_organizations = {
+		icon = generic_prepare_civil_war
+		fire_only_once = no
+		days_re_enable = 35
+		cost = 65
+		ai_will_do = { base = 10 }
+		visible = { has_idea = POR_the_battle_for_the_nation_fas }
+		days_remove = 35
+		cancel_trigger = { has_completed_focus = POR_unlatch_salazars_grip }
+		remove_effect = {
+			add_stability = -0.05
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
+			add_popularity = {
+				ideology = communism
+				popularity = 0.03
+			}
+		}
+	}
+
+	POR_rekindle_the_anglo_portuguese_alliance = {
+		icon = generic_nationalism
+		fire_only_once = yes
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 100
+				ENG = { has_completed_focus = ENG_steady_as_she_goes }
+			}
+		}
+		visible = { 
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+			has_completed_focus = POR_reenter_european_affairs
+			has_government = fascism
+			ENG = { 
+				is_faction_leader = yes
+				has_government = fascism
+			} 
+		}
+		targets = { ENG }
+		complete_effect = {
+			ENG = {
+				country_event = { id = generic.2 }
+			}
+		}
+	}
+
+	POR_request_axis_membership = {
+		icon = generic_nationalism
+		fire_only_once = yes
+		ai_will_do = { 
+			base = 0 
+			modifier = {
+				add = 500
+				NOT = {
+					any_other_country = {
+						has_government = fascism
+						is_faction_leader = yes
+					}
+				}
+			}
+		}
+		visible = { 
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+			has_completed_focus = POR_reenter_european_affairs
+			has_government = fascism
+			GER = { 
+				is_faction_leader = yes
+				has_government = fascism
+			} 
+		}
+		targets = { GER }
+		complete_effect = {
+			GER = {
+				country_event = { id = portugal.30 }
+			}
+		}
+	}
+
+	POR_align_with_rome = {
+		icon = generic_nationalism
+		fire_only_once = yes
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 100
+				ENG = { has_completed_focus = ENG_steady_as_she_goes }
+			}
+		}
+		visible = { 
+			has_war = no
+			is_in_faction = no
+			is_subject = no
+			has_completed_focus = POR_reenter_european_affairs
+			has_government = fascism
+			ITA = { 
+				is_faction_leader = yes
+				has_government = fascism
+			} 
+		}
+		targets = { ITA }
+		complete_effect = {
+			ITA = {
+				country_event = { id = generic.2 }
+			}
 		}
 	}
 }
