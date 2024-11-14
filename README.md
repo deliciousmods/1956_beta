@@ -1,5 +1,5 @@
 # Road to 56 Beta Build
-## 1956_Gunnerside [1.14.* Compatibility]
+## 1956_Operation_Manstein [1.15.* Compatibility]
 
 This is the Readme guide for using Github with Road to 56.
 

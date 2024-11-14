@@ -1,12 +1,73 @@
-capital = 43
+capital = 43 # Budapest (Northern Hungary)
 
-oob = "HUN_1936"
+IF = {
+	limit = {
+		has_dlc = "Gotterdammerung"
+	}
+	set_oob = "HUN_wuw_1936"
+	ELSE_IF = {
+		limit = {
+			NOT = {
+				has_dlc = "Gotterdammerung"
+			}
+		}
+		set_oob = "HUN_1936"
+	}
+}
+
+IF = {
+	limit = { has_dlc = "By Blood Alone" }
+		set_air_oob = "HUN_1936_air_bba"
+		set_technology = {
+			iw_small_airframe = 1
+			engines_1 = 1
+			early_bombs = 1
+			photo_reconnaisance = 1
+			aa_lmg = 1
+		}
+	ELSE = {
+		set_air_oob = "HUN_1936_air_legacy"
+		set_technology = {
+			early_fighter = 1
+			CAS1 = 1
+		}
+	}
+}
+
+### SETUP THE CORRECT POLITICAL PARTIES ###
+
+IF = {
+	limit = {
+		has_dlc = "Gotterdammerung"
+	}
+	set_party_name = {
+	    ideology = fascism
+	    long_name = HUN_national_socialist_party_long
+	    name = HUN_national_socialist_party
+	}
+}
 
 set_research_slots = 4
-set_stability = 0.7
-set_war_support = 0.6
+
+### SETUP STABILITY AND WAR SUPPORT ###
+
+IF = {
+	limit = {
+		NOT = {
+			has_dlc = "Gotterdammerung"
+		}
+	}
+	set_stability = 0.7
+	set_war_support = 0.6
+	ELSE = {
+		set_stability = 0.3
+		set_war_support = 0.4
+	}
+}
+
 set_country_flag = started_out_as_landlocked
-# Starting tech
+
+# Starting tech #
 set_technology = {
 
 	# Extended Technologies
@@ -23,23 +84,7 @@ set_technology = {
 
 	basic_train = 1
 }
-if = {
-	limit = { has_dlc = "By Blood Alone" }
-	set_air_oob = "HUN_1936_air_bba"
-	set_technology = {
-		iw_small_airframe = 1
-		engines_1 = 1
-		aa_lmg = 1
-		early_bombs = 1
-	}
-	else = {
-		set_air_oob = "HUN_1936_air_legacy"
-		set_technology = {
-			early_fighter = 1
-			CAS1 = 1
-		}
-	}
-}
+
 if = {
 	limit = {
 		NOT = { has_dlc = "No Step Back" }
@@ -56,6 +101,7 @@ if = {
 		gwtank_chassis = 1
 	}
 }
+
 if = {
 	limit = {
 		has_dlc = "La Resistance"
@@ -65,20 +111,237 @@ if = {
 		armored_car1 = 1
 	}
 }
-add_ideas = {
-	disarmed_nation
-}
-if = {
-	limit = { has_dlc = "Arms Against Tyranny" }
-	add_ideas = { HUN_treaty_of_triannon_aat }
-}
-if = {
-	limit = {
-		NOT = { has_dlc = "Arms Against Tyranny" }
+
+IF = {
+	limit = { has_dlc = "Man the Guns" }
+		set_technology = {
+			mtg_transport = 1
+		}
+	ELSE = {
+		set_technology = {
+			transport = 1
+		}
 	}
-	add_ideas = { HUN_treaty_of_triannon }
 }
 
+### SETUP NATIONAL SPIRITS NO WW ###
+IF = {
+	limit = {
+		AND = {
+			has_dlc = "Death or Dishonor"
+			NOT = {
+				has_dlc = "Gotterdammerung"
+			}
+		}
+	}
+	add_ideas = {
+		disarmed_nation
+	}
+	IF = {
+		limit = { has_dlc = "Arms Against Tyranny" }
+		add_ideas = { HUN_treaty_of_triannon_aat }
+	}
+	IF = {
+		limit = {
+			NOT = { has_dlc = "Arms Against Tyranny" }
+		}
+		add_ideas = { HUN_treaty_of_triannon }
+	}
+}
+
+### SETUP HUNGARO-GERMAN RELATIONS AND NATIONAL SPIRITS ###
+IF = {
+	limit = {
+		AND = {
+			has_dlc = "Death or Dishonor"
+			has_dlc = "Gotterdammerung"
+		}
+	}
+
+	add_ideas = {
+		disarmed_nation
+		HUN_gombos_trade_treaty
+		HUN_hungarian_national_defense_association
+		HUN_levente_associations
+	}
+
+	### OPINION MODIFIERS ###
+
+	add_opinion_modifier = {
+		target = GER
+		modifier = HUN_GER_trade_modifier
+	}	
+	GER = {
+		add_opinion_modifier = {
+			target = HUN
+			modifier = HUN_GER_trade_modifier
+		}	
+	}
+
+	add_opinion_modifier = {
+		target = POL
+		modifier = HUN_POL_friendship_modifier
+	}	
+	POL = {
+		add_opinion_modifier = {
+			target = HUN
+			modifier = HUN_POL_friendship_modifier
+		}	
+	}
+
+	IF = {
+		limit = { has_dlc = "Arms Against Tyranny" }
+		add_ideas = { HUN_treaty_of_triannon_aat_wuw }
+		add_relation_rule_override = { 
+			target = GER
+			usage_desc = HUN_gombos_trade_treaty_tt
+			can_access_market = yes
+		}
+		give_market_access = GER
+	}
+
+	IF = {
+		limit = {
+			NOT = { has_dlc = "Arms Against Tyranny" }
+		}
+		add_ideas = { HUN_treaty_of_triannon_wuw }
+	}
+
+}
+
+# The Academy of Sciences Modifier
+set_variable = { HUN_academy_of_sciences_research_speed_factor = 0.03 }
+
+### PLANE VARIANTS ###
+IF = {
+	limit = {
+		has_dlc = "By Blood Alone"
+	}
+	create_equipment_variant = {
+		name = "Weiss WM-16 Budapest"
+		type = small_plane_cas_airframe_0
+		modules = {
+			fixed_main_weapon_slot = bomb_locks
+			engine_type_slot = engine_1_1x
+			special_type_slot_1 = empty
+		}
+	}
+	create_equipment_variant = {
+		name = "Weiss WM-10 Ölyv"
+		type = small_plane_airframe_0
+		modules = {
+			fixed_main_weapon_slot = light_mg_2x
+			engine_type_slot = engine_1_1x
+			special_type_slot_1 = empty
+		}
+	}
+}
+
+### TANK VARIANTS ###
+IF = {
+	limit = {
+		has_dlc = "No Step Back"
+	}
+	create_equipment_variant = {
+		name = "Straussler V-4"
+		type = light_tank_chassis_0
+		parent_version = 0
+		obsolete = no
+		modules = {
+			main_armament_slot = tank_small_cannon
+			turret_type_slot = tank_light_one_man_tank_turret
+			suspension_type_slot = tank_bogie_suspension
+			armor_type_slot = tank_riveted_armor
+			engine_type_slot = tank_gasoline_engine
+			special_type_slot_1 = secondary_turret_hmg
+		}
+		upgrades = {
+			tank_nsb_engine_upgrade = 0
+			tank_nsb_armor_upgrade = 1
+		}
+		#icon = "GFX_gwtank_medium"
+	}
+
+	add_equipment_to_stockpile = {
+		type = light_tank_chassis_0
+		amount = 4
+		variant_name = "Straussler V-4"
+	}
+}
+
+### AH DYNAMIC MODIFIERS ###
+
+IF = {
+	limit = {
+		has_dlc = "Gotterdammerung"
+	}
+
+	# JOINT ECONOMY SPIRIT
+	set_variable = { global.HABSBURG_economy_stability_factor = 0.05 }
+	set_variable = { global.HABSBURG_economy_power_factor = 0.1 }	
+	set_variable = { global.HABSBURG_economy_consumer_goods_factor = 0.0 }	
+	set_variable = { global.HABSBURG_economy_research_sharing_per_country_bonus_factor = 0.0 }	
+	set_variable = { global.HABSBURG_economy_production_speed_industrial_complex_factor = 0.0 }	
+	set_variable = { global.HABSBURG_economy_trade_laws_cost_factor = 0.0 }	
+	set_variable = { global.HABSBURG_economy_economy_cost_factor = 0.0 }	
+	set_variable = { global.HABSBURG_economy_license_purchase_cost = 0.0 }	
+	set_variable = { global.HABSBURG_economy_license_production_speed = 0.0 }	
+	set_variable = { global.HABSBURG_economy_special_project_speed_factor = 0.0 }	
+
+	# JOINT INDUSTRY SPIRIT
+	set_variable = { global.HABSBURG_industry_production_speed_industrial_complex_factor = 0.1 }	
+	set_variable = { global.HABSBURG_industry_industrial_capacity_factory = 0.05 }	
+	set_variable = { global.HABSBURG_industry_local_resources_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_production_speed_rail_way_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_production_speed_supply_node_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_global_building_slots_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_production_speed_arms_factory_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_line_change_production_efficiency_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_industry_free_repair_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_industry_air_damage_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_production_lack_of_resource_penalty_factor = 0.00 }	
+	set_variable = { global.HABSBURG_industry_production_factory_max_efficiency_factor = 0.00 }	
+
+	# JOINT ARMY SPIRIT
+	set_variable = { global.HABSBURG_army_war_stability_factor = 0.1 }	
+	set_variable = { global.HABSBURG_army_land_doctrine_cost_factor = -0.1 }	
+	set_variable = { global.HABSBURG_army_conscription_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_experience_gain_army_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_max_command_power = 0.0 }	
+	set_variable = { global.HABSBURG_army_planning_speed = 0.0 }	
+	set_variable = { global.HABSBURG_army_army_speed_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_org_loss_when_moving = 0.0 }	
+	set_variable = { global.HABSBURG_army_supply_consumption_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_supply_node_range = 0.0 }	
+	set_variable = { global.HABSBURG_army_army_core_attack_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_army_core_defence_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_motorized_attack_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_army_armor_attack_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_fuel_gain_factor = 0.0 }	
+	set_variable = { global.HABSBURG_army_army_attack_factor = 0.0 }	
+
+	# JOINT HUSSAR SPIRIT
+	set_variable = { global.HABSBURG_cavalry_cavalry_attack_factor = 0.05 }	
+	set_variable = { global.HABSBURG_cavalry_cavalry_defence_factor = 0.1 }	
+	set_variable = { global.HABSBURG_army_conscription = 0.01 }	
+	set_variable = { global.HABSBURG_cavalry_breakthrough_factor = 0.00 }	
+
+}
+
+add_opinion_modifier = { 
+	target = CZE
+	modifier = BFTB_incongruous_neighbors
+}
+add_opinion_modifier = { 
+	target = ROM
+	modifier = BFTB_incongruous_neighbors
+}
+add_opinion_modifier = { 
+	target = YUG
+	modifier = BFTB_incongruous_neighbors
+}
+
+# SETUP HUNGARIAN POLITICS
 set_politics = {
 	ruling_party = neutrality
 	last_election = "1935.3.31"
@@ -136,11 +399,71 @@ recruit_character = HUN_odon_trunkwalter
 recruit_character = HUN_kalman_hardy
 
 recruit_character = HUN_paul_erdos
-recruit_character = HUN_john_von_neumann
 
 recruit_character = HUN_mate_zalka # communist guy you can get if you turn communist quickly enough.
 recruit_character = HUN_ferenc_munnich
 recruit_character = HUN_gyorgy_lukacs
+
+#wuw characters
+recruit_character = HUN_joseph_august_von_habsburg
+recruit_character = HUN_istvan_horthy
+recruit_character = HUN_ferenc_szalasi
+recruit_character = HUN_bela_kun
+recruit_character = HUN_mihaly_karolyi
+recruit_character = HUN_janos_zichy
+recruit_character = HUN_carl_wilhelm
+recruit_character = HUN_istvan_szechenyi
+recruit_character = HUN_vilmos_nagy
+recruit_character = HUN_jozsef_bajnoczy
+recruit_character = HUN_karoly_bartha
+recruit_character = HUN_dome_sztojay
+recruit_character = HUN_jeno_oszkar_ruszkay
+recruit_character = HUN_janos_voros
+recruit_character = HUN_lajos_csatay
+recruit_character = HUN_sandor_gyorffy_bengyel
+recruit_character = HUN_zoltan_decleva
+recruit_character = HUN_elemer_gorondy_novak
+recruit_character = HUN_bela_miklos
+recruit_character = HUN_kocsard_janky
+recruit_character = HUN_antal_freiherr
+recruit_character = HUN_vasyl_vyshyvanyi
+recruit_character = HUN_pal_pronay
+recruit_character = HUN_imre_kemeri_nagy
+recruit_character = HUN_francois_deak
+recruit_character = HUN_reszo_kastner
+recruit_character = HUN_laszlo_hary
+recruit_character = HUN_bela_imredy
+recruit_character = HUN_pal_teleki
+recruit_character = HUN_ferenc_fischer
+recruit_character = HUN_erno_gero
+recruit_character = HUN_fidel_palffy
+recruit_character = HUN_istvan_friedrich
+recruit_character = HUN_magdolna_purgly
+recruit_character = HUN_hermann_pokorny
+recruit_character = HUN_dezso_magos
+recruit_character = HUN_sandor_garbai
+recruit_character = HUN_jozsef_kelen
+recruit_character = HUN_istvan_bethlen
+recruit_character = HUN_gyula_kadar
+recruit_character = HUN_imre_nagy
+recruit_character = HUN_miklos_horthy_jr
+recruit_character = HUN_pal_kiraly
+recruit_character = HUN_janos_kadar
+recruit_character = HUN_jusztinian_seredi
+recruit_character = HUN_lennart_bernadotte
+recruit_character = HUN_hermann_goring
+
+
+
+
+#Scientists always recruited
+recruit_character = HUN_nicholas_straussler
+recruit_character = HUN_leo_szilard
+recruit_character = HUN_john_von_neumann
+recruit_character = HUN_edward_teller
+recruit_character = HUN_laszlo_varga
+recruit_character = HUN_asboth_oszkar
+
 if = {
 	limit = {
 		has_dlc = "La Resistance"
@@ -154,17 +477,21 @@ if = {
 		nationalities = { HUN ARG }
 	}
 }
-if = {
+
+# HIRES THE STARTING PM
+IF = {
 	limit = {
-		has_dlc = "By Blood Alone"
+		has_dlc = "Gotterdammerung"
 	}
-	create_equipment_variant = {
-		name = "WM-16"
-		type = small_plane_cas_airframe_0
-		modules = {
-			fixed_main_weapon_slot = bomb_locks
-			engine_type_slot = engine_1_1x
-			special_type_slot_1 = empty
-		}
-	}
+	add_ideas = { HUN_gyula_gombos_de_jakfa }
+}
+
+add_breakthrough_progress = {
+	specialization = specialization_land
+	value = 0.2 # Due to Straussler
+}
+
+add_breakthrough_progress = {
+	specialization = specialization_air
+	value = 0.2 # Due to Azboth Oskar
 }

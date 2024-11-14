@@ -1,4 +1,5 @@
 	NDefines.NGame.END_DATE = "1956.1.1.1" -- we are called r56 for a reason!
+	NDefines.NGame.HANDS_OFF_START_TAG = "YEM" --more central than vanilla's Haiti
 	
 	
 	NDefines.NDiplomacy.LICENSE_ACCEPTANCE_PUPPET_BASE = 20			-- Acceptance modifier for puppets requesting production licenses.
@@ -30,6 +31,7 @@
 			0.0, -- navy leaders
 			0.0, -- army leaders
 			0.6, -- operatives
+			0.5, -- scientists
 	}
 	NDefines.NCountry.STARTING_COMMAND_POWER = 10.0					-- starting command power for every country
 	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 1	--Starting level for exile leader  -- why 3?!
@@ -177,6 +179,8 @@
 			0.0, -- NAVAL_MINES_SWEEPING
 			0.0, -- MISSION_RECON
 			0.0, -- NAVAL_PATROL
+			0,0, -- SAM
+			0,0, -- BARRAGE
 		}
 		
 	NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0
@@ -274,7 +278,7 @@
 	NDefines.NAI.MAIN_ENEMY_FRONT_IMPORTANCE = 50.0
 	NDefines.NAI.RESERVE_TO_COMMITTED_BALANCE = 0.2
 	NDefines.NAI.FRONT_REASSIGN_DISTANCE = 250.0
-	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 90                  -- reduced from 168 ; if we are in combat for this amount and it goes shitty then try skipping it 
+	NDefines.NAI.CANCEL_COMBAT_DISADVANTAGE_RATIO = 1.5 -- changed 1.15 ; if we are in combat for this amount and it goes shitty then try skipping it 
 	NDefines.NAI.UNIT_ASSIGNMENT_TERRAIN_IMPORTANCE = 20.0 -- Instead of 10 should improve terrain optimization
 
 --------------------------------------------------------------------------------------------------------------
@@ -564,7 +568,6 @@
 	NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 5		
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE = 0 --0.08			-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend.
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE_DEFENSIVE = 0 --0.4	-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend but while being a defensive country.
-	NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 150					-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
 	NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 12				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
 	NDefines.NAI.MAX_DISTANCE_NAVAL_INVASION = 400.0				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
 	NDefines.NAI.MAX_INVASION_SIZE = 18 --24									-- max invasion group size
