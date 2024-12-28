@@ -1,4 +1,5 @@
 	NDefines.NGame.END_DATE = "1956.1.1.1" -- we are called r56 for a reason!
+	NDefines.NGame.HANDS_OFF_START_TAG = "YEM" --more central than vanilla's Haiti
 	
 	
 	NDefines.NDiplomacy.LICENSE_ACCEPTANCE_PUPPET_BASE = 20			-- Acceptance modifier for puppets requesting production licenses.
@@ -30,6 +31,7 @@
 			0.0, -- navy leaders
 			0.0, -- army leaders
 			0.6, -- operatives
+			0.5, -- scientists
 	}
 	NDefines.NCountry.STARTING_COMMAND_POWER = 10.0					-- starting command power for every country
 	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 1	--Starting level for exile leader  -- why 3?!
@@ -93,6 +95,8 @@
 	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_FRONT = 8.0
 	NDefines.NMilitary.PLAN_AREA_DEFENSE_ENEMY_CONTROLLER_SCORE = 30.0
 	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.60
+	NDefines.NMilitary.PEN_VS_AVERAGE = 0.9
+	NDefines.NMilitary.ARMOR_VS_AVERAGE = 0.2
 	
 	-- Addition with 1.3.2
 	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 18.0		-- increased from 12.0 ; Added importance for area defense province with a port
@@ -119,9 +123,6 @@
 	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.54				-- increased from 0.50 ; If Lower progress than this probably needs support
 	
 	NDefines.NMilitary.PLAN_BLITZ_OPTIMISM = 0.3						-- increased from 0.2 ; Additional combat balance value in favor of blitzing side when considering targets (not a combat bonus just offsets planning)
-
-	NDefines.NMilitary.BASE_CAPTURE_EQUIPMENT_RATIO = 0.02				-- after a successful land combat ratio of the equipments that are being captured/salvaged from enemy's lost equipment
-
 	
 	NDefines.NMilitary.NEW_COMMANDER_RANDOM_BASIC_TRAIT_CHANCES = {  -- chances to gain a basic trait for new generals
 	}
@@ -178,6 +179,8 @@
 			0.0, -- NAVAL_MINES_SWEEPING
 			0.0, -- MISSION_RECON
 			0.0, -- NAVAL_PATROL
+			0,0, -- SAM
+			0,0, -- BARRAGE
 		}
 		
 	NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0
@@ -186,7 +189,7 @@
 --------------------------------------------------------------------------------------------------------------
 -- RESEARCH
 --------------------------------------------------------------------------------------------------------------
-	NDefines.NAI.RESEARCH_DAYS_BETWEEN_WEIGHT_UPDATE = 1
+	NDefines.NAI.RESEARCH_DAYS_BETWEEN_WEIGHT_UPDATE = 7		-- DO NOT CHANGE TO A LOWER VALUE - SpicyAlfredo
 	NDefines.NAI.RESEARCH_LAND_DOCTRINE_NEED_GAIN_FACTOR = 0	-- Multiplies value based on relative military industry size / country size.
 	NDefines.NAI.RESEARCH_NAVAL_DOCTRINE_NEED_GAIN_FACTOR = 0	-- Multiplies value based on relative naval industry size / country size.
 	NDefines.NAI.RESEARCH_AIR_DOCTRINE_NEED_GAIN_FACTOR = 0		-- Multiplies value based on relative number of air base / country size.
@@ -201,7 +204,7 @@
 --------------------------------------------------------------------------------------------------------------
 -- DESIGN
 --------------------------------------------------------------------------------------------------------------
-	NDefines.NAI.DEFAULT_LEGACY_VARIANT_CREATION_XP_CUTOFF_LAND = 199 --10	-- Army XP needed before attempting to create a variant of a type that uses the legacy upgrades system. ai_strategy supports land_xp_spend_priority upgrade_xp_cutoff. If none is set this define is used instead.
+	NDefines.NAI.DEFAULT_LEGACY_VARIANT_CREATION_XP_CUTOFF_LAND = 500 --10	-- Army XP needed before attempting to create a variant of a type that uses the legacy upgrades system. ai_strategy supports land_xp_spend_priority upgrade_xp_cutoff. If none is set this define is used instead.
 	NDefines.NAI.DEFAULT_LEGACY_VARIANT_CREATION_XP_CUTOFF_NAVY = 49 --25	-- Same as above but for navy XP and navy_xp_spend_priority.
 	NDefines.NAI.DEFAULT_LEGACY_VARIANT_CREATION_XP_CUTOFF_AIR  = 199 --25	-- Same as above but for air XP and air_xp_spend_priority.
 
@@ -275,7 +278,7 @@
 	NDefines.NAI.MAIN_ENEMY_FRONT_IMPORTANCE = 50.0
 	NDefines.NAI.RESERVE_TO_COMMITTED_BALANCE = 0.2
 	NDefines.NAI.FRONT_REASSIGN_DISTANCE = 250.0
-	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 90                  -- reduced from 168 ; if we are in combat for this amount and it goes shitty then try skipping it 
+	NDefines.NAI.CANCEL_COMBAT_DISADVANTAGE_RATIO = 1.5 -- changed 1.15 ; if we are in combat for this amount and it goes shitty then try skipping it 
 	NDefines.NAI.UNIT_ASSIGNMENT_TERRAIN_IMPORTANCE = 20.0 -- Instead of 10 should improve terrain optimization
 
 --------------------------------------------------------------------------------------------------------------
@@ -412,75 +415,76 @@
 	
 	NDefines.NAI.WANTED_UNITS_MANPOWER_DIVISOR = 22000
 	
-	NDefines.NAI.DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
-		--Army Values
-		0.5, -- default_morale
-		1.0, -- defense
-		1.0, -- breakthrough
-		1.0, -- hardness
-		1.3, -- soft_attack #was 1.2 should build better divs.
-		0.01, -- hard_attack #was 0. Experiment so AI base vaules anti-tank and tanks more - SpicyAlfrdo
-		0.0, -- recon
-		0.0, -- entrenchment
-		0.0, -- initiative
-		0.0, -- casualty_trickleback 
-		-1.0, -- supply_consumption_factor
-		-0.25, -- supply_consumption
-		0.0, -- suppression
-		0.0, -- suppression_factor
-		0.0, -- experience_loss_factor
-		0.0, -- equipment_capture_factor
-		0.0, -- fuel_capacity
-		--Navy Values
-		0.0, -- surface_detection
-		0.01, -- sub_detection Experimental nudge for the ai to not build DD's that let Subs massacre them - SpicyAlfrdo
-		0.0, -- surface_visibility
-		0.0, -- sub_visibility
-		0.0, -- lg attack
-		0.0, -- lg piercing
-		0.0, -- hg attack
-		0.0, -- hg piercing
-		0.0, -- torpedo
-		0.0, -- sub attack
-		0.0, -- anti air attack
-		0.0, -- amphibious_defense
-		0.0, -- naval_speed
-		0.0, -- range
-		0.0, -- mine plant
-		0.0, -- mine sweep
-		0.0, -- raiding coordination
-		0.0, -- patrol coordination
-		0.0, -- search and destroy coordination
-		--Air Values
-		0.0, -- air_range
-		0.0, -- air_defence
-		0.0, -- air_attack
-		0.0, -- air_agility
-		0.0, -- air_bombing
-		0.01, -- air_superiority #ai nudge for the most important air stat bar none - Spicyalfredo
-		0.0, -- naval_strike_attack
-		0.0, -- naval_strike_targetting
-		0.0, -- air_ground_attack
-		0.0, -- air_visibility_factor
-		--Common Values
-		1.0, -- max_organisation
-		1.0, -- max_strength
-		1.0, -- maximum_speed
-		1.0, -- armor_value
-		0.5, -- ap_attack
-		0.0, -- reliability
-		0.0, -- reliability_factor
-		-0.25, -- weight
-		0.0, -- fuel_consumption
-		0.0, -- fuel_consumption_factor
-		--Special Values
-		0.0, -- strategic_attack
-		0.0, -- carrier_size
-		0.0, -- acclimatization hot gain
-		0.0, -- acclimatization cold gain
-		0.0, -- night_penalty
-		-0.5, -- build_cost_ic
-	}
+	-- seems to not be based on the right number of entries even before AAT
+	-- NDefines.NAI.DIVISION_DESIGN_WEIGHTS = {							-- Base values used by AI to evaluate value of a stat
+	-- 	--Army Values
+	-- 	0.5, -- default_morale
+	-- 	1.0, -- defense
+	-- 	1.0, -- breakthrough
+	-- 	1.0, -- hardness
+	-- 	1.3, -- soft_attack #was 1.2 should build better divs.
+	-- 	0.01, -- hard_attack #was 0. Experiment so AI base vaules anti-tank and tanks more - SpicyAlfrdo
+	-- 	0.0, -- recon
+	-- 	0.0, -- entrenchment
+	-- 	0.0, -- initiative
+	-- 	0.0, -- casualty_trickleback 
+	-- 	-1.0, -- supply_consumption_factor
+	-- 	-0.25, -- supply_consumption
+	-- 	0.0, -- suppression
+	-- 	0.0, -- suppression_factor
+	-- 	0.0, -- experience_loss_factor
+	-- 	0.0, -- equipment_capture_factor
+	-- 	0.0, -- fuel_capacity
+	-- 	--Navy Values
+	-- 	0.0, -- surface_detection
+	-- 	0.01, -- sub_detection Experimental nudge for the ai to not build DD's that let Subs massacre them - SpicyAlfrdo
+	-- 	0.0, -- surface_visibility
+	-- 	0.0, -- sub_visibility
+	-- 	0.0, -- lg attack
+	-- 	0.0, -- lg piercing
+	-- 	0.0, -- hg attack
+	-- 	0.0, -- hg piercing
+	-- 	0.0, -- torpedo
+	-- 	0.0, -- sub attack
+	-- 	0.0, -- anti air attack
+	-- 	0.0, -- amphibious_defense
+	-- 	0.0, -- naval_speed
+	-- 	0.0, -- range
+	-- 	0.0, -- mine plant
+	-- 	0.0, -- mine sweep
+	-- 	0.0, -- raiding coordination
+	-- 	0.0, -- patrol coordination
+	-- 	0.0, -- search and destroy coordination
+	-- 	--Air Values
+	-- 	0.0, -- air_range
+	-- 	0.0, -- air_defence
+	-- 	0.0, -- air_attack
+	-- 	0.0, -- air_agility
+	-- 	0.0, -- air_bombing
+	-- 	0.01, -- air_superiority #ai nudge for the most important air stat bar none - Spicyalfredo
+	-- 	0.0, -- naval_strike_attack
+	-- 	0.0, -- naval_strike_targetting
+	-- 	0.0, -- air_ground_attack
+	-- 	0.0, -- air_visibility_factor
+	-- 	--Common Values
+	-- 	1.0, -- max_organisation
+	-- 	1.0, -- max_strength
+	-- 	1.0, -- maximum_speed
+	-- 	1.0, -- armor_value
+	-- 	0.5, -- ap_attack
+	-- 	0.0, -- reliability
+	-- 	0.0, -- reliability_factor
+	-- 	-0.25, -- weight
+	-- 	0.0, -- fuel_consumption
+	-- 	0.0, -- fuel_consumption_factor
+	-- 	--Special Values
+	-- 	0.0, -- strategic_attack
+	-- 	0.0, -- carrier_size
+	-- 	0.0, -- acclimatization hot gain
+	-- 	0.0, -- acclimatization cold gain
+	-- 	0.0, -- night_penalty
+	-- 	-0.5, -- build_cost_ic
+	-- }
 	
 	
 	NDefines.NAI.MAX_UNITS_FACTOR_INVASION_ORDER = 1.0				-- Factor for max number of units to assign to naval invasion orders
@@ -564,7 +568,6 @@
 	NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 5		
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE = 0 --0.08			-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend.
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE_DEFENSIVE = 0 --0.4	-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend but while being a defensive country.
-	NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 150					-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
 	NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 12				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
 	NDefines.NAI.MAX_DISTANCE_NAVAL_INVASION = 400.0				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
 	NDefines.NAI.MAX_INVASION_SIZE = 18 --24									-- max invasion group size
@@ -697,10 +700,13 @@
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_STRIPE_TEX_MAX_HEIGHT = 8196
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_WIDTH = 41
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_LARGE_STRIPE_MAX_HEIGHT = 24000
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_AFTER = {0, 20} -- After this amount of VP the map icon becomes bigger dot.
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {200, 500, 750} -- At what camera distance the VP name text disappears.
-	NDefines_Graphics.NGraphics.VICTORY_POINTS_DISTANCE_CUTOFF = {300, 750, 1000} -- At what distance VPs are hidden
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_COLOR_DEFAULT = { 0, 128, 0, 1.0 } -- green default railway maparrow color
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_THIN_LEVEL_THRESHOLD = 1 -- Railway level 1 uses thin map arrow in supply map mode
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_MEDIUM_LEVEL_THRESHOLD = 5 -- Railway level 2-3 uses medium map arrow in supply map mode
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_THICK_LEVEL_THRESHOLD = 9 -- Railway level 4-5 uses thick map arrow in supply map mode
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_CAPITAL_CUTOFF_MAX = 1700.0 -- Capitals are special snowflakes, they need their own number
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {100, 250, 550} -- At what camera distance the VP name text disappears. 
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MAX = 800.0-- Max range for victory point text 
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0  -- Max range for victory point text 
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MIN = 100.0 -- Min range for victory point text
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point text

@@ -8,12 +8,12 @@ focus_tree = {
         }
     }
     default = no
-	continuous_focus_position = { x = 650 y = 1350 }
+	continuous_focus_position = { x = 5 y = 1150 }
 
     focus = {
         id = ADR_continue_the_policy_of_neutrality
         icon = GFX_goal_generic_neutrality_focus
-        x = 12
+        x = 9
         y = 0
         cost = 10
         mutually_exclusive = {
@@ -167,15 +167,15 @@ focus_tree = {
         }
         completion_reward = {
             add_stability = -0.1
-            remove_ideas = neutrality_idea
-            if = {
+			if = {
                 limit = {
                     ROOT = {
                         is_ai = no
                     }
                 }
-                add_war_support = 0.03
+                add_war_support = 0.05
             }
+            remove_ideas = neutrality_idea
         }
     }
     focus = {
@@ -188,7 +188,13 @@ focus_tree = {
             x = -1
             y = 0
             trigger = {
-				is_ai = no
+                OR = {
+                    has_game_rule = {
+                        rule = ADR_ai_behavior
+                        option = FLEXIBLE_FOREIGN_POLICY
+                    }
+                    is_ai = no
+                }
 			}
         }
         cost = 10
@@ -215,25 +221,14 @@ focus_tree = {
             factor = 10
         }
         completion_reward = {
-            if = {
-                limit = {
-                    has_dlc = "Together for Victory"
-                }
-                FRA = {
-                    set_autonomy = {
-                        target = ADR
-                        autonomous_state = autonomy_dominion
-                        freedom_level = 0.6
-                    }
-                    add_opinion_modifier = { target = ROOT modifier = large_increase }	
-                }
-                else = {
-                    FRA = {
-                        puppet = ADR
-                        add_opinion_modifier = { target = ROOT modifier = large_increase }
-                    }
-                }
-            }
+			FRA = {
+				add_opinion_modifier = { target = ROOT modifier = large_increase }	
+				set_autonomy = {
+					target = ADR
+					autonomous_state = autonomy_dominion
+					freedom_level = 0.6
+				}
+			}
             hidden_effect = {
                 set_politics = {
                     ruling_party = neutrality
@@ -254,7 +249,13 @@ focus_tree = {
         y = 1
         cost = 10
         allow_branch = {
-            is_ai = no
+            OR = {
+                has_game_rule = {
+                    rule = ADR_ai_behavior
+                    option = FLEXIBLE_FOREIGN_POLICY
+                }
+                is_ai = no
+            }
         }
         available = {
             is_subject = no
@@ -275,137 +276,298 @@ focus_tree = {
         }
     }
 
-    # military 
+	#   # ### #   ### ###  ##  ###  #   # 
+	## ##  #  #    #   #  #  # #  #  # #  
+	# # #  #  #    #   #  #### ###    #   
+	#   #  #  #    #   #  #  # #  #   #   
+	#   # ### ### ###  #  #  # #  #   #   
 
-    focus = {
-        id = ADR_reestablish_the_armed_forces
-        icon = GFX_focus_generic_manpower
-        x = 4
-        y = 0
-        cost = 5
-        search_filters = {FOCUS_FILTER_ARMY_XP}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-            army_experience = 10
-
-        }
-    }
 	focus = {
-        id = ADR_reequip_the_military
-        icon = GFX_goal_generic_small_arms
-		relative_position_id = ADR_reestablish_the_armed_forces
-        x = -1
-        y = 1
-        cost = 10
-		prerequisite = {
-			focus = ADR_reestablish_the_armed_forces
+		id = ADR_militarize_the_police_force
+		icon = GFX_focus_ETH_peacekeeping_forces
+		prerequisite = { focus = ADR_continue_the_policy_of_neutrality }
+
+		x = 6
+		y = 1
+		#relative_position_id =
+		cost = 5
+
+		search_filters = {FOCUS_FILTER_ARMY_XP FOCUS_FILTER_MILITARY_EQUIPMENT}
+
+		completion_reward = {
+			army_experience = 10
+			division_template = {
+				name = "Cos de Policia d'Andorra"
+				priority = 1
+				division_names_group = SPR_INF_01
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					cavalry = { x = 1 y = 0 }
+				}
+			}
+			capital_scope = {
+				create_unit = {
+					division = "division_template = \"Cos de Policia d'Andorra\" start_experience_factor = 0.05 start_equipment_factor = 0.95"
+					owner = PREV
+				}
+			}
 		}
-        search_filters = {FOCUS_FILTER_RESEARCH}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-            add_tech_bonus = {
-                name = ADR_reequip_the_military
+	}
+	focus = {
+		id = ADR_build_andorra_city_airport
+		icon = GFX_goal_generic_airport
+		x = -2
+		y = 0
+		relative_position_id = ADR_militarize_the_police_force
+		cost = 10
+        prerequisite = { focus = ADR_continue_the_policy_of_neutrality }
+
+		search_filters = {FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MILITARY_EQUIPMENT}
+
+		completion_reward = {
+			capital_scope = {
+				add_building_construction = {
+					type = air_base
+					level = 2
+					instant_build = yes
+				}
+			}
+			add_equipment_to_stockpile = { 
+				type = transport_plane_equipment
+				amount = 10 
+				producer = ROOT
+			}
+		}
+	}
+	focus = {
+		id = ADR_the_monegasque_air_fleet
+		icon = GFX_goal_generic_air_fighter
+		prerequisite = { focus = ADR_build_andorra_city_airport }
+		x = 0
+		y = 1
+		relative_position_id = ADR_build_andorra_city_airport
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_AIR_XP FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			air_experience = 20
+			add_tech_bonus = {
+				name = ADR_the_monegasque_air_fleet
+				bonus = 0.5
+				uses = 1
+				category = light_air
+			}
+			add_tech_bonus = {
+				name = ADR_the_monegasque_air_fleet
+				bonus = 0.5
+				uses = 1
+				category = medium_air
+			}
+			add_tech_bonus = {
+				name = ADR_the_monegasque_air_fleet
+				bonus = 0.5
+				uses = 1
+				category = heavy_air
+			}
+		}
+	}
+	focus = {
+		id = ADR_torpedo_bombers
+		icon = GFX_goal_generic_air_naval_bomber
+		prerequisite = { focus = ADR_monegasque_naval_academy }
+		prerequisite = { focus = ADR_the_monegasque_air_fleet }
+		x = -1
+		y = 1
+		relative_position_id = ADR_the_monegasque_air_fleet
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			if = {
+				limit  = {
+					has_dlc = "By Blood Alone"
+				}
+				add_tech_bonus = {
+					name = ADR_torpedo_bombers
+					technology = improved_medium_airframe
+					bonus = 1
+					uses = 1
+				}
+			}
+            else = {
+                add_tech_bonus = {
+                    name = nav_bomber_bonus
+                    bonus = 1
+                    uses = 1
+                    category = naval_bomber
+                }
+            }
+		}
+	}
+	focus = {
+		id = ADR_weaponary_modernization
+		icon = GFX_goal_generic_small_arms
+		prerequisite = { focus = ADR_militarize_the_police_force }
+
+		x = 0
+		y = 1
+		relative_position_id = ADR_militarize_the_police_force
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+				name = ADR_weaponary_modernization
+				bonus = 0.5
+				uses = 2
+				category = infantry_weapons 
+			}
+		}
+	}
+	focus = {
+		id = ADR_develop_special_forces
+		icon = GFX_goal_generic_special_forces
+		prerequisite = { focus = ADR_weaponary_modernization }
+		x = -1
+		y = 1
+		relative_position_id = ADR_weaponary_modernization
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+				name = ADR_develop_special_forces
 				bonus = 1
 				uses = 1
-				category = infantry_weapons
+				category = r56_special_forces_training_tech 
 			}
-
-        }
-    }
-	focus = {
-        id = ADR_modern_weaponary
-        icon = GFX_goal_generic_army_artillery2
-		relative_position_id = ADR_reequip_the_military
-        x = 0
-        y = 1
-        cost = 10
-		prerequisite = {
-			focus = ADR_reequip_the_military
+			add_tech_bonus = {
+				name = ADR_develop_special_forces
+				bonus = 0.5
+				uses = 2
+				category = mountaineers_tech
+				category = r56_desert_infantry_tech
+			}
 		}
-        search_filters = {FOCUS_FILTER_RESEARCH}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-            add_tech_bonus = {
-                name = ADR_modern_weaponary
+	}
+	focus = {
+		id = ADR_the_andorra_industrial_fund
+		icon = GFX_goal_generic_industrial_plan
+		prerequisite = { focus = ADR_weaponary_modernization }
+		x = 1
+		y = 1
+		relative_position_id = ADR_weaponary_modernization
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_INDUSTRY}
+
+		completion_reward = {
+			capital_scope = {
+				r56_state_category_level_up = yes
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}
+		}
+	}
+	focus = {
+		id = ADR_recruit_marines
+		icon = GFX_goal_generic_amphibious_assault
+		prerequisite = { focus = ADR_monegasque_naval_academy }
+		prerequisite = { focus = ADR_develop_special_forces }
+
+		x = -1
+		y = 1
+		relative_position_id = ADR_develop_special_forces
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+				name = ADR_recruit_marines
 				bonus = 1
 				uses = 1
-				category = artillery
+				category = marine_tech
 			}
-
-        }
-    }
-	focus = {
-        id = ADR_motorized_support
-        icon = GFX_goal_generic_army_motorized
-		relative_position_id = ADR_modern_weaponary
-        x = 0
-        y = 1
-        cost = 10
-		prerequisite = {
-			focus = ADR_modern_weaponary
 		}
-        search_filters = {FOCUS_FILTER_RESEARCH}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-            add_tech_bonus = {
-                name = ADR_motorized_support
-				bonus = 1
-				uses = 1
-				category = motorized_equipment
-			}
-
-        }
-    }
+	}
 	focus = {
-        id = ADR_adoption_of_new_tactics
-        icon = GFX_goal_generic_army_doctrines
-		relative_position_id = ADR_reestablish_the_armed_forces
-        x = 1
-        y = 1
-        cost = 10
-		prerequisite = {
-			focus = ADR_reestablish_the_armed_forces
-		}
-        search_filters = {FOCUS_FILTER_ARMY_XP FOCUS_FILTER_RESEARCH}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-			army_experience = 5
+		id = ADR_andorra_military_insituite
+		icon = GFX_focus_generic_military_academy
+		prerequisite = { focus = ADR_develop_special_forces focus = ADR_the_andorra_industrial_fund }
+
+		x = 1
+		y = 1
+		relative_position_id = ADR_develop_special_forces
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_ARMY_XP FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			army_experience = 10
             add_doctrine_cost_reduction = {
-                name = ADR_adoption_of_new_tactics
+				name = ADR_andorra_military_insituite
 				uses = 1
 				cost_reduction = 0.5
 				category = land_doctrine
             }
-        }
-    }
-	focus = {
-        id = ADR_promote_military_development
-        icon = GFX_goal_generic_construct_mil_factory
-		relative_position_id = ADR_adoption_of_new_tactics
-        x = 1
-        y = 1
-        cost = 10
-		available_if_capitulated = no
-		prerequisite = {
-			focus = ADR_adoption_of_new_tactics
-			focus = ADR_aviation_experiments
 		}
-        search_filters = {FOCUS_FILTER_INDUSTRY}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-			add_war_support = 0.02
+	}
+	focus = {
+		id = ADR_economic_mobilization
+		icon = GFX_goal_polish_wartime_industry
+		prerequisite = { focus = ADR_the_andorra_industrial_fund }
+
+		x = 1
+		y = 1
+		relative_position_id = ADR_the_andorra_industrial_fund
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_INDUSTRY}
+
+		completion_reward = {
+			add_war_support = 0.1
+			upgrade_economy_law = yes
+		}
+	}
+	focus = {
+		id = ADR_the_grand_university_of_andorra_city
+		icon = GFX_focus_research
+		prerequisite = { focus = ADR_andorra_military_insituite }
+
+		x = 0
+		y = 1
+		relative_position_id = ADR_andorra_military_insituite
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_research_slot = 1
+		}
+	}
+	focus = {
+		id = ADR_encourage_local_arms_production
+		icon = GFX_goal_generic_construct_mil_factory
+		prerequisite = { focus = ADR_economic_mobilization }
+
+		x = 2
+		y = 1
+		relative_position_id = ADR_andorra_military_insituite
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_INDUSTRY}
+
+		completion_reward = {
 			random_owned_controlled_state = {
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
@@ -414,148 +576,223 @@ focus_tree = {
 					instant_build = yes
 				}
 			}
-        }
-    }
-	focus = {
-        id = ADR_defense_of_andorra
-        icon = GFX_goal_generic_construct_military
-		relative_position_id = ADR_adoption_of_new_tactics
-        x = 0
-        y = 2
-        cost = 10
-		available = {
-			OR = {
-				has_war = yes
-				threat > 0.1
-			}
-		}
-		available_if_capitulated = no
-		prerequisite = {
-			focus = ADR_adoption_of_new_tactics
-		}
-        search_filters = {FOCUS_FILTER_INDUSTRY}
-        ai_will_do = {
-            factor = 0
-			modifier = {
-				factor = 50
-				threat > 0.3
-			}
-        }
-        completion_reward = {
-			973 = {
+			random_owned_controlled_state = {
+				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
-					type = bunker
+					type = arms_factory
 					level = 1
-					province = {
-						id = 3898
-					}
 					instant_build = yes
 				}
 			}
-			add_ideas = ADR_defense_of_andorra
-        }
-    }
+		}
+	}
 	focus = {
-        id = ADR_increase_conscription
-        icon = GFX_goal_generic_army_mobilization
-		relative_position_id = ADR_defense_of_andorra
-        x = 0
-        y = 1
-        cost = 10
+		id = ADR_resource_commission
+		icon = GFX_goal_BEL_steel
+		prerequisite = { focus = ADR_encourage_local_arms_production }
+
+		x = 1
+		y = 1
+		relative_position_id = ADR_encourage_local_arms_production
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY}
+
+		completion_reward = {
+			add_tech_bonus = {
+				name = excavation_tech_bonus_name
+				bonus = 1
+				uses = 1
+				category = excavation_tech
+			}
+			random_owned_controlled_state = {
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = steel_mill
+					level = 1
+					instant_build = yes
+				}
+			}		
+		
+		}
+	}
+	focus = {
+		id = ADR_introduce_motorization_technologies
+		icon = GFX_goal_generic_army_motorized
+		prerequisite = { focus = ADR_the_grand_university_of_andorra_city }
+		x = -1
+		y = 1
+		relative_position_id = ADR_the_grand_university_of_andorra_city
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+				name = ADR_introduce_motorization_technologies
+				bonus = 1
+				uses = 1
+				category = motorized_equipment
+			}
+		}
+	}
+	focus = {
+		id = ADR_the_roars_of_thunder
+		icon = GFX_goal_generic_army_artillery2
+		prerequisite = { focus = ADR_the_grand_university_of_andorra_city focus = ADR_encourage_local_arms_production }
+		x = 1
+		y = 1
+		relative_position_id = ADR_the_grand_university_of_andorra_city
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+				name = ADR_the_roars_of_thunder
+				bonus = 0.5
+				uses = 2
+				category = artillery 
+				category = cat_anti_tank 
+			}
+		}
+	}
+	focus = {
+		id = ADR_the_steel_lions
+		icon = GFX_focus_generic_army_tanks2
+		prerequisite = { focus = ADR_introduce_motorization_technologies }
+
+		x = 0
+		y = 1
+		relative_position_id = ADR_introduce_motorization_technologies
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+				name = ADR_the_steel_lions
+				bonus = 1
+				uses = 1
+				category = armor 
+			}
+		}
+	}
+
+
+
+	focus = {
+		id = ADR_develop_our_dockyards
+		icon = GFX_goal_generic_construct_naval_dockyard
+		prerequisite = { focus = ADR_continue_the_policy_of_neutrality }
+
+		x = -3
+		y = 0
+		relative_position_id = ADR_build_andorra_city_airport
+		cost = 10
 		available = {
-			OR = {
-				has_war = yes
-				threat > 0.2
+			any_owned_state = {
+				is_coastal = yes
 			}
 		}
-		available_if_capitulated = no
-		prerequisite = {
-			focus = ADR_defense_of_andorra
-		}
-        search_filters = {FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_MANPOWER}
-        ai_will_do = {
-			factor = 0
-            modifier = {
-				factor = 50
-				threat > 0.5
-			}
-        }
-        completion_reward = {
-			add_war_support = 0.05
-			if = {
+
+		search_filters = {FOCUS_FILTER_INDUSTRY}
+
+		completion_reward = {
+			random_owned_controlled_state = {
 				limit = {
-					OR = {
-						has_idea = disarmed_nation
-						has_idea = volunteer_only
-						has_idea = limited_conscription
-					}
+					is_coastal = yes
 				}
-				add_ideas = extensive_conscription
-			}
-			else = {
-				add_manpower = 2000
-			}
-        }
-    }
-	focus = {
-        id = ADR_la_vella_airport
-        icon = GFX_goal_generic_airport
-		relative_position_id = ADR_reestablish_the_armed_forces
-        x = 3
-        y = 0
-        cost = 10
-		bypass = {
-			has_capitulated = yes
-		}
-        search_filters = {FOCUS_FILTER_AIR_XP FOCUS_FILTER_INDUSTRY}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-			air_experience = 10
-			973 = {
+				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
-					type = air_base
+					type = dockyard
 					level = 1
 					instant_build = yes
 				}
 			}
-        }
-    }
-	focus = {
-        id = ADR_aviation_experiments
-        icon = GFX_goal_generic_air_fighter
-		relative_position_id = ADR_la_vella_airport
-        x = 0
-        y = 1
-        cost = 10
-		prerequisite = {
-			focus = ADR_la_vella_airport
+			random_owned_controlled_state = {
+				limit = {
+					is_coastal = yes
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = dockyard
+					level = 1
+					instant_build = yes
+				}
+			}
 		}
-        search_filters = {FOCUS_FILTER_RESEARCH}
-        ai_will_do = {
-            factor = 10
-        }
-        completion_reward = {
-            if = {
-                limit = {
-                    has_dlc = "By Blood Alone"
-                }
-                add_tech_bonus = {
-                    name = ADR_aviation_experiments
-                    bonus = 1
-                    uses = 1
-                    category = light_air
-                }
+	}
+	focus = {
+		id = ADR_monegasque_naval_academy
+		icon = GFX_goal_generic_admirality
+		prerequisite = { focus = ADR_develop_our_dockyards }
+
+		x = 1
+		y = 1
+		relative_position_id = ADR_develop_our_dockyards
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_NAVY_XP}
+
+		completion_reward = {
+			navy_experience = 25
+			add_ideas = SCO_idea_national_admiralty
+		}
+	}
+	focus = {
+		id = ADR_develop_indigenous_models
+		icon = GFX_focus_generic_destroyer
+		prerequisite = { focus = ADR_develop_our_dockyards }
+
+		x = -1
+		y = 1
+		relative_position_id = ADR_develop_our_dockyards
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+                name = dd_bonus
+                bonus = 1
+                uses = 1
+                category = dd_tech
             }
-            else = {
-                add_tech_bonus = {
-                    name = ADR_aviation_experiments
-                    bonus = 1
-                    uses = 1
-                    category = light_fighter
-                }
+			add_tech_bonus = {
+                name = dd_bonus
+                bonus = 1
+                uses = 1
+                category = ss_tech
             }
-        }
-    }
+		}
+	}
+	focus = {
+		id = ADR_the_big_guns
+		icon = GFX_focus_generic_navy_battleship2
+		prerequisite = { focus = ADR_develop_indigenous_models }
+
+		x = 0
+		y = 1
+		relative_position_id = ADR_develop_indigenous_models
+		cost = 10
+
+		search_filters = {FOCUS_FILTER_RESEARCH}
+
+		completion_reward = {
+			add_tech_bonus = {
+                name = dd_bonus
+                bonus = 1
+                uses = 1
+                category = bb_tech
+            }
+			add_tech_bonus = {
+                name = dd_bonus
+                bonus = 1
+                uses = 1
+                category = cv_tech
+            }
+		}
+	}
+
 }

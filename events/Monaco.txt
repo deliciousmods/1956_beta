@@ -1,0 +1,944 @@
+﻿###########################
+# Costa Rica Events
+###########################
+
+add_namespace = monaco
+
+# Italian Occupation
+country_event = {
+	id = monaco.1
+	title = monaco.1.t
+	desc = monaco.1.d
+	picture = GFX_report_event_mnc_monaco
+
+	fire_only_once = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		set_variable = { MNC_democratic_popularity = MNC.party_popularity_100@democratic }
+		clamp_variable = {
+			var = MNC_democratic_popularity
+			min = 0
+			max = 100
+		}
+		set_variable = { MNC_communism_popularity = MNC.party_popularity_100@communism }
+		clamp_variable = {
+			var = MNC_communism_popularity
+			min = 0
+			max = 100
+		}
+		set_variable = { MNC_neutrality_popularity = MNC.party_popularity_100@neutrality }
+		clamp_variable = {
+			var = MNC_neutrality_popularity
+			min = 0
+			max = 100
+		}
+		set_variable = { MNC_fascism_popularity = MNC.party_popularity_100@fascism }
+		clamp_variable = {
+			var = MNC_fascism_popularity
+			min = 0
+			max = 100
+		}
+		if = {
+			limit = {
+				has_government = democratic
+			}
+			set_country_flag = MNC_is_democratic_flag
+		}
+		if = {
+			limit = {
+				has_government = neutrality
+			}
+			set_country_flag = MNC_is_neutral_flag
+		}
+		if = {
+			limit = {
+				has_government = communism
+			}
+			set_country_flag = MNC_is_communistic_flag
+		}
+		if = {
+			limit = {
+				has_government = fascism
+			}
+			set_country_flag = MNC_is_fascist_flag
+		}
+	}
+
+	option = { # historical
+		name = monaco.1.a
+
+		ai_chance = {
+			base = 99 #Let's be honest, it's Monaco we're talking about here
+			modifier = {
+				is_historical_focus_on = yes
+
+				add = 101
+			}
+			modifier = {
+				factor = 0
+
+				OR = {
+					is_in_faction = yes
+					is_subject = yes
+				}
+			}
+        }
+		
+
+		add_stability = -0.15
+		add_war_support = -0.15
+
+		ITA = { 
+			puppet = MNC 
+		}
+
+		MNC = {
+			set_rule = { can_join_factions = no	}
+			set_rule = { can_decline_call_to_war = yes }
+			set_rule = {
+	    		desc = can_access_market 
+	    		can_access_market = no
+			}
+
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				set_rule = { contributes_operatives = no	}
+			}
+			hidden_effect = {
+				set_country_flag = MNC_is_protectorate_flag
+			}
+		}
+
+		every_state = {
+			limit = {
+				is_controlled_by = ITA 
+				is_core_of = MNC
+			}
+			transfer_state_to = MNC
+		}
+		if = {
+			limit = {
+				has_wargoal_against = ITA
+			}
+			remove_wargoal = {
+			    type = all
+			    target = ITA
+			}
+		}
+
+		hidden_effect = {
+			set_popularities = { 
+				democratic = MNC_democratic_popularity
+				fascism = MNC_fascism_popularity
+				communism = MNC_communism_popularity
+				neutrality = MNC_neutrality_popularity
+			}
+			if = {
+				limit = {
+					MNC = {
+						is_ai = yes
+					}
+				}
+				add_ideas = MNC_reluctant_puppet
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_democratic_flag
+				}
+				set_politics = { ruling_party = democratic }
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_neutral_flag
+				}
+				set_politics = { ruling_party = neutrality }
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_communistic_flag
+				}
+				set_politics = { ruling_party = communism }
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_fascist_flag
+				}
+				set_politics = { ruling_party = fascism }
+			}
+
+			every_possible_country = {
+				limit = {
+					has_war_with = MNC
+				}
+				white_peace = MNC
+			}
+
+			every_country = {
+				limit = {
+					OR = {
+						capital_scope = {
+							is_on_continent = europe
+						}
+						has_war_with = ITA
+					}
+				}
+				news_event = {
+					id = monaco.6
+					days = 1
+					random_hours = 12
+				}
+			}
+				
+			
+			ITA = {
+				country_event = { id = monaco.5 days = 1 }
+			}
+		}
+	}
+
+	option = { # resist
+		name = monaco.1.b
+
+		ai_chance = {
+			base = 1
+
+			modifier = {
+				OR = {
+					is_in_faction = yes
+					is_subject = yes
+				}
+
+				add = 99
+			}
+        }
+
+		
+
+		add_war_support = 0.15
+
+		ITA = {
+			country_event = { id = monaco.13 days = 1 }
+		}
+	}	
+}
+
+# Monaco becomes free from Italy
+country_event = {
+	id = monaco.2
+	title = monaco.2.t
+	desc = monaco.2.d
+	picture = GFX_report_event_mnc_monaco
+
+	fire_only_once = yes
+	
+	trigger = {
+		original_tag = MNC
+		ITA = {
+			NOT = {
+				controls_state = 735
+			}	
+		}
+		MNC = {
+			is_subject_of = ITA
+			has_country_flag = MNC_is_protectorate_flag
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 14
+	}
+
+	option = { # We're free
+		name = monaco.2.a
+
+		add_war_support = 0.05
+
+		ITA = {
+			end_puppet = MNC
+		}
+
+		leave_faction = yes
+
+		if = {
+			limit = {
+				has_idea = MNC_reluctant_puppet
+			}
+			remove_ideas = MNC_reluctant_puppet
+		}
+		MNC = {
+			set_rule = { can_join_factions = yes }
+			set_rule = { can_decline_call_to_war = yes }
+			set_rule = {
+	    		desc = can_access_market 
+	    		can_access_market = yes
+			}
+
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				set_rule = { contributes_operatives = yes }
+			}
+		}
+	}
+}
+
+# German Invasion
+country_event = {
+	id = monaco.3
+	title = monaco.3.t
+	desc = monaco.3.d
+	picture = GFX_report_event_mnc_monaco
+
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		set_variable = { MNC_democratic_popularity = MNC.party_popularity_100@democratic }
+		clamp_variable = {
+			var = MNC_democratic_popularity
+			min = 0
+			max = 100
+		}
+		set_variable = { MNC_communism_popularity = MNC.party_popularity_100@communism }
+		clamp_variable = {
+			var = MNC_communism_popularity
+			min = 0
+			max = 100
+		}
+		set_variable = { MNC_neutrality_popularity = MNC.party_popularity_100@neutrality }
+		clamp_variable = {
+			var = MNC_neutrality_popularity
+			min = 0
+			max = 100
+		}
+		set_variable = { MNC_fascism_popularity = MNC.party_popularity_100@fascism }
+		clamp_variable = {
+			var = MNC_fascism_popularity
+			min = 0
+			max = 100
+		}
+		if = {
+			limit = {
+				has_government = democratic
+			}
+			set_country_flag = MNC_is_democratic_flag
+		}
+		if = {
+			limit = {
+				has_government = neutrality
+			}
+			set_country_flag = MNC_is_neutral_flag
+		}
+		if = {
+			limit = {
+				has_government = communism
+			}
+			set_country_flag = MNC_is_communistic_flag
+		}
+		if = {
+			limit = {
+				has_government = fascism
+			}
+			set_country_flag = MNC_is_fascist_flag
+		}
+	}
+
+	option = { # historical
+		name = monaco.3.a
+
+		ai_chance = {
+			base = 75
+        }
+
+		GER = { 
+			puppet = MNC 
+		}
+
+		MNC = {
+			set_rule = { can_join_factions = no	}
+			set_rule = { can_decline_call_to_war = yes }
+			set_rule = {
+	    		desc = can_access_market 
+	    		can_access_market = no
+			}
+
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				set_rule = { contributes_operatives = no }
+			}
+		}
+
+		every_state = {
+			limit = {
+				is_controlled_by = GER 
+				is_core_of = MNC
+			}
+			transfer_state_to = MNC
+		}
+		if = {
+			limit = {
+				has_wargoal_against = GER
+			}
+			remove_wargoal = {
+			    type = all
+			    target = GER
+			}
+		}
+
+		hidden_effect = {
+			set_popularities = { 
+				democratic = MNC_democratic_popularity
+				fascism = MNC_fascism_popularity
+				communism = MNC_communism_popularity
+				neutrality = MNC_neutrality_popularity
+			}
+			if = {
+				limit = {
+					MNC = {
+						is_ai = yes
+					}
+				}
+				add_ideas = MNC_reluctant_puppet
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_democratic_flag
+				}
+				set_politics = { ruling_party = democratic }
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_neutral_flag
+				}
+				set_politics = { ruling_party = neutrality }
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_communistic_flag
+				}
+				set_politics = { ruling_party = communism }
+			}
+			if = {
+				limit = {
+					has_country_flag = MNC_is_fascist_flag
+				}
+				set_politics = { ruling_party = fascism }
+			}
+			GER = {
+				country_event = { id = monaco.5 days = 1 }
+			}
+
+			every_possible_country = {
+				limit = {
+					has_war_with = MNC
+				}
+				white_peace = MNC
+			}
+
+			hidden_effect = {
+				set_country_flag = MNC_is_protectorate_flag_GER
+			}
+
+			every_country = {
+				limit = {
+					OR = {
+						capital_scope = {
+							is_on_continent = europe
+						}
+						has_war_with = GER
+					}
+				}
+				news_event = {
+					id = monaco.7
+					days = 1
+					random_hours = 12
+				}
+			}
+		}
+	}
+
+	option = { # resist
+		name = monaco.3.b
+
+		ai_chance = {
+			base = 5 #More likely to resist as the war has begun to turn
+
+			modifier = {
+				158 = {
+					NOT = {
+						is_controlled_by = GER
+						is_controlled_by = ITA
+					}
+				}
+
+				add = 20 #Even more likely to resist if the allies are near
+			}
+			modifier = {
+				factor = 0
+
+				is_historical_focus_on = yes
+			}
+        }
+
+
+		add_war_support = 0.15
+
+		GER = {
+			country_event = { id = monaco.13 days = 1 }
+		}
+	}	
+}
+
+# Monaco Breaks Free from Germany
+country_event = {
+	id = monaco.4
+	title = monaco.4.t
+	desc = monaco.4.d
+	picture = GFX_report_event_mnc_monaco
+
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+
+	option = { # We're free...again
+		name = monaco.4.a
+
+		add_war_support = 0.05
+
+		GER = {
+			end_puppet = MNC
+		}
+		if = {
+			limit = {
+				has_idea = MNC_reluctant_puppet
+			}
+			remove_ideas = MNC_reluctant_puppet
+		}
+		MNC = {
+			set_rule = { can_join_factions = yes }
+			set_rule = { can_decline_call_to_war = yes }
+			set_rule = {
+	    		desc = can_access_market 
+	    		can_access_market = yes
+			}
+
+			leave_faction = yes
+
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				set_rule = { contributes_operatives = yes }
+			}
+			add_popularity = {
+				ideology = communism
+				popularity = 0.2
+			}
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.2
+			}
+		}
+	}
+}
+
+# Occupier Event
+country_event = {
+	id = monaco.5
+	title = monaco.5.t
+	desc = monaco.5.d
+	picture = GFX_report_event_mnc_monaco
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	option = { # Excellent
+		name = monaco.5.a
+
+		add_political_power = 10
+	}
+}
+
+# Monaguesque Occupation by Italy
+news_event = {
+	id = monaco.6
+	title = monaco.6.t
+	desc = monaco.6.d
+	picture = GFX_news_event_mnc_monaco
+	
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	option = {
+		name = monaco.6.a
+	}
+}
+
+# Monaguesque Occupation by Germany
+news_event = {
+	id = monaco.7
+	title = monaco.7.t
+	desc = monaco.7.d
+	picture = GFX_news_event_mnc_monaco
+	
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	option = {
+		name = monaco.7.a
+	}
+}
+
+# Louis II Death
+country_event = {
+	id = monaco.8
+	title = monaco.8.t
+	desc = monaco.8.d
+	picture = GFX_report_event_mnc_rainier_III
+
+	fire_only_once = yes
+
+	is_triggered_only = yes
+
+	option = {
+		name = monaco.8.a
+
+		trigger = {
+			NOT = {
+				has_government = communism
+				has_cosmetic_tag = MNC_republic
+			}
+		}
+		retire_character = MNC_louis_antoine_grimaldi
+		promote_character = MNC_rainier_louis_henri_grimaldi
+		add_corps_commander_role = {
+			character = MNC_rainier_louis_henri_grimaldi
+			skill = 2
+			attack_skill = 1
+			defense_skill = 3
+			planning_skill = 1
+			logistics_skill = 2
+		}
+		if = {
+			limit = {
+				has_idea = MNC_louis_II
+				NOT = {
+					has_government = fascism
+				}
+			}
+			swap_ideas = {
+				add_idea = MNC_Rainier_III
+				remove_idea = MNC_Louis_II
+			}
+		}
+		else_if = {
+			limit = {
+				has_idea = MNC_louis_II
+				has_government = fascism
+			}
+			swap_ideas = {
+				add_idea = MNC_Rainier_III_fascism
+				remove_idea = MNC_Louis_II
+			}
+		}
+	}
+	option = { 
+		name = monaco.8.b
+
+		trigger = {
+			OR = {
+				has_government = communism
+				has_cosmetic_tag = MNC_republic
+			}
+		}
+
+		add_manpower = -1
+	}	
+}
+
+# Constitutional Monarchy or Republic
+country_event = {
+	id = monaco.9
+	title = monaco.9.t
+	desc = monaco.9.d
+	picture = GFX_r56i_generic_event_06
+
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+
+	option = { #Keep the monarch
+		name = monaco.9.a
+
+		ai_chance = {
+			base = 25
+			modifier = {
+				is_historical_focus_on = yes
+
+				add = 90
+			}	
+        }
+
+		add_political_power = 50
+
+		if = {
+			limit = {
+				has_country_leader = {
+					character = MNC_louis_antoine_grimaldi
+					ruling_only = no
+				}
+			}
+			add_ideas = MNC_Louis_II
+		}
+		else = {
+			add_ideas = MNC_Rainier_III
+		}
+	}
+
+	option = { # Get rid of it
+		name = monaco.9.b
+
+		ai_chance = {
+			base = 10
+        }
+
+		custom_effect_tooltip = Monaco_French_Intervention_TT
+
+		add_political_power = -50
+		add_war_support = 0.05
+
+		retire_character = MNC_louis_antoine_grimaldi
+		retire_character = MNC_rainier_louis_henri_grimaldi
+		retire_character = MNC_charlotte_louise_juliette_grimaldi
+
+		set_cosmetic_tag = MNC_republic
+
+		set_party_name = {
+			ideology = neutrality
+			long_name = MNC_neutrality_party_republic_long
+			name = MNC_neutrality_party_republic
+		}
+	}
+}
+
+#Puppet Monarchy?
+country_event = {
+	id = monaco.10
+	title = monaco.10.t
+	desc = monaco.10.d
+	picture = GFX_r56i_generic_event_06
+
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+
+	option = { #Keep the monarch
+		name = monaco.10.a
+
+		ai_chance = {
+			base = 25
+			modifier = {
+				is_historical_focus_on = yes
+
+				add = 90
+			}	
+        }
+
+		add_political_power = 50
+
+		if = {
+			limit = {
+				has_country_leader = {
+					character = MNC_louis_antoine_grimaldi
+					ruling_only = no
+				}
+			}
+			add_ideas = MNC_Louis_II
+		}
+		else = {
+			add_ideas = MNC_Rainier_III_fascism
+		}
+	}
+
+	option = { # Get rid of it
+		name = monaco.10.b
+
+		ai_chance = {
+			base = 10
+        }
+
+		custom_effect_tooltip = Monaco_French_Intervention_TT
+
+		add_political_power = -50
+		add_war_support = 0.05
+
+		retire_character = MNC_louis_antoine_grimaldi
+		retire_character = MNC_rainier_louis_henri_grimaldi
+		retire_character = MNC_charlotte_louise_juliette_grimaldi
+
+		set_cosmetic_tag = MNC_republic
+
+		set_party_name = {
+			ideology = neutrality
+			long_name = MNC_neutrality_party_republic_long
+			name = MNC_neutrality_party_republic
+		}
+	}
+}
+
+country_event = {
+	id = monaco.11
+	title = monaco.11.t
+	desc = monaco.11.d
+	picture = GFX_report_event_generic_handshake
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	option = { # We have better things to worry about
+		name = monaco.11.a
+
+		ai_chance = {
+			base = 15
+			modifier = {
+				FRA = {
+					OR = {
+						has_government = democratic
+						has_government = communism
+					}	
+				}
+				add = 5
+			}
+        }
+
+		add_political_power = 25
+	}
+
+	option = { # Issue an ultimatum
+		name = monaco.11.b
+
+		ai_chance = {
+			base = 5
+			modifier = {
+				GER = {
+					has_government = neutrality
+				}
+				add = 15
+			}
+			modifier = {
+				FRA = {
+					OR = {
+						has_government = fascism
+						has_government = neutrality
+					}	
+				}
+				add = 5
+			}
+        }
+
+		add_war_support = -0.05
+		MNC = {
+			country_event = { id = generic.20 days = 1 }
+		}
+	}	
+}
+
+#Italian Event - Start of Chain
+country_event = {
+	id = monaco.12
+	title = monaco.12.t
+	desc = monaco.12.d
+	picture = GFX_report_event_mnc_monaco
+
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	option = { # Invade them
+		name = monaco.12.a
+
+		ai_chance = {
+			base = 10
+        }
+
+		MNC = {
+			country_event = { id = monaco.1 random_days = 1 }
+		}
+	}
+
+	option = { # We have better things to worry about
+		name = monaco.12.b
+
+		ai_chance = {
+			base = 1
+        }
+	}	
+}
+
+# Monaco Resists
+country_event = {
+	id = monaco.13
+	title = monaco.13.t
+	desc = monaco.13.d
+	picture = GFX_report_event_mnc_monaco_resists
+
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	option = { # THEY WHAT?!
+		name = monaco.13.a
+
+		ai_chance = {
+			base = 10
+        }
+
+		add_war_support = -0.025
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = MNC
+		}
+	}	
+}
+
+# German Invasion
+country_event = {
+	id = monaco.14
+	title = monaco.14.t
+	desc = monaco.14.d
+	picture = GFX_report_event_mnc_monaco
+
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	option = { # Invade them
+		name = monaco.14.a
+
+		ai_chance = {
+			base = 10
+        }
+
+		MNC = {
+			country_event = { id = monaco.3 random_days = 1 }
+		}
+	}
+
+	option = { # We have better things to worry about
+		name = monaco.14.b
+
+		ai_chance = {
+			base = 0
+        }
+	}	
+}
+

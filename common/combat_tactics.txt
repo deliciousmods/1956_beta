@@ -8,8 +8,13 @@ phases = { # phase = no is the standard phase
 	tactical_withdrawal
 	seize_bridge
 	hold_bridge
+	complex_ambush
+	deadly_trap
+	break_line
 }
+#mod tactics and phases first
 
+#this marks the start of default tactics
 tactic_basic_attack = {
 
 	is_attacker = yes
@@ -24,8 +29,6 @@ tactic_basic_attack = {
 		factor = 4
 	}
 	picture = attack
-	
-	countered_by = tactic_counterattack
 
 	attacker = 0.05
 }
@@ -41,8 +44,6 @@ tactic_basic_defend = {
 	
 	base =  { factor = 4 }
 	picture = defend
-	
-	countered_by = tactic_double_envelopment
 
 	defender = 0.05
 }
@@ -51,8 +52,13 @@ tactic_counterattack = { # counters basic attack, assault
 	is_attacker = no
 	trigger = {
 		is_attacker = no
-		skill_advantage > 0
 		phase = no
+		
+		OR = {
+			skill_advantage > 0
+			defense_skill_level > 4
+			planning_skill_level > 4
+		}
 	}
 	
 	active = yes
@@ -68,6 +74,94 @@ tactic_counterattack = { # counters basic attack, assault
 	defender = 0.25
 }
 
+tactic_basic_false_retreat = { #slighly better version of defend for skill advantage
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = no
+		AND = {
+			skill > 1
+			skill_advantage > 0
+		}
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 1
+		modifier = {
+			add = 4
+			skill_advantage > 0
+		}
+		modifier = {
+			add = 1
+			has_trait = trickster
+		}
+		modifier = {
+			add = 1
+			has_trait = homeland_connoisseur
+		}
+		modifier = {
+			has_trait = unyielding_defender
+			add = -3
+		}
+	}
+
+	picture = defend
+
+	countered_by = tactic_double_envelopment
+
+	attacker_movement_speed = -0.05
+	defender = 0.05
+	
+}
+
+tactic_basic_chase = { #slightly worse version of attack for skill disadvantage. 
+
+	is_attacker = yes
+	trigger = { # combined scope for both country and combatant
+		is_attacker = yes
+		phase = no
+		OR = {
+			skill < 2 #Get baited noob
+			skill_advantage < 1
+		}
+	}
+	
+	active = yes
+
+	base =  { 
+		factor = 0
+		modifier = {
+			add = 4
+			OR = {
+				skill_advantage < 1
+				attack_skill_level < 2
+			}
+		}
+		modifier = {
+			add = 1
+			AND = {
+				skill_advantage < 1
+				planning_skill_level < 2
+			}
+		}
+		modifier = {
+			add = 1
+			AND = {
+				skill_advantage < 1
+				logistics_skill_level < 2
+			}
+		}
+	}
+
+	picture = attack
+
+	countered_by = tactic_basic_false_retreat 
+
+	attacker = 0.05
+	attacker_movement_speed = -0.05
+}
 
 tactic_assault = { 
 	is_attacker = yes
@@ -82,14 +176,16 @@ tactic_assault = {
 		factor = 2
 		modifier = {
 			add = 2
+
 			has_trait = aggressive_assaulter
 		}
 
 		modifier = {
 			add = 2
+
 			is_fighting_in_terrain = urban
-			}
 		}
+	}
 	#Revisit ideally this should be more common in urban terrain
 	
 	picture = assault
@@ -147,6 +243,7 @@ tactic_cc_storm = {
 	picture = cc_storm
 	display_phase = close_combat
 	
+	
 
 	attacker = 0.2			#attacker gets a bonus to doing damage
 	defender = 0.2
@@ -163,6 +260,8 @@ tactic_cc_local_strong_point = {
 
 	base =  { factor = 2 }
 	picture = cc_local_strong_point
+	
+	#countered_by = tactic_precision_cas_strike_cc
 	
 	attacker = -0.2			#attacker gets a penalty to doing damage
 }
@@ -212,7 +311,6 @@ tactic_cc_occupy_building = {
 	trigger = {
 		is_attacker = yes
 		phase = close_combat
-		is_fighting_in_terrain = urban
 	}
 	
 	active = yes
@@ -263,19 +361,348 @@ tactic_cc_garrison_building = {
 	
 	active = yes
 	
-	base = {
-		factor = 4
-
+	base =  { factor = 2 
+		modifier = {
+			has_trait = unyielding_defender
+			add = 1
+		}
+		modifier = {
+			has_trait = ambusher
+			add = 1
+		}
 	}
 	picture = cc_garrison_building
 	display_phase = close_combat
 
-	defender = .1	#attacker gets a bonus to doing damage
-	attacker = -0.05
-	attacker_movement_speed = -0.5
+	attacker = 0.05
+	defender = 0.35			#defender gets a bonus to doing damage
+	attacker_movement_speed = -0.25
 	countered_by = tactic_cc_flamethrower_attack
 }
 
+##schizo CQB start
+
+# tactic_cc_template = {  
+# 	is_attacker = no
+# 	trigger = {
+# 		is_attacker = no
+# 		phase = close_combat
+# 		is_fighting_in_terrain = urban
+# 	}
+	
+# 	active = yes
+	
+# 	base =  { factor = 2 
+# 		modifier = {
+
+# 		}
+# 	}
+# 	picture = cc_garrison_building
+# 	display_phase = close_combat
+
+# 	attacker = 0
+# 	defender = 0			#defender gets a bonus to doing damage
+# 	attacker_movement_speed = 0 
+# }
+
+
+tactic_cc_hq_bombardment_defense = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		is_fighting_in_terrain = urban
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = cc_hq_bombardment_defense
+	display_phase = close_combat
+
+	attacker = -0.15
+	attacker_movement_speed = -0.1 
+}
+
+tactic_cc_hq_bombardment_attack = { 
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		is_fighting_in_terrain = urban
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = cc_hq_bombardment_attack
+	display_phase = close_combat
+
+	defender = -0.15
+	attacker_movement_speed = 0.1 
+}
+
+tactic_cc_every_window_a_rifle = {  
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		is_fighting_in_terrain = urban
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 
+		modifier = {
+			has_reserves = yes
+			add = 1
+		}
+	}
+	picture = cc_every_window_a_rifle
+	display_phase = close_combat
+
+	attacker = -0.1
+	defender = 0.2			#defender gets a bonus to doing damage
+	attacker_movement_speed = -0.15 
+}
+
+tactic_cc_borrowed_artillery = { 
+	active = yes
+	
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		has_reserves = yes
+	}
+	base =  { 
+		factor = 2 
+		modifier = {
+			has_trait = artillerist
+			add = 1
+		}
+		modifier = {
+			has_trait = obsessed_by_artillery
+			add = 1
+		}		
+		modifier = {
+			has_trait = bearer_of_artillery
+			add = 2
+		}
+	}
+	picture = cc_borrowed_artillery
+	display_phase = close_combat
+
+	attacker = 0.2
+	defender = -0.2			#defender gets a bonus to doing damage 
+}
+
+tactic_cc_collapsed_lines = { #DISASTEROUS ROLL   
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		has_reserves = no
+		is_winning = no
+	}
+	
+	active = yes
+	
+	base =  { factor = 0.25 
+		modifier = {
+			skill < 3
+			add = 1
+		}
+		# modifier = {
+		# 	num_units < 7
+		# 	add = 1
+		# }
+		modifier = {
+			logistics_skill_level < 3
+			add = 1
+			#hard to fight without bullets
+		}
+		#modifier = {				#doesn't seem to work
+		#	recon_advantage > 0
+		#	add = -1
+		#}
+		modifier = {
+			less_combat_width_than_opponent = yes
+			add = -5 
+			#must have more divs than defender to trigger this
+		}
+	}
+	picture = cc_collapsed_lines
+	display_phase = close_combat
+
+	attacker = 0.25 #combines with attacker tactic to kill defenders badly, probably 30-45% incoming dmg
+	attacker_movement_speed = 0.1 
+}
+
+tactic_cc_prepared_for_siege = {  
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		#has_combat_modifier = encirclement
+		OR = {
+			has_trait = logistics_wizard
+			planning_skill_level > 4
+		}
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 2
+		modifier = {
+			has_trait = urban_assault_specialist
+			add = 1 
+		}
+	}
+	
+	picture = cc_prepared_for_siege
+	display_phase = close_combat
+
+	defender = 0.3			#defender gets a bonus to doing damage 
+}
+
+tactic_cc_sector_suppression = {  
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		has_reserves = yes
+		OR = {
+			planning_skill_level > 5
+			attack_skill_level > 5
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = cc_borrowed_artillery
+	display_phase = close_combat
+
+	attacker = 0.2
+	defender = -0.3			#defender gets a bonus to doing damage
+}
+
+tactic_cc_secret_tunnels = {  
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		NOT = {
+			has_trait = ambusher
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 2}
+	picture = cc_secret_tunnels
+	display_phase = close_combat
+
+	defender = 0.1
+}
+
+tactic_cc_secret_tunnels_2 = {  
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		has_trait = ambusher
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 2
+	}
+	picture = cc_secret_tunnels_2
+	display_phase = close_combat
+
+	defender = 0.25
+}
+
+tactic_cc_sapper_teams = {  
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		NOT = {
+			has_trait = trait_engineer
+			has_trait = fortress_buster
+		}
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 2 
+	}
+	picture = cc_sapper_teams_1
+	display_phase = close_combat
+
+	attacker = 0.1
+	defender = -0.08
+	attacker_movement_speed = 0.1
+}
+
+tactic_cc_sapper_teams_2 = {  
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		has_trait = trait_engineer
+		NOT = {
+			has_trait = fortress_buster
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 
+	}
+	picture = cc_sapper_teams_2
+	display_phase = close_combat
+
+	attacker = 0.2
+	defender = -0.16
+	attacker_movement_speed = 0.1
+}
+
+tactic_cc_sapper_teams_3 = {  
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = close_combat
+		is_fighting_in_terrain = urban
+		has_trait = fortress_buster
+	}
+	
+	active = yes
+	
+	base =  { 
+		factor = 2 
+	}
+	picture = cc_sapper_teams_3
+	display_phase = close_combat
+
+	attacker = 0.25
+	defender = -0.16
+	attacker_movement_speed = 0.1
+}
 
 tactic_encirclement = {
 	is_attacker = yes
@@ -353,6 +780,7 @@ tactic_shock = { #counters delay
 	
 	defender = -0.25
 }
+
 
 tactic_tactical_withdrawal = { #counters encirclement
 	is_attacker = no
@@ -471,7 +899,29 @@ tactic_breakthrough = { #counters ambush
 	
 	active = no
 	
-	base =  { factor = 4 }
+	base =  { #base here taken from blackIce and slighty modified
+		factor = 2
+		modifier = {
+			add = 2
+			skill_advantage > 0
+		}
+		modifier = {
+			add = 1
+			hardness > 0.65
+		}
+		modifier = {
+			add = 1
+			hardness > 0.75
+		}
+		modifier = {
+			add = 1
+			has_trait = panzer_expert
+		}
+		modifier = {
+			add = 1
+			has_trait = combined_arms_expert
+		}
+	}
 	picture = breakthrough
 	
 	countered_by = tactic_backhand_blow
@@ -490,6 +940,10 @@ tactic_ambush = { #counters shock
 			skill_advantage > 1
 			skill > 2
 			has_trait = trickster
+			# custom_trigger_tooltip = {
+			# 	tooltip = trickster_TT
+			# 	check_variable = { leader_modifier@trickster > 0 }
+			# }
 		}
 	}
 	
@@ -578,8 +1032,6 @@ tactic_backhand_blow = { #counters breakthrough
 	
 	base =  { factor = 4 }
 	picture = backhand_blow
-
-	
 	
 	attacker_movement_speed = -0.3
 	attacker = -0.2
@@ -800,9 +1252,31 @@ tactic_defender_hb_skillful_defence = {
 	defender = 0.05
 }
 
+#Anti-Partisan, purpose is to counter guerrilla 
+#default phase so everyone can counter meme roaching
+#is otherwise identical to normal attack, so that rolling it outside of countering has little impact
+tactic_partisan_sweeps = {
+
+    is_attacker = yes
+    trigger = { # combined scope for both country and combatant
+        is_attacker = yes
+        phase = no
+    }
+    
+    active = yes
+
+    base =  { factor = 2 } #ideally doesn't show up except when countering guerrila warfare
+    
+    picture = partisan_sweeps
+    
+    countered_by = tactic_counterattack #keep so that is otherwise identical to attack
+    attacker = 0.05
+}
+
 tactic_guerrilla_tactics = { #People's army defender tactic. also for German volksturm branch.
 	is_attacker = no
 	trigger = {
+		hardness < .05 #guerrilla tactic tanks OP
 		is_attacker = no
 		phase = no
 		OR = {
@@ -815,6 +1289,8 @@ tactic_guerrilla_tactics = { #People's army defender tactic. also for German vol
 	
 	base =  { factor = 4 }
 	picture = tactic_guerrilla_tactics
+	
+	countered_by = tactic_partisan_sweeps
 	
 	combat_width = -0.5
 	attacker = -0.7
@@ -855,7 +1331,7 @@ tactic_banzai_charge = { #Special Japan attacker tactic
 	base =  { factor = 4 }
 	picture = tactic_banzai_charge
 	
-	attacker_movement_speed = 0.1
+	attacker_movement_speed = 0.15
 	attacker = 0.25 
 	defender = 0.1
 }
@@ -924,7 +1400,7 @@ tactic_unexpected_thrust = { #Mobile warfare attacker tactic
 	attacker = 0.15 
 }
 
-tactic_overwhelming_fire = { # Counters Banzai charge and double envelopment
+tactic_overwhelming_fire = { # Counters Banzai charge and double envelopment #revisit, be sure 1 tactic can counter 2 tactics
 	is_attacker = no
 	trigger = {
 		is_attacker = no
@@ -958,7 +1434,7 @@ tactic_barrage = { #Superior firepower attacker tactic
 	countered_by = tactic_counter_battery_fire
 }
 
-tactic_double_envelopment = { #Asymmetrical warfare attacker tactic
+tactic_double_envelopment = { #Asymmetrical warfare attacker tactic #revisit, make sure has tech works 
 	is_attacker = yes
 	trigger = {
 		is_attacker = yes
@@ -1008,7 +1484,7 @@ tactic_masterful_double_envelopment = { #Improved version for Finland
 	countered_by = tactic_overwhelming_fire
 }
 
-tactic_masterful_blitz = { #Improved version of Blitz for Soviets
+tactic_masterful_blitz = { #Improved version of Blitz for Soviets #revisit for balance
 	only_show_for = SOV
 	
 	is_attacker = yes
@@ -1063,19 +1539,19 @@ tactic_masterful_backhand_blow = { #counters breakthrough - Germany focus reward
 	attacker = -0.25
 	defender = 0.25
 }
-
-tactic_counter_battery_fire = { #Skill enough to counter artillery
+tactic_counter_battery_fire = { #Skill enough to counter artillery #revisit for balance, check if incrementing skill advantage works, fix recon checks (they don't work)
 
 	is_attacker = no
 	trigger = {
 		is_attacker = no
 		phase = no
+		planning_skill_level > 4
 	}
 	
 	active = yes
 	
 	base =  { 
-		factor = 0 
+		factor = 1 
 		modifier = {
 			add = 1
 			AND = {
@@ -1089,11 +1565,1294 @@ tactic_counter_battery_fire = { #Skill enough to counter artillery
 				skill > 3
 				skill_advantage > 2
 			}
-		}		
+		}
+		#modifier = {
+		#	add = 1
+		#	AND = {
+		#		skill > 3
+		#		recon_advantage > 0
+		#	}
+		#}		
 	}
 	
 	picture = counter_battery_fire
 	
-	attacker = -0.2
+	attacker = -0.25
+	defender = 0.1
 	
 }
+
+tactic_cc_order_227 = { 
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = close_combat
+		tag = SOV
+		hardness < .05
+		date > 1939.01.01
+		OR = {
+			is_fighting_in_terrain = urban
+		}
+		
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 
+		modifier = {
+			has_trait = unyielding_defender
+			add = 1
+		}
+		modifier = {
+			has_trait = ambusher
+			add = 1
+		}
+	}
+	picture = cc_order_227
+	display_phase = close_combat
+
+	attacker = 0.05
+	defender = 0.35			#defender gets a bonus to doing damage
+	attacker_movement_speed = -0.25
+}
+
+tactic_terrain_attack = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = no
+		OR = {
+			AND = {
+				is_fighting_in_terrain = marsh
+				has_trait = swamp_fox
+			}
+			AND = {
+				is_fighting_in_terrain = desert
+				has_trait = desert_fox
+			}
+			AND = {
+				is_fighting_in_terrain = hills
+				has_trait = hill_fighter
+			}
+			AND = {
+				is_fighting_in_terrain = forest
+				has_trait = ranger
+			}
+			AND = {
+				is_fighting_in_terrain = urban
+				has_trait = urban_assault_specialist
+			}
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 4 }
+	picture = terrain_attack
+
+	attacker = 0.10
+	defender = -0.10
+	attacker_movement_speed = 0.15
+}
+
+tactic_terrain_defense = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no #only god knows why it wants it twice
+		phase = no
+		OR = {
+			AND = {
+				is_fighting_in_terrain = marsh
+				has_trait = swamp_fox
+			}
+			AND = {
+				is_fighting_in_terrain = desert
+				has_trait = desert_fox
+			}
+			AND = {
+				is_fighting_in_terrain = hills
+				has_trait = hill_fighter
+			}
+			AND = {
+				is_fighting_in_terrain = forest
+				has_trait = ranger
+			}
+			AND = {
+				is_fighting_in_terrain = urban
+				has_trait = urban_assault_specialist
+			}
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 4 }
+	picture = terrain_defense
+
+	attacker = -0.10
+	defender = 0.10
+	attacker_movement_speed = -0.15
+}
+#special D DAY tactic for allies during June of 44 for fun
+#note, would be possible to do a state level check with meta triggers to reward landing on the historic sites, but too labor intensive
+tactic_dday_landings = { 
+	is_attacker = yes
+	trigger = {
+		phase = no
+		is_amphibious_invasion = yes
+		is_attacker = yes
+		AND = {
+			OR = {
+				tag = USA
+				tag = CAN
+				tag = ENG
+				#added france/brazil as they are usually allied infantry minors while CAN isn't, and the UK might not be
+				tag = BRA
+				tag = FRA
+			}
+			OR = {
+				AND = {
+					date < 1944.07.01
+					date > 1944.05.31
+				}
+				AND = {
+					date < 1945.07.01
+					date > 1945.05.31
+				}
+			}
+		}
+	}
+	
+	active = yes
+	
+	base = {
+		factor = 12 
+	}
+	picture = dday_landings
+
+	attacker = 0.35
+	defender = -0.15
+}
+
+#soviet larp delaying tactic
+tactic_maskirovka = { 
+	is_attacker = no
+	trigger = {
+		tag = SOV
+		is_attacker = no
+		phase = no
+	}
+	
+	active = yes
+	
+	countered_by = tactic_unexpected_thrust
+	
+	base =  { factor = 2 }
+	picture = maskirovka
+	
+	attacker_movement_speed = -0.30
+	defender = -0.15
+}
+
+
+tactic_causeway_advance = {
+	is_attacker = yes
+	trigger = {
+		phase = no
+		is_attacker = yes
+		OR = {
+			is_fighting_in_terrain = plains
+			is_fighting_in_terrain = forest
+			is_fighting_in_terrain = urban
+		}
+	}
+	
+	active = yes
+	
+	countered_by = tactic_causeway_ambushes
+	
+	base =  { factor = 4 }
+	picture = causeway_advance
+	
+	attacker_movement_speed = 0.10
+	attacker = 0.10 
+	defender = 0.05
+}
+
+tactic_causeway_ambushes = {
+	is_attacker = no
+	trigger = {
+		phase = no
+		is_attacker = no
+		OR = {
+			is_fighting_in_terrain = plains
+			is_fighting_in_terrain = forest
+			is_fighting_in_terrain = urban
+		}
+		OR = {
+			has_trait = trickster
+			defense_skill_level > 4
+			planning_skill_level > 4
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 4 }
+	picture = causeway_ambushes
+	
+	attacker_movement_speed = -0.2
+	attacker = 0.15 
+	defender = 0.15
+}
+
+tactic_sniper_companies = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = no
+		attack_skill_level < 6
+	}
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = sniper_companies
+	defender = -0.10
+}
+
+tactic_sniper_companies_2 = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = no
+		attack_skill_level > 5
+	}
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = sniper_companies_2
+	defender = -0.15
+}
+
+
+tactic_roadside_ambushes = {
+	is_attacker = no
+	
+	trigger = {
+		is_attacker = no
+		phase = no
+		AND = {
+			defense_skill_level < 6
+			planning_skill_level < 6
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = roadside_ambushes
+	
+	attacker_movement_speed = -0.15
+	defender = 0.05
+}
+
+tactic_roadside_ambushes_2 = {
+	is_attacker = no
+	
+	trigger = {
+		is_attacker = no
+		phase = no
+		OR = {
+			defense_skill_level > 4
+			planning_skill_level > 4
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = roadside_ambushes_2
+	
+	attacker_movement_speed = -0.15
+	defender = 0.15
+}
+
+#tactic_mechanized_attack = {
+#	is_attacker = yes
+#	trigger = {
+#		phase = no
+#		is_attacker = yes
+#		has_cavalry_ratio > 0.5
+#		hardness < 0.65
+#	}
+#	
+#	active = yes
+#	
+#	base =  { factor = 2 }
+#	picture = mechanized_attack
+#	
+#	attacker_movement_speed = 0.05
+#	attacker = 0.05
+#	defender = -0.05
+#}
+
+tactic_multiple_lines = {
+	is_attacker = no
+	trigger = {
+		phase = no
+		is_attacker = no
+		AND = {
+			defense_skill_level < 6
+			planning_skill_level < 6
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = multiple_lines
+	
+	defender = 0.10
+}
+
+tactic_multiple_lines_2 = {
+	is_attacker = no
+	trigger = {
+		phase = no
+		is_attacker = no
+		OR = {
+			defense_skill_level > 4
+			planning_skill_level > 4
+		}
+	}
+	
+	active = yes
+	
+	base =  { factor = 2 }
+	picture = multiple_lines_2
+	
+	defender = 0.15
+}
+
+tactic_defense_in_depth = {
+	is_attacker = no
+	trigger = {
+		phase = no
+		is_attacker = no
+		OR = {
+			has_combat_modifier = fort_attack
+			has_combat_modifier = dugin
+			#testing shows this modifier working
+		}
+	}
+
+	active = yes
+
+	base = {
+		factor = 2
+	}
+
+	picture = defense_in_depth
+	attacker = -0.10
+	defender = 0.10
+}
+
+tactic_extensive_minefields = {
+	is_attacker = no
+	trigger = {
+		phase = no
+		is_attacker = no
+		OWNER = { has_template_containing_unit = engineer }
+	}
+
+	active = yes
+
+	base = {
+		factor = 2
+	}
+
+	picture = extensive_minefields
+
+	defender = 0.00
+	attacker_movement_speed = -0.3
+}
+
+
+############ Blunders ############
+
+tactic_baited_attacker = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = no
+		skill_advantage < 1
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+
+		modifier = {
+			add = 1
+			has_trait = old_guard
+		}
+
+		modifier = { #Im new to this
+			add = 1
+			OR = {
+				skill < 2
+				planning_skill_level < 2
+			}
+		}
+	}
+
+	defender = 0.1
+
+	picture = baited_attacker
+}
+
+tactic_baited_defender = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = no
+		skill_advantage < 1
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+
+		modifier = {
+			add = 1
+			has_trait = old_guard
+		}
+
+		modifier = { #Im new to this
+			add = 1
+			OR = {
+				skill < 2
+				planning_skill_level < 2
+			}
+		}
+	}
+
+	attacker = 0.1
+
+	picture = baited_defender
+}
+
+tactic_ammo_attacker = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = no
+		skill_advantage < 1
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+		
+		modifier = {
+			add = 1
+			OR = {
+				skill < 2
+				logistics_skill_level < 2
+			}
+		}
+	}
+
+	attacker = -0.1
+
+	picture = ammo_attacker
+}
+
+tactic_ammo_defender = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = no
+		skill_advantage < 1
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+
+		modifier = { #Im new to this
+			add = 1
+			OR = {
+				skill < 2
+				logistics_skill_level < 2
+			}
+			
+		}
+	}
+
+	defender = -0.1
+
+	picture = ammo_defender
+}
+
+tactic_lost_formations = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = no
+		has_reserves = yes
+		has_flanked_opponent = yes
+		NOT = {
+			is_fighting_in_terrain = urban
+		}
+		skill_advantage < 1
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+
+		modifier = { #Im new to this
+			add = 1
+			OR = {
+				skill < 2
+				planning_skill_level < 2
+			}
+		}
+	}
+
+	attacker = -0.05
+	combat_width = -0.5
+
+	picture = lost_formations
+}
+
+tactic_poor_fortifications = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = no
+		skill_advantage < 1
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+
+		modifier = { #Im new to this
+			add = 1
+			AND = {
+				skill < 2
+				defense_skill_level < 2
+			}
+		}
+	}
+
+	defender = -0.1
+	attacker_movement_speed = 0.1
+
+	picture = poor_fortifications
+}
+
+############	Phases Tactics ############
+#These tactics are meant to draw the enemy into a bad phase and keep them there until they escape or the battle ends. It is intentional that there are few ways out.
+
+###Complex Ambush
+
+tactic_trap = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = no
+		
+		 OR = {
+		 	has_trait = ambusher
+		 	has_trait = unyielding_defender
+		 	skill > 3
+		 }
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+
+		modifier = {
+			add = 1
+			AND = {
+				has_trait = ambusher
+				has_trait = unyielding_defender
+				#remember, the officer must be in the GENERAL's slot for field marshal traits to pass this check. Officers in FM slots do *not* command armies.
+			}
+		}
+
+	}
+
+	picture = trap
+
+
+	phase = complex_ambush
+	#this worked perfectly on my old night tactics.......
+
+	display_phase = complex_ambush
+	
+	attacker_movement_speed = 0.1
+	defender = 0.00
+}
+
+tactic_ca_ambushed = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	attacker = -0.1
+	defender = 0.1
+
+	picture = ca_ambushed
+	display_phase = complex_ambush
+}
+
+tactic_ca_reforming = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	attacker = -0.15
+	picture = ca_reforming
+}
+
+tactic_ca_found_cover = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	attacker = -0.05
+
+	picture = ca_found_cover
+	display_phase = complex_ambush
+}
+
+tactic_ca_escape = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 3
+	}
+
+	attacker = 0.1
+	picture = ca_escape
+
+	phase = no
+	display_phase = complex_ambush
+}
+
+tactic_ca_openup = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	defender = 0.1
+
+	picture = ca_openup
+	display_phase = complex_ambush
+}
+
+tactic_ca_concentrate_fire = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	defender = 0.12
+
+	picture = ca_openup
+	display_phase = complex_ambush
+}
+
+tactic_ca_corner_them = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	defender = 0.15
+
+	picture = ca_corner_them
+	display_phase = complex_ambush
+}
+
+tactic_ca_escalate = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = complex_ambush
+	}
+
+	active = yes
+
+	base = {
+		factor = 3
+	}
+
+	attacker_movement_speed = -0.2
+	defender = 0.0
+	picture = ca_escalate
+
+	phase = complex_ambush
+	display_phase = complex_ambush
+}
+
+tactic_dt_sustained_casualties = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	attacker = -0.1
+	defender = 0.1
+	attacker_movement_speed = -0.15
+
+	picture = dt_sustained_casualties
+	display_phase = deadly_trap
+}
+
+tactic_dt_cornered = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	attacker = -0.15
+	attacker_movement_speed = -0.15
+
+	picture = dt_cornered
+	display_phase = deadly_trap
+}
+
+tactic_dt_desperate_stand = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 4
+	}
+
+	attacker = 0.05
+	defender = 0.05
+	attacker_movement_speed = -0.15
+
+	picture = dt_desperate_stand
+	display_phase = deadly_trap
+}
+
+tactic_dt_de_escalate = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 2.5
+	}
+
+	attacker = 0.1
+
+	picture = dt_de_escalate
+
+	phase = complex_ambush
+	display_phase = deadly_trap
+}
+
+tactic_dt_breakout = {
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 1.5
+	}
+
+	attacker = 0.2
+	defender = 0.05
+
+	picture = dt_breakout
+
+	phase = no
+	display_phase = deadly_trap
+}
+
+tactic_dt_overlapping_fire = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 3
+	}
+
+	defender = 0.15
+
+	picture = dt_overlapping_fire
+	display_phase = deadly_trap
+}
+
+tactic_dt_heavy_mortar_barrage = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 3
+	}
+
+	defender = 0.2
+
+	picture = dt_heavy_mortar_barrage
+	display_phase = deadly_trap
+}
+
+tactic_dt_finish_them = {
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = deadly_trap
+	}
+
+	active = yes
+
+	base = {
+		factor = 1
+	}
+
+	defender = 0.25
+
+	picture = dt_finish_them
+	display_phase = deadly_trap
+}
+
+###Break Line
+
+#special MW tactics
+#
+#tactic_manuever_warfare = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#		hardness > .49
+#		armor > 44.9
+#		OR = {
+#			has_trait = panzer_expert
+#			skill_advantage > 1
+#			skill > 2
+#		}
+#	}
+#	active = no
+#	base =  { 
+#		factor = 4 
+#		modifier = {
+#			add = 2
+#			has_trait = panzer_expert
+#		}
+#		modifier = {
+#			add = 2
+#			skill_advantage > 1
+#		}
+#	}
+#	picture = manuever_warfare
+#
+#	countered_by = tactic_elastic_defense
+#	attacker = -0.05
+#	defender = -0.1
+#	attacker_movement_speed = 0.2
+#}
+#
+#tactic_armored_spearhead = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#		hardness > .69
+#		armor > 59.9
+#		custom_trigger_tooltip = {
+#				tooltip = min_armor_60_cbt
+#			}
+#		OR = {
+#			has_trait = panzer_expert
+#			skill_advantage > 1
+#			skill > 2
+#		}
+#		custom_trigger_tooltip = {
+#			tooltip = warn_pierce_cbt
+#		}
+#	}
+#	active = no
+#	base =  { 
+#		factor = 4 
+#		modifier = {
+#			add = 2
+#			has_trait = panzer_expert
+#		}
+#		modifier = {
+#			add = 2
+#			armor > 74
+#		}
+#	}
+#	picture = armored_spearhead
+#
+#	attacker = 0.3
+#	
+#	countered_by = tactic_backhand_blow
+#}
+
+#SF special tactics
+
+#tactic_harrassing_artillery = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#	}
+#	active = no
+#	base =  { factor = 4 }
+#	picture = explosion_tacG
+#
+#	attacker = 0.05
+#	defender = -0.1
+#}
+#
+#tactic_localized_terraforming = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#		NOT = {
+#			attack_skill_level < 4
+#		}
+#	}
+#	active = no
+#	base =  { factor = 1 
+#		modifier = {
+#			attack_skill_level > 6
+#			add = 2
+#		}
+#	}
+#	picture = explosion_tacG
+#	#countered_by = tactic_precision_cas_strike
+#	attacker = 0.25
+#}
+#
+#tactic_prezeroed_ranges = {
+#	is_attacker = no
+#	trigger = {
+#		is_attacker = no
+#		phase = no
+#	}
+#	active = no
+#	base =  { factor = 4}	
+#	picture = explosion_tacG
+#	
+#	defender = 0.15
+#	attacker = -0.10
+#	#would counter basic defense stuff
+#	#maybe counters relentless assault
+#}
+#
+##GBP (left side I guess) tactics
+#
+#tactic_methodical_assault = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#		min_planning > 0.3
+#	}
+#	active = no
+#	base =  { factor = 4}	
+#	picture = cc_attack
+#	
+#	attacker = 0.15
+#	defender = -0.10
+#}
+#
+#tactic_grand_assault = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#		min_planning > 0.8
+#		frontage_full = yes
+#		recon_advantage > 0
+#		custom_trigger_tooltip = {
+#			tooltip = reqs_recon_cbt
+#		}
+#	}
+#	active = no
+#	base =  { factor = 4
+#		modifier = {
+#			add = 2
+#			OR = {
+#				has_trait = offensive_doctrine
+#				has_trait = organizer
+#			}
+#		}
+#		modifier = {
+#			has_combat_modifier = decryption_superiority
+#			add = 2
+#		}
+#		modifier = {
+#			has_max_planning = yes
+#			add = 4
+#		}
+#		modifier = {
+#			planning_skill_level > 3
+#			add = 2
+#		}
+#		modifier = {
+#			planning_skill_level > 5
+#			add = 2
+#		}
+#		#modifier = {  #test to see if this works if extra recon is present
+#		#	recon_advantage > 1
+#		#	add = 2
+#		#}
+#	}
+#	picture = cc_attack
+#	
+#	attacker = 0.3
+#	defender = 0.1
+#}
+##GBP relies on min planning for anything good, and due to scale it isn't counterable
+#
+#tactic_exquisite_defense = {
+#	is_attacker = no
+#	trigger = {
+#		is_attacker = no
+#		phase = no
+#		defense_skill_level > 3
+#			has_combat_modifier = dugin
+#			recon_advantage > 0
+#			#frontage_full = yes
+#			custom_trigger_tooltip = {
+#			tooltip = reqs_recon_cbt
+#		}
+#	}
+#	active = no
+#	base =  { factor = 2
+#		modifier = {
+#			has_trait = unyielding_defender
+#			add = 2
+#		}
+#		modifier = {
+#			skill_advantage > 1
+#			add = 2
+#		}
+#		modifier = {
+#			defense_skill_level > 5
+#			add = 2
+#		}
+#		modifier = {
+#			has_combat_modifier = decryption_superiority
+#			add = 2
+#		}
+#		#modifier = {   #test to see if this works if extra recon is present
+#		#	recon_advantage > 2
+#		#	add = 2
+#		#}
+#	}
+#	picture = cc_attack
+#	
+#	attacker = -0.3
+#	defender = 0.1
+#	attacker_movement_speed = -0.4
+#}
+#
+##Mass assault tactics
+#
+#tactic_massed_armor = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#		hardness > .49
+#		frontage_full = yes
+#		has_reserves = yes
+#	}
+#	active = no
+#	base =  { 
+#		factor = 4 
+#		modifier = {
+#			add = 2
+#			has_trait = panzer_expert
+#		}
+#		modifier = {
+#			add = 2
+#			skill_advantage > 0
+#		}
+#	}
+#	picture = cc_attack
+#
+#	countered_by = tactic_backhand_blow
+#	attacker = 0.15
+#	defender = 0.1
+#	combat_width = 0.5
+#	
+#}
+#
+#tactic_brazen_advance = {
+#	is_attacker = yes
+#	trigger = {
+#		is_attacker = yes
+#		phase = no
+#		}
+#	active = no
+#	base =  { 
+#		factor = 4 
+#		modifier = {
+#			add = 2
+#			hardness > 49.9
+#		}
+#	}
+#	picture = cc_attack
+#	
+#	countered_by = tactic_prezeroed_ranges
+#	attacker = 0.25
+#	defender = 0.1
+#}
+#
+#tactic_request_reinforcement = {
+#	is_attacker = no
+#	trigger = {
+#		is_attacker = no
+#		phase = no
+#		is_winning = no
+#		has_reserves = yes
+#		frontage_full = yes
+#		
+#		custom_trigger_tooltip = {
+#				tooltip = losing_cbt
+#			}
+#		}
+#	active = no
+#	base =  { factor = 4 }
+#	picture = cc_attack
+#	
+#	defender = 0.08
+#	combat_width = 0.5
+#	countered_by = tactic_manuever_warfare
+#}
+
+
+####themed/variety tactics start here. The goal here is to add more tactics for variety/larp. They should be weaker than doctrine tactics
+
+
+####List
+
+####Tactical Withdrawal is too prevalent, it will slow down combat too often - remove from more doctrines or give a counter
+####
+
+#modifiers
+#dugin
+#fort_attack
+#air_cas_present
+#decryption_superiority
+#paradrop
+#river_crossing
+#shore_bombard
+#lack_of_supply
+#base_proximity
+#poor_screen
+#enemy_air_superiority
+#amphibious_attack

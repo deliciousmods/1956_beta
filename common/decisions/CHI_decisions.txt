@@ -206,16 +206,21 @@ CHI_war_of_resistance = {
 		modifier = {
 			political_power_factor = -0.05
 		}
+
+		cancel_trigger = {
+			OR = {
+				is_in_faction = yes		#prevents faction betrayal
+				has_war = no			#no war = no issue
+			}
+		}
 		
 		remove_effect = {
 			if = {
 				limit = {
-					CHI = { is_in_faction = no }
+					is_in_faction = no
 				}
-				CHI = {
-					set_rule = { can_create_factions = yes }
-					create_faction = chinese_united_front
-				}
+				set_rule = { can_create_factions = yes }
+				create_faction = chinese_united_front
 			}
 			add_ideas = KMT_united_front
 			#load_oob = "CHI_united_front"
@@ -226,6 +231,59 @@ CHI_war_of_resistance = {
 					is_subject_of = ROOT
 				}
 				add_to_faction = PREV
+			}
+			save_event_target_as = CHI_united_front_leader
+			hidden_effect = {				#they all fire at the same, meaning that AI should not join some random wars against each other
+				if = {
+					limit = {
+						OR = {
+							AND = {
+								event_target:CHI_united_front_leader = { has_country_flag = CHI_hostile_against_warlords }
+								NOT = {
+									has_global_flag = CHI_no_national_front_flag
+								}
+							}
+							has_global_flag = CHI_unite_PRC
+						}
+						PRC = {
+							exists = yes
+							OR ={							#no release of subjects + calling warlord subjects in to prevent frontline exploits
+								is_subject = no
+								is_subject_of = ROOT
+							}
+							NOT = { has_war_with = ROOT }
+							is_in_faction = no				#no faction betrayal
+						}
+					}
+					PRC = {
+						country_event = china.104
+					}
+				}
+				if = {
+					limit = {
+						NOT = { has_country_flag = popular_front_fired }
+						has_global_flag = CHI_unite
+						NOT = { has_country_flag = CHI_hostile_against_warlords }
+						JAP = { has_offensive_war = yes }							#a little extra check here
+					}
+					every_other_country = {
+						limit = {
+							OR = {
+								tag = GXC
+								tag = YUN
+								tag = XSM
+								tag = SHX	#no Sinkiang or Tunganistan - theycan use decisions later to join the struggle -	#Fantom
+							}
+							OR ={							#no release of subjects + calling warlord subjects in to prevent frontline exploits
+								is_subject = no
+								is_subject_of = ROOT
+							}
+							NOT = { has_war_with = ROOT }
+							is_in_faction = no				#no faction betrayal
+						}
+						country_event = china.101
+					}
+				}
 			}
 		}
 	}
@@ -260,11 +318,11 @@ CHI_war_of_resistance = {
 			}
 		}
 
-		cost = 50
+		cost = 15
 
 		fire_only_once = yes
 
-		days_remove = 60
+		days_remove = 20
 
 		highlight_states = {
  			highlight_state_targets = { state = 605 }
@@ -275,10 +333,11 @@ CHI_war_of_resistance = {
 		}
 
 		modifier = {
-			consumer_goods_factor = 0.10
+			consumer_goods_factor = 0.2
 			
 		}
 		complete_effect = {
+			add_war_support = 0.05				#we will fight until the end, hurra!
 			605 = {
 				add_building_construction = {
 					type = supply_node
@@ -287,11 +346,15 @@ CHI_war_of_resistance = {
 					instant_build = yes
 				}
 			}
+			add_victory_points = {
+				province = 6999
+				value = 5
+			}
 		}
 		remove_effect = {
 			# Chongqing - Xi'an
 			build_railway = {
-				path = { 6999 1893 11865 10144 7418 }
+				path = { 6999 1893 11865 10144 7418 7406 7301 }
 			}
 			# Chongqing - Changsha
 			build_railway = {
@@ -495,10 +558,10 @@ CHI_war_of_resistance = {
 		}
 
 		visible = {
-			#focus_progress = {
-			#	focus = KMT_improve_burma_road
-			#	progress > 0
-			#}
+			focus_progress = {
+				focus = KMT_improve_burma_road
+				progress > 0
+			}
 		}
 
 		cost = 10
@@ -512,7 +575,7 @@ CHI_war_of_resistance = {
 		days_remove = 15
 
 		modifier = {
-			consumer_goods_factor = 0.02
+			consumer_goods_factor = 0.04
 		}
 		complete_effect = {
 			set_country_flag = KMT_burma_rd_forts
@@ -522,6 +585,140 @@ CHI_war_of_resistance = {
 		remove_effect = {
 			army_experience = 5
 			add_war_support = 0.03
+		}
+	}
+
+	CHI_join_united_front = {
+		icon = icon_kuomintang
+		available = {
+			is_literally_china = yes
+			CHI = {
+				is_in_faction_with = PRC
+			}
+			OR = {
+				PRC = {
+					is_faction_leader = yes
+				}
+				CHI = {
+					is_faction_leader = yes
+				}
+			}
+			NOT = {
+				OR = {
+					has_war_with = CHI
+					has_war_with = PRC
+				}
+			}
+			is_in_faction = no
+			NOT = {
+				has_completed_focus = CHI_opposition
+			}
+			OR = {
+				is_subject = no
+				OVERLORD = {
+					is_in_faction_with = event_target:WTT_current_china_leader
+				}
+			}
+			if = {			#sort out your differences first, buddies
+				limit = {
+					OR = {
+						original_tag = SIK
+						original_tag = TNG
+					}
+				}
+				NOT = {
+					has_idea = GEN_personal_affair
+				}
+			}
+		}
+		visible = {
+			is_literally_china = yes
+			CHI = {
+				is_in_faction_with = PRC
+			}
+			is_in_faction = no
+			NOT = {							#sanity check - if event about China uniting has fired and you picked other option, you have sealed your fate
+				has_country_flag = popular_front_fired
+			}
+			NOT = {							#you tried once, this will not work again
+				has_country_flag = ROOT_tried_to_join_united_front
+			}
+		}
+		cost = 25
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				CHI = {
+					has_war_with = JAP 
+					has_defensive_war = yes
+				}
+				factor = 10
+			}
+			modifier = {
+				PRC = {
+					has_war_with = JAP 
+					has_defensive_war = yes
+				}
+				factor = 10
+			}
+			modifier = {
+				has_war_with = JAP
+				factor = 500
+			}
+			modifier = {
+				original_tag = SIK
+				date < 1942.10.5
+				factor = 0
+			}
+			modifier = {
+				original_tag = TNG
+				date < 1939.4.12
+				factor = 0
+			}
+			modifier = {
+				OR = {
+					original_tag = SIK
+					original_tag = TNG
+				}
+				has_war = yes
+				factor = 0
+			}
+		}
+
+		fire_only_once = yes
+
+		complete_effect = {
+			set_country_flag = ROOT_tried_to_join_united_front
+			If = {
+				limit = {
+					CHI = {
+						is_faction_leader = yes
+					}
+				}
+				CHI = {
+					country_event = china.106
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = "CHI"
+					value = 200
+				}
+			}
+			else_if = {
+				limit = {
+					PRC = {
+						is_faction_leader = yes
+					}
+				}
+				PRC = {
+					country_event = china.106
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = "PRC"
+					value = 200
+				}
+			}
 		}
 	}
 
@@ -798,6 +995,7 @@ CHI_liberation_of_asia = {
 						region = 167
 						region = 160
 						state = 323
+						state = 1091
 					}
 					is_core_of = FROM
 					is_controlled_by = ROOT
@@ -834,6 +1032,7 @@ CHI_liberation_of_asia = {
 									region = 167
 									region = 160
 									state = 323
+									state = 1091
 								}
 							}
 						}
@@ -875,27 +1074,9 @@ CHI_liberation_of_asia = {
 					give_military_access = PREV
 				}
 			}
-			if = {
-				limit = {
-					has_dlc = "Death or Dishonor"
-					NOT = { has_dlc = "Waking the Tiger" }
-				}
-				set_autonomy = {
-					target = FROM
-					autonomy_state = autonomy_reichskommissariat
-				}
-			}
-			else_if = {
-				limit = {
-					has_dlc = "Waking the Tiger"
-				}
-				set_autonomy = {
-					target = FROM
-					autonomy_state = autonomy_wtt_imperial_protectorate
-				}
-			}
-			else = {
-				puppet = FROM
+			set_autonomy = {
+				target = FROM
+				autonomy_state = autonomy_wtt_imperial_protectorate
 			}
 			FROM = {
 				division_template = {
@@ -973,6 +1154,7 @@ CHI_liberation_of_asia = {
 								region = 167
 								region = 160
 								state = 323
+								state = 1091
 							}
 						}
 					}
@@ -1050,112 +1232,6 @@ CHI_army_reform = {
 			army_experience = -100
 			custom_effect_tooltip = 90_days_tt
 						
-		}		
-	}
-
-	CHI_lessons_of_war = {
-		icon = generic_army_support
-		available = {
-			has_army_experience > 199
-			has_idea = CHI_incompetent_officers
-			if = {
-				limit = { has_idea = CHI_army_corruption_1 }
-				NOT = { has_idea = CHI_army_corruption_1 }
-			}
-
-			if = {
-				limit = { has_idea = CHI_army_corruption_2 }
-				NOT = { has_idea = CHI_army_corruption_2 }
-			}
-
-			if = {
-				limit = { has_idea = CHI_army_corruption_3 }
-				NOT = { has_idea = CHI_army_corruption_3 }
-			}
-
-			if = {
-				limit = {
-					NOT = { has_idea = CHI_army_corruption_1 }
-					NOT = { has_idea = CHI_army_corruption_2 }
-					NOT = { has_idea = CHI_army_corruption_3 }
-				}
-				NOT = { has_idea = CHI_army_corruption_3 }
-			}
-		}
-
-		cost = 0
-		ai_will_do = {
-			factor = 10
-		}
-		fire_only_once = yes
-
-		visible = {
-			has_idea = CHI_incompetent_officers
-			has_completed_focus = KMT_modernize_army
-		}
-
-		complete_effect = {
-			army_experience = -200
-			remove_ideas = CHI_incompetent_officers
-			set_country_flag = CHI_lessons_of_war_completed
-		}		
-	}
-
-	#Activates when the player picks CHI_60_divisions_plan decision
-	CHI_bolster_our_ranks = {
-
-		icon = generic_prepare_civil_war
-
-		available = {
-			num_divisions > 60
-			has_army_manpower = { size > 549999 }
-		}
-
-		fire_only_once = yes
-		
-		days_mission_timeout = 180
-
-		is_good = no
-
-		activation = {
-			always = no #Triggered from effect in CHI_60_divisions_plan
-		}
-
-		complete_effect = {
-			add_war_support = 0.1
-		}
-
-		timeout_effect = {
-
-		}
-	}
-
-	CHI_60_divisions_plan = {
-
-		icon = generic_operation
-
-		available = {
-			
-		}
-
-		cost = 90
-		ai_will_do = {
-			factor = 1
-		}
-		fire_only_once = yes
-
-		visible = {
-			always = no
-		}
-
-		days_remove = 180
-
-		modifier = {
-			training_time_army_factor = -0.25
-		}
-
-		complete_effect = {
-			activate_mission = CHI_bolster_our_ranks
 		}		
 	}
 
@@ -1346,13 +1422,13 @@ economy_decisions = {
 		}
 
 		ai_will_do = {
-			factor = 500	#of course we want to have better industry!
+			factor = 750 #of course we want to have better industry!
 		}
 
 		days_remove = 30
 
 		modifier = {
-			consumer_goods_factor = 0.05
+			consumer_goods_factor = 0.1
 			political_power_gain = 0.15
 		}
 
@@ -1381,25 +1457,6 @@ economy_decisions = {
 		cost = 100
 		ai_will_do = {
 			factor = 1
-			modifier = {
-				OR = {
-					has_idea = CHI_hyper_inflation_none
-					has_idea = CHI_hyper_inflation_1
-				}
-				factor = 0
-			}
-			modifier = {
-				has_idea = CHI_hyper_inflation_3
-				factor = 2
-			}
-			modifier = {
-				has_idea = CHI_hyper_inflation_4
-				factor = 5
-			}
-			modifier = {
-				has_idea = CHI_hyper_inflation_5
-				factor = 10
-			}
 		}
 
 		visible = {
@@ -2221,7 +2278,7 @@ foreign_support = {
 	CHI_flying_tigers = {
 		icon = generic_air
 		available = {
-			has_equipment = { fighter_equipment > 149 }
+			has_equipment = { small_plane_airframe > 149 }
 		}
 		visible = {
 			has_country_flag = CHI_flying_tigers
@@ -2242,7 +2299,7 @@ foreign_support = {
 					USA = {
 						send_equipment = {
 							target = PREV
-							type = fighter_equipment
+							type = small_plane_airframe
 							amount = 150
 		
 						}
@@ -2259,7 +2316,7 @@ foreign_support = {
 	CHI_soviet_volunteer_group = {
 		icon = generic_air
 		available = {
-			has_equipment = { fighter_equipment > 99 }
+			has_equipment = { small_plane_airframe > 99 }
 			has_equipment = { tac_bomber_equipment > 49 }
 		}
 		visible = {
@@ -2281,7 +2338,7 @@ foreign_support = {
 					SOV = {
 						send_equipment = {
 							target = PREV
-							type = fighter_equipment
+							type = small_plane_airframe
 							amount = 100
 						}
 					}
@@ -2315,7 +2372,7 @@ foreign_support = {
 				limit = {
 					OR = {
 						has_focus_tree = china_nationalist_focus
-						has_focus_tree = china_communist_focus 
+						#has_focus_tree = china_communist_focus 
 					}
 				}
 				has_completed_focus = KMT_improve_burma_road
@@ -2709,100 +2766,9 @@ political_actions = {
 			add_ideas = CHI_inter_party_coordination_council
 		}
 	}
-
-	CHI_join_united_front = {
-		icon = icon_kuomintang
-		available = {
-			is_literally_china = yes
-			CHI = {
-				is_in_faction_with = PRC
-			}
-			OR = {
-				PRC = {
-					is_faction_leader = yes
-				}
-				CHI = {
-					is_faction_leader = yes
-				}
-			}
-			NOT = {
-				OR = {
-					has_war_with = CHI
-					has_war_with = PRC
-				}
-			}
-			is_in_faction = no
-			NOT = {
-				has_completed_focus = CHI_opposition
-			}
-			OR = {
-				is_subject = no
-				OVERLORD = {
-					is_in_faction_with = event_target:WTT_current_china_leader
-				}
-			}
-		}
-		visible = {
-			is_literally_china = yes
-			CHI = {
-				is_in_faction_with = PRC
-			}
-			is_in_faction = no
-		}
-		cost = 25
-		ai_will_do = {
-			factor = 1
-			modifier = {
-				JAP = {
-					OR = {
-						has_war_with = CHI
-						has_war_with = PRC
-					}
-				}
-				factor = 10
-			}
-			modifier = {
-				has_war_with = JAP
-				factor = 500
-			}
-		}
-		complete_effect = {
-			If = {
-				limit = {
-					CHI = {
-						is_faction_leader = yes
-					}
-				}
-				CHI = {
-					country_event = generic.2
-				}
-				add_ai_strategy = {
-					type = alliance
-					id = "CHI"
-					value = 200
-				}
-			}
-			else_if = {
-				limit = {
-					PRC = {
-						is_faction_leader = yes
-					}
-				}
-				PRC = {
-					country_event = generic.2
-				}
-				add_ai_strategy = {
-					type = alliance
-					id = "PRC"
-					value = 200
-				}
-			}
-		}
-	}
 	CHI_move_the_capital = {
 		allowed = {
 			is_literally_china = yes
-			has_dlc = "Waking the Tiger"
 		}
 		available = {
 			has_war = no
@@ -3047,7 +3013,7 @@ CHI_weapons_purchases_category = {
 			factor = 1
 			modifier = {
 				has_equipment = {
-					fighter_equipment < 1
+					small_plane_airframe < 1
 				}
 				factor = 5
 			}

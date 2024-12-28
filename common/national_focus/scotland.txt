@@ -10,939 +10,818 @@ focus_tree = {
 		}
 	}
 	
-	continuous_focus_position = { x = 1300 y = 1300 }
+	continuous_focus_position = { x = 1865 y = 675 }
 
 	default = no
 
+	shared_focus = CEL_establish_the_army
+	shared_focus = CEL_industrial_modernization
+	shared_focus = CEL_aviation_air_academy
+	shared_focus = CEL_naval_effort
 	shared_focus = GEN_industrial_boom
-	shared_focus = GEN_State_Matter
 	shared_focus = CEL_celtic_unification
 	shared_focus = CEL_brittany_industry
 	shared_focus = CEL_develop_ireland
-	shared_focus = CEL_coal_mining
-				
-	focus = {
-		id = SCO_establish_the_army
-		icon = GFX_focus_generic_commonwealth_build_infantry
-		x = 13
-		y = 0
+	shared_focus = CEL_scottish_steel_sector						
 
+    focus = {
+        id = SCO_provisional_government
+        icon = GFX_focus_generic_self_management
+        x = 51
+        y = 0
+        cost = 5
+        available_if_capitulated = yes
+        search_filters = {FOCUS_FILTER_POLITICAL}
+        ai_will_do = {
+            factor = 50
+        }
+        completion_reward = { 
+            add_political_power = 150
+
+        }    
+    }
+
+    focus = {
+        id = SCO_favour_republicanism
+        icon = GFX_focus_ICE_break_with_the_crown
+		prerequisite = { focus = SCO_provisional_government }		
+		relative_position_id = SCO_provisional_government
+		mutually_exclusive = { focus = SCO_choose_a_monarch }
+ 		x = -5
+		y = 1
+        cost = 5
+        available_if_capitulated = yes
+        search_filters = {FOCUS_FILTER_POLITICAL}
+        ai_will_do = {
+            factor = 10
+        }
+        completion_reward = { 
+            add_political_power = 50
+			add_stability = 0.05
+
+        }    
+    }
+
+    focus = { # event to choose between Rupprecht, his younger living brother or choose another monarch.
+        id = SCO_choose_a_monarch
+        icon = GFX_goal_tfv_strengthen_commonwealth_ties
+		prerequisite = { focus = SCO_provisional_government }		
+		relative_position_id = SCO_provisional_government
+		mutually_exclusive = { focus = SCO_favour_republicanism }
+ 		x = 4
+		y = 1
+        cost = 5
+        available_if_capitulated = yes
+        search_filters = {FOCUS_FILTER_POLITICAL}
+        ai_will_do = {
+            factor = 10
+        }
+        completion_reward = { 
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
+			country_event = r56_scotland.1
+			set_cosmetic_tag = SCO_MONARCHIST
+        }    
+    }
+
+    focus = {
+        id = SCO_grant_power_to_the_crown
+        icon = GFX_focus_rom_royal_dictatorship
+		prerequisite = { focus = SCO_choose_a_monarch }
+		mutually_exclusive = { focus = SCO_democratic_constitutionalism }
+		relative_position_id = SCO_choose_a_monarch
+ 		x = 4
+		y = 1
+        cost = 10
+        available_if_capitulated = yes
+        search_filters = {FOCUS_FILTER_POLITICAL}
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				is_puppet = yes
+				NOT = {
+					OVERLORD = {
+						has_government = neutrality
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				NOT = {
+					has_government = neutrality
+				}
+			}
+			modifier = {
+				factor = 0.1
+				is_historical_focus_on = no
+				is_puppet = no
+				NOT = {
+					has_government = neutrality
+				}
+			}
+			modifier = {
+				factor = 6
+				has_government = neutrality
+			}
+		}
+        completion_reward = { 
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
+			add_timed_idea = { idea = GEN_Strenghten_Monarchy_I days = 1395 }			
+            set_politics = {
+				ruling_party = neutrality 
+				elections_allowed = no
+			}
+        }    
+    }	
+
+	focus = {
+		id = SCO_kings_guard
+		icon = GFX_goal_generic_allies_build_infantry
+		prerequisite = { focus = SCO_grant_power_to_the_crown }
+		relative_position_id = SCO_grant_power_to_the_crown
+
+		x = 1
+		y = 1
 		cost = 10
 
 		ai_will_do = {
-			factor = 10
+			factor = 2.5
 		}
+		
+		bypass = {
+			has_capitulated = yes
+		}
+
+		search_filters = { FOCUS_FILTER_MANPOWER }
 		completion_reward = {
-			army_experience = 5
-			add_doctrine_cost_reduction = {
-				name = land_doc_bonus
-				cost_reduction = 0.5
-				uses = 1
-				category = land_doctrine
+			add_ideas = { POL_royal_guard }
+			division_template = {
+				name = "Royal Guard"
+				priority = 2
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+		
+					infantry = { x = 1 y = 0 }
+					infantry = { x = 1 y = 1 }
+					infantry = { x = 1 y = 2 }
+		
+					infantry = { x = 2 y = 0 }
+					artillery_brigade = { x = 2 y = 1 }
+					artillery_brigade = { x = 2 y = 2 }
+				}
+				support = {
+					engineer = { x = 0 y = 0 }
+				}
 			}
-			if = {
-				limit = {
-					num_divisions < 4
+			random_owned_controlled_state = {
+				limit = { ROOT = { has_full_control_of_state = PREV } }
+				prioritize = { 121 } #Krakow
+				create_unit = {
+					division = "name = \"Royal Guard\" division_template = \"Royal Guard\" start_experience_factor = 1.0" 
+					owner = SCO
 				}
-				hidden_effect = {		#replaced the old oob which might have caused crash + made it slightly more dynamic - Fantom
-					division_template = {
-						name = "Infantry Division"
-						regiments = {
-							infantry = { x = 0 y = 0 }
-							infantry = { x = 0 y = 1 }
-							infantry = { x = 0 y = 2 }
-							infantry = { x = 1 y = 0 }
-							infantry = { x = 1 y = 1 }
-							infantry = { x = 1 y = 2 }
-							infantry = { x = 2 y = 0 }
-							infantry = { x = 2 y = 1 }
-							infantry = { x = 2 y = 2 }
-						}
-						support = {
-							engineer = { x = 0 y = 0 }
-						}
-					}
-					division_template = {
-						name = "Cavalry Brigade"
-						division_names_group = ENG_CAV_01
-					
-						regiments = {
-							cavalry = { x = 0 y = 0 }
-							cavalry = { x = 0 y = 1 }
-							cavalry = { x = 0 y = 2 }
-							cavalry = { x = 0 y = 3 }
-						}
-						support = {
-							recon = { x = 0 y = 0 }
-						}
-					}
+				create_unit = {
+					division = "name = \"Royal Guard\" division_template = \"Royal Guard\" start_experience_factor = 1.0" 
+					owner = SCO
 				}
-				every_controlled_state = {
-					limit = {
-						is_core_of = ROOT	#create only in core states
-					}
-					create_unit = {
-						division = "name = \"Infantry Division\" division_template = \"Infantry Division\" start_experience_factor = 0.3 start_equipment_factor = 1.0 force_equipment_variants = { infantry_equipment_1 = { owner = ENG } }" 
-						owner = ROOT
-					}
-				}
-				random_owned_controlled_state = {	#oob raised one division, so Scotland will gain only one too
-					limit = {
-						is_core_of = ROOT
-					}
-					create_unit = {
-						division = "name = \"Cavalry Brigade\" division_template = \"Cavalry Brigade\" start_experience_factor = 0.3 start_equipment_factor = 1.0 force_equipment_variants = { infantry_equipment_1 = { owner = ENG } }" 
-						owner = ROOT
-					}
-				}
-			}			
+			}
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_MANPOWER }
 	}
+
 	focus = {
-		id = SCO_industrial_modernization
-		icon = GFX_goal_generic_production
-		relative_position_id = SCO_establish_the_army
-		x = 5
-		y = 0
+		id = SCO_royal_aeronautical_patronage
+		icon = GFX_focus_NORDIC_mon_airforce
+		prerequisite = { focus = SCO_kings_guard }
+		relative_position_id = SCO_kings_guard
+
+		x = 4
+		y = 1
 		cost = 10
+
+		ai_will_do = {
+			factor = 2.5
+		}
+		
+		bypass = {
+			has_capitulated = yes
+		}
+
+		available = {
+			has_country_leader = { ruling_only = yes name = "Douglas I" }
+		}
+
+		search_filters = { FOCUS_FILTER_MANPOWER }
+		completion_reward = {
+			IF = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+
+				mio:SCO_william_beardmore_organization = {
+					add_mio_size = 1
+					add_mio_funds = 1000
+				}
+				mio:SCO_scottish_aviation_organization = {
+					add_mio_size = 1
+					add_mio_funds = 1000
+				}				
+			}
+			add_ideas = JAP_economy_by_japan_planes	
+
+		}
+	}
+
+	focus = {
+		id = SCO_monarchist_officer_corps
+		icon = GFX_focus_generic_military_academy
+		prerequisite = { focus = SCO_kings_guard }
+		relative_position_id = SCO_kings_guard
+
+		x = 0
+		y = 1
+		cost = 10
+
+		ai_will_do = {
+			factor = 2.5
+		}
+		
+		available = {
+		}
+		
+		bypass = {
+		}
 
 		available_if_capitulated = yes
 
+		search_filters = { FOCUS_FILTER_MANPOWER }
 		completion_reward = {
-			add_tech_bonus = {
-				name = industrial_bonus
-				bonus = 1
-				uses = 1
-				category = industry
-			}
-			random_owned_controlled_state = {
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = industrial_complex
-					level = 1
-					instant_build = yes
+			add_ideas = { POL_royal_officer_corps }
+			army_experience = 50
+		}
+	}
+
+	focus = {
+		id = SCO_ally_bavaria
+		icon = GFX_goal_generic_major_alliance
+		prerequisite = { focus = SCO_monarchist_officer_corps }
+		#mutually_exclusive = { focus = SWE_the_northern_lights focus = SWE_swedish_french_ties focus = SWE_nordic_solidarity  }
+		relative_position_id = SCO_monarchist_officer_corps
+		x = -2
+		y = 2
+		cost = 5
+
+		available_if_capitulated = yes
+
+		available = {
+			has_government = neutrality
+			BAY = {
+				exists = yes
+				has_government = neutrality
+				is_subject = no
+				OR = {
+					is_faction_leader = yes
+					is_in_faction = no
 				}
+				has_capitulated = no
+			}
+		}
+
+		completion_reward = {
+			add_ai_strategy = {
+				type = build_army
+				id = infantry
+				value = 30
+			}				
+			set_rule = { can_create_factions = yes }
+			if = {
+				limit = {
+					any_country = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = BAY
+					}
+				}
+				random_country = {
+					limit = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = BAY
+					}
+					country_event = generic.2
+				}
+			}
+			else = {
+				create_faction = "Treaty of Castle Rock"
+				every_other_country = {
+					limit = {
+						is_in_faction = no
+						is_subject = no
+						NOT = {
+							has_war_with = ROOT
+						}						
+						NOT = {
+							has_government = communism
+						}
+						original_tag = BAY
+					}
+					country_event = generic.5
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}
+
+	focus = {
+		id = SCO_alliance_with_norway
+		icon = GFX_focus_NOR_the_kingdom_of_norway
+		prerequisite = { focus = SCO_monarchist_officer_corps }
+		#mutually_exclusive = { focus = SWE_the_northern_lights focus = SWE_swedish_french_ties focus = SWE_nordic_solidarity  }
+		relative_position_id = SCO_monarchist_officer_corps
+		x = -3
+		y = 1
+		cost = 5
+
+		available_if_capitulated = yes
+
+		available = {
+			has_government = neutrality
+			NOR = {
+				exists = yes
+				has_government = neutrality
+				is_subject = no
+				OR = {
+					is_faction_leader = yes
+					is_in_faction = no
+				}
+				has_capitulated = no
+			}
+		}
+
+		completion_reward = {
+			add_ai_strategy = {
+				type = build_army
+				id = infantry
+				value = 30
+			}				
+			set_rule = { can_create_factions = yes }
+			if = {
+				limit = {
+					any_country = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = NOR
+					}
+				}
+				random_country = {
+					limit = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = NOR
+					}
+					country_event = generic.2
+				}
+			}
+			else = {
+				create_faction = "The North Sea Defense Treaty"
+				every_other_country = {
+					limit = {
+						is_in_faction = no
+						is_subject = no
+						NOT = {
+							has_war_with = ROOT
+						}						
+						NOT = {
+							has_government = communism
+						}
+						original_tag = NOR
+					}
+					country_event = generic.5
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}
+
+	focus = {
+		id = SCO_restore_the_auld_alliance
+		icon = GFX_focus_chi_reach_out_to_france
+		prerequisite = { focus = SCO_monarchist_officer_corps }
+		#mutually_exclusive = { focus = SWE_the_northern_lights focus = SWE_swedish_french_ties focus = SWE_nordic_solidarity  }
+		relative_position_id = SCO_monarchist_officer_corps
+		x = -1
+		y = 1
+		cost = 5
+
+		available_if_capitulated = yes
+
+		available = {
+			has_government = neutrality
+			FRA = {
+				exists = yes
+				has_government = neutrality
+				is_subject = no
+				OR = {
+					is_faction_leader = yes
+					is_in_faction = no
+				}
+				has_capitulated = no
+			}
+		}
+
+		completion_reward = {
+			add_ai_strategy = {
+				type = build_army
+				id = infantry
+				value = 30
+			}				
+			set_rule = { can_create_factions = yes }
+			if = {
+				limit = {
+					any_country = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = FRA
+					}
+				}
+				random_country = {
+					limit = {
+						is_faction_leader = yes
+						NOT = {
+							has_government = communism
+						}
+						original_tag = FRA
+					}
+					country_event = generic.2
+				}
+			}
+			else = {
+				create_faction = "The Auld Alliance"
+				every_other_country = {
+					limit = {
+						is_in_faction = no
+						is_subject = no
+						NOT = {
+							has_war_with = ROOT
+						}
+						NOT = {
+							has_government = communism
+						}
+						original_tag = FRA
+					}
+					country_event = generic.5
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}	
+	focus = {
+		id = SCO_demand_the_stone_of_scone
+		icon = GFX_goal_FRA_operation_charlemagne
+		prerequisite = { focus = SCO_kings_guard }
+		relative_position_id = SCO_kings_guard
+
+		x = 2
+		y = 1
+		cost = 10
+
+		ai_will_do = {
+			factor = 2.5
+		}
+
+		will_lead_to_war_with = ENG
+		
+		available = {
+
+			has_government = neutrality
+
+			r56_script_i_am_sane = yes
+			is_subject = no
+			has_army_manpower = { size > 59999 }
+			ENG = {
+				exists = yes
+			}
+		}
+		
+		bypass = {
+			has_country_flag = SCO_has_the_stone_of_scone
+		}
+
+		available_if_capitulated = yes
+
+		search_filters = { FOCUS_FILTER_STABILITY }
+		completion_reward = {
+			# SEND event to Britain, maybe use it as a reason to take london and reunite Britain from Scotland.
+			# Would the British communists agree automatically because they don't care?
+
+			# make it more dynamic if let's say Germany conquers Britain, if Sco is puppet of let's say GER and Britain is in Exile the stone may be in exile in Canada?
+			ENG = {
+				country_event = { id = r56_scotland.2 hours = 6 }
+			}
+		}
+	}
+	focus = {
+		id = SCO_devise_cunning_plans
+		icon = GFX_focus_SWI_embrace_rote_drei
+		cost = 10
+		prerequisite = {
+			focus = SCO_demand_the_stone_of_scone
+		}
+        x = 1
+        y = 1
+        relative_position_id = SCO_demand_the_stone_of_scone
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				is_historical_focus_on = yes
+				factor = 0.5
+			}
+		}
+		available = {
+		
+		}
+		allow_branch = {
+			has_country_flag = SCO_intelligence_agency_cunning_plan
+		}
+		completion_reward = {			
+			
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+					NOT = {
+						has_intelligence_agency = yes
+					}
+				}
+				create_intelligence_agency = yes
+				
+			}	
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				add_ideas = SCO_cunning_plans
+			}
+			upgrade_intelligence_agency = upgrade_commando_training								
+		}
+	}
+	focus = {
+		id = SCO_free_bavaria
+		icon = GFX_focus_attack_germany
+		prerequisite = { focus = SCO_demand_the_stone_of_scone }
+		prerequisite = { focus = SCO_monarchist_officer_corps }
+		relative_position_id = SCO_demand_the_stone_of_scone
+
+		x = -1
+		y = 1
+		cost = 5
+
+		ai_will_do = {
+			factor = 2.5
+		}
+		
+		available = {
+			#only if a Wittelsbach is in power and Bavaria is "under foreign occupation
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
+			}
+			
+			is_subject = no
+		}
+		
+		bypass = {
+			BAY = {
+				exists = yes
+			}
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
 			}			
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY }
+
+		available_if_capitulated = yes
+
+		search_filters = { FOCUS_FILTER_MANPOWER }
+		completion_reward = {
+			# wargoal for Munich,maybe get personal union
+			# is it possible to write that "liberating" a certain country is cheaper for you in a peace conference?
+
+			if = {
+				limit = {
+					BAY = {
+						exists = no
+					}
+				}
+				add_state_claim = 52
+				add_state_claim = 53
+				add_state_claim = 54				
+			}
+
+		}
+	}
+
+	focus = {
+		id = SCO_split_germany_with_france
+		icon = GFX_goal_generic_major_war
+		x = 1
+		y = 1
+		prerequisite = {
+			focus = SCO_free_bavaria
+		}
+		relative_position_id = SCO_free_bavaria
+		cost = 10
 
 		ai_will_do = {
 			factor = 3
-		}	
-	}
-	focus = {
-		id = SCO_dingham_ammunition_factory
-		icon = GFX_goal_ammunitions
-		relative_position_id = SCO_industrial_modernization
-		prerequisite = { focus = SCO_industrial_modernization }
-		prerequisite = { focus = SCO_establish_the_army }
-		x = -6
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 133 }
-				add_extra_state_shared_building_slots = 2
-				add_building_construction = {
-					type = arms_factory
-					level = 2
-					instant_build = yes
-				}
-
-			}			
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY }
-	}
-	focus = {
-		id = SCO_redesign_small_arms
-		icon = GFX_goal_generic_small_arms
-		prerequisite = { focus = SCO_dingham_ammunition_factory }
-		x = -1
-		y = 1
-		relative_position_id = SCO_dingham_ammunition_factory
-		cost = 10
-
-		available_if_capitulated = yes
-
-		completion_reward = {
-			army_experience = 5
-			add_tech_bonus = {
-				name = infantry_artillery_bonus
-				bonus = 1
-				uses = 1
-				category = infantry_weapons
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_motorization_plan
-		icon = GFX_goal_generic_modernizing_the_cavalry
-		prerequisite = { focus = SCO_redesign_small_arms }
-		x = -2
-		y = 1
-		relative_position_id = SCO_redesign_small_arms
-		cost = 10
-
-		available_if_capitulated = yes
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = motorized_bonus
-				bonus = 2
-				uses = 1
-				category = cat_mechanized_equipment
-			}
-			hidden_effect = {
-				division_template = {
-					name = "Motorised Division"
-				
-					regiments = {
-						motorized = { x = 0 y = 0 }
-						motorized = { x = 0 y = 1 }
-						motorized = { x = 0 y = 2 }
-						motorized = { x = 1 y = 0 }
-						motorized = { x = 1 y = 1 }
-						motorized = { x = 1 y = 2 }
-					}
-					support = {
-						 engineer = { x = 0 y = 0 }
-						recon = { x = 0 y = 1 }
-					}
-				}
-			}			
-			capital_scope = {
-				create_unit = { division = "name = \"1. Motorised Division\" division_template = \"Motorised Division\" start_experience_factor = 0.3 start_equipment_factor = 0.8"
-					owner = ROOT
-				}
-			}
-
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_MANPOWER }
-	}
-	focus = {
-		id = SCO_mechanization_effort
-		icon = GFX_goal_mechanized_offensive
-		prerequisite = { focus = SCO_motorization_plan }
-		x = -2
-		y = 1
-		relative_position_id = SCO_motorization_plan
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 1
 		}
 
-		available = {
-
-		}
-		
-		bypass = {
+		allow_branch = {
 			
 		}
 
-		
-		
-		
-
-		complete_tooltip = {
-			add_tech_bonus = {
-				name = FRA_mechanized_focus
-				ahead_reduction = 0.5
-				uses = 1
-				category = cat_mechanized_equipment
-			}
-		}
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = FRA_mechanized_focus
-				ahead_reduction = 0.5
-				bonus = 0.5
-				uses = 1
-				category = cat_mechanized_equipment
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-
-	focus = {
-		id = SCO_field_hospitals
-		icon = GFX_goal_medicine
-		prerequisite = { focus = SCO_motorization_plan }
-		x = 0
-		y = 1
-		relative_position_id = SCO_motorization_plan
-
-		cost = 5
-
-		ai_will_do = {
-			factor = 1
-		}
-
 		available = {
-			has_tech = motorised_infantry
-		}
-
-		complete_tooltip = {
-			add_tech_bonus = {
-				name = hospital_company_tech_bonus_name
-				bonus = 3
-				uses = 1
-				category = hospital_tech
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
+			}			
+			is_subject = no
+			has_government = neutrality
+			any_state = { 
+				is_core_of = GER
+				OR = {
+					is_controlled_by = ROOT
+					is_controlled_by = FRA
+				}
+			}
+			FRA = {
+				has_government = neutrality
+				is_in_faction_with = ROOT
+			}
+			GER = {
+				OR = {
+					exists = no
+					has_capitulated = yes
+				}
 			}
 		}
 
 		completion_reward = {
-			add_tech_bonus = {
-				name = hospital_company_tech_bonus_name
-				bonus = 3
-				uses = 1
-				category = hospital_tech
-			}
+			custom_effect_tooltip = FRA_disunite_germany_tt
+			FRA_SCO_disunite_germany_confederation_borders = yes
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_signal_companies
-		icon = GFX_goal_generic_radio_development_2
-		prerequisite = { focus = SCO_motorization_plan }
-		prerequisite = { focus = SCO_new_tactics }
-		x = 2
-		y = 1
-		relative_position_id = SCO_motorization_plan
-
-		cost = 5
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		available = {
-			has_tech = radio
-			has_tech = motorised_infantry
-		}
-		
-
-		complete_tooltip = {
-			add_tech_bonus = {
-				name = electronics_bonus
-				bonus = 3
-				uses = 1
-				category = signal_company_tech
-			}
-		}
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = electronics_bonus
-				bonus = 1
-				uses = 1
-				category = signal_company_tech
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
+	}	
 
 	focus = {
-		id = SCO_modern_logistics
-		icon = GFX_goal_generic_position_armies
-		prerequisite = { focus = SCO_field_hospitals }
-		prerequisite = { focus = SCO_mechanization_effort }
-		prerequisite = { focus = SCO_signal_companies }
-		x = -2
+		id = SCO_restore_order_in_bavaria
+		icon = GFX_goal_generic_occupy_states_ongoing_war
+		x = -1
 		y = 1
-		relative_position_id = SCO_signal_companies
-
+		prerequisite = {
+			focus = SCO_free_bavaria
+		}
+		relative_position_id = SCO_free_bavaria
 		cost = 10
 
 		ai_will_do = {
-			factor = 1
+			factor = 3
 		}
 
-		available = {
-			has_tech = motorised_infantry
-		}
-		
-		bypass = {
+		allow_branch = {
 			
 		}
 
-		
-		
-		
-
-		complete_tooltip = {
-			add_tech_bonus = {
-				name = logistics_company_tech_bonus_name
-				bonus = 3
-				uses = 1
-				category = logistics_tech
-			}
-		}
-
-		completion_reward = {
-			every_army_leader = {
-				add_logistics = 1
-				}
-			add_ideas = ABC_modern_logistics_idea
-			add_tech_bonus = {
-				name = logistics_company_tech_bonus_name
-				bonus = 3
-				uses = 1
-				category = logistics_tech
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}		
-	focus = {
-		id = SCO_dalmuir_shells
-		icon = GFX_goal_proving_grounds
-		relative_position_id = SCO_dingham_ammunition_factory
-		prerequisite = { focus = SCO_dingham_ammunition_factory }
-		x = 1
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 133 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = arms_factory
-					level = 1
-					instant_build = yes
-				}
+		available = {
+			OR = {
+				has_country_leader = { ruling_only = yes name = "Rupprecht I" }
+				has_country_leader = { ruling_only = yes name = "Henry I" }
 			}			
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY }
-	}
-	focus = {
-		id = SCO_convert_north_british_locomotive_factory
-		icon = GFX_goal_generic_army_tanks
-		prerequisite = { focus = SCO_dalmuir_shells }
-		prerequisite = { focus = SCO_support_steel_sector }
-		x = 1
-		y = 1
-		relative_position_id = SCO_dalmuir_shells
-		cost = 10
-
-		available_if_capitulated = yes
-
-		completion_reward = {		
-			add_tech_bonus = {
-				name = CAN_the_valentine_tank
-				bonus = 1
-				uses = 1
-				category = armor
-			}
-			add_tech_bonus = {
-				name = CAN_the_valentine_tank
-				ahead_reduction = 2
-				bonus = 1
-				uses = 1
-				category = cat_light_armor
-			}
-
-			random_owned_controlled_state = {
-				prioritize = { 133 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = arms_factory
-					level = 1
-					instant_build = yes
-				}
-			}			
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY }
-	}	
-	focus = {
-		id = SCO_artillery_modernization
-		icon = GFX_goal_generic_army_mobilization2
-		prerequisite = { focus = SCO_dalmuir_shells }
-		x = 0
-		y = 2
-		relative_position_id = SCO_dalmuir_shells
-		cost = 10
-
-		available_if_capitulated = yes
-
-		completion_reward = {
-			army_experience = 5
-			add_tech_bonus = {
-				name = infantry_artillery_bonus
-				bonus = 1
-				uses = 1
-				category = artillery
-			}
-			add_tech_bonus = {
-				name = infantry_artillery_bonus
-				bonus = 0.5
-				uses = 1
-				category = artillery
-			}			
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_new_tactics
-		icon = GFX_goal_generic_army_doctrines
-		relative_position_id = SCO_dalmuir_shells
-		prerequisite = { focus = SCO_dalmuir_shells focus = SCO_redesign_small_arms }
-		x = -1
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			army_experience = 5
-			add_doctrine_cost_reduction = {
-				name = land_doc_bonus
-				cost_reduction = 0.5
-				uses = 1
-				category = land_doctrine
-			}			
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_planning_staff
-		icon = GFX_focus_generic_military_academy
-		relative_position_id = SCO_new_tactics
-		prerequisite = { focus = SCO_new_tactics }
-		prerequisite = { focus = SCO_signal_companies }
-		x = 0
-		y = 2
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			army_experience = 5
-			every_army_leader = {
-				add_planning = 1
-			}
-			add_ideas = ABC_establish_a_military_academy_idea		
-		}
-		search_filters = { FOCUS_FILTER_MANPOWER }
-	}
-	focus = {
-		id = SCO_establish_special_forces
-		icon = GFX_goal_generic_special_forces
-		relative_position_id = SCO_planning_staff
-		prerequisite = { focus = SCO_planning_staff }
-		x = 0
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			army_experience = 5
-			add_tech_bonus = {
-                name = special_forces_bonus
-				bonus = 1
-				uses = 2
-				category = r56_jaeger_infantry_tech
-				category = r56_marines_infantry_tech
-				category = r56_mountain_infantry_tech
-				category = r56_paratroops_infantry_tech	
-				category = r56_shock_infantry_tech
-			}
-			add_tech_bonus = {
-                name = special_forces_bonus
-                bonus = 1.0
-                uses = 2
-                category = r56_special_forces_training_tech 
-            }	
-            hidden_effect = {
-                set_country_flag = cite_an_airborne_unit_flag
-            }
-            unlock_decision_tooltip = { decision = cite_an_airborne_unit show_effect_tooltip = yes }										
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}	
-	focus = {
-		id = SCO_highlander_spirit
-		icon = GFX_goal_infantry_offensive
-		relative_position_id = SCO_establish_special_forces
-		prerequisite = { focus = SCO_establish_special_forces }
-		x = 0
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-		completion_reward = {
-            add_ideas = special_forces
-            add_tech_bonus = {
-                name = infantry_artillery_bonus
-                bonus = 1
-                uses = 2
-                technology = tech_special_forces
-                technology = advanced_special_forces
-                technology = improved_special_forces
-                technology = extreme_environment_training
-                technology = survival_training
-                technology = elite_forces
-            }				
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}				
-	focus = {
-		id = SCO_expand_the_construction_sector
-		icon = GFX_goal_generic_construction
-		relative_position_id = SCO_industrial_modernization
-		prerequisite = { focus = SCO_industrial_modernization }
-		x = -1
-		y = 1
-
-		cost = 5
-
-		ai_will_do = {
-			factor = 10
-		}
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 121 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = industrial_complex
-					level = 1
-					instant_build = yes
+			is_subject = no
+			has_government = neutrality
+			BAY = {
+				exists = yes
+				NOT = {
+					OR = {
+						has_government = democratic
+						has_government = neutrality
+					}
 				}
 			}
-			random_owned_controlled_state = {
-				prioritize = { 136 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = industrial_complex
-					level = 1
-					instant_build = yes
-				}
-			}						
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY }
-	}
-	focus = {
-		id = SCO_northern_mining
-		icon = GFX_goal_excavation
-		relative_position_id = SCO_industrial_modernization
-		prerequisite = { focus = SCO_industrial_modernization }
-		x = 1
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
 		}
 
 		completion_reward = {
-            add_tech_bonus = {
-                name = excavation_tech_bonus_name
-                bonus = 1
-                uses = 2
-                category = excavation_tech
-            }						
+			create_wargoal = {
+				target = BAY
+				type = puppet_wargoal_focus
+				expire = 0
+			}		
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
-	focus = {
-		id = SCO_support_steel_sector
-		icon = GFX_focus_generic_steel
-		relative_position_id = SCO_expand_the_construction_sector
-		prerequisite = { focus = SCO_northern_mining focus = SCO_expand_the_construction_sector }
-		x = 0
-		y = 1
 
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 133 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = steel_mill
-					level = 1
-					instant_build = yes
-				}
-			}
-			add_tech_bonus = {
-				name = industrial_bonus
-				bonus = 1
-				uses = 1
-				category = steel_tech
-			}								
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_RESEARCH FOCUS_FILTER_STEEL }
-	}
-	focus = {
-		id = SCO_support_light_industry
-		icon = GFX_goal_generic_light_industry
-		relative_position_id = SCO_support_steel_sector
-		prerequisite = { focus = SCO_support_steel_sector }
-		x = -1
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 121 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = industrial_complex
-					level = 1
-					instant_build = yes
-				}
-			}
-			random_owned_controlled_state = {
-				prioritize = { 136 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = industrial_complex
-					level = 1
-					instant_build = yes
-				}
-			}						
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY }
-	}
-	focus = {
-		id = SCO_ferranti_instruments
-		icon = GFX_goal_generic_production2
-		relative_position_id = SCO_support_light_industry
-		prerequisite = { focus = SCO_support_light_industry }
-		x = 0
-		y = 2
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = electronics_bonus
-				bonus = 1.0
-				uses = 2
-				category = electronics
-			}							
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}	
     focus = {
-        id = SCO_connect_extraction_and_production_areas
-        icon = GFX_goal_generic_construct_infrastructure
-        relative_position_id = SCO_northern_mining
-        prerequisite = { focus = SCO_northern_mining focus = SCO_expand_the_construction_sector }
-		x = 0
+        id = SCO_democratic_constitutionalism
+        icon = GFX_focus_generic_treaty
+		prerequisite = { focus = SCO_choose_a_monarch focus = SCO_favour_republicanism }		
+		relative_position_id = SCO_choose_a_monarch
+		mutually_exclusive = { focus = SCO_grant_power_to_the_crown }
+ 		x = -3
 		y = 1
         cost = 10
-		ai_will_do = {
-			factor = 10			
-			}		
-		available_if_capitulated = yes
-        completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 120 }
-                add_building_construction = {
-                    type = infrastructure
-                    level = 1
-                    instant_build = yes 
-                }    
-            }
-			random_owned_controlled_state = {
-				prioritize = { 136 }
-                add_building_construction = {
-                    type = infrastructure
-                    level = 1
-                    instant_build = yes 
-                }    
-            }  
-			random_owned_controlled_state = {
-                add_building_construction = {
-                    type = infrastructure
-                    level = 1
-                    instant_build = yes 
-                }    
-            }                      
-        }
-        search_filters = { FOCUS_FILTER_INDUSTRY }
-    }
-    focus = {
-        id = SCO_industrial_research
-        icon = GFX_focus_research
-        relative_position_id = SCO_support_steel_sector
-        prerequisite = { focus = SCO_connect_extraction_and_production_areas }
-        prerequisite = { focus = SCO_support_steel_sector }        
-		x = 0
-		y = 2
-        cost = 10
-		ai_will_do = {
-			factor = 10			
-			}		
-		available_if_capitulated = yes
-        completion_reward = {
-			add_research_slot = 1            
-        }
-        search_filters = { FOCUS_FILTER_RESEARCH }
-    }    
-	focus = {
-		id = SCO_develop_aluminium_industry
-		icon = GFX_focus_generic_aluminum
-		relative_position_id = SCO_support_steel_sector
-		prerequisite = { focus = SCO_support_steel_sector }
-		prerequisite = { focus = SCO_connect_extraction_and_production_areas }
-		x = 1
-		y = 1
+        available_if_capitulated = yes
+        search_filters = {FOCUS_FILTER_POLITICAL}
+        ai_will_do = {
+            factor = 10
 
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 121 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = aluminum_mill
-					level = 1
-					instant_build = yes
-				}
+			modifier = {
+				factor = 10
+				is_historical_focus_on = yes
+				has_government = democratic
 			}
+        }
+        completion_reward = { 
+			#2 different effect for constitutional monarchy and republic
+			#add a stability boost to monarchs? add_stability = 0.05
+            #add_political_power = 250
 			if = {
 				limit = {
-					NOT = {
-						has_tech = aluminum_production_1
+					has_completed_focus = SCO_favour_republicanism
+				}
+				add_ideas = SCO_parliamentarianism
+			}
+			else_if = {
+				limit = {
+					has_completed_focus = SCO_choose_a_monarch
+					has_country_leader = {
+						name = "Rupprecht I" ruling_only = no
 					}
 				}
-				set_technology = { aluminum_production_1 = 1 }
-				else = {
-					add_tech_bonus = {
-						name = construction_tech_bonus
-						bonus = 1
-						uses = 1
-						category = aluminium_tech
-					}					
+				add_ideas = SCO_king_rupprecht				
+			}
+			else_if = {
+				limit = {
+					has_completed_focus = SCO_choose_a_monarch
+					has_country_leader = {
+						name = "Henry I" ruling_only = no
+					}
 				}
-			}								
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_RESEARCH FOCUS_FILTER_ALUMINIUM}
-	}
-	focus = {
-		id = SCO_develop_the_shale_oil_sector
-		icon = GFX_goal_refining
-		relative_position_id = SCO_connect_extraction_and_production_areas
-		prerequisite = { focus = SCO_connect_extraction_and_production_areas }
-		x = 0
-		y = 2
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 10
-		}
-
-		available = {
-			
-		}
-		
-		bypass = {
+				add_ideas = SCO_king_henry				
+			}
+			else_if = {
+				limit = {
+					has_completed_focus = SCO_choose_a_monarch
+					has_country_leader = { 
+						ruling_only = yes name = "Douglas I" 
+					}
+				}
+				add_ideas = SCO_king_douglas				
+			}						
 			#
-		}
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.1
+			}			
 
-		
-		
-		
+        }    
+    }
 
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 121 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = fuel_silo
-					level = 1
-					instant_build = yes
-				}
-			}
-			121 = {
-				add_resource = {
-					type = oil
-					amount = 1
-				}			
-			}
-			add_tech_bonus = {
-				name = industrial_bonus
-				bonus = 1
-				uses = 1
-				category = refining_tech
-			}							
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_RESEARCH FOCUS_FILTER_OIL}
-	}
 	focus = {
-		id = SCO_substitution_technologies
-		icon = GFX_goal_generic_oil_refinery
-		relative_position_id = SCO_develop_the_shale_oil_sector
-		prerequisite = { focus = SCO_develop_the_shale_oil_sector }
-		x = 0
+		id = SCO_promote_chemical_industry
+		icon = GFX_focus_generic_rubber
+		prerequisite = { focus = SCO_democratic_constitutionalism }
+		mutually_exclusive = { focus = SCO_support_trade }
+		x = -2
 		y = 1
-
-		cost = 10
+		relative_position_id = SCO_democratic_constitutionalism
+		cost = 5
 
 		ai_will_do = {
 			factor = 10
 		}
 
 		available = {
-			
-		}
-		
-		bypass = {
-			#
+
 		}
 
-		
-		
-		
-
+		available_if_capitulated = yes
+		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY }
 		completion_reward = {
 			random_owned_controlled_state = {
 				prioritize = { 121 }
@@ -953,879 +832,1791 @@ focus_tree = {
 					instant_build = yes
 				}
 			}
-			if = {
-				limit = { 
-					NOT = {
-						has_tech = synth_oil_experiments
-					} 
-				}
-				set_technology = { synth_oil_experiments = 1 }
-				else = {					
-					add_tech_bonus = {
-						name = industrial_bonus
-						ahead_reduction = 2
-						bonus = 1
-						uses = 1
-						category = synth_resources
-					}
-				}				
-			}										
-		}
-		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_RESEARCH FOCUS_FILTER_OIL}
-	}
-	focus = {
-		id = SCO_scottish_aviation_air_academy
-		icon = GFX_goal_generic_build_airforce
-		x = 24
-		y = 0
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			air_experience = 25
-
-			if = {
-				limit = {
-					capital_scope = {
-						NOT = {
-							free_building_slots = {
-								building = air_base
-								size > 1
-							}
-						}
-					}
-				}
-				random_owned_controlled_state = {
-					limit = {
-						free_building_slots = {
-							building = air_base
-							size > 1
-						}
-					}
-					add_building_construction = {
-						type = air_base
-						level = 2
-						instant_build = yes
-					}
-					ROOT = { set_country_flag = aviation_effort_AB }
-				}
-			}
-			if = {
-				limit = {
-					capital_scope = {
-						free_building_slots = {
-							building = air_base
-							size > 1
-						}
-					}
-				}
-				capital_scope = {
-					add_building_construction = {
-						type = air_base
-						level = 2
-						instant_build = yes
-					}
-					ROOT = { set_country_flag = aviation_effort_AB }
-				}
-			}
-			add_doctrine_cost_reduction = {
-				name = air_doc_bonus
-				cost_reduction = 0.5
+			add_tech_bonus = {
+				name = POL_promote_chemical_industry
+				bonus = 1.0
 				uses = 1
-				category = air_doctrine
+				category = synth_resources
 			}
 		}
-		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_RESEARCH }
 	}
+
 	focus = {
-		id = SCO_build_trainer_aircrafts
-		icon = GFX_goal_generic_air_fighter
-		prerequisite = { focus = SCO_scottish_aviation_air_academy }
-		mutually_exclusive = { focus = SCO_bimotor_aircrafts}
-		relative_position_id = SCO_scottish_aviation_air_academy		
-		x = -1
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			air_experience = 5
-			add_tech_bonus = {
-				name = fighter_bonus
-				bonus = 1
-				uses = 1
-				technology = fighter1
-				technology = fighter2
-				technology = fighter3
-			}			
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_bimotor_aircrafts
-		icon = GFX_goal_generic_air_heavy_fighter_new
-		prerequisite = { focus = SCO_scottish_aviation_air_academy }
-		mutually_exclusive = { focus = SCO_build_trainer_aircrafts}
-		relative_position_id = SCO_scottish_aviation_air_academy		
-		x = 1
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			air_experience = 5
-			add_tech_bonus = {
-				name = fighter_bonus
-				bonus = 1
-				uses = 1
-				category = cat_heavy_fighter
-			}
-			add_tech_bonus = {
-				name = bomber_bonus
-				bonus = 1
-				uses = 1
-				category = tactical_bomber
-			}						
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_train_pilots
-		icon = GFX_goal_italy_further_pilots_training
-		prerequisite = { focus = SCO_build_trainer_aircrafts focus = SCO_bimotor_aircrafts }
-		relative_position_id = SCO_build_trainer_aircrafts		
-		x = -1
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			add_ideas = ITA_further_pilots_training						
-		}
-	}
-	focus = {
-		id = SCO_train_mechanics
-		icon = GFX_goal_generic_air_production
-		prerequisite = { focus = SCO_build_trainer_aircrafts focus = SCO_bimotor_aircrafts }
-		relative_position_id = SCO_build_trainer_aircrafts		
-		x = 3
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			add_ideas = CRO_idea_trained_mechanics						
-		}
-	}
-	focus = {
-		id = SCO_support_designers_innovations
-		icon = GFX_goal_generic_air_bomber
-		prerequisite = { focus = SCO_build_trainer_aircrafts focus = SCO_bimotor_aircrafts }
-		relative_position_id = SCO_build_trainer_aircrafts		
-		x = 1
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			add_ideas = SCO_idea_designers_innovations						
-		}
-	}
-	focus = {
-		id = SCO_naval_aviation
-		icon = GFX_goal_zero_blue
-		prerequisite = { focus = SCO_train_mechanics focus = SCO_support_designers_innovations  }
-		relative_position_id = SCO_support_designers_innovations		
-		x = 1
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			air_experience = 5
-			add_tech_bonus = {
-				name = nav_bomber_bonus
-				bonus = 1
-				uses = 1
-				category = naval_bomber
-			}
-			add_tech_bonus = {
-				name = nav_bomber_bonus
-				bonus = 1
-				uses = 1
-				category = naval_air
-				category = maritime
-			}									
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_refine_air_doctrine
-		icon = GFX_goal_generic_air_doctrine
-		prerequisite = { focus = SCO_train_pilots focus = SCO_support_designers_innovations  }
-		relative_position_id = SCO_support_designers_innovations		
-		x = -1
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			air_experience = 5		
-			add_doctrine_cost_reduction = {
-				name = air_doc_bonus
-				cost_reduction = 0.5
-				uses = 2
-				category = air_doctrine
-			}										
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_radar_network
-		icon = GFX_goal_generic_radar
-		prerequisite = { focus = SCO_refine_air_doctrine  }
-		relative_position_id = SCO_refine_air_doctrine		
+		id = SCO_support_trade
+		icon = GFX_goal_generic_positive_trade_relations
+		prerequisite = {focus = SCO_democratic_constitutionalism }
+		relative_position_id = SCO_democratic_constitutionalism
+		mutually_exclusive = { focus = SCO_promote_chemical_industry }
 		x = 0
 		y = 1
 		cost = 10
 
 		available_if_capitulated = yes
 
+		available ={
+			OR = {
+				has_government = democratic
+				has_government = neutrality
+			}				
+		}
+
 		ai_will_do = {
-			factor = 1
+			factor = 5
+		}
+
+        completion_reward = {
+			random_owned_controlled_state = {
+				prioritize = { 121 }
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = yes
+					}
+				}				
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+
+			}
+			add_ideas = liberty_ethos_focus
+
+        }
+        search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+	focus = {
+		id = SCO_research_grants
+		icon = GFX_goal_research_silver_cooperation
+		prerequisite = { focus = SCO_support_trade focus = SCO_promote_chemical_industry }
+		
+		relative_position_id = SCO_support_trade
+		x = -1
+		y = 1
+		cost = 10
+
+		ai_will_do = {
+			factor = 3
 		}
 
 		completion_reward = {
-			add_tech_bonus = {
-				name = radar_focus
-				bonus = 1.0
-				uses = 2
-				category = radar_tech
-			}										
+			add_ideas = CRO_idea_research_grants
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 	focus = {
-		id = SCO_the_shipyard_of_the_world
-		icon = GFX_goal_generic_naval_effort2
-
-		x = 36
-		y = 0
-
+		id = SCO_attract_investors
+		icon = GFX_goal_industrial_investment
+		prerequisite = { focus = SCO_research_grants }
+		relative_position_id = SCO_research_grants
+		available = {
+			OR = {
+				has_government = democratic
+				has_government = neutrality
+			}
+			if = {
+				limit = {
+					is_subject = yes
+				}
+				OVERLORD = { 
+					OR = {
+						has_government = democratic
+						has_government = neutrality
+					} 
+				}
+			}			
+		}
+		
+		x = -2
+		y = 1
 		cost = 10
 
 		ai_will_do = {
-			factor = 8
+			factor = 5
 		}
-		available = {
-			any_state = {
-				is_coastal = yes
-				is_controlled_by = ROOT
-			}
-		}
-		
-		bypass = {
-			#
-		}
-
-		
-		
-		
 
 		completion_reward = {
-			navy_experience = 25
-			random_owned_controlled_state = {
-				prioritize = { 133 }
-				add_extra_state_shared_building_slots = 4
-				add_building_construction = {
-					type = dockyard
-					level = 4
-					instant_build = yes
-				}
-			}
-			add_ideas = BEL_british_ship_designs_idea										
+			add_ideas = LAT_invite_foreign_investors
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
-	focus = {
-		id = SCO_shipbuilding_contacts
-		icon = GFX_focus_naval_defense_fund
-		prerequisite = { focus = SCO_the_shipyard_of_the_world  }
-		relative_position_id = SCO_the_shipyard_of_the_world
-		x = -1
-		y = 1
 
+	focus = {
+		id = SCO_economic_optimization
+		icon = GFX_goal_generic_trade
+		prerequisite = { focus = SCO_research_grants }
+		relative_position_id = SCO_research_grants
+		
+		x = 0
+		y = 1
 		cost = 10
 
 		ai_will_do = {
-			factor = 5
+			factor = 3
 		}
-
-		available = {
-			
-		}
-		
-		bypass = {
-			#
-		}
-
-		
-		
-		
-
 		completion_reward = {
-			navy_experience = 10
-
-			add_ideas = SCO_idea_shipbuilding_contacts										
+			add_ideas = CRO_idea_economic_optimization
 		}
-	}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}	
+
 	focus = {
-		id = SCO_national_admiralty
-		icon = GFX_goal_generic_admirality
-		prerequisite = { focus = SCO_the_shipyard_of_the_world  }
-		relative_position_id = SCO_the_shipyard_of_the_world
+		id = SCO_coalition_building
+		icon = GFX_goal_generic_foreign_diplomacy2
+		prerequisite = { focus = SCO_support_trade }
+		prerequisite = { focus = SCO_economic_mobilization }
+		relative_position_id = SCO_support_trade
+		
 		x = 1
-		y = 1
-
+		y = 2
 		cost = 10
 
 		ai_will_do = {
-			factor = 5
+			factor = 3
 		}
 
 		available = {
+			is_in_faction = no
+		#	OR = {
+		#		ENG = {
+		#			NOT = { has_war_with = ROOT }
+		#			has_government = democratic
+		#			has_capitulated = no
+		#			is_faction_leader = yes
+		#			NOT = {
+		#				OR = {
+		#					has_completed_focus = ENG_a_change_in_course
+		#					has_completed_focus = ENG_visit_germany
+		#				}	
+		#			}						
+		#		}
+				any_other_country = {
+					is_major = yes
+					has_government = democratic
+					is_faction_leader = yes
+					NOT = { has_war_with = ROOT }
+				}
+		#	}
+		}		
+
+		bypass = {
 			
 		}
-		
-		bypass = {
-			#
-		}
-
-		
-		
-		
 
 		completion_reward = {
-			navy_experience = 10
-
-			add_ideas = SCO_idea_national_admiralty										
+			set_rule = { can_create_factions = yes }
+		#	if = {
+		#		limit = {
+		#			ENG = {
+		#				has_government = democratic
+		#				is_faction_leader = yes
+		#				has_capitulated = no
+		#				NOT = { has_war_with = ROOT }
+		#			}
+		#			NOT = {
+		#				any_other_country = {
+		#					is_in_faction_with = ENG
+		#					has_war_with = ROOT
+		#				}
+		#			}					
+		#		}
+		#		ENG = {
+		#			country_event = generic.2
+		#		}
+		#	}
+		#	else = {
+				get_best_alliance_match_democratic_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+		#	}					
+			
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL }
 	}
+
+#	focus = {
+#		id = SCO_the_church_question
+#		icon = GFX_goal_christianity_and_state
+#		prerequisite = { focus = SCO_democratic_constitutionalism focus = SCO_grant_power_to_the_crown }
+#
+#		x = 6
+#		y = 1
+#		relative_position_id = SCO_democratic_constitutionalism
+#		cost = 10
+#		available = {
+#		}
+#
+#		search_filters = {FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_INDUSTRY}
+#
+#		completion_reward = {
+#			#Wittelsbach are Jacobite claimants for catholic only -> problem?
+#		}
+#	}
+
 	focus = {
-		id = SCO_naval_mine_warfare
-		prerequisite = { focus = SCO_shipbuilding_contacts focus = SCO_national_admiralty  }
-		relative_position_id = SCO_shipbuilding_contacts
-		icon = GFX_focus_generic_mine_warfare
-		x = 4
+		id = SCO_deterrence
+		icon = GFX_goal_generic_defence
+		prerequisite = { focus = SCO_democratic_constitutionalism focus = SCO_grant_power_to_the_crown }
+		relative_position_id = SCO_democratic_constitutionalism
+		mutually_exclusive = { focus = SCO_the_volunteer_corps }
+		x = 2
 		y = 1
 		cost = 10
-		ai_will_do = {
-			factor = 1
-		}
 
-		allow_branch = {
-			has_dlc = "Man the Guns"
-		}
+		
 
-		available_if_capitulated = yes
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = ENG_anti_non_contact_committee
-				bonus = 1.0
-				uses = 1
-				category = naval_minelaying
-			}
-			add_tech_bonus = {
-				name = ENG_anti_non_contact_committee
-				bonus = 1.0
-				uses = 2
-				category = naval_minesweeping
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_destroyer_focus
-		prerequisite = { focus = SCO_shipbuilding_contacts focus = SCO_national_admiralty  }
-		icon = GFX_focus_generic_destroyer
-		x = 0
-		y = 1
-		relative_position_id = SCO_national_admiralty
-		cost = 10
-		ai_will_do = {
-			factor = 3
-		}
-
-		available_if_capitulated = yes
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = dd_bonus
-				bonus = 1.0
-				uses = 2
-				category = dd_tech
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}	
-	focus = {
-		id = SCO_cruiser_focus
-		prerequisite = { focus = SCO_shipbuilding_contacts focus = SCO_national_admiralty  }
-		relative_position_id = SCO_shipbuilding_contacts
-		icon = GFX_focus_generic_cruiser2
-		x = 0
-		y = 1
-
-		cost = 10
 		ai_will_do = {
 			factor = 3
 		}
 
 		completion_reward = {
-			add_tech_bonus = {
-				name = ENG_secure_the_imperial_shipping_routes
-				bonus = 1.0
-				uses = 2
-				category = cl_tech
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_a_s_warfare
-		prerequisite = { focus = SCO_destroyer_focus }
-		prerequisite = { focus = SCO_cruiser_focus}
-		icon = GFX_goal_generic_navy_anti_submarine
-		x = 0
-		y = 1
-		relative_position_id = SCO_destroyer_focus
-		cost = 10
-		ai_will_do = {
-			factor = 1
-		}
-
-		available_if_capitulated = yes
-
-		allow_branch = {
-			has_dlc = "Man the Guns"
-		}
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = dd_bonus
-				bonus = 1.0
-				ahead_reduction = 2
-				uses = 2
-				category = asw_tech
-			}	
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-
-	focus = {
-		id = SCO_increase_naval_production
-		prerequisite = { focus = SCO_destroyer_focus }
-		prerequisite = { focus = SCO_cruiser_focus}
-		icon = GFX_goal_generic_construct_naval_dockyard
-		x = -2
-		y = 1
-		relative_position_id = SCO_destroyer_focus
-		cost = 10
-		ai_will_do = {
-			factor = 1
-		}
-
-		available_if_capitulated = yes
-
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 121 }
-				add_extra_state_shared_building_slots = 2
-				add_building_construction = {
-					type = dockyard
-					level = 2
-					instant_build = yes
-				}
-			}	
+			add_ideas = deterrence
 		}
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 	}
-			
+
 	focus = {
-		id = SCO_the_fleet_of_old
-		icon = GFX_goal_generic_blue_navy
-		prerequisite = { focus = SCO_shipbuilding_contacts focus = SCO_national_admiralty  }
-		relative_position_id = SCO_shipbuilding_contacts
-		mutually_exclusive = { focus = SCO_the_blocade_doctrine focus = SCO_carrier_strikes}
-		x = -6
+		id = SCO_the_volunteer_corps
+		icon = GFX_goal_generic_more_territorial_claims
+		prerequisite = { focus = SCO_democratic_constitutionalism focus = SCO_grant_power_to_the_crown }
+		mutually_exclusive = { focus = SCO_deterrence }
+		relative_position_id = SCO_democratic_constitutionalism
+		x = 4
 		y = 1
+		cost = 5
+		completion_reward = {
+			if = {
+				limit = { has_idea = neutrality_idea }
+				remove_ideas = neutrality_idea
+			}	
+			set_rule = { can_send_volunteers = yes }
+			add_ideas = BEL_volunteer_corps
+		}
+	}
+
+	focus = {
+		id = SCO_economic_mobilization
+		icon = GFX_goal_polish_wartime_industry
+		prerequisite = { focus = SCO_deterrence focus = SCO_the_volunteer_corps }
+
+		x = 1
+		y = 1
+
+		ai_will_do = {
+			factor = 60
+		}
+
+		relative_position_id = SCO_deterrence
+		cost = 10
+		available = {
+		}
+
+		search_filters = {FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_INDUSTRY}
+
+		completion_reward = {
+			add_war_support = 0.1
+			upgrade_economy_law = yes
+		}
+	}
+
+	focus = {
+		id = SCO_women_army_service
+		icon = GFX_focus_generic_women_in_military
+		prerequisite = { focus = SCO_economic_mobilization }
+		x = 0
+		y = 1
+		relative_position_id = SCO_economic_mobilization
 
 		cost = 10
 
 		ai_will_do = {
-			factor = 4
+			factor = 3
+		}
+		
+		available = {
+			NOT = {
+				OR = {
+					has_idea = disarmed_nation
+					has_idea = volunteer_only
+				}
+			}
+			
+		}
+
+		search_filters = { FOCUS_FILTER_MANPOWER }
+
+		completion_reward = {
+			add_ideas = SCO_womens_army_service
+		}
+	}
+
+	focus = {
+		id = SCO_womens_suffrage
+		icon = GFX_goal_womens_rights
+		prerequisite = { focus = SCO_women_army_service }
+		x = 0
+		y = 1
+		relative_position_id = SCO_women_army_service
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 2
 		}
 
 		available = {
-			has_tech = fleet_in_being
-		}
-		
-		bypass = {
-			#
-		}
-
-		
-		
-		
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = fleet_in_being_bonus
-				bonus = 1
-				uses = 2
-				category = cat_fleet_in_being
-			}												
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_battleship_focus
-		prerequisite = { focus = SCO_the_fleet_of_old }
-		icon = GFX_goal_sea_navy
-		x = 0
-		y = 1
-		relative_position_id = SCO_the_fleet_of_old
-		cost = 10
-		ai_will_do = {
-			factor = 1
+			has_elections = yes
 		}
 
 		available_if_capitulated = yes
-
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_RESEARCH FOCUS_FILTER_POLITICAL}
 		completion_reward = {
-			navy_experience = 25
-			add_tech_bonus = {
-				name = uk_battleship_focus
-				bonus = 1.0
-				uses = 1
-				category = bb_tech
+			add_ideas = MEX_womens_suffrage
+			#change this into a womens rights scripted effect?
+			if = {
+				limit = {
+					has_idea = r56i_laws_gender_traditional
+				}
+				swap_ideas = {
+					remove_idea = r56i_laws_gender_traditional
+					add_idea = r56i_laws_gender_limited
+				}
 			}
+			else_if = {			
+				limit = {
+					has_idea = r56i_laws_gender_patriarchy
+				}
+				swap_ideas = {
+					remove_idea = r56i_laws_gender_patriarchy
+					add_idea = r56i_laws_gender_limited
+				}			
+			}
+			else_if = {
+			
+				limit = {
+					has_idea = r56i_laws_gender_limited
+				}
+				swap_ideas = {
+					remove_idea = r56i_laws_gender_limited
+					add_idea = r56i_laws_gender_equality
+				}			
+			}
+			else = {
+				add_ideas = r56i_laws_gender_limited
+			}			
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}	
-	focus = {
-		id = SCO_the_biggest_battleship
-		icon = GFX_goal_generic_navy_battleship
-		prerequisite = { focus = SCO_battleship_focus }
-		x = 0
+	}
+
+
+	focus = { 
+		id = SCO_the_scottish_workers_republican_party
+		icon = GFX_focus_ICE_embrace_the_workers_revolution
+		prerequisite = { focus = SCO_favour_republicanism }		
+		relative_position_id = SCO_favour_republicanism
+		mutually_exclusive = { focus = SCO_scottish_democratic_fascist_party }
+		x = -2
 		y = 1
-		relative_position_id = SCO_battleship_focus
-
 		cost = 10
-
-		ai_will_do = {
-			factor = 1
-		}
-
 		available = {
 			if = {
 				limit = {
-					has_dlc = "Man the Guns"
+					is_puppet = yes
 				}
-				has_tech = basic_ship_hull_heavy
-			}
+				has_government = communism
+			}		
 		}
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 2
+				is_historical_focus_on = no
+			}
+			modifier = {
+				factor = 10
+				AND = {
+					is_puppet = yes
+					OVERLORD = {
+						has_government = communism
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				AND = {
+					is_historical_focus_on = yes
+					NOT = { has_government = communism }
+				}
+			}
+		}				
+		completion_reward = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			add_timed_idea = { idea = internationalism days = 1395 }			
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL}
+	}
 
+
+    focus = {
+        id = SCO_political_batallions
+        icon = GFX_focus_generic_manpower
+        prerequisite = { focus = SCO_the_scottish_workers_republican_party }
+        x = 0
+        y = 1
+        relative_position_id = SCO_the_scottish_workers_republican_party
+    
+        cost = 10
+    
+        ai_will_do = {
+            factor = 15
+        }
+    
+        available = {
+			has_government = communism
+        }
+    
+        search_filters = { FOCUS_FILTER_MANPOWER }
+        completion_reward = {
+            division_template = { 
+                name = "Red Riflemen"
+                is_locked = no
+                regiments = { 
+                    infantry = { x = 0 y = 0 }
+                    infantry = { x = 1 y = 0 }
+                    infantry = { x = 2 y = 0 }
+                    infantry = { x = 3 y = 0 }
+    
+                    infantry = { x = 0 y = 1 }
+                    infantry = { x = 1 y = 1 }
+                    infantry = { x = 2 y = 1 }
+                    infantry = { x = 3 y = 1 }
+    
+                    infantry = { x = 0 y = 2 }
+                    infantry = { x = 1 y = 2 }
+                    infantry = { x = 2 y = 2 }
+                    infantry = { x = 3 y = 2 }
+                }
+                support = {
+                    recon = { x = 0 y = 0 }
+                    engineer = { x = 0 y = 1 }
+                    artillery = { x = 0 y = 2 }
+                }
+            }
+            capital_scope = {
+                create_unit = { 
+                    division = "name = \"1. Red Riflemen\" division_template = \"Red Riflemen\" start_experience_factor = 0.5" 
+                    owner = ROOT
+                }
+                create_unit = { 
+                    division = "name = \"2. Red Riflemen\" division_template = \"Red Riflemen\" start_experience_factor = 0.5" 
+                    owner = ROOT
+                }
+                create_unit = { 
+                    division = "name = \"3. Red Riflemen\" division_template = \"Red Riflemen\" start_experience_factor = 0.5" 
+                    owner = ROOT
+                }
+            #    create_unit = { 
+            #        division = "name = \"4. Red Riflemen\" division_template = \"Red Riflemen\" start_experience_factor = 0.5" 
+            #        owner = ROOT
+            #    }
+            #    create_unit = { 
+            #        division = "name = \"5. Red Riflemen\" division_template = \"Red Riflemen\" start_experience_factor = 0.5" 
+            #        owner = ROOT
+            #    }
+            }
+        }
+    }
+	focus = {
+		id = SCO_political_commissars
+		icon = GFX_goal_generic_forceful_treaty
+		prerequisite = { focus = SCO_political_batallions }
+		relative_position_id = SCO_political_batallions
+		x = 0
+		y = 1
+		cost = 10
+		
+		completion_reward = {
+			add_ideas = political_commissars_focus
+			if = {
+				limit = { has_government = fascism }
+				add_popularity = {
+					ideology = fascism
+					popularity = 0.2
+				}
+			}
+			if = {
+				limit = { has_government = communism }
+				add_popularity = {
+					ideology = communism
+					popularity = 0.2
+				}
+			}
+			add_political_power = 125
+		}
+		search_filters = { FOCUS_FILTER_MILITARY_IMPROVEMENT FOCUS_FILTER_POLITICAL }
+	}	
+    focus = {
+        id = SCO_red_army
+        icon = GFX_postive_heroism
+        prerequisite = { focus = SCO_political_commissars }
+        x = -1
+        y = 1
+		relative_position_id = SCO_political_commissars
+    
+        cost = 10
+    
+        ai_will_do = {
+            factor = 12
+        }
+    
+        available = {
+			has_government = communism
+        }
+    
+        search_filters = { FOCUS_FILTER_MANPOWER }
+        completion_reward = {
+			add_ideas = GEN_red_army
+        }
+    }
+
+	focus = {
+		id = SCO_celtic_liberation
+		icon = GFX_goal_generic_major_war
+		x = -1
+		y = 1
+		prerequisite = {
+			focus = SCO_red_army
+			focus = SCO_propagate_the_importance_of_struggle
+		}
+		relative_position_id = SCO_red_army
+		
+		cost = 10
+		available = {
+			r56_script_i_am_sane = yes
+			is_subject = no
+			has_army_manpower = { size > 59999 }
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+			has_navy_size = {
+				size > 9
+			}
+		}	
+		ai_will_do = {
+			factor = 4
+		}
+		will_lead_to_war_with = ENG
+		will_lead_to_war_with = NIR
+		will_lead_to_war_with = IRE
+		will_lead_to_war_with = WLS
+		
 		bypass = {
-			AND = {
-				has_tech = heavy_battleship
-				has_tech = heavy_battleship2
-			}
-		}
-
-		
-		
-		
-
-		complete_tooltip = {
-
+			has_war_with = NIR
+			has_war_with = IRE
+			has_war_with = GAM
+			has_war_with = WLS
 		}
 
 		completion_reward = {
+			every_state = {
+				limit = {
+					OR = {
+						is_core_of = NIR
+						is_core_of = IRE
+						is_core_of = WLS
+					}
+				}
+				
+				add_claim_by = ROOT
+			}
 			if = {
 				limit = {
-					not = { has_dlc = "Man the Guns" }
+					NIR = { # 119
+						exists = yes
+					}
 				}
-				add_tech_bonus = {
-					name = JAP_the_ultimate_battleship
-					bonus = 3.0
-					uses = 1
-					category = shbb_tech
+				create_wargoal = {
+					target = NIR
+					type = annex_everything
+					expire = 0
 				}
 			}
 			else = {
 				if = {
 					limit = {
-						not = { has_tech = ship_hull_super_heavy }
-					}
-					set_technology = {
-						ship_hull_super_heavy = 1
-					}
-				}
-				create_equipment_variant = {
-					name = "Claymore Class"
-					type = ship_hull_super_heavy_1
-					parent_version = 0
-					modules = {
-						fixed_ship_battery_slot = ship_super_heavy_battery_1
-						fixed_ship_anti_air_slot = ship_anti_air_2
-						fixed_ship_fire_control_system_slot = ship_fire_control_system_1
-						fixed_ship_radar_slot = empty
-						fixed_ship_engine_slot = heavy_ship_engine_2
-						fixed_ship_secondaries_slot = ship_secondaries_2
-						fixed_ship_armor_slot = ship_armor_shbb
-						front_1_custom_slot = ship_anti_air_1
-						front_2_custom_slot = empty
-						mid_1_custom_slot = empty
-						mid_2_custom_slot = ship_secondaries_2
-						mid_3_custom_slot = ship_secondaries_2
-						rear_1_custom_slot = ship_super_heavy_battery_1
-						rear_2_custom_slot = ship_airplane_launcher_1
-					}
-				}
-				hidden_effect = {
-					add_equipment_production = {
-						equipment = {
-							type = ship_hull_super_heavy_1
-							creator = "SCO"
-							version_name = "Claymore Class"
+						119 = {
+							OWNER = {
+								NOT = {
+									tag = ROOT
+								}
+							}
 						}
-						name = "Claymore"
-						requested_factories = 1
-						progress = 0.75
-						amount = 1
+					}				
+					119 = {
+						OWNER = {
+							ROOT = {
+								create_wargoal = {
+									target = PREV
+									expire = 0
+									type = take_state_focus
+									generator = { 119 }
+								}
+								add_ai_strategy = {
+									type = conquer
+									id = PREV
+									value = 10
+								}
+							}
+						}
 					}
 				}
+			}				
+			if = {
+				limit = {
+					IRE = {
+						exists = yes
+					}
+				}
+				create_wargoal = {
+					target = IRE
+					type = annex_everything
+					expire = 0
+				}
 			}
+			else = {
+				if = {
+					limit = {
+						113 = {
+							OWNER = {
+								NOT = {
+									tag = ROOT
+								}
+							}
+						}
+					}
+					113 = {
+						OWNER = {
+							ROOT = {
+								create_wargoal = {
+									target = PREV
+									expire = 0
+									type = take_state_focus
+									generator = { 113 }
+								}
+								add_ai_strategy = {
+									type = conquer
+									id = PREV
+									value = 10
+								}
+							}
+						}
+					}
+				}
+			}			
+			if = {
+				limit = {
+					WLS = {
+						exists = yes
+					}
+				}
+				create_wargoal = {
+					target = WLS
+					type = annex_everything
+					expire = 0
+				}
+			}		
+			else = {
+				if = {
+					limit = {
+						122 = {
+							OWNER = {
+								NOT = {
+									tag = ROOT
+								}
+							}
+						}
+					}
+					122 = {
+						OWNER = {
+							ROOT = {
+								create_wargoal = {
+									target = PREV
+									expire = 0
+									type = take_state_focus
+									generator = { 122 }
+								}
+								add_ai_strategy = {
+									type = conquer
+									id = PREV
+									value = 10
+								}
+							}
+						}
+					}
+				}	
+			}										
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}	
-	focus = {
-		id = SCO_the_blocade_doctrine
-		icon = GFX_goal_generic_wolf_pack
-		prerequisite = { focus = SCO_shipbuilding_contacts focus = SCO_national_admiralty  }
-		relative_position_id = SCO_shipbuilding_contacts
-		mutually_exclusive = { focus = SCO_the_fleet_of_old focus = SCO_carrier_strikes}
-		x = -4
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		available = {
-			has_tech = trade_interdiction
-		}
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = naval_doctrine_tech_bonus_name
-				bonus = 1
-				uses = 2
-				category = 	cat_trade_interdiction
-			}												
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
+		search_filters = { FOCUS_FILTER_ANNEXATION }
 	}
+
+	### need Britanny ultimatum?
+
+
 	focus = {
-		id = SCO_silent_service
-		icon = GFX_goal_generic_navy_submarine
-		prerequisite = { focus = SCO_the_blocade_doctrine  }
-		relative_position_id = SCO_the_blocade_doctrine
-		x = 0
+		id = SCO_push_for_brittany
+		icon = GFX_goal_BRI_hermine
+		x = 1
 		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 1
+		prerequisite = {
+			focus = SCO_celtic_liberation
 		}
-
-		completion_reward = {
-			navy_experience = 10
-			add_tech_bonus = {
-				name = ss_bonus
-				bonus = 1
-				uses = 1
-				category = ss_tech
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_stealth_upgrades
-		icon = GFX_goal_navy_schematics
-		prerequisite = { focus = SCO_silent_service  }
-		relative_position_id = SCO_silent_service
-		x = 0
-		y = 1
-
-		cost = 8
-
-		allow_branch = {
-			has_dlc = "Man the Guns"
-		}
-
-		ai_will_do = {
-			factor = 3
-		}
-
-		completion_reward = {
-			add_tech_bonus = {
-				name = ss_bonus
-				bonus = 1
-				uses = 1
-				technology = basic_submarine_snorkel
-				technology = improved_submarine_snorkel
-			}
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}		
-	focus = {
-		id = SCO_carrier_strikes
-		icon = GFX_goal_carrier
-		prerequisite = { focus = SCO_shipbuilding_contacts focus = SCO_national_admiralty  }
-		relative_position_id = SCO_shipbuilding_contacts
-		mutually_exclusive = { focus = SCO_the_fleet_of_old focus = SCO_the_blocade_doctrine}
-		x = -2
-		y = 1
-
-		cost = 10
-
-		ai_will_do = {
-			factor = 1
-		}
-
+		relative_position_id = SCO_celtic_liberation
+		
+		cost = 5
 		available = {
-			has_tech = base_strike
+			r56_script_i_am_sane = yes
+			is_subject = no
+			has_army_manpower = { size > 89999 }
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+			has_navy_size = {
+				size > 9
+			}
+		}	
+		ai_will_do = {
+			factor = 4
+		}
+		will_lead_to_war_with = FRA
+		
+		bypass = {
+			has_war_with = FRA
 		}
 
 		completion_reward = {
-			add_tech_bonus = {
-				name = naval_doctrine_tech_bonus_name
-				bonus = 1
-				uses = 2
-				category = 	cat_base_strike
+			every_state = {
+				limit = {
+					is_core_of = BRI
+				}
+				
+				add_claim_by = ROOT
 			}
 			if = {
 				limit = {
-					has_dlc = "Man the Guns"
+					BRI = { # 14
+						exists = yes
+					}
 				}
+				create_wargoal = {
+					target = BRI
+					type = annex_everything
+					expire = 0
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						14 = {
+							OWNER = {
+								NOT = {
+									tag = ROOT
+								}
+							}
+						}
+					}				
+					14 = {
+						OWNER = {
+							ROOT = {
+								create_wargoal = {
+									target = PREV
+									expire = 0
+									type = take_state_focus
+									generator = { 14 }
+								}
+								add_ai_strategy = {
+									type = conquer
+									id = PREV
+									value = 10
+								}
+							}
+						}
+					}
+				}
+			}										
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+
+	focus = {
+		id = SCO_revolutionary_guards
+		icon = GFX_goal_HON_nkvd_assistance
+		cost = 10
+		prerequisite = {
+			focus = SCO_political_commissars
+		}
+        x = 1
+        y = 1
+        relative_position_id = SCO_political_commissars
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				is_historical_focus_on = yes
+				factor = 0.5
+			}
+		}
+		available = {
+			has_government = communism
+		}
+		completion_reward = {			
+			
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+					NOT = {
+						has_intelligence_agency = yes
+					}
+				}
+				create_intelligence_agency = yes
+				
+			}
+
+			else = {
 				add_tech_bonus = {
-					name = air_doc_bonus
+					name = SCO_revolutionary_guards
 					bonus = 1
 					uses = 1
-					technology = improved_airplane_launcher
+					category = encryption_tech
 				}
-			}															
-		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = SCO_naval_air_groups
-		icon = GFX_goal_zero_blue
-		prerequisite = { focus = SCO_carrier_strikes  }
-		relative_position_id = SCO_carrier_strikes		
-		x = 0
-		y = 1
-		cost = 10
-
-		available_if_capitulated = yes
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		completion_reward = {
-			air_experience = 5
+			}	
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+				}
+				add_ideas = GER_abwehr_contacts
+			}			
+            if = {
+                limit = {
+                    has_dlc = "La Resistance"
+                    NOT = {
+                        has_done_agency_upgrade = upgrade_form_department
+                    }
+                }
+                upgrade_intelligence_agency = upgrade_form_department            
+            }
+            else_if = {
+                limit = {
+                    has_dlc = "La Resistance"
+                    NOT = {
+                        has_done_agency_upgrade = upgrade_decryption_boost
+                    }
+                }
+                upgrade_intelligence_agency = upgrade_decryption_boost            
+            }    
+            else_if = {
+                limit = {
+                    has_dlc = "La Resistance"
+                    NOT = {
+                        has_done_agency_upgrade = upgrade_decryption_boost_2
+                    }
+                }
+                upgrade_intelligence_agency = upgrade_decryption_boost_2            
+            }					
 			add_tech_bonus = {
-				name = nav_bomber_bonus
+				name = mp_tech_bonus_name
 				bonus = 1
 				uses = 1
-				category = naval_bomber
-				category = naval_air
-			}									
+				category = military_police_tech
+			}	
+			add_political_power = -50									
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
+	}	
 	focus = {
-		id = SCO_lessons_for_the_air_force
-		icon = GFX_goal_generic_build_airforce
-		prerequisite = { focus = SCO_naval_air_groups  }
-		relative_position_id = SCO_naval_air_groups		
+
+		id = SCO_ideological_propaganda
+		text = BRA_ideological_propaganda
+		icon = GFX_focus_propaganda_soviet
+		prerequisite = { focus = SCO_revolutionary_guards }
 		x = 0
 		y = 1
+		relative_position_id = SCO_revolutionary_guards
+
+		cost = 5
+
+		ai_will_do = {
+			factor = 0
+		}
+
+		allow_branch = {
+			has_dlc = "La Resistance"
+		}
+
+		available = {
+			has_intelligence_agency = yes
+		}
+
+		completion_reward = {
+			upgrade_intelligence_agency = upgrade_psycho_warfare
+			add_ideas = r56_clandestine_propaganda_techniques
+		}
+		search_filters = { FOCUS_FILTER_ESPIONAGE }
+	}	
+
+	focus = {
+		id = SCO_one_union_for_all_workers
+		icon = GFX_goal_generic_karl_marx
+		cost = 10
+		prerequisite = { focus = SCO_the_scottish_workers_republican_party }
+		x = 2
+		y = 1
+		relative_position_id = SCO_the_scottish_workers_republican_party
+		available = {
+			
+		}
+
+		completion_reward = {
+			add_ideas = URG_one_union_for_all_workers
+			add_tech_bonus = {
+				name = ROM_civil_works
+				bonus = 1.0
+				uses = 1
+				category = construction_tech
+			}			
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	focus = {
+		id = SCO_encourage_the_proletariat
+		icon = GFX_goal_communist_factory
+		prerequisite = { focus = SCO_one_union_for_all_workers }
+		x = 0
+		y = 1
+		relative_position_id = SCO_one_union_for_all_workers
+
 		cost = 10
 
 		available_if_capitulated = yes
+
+		available = {
+			has_government = communism
+		}
+
+		completion_reward = {
+			add_political_power = 25
+			add_ideas = GEN_Collectivist_Propaganda_I
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_POLITICAL }
+	}
+
+	focus = {
+		id = SCO_reeducate_the_bourgeoisie
+		prerequisite = { focus = SCO_one_union_for_all_workers }
+		
+		icon = GFX_goal_FRA_pcf_sfio_coalition
+		x = 1
+		y = 2
+		relative_position_id = SCO_one_union_for_all_workers
+		cost = 10
+
+		available_if_capitulated = yes
+		search_filters = {FOCUS_FILTER_POLITICAL FOCUS_FILTER_STABILITY}
+		completion_reward = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			add_ideas = indoctrination_focus
+		}
+	}
+
+	focus = {
+		id = SCO_join_the_comintern
+		icon = GFX_focus_SOV_third_rome
+		prerequisite = { focus = SCO_reeducate_the_bourgeoisie }
+		mutually_exclusive = { focus = SCO_a_new_international }
+		relative_position_id = SCO_reeducate_the_bourgeoisie
+		available = {
+			is_puppet = no
+			OR = {
+				has_government = communism
+				communism > 0.4
+			}				
+			OR = {
+				SOV = {
+					NOT = { has_war_with = ROOT }
+					has_government = communism
+					has_capitulated = no
+					is_faction_leader = yes
+				}
+				any_other_country = {
+					is_major = yes
+					has_government = communism
+					is_faction_leader = yes
+					NOT = { has_war_with = ROOT }
+				}
+			}
+		}
+	
+		bypass = {
+			is_in_faction_with = SOV 
+		}	
+		x = -1
+		y = 2
+		cost = 10
+			
+		completion_reward = {
+			if = {
+				limit = {
+					SOV = {
+						has_government = communism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = SOV
+							has_war_with = ROOT
+						}
+					}					
+				}
+				SOV = {
+					country_event = argentina.15
+				}
+			}
+			else = {
+				get_best_alliance_match_communism_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+			}				
+			
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}
+
+	focus = {
+		id = SCO_a_new_international
+		icon = GFX_goal_generic_communism
+		prerequisite = { focus = SCO_reeducate_the_bourgeoisie }
+		mutually_exclusive = { focus = SCO_join_the_comintern }
+		relative_position_id = SCO_reeducate_the_bourgeoisie
+		x = 1
+		y = 2
+		cost = 5
+		
+		available = {
+			is_puppet = no
+			has_government = communism
+		}
+		
+		completion_reward = {
+			if = {
+				limit = {
+					any_other_country = {
+						NOT = {
+							original_tag = SOV
+						}
+						is_faction_leader = yes
+						has_government = communism
+						NOT = {
+							has_war_with = ROOT
+						}
+					}
+				}
+				r56_other_faction_invite_communism_NOT_SOV = yes
+				set_rule = { can_create_factions = yes }
+			}
+			else = {				
+				add_political_power = 150
+				add_command_power = 50
+				set_rule = { can_create_factions = yes }
+			}	
+		}
+	}
+
+
+	#######fascism
+	focus = { 
+		id = SCO_scottish_democratic_fascist_party
+		icon = GFX_goal_support_fascism
+		prerequisite = { focus = SCO_favour_republicanism }		
+		relative_position_id = SCO_favour_republicanism
+		mutually_exclusive = { focus = SCO_the_scottish_workers_republican_party }
+		x = -6
+		y = 1
+		cost = 10
+		available = {
+			if = {
+				limit = {
+					is_puppet = yes
+				}
+				has_government = fascism
+			}		
+		}
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 2
+				is_historical_focus_on = no
+			}
+			modifier = {
+				factor = 10
+				AND = {
+					is_puppet = yes
+					OVERLORD = {
+						has_government = fascism
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				AND = {
+					is_historical_focus_on = yes
+					NOT = { has_government = fascism }
+				}
+			}
+		}				
+		completion_reward = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
+			add_timed_idea = { idea = nationalism days = 1395 }			
+		}
+		search_filters = { FOCUS_FILTER_MILITARY_IMPROVEMENT FOCUS_FILTER_MILITARY_MANPOWER FOCUS_FILTER_POLITICAL}
+	}
+
+	#leader : SCO_william_weir_gilmour
+	# Gilmour is "indecisive" at the start because he was in 4 parties and his fascism apparenlty should keep elections.
+	focus = { 
+		id = SCO_perfect_the_propaganda
+		icon = GFX_focus_generic_fascist_propaganda
+		prerequisite = { focus = SCO_scottish_democratic_fascist_party }		
+		relative_position_id = SCO_scottish_democratic_fascist_party
+		#mutually_exclusive = { focus = ADU_promote_quietism }
+		x = 0
+		y = 1
+		cost = 5
+		available = {
+			has_government = fascism		
+		}
+		ai_will_do = {
+			factor = 2
+		}				
+		completion_reward = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}		
+			add_war_support = 0.1
+			swap_ruler_traits = { remove = undecided add = hawk }			
+			
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL}
+	}
+
+	focus = {
+        id = SCO_reject_catholicism
+        icon = GFX_focus_ARG_state_atheism
+        prerequisite = { focus = SCO_perfect_the_propaganda }
+        x = 0
+        y = 1
+		relative_position_id = SCO_perfect_the_propaganda
+		
+    
+        cost = 5
+    
+        ai_will_do = {
+            factor = 1
+        }
+    
+        available = {
+			has_government = fascism
+        }
+    
+        search_filters = { FOCUS_FILTER_MANPOWER }
+        completion_reward = {
+			custom_effect_tooltip = disable_panceltism_tt
+			add_political_power = 150
+			custom_effect_tooltip = available_political_advisor
+				show_ideas_tooltip = SCO_john_cormack
+			add_war_support = 0.1
+			add_popularity = {
+				ideology = democratic
+				popularity = -0.1
+			}
+			IRE = {
+				add_opinion_modifier = { 
+					target = ROOT
+					modifier = large_decrease
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = -100
+				}				
+			}
+		#	FRA = { # old alliance go brr?
+		#		add_opinion_modifier = { 
+		#			target = ROOT
+		#			modifier = large_decrease
+		#		}
+		#		add_ai_strategy = {
+		#			type = alliance
+		#			id = ROOT
+		#			value = -100
+		#		}				
+		#	}			
+			ITA = {
+				add_opinion_modifier = { 
+					target = ROOT
+					modifier = large_decrease
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = -100
+				}				
+			}		
+			PAP = {
+				add_opinion_modifier = { 
+					target = ROOT
+					modifier = large_decrease
+				}
+				add_ai_strategy = {
+					type = alliance
+					id = ROOT
+					value = -100
+				}				
+			}						
+        }
+    }
+
+	focus = {
+		id = SCO_militarized_police
+		icon = GFX_goal_generic_army
+		prerequisite = { focus = SCO_perfect_the_propaganda focus = SCO_political_batallions }
+		relative_position_id = SCO_perfect_the_propaganda
+
+		x = 2
+		y = 1
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
 		}
 
+		available_if_capitulated = yes
+
 		completion_reward = {
-			air_experience = 25
-			add_doctrine_cost_reduction = {
-				name = air_doc_bonus
-				cost_reduction = 0.5
+			add_ideas = paramilitarism_focus
+			add_tech_bonus = {
+				name = mp_tech_bonus_name
+				bonus = 1
 				uses = 1
-				category = air_doctrine
-			}			
+				category = military_police_tech
+			}	
 		}
-		search_filters = { FOCUS_FILTER_RESEARCH }
-	}														
+	}
+
+	focus = {
+		id = SCO_scottish_corporate_commonwealth
+		icon = GFX_focus_ICE_state_corporatism
+		prerequisite = { focus = SCO_perfect_the_propaganda }
+		#mutually_exclusive = { focus = ICE_embrace_the_workers_revolution }
+		x = -1
+		y = 2
+		relative_position_id = SCO_perfect_the_propaganda
+		cost = 10
+		available = {
+		}
+
+		search_filters = {FOCUS_FILTER_INDUSTRY}
+
+		completion_reward = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
+			set_politics = {
+				ruling_party = fascism 
+				elections_allowed = no
+			}
+			random_owned_state = {
+				limit = {
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = yes 
+					}
+
+				}
+				prioritize = { 100 } #optional: to pick those states first if they fulfill the limit
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+		}
+	}
+
+	focus = { 
+		id = SCO_propagate_the_importance_of_struggle
+		icon = GFX_goal_extensive_conscription_fascism
+		prerequisite = { focus = SCO_perfect_the_propaganda }		
+		relative_position_id = SCO_perfect_the_propaganda
+		#mutually_exclusive = { focus = ADU_promote_quietism }
+		x = 1
+		y = 2
+		cost = 10
+		available = {
+			if = {
+				limit = {
+					is_puppet = yes
+				}
+				has_government = fascism
+			}		
+		}
+		ai_will_do = {
+			factor = 10
+		}				
+		completion_reward = {		
+			add_war_support = 0.05
+			army_experience = 20
+			if = {
+				limit = { has_idea = neutrality_idea }
+				remove_ideas = neutrality_idea
+			}			
+			add_ideas = GEN_militarism_I			
+			
+		}
+		search_filters = { FOCUS_FILTER_MILITARY_IMPROVEMENT FOCUS_FILTER_MILITARY_MANPOWER FOCUS_FILTER_POLITICAL}
+	}
+
+	focus = {
+		id = SCO_join_the_axis
+		icon = GFX_goal_generic_the_axis
+		prerequisite = { focus = SCO_propagate_the_importance_of_struggle }
+		relative_position_id = SCO_propagate_the_importance_of_struggle
+		mutually_exclusive = { focus = SCO_forge_our_own_path }
+		ai_will_do = {
+			factor = 0.01
+			modifier = {
+				date > 1939.1.1 
+				any_other_country = {
+					has_government = fascism
+					is_faction_leader = yes
+					is_major = yes
+					has_capitulated = no
+					num_of_factories > 50
+					NOT = { has_war_with = ROOT }
+				}
+				add = 50
+			}
+		}
+
+
+		available = {
+			is_puppet = no
+			OR = {
+				has_government = fascism
+				fascism > 0.45
+			}				
+			OR = {
+				GER = {
+					NOT = { has_war_with = ROOT }
+					has_government = fascism
+					has_capitulated = no
+					is_faction_leader = yes
+				}
+				any_other_country = {
+					is_major = yes
+					has_government = fascism
+					is_faction_leader = yes
+					NOT = { has_war_with = ROOT }
+				}
+			}
+		}
+
+		bypass = {
+			is_in_faction_with = GER
+		}		
+
+		x = -2
+		y = 2
+		cost = 10
+		
+		completion_reward = {
+			if = {
+				limit = {
+					GER = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = GER
+							OR = {
+								has_war_with = ROOT
+								tag = ENG
+							}
+							
+						}
+					}					
+				}
+				GER = {
+					country_event = argentina.14
+				}
+			}
+			else_if = {
+				limit = {
+					SWE = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}					
+				}
+				SWE = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					FRA = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}					
+				}
+				FRA = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					NOR = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}	
+				}
+				NOR = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					USA = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}	
+				}
+				USA = {
+					country_event = generic.2
+				}
+			}								
+			else_if = {
+				limit = {
+					CAN = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}	
+				}
+				CAN = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					DEN = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}	
+				}
+				DEN = {
+					country_event = generic.2
+				}
+			}
+			else_if = {
+				limit = {
+					SPR = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}	
+				}
+				SPR = {
+					country_event = generic.2
+				}
+			}			
+			else_if = {
+				limit = {
+					MEX = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = PREV
+							has_war_with = ROOT
+						}
+					}	
+				}
+				MEX = {
+					country_event = generic.2
+				}
+			}
+									
+									
+			else = { #add an anti English system?
+				get_best_alliance_match_fascism_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+			}				
+		}
+	}	
+
+	focus = {
+		id = SCO_forge_our_own_path
+		icon = GFX_focus_generic_support_the_left_right
+		prerequisite = { focus = SCO_propagate_the_importance_of_struggle }
+		relative_position_id = SCO_propagate_the_importance_of_struggle
+
+		mutually_exclusive = { focus = SCO_join_the_axis }
+	
+		x = 0
+		y = 2
+		cost = 10
+		
+		search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_POLITICAL}
+
+		completion_reward = {
+			add_political_power = 120
+			add_command_power = 50
+			set_rule = { can_create_factions = yes }
+		}
+		
+	}
+
+	focus = {
+		id = SCO_implement_the_total_war_theory
+		icon = GFX_goal_generic_state_economy
+		prerequisite = { focus = SCO_propagate_the_importance_of_struggle }
+		prerequisite = { focus = SCO_scottish_corporate_commonwealth }
+		x = -4
+		y = 1
+		relative_position_id = SCO_propagate_the_importance_of_struggle
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 50
+		}
+		completion_reward = {
+			if = {
+				limit = {
+					has_war_support < 0.8
+				}
+				add_war_support = 0.1
+			}
+		#	if = {
+		#		limit = {
+		#			NOT = { 
+		#				has_idea = extensive_conscription 
+		#			}
+		#		}
+		#		add_ideas = extensive_conscription
+		#	}
+			if = {
+				limit = {
+					has_idea = tot_economic_mobilisation
+				}
+				add_political_power = 150
+			}
+			else = {
+				add_ideas = tot_economic_mobilisation
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER FOCUS_FILTER_WAR_SUPPORT }
+	}
+
+	focus = {
+		id = SCO_Forced_Conscription
+		icon = GFX_goal_generic_army
+		prerequisite = { focus = SCO_implement_the_total_war_theory }
+		x = 0
+		y = 1
+		relative_position_id = SCO_implement_the_total_war_theory
+
+		cost = 5
+
+		available_if_capitulated = yes
+
+		available = {
+			OR = {
+				has_war = yes
+				threat > 0.25
+			}
+			NOT = {
+				OR = {
+					has_idea = service_by_requirement
+					has_idea = scraping_the_barrel
+					has_idea = all_adults_serve
+				}
+			}
+		}
+
+		completion_reward = {
+			add_ideas = service_by_requirement
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MANPOWER }
+	}				
+#	focus = { 
+#		id = SCO_embrace_pan_celtism
+#		icon = GFX_goal_BRI_bagadou_stourm
+#		prerequisite = { focus = SCO_propagate_the_importance_of_struggle }		
+#		relative_position_id = SCO_propagate_the_importance_of_struggle
+#		#mutually_exclusive = { focus = ADU_promote_quietism }
+#		x = -1
+#		y = 1
+#		cost = 10
+#		available = {
+#			if = {
+#				limit = {
+#					is_puppet = yes
+#				}
+#				has_government = fascism
+#			}		
+#		}
+#		ai_will_do = {
+#			factor = 2
+#		}				
+#		completion_reward = {		
+#		
+#			
+#		}
+#		search_filters = { FOCUS_FILTER_MILITARY_IMPROVEMENT FOCUS_FILTER_MILITARY_MANPOWER FOCUS_FILTER_POLITICAL}
+#	}	
+#	focus = { 
+#		id = SCO_influence_ireland
+#		icon = GFX_goal_IRE_united_ireland
+#		prerequisite = { focus = SCO_embrace_pan_celtism }		
+#		relative_position_id = SCO_embrace_pan_celtism
+#		x = -1
+#		y = 1
+#		cost = 5
+#		available = {
+#			if = {
+#				limit = {
+#					is_puppet = yes
+#				}
+#				has_government = fascism
+#			}		
+#		}
+#		ai_will_do = {
+#			factor = 2
+#		}				
+#		completion_reward = {		
+#			# offer an alliance to Ireland to win against the British together, offer to unify the celtic world later(?)	
+#
+#		}
+#		search_filters = { FOCUS_FILTER_POLITICAL}
+#	}
+#	focus = { 
+#		id = SCO_influence_wales
+#		icon = GFX_goal_IRE_united_ireland
+#		prerequisite = { focus = SCO_embrace_pan_celtism }		
+#		relative_position_id = SCO_embrace_pan_celtism
+#		x = 1
+#		y = 1
+#		cost = 5
+#		available = {
+#			if = {
+#				limit = {
+#					is_puppet = yes
+#				}
+#				has_government = fascism
+#			}		
+#		}
+#		ai_will_do = {
+#			factor = 2
+#		}				
+#		completion_reward = {		
+#			# offer an alliance to Ireland to win against the British together, offer to unify the celtic world later(?)	
+#
+#		}
+#		search_filters = { FOCUS_FILTER_POLITICAL}
+#	}			
 }

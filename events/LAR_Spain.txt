@@ -22,7 +22,6 @@ country_event = {
 			retire_ideology_leader = democratic
 			create_country_leader = {
 				name = "Manuel Azaña"
-				desc = "POLITICS_MANUEL_AZANA_DESC"
 				picture = "Portrait_Spain_Manuel_Azana.dds"
 				expire = "1965.1.1"
 				ideology = socialism
@@ -119,10 +118,9 @@ country_event = {
 		effect_tooltip = {
 			create_country_leader = {
 				name = "Manuel Azaña"
-				desc = "POLITICS_MANUEL_AZANA_DESC"
 				picture = "Portrait_Spain_Manuel_Azana.dds"
 				expire = "1965.1.1"
-				ideology = conservatism
+				ideology = socialism
 				traits = {
 					figurehead_president
 				}
@@ -176,10 +174,9 @@ country_event = {
 			retire_ideology_leader = democratic
 			create_country_leader = {
 				name = "Manuel Azaña"
-				desc = "POLITICS_MANUEL_AZANA_DESC"
 				picture = "Portrait_Spain_Manuel_Azana.dds"
 				expire = "1965.1.1"
-				ideology = conservatism
+				ideology = socialism
 				traits = {
 					figurehead_president
 				}
@@ -295,7 +292,7 @@ country_event = {
 						name = "Manuel Azaña"
 						picture = "Portrait_Spain_Manuel_Azana.dds"
 						expire = "1965.1.1"
-						ideology = conservatism
+						ideology = socialism
 						traits = {
 							figurehead_president
 						}
@@ -326,16 +323,18 @@ country_event = {
 				    ideology = communism
 				    popularity = -0.1
 				}
-				kill_country_leader = yes
-				create_country_leader = {
-					name = "José Sanjurjo"
-					picture = "GFX_portrait_SPA_jose_sanjurjo"
-					expire = "1965.1.1"
-					ideology = despotism
-					traits = {
-						the_lion_of_the_rif
+				add_country_leader_role = {
+					character = SPA_jose_sanjurjo
+					country_leader = {
+						ideology = military_junta
+						traits = {
+							the_lion_of_the_rif
+						}
+						expire = "1965.1.1"
 					}
+					promote_leader = yes 
 				}
+				save_event_target_as = nationalist_spain_target
 				# Add Nationalist and Republican Garrison division templates
 				division_template = {
 					name = "Guarnición Nacionalista"
@@ -348,6 +347,7 @@ country_event = {
 					}
 				}
 				SPD = {
+					save_event_target_as = republican_spain_target
 					division_template = {
 						name = "Guarnición Republicana"
 						is_locked = yes
@@ -518,17 +518,115 @@ country_event = {
 						}
 					}
 				}
+				# Switch leaders who do not have nationalist sympathies to the Republicans
+				every_unit_leader = {
+					limit = {
+						NOT = { has_trait = trait_SPA_nationalist_sympathies }
+					}
+					set_nationality = SPD
+				}
+				# Remove unnecessary traits from Nationalist commanders (no longer relevant to see for the player, as the SCW has started)
+				every_unit_leader = {
+					limit = {
+						has_trait = trait_SPA_nationalist_sympathies
+					}
+					remove_unit_leader_trait = trait_SPA_nationalist_sympathies
+				}
+				# Add various loyalist traits that now become relevant - indicating loyalties to the different subfactions
+				every_unit_leader = {
+					limit = {
+						OR = {
+							has_id = 1108
+							has_id = 1109
+							has_id = 1111
+							has_id = 1112
+							has_id = 1113
+						}
+					}
+					add_unit_leader_trait = trait_SPA_falangist_loyalties
+				}
+				every_unit_leader = {
+					limit = {
+						OR = {
+							has_id = 1114
+							has_id = 1115
+							has_id = 1116
+						}
+					}
+					add_unit_leader_trait = trait_SPA_carlist_loyalties
+				}
+				SPD = {
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id = 1101
+								has_id = 1102
+								has_id = 1103
+							}
+						}
+						add_unit_leader_trait = trait_SPR_republican_loyalties
+					}
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id = 1104
+								has_id = 1105
+								has_id = 1106
+							}
+						}
+						add_unit_leader_trait = trait_SPR_stalinist_loyalties
+					}
+					every_unit_leader = {
+						limit = {
+							OR = {
+								has_id = 1107
+							}
+						}
+						add_unit_leader_trait = trait_SPR_anti_stalinist_loyalties
+					}
+				}
+				# Add 3 Republican garrisons to every state where the Nationalists have NONE control
+				every_owned_state = {
+					limit = {
+						check_variable = { var = SPA_garrison_control value = 1 compare = equals }
+						NOT = {
+							state = 290
+							state = 699
+							state = 783
+							state = 297
+						}
+					}
+					# Transfer states and set flag to prepare for post-Civil War de-coring
+					SPD = {
+						transfer_state = PREV
+					}
+					set_state_flag = SPR_sided_with_republicans_flag
+					create_unit = {
+						division = "division_template = \"Guarnición Republicana\" start_experience_factor = 0.1" 
+						owner = SPD
+						allow_spawning_on_enemy_provs = yes
+						count = 3
+					}
+				}
+				41 = { # Extra 6 divisions to make Madrid harder to capture (as historically)
+					create_unit = {
+						division = "division_template = \"Guarnición Republicana\" start_experience_factor = 0.1" 
+						owner = SPD
+						allow_spawning_on_enemy_provs = yes
+						count = 6
+					}
+				}
 				# Split equipment and army/navy depending on which focuses the Republicans have finished
 				if = {
 					limit = {
 						NOT = { has_country_flag = SPR_enlarge_the_weapon_caches_flag }
 					}
 					transfer_units_fraction = {
-						target = SPD
+						target = event_target:republican_spain_target
 						size = 0.5 # Fallback in case one of the ratios below are not stipulated
 						stockpile_ratio = 0.5
 						army_ratio = 0.5
-						navy_ratio = 0.5
+						navy_ratio = 0.9
 						air_ratio = 0.5
 						#keep_unit_leaders = {
 						#    
@@ -544,11 +642,11 @@ country_event = {
 						NOT = { has_country_flag = SPR_disband_the_army_flag }
 					}
 					transfer_units_fraction = {
-						target = SPD
+						target = event_target:republican_spain_target
 						size = 0.5
 						stockpile_ratio = 0.8
 						army_ratio = 0.5
-						navy_ratio = 0.5
+						navy_ratio = 0.95
 						air_ratio = 0.5
 						#keep_unit_leaders = {
 						#    
@@ -563,11 +661,11 @@ country_event = {
 						has_country_flag = SPR_disband_the_army_flag
 					}
 					transfer_units_fraction = {
-						target = SPD
+						target = event_target:republican_spain_target
 						size = 0.5
 						stockpile_ratio = 0.8
 						army_ratio = 0.8
-						navy_ratio = 0.5
+						navy_ratio = 1.0
 						air_ratio = 0.5
 						#keep_unit_leaders = {
 						#    
@@ -575,6 +673,18 @@ country_event = {
 						keep_unit_leaders_trigger = {
 							has_trait = trait_SPA_nationalist_sympathies
 						}
+					}
+				}
+				# Add 3 Nationalist garrisons to every state where the Nationalists have TOTAL control
+				every_owned_state = {
+					limit = {
+						check_variable = { var = SPA_garrison_control value = 4 compare = equals }
+					}
+					create_unit = {
+						division = "division_template = \"Guarnición Nacionalista\" start_experience_factor = 0.1" 
+						owner = SPA
+						allow_spawning_on_enemy_provs = yes
+						count = 3
 					}
 				}
 				# If player has completed this focus, give North Africa and spawn units there (this effect is run first so the tag has any territory whatsoever - it's assumed all players take this focus)
@@ -683,116 +793,6 @@ country_event = {
 					delete_units = {
 					    division_template = "Brigada de Infantería"
 					    disband = yes
-					}
-				}
-				# Switch leaders who do not have nationalist sympathies to the Republicans
-				every_unit_leader = {
-					limit = {
-						NOT = { has_trait = trait_SPA_nationalist_sympathies }
-					}
-					set_nationality = SPD
-				}
-				# Remove unnecessary traits from Nationalist commanders (no longer relevant to see for the player, as the SCW has started)
-				every_unit_leader = {
-					limit = {
-						has_trait = trait_SPA_nationalist_sympathies
-					}
-					remove_unit_leader_trait = trait_SPA_nationalist_sympathies
-				}
-				# Add various loyalist traits that now become relevant - indicating loyalties to the different subfactions
-				every_unit_leader = {
-					limit = {
-						OR = {
-							has_id = 1108
-							has_id = 1109
-							has_id = 1111
-							has_id = 1112
-							has_id = 1113
-						}
-					}
-					add_unit_leader_trait = trait_SPA_falangist_loyalties
-				}
-				every_unit_leader = {
-					limit = {
-						OR = {
-							has_id = 1114
-							has_id = 1115
-							has_id = 1116
-						}
-					}
-					add_unit_leader_trait = trait_SPA_carlist_loyalties
-				}
-				SPD = {
-					every_unit_leader = {
-						limit = {
-							OR = {
-								has_id = 1101
-								has_id = 1102
-								has_id = 1103
-							}
-						}
-						add_unit_leader_trait = trait_SPR_republican_loyalties
-					}
-					every_unit_leader = {
-						limit = {
-							OR = {
-								has_id = 1104
-								has_id = 1105
-								has_id = 1106
-							}
-						}
-						add_unit_leader_trait = trait_SPR_stalinist_loyalties
-					}
-					every_unit_leader = {
-						limit = {
-							OR = {
-								has_id = 1107
-							}
-						}
-						add_unit_leader_trait = trait_SPR_anti_stalinist_loyalties
-					}
-				}
-				# Add 3 Republican garrisons to every state where the Nationalists have NONE control
-				every_owned_state = {
-					limit = {
-						check_variable = { var = SPA_garrison_control value = 1 compare = equals }
-						NOT = {
-							state = 290
-							state = 699
-							state = 783
-							state = 297
-						}
-					}
-					# Transfer states and set flag to prepare for post-Civil War de-coring
-					SPD = {
-						transfer_state = PREV
-					}
-					set_state_flag = SPR_sided_with_republicans_flag
-					create_unit = {
-						division = "division_template = \"Guarnición Republicana\" start_experience_factor = 0.1" 
-						owner = SPD
-						allow_spawning_on_enemy_provs = yes
-						count = 3
-					}
-				}
-				41 = { # Extra 6 divisions to make Madrid harder to capture (as historically)
-					create_unit = {
-						division = "division_template = \"Guarnición Republicana\" start_experience_factor = 0.1" 
-						owner = SPD
-						allow_spawning_on_enemy_provs = yes
-						count = 6
-					}
-				}
-				# Add 3 Nationalist garrisons to every state where the Nationalists have TOTAL control
-				every_owned_state = {
-					limit = {
-						check_variable = { var = SPA_garrison_control value = 4 compare = equals }
-					}
-					create_unit = {
-						division = "division_template = \"Guarnición Nacionalista\" start_experience_factor = 0.1" 
-						owner = SPA
-						allow_spawning_on_enemy_provs = yes
-						count = 3
 					}
 				}
 				# Trigger war between the sides - necessary because the next effects spawn units on contested provinces and this requires both sides to be at war
@@ -2569,18 +2569,17 @@ country_event = {
 				}
 				SPA = {
 					retire_ideology_leader = democratic
-					retire_ideology_leader = neutrality
 					retire_ideology_leader = communism
-					kill_country_leader = yes
-					create_country_leader = {
-						name = "José Sanjurjo"
-						desc = "POLITICS_JOSE_SANJURJO_DESC"
-						picture = "GFX_portrait_SPA_jose_sanjurjo"
-						expire = "1965.1.1"
-						ideology = despotism
-						traits = {
-							the_lion_of_the_rif
+					add_country_leader_role = {
+						character = SPA_jose_sanjurjo
+						country_leader = {
+							ideology = military_junta
+							traits = {
+								the_lion_of_the_rif
+							}
+							expire = "1965.1.1"
 						}
+						promote_leader = yes 
 					}
 					set_popularities = {
 						democratic = 5
@@ -2612,10 +2611,9 @@ country_event = {
 					retire_ideology_leader = neutrality
 					create_country_leader = {
 						name = "Manuel Azaña"
-						desc = "POLITICS_MANUEL_AZANA_DESC"
 						picture = "Portrait_Spain_Manuel_Azana.dds"
 						expire = "1965.1.1"
-						ideology = conservatism
+						ideology = socialism
 						traits = {
 							figurehead_president
 						}
@@ -2623,6 +2621,7 @@ country_event = {
 					set_politics = {
 						ruling_party = democratic
 					}
+					save_event_target_as = republican_spain_target
 				}
 				add_popularity = {
 				    ideology = fascism
@@ -2643,6 +2642,7 @@ country_event = {
 					}
 				}
 				SPA = {
+					save_event_target_as = nationalist_spain_target
 					division_template = {
 						name = "Guarnición Nacionalista"
 						is_locked = yes
@@ -2759,11 +2759,11 @@ country_event = {
 						NOT = { has_completed_focus = SPR_enlarge_the_weapon_caches }
 					}
 					transfer_units_fraction = {
-						target = SPA
+						target = event_target:nationalist_spain_target
 						size = 0.5 # Fallback in case one of the ratios below are not stipulated
 						stockpile_ratio = 0.5
 						army_ratio = 0.5
-						navy_ratio = 0.5
+						navy_ratio = 0.2
 						air_ratio = 0.5
 						#keep_unit_leaders = {
 						#    
@@ -2779,11 +2779,11 @@ country_event = {
 						NOT = { has_completed_focus = SPR_disband_the_army }
 					}
 					transfer_units_fraction = {
-						target = SPA
+						target = event_target:nationalist_spain_target
 						size = 0.5
 						stockpile_ratio = 0.2
 						army_ratio = 0.5
-						navy_ratio = 0.5
+						navy_ratio = 0.1
 						air_ratio = 0.5
 						#keep_unit_leaders = {
 						#    
@@ -2798,11 +2798,11 @@ country_event = {
 						has_completed_focus = SPR_disband_the_army
 					}
 					transfer_units_fraction = {
-						target = SPA
+						target = event_target:nationalist_spain_target
 						size = 0.5
 						stockpile_ratio = 0.2
 						army_ratio = 0.2
-						navy_ratio = 0.5
+						navy_ratio = 0.0
 						air_ratio = 0.5
 						#keep_unit_leaders = {
 						#    
@@ -7642,7 +7642,6 @@ country_event = {
 				set_party_name = { ideology = communism long_name = SPR_communism_independent_party_long name = SPR_communism_independent_party }
 				create_country_leader = {
 					name = "Julián Gorkin"
-					desc = "POLITICS_JULIAN_GORKIN_DESC"
 					picture = "GFX_portrait_SPR_julian_gorkin"
 					expire = "1965.1.1"
 					ideology = marxism
@@ -7652,7 +7651,6 @@ country_event = {
 				}
 				create_country_leader = {
 					name = "Anarchist Commune"
-					desc = "POLITICS_ANARCHIST_COMMUNE_DESC"
 					picture = "GFX_portrait_SPR_anarchist_commune"
 					expire = "1965.1.1"
 					ideology = anarchism
@@ -7696,7 +7694,6 @@ country_event = {
 				set_party_name = { ideology = communism long_name = SPR_communism_independent_party_long name = SPR_communism_independent_party }
 				create_country_leader = {
 					name = "Julián Gorkin"
-					desc = "POLITICS_JULIAN_GORKIN_DESC"
 					picture = "GFX_portrait_SPR_julian_gorkin"
 					expire = "1965.1.1"
 					ideology = marxism
@@ -8234,10 +8231,9 @@ country_event = {
 			SPD = {
 				create_country_leader = {
 					name = "Manuel Azaña"
-					desc = "POLITICS_MANUEL_AZANA_DESC"
 					picture = "Portrait_Spain_Manuel_Azana.dds"
 					expire = "1965.1.1"
-					ideology = conservatism
+					ideology = socialism
 					traits = {
 						figurehead_president
 					}
@@ -8449,7 +8445,6 @@ country_event = {
 				}
 				create_country_leader = {
 					name = "Anarchist Commune"
-					desc = "POLITICS_ANARCHIST_COMMUNE_DESC"
 					picture = "GFX_portrait_SPR_anarchist_commune"
 					expire = "1965.1.1"
 					ideology = anarchism
@@ -8485,7 +8480,6 @@ country_event = {
 				}
 				create_country_leader = {
 					name = "Julián Gorkin"
-					desc = "POLITICS_JULIAN_GORKIN_DESC"
 					picture = "GFX_portrait_SPR_julian_gorkin"
 					expire = "1965.1.1"
 					ideology = marxism
@@ -10072,7 +10066,6 @@ country_event = {
 				retire_country_leader = yes
 				create_country_leader = {
 					name = "Anarchist Commune"
-					desc = "POLITICS_ANARCHIST_COMMUNE_DESC"
 					picture = "GFX_portrait_SPR_anarchist_commune"
 					expire = "1965.1.1"
 					ideology = anarchism
@@ -11162,7 +11155,6 @@ country_event = {
 				kill_country_leader = yes
 				create_country_leader = {
 					name = "Jaime IV"
-					desc = "POLITICS_JAIME_IV_DESC"
 					picture = "GFX_portrait_fra_infante_jaime"
 					expire = "1965.1.1"
 					ideology = absolute_monarchism
@@ -11188,7 +11180,6 @@ country_event = {
 				kill_country_leader = yes
 				create_country_leader = {
 					name = "Jaime IV"
-					desc = "POLITICS_JAIME_IV_DESC"
 					picture = "GFX_portrait_fra_infante_jaime"
 					expire = "1965.1.1"
 					ideology = despotism
@@ -11213,16 +11204,17 @@ country_event = {
 	
 	immediate = {
 		hidden_effect = {
-			kill_country_leader = yes
-			create_country_leader = {
-				name = "Military Junta"
-				desc = "POLITICS_MILITARY_JUNTA_DESC"
-				picture = "GFX_portrait_SPA_military_junta"
-				expire = "1965.1.1"
-				ideology = despotism
-				traits = {
-					divided_interests
+			retire_character = SPA_jose_sanjurjo
+			add_country_leader_role = {
+				character = SPA_military_junta
+				country_leader = {
+					ideology = military_junta
+					traits = {
+						divided_interests
+					}
+					expire = "1965.1.1"
 				}
+				promote_leader = yes 
 			}
 		}
 	}
@@ -11231,18 +11223,16 @@ country_event = {
 		name = lar_spain.78.a
 		effect_tooltip = {
 			custom_effect_tooltip = lar_spain.78_tt
-			hidden_effect = {
-				kill_country_leader = yes
-			}
-			create_country_leader = {
-				name = "Military Junta"
-				desc = "POLITICS_MILITARY_JUNTA_DESC"
-				picture = "GFX_portrait_SPA_military_junta"
-				expire = "1965.1.1"
-				ideology = despotism
-				traits = {
-					divided_interests
+			add_country_leader_role = {
+				character = SPA_military_junta
+				country_leader = {
+					ideology = military_junta
+					traits = {
+						divided_interests
+					}
+					expire = "1965.1.1"
 				}
+				promote_leader = yes 
 			}
 		}
 	}
@@ -11287,7 +11277,7 @@ country_event = {
 	}
 
 	mean_time_to_happen = {
-		days = 2
+		days = 720				#was days = 2, serioiusly??? - Fantom
 	}
 
 	fire_only_once = yes
@@ -11295,59 +11285,12 @@ country_event = {
 	hidden = yes
 
 	immediate = {
-		hidden_effect = {
-			kill_ideology_leader = neutrality
-			kill_ideology_leader = fascism
-			if = {
-				limit = {
-					NOT = { has_completed_focus = SPA_dictator_for_life }
+		SPA_francisco_franco = {
+			set_portraits = {
+				civilian = {
+					large="GFX_portrait_spain_francisco_franco_old"
 				}
-				create_country_leader = {
-					name = "Francisco Franco"
-					desc = "POLITICS_FRANCISCO_FRANCO_DESC"
-					picture = "GFX_portrait_spain_francisco_franco_old"
-					expire = "1965.1.1"
-					ideology = fascism_ideology
-					traits = {
-						caudillo_1
-					}
-				}
-				create_country_leader = {
-					name = "Francisco Franco"
-					desc = "POLITICS_FRANCISCO_FRANCO_DESC"
-					picture = "GFX_portrait_spain_francisco_franco_old"
-					expire = "1965.1.1"
-					ideology = despotism
-					traits = {
-						caudillo_1
-					}
-				}
-			}
-			if = {
-				limit = {
-					has_completed_focus = SPA_dictator_for_life
-				}
-				create_country_leader = {
-					name = "Francisco Franco"
-					desc = "POLITICS_FRANCISCO_FRANCO_DESC"
-					picture = "GFX_portrait_spain_francisco_franco_old"
-					expire = "1965.1.1"
-					ideology = fascism_ideology
-					traits = {
-						caudillo_2
-					}
-				}
-				create_country_leader = {
-					name = "Francisco Franco"
-					desc = "POLITICS_FRANCISCO_FRANCO_DESC"
-					picture = "GFX_portrait_spain_francisco_franco_old"
-					expire = "1965.1.1"
-					ideology = despotism
-					traits = {
-						caudillo_2
-					}
-				}
-			}
+			}			
 		}
 	}
 }
