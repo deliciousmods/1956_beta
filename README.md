@@ -29,6 +29,10 @@ If, for some reason, you need greater access rights to the Git, or don't underst
 * To reiterate: 'Road to 56' retains the right to use all original contributor and developer work made for 'Road to 56.' Even if said contributor and developer wishes to be no longer affiliated with Road to 56 and asks for removal of assets, code, or localization made by them. Such requests are considered meritless under this agreement.
 * If you want to discuss particulars of this agreement, contact either Greatexperiment, Thinking_Waffle, SpicyAlfredo, or Abbus on Discord.
 
+### AI Usage Disclosure
+* AI tools have been used to enhance historical pictures and sources to aid in art asset creation on this project. AI tools have not been used to replace human work or creativity but only in the context of helping to make art assets that would not be possible without the assistance of these AI tools. 
+
+
 Thanks for reading! - The Road to 56 Team
 
 ##### Footnotes & Definitions
