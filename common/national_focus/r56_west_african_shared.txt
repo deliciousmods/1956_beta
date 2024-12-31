@@ -1,0 +1,2816 @@
+focus_tree = {
+    id = west_africa_focus
+
+    country = {
+        factor = 0
+        modifier = {
+            add = 10
+			OR = {
+				tag = MRT
+				tag = SEN
+				tag = GAM
+				tag = MLI
+				tag = GNB
+				tag = GNA
+				tag = SIE
+				tag = LIB
+				tag = IVO
+				tag = VOL
+				tag = GHA
+				tag = TOG
+				tag = DAH
+				tag = NGR
+				tag = NGA
+				tag = SOK
+				tag = BIA
+			}
+        }
+    }
+
+    default = no
+	continuous_focus_position = { x = 15 y = 900 }
+
+    shared_focus = ABC_establish_a_general_staff	
+    shared_focus = GEN_Aviation_Effort
+    shared_focus = GEN_Naval_Effort
+    shared_focus = GEN_begin_industrial_buildup
+    shared_focus = GEN_industrial_boom
+    shared_focus = AFR_african_unification
+
+    focus = {
+        id = WAF_institutional_establishment
+        icon = GFX_focus_generic_self_management
+        x = 55
+        y = 0
+        cost = 5
+        search_filters = { FOCUS_FILTER_POLITICAL }
+        ai_will_do = {
+            factor = 10
+        }
+        completion_reward = { 
+            add_political_power = 120
+        }    
+    }
+	focus = {
+        id = WAF_seize_colonial_industries
+        icon = GFX_focus_DEN_heavy_regulations
+		prerequisite = { focus = WAF_institutional_establishment }
+        x = -1
+        y = 1
+		relative_position_id = WAF_institutional_establishment
+        cost = 10
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+        ai_will_do = {
+            factor = 10
+        }
+		available = {
+			is_subject = no
+			if = {
+				limit = {
+					tag = LIB
+				}
+				NOT = {
+					original_tag = LIB
+				}
+			}
+			capital_scope = {
+				is_fully_controlled_by = ROOT
+			}
+		}
+        completion_reward = { 
+            random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+			add_popularity = {
+				ideology = neutrality
+				popularity = -0.10
+			}
+			add_stability = -0.05
+        }    
+    }
+	focus = {
+        id = WAF_establish_the_army
+        icon = GFX_focus_generic_military_mission
+		prerequisite = { focus = WAF_institutional_establishment }
+        x = 0
+        y = 2
+		relative_position_id = WAF_institutional_establishment
+        cost = 10
+        search_filters = { FOCUS_FILTER_MILITARY_IMPROVEMENT }
+        ai_will_do = {
+            factor = 10
+        }
+		available = {
+			num_divisions < 1
+		}
+		bypass = {
+			OR = {
+				num_divisions > 0
+				hidden_trigger = {
+					tag = LIB #they have an army
+				}
+			}
+		}
+        completion_reward = {
+            army_experience = 15
+			add_doctrine_cost_reduction = {
+				name = land_doc_bonus
+				cost_reduction = 0.5
+				uses = 1
+				category = land_doctrine
+			}
+			if = { # Replaced the old OOB
+				limit = {
+					OR = {
+						tag = NGA
+						tag = GHA
+						tag = SIE
+						tag = GAM
+						tag = SOK
+						tag = BIA
+					}
+				}
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = 500
+					producer = ENG
+				}
+				hidden_effect = {
+					if = {
+						limit = {
+							NOT = {
+								has_template = "Infantry Division"
+							}
+						}
+						division_template = {
+							name = "Infantry Division"
+							regiments = {
+								infantry = { x = 0 y = 0 }
+								infantry = { x = 0 y = 1 }
+								infantry = { x = 0 y = 2 }
+								infantry = { x = 1 y = 0 }
+								infantry = { x = 1 y = 1 }
+								infantry = { x = 1 y = 2 }
+								infantry = { x = 2 y = 0 }
+								infantry = { x = 2 y = 1 }
+								infantry = { x = 2 y = 2 }
+							}
+							support = {
+								engineer = { x = 0 y = 0 }
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_template = "Cavalry Brigade"
+							}
+						}
+						division_template = {
+							name = "Cavalry Brigade"
+							division_names_group = ENG_CAV_01
+						
+							regiments = {
+								cavalry = { x = 0 y = 0 }
+								cavalry = { x = 0 y = 1 }
+								cavalry = { x = 0 y = 2 }
+								cavalry = { x = 0 y = 3 }
+							}
+							support = {
+								recon = { x = 0 y = 0 }
+							}
+						}
+					}
+				}
+				every_controlled_state = {
+					limit = {
+						is_core_of = ROOT # Create only in core states
+					}
+					create_unit = {
+						division = "name = \"Infantry Division\" division_template = \"Infantry Division\" start_experience_factor = 0.10 start_equipment_factor = 0.55 start_manpower_factor = 0.85 force_equipment_variants = { infantry_equipment = { owner = ENG } }" 
+						owner = ROOT
+					}
+				}
+				random_owned_controlled_state = { # Create in Capital, one per country
+					limit = {
+						is_capital = yes
+						is_core_of = ROOT
+					}
+					create_unit = {
+						division = "name = \"Cavalry Brigade\" division_template = \"Cavalry Brigade\" start_experience_factor = 0.15 start_equipment_factor = 0.75 start_manpower_factor = 0.95 force_equipment_variants = { infantry_equipment = { owner = ENG } }" 
+						owner = ROOT
+					}
+				}
+			}
+			else = {
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = 500
+					producer = FRA
+				}
+				hidden_effect = {
+					if = {
+						limit = {
+							NOT = {
+								has_template = "Division d'Infanterie"
+							}
+						}
+						division_template = {
+							name = "Division d'Infanterie"
+							division_names_group = FRA_INF_01
+							regiments = {
+								infantry = { x = 0 y = 0 }
+								infantry = { x = 0 y = 1 }
+								infantry = { x = 0 y = 2 }
+								infantry = { x = 1 y = 0 }
+								infantry = { x = 1 y = 1 }
+								infantry = { x = 1 y = 2 }
+								infantry = { x = 2 y = 0 }
+								infantry = { x = 2 y = 1 }
+								infantry = { x = 2 y = 2 }
+							}
+							support = {
+								artillery = { x = 0 y = 0 }
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_template = "Division de Cavalerie"
+							}
+						}
+						division_template = {
+							name = "Division de Cavalerie"
+							division_names_group = FRA_CAV_01
+							regiments = {
+								cavalry = { x = 0 y = 0 }
+								cavalry = { x = 0 y = 1 }
+								cavalry = { x = 1 y = 0 }
+								cavalry = { x = 1 y = 1 }
+							}
+							support = {
+								recon = { x = 0 y = 0 }
+							}
+						}
+					}
+				}
+				every_controlled_state = {
+					limit = {
+						is_core_of = ROOT # Create only in core states
+					}
+					create_unit = {
+						division = "name = \"Division d'Infanterie\" division_template = \"Division d'Infanterie\" start_experience_factor = 0.10 start_equipment_factor = 0.55 start_manpower_factor = 0.85 force_equipment_variants = { infantry_equipment = { owner = FRA } }" 
+						owner = ROOT
+					}
+				}
+				random_owned_controlled_state = { # Create in Capital, one per country
+					limit = {
+						is_capital = yes
+						is_core_of = ROOT
+					}
+					create_unit = {
+						division = "name = \"Division de Cavalerie\" division_template = \"Division de Cavalerie\" start_experience_factor = 0.15 start_equipment_factor = 0.75 start_manpower_factor = 0.95 force_equipment_variants = { infantry_equipment = { owner = ENG } }" 
+						owner = ROOT
+					}
+				}
+			}
+    	}
+	}
+	focus = {
+		id = WAF_collectivist_thinking
+		icon = GFX_goal_generic_national_unity
+		prerequisite = { focus = WAF_establish_the_army }
+		mutually_exclusive = { focus = WAF_empower_the_educated_elite focus = WAF_build_democratic_institutions }
+
+		available = {
+		}
+
+		x = -4
+		y = 1
+		relative_position_id = WAF_establish_the_army
+
+		cost = 5
+
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				has_global_flag = rt56_old_school
+				add = 0.1
+			}
+			modifier = {
+				factor = 0
+				AND = {
+					is_historical_focus_on = yes
+					is_puppet = yes
+					NOT = {
+						OVERLORD = {
+							OR = {
+								has_government = fascism
+								has_government = communism
+							}
+						}
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				AND = {
+					is_historical_focus_on = yes
+					NOT = {
+						OR = {
+							has_government = communism
+							has_government = fascism
+						}
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+				OR = {
+					has_government = democratic
+					has_government = neutrality
+				}
+			}
+			modifier = {
+				factor = 0.01
+				AND = {
+					is_historical_focus_on = no
+					is_puppet = yes
+					NOT = {
+						OVERLORD = {
+							OR = {
+								has_government = fascism
+								has_government = communism
+							}
+						}
+					}
+				}
+			}
+			modifier = {
+				factor = 0.02
+				AND = {
+					is_historical_focus_on = no
+					is_puppet = no
+					OR = {
+						has_government = fascism
+						has_government = communism
+					}
+				}
+			}
+		}
+
+		completion_reward = {
+			add_political_power = 25
+			add_popularity = {
+				ideology = neutrality
+				popularity = -0.05
+			}
+			add_timed_idea = { idea = collectivist_ethos_focus days = 1395 }
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = WAF_everything_for_the_nation
+		icon = GFX_goal_support_fascism
+		prerequisite = { focus = WAF_collectivist_thinking }
+		mutually_exclusive = { focus = WAF_propagate_marxist_ideas }
+
+		available = {
+			OR = {
+				fascism > 0.15
+				has_government = neutrality
+			}
+		}
+
+		x = 3
+		y = 1
+		relative_position_id = WAF_collectivist_thinking
+
+		cost = 8
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 2
+				is_historical_focus_on = no
+			}
+			modifier = {
+				factor = 10
+				AND = {
+					is_puppet = yes
+					OVERLORD = {
+						has_government = fascism
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				AND = {
+					is_historical_focus_on = yes
+					NOT = { has_government = fascism }
+				}
+			}
+		}
+
+		completion_reward = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
+			add_timed_idea = { idea = nationalism days = 1395 }
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = WAF_military_coup
+		icon = GFX_focus_generic_military_dictatorship
+		prerequisite = { focus = WAF_everything_for_the_nation }
+		relative_position_id = WAF_everything_for_the_nation		
+		x = 0
+		y = 1
+		cost = 5
+
+		available = {
+			fascism > 0.4
+		}
+		
+		ai_will_do = {
+			factor = 20
+		}		
+		
+		completion_reward = {
+			add_war_support = 0.1
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.1
+			}
+			add_political_power = 100
+			add_command_power = 50
+			if = {
+				limit = { 
+					any_unit_leader = { 
+						has_trait = harsh_leader 
+						NOT = {
+							has_trait = JAP_communist_sympathizer
+						}
+					}
+				}
+				ROOT = {
+					random_unit_leader = {
+						limit = {
+							has_trait = harsh_leader
+							NOT = {
+								has_trait = JAP_communist_sympathizer
+							}
+						}
+						if = {
+							limit = {
+								is_field_marshal = no
+							}
+							promote_leader = yes
+						}
+						add_country_leader_role = {
+							country_leader = {
+								ideology = fascism_ideology
+								expire = "1965.1.1.1"
+							}							
+							promote_leader = yes 
+						}	
+					}
+				}
+			}
+			else_if = {
+				limit = { 
+					any_unit_leader = { 
+						has_trait = trait_reckless
+						NOT = {
+							has_trait = JAP_communist_sympathizer
+						}
+					}
+				}
+				ROOT = {
+					random_unit_leader = {
+						limit = { 
+							has_trait = trait_reckless
+							not = {
+								has_trait = JAP_communist_sympathizer
+							}
+						}
+						add_country_leader_role = {
+							country_leader = {
+								ideology = fascism_ideology
+								expire = "1965.1.1.1"
+							}
+							promote_leader = yes 
+						}
+					}
+				}
+			}
+			else = {
+				ROOT = {
+					random_unit_leader = {
+						add_country_leader_role = {
+							country_leader = {
+								ideology = fascism_ideology
+								expire = "1965.1.1.1"
+							}
+							promote_leader = yes 
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_government = fascism
+					}
+				}
+				set_politics = {
+					ruling_party = fascism
+					elections_allowed = no
+				}
+			}	
+			random_list = {
+				20 = {
+					add_country_leader_trait = baron_of_terror	
+				}
+				20 = {
+					add_country_leader_trait = fascistic_paramilitarist	
+				}
+				20 = {
+					add_country_leader_trait = mobilization_proponent
+				}
+				20 = {
+					add_country_leader_trait = authoritarian_centralizer
+				}								
+				20 = {
+					add_country_leader_trait = radical_anti_communist	
+				}
+			}					
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_WAR_SUPPORT }
+	}		
+	focus = {
+		id = WAF_mobilization_of_the_masses
+		icon = GFX_focus_generic_fascist_troops
+		prerequisite = { focus = WAF_military_coup }
+		relative_position_id = WAF_military_coup		
+		x = 0
+		y = 2
+		cost = 10
+
+		available = {
+			has_government = fascism
+			NOT = {
+				has_idea = tot_economic_mobilisation
+			}
+		}
+		
+		ai_will_do = {
+			factor = 20
+		}		
+		
+		completion_reward = {
+			add_ideas = militarism_focus	
+			r56_economy_law_level_up = yes
+		}
+		search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_WAR_SUPPORT }
+	}	
+	focus = {
+		id = WAF_armament_program
+		icon = GFX_goal_generic_construct_mil_factory
+		prerequisite = { focus = WAF_military_coup }
+		relative_position_id = WAF_military_coup		
+		x = 1
+		y = 1
+		cost = 10			
+		
+		available = {
+			has_government = fascism
+		}
+
+		ai_will_do = {
+			factor = 5
+		}		
+		
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:generic_infantry_equipment_organization = {
+					add_mio_size = 1
+					add_mio_funds = 500
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+	focus = {
+		id = WAF_organise_the_youth
+		icon = GFX_focus_generic_limited_social_mobilization
+		prerequisite = { focus = WAF_military_coup }
+		x = -1
+		y = 1
+		relative_position_id = WAF_military_coup
+
+		cost = 10
+
+		available = {
+			has_government = fascism
+		}
+
+		completion_reward = {
+			add_popularity = {
+				ideology = ROOT
+				popularity = 0.05
+			}
+			add_political_power = 25
+			add_ideas = WAF_fascist_youth
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
+	}
+	focus = {
+		id = WAF_join_the_axis
+		icon = GFX_goal_generic_the_axis
+		prerequisite = { focus = WAF_mobilization_of_the_masses }
+		x = 0
+		y = 1
+		relative_position_id = WAF_mobilization_of_the_masses
+
+		cost = 5
+
+		available = {
+			is_in_faction = no
+			is_subject = no
+			has_government = fascism
+			any_other_country = {
+				is_major = yes
+				has_government = fascism
+				is_faction_leader = yes
+				NOT = { has_war_with = ROOT }
+			}
+		}
+
+		completion_reward = {
+			if = {
+				limit = {
+					GER = {
+						has_government = fascism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+						exists = yes
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = GER
+							has_war_with = ROOT
+						}
+					}
+				}
+				GER = {
+					country_event = generic.2
+				}
+			}
+			else = {
+				get_best_alliance_match_fascism_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}
+	focus = {
+		id = WAF_propagate_marxist_ideas
+		icon = GFX_focus_prc_agrarian_socialism
+		prerequisite = { focus = WAF_collectivist_thinking }
+		mutually_exclusive = { focus = WAF_everything_for_the_nation }
+
+		available = {
+			OR = {
+				communism > 0.15
+				has_government = neutrality
+			}
+		}
+
+		x = -3
+		y = 1
+		relative_position_id = WAF_collectivist_thinking
+
+		cost = 8
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 10
+				OR = {
+					AND = {
+						is_puppet = yes
+						OVERLORD = {
+							has_government = communism
+						}
+					}
+					AND = {
+						is_in_faction_with = SOV
+						SOV = {
+							has_government = communism
+						}
+					}
+				}
+			}
+			modifier = {
+				factor = 0.2
+				AND = {
+					is_in_faction = yes
+					faction_leader = {
+						has_government = fascism
+					}
+				}
+			}
+			modifier = {
+				factor = 0.2
+				any_enemy_country = {
+					is_faction_leader = yes
+					has_government = communism
+				}
+			}						
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				NOT = { has_government = communism }
+			}
+			modifier = {
+				factor = 2
+				is_historical_focus_on = no
+			}
+		}
+
+		completion_reward = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			add_timed_idea = { idea = internationalism days = 1395 }
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+        id = WAF_seize_the_means_of_production
+        icon = GFX_goal_generic_communist_economy
+        prerequisite = { focus = WAF_propagate_marxist_ideas }
+        x = -1
+        y = 1
+        relative_position_id = WAF_propagate_marxist_ideas
+    
+        cost = 10
+    
+        ai_will_do = {
+            factor = 5
+        }
+    
+        available = {
+            has_government = communism
+        }
+    
+        search_filters = { FOCUS_FILTER_INDUSTRY }
+        completion_reward = {
+            random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+			add_ideas = { baltic_siezed_means_of_production_idea }
+        }
+    }
+    focus = {
+        id = WAF_political_batallions
+        icon = GFX_goal_generic_communist_officer
+        prerequisite = { focus = WAF_propagate_marxist_ideas }
+        x = 1
+        y = 1
+        relative_position_id = WAF_propagate_marxist_ideas
+    
+        cost = 10
+    
+        ai_will_do = {
+            factor = 15
+        }
+    
+        available = {
+			has_government = communism
+			any_controlled_state = {
+				is_core_of = ROOT
+			}
+        }
+    
+        search_filters = { FOCUS_FILTER_MANPOWER }
+        completion_reward = {
+			army_experience = 15
+			custom_effect_tooltip = SAU_gain_3_generals
+			hidden_effect = {
+				create_corps_commander = {
+					traits = { JAP_communist_sympathizer infantry_officer }
+					skill = 3
+					attack_skill = 2
+					defense_skill = 4
+					planning_skill = 3
+					logistics_skill = 1
+				}
+				create_corps_commander = {
+					traits = { JAP_communist_sympathizer artillerist }
+					skill = 2
+					attack_skill = 2
+					defense_skill = 2
+					planning_skill = 1
+					logistics_skill = 2
+				}
+				create_corps_commander = {
+					traits = { JAP_communist_sympathizer trait_reckless cavalry_officer }
+					skill = 2
+					attack_skill = 3
+					defense_skill = 1
+					planning_skill = 2
+					logistics_skill = 1
+				}
+			}
+            division_template = { 
+                name = "Red Riflemen"
+				template_counter = 69
+                regiments = { 
+                    infantry = { x = 0 y = 0 }
+                    infantry = { x = 1 y = 0 }
+                    infantry = { x = 0 y = 1 }
+                    infantry = { x = 1 y = 1 }
+                }
+                support = {
+                    engineer = { x = 0 y = 0 }
+                    artillery = { x = 0 y = 1 }
+                }
+            }
+			if = {
+				limit = {
+					capital_scope = {
+						is_controlled_by = ROOT
+					}
+				}
+				random_owned_controlled_state = {
+					limit = {
+						is_core_of = ROOT
+						is_capital = yes
+					}
+					create_unit = { 
+						division = "name = \"1. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+					create_unit = { 
+						division = "name = \"2. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+					create_unit = { 
+						division = "name = \"3. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+					create_unit = { 
+						division = "name = \"4. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+				}
+			}
+			else = {
+				random_owned_controlled_state = {
+					limit = {
+						is_core_of = ROOT
+					}
+					create_unit = { 
+						division = "name = \"1. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+					create_unit = { 
+						division = "name = \"2. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+					create_unit = { 
+						division = "name = \"3. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+					create_unit = { 
+						division = "name = \"4. Red Rifle Brigade\" division_template = \"Red Riflemen\" start_experience_factor = 0.15 start_equipment_factor = 0.85" 
+						owner = ROOT
+					}
+				}
+			}
+			add_ideas = political_commissars_focus
+        }
+    }
+	focus = {
+		id = WAF_join_the_comintern
+		icon = GFX_focus_chi_mission_to_the_soviet_union
+		prerequisite = { focus = WAF_political_batallions focus = WAF_seize_the_means_of_production }
+		mutually_exclusive = { focus = WAF_lead_the_african_communist_movements }
+		relative_position_id = WAF_political_batallions
+		x = -1
+		y = 1
+		cost = 5
+
+		available = {
+			is_subject = no
+			is_in_faction = no
+			has_government = communism
+			any_other_country = {
+				is_major = yes
+				has_government = communism
+				is_faction_leader = yes
+				NOT = { has_war_with = ROOT }
+			}
+		}
+
+		completion_reward = {
+			if = {
+				limit = {
+					SOV = {
+						has_government = communism
+						is_faction_leader = yes
+						has_capitulated = no
+						NOT = { has_war_with = ROOT }
+					}
+					NOT = {
+						any_other_country = {
+							is_in_faction_with = SOV
+							has_war_with = ROOT
+						}
+					}
+				}
+				
+				SOV = { country_event = { days = 1 id = generic.2 } }
+				add_opinion_modifier = { target = SOV modifier = bra_comercio_modifier }
+				add_opinion_modifier = { target = SOV modifier = bra_amigo_modifier }
+				SOV = { add_opinion_modifier = { target = ROOT modifier = bra_amigo_outro_modifier } }
+			}
+			else = {
+				get_best_alliance_match_communism_effect = yes
+				var:best_leader = {
+					country_event = generic.2
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_POLITICAL }
+	}	
+	focus = {
+        id = WAF_red_army
+        icon = GFX_goal_generic_red_army
+        prerequisite = { focus = WAF_join_the_comintern }
+        x = 0
+        y = 1
+        relative_position_id = WAF_join_the_comintern
+    
+        cost = 10
+    
+        ai_will_do = {
+            factor = 12
+        }
+    
+        available = {
+			has_government = communism
+        }
+    
+        search_filters = { FOCUS_FILTER_MANPOWER }
+        completion_reward = {
+			add_popularity = {
+				ideology = ROOT
+				popularity = 0.10
+			}
+			add_ideas = GEN_red_army
+        }
+    }
+	focus = {
+		id = WAF_prepare_expansion
+		icon = GFX_goal_generic_more_territorial_claims
+		x = 4
+		y = 1
+		prerequisite = {
+			focus = WAF_red_army focus = WAF_mobilization_of_the_masses
+		}
+		relative_position_id = WAF_red_army
+		cost = 10
+		available = {
+			r56_script_i_am_sane = yes
+			is_subject = no
+			has_army_manpower = { size > 39999 }
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+		}	
+		ai_will_do = {
+			factor = 4
+		}
+
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = infrastructure
+						size > 1
+					}
+				}
+				add_building_construction = {
+					type = infrastructure
+					level = 1
+					instant_build = yes
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = air_base
+						size > 2
+					}
+				}
+				add_building_construction = {
+					type = air_base
+					level = 3
+					instant_build = yes
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = air_base
+						size > 1
+					}
+				}
+				add_building_construction = {
+					type = air_base
+					level = 2
+					instant_build = yes
+				}
+			}
+			add_popularity = {
+				ideology = ROOT
+				popularity = 0.05
+			}
+			add_war_support = 0.05
+			if = { # Tuareg 
+				limit = {
+					original_tag = MRT
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 782
+							state = 699
+							state = 898
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Senegal, Gambia and Guinea-Bissau
+				limit = {
+					OR = {
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = GNB
+					}
+				}
+				every_state = {
+					limit = {
+						NOT = {
+							is_core_of = ROOT
+						}
+						OR = {
+							state = 701
+							state = 296
+							state = 272
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Mali Empire
+				limit = {
+					original_tag = MLI
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 272
+							state = 701
+							state = 557
+							state = 786
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Guinea, Liberia and Sierra Leone
+				limit = {
+					OR = {
+						original_tag = GNA
+						original_tag = LIB
+						original_tag = SIE
+					}
+				}
+				every_state = {
+					limit = {
+						NOT = {
+							is_core_of = ROOT
+						}
+						OR = {
+							state = 780
+							state = 700
+							state = 298
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Ivory Coast
+				limit = {
+					original_tag = IVO
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 298
+							state = 700
+							state = 780
+							state = 274
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Ghana - Ashanti
+				limit = {
+					original_tag = GHA
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 779
+							state = 777
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Togo
+				limit = {
+					original_tag = TOG
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 274
+							state = 776
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Upper Volta
+				limit = {
+					original_tag = VOL
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 556
+							state = 779
+							state = 274
+							state = 777
+							state = 776
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Benin - Dahomey
+				limit = {
+					original_tag = DAH
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 558
+							state = 777
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+			if = { # Nigeria
+				limit = {
+					original_tag = NGA
+					original_tag = SOK
+					original_tag = BIA
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 776
+							state = 781
+							state = 515
+							state = 773
+						}
+					}
+					add_claim_by = ROOT
+				}
+				if = {
+					limit = {
+						original_tag = SOK
+						original_tag = BIA
+					}
+					every_state = {
+						limit = {
+							NOT = {
+								is_owned_by = ROOT
+							}
+							OR = {
+								state = 900
+								state = 558
+								state = 902
+								state = 901
+							}
+						}
+						add_claim_by = ROOT
+					}
+				}
+			}
+			if = { # Niger
+				limit = {
+					original_tag = NGR
+				}
+				every_state = {
+					limit = {
+						OR = {
+							state = 901
+							state = 902
+							state = 898
+							state = 782
+							state = 556
+							state = 899
+						}
+					}
+					add_claim_by = ROOT
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+	focus = {
+		id = WAF_continue_expansion
+		icon = GFX_goal_generic_territory_or_war
+		x = 1
+		y = 1
+		prerequisite = {
+			focus = WAF_prepare_expansion
+		}
+		prerequisite = {
+			focus = WAF_mobilization_of_the_masses
+		}
+		relative_position_id = WAF_prepare_expansion
+		cost = 10
+		available = {
+			r56_script_i_am_sane = yes
+			is_subject = no
+			has_army_manpower = { size > 79999 }
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+		}
+		ai_will_do = {
+			factor = 4
+		}
+
+		completion_reward = {
+			add_war_support = 0.10
+			add_manpower = 15000
+			if = { # Tuareg 
+				limit = {
+					OR = {
+						original_tag = MRT
+					}
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 782
+								state = 699
+								state = 898
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Senegal, Gambia and Guinea-Bissau
+				limit = {
+					OR = {
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = GNB
+					}
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 272
+								state = 701
+								state = 296
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Mali Empire
+				limit = {
+					original_tag = MLI
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 272
+								state = 701
+								state = 557
+								state = 786
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+				unlock_decision_tooltip = reform_the_empire_of_mali
+			}
+			if = { # Guinea, Liberia and Sierra Leone
+				limit = {
+					OR = {
+						original_tag = GNA
+						original_tag = LIB
+						original_tag = SIE
+					}
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 780
+								state = 700
+								state = 298
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Ivory Coast
+				limit = {
+					original_tag = IVO
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 298
+								state = 700
+								state = 780
+								state = 274
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Ghana - Ashanti
+				limit = {
+					original_tag = GHA
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 779
+								state = 777
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Togo
+				limit = {
+					original_tag = TOG
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 274
+								state = 776
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Upper Volta
+				limit = {
+					original_tag = VOL
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 556
+								state = 779
+								state = 274
+								state = 777
+								state = 776
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Benin - Dahomey
+				limit = {
+					original_tag = DAH
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 558
+								state = 777
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+			if = { # Nigeria
+				limit = {
+					original_tag = NGA
+					original_tag = SOK
+					original_tag = BIA
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 776
+								state = 781
+								state = 515
+								state = 773
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+				if = {
+					limit = {
+						original_tag = SOK
+						original_tag = BIA
+					}
+					every_other_country = {
+						limit = {
+							any_owned_state = {
+								OR = {
+									state = 900
+									state = 558
+									state = 902
+									state = 901
+								}
+							}
+							NOT = {
+								is_ally_with = ROOT
+								has_war_with = ROOT
+							}
+						}
+						ROOT = {
+							create_wargoal = {
+								target = PREV
+								type = take_claimed_state
+								expire = 0
+							}
+						}
+					}
+				}
+			}
+			if = { # Niger
+				limit = {
+					original_tag = NGR
+				}
+				every_other_country = {
+					limit = {
+						any_owned_state = {
+							OR = {
+								state = 901
+								state = 902
+								state = 898
+								state = 782
+								state = 556
+								state = 899
+							}
+						}
+						NOT = {
+							is_ally_with = ROOT
+							has_war_with = ROOT
+						}
+					}
+					ROOT = {
+						create_wargoal = {
+							target = PREV
+							type = take_claimed_state
+							expire = 0
+						}
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}			
+	focus = {
+		id = WAF_lead_the_african_communist_movements
+		icon = GFX_focus_ETH_african_wildfire
+		prerequisite = { focus = WAF_seize_the_means_of_production }
+		mutually_exclusive = { focus = WAF_join_the_comintern }
+		relative_position_id = WAF_seize_the_means_of_production
+		x = -1
+		y = 1
+		cost = 5
+		ai_will_do = {
+			factor = 15 #if we commie rush this
+		}
+		available = {
+			is_subject = no
+			is_in_faction = no
+			has_government = communism 
+		}
+		completion_reward = {
+			if = {
+				limit = {
+					any_other_country = {
+						NOT = {
+							original_tag = SOV
+						}
+						is_faction_leader = yes
+						has_government = communism
+						NOT = {
+							has_war_with = ROOT
+						}
+					}
+				}
+				r56_other_faction_invite_communism_NOT_SOV = yes
+			}
+			else = {
+				set_rule = { can_create_factions = yes }
+				create_faction = "African Anti-Imperialist League"
+			}
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_POLITICAL }
+	}	
+	focus = {
+		id = WAF_find_close_allies
+		icon = GFX_goal_african_alliance
+		prerequisite = { focus = WAF_lead_the_african_communist_movements }
+		x = 0
+		y = 1
+		relative_position_id = WAF_lead_the_african_communist_movements
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			is_faction_leader = yes
+		}
+
+		bypass_if_unavailable = yes
+
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					OR = {
+						original_tag = MRT
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = MLI
+						original_tag = GNB
+						original_tag = GNA
+						original_tag = SIE
+						original_tag = LIB
+						original_tag = IVO
+						original_tag = VOL
+						original_tag = GHA
+						original_tag = TOG
+						original_tag = DAH
+						original_tag = NGR
+						original_tag = NGA
+						original_tag = SOK
+						original_tag = BIA
+					}
+					is_in_faction = no
+					has_government = communism
+					NOT = {
+						has_war_with = ROOT
+					}
+				}
+				country_event = { id = generic.5 hours = 12 }
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}	
+	focus = {
+		id = WAF_common_armament_program
+		icon = GFX_focus_generic_africa_liberation
+		prerequisite = { focus = WAF_find_close_allies }
+		x = -1
+		y = 1
+		relative_position_id = WAF_find_close_allies
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			is_faction_leader = yes
+			num_faction_members > 1
+		}
+
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+			army_experience = 15
+			add_command_power = 25
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = MRT
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = MLI
+						original_tag = GNB
+						original_tag = GNA
+						original_tag = SIE
+						original_tag = LIB
+						original_tag = IVO
+						original_tag = VOL
+						original_tag = GHA
+						original_tag = TOG
+						original_tag = DAH
+						original_tag = NGR
+						original_tag = NGA
+						original_tag = SOK
+						original_tag = BIA
+					}
+					is_in_faction_with = ROOT
+					has_government = communism
+				}
+				random_owned_controlled_state = {
+					limit = {
+						free_building_slots = {
+							building = arms_factory
+							size > 1
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				army_experience = 15
+				add_command_power = 25
+			}			
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}	
+	focus = {
+		id = WAF_down_with_the_imperialists
+		icon = GFX_focus_ger_break_anglo_french_colonial_hegemony
+		prerequisite = { focus = WAF_find_close_allies focus = WAF_red_army }
+		x = 1
+		y = 1
+		relative_position_id = WAF_find_close_allies
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		# cant have dynamic but these are most likely
+		will_lead_to_war_with = ENG
+		will_lead_to_war_with = FRA
+
+		available = {
+			is_subject = no
+			has_government = communism
+			any_other_country = {
+				capital_scope = {
+					NOT = {
+						is_on_continent = africa
+						is_on_continent = middle_east
+					}
+				}
+				OR = {
+					any_owned_state = {
+						is_on_continent = africa
+					}
+					any_subject_country = {
+						any_owned_state = {
+							is_on_continent = africa
+						}
+					}
+				}
+			}
+		}
+
+		completion_reward = {
+			add_war_support = 0.05
+			every_other_country = {
+				limit = {
+					capital_scope = {
+						NOT = {
+							is_on_continent = africa
+							is_on_continent = middle_east
+						}
+					}
+					OR = {
+						any_owned_state = {
+							is_on_continent = africa
+							NOT = {
+								state = 697 #some islands that dont decolonize
+								state = 178
+								state = 906
+							}
+						}
+						any_subject_country = {
+							any_owned_state = {
+								is_on_continent = africa
+							}
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = topple_government
+					}
+				}
+			}		
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}	
+	focus = {
+		id = WAF_to_the_bitter_end
+		icon = GFX_goal_generic_propaganda
+		prerequisite = { focus = WAF_red_army focus = WAF_mobilization_of_the_masses }
+		x = 2
+		y = 1
+		relative_position_id = WAF_red_army
+
+		cost = 10
+
+		available = {
+			has_war = yes
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+		}
+
+		completion_reward = {
+			add_ideas = ideological_fanaticism_focus
+			hidden_effect = {
+				set_rule = { can_use_kamikaze_pilots = yes }
+			}
+			custom_effect_tooltip = kamikaze_focus_tooltip
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_WAR_SUPPORT }
+	}
+	focus = {
+		id = WAF_empower_the_educated_elite
+		icon = GFX_goal_generic_aristocratic_cooperation
+		prerequisite = { focus = WAF_establish_the_army }
+		mutually_exclusive = { focus = WAF_build_democratic_institutions focus = WAF_collectivist_thinking  }
+		x = 3
+		y = 1
+		relative_position_id = WAF_establish_the_army
+
+		cost = 5
+
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				is_puppet = yes
+				NOT = {
+					OVERLORD = {
+						has_government = neutrality
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				NOT = {
+					has_government = neutrality
+				}
+			}
+			modifier = {
+				factor = 0.1
+				is_historical_focus_on = no
+				is_puppet = no
+				NOT = {
+					has_government = neutrality
+				}
+			}
+			modifier = {
+				factor = 6
+				has_government = neutrality
+			}
+		}
+
+		available = {
+
+		}
+
+		completion_reward = {
+			add_stability = 0.05
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
+			add_timed_idea = { idea = GEN_Strenghten_Monarchy_I days = 1395 }
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_STABILITY }
+	}  
+	focus = {
+		id = WAF_gather_close_advisors
+		icon = GFX_focus_generic_treaty
+		prerequisite = { focus = WAF_empower_the_educated_elite }
+		x = -1
+		y = 1
+		relative_position_id = WAF_empower_the_educated_elite
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 3
+		}
+
+		available = {
+			has_government = neutrality
+		}
+
+		completion_reward = {
+			add_political_power = 35
+			add_popularity = {
+				ideology = ROOT
+				popularity = -0.05
+			}
+			add_stability = 0.05
+			add_country_leader_trait = camarilla_leader
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}   
+	focus = {
+		id = WAF_religious_political_justifications
+		icon = GFX_focus_YUG_guarantee_religious_liberties
+		prerequisite = { focus = WAF_gather_close_advisors }
+		prerequisite = { focus = WAF_control_extremists }
+		x = 1
+		y = 1
+		relative_position_id = WAF_gather_close_advisors
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 3
+		}
+
+		available = {
+			has_government = neutrality	
+			has_idea = WAF_religious_divide
+		}
+
+		bypass = {
+			NOT = {
+				has_idea = WAF_religious_divide
+			}
+		}
+
+		completion_reward = {
+			add_stability = 0.05
+			remove_ideas = WAF_religious_divide
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}  	     
+	focus = {
+		id = WAF_build_democratic_institutions
+		icon = GFX_goal_generic_freedom
+		prerequisite = { focus = WAF_establish_the_army }
+		mutually_exclusive = { focus = WAF_collectivist_thinking focus = WAF_empower_the_educated_elite  }
+		x = 7
+		y = 1
+		relative_position_id = WAF_establish_the_army
+
+		cost = 5
+
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				is_puppet = yes
+				OVERLORD = {
+					OR = {
+						has_government = fascism
+						has_government = communism
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+				NOT = {
+					OR = {
+						has_government = democratic
+						has_government = neutrality
+					}
+				}
+			}
+			modifier = {
+				factor = 0.01
+				AND = {
+					is_historical_focus_on = no
+					is_puppet = yes
+					OVERLORD = {
+						OR = {
+							has_government = fascism
+							has_government = communism
+						}
+					}
+				}
+			}
+			modifier = {
+				factor = 0.15
+				AND = {
+					is_historical_focus_on = no
+					is_puppet = no
+					OR = {
+						has_government = fascism
+						has_government = communism
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				has_civil_war = yes
+				OR = {
+					has_government = fascism
+					has_government = communism
+				}
+			}
+			modifier = {
+				factor = 10
+				is_historical_focus_on = no
+				is_puppet = no
+				tag = WGR
+			}
+		}
+
+		available = {
+
+		}
+
+		completion_reward = {
+			add_stability = 0.05
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.1
+			}
+			add_timed_idea = { idea = GEN_Strenghten_Democracy_I days = 1395 }
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = WAF_control_extremists
+		icon = GFX_goal_generic_stamp_extremists
+		prerequisite = { focus = WAF_build_democratic_institutions focus = WAF_empower_the_educated_elite }
+		x = 1
+		y = 1
+		relative_position_id = WAF_empower_the_educated_elite
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 2
+		}
+
+		available = {
+			OR = {
+				has_government = neutrality
+				has_government = democratic
+			}
+		}
+
+		completion_reward = {
+			add_popularity = { ideology = fascism popularity = -0.05 }
+			add_popularity = { ideology = communism popularity = -0.05 }
+			add_stability = 0.05
+			add_ideas = GEN_Defence_Act_I
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = WAF_secret_police
+		icon = GFX_goal_CAN_CAMP_X
+		prerequisite = { focus = WAF_propagate_marxist_ideas focus = WAF_everything_for_the_nation }
+
+		available = {
+			OR = {
+				has_government = fascism
+				has_government = communism
+			}
+		}
+
+		x = -3
+		y = 1
+		relative_position_id = WAF_everything_for_the_nation
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 2
+				is_historical_focus_on = no
+			}
+
+		}
+
+		completion_reward = {
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+					NOT = {
+						has_intelligence_agency = yes
+					}
+				}
+				create_intelligence_agency = yes
+				add_ideas = GER_abwehr_contacts
+			}
+			else = {
+				add_tech_bonus = {
+					name = WAF_secret_police
+					bonus = 1
+					uses = 2
+					category = encryption_tech
+				}
+			}			
+			add_tech_bonus = {
+				name = WAF_secret_police
+				bonus = 1
+				uses = 2
+				category = military_police_tech
+			}	
+		}
+		search_filters = { FOCUS_FILTER_ESPIONAGE }
+	}
+	focus = {
+		id = WAF_police_the_north
+		icon = GFX_goal_generic_secret_police_2
+		prerequisite = { focus = WAF_secret_police }
+		x = 0
+		y = 1
+		relative_position_id = WAF_secret_police
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 2
+		}
+
+		available = {
+			OR = {
+				has_government = fascism	
+				has_government = communism	
+			}
+			has_idea = WAF_religious_divide
+		}
+
+		bypass = {
+			NOT = {
+				has_idea = WAF_religious_divide
+			}
+		}
+
+		completion_reward = {
+			add_popularity = {
+				ideology = ROOT
+				popularity = -0.05
+			}
+			add_political_power = -35
+			remove_ideas = WAF_religious_divide
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = WAF_state_intervention
+		icon = GFX_goal_generic_state_economy
+		cost = 10
+		prerequisite = { focus = WAF_build_democratic_institutions focus = WAF_empower_the_educated_elite }
+		x = -1
+		y = 1
+		relative_position_id = WAF_build_democratic_institutions
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+			add_stability = -0.10
+			add_ideas = SIA_state_invervention
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}	
+	focus = {
+		id = WAF_fund_the_defense_industry
+		icon = GFX_goal_ammunitions
+		prerequisite = { focus = WAF_state_intervention}
+		x = 0
+		y = 1
+		relative_position_id = WAF_state_intervention
+
+		cost = 10
+
+		available = {
+
+		}
+
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+			add_ideas = GEN_Military_Build_I
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				mio:generic_infantry_equipment_organization = {
+					add_mio_size = 1
+					add_mio_funds = 500
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}     
+	focus = {
+		id = WAF_emphasize_religious_tolerance
+		icon = GFX_focus_generic_concessions
+		prerequisite = { focus = WAF_build_democratic_institutions }
+		x = 1
+		y = 1
+		relative_position_id = WAF_build_democratic_institutions
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			has_government = democratic
+			has_idea = WAF_religious_divide
+		}
+
+		bypass = {
+			NOT = {
+				has_idea = WAF_religious_divide
+			}
+		}
+
+		completion_reward = {
+			add_popularity = {
+				ideology = democratic
+				popularity = 0.05
+			}
+			swap_ideas = {
+				remove_idea = WAF_religious_divide
+				add_idea = ALG_religious_freedom_buff
+			}
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+	}  
+	focus = {
+		id = WAF_consider_foreign_intervention
+		icon = GFX_goal_AFG_international_mujahideen
+		prerequisite = { focus = WAF_emphasize_religious_tolerance }
+		x = 2
+		y = 1
+		relative_position_id = WAF_emphasize_religious_tolerance
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				has_idea = neutrality_idea
+			}
+		}
+
+		available = {
+			has_war = no
+			is_subject = no
+			is_in_faction = no
+		}
+
+		completion_reward = {
+			set_rule = { can_send_volunteers = yes }
+            add_ideas = BEL_volunteer_corps
+			if = {
+				limit = { has_idea = neutrality_idea }
+				remove_ideas = neutrality_idea
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_WAR_SUPPORT }
+	}   
+     
+	focus = {
+		id = WAF_push_for_a_west_african_federation
+		icon = GFX_goal_african_alliance
+		prerequisite = { focus = WAF_emphasize_religious_tolerance }
+		x = 0
+		y = 1
+		relative_position_id = WAF_emphasize_religious_tolerance
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			is_subject = no
+			is_in_faction = no
+			has_government = democratic
+		}
+
+		completion_reward = {
+			add_political_power = 75
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = MRT
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = MLI
+						original_tag = GNB
+						original_tag = GNA
+						original_tag = SIE
+						original_tag = LIB
+						original_tag = IVO
+						original_tag = VOL
+						original_tag = GHA
+						original_tag = TOG
+						original_tag = DAH
+						original_tag = NGR
+						original_tag = NGA
+						original_tag = SOK
+						original_tag = BIA
+					}
+					OR = {
+						has_government = neutrality
+						has_government = democratic
+					}
+				}
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = huge_increase
+				}
+				ROOT = {
+					add_opinion_modifier = {
+						target = PREV
+						modifier = huge_increase
+					}
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+	}   
+	focus = {
+		id = WAF_proclaim_neutrality
+		icon = GFX_goal_generic_neutrality_focus
+		prerequisite = { focus = WAF_religious_political_justifications }
+		x = 0
+		y = 1
+		relative_position_id = WAF_religious_political_justifications
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			has_war = no
+			is_subject = no
+			is_in_faction = no
+		}
+
+		completion_reward = {
+			add_stability = 0.05
+			add_popularity = {
+				ideology = neutrality
+				popularity = 0.1
+			}
+			add_ideas = neutrality_idea
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+	}
+	focus = {
+		id = WAF_west_african_defense_treaty
+		icon = GFX_focus_hol_the_foundations_of_defense
+		prerequisite = { focus = WAF_push_for_a_west_african_federation }
+		x = -1
+		y = 1
+        mutually_exclusive = { focus = WAF_propose_a_west_african_federation }
+		relative_position_id = WAF_push_for_a_west_african_federation
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			is_in_faction = no
+			has_capitulated = no
+			is_subject = no
+		}
+
+		completion_reward = {
+			set_rule = { can_create_factions = yes }
+			create_faction = "West African Defense Treaty"
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = MRT
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = MLI
+						original_tag = GNB
+						original_tag = GNA
+						original_tag = SIE
+						original_tag = LIB
+						original_tag = IVO
+						original_tag = VOL
+						original_tag = GHA
+						original_tag = TOG
+						original_tag = DAH
+						original_tag = NGR
+						original_tag = NGA
+						original_tag = SOK
+						original_tag = BIA
+					}
+					is_in_faction = no
+					OR = {
+						has_government = neutrality
+						has_government = democratic
+					}
+					NOT = {
+						has_war_with = ROOT
+					}
+				}
+				country_event = { id = generic.5 hours = 24 }
+			}			
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+	}
+	focus = {
+		id = WAF_reinforce_the_treaty_members
+		icon = GFX_focus_generic_africa_defense
+		prerequisite = { focus = WAF_west_african_defense_treaty }
+		x = 0
+		y = 1
+		relative_position_id = WAF_west_african_defense_treaty
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			is_faction_leader = yes
+			has_capitulated = no
+			num_faction_members > 1
+		}
+
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+			add_stability = 0.05
+			add_timed_idea = {
+				idea = GEN_Anti_Invasion_I
+				days = 180
+			}
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = MRT
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = MLI
+						original_tag = GNB
+						original_tag = GNA
+						original_tag = SIE
+						original_tag = LIB
+						original_tag = IVO
+						original_tag = VOL
+						original_tag = GHA
+						original_tag = TOG
+						original_tag = DAH
+						original_tag = NGR
+						original_tag = NGA
+						original_tag = SOK
+						original_tag = BIA
+					}
+					is_in_faction_with = ROOT
+					OR = {
+						has_government = neutrality
+						has_government = democratic
+					}
+				}
+				random_owned_controlled_state = {
+					limit = {
+						free_building_slots = {
+							building = industrial_complex
+							size > 1
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				add_stability = 0.05
+				add_timed_idea = {
+					idea = GEN_Anti_Invasion_I
+					days = 180
+				}
+			}			
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+	}	
+	focus = {
+		id = WAF_propose_a_west_african_federation
+		icon = GFX_goal_morale_bonus
+		prerequisite = { focus = WAF_push_for_a_west_african_federation }
+		x = 1
+		y = 1
+        mutually_exclusive = { focus = WAF_west_african_defense_treaty }
+		relative_position_id = WAF_push_for_a_west_african_federation
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		available = {
+			is_subject = no
+			NOT = {
+				any_other_country = {
+					OR = {
+						focus_progress = {
+							focus = WAF_propose_a_west_african_federation
+							progress > 0 
+						}
+						has_completed_focus = WAF_propose_a_west_african_federation
+					}
+				}
+			}
+			any_country = {
+				OR = {
+					original_tag = MRT
+					original_tag = SEN
+					original_tag = GAM
+					original_tag = MLI
+					original_tag = GNB
+					original_tag = GNA
+					original_tag = SIE
+					original_tag = LIB
+					original_tag = IVO
+					original_tag = VOL
+					original_tag = GHA
+					original_tag = TOG
+					original_tag = DAH
+					original_tag = NGR
+					original_tag = NGA
+					original_tag = SOK
+					original_tag = BIA
+				}
+				is_subject = no
+				NOT = {
+					has_war_with = ROOT
+				}
+				OR = {
+					has_government = neutrality
+					has_government = democratic
+				}
+			}
+		}
+
+		completion_reward = {
+			every_other_country = {
+				limit = {
+					OR = {
+						original_tag = MRT
+						original_tag = SEN
+						original_tag = GAM
+						original_tag = MLI
+						original_tag = GNB
+						original_tag = GNA
+						original_tag = SIE
+						original_tag = LIB
+						original_tag = IVO
+						original_tag = VOL
+						original_tag = GHA
+						original_tag = TOG
+						original_tag = DAH
+						original_tag = NGR
+						original_tag = NGA
+						original_tag = SOK
+						original_tag = BIA
+					}
+					is_subject = no
+					NOT = {
+						has_war_with = ROOT
+					}
+					OR = {
+						has_government = neutrality
+						has_government = democratic
+					}
+				}
+				country_event = {
+					id = r56_nigeria.1 hours = 6
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION FOCUS_FILTER_POLITICAL }
+	}                              
+}
