@@ -250,9 +250,9 @@
 	NDefines.NAI.DESIRE_USE_XP_TO_UNLOCK_NAVY_SPIRIT = 0.4   -- How quickly is desire to unlock naval spirits accumulated?
 	NDefines.NAI.DESIRE_USE_XP_TO_UNLOCK_AIR_SPIRIT = 0.4    -- How quickly is desire to unlock air spirits accumulated?
 	
-	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_DOCTRINE = 7       -- Recalculate desired best doctrine to unlock with this many days inbetween.
-	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_TEMPLATE = 7       -- Recalculate desired best template to upgrade with this many days inbetween.
-	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_EQUIPMENT = 7      -- Recalculate desired best equipment to upgrade with this many days inbetween.
+	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_DOCTRINE = 30       -- Recalculate desired best doctrine to unlock with this many days inbetween.
+	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_TEMPLATE = 30       -- Recalculate desired best template to upgrade with this many days inbetween.
+	NDefines.NAI.DAYS_BETWEEN_CHECK_BEST_EQUIPMENT = 30      -- Recalculate desired best equipment to upgrade with this many days inbetween.
 	
 	NDefines.NAI.GARRISON_TEMPLATE_SCORE_IC_FACTOR = 1.0 -- ai uses these defines while calculating garrison template score of a template.
 	NDefines.NAI.GARRISON_TEMPLATE_SCORE_MANPOWER_FACTOR = 0.05 -- formula is (template_ic * ic_factor + template_manpower * manpower_factor ) / template_supression (lower is better)	
@@ -337,6 +337,10 @@
 	NDefines.NAI.PRODUCTION_EQUIPMENT_SURPLUS_FACTOR = 0.15	-- Base value for how much of currently used equipment the AI will at least strive to have in stock
 
 	NDefines.NAI.GENERATE_WARGOAL_ANTAGONIZE_SCALE = 0.25 -- (Original value: 0.35) How likely the AI acts on claims to generated war goals. Baseline is 'min_threat - antagonize * scale.' So don't lower it below 0.25! 
+
+	NDefines.NAI.EQUIPMENT_MARKET_UPDATE_FREQUENCY_DAYS = 14 -- How often the AI runs its market logic
+
+	NDefines.NAI.RAIDS_CREATE_FREQUENCY_DAYS = 14 -- How often will AI run its raid creation logic. Lowering this number may decrease performance.
 	
 --------------------------------------------------------------------------------------------------------------
 -- ECONOMY
