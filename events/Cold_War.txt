@@ -101,7 +101,6 @@ country_event = {
             }
             add_autonomy_score = {
                 value = 200
-                #localization = EXAMPLE
             }
             add_timed_idea = {
                 idea = USA_marshall_plan_aid_idea
@@ -261,6 +260,59 @@ country_event = {   #china ultimatum to France
             generator = { 670 671 924 928 }
             expire = 700
         }
+    }
+}
+
+country_event = {   #Soviet pressure on Finland
+    id = cold_war.23
+    picture = GFX_report_event_generic_conference
+	title = cold_war.23.t
+	desc = cold_war.23.d
+    fire_only_once = yes
+
+    is_triggered_only = yes
+
+    option = {  #agree
+        name = cold_war.23.a
+        give_guarantee = SOV
+        SOV = {
+            give_guarantee = FIN
+        }
+    }
+    option = {  #disagree
+        name = cold_war.23.b
+        add_stability = -0.05
+        SOV = {
+            add_opinion_modifier = {
+                target = ROOT
+                modifier = medium_decrease
+            }
+        }
+    }
+}
+
+news_event = {  #death of Paton
+    id = cold_war.31
+	title = cold_war.31.t
+	desc = cold_war.31.d
+
+    trigger = {
+        original_tag = USA
+        has_war = no
+        date > 1944.1.1
+    }
+
+    mean_time_to_happen = {
+        days = 180
+        modifier = {
+            factor = 0.5
+            has_global_flag = r56_yalta_script_is_a_go
+        }
+    }
+
+    option = {
+        name = cold_war.31.a
+        retire_character = USA_george_s_patton
     }
 }
 
@@ -729,7 +781,10 @@ country_event = {
         ai_chance = {
             base = 1
         }
-        add_threat = -15
+        add_named_threat = {
+            threat = -15
+            name = CW_czechoslovak_autonomy_postyalta
+        }
         if = {
             limit = {
                 has_dlc = "Man the Guns"
@@ -784,7 +839,6 @@ country_event = {
                 factor = 3
             }
         }
-        add_threat = 5
         puppet = CZE
         CZE = {
             set_popularities = {
@@ -817,5 +871,289 @@ country_event = {
 
     option = {  #refuse
         name = cold_war.44.b
+    }
+}
+
+country_event = {   #Italy requests Marshall Aid alternative
+    id = cold_war.45
+    title = cold_war.45.t
+	desc = cold_war.45.d
+    picture = GFX_report_event_military_planning
+
+    is_triggered_only = yes
+
+    option = {
+        name = cold_war.45.a
+        ai_chance = {
+            base = 1
+            modifier = {
+                factor = 0
+                is_historical_focus_on = yes
+            }
+        }
+        add_timed_idea = {
+            idea = SOV_financing_ITA_support
+            days = 360
+        }
+        FROM = {
+            add_timed_idea = {
+                idea = SOV_marshall_plan_alternative_aid_idea
+                days = 1440
+            }
+        }
+    }
+
+    option = {  #refuse
+        name = cold_war.45.b
+        FROM = {
+            add_popularity = {
+                ideology = communism
+                popularity = -0.05
+            }
+            if = {
+                limit = {
+                    NOT = {
+                        has_war_with = USA
+                    }
+                }
+                add_timed_idea = {
+                    idea = USA_marshall_plan_aid_idea
+                    days = 1440
+                }
+            }
+        }
+    }
+}
+
+country_event = {   #Italy requests permission/support for a civil war
+    id = cold_war.46
+    title = cold_war.46.t
+	desc = cold_war.46.d
+    picture = GFX_report_event_military_planning
+
+    is_triggered_only = yes
+
+    option = {
+        name = cold_war.46.a
+        FROM = {
+            set_country_flag = ITA_civil_war_got_SOV_support
+            hidden_effect = { #event title tooltip doesn't update, refuse is default
+                country_event = cold_war.47
+            }
+            effect_tooltip = {
+                add_equipment_to_stockpile = { type = light_tank_chassis_1 amount = 500 producer = SOV variant_name = "T-26TU mod. 1933" }
+                add_equipment_to_stockpile = { type = infantry_equipment amount = 2000 producer = SOV }
+                add_equipment_to_stockpile = { type = artillery_equipment amount = 100 producer = SOV }
+            }
+        }
+    }
+
+    option = {  #refuse
+        name = cold_war.46.b
+        FROM = {
+            country_event = cold_war.47
+        }
+    }
+}
+
+country_event = {
+    id = cold_war.47
+    title = {
+        trigger = {
+            has_country_flag = ITA_civil_war_got_SOV_support
+        }
+        text = cold_war.47.t1
+    }
+    title = {
+        text = cold_war.47.t2
+    }
+	desc = {
+        trigger = {
+            has_country_flag = ITA_civil_war_got_SOV_support
+        }
+        text = cold_war.47.d1
+    }
+    desc = {
+        text = cold_war.47.d2
+    }
+    picture = GFX_report_event_military_planning
+
+    is_triggered_only = yes
+
+    option = {
+        name = cold_war.47.a
+        set_temp_variable = { civil_war_strength = 1 }
+        subtract_from_temp_variable = { civil_war_strength = party_popularity@communism }
+        start_civil_war = { #the civil war splits of from the NON-communists
+            ruling_party = communism
+            ideology = ROOT
+            size = civil_war_strength
+            states_filter = {
+                NOT = {
+                    state = 161
+                    state = 162
+                }
+            }
+        }
+        if = {
+            limit = {
+                has_country_flag = ITA_civil_war_got_SOV_support
+            }
+            add_equipment_to_stockpile = { type = light_tank_chassis_1 amount = 500 producer = SOV variant_name = "T-26TU mod. 1933" }
+            add_equipment_to_stockpile = { type = infantry_equipment amount = 2000 producer = SOV }
+            add_equipment_to_stockpile = { type = artillery_equipment amount = 100 producer = SOV }
+            FROM = {
+                add_named_threat = {
+                    threat = 5
+                    name = cold_war.47.t
+                }
+            }
+        }
+        if = {
+            limit = {
+                YUG = {
+                    has_government = communism
+                    NOT = {
+                        has_war_with = ROOT
+                    }
+                    any_owned_state = {
+                        OR = {
+                            is_claimed_by = ROOT
+                            is_core_of = ROOT
+                        }
+                    }
+                }
+            }
+            country_event = cold_war.48
+        }
+    }
+
+    option = {  #refuse
+        name = cold_war.47.b
+    }
+}
+
+country_event = {
+    id = cold_war.48
+    title = cold_war.48.t
+	desc = cold_war.48.d
+
+    is_triggered_only = yes
+
+    option = {
+        name = cold_war.48.a
+        YUG = {
+            every_owned_state = {
+                limit = {
+                    is_core_of = ITA
+                }
+                remove_core_of = ITA
+            }
+            every_owned_state = {
+                limit = {
+                    is_claimed_by = ITA
+                }
+                remove_claim_by = ITA
+            }
+        }
+        if = {
+            limit = {
+                has_global_flag = r56_YUG_in_yalta
+                date > 1940.1.1 #if Yalta somehow happened extremely early, dont give real-life designs
+            }
+            if = {
+                limit = {
+                    has_dlc = "No Step Back"
+                }
+                hidden_effect = {
+                    GER = {
+                        create_equipment_variant = {
+                            name = "Tiger I Ausf. A"
+                            type = heavy_tank_chassis_2
+                            design_team = mio:GER_porsche_organization #We feed on your tears
+                            modules = {
+                                main_armament_slot = tank_heavy_cannon
+                                turret_type_slot = tank_heavy_three_man_tank_turret
+                                suspension_type_slot = tank_interleaved_suspension
+                                armor_type_slot = tank_welded_armor
+                                engine_type_slot = tank_gasoline_engine
+                                special_type_slot_1 = tank_radio_1
+                                special_type_slot_2 = smoke_launchers
+                                special_type_slot_3 = additional_machine_guns
+                            }
+                            upgrades = {
+                                tank_nsb_engine_upgrade = 8
+                                tank_nsb_armor_upgrade = 6
+                            }
+                            icon = "GFX_GER_advanced_heavy_tank_medium"
+                        }
+                    }
+                    SOV = {
+                        if = {
+                            limit = {
+                                OR = {
+                                    has_tech = artillery3
+                                    has_tech = antitank3
+                                }
+                            }
+                            create_equipment_variant = {
+                                name = "T-34"
+                                type = medium_tank_chassis_2
+                                parent_version = 0
+                                modules = {
+                                    main_armament_slot = tank_medium_cannon_2
+                                    turret_type_slot = tank_medium_two_man_tank_turret
+                                    suspension_type_slot = tank_christie_suspension
+                                    armor_type_slot = tank_welded_armor
+                                    engine_type_slot = tank_diesel_engine
+                                    special_type_slot_1 = sloped_armor
+                                }
+                                upgrades = {
+                                    tank_nsb_engine_upgrade = 10
+                                    tank_nsb_armor_upgrade = 7
+                                }
+                                icon = "GFX_SOV_improved_medium_tank_medium"
+                            }
+                        }
+                        else_if = {
+                            limit = {
+                                OR = {
+                                    has_tech = artillery1
+                                    has_tech = antitank1
+                                }
+                            }
+                            create_equipment_variant = {
+                                name = "T-34"
+                                type = medium_tank_chassis_2
+                                parent_version = 0
+                                modules = {
+                                    main_armament_slot = tank_medium_cannon
+                                    turret_type_slot = tank_medium_two_man_tank_turret
+                                    suspension_type_slot = tank_christie_suspension
+                                    armor_type_slot = tank_welded_armor
+                                    engine_type_slot = tank_diesel_engine
+                                    special_type_slot_1 = sloped_armor
+                                }
+                                upgrades = {
+                                    tank_nsb_engine_upgrade = 10
+                                    tank_nsb_armor_upgrade = 7
+                                }
+                                icon = "GFX_SOV_improved_medium_tank_medium"
+                            }
+                        }
+                    }
+                }
+                add_equipment_to_stockpile = { type = heavy_tank_chassis_2 amount = 40 producer = GER variant_name = "Tiger I Ausf. A" }
+                add_equipment_to_stockpile = { type = medium_tank_chassis_2 amount = 100 producer = SOV variant_name = "T-34" }
+            }
+            else = {
+                add_equipment_to_stockpile = { type = heavy_tank_equipment_2 amount = 40 producer = GER }
+                add_equipment_to_stockpile = { type = medium_tank_chassis_2 amount = 100 producer = SOV }
+            }
+            add_equipment_to_stockpile = { type = infantry_equipment amount = 500 producer = YUG }
+        }
+    }
+    option = {
+        name = cold_war.48.b
     }
 }
