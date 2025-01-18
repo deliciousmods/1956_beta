@@ -125,7 +125,6 @@ focus_tree = {
 						free_building_slots = {
 							building = infrastructure
 							size > 1
-							include_locked = yes
 						}
 					}
 				}
@@ -144,7 +143,6 @@ focus_tree = {
 						free_building_slots = {
 							building = infrastructure
 							size > 1
-							include_locked = yes
 						}
 					}
 				}
@@ -163,7 +161,6 @@ focus_tree = {
 						free_building_slots = {
 							building = infrastructure
 							size > 1
-							include_locked = yes
 						}
 					}
 				}
@@ -552,11 +549,29 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			add_tech_bonus = {
-				name = PHI_research_new_enegry_options
-				bonus = 1
-				uses = 1
-				category = nuclear
+			IF = {
+				limit = {
+					NOT = {
+						has_tech = atomic_research
+					}
+				}
+				add_tech_bonus = {
+					name = PHI_research_new_enegry_options
+					bonus = 1.0
+					uses = 1
+					category = nuclear
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				add_breakthrough_progress = {
+					specialization = specialization_nuclear
+					value = 0.5
+				}
+			}
+			ELSE = {
+				add_breakthrough_progress = {
+					specialization = specialization_nuclear
+					value = 0.8
+				}
 			}
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
@@ -1436,6 +1451,10 @@ focus_tree = {
 				category = radar_tech
 			}			
 			add_ideas = arg_aviation_schools
+			add_breakthrough_progress = {
+				specialization = specialization_air
+				value = 0.50
+			}
 			#1x 50% reduction in an air doctrine research
 
 		}
@@ -1461,14 +1480,20 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			add_tech_bonus = {
-				name = POL_rocket_development
-				bonus = 1
+			add_tech_bonus = { 
+				name = jet_rocket_bonus
+				bonus = 0.50
 				uses = 2
-				category = jet_technology
 				category = rocketry
+				category = jet_technology
 			}
-			#2x50% research to Rockets and Jet Engine Research
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_breakthrough_progress = {
+				specialization = specialization_air
+				value = 0.50
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_ideas = r56_generic_rocket_idea
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -1779,6 +1804,8 @@ focus_tree = {
 				ahead_reduction = 0.5
 				category = dd_tech
 			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+            add_ideas = r56_generic_radar_idea
 			#1x50% research bonus to destroyers & 1 x50% bonus to Submarines
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
@@ -1898,7 +1925,7 @@ focus_tree = {
 
 	focus = {
 		id = PHI_follow_the_american_way
-		icon = GFX_focus_chi_mission_to_the_us
+		icon = GFX_goal_generic_befriend_united_states
 		prerequisite = { focus = PHI_post_indenpence_stabilization}
 		mutually_exclusive = { focus = PHI_a_new_regime }
 		relative_position_id = PHI_post_indenpence_stabilization
@@ -2357,56 +2384,55 @@ focus_tree = {
 		}
 		available = {
 			SPR_scw_in_progress = yes
-			OR = {
-				AND = {
-					has_completed_focus = PHI_may_2nd_uprising
-					country_exists = SPA
-					NOT = { has_war_with = SPA }
-				}
-				AND = {
-					has_completed_focus = PHI_hukbalap_rebellion
-					country_exists = SPD
-					NOT = { has_war_with = SPD }
-				}
+			any_other_country = {
+				original_tag = SPR 
+				NOT = { has_war_with = ROOT }
 			}
 		}
 		completion_reward = {
-			if = {
-				limit = {
-					has_completed_focus = PHI_may_2nd_uprising
-				}
-				add_ideas = PHI_volunteers_in_the_war_nationalist
-			}
-			else = {
-				add_ideas = PHI_volunteers_in_the_war_republican
-			}
 			add_manpower = -5000
 			if = {
 				limit = {
 					has_completed_focus = PHI_may_2nd_uprising
 				}
-				add_relation_rule_override = {
-					target = SPA
-					can_send_volunteers = yes 
+				set_rule = {
+					can_send_volunteers = yes
 				}
-				SPA = {
+				add_ideas = PHI_volunteers_in_the_war_nationalist
+				random_other_country = {
+					limit = {
+						original_tag = SPR
+						OR = {
+							has_government = fascism
+							has_government = neutrality
+						}
+					}
+					add_opinion_modifier = { target = ROOT modifier = ita_supported_spain_civil_war }
 					add_equipment_to_stockpile = {
 						type = infantry_equipment
-						amount = 2000
-						producer = PHI
+						amount = 500
+						producer = ROOT
 					}
 				}
 			}
 			else = {
-				add_relation_rule_override = {
-					target = SPD
-					can_send_volunteers = yes 
+				set_rule = {
+					can_send_volunteers = yes
 				}
-				SPD = {
+				add_ideas = PHI_volunteers_in_the_war_republican
+				random_other_country = {
+					limit = {
+						original_tag = SPR
+						OR = {
+							has_government = democratic
+							has_government = communism
+						}
+					}
+					add_opinion_modifier = { target = ROOT modifier = ita_supported_spain_civil_war }
 					add_equipment_to_stockpile = {
 						type = infantry_equipment
-						amount = 2000
-						producer = PHI
+						amount = 500
+						producer = ROOT
 					}
 				}
 			}
@@ -3230,6 +3256,7 @@ focus_tree = {
 								region = 167
 								region = 160
 								state = 323
+								state = 1091
 							}
 						}
 					}
@@ -3252,6 +3279,7 @@ focus_tree = {
 									region = 167
 									region = 160
 									state = 323
+									state = 1091
 								}
 							}
 						}
@@ -3283,6 +3311,7 @@ focus_tree = {
 									region = 167
 									region = 160
 									state = 323
+									state = 1091
 								}
 							}
 						}
@@ -3305,6 +3334,7 @@ focus_tree = {
 										region = 167
 										region = 160
 										state = 323
+										state = 1091
 									}
 								}
 							}
