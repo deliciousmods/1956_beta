@@ -325,12 +325,12 @@ GER_seize_gold_reserves_cat = {
 			ROOT = { has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }}
 		}
 		
-		fire_only_once = no
+		fire_only_once = yes
 
 		cost = 25
 
 		complete_effect = {
-			ROOT = { set_temp_variable = { occupied_state_num_factory = 0 } } #This will show how many factories in total Germany controls from FROM's cores
+			set_temp_variable = { occupied_state_num_factory = 0 } #This will show how many factories in total Germany controls from FROM's cores
 			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_military_factories_in_cores@GER }
 			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_civilian_factories_in_cores@GER }
 			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_naval_factories_in_cores@GER }
@@ -341,35 +341,152 @@ GER_seize_gold_reserves_cat = {
 						is_fully_controlled_by = ROOT
 						NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
 					}
-
 					add_compliance = -5
 					add_resistance = 10
 					set_state_flag = GER_seize_gold_reserves_state_flag
 					add_dynamic_modifier = { modifier = GER_overburdened_state_modifier days = 90 }
 				}
 			}
-			ROOT = {			
+			
+			divide_temp_variable = { occupied_state_num_factory = 200 } #This is necessary since a single factory will increase the occupied_state_num_factory number to 1, which in turn translates to -100% when subtracting from the Consumer Goods. Dividing it by 100 here will give you 1% instead, which is more like what we want.
+			multiply_temp_variable = { occupied_state_num_factory = -1 }
+
+			#If Germany has seized Gold Reserves from Soviet states, deduct that amount when seizing the nation wide Gold Reserves from Soviet, so we're not double dipping
+			if = { 
+				limit = {
+					FROM = {
+						original_tag = SOV
+					}
+					#Check if Germany has seized Gold Reserves that needs to be deducted from the total amount
+					check_variable = { GER_reduce_russian_CG_bonus < 0 }
+				}
+				subtract_from_temp_variable = { occupied_state_num_factory = GER_reduce_russian_CG_bonus }
+			}
+			
+			custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
+			add_to_variable = {
+				GER_industrial_consumer_goods_factor = occupied_state_num_factory
+				tooltip = consumer_goods_factor_tt
+			}
+			GER_reduce_mefo_bills_penalty = yes
+		}
+	}
+	GER_seize_russian_citites_gold_reserves = {
+		priority = 1
+		icon = GFX_decision_generic_confiscation
+
+		ai_will_do = {
+			base = 10
+			modifier = {
+				factor = 3
+				check_variable = { GER_industrial_consumer_goods_factor > 0.25 }
+			}
+			modifier = {
+				factor = 3
+				check_variable = { GER_industrial_consumer_goods_factor > 0.5 }
+			}
+			modifier = {
+				factor = 3
+				check_variable = { GER_industrial_consumer_goods_factor > 0.75 }
+			}
+			modifier = {
+				factor = 5
+				check_variable = { GER_industrial_consumer_goods_factor > 0.99 }
+			}
+			modifier = {
+				factor = 1.5
+				has_war_with_major = yes
+			}
+			modifier = {
+				factor = 1.5
+				FROM = {
+					controller = {
+						is_major = yes
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				check_variable = { GER_industrial_consumer_goods_factor < 0.15 }
+			}
+		}
+
+		state_target = yes
+
+		targets = { 195 219 217 242 218 206 202 137 }
+		#States being targeted: Leningrad, Moscow, Stalingrad, Smolensk, Rostov, Minsk, Kyiv, Crimea
+
+		target_trigger = {
+			FROM = {
+				owner = {
+					original_tag = SOV
+					has_war_with = ROOT
+					NOT = { has_country_flag = GER_has_capitulated_to_germany }
+				}
+				NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
+				NOT = { is_core_of = ROOT }
+				OR = {
+					check_variable = { industrial_complex_level > 0 }
+					check_variable = { arms_factory_level > 0 }
+					check_variable = { building_level@dockyard > 0 }
+				}
+			}
+		}		
+
+		available = {
+			FROM = { #This is all for tooltip purposes
+				is_fully_controlled_by = ROOT
+				owner = {
+					NOT = { has_country_flag = GER_has_capitulated_to_germany }
+				}
+			}
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = FROM
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 10
+
+		complete_effect = {
+
+			#All temp variables need to be in the same scope to display the effect tooltip properly
+			FROM = {
+				set_temp_variable = { occupied_state_num_factory = 0 }
+				add_to_temp_variable = { occupied_state_num_factory = arms_factory_level }
+				add_to_temp_variable = { occupied_state_num_factory = industrial_complex_level }
+				add_to_temp_variable = { occupied_state_num_factory = building_level@dockyard }
+
+				add_resistance = 10
+				add_compliance = -5
+				set_state_flag = GER_seize_gold_reserves_state_flag
+				add_dynamic_modifier = { modifier = GER_overburdened_state_modifier days = 90 }
+				
 				divide_temp_variable = { occupied_state_num_factory = 200 } #This is necessary since a single factory will increase the occupied_state_num_factory number to 1, which in turn translates to -100% when subtracting from the Consumer Goods. Dividing it by 100 here will give you 1% instead, which is more like what we want.
 				multiply_temp_variable = { occupied_state_num_factory = -1 }
 
-				custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
 				if = {
 					limit = {
-						check_variable = { occupied_state_num_factory < 50 }
+						FROM = { is_fully_controlled_by = ROOT }
 					}
+					custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
 					add_to_variable = {
-						GER_industrial_consumer_goods_factor = occupied_state_num_factory
+						ROOT.GER_industrial_consumer_goods_factor = occupied_state_num_factory
 						tooltip = consumer_goods_factor_tt
 					}
 				}
 				else = {
-					add_to_variable = {
-						GER_industrial_consumer_goods_factor = -0.25
-						tooltip = consumer_goods_factor_tt
-					}
+					custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_russian_states_tt
 				}
-				GER_reduce_mefo_bills_penalty = yes
+
+				#Reduce future Soviet Gold Reserves Germany can seize
+				add_to_variable = { ROOT.GER_reduce_russian_CG_bonus = occupied_state_num_factory }
 			}
+			GER_reduce_mefo_bills_penalty = yes
 		}
 	}
 }
