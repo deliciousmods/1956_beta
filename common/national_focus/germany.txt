@@ -6,6 +6,9 @@
 ### search_filters = {FOCUS_FILTER_MANPOWER}
 ### search_filters = {FOCUS_FILTER_ANNEXATION}
 ### search_filters = {FOCUS_FILTER_INTERNAL_AFFAIRS}
+### search_filters = {FOCUS_FILTER_ARMY_XP}
+### search_filters = {FOCUS_FILTER_NAVY_XP}
+### search_filters = {FOCUS_FILTER_AIR_XP}
 ### search_filters = {FOCUS_FILTER_BALANCE_OF_POWER}
 ### search_filters = {FOCUS_FILTER_POLITICAL_CHARACTER}
 ### search_filters = {FOCUS_FILTER_MILITARY_CHARACTER}
@@ -123,6 +126,9 @@ focus_tree = {
 
 ##########################################
 
+
+
+
 	focus = {
 		id = GER_prioritize_economic_growth
 		icon = GFX_focus_usa_reestablish_the_gold_standard
@@ -133,6 +139,12 @@ focus_tree = {
 		cost = 5
 		#relative_position_id = GER_strengthen_the_kriegsmarine
 
+		available = {
+			NOT = {
+				has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+			}
+		}
+
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_INDUSTRY FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL_CHARACTER }
 
 		completion_reward = {
@@ -141,12 +153,7 @@ focus_tree = {
 			custom_effect_tooltip = generic_skip_one_line_tt
 
 			add_stability = -0.1
-			if = {
-				limit = {
-					NOT = {
-						has_government = democratic
-					}
-				}
+			if = { limit = { NOT = { has_government = democratic } } # R56 ?
 				add_popularity = {
 					ideology = ROOT
 					popularity = -0.1
@@ -6297,8 +6304,8 @@ focus_tree = {
 					allow_without_tech = no
 					design_team = mio:GER_junkers_organization
 					modules = {
-						fixed_main_weapon_slot = bomb_locks
-						fixed_auxiliary_weapon_slot_1 = tank_buster_1
+						fixed_main_weapon_slot = tank_buster_1
+						fixed_auxiliary_weapon_slot_1 = bomb_locks
 						engine_type_slot = engine_3_1x
 						special_type_slot_1 = lmg_defense_turret
 						special_type_slot_2 = empty
@@ -27919,6 +27926,11 @@ focus_tree = {
 
 		available = {
 			has_government = neutrality
+			36 = { #State with Utrecht, where Wilhelm II resided
+				controller = {	
+					NOT = { has_war_with = ROOT }
+				}
+			}
 		}
 
 		will_lead_to_war_with = HOL
@@ -27931,17 +27943,64 @@ focus_tree = {
 			add_popularity = {
 				ideology = democratic
 				popularity = -0.05
-			}	
+			}
+			add_war_support = 0.05
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			HOL = {
-				country_event = { 
-					id = wtt_germany.3 
-					hours = 6
+			if = {
+				limit = {
+					NOT = { controls_state = 36 }
+					36 = { #State with Utrecht, where Wilhelm II resided
+						controller = {	
+							NOT = { is_subject_of = ROOT }
+						}
+					}
+				}
+				36 = { #State with Utrecht, where Wilhelm II resided
+					controller = {	
+						country_event = { 
+							id = wtt_germany.3 
+							hours = 6
+						}
+					}
+				}
+				custom_effect_tooltip = if_they_accept_tt
+				effect_tooltip = {
+					GER_wilhelm_ii = {
+						add_country_leader_role = {
+							country_leader = {
+								expire = "1965.1.1"
+								ideology = despotism
+								traits = {
+									anti_democrat
+									imperial_connections				
+								}
+							}
+							promote_leader = yes
+						}
+					}
 				}
 			}
-
+			else = {
+				set_country_flag = kaiser_wilhelm_ii
+				GER_wilhelm_ii = {
+					add_country_leader_role = {
+						country_leader = {
+							expire = "1965.1.1"
+							ideology = despotism
+							traits = {
+								anti_democrat
+								imperial_connections				
+							}
+						}
+						promote_leader = yes
+					}
+				}
+				hidden_effect = { 
+					news_event = { id = wtt_news.3 hours = 6 } 
+				}
+			}
 		}
 	}
 
@@ -28732,6 +28791,20 @@ focus_tree = {
 	 					trait = head_of_the_abwehr_improved
 	 				}
 	 			}
+	 			hidden_effect = {
+					GER_hans_oster = {
+						remove_trait = {
+							slot = political_advisor
+							trait = anti_fascist_agent
+						}
+					}
+				}
+				GER_hans_oster = {
+	 				add_trait = { 
+	 					slot = political_advisor
+	 					trait = intelligence_service_deputy
+	 				}
+	 			}
 			}
 
 		}
@@ -28824,10 +28897,18 @@ focus_tree = {
 		dynamic = yes
 
 		bypass = {
-			OR = {
-				AUS = { 
-					is_subject = yes
-					NOT = { is_subject_of = ROOT }
+			AUS = { 
+				OR = {
+					exists = no
+					has_war_with = ROOT
+					AND = {
+						is_in_faction = yes
+						NOT = { is_in_faction_with = ROOT }
+					}
+					AND = {
+						is_subject = yes
+						NOT = { is_subject_of = ROOT }
+					}
 				}
 				AUS = { exists = no }
 			}
@@ -35617,13 +35698,15 @@ focus_tree = {
 
 		completion_reward = {
 
+			add_named_threat = { threat = 5 name = GER_realize_mittelafrika }
+
 			every_country = {
 				limit = {
 					NOT = {
-						is_subject_of = ROOT
-						is_in_faction_with = ROOT
+						is_ally_with = ROOT
 						is_guaranteed_by = ROOT
 						has_war_with = ROOT
+						has_a_german_trade_idea = yes
 					}
 					OR = {
 						owns_state = 904
@@ -36579,8 +36662,8 @@ focus_tree = {
 					has_global_flag = flag_franco_british_union
 				}
 			}
-			NOT = { is_in_faction_with = BEL }
-			NOT = { is_in_faction_with = LUX }
+			NOT = { is_ally_with = BEL }
+			NOT = { is_ally_with = LUX }
 		}
 		bypass = {
 			NOT = { country_exists = BEL }
@@ -36958,15 +37041,18 @@ focus_tree = {
 		
 		completion_reward = {
 			ENG = {
-				country_event = { id = generic.2 }
+				country_event = { 
+					id = generic.2 
+					hours = 2
+				}
 				add_ai_strategy = {
 					type = befriend
-					id = "GER"			
+					id = GER			
 					value = 1000
 				}
 				add_ai_strategy = {
 					type = alliance
-					id = "GER"			
+					id = GER			
 					value = 200
 				}	
 			}
@@ -38959,35 +39045,54 @@ focus_tree = {
 					technology = atomic_research
 				}
 			}
-			if = {
+			else_if = {
 				limit = {
-					has_tech = atomic_research
-					NOT = { has_tech = nuclear_reactor }
+					NOT = { is_special_project_completed = sp:sp_nuclear_reactor }
 				}
-				add_tech_bonus = {
-					name = GER_the_mannheim_project
-					bonus = 1.0
-					ahead_reduction = 2
-					technology = nuclear_reactor
+				add_breakthrough_progress = {
+					specialization = specialization_nuclear
+					value = 0.75
 				}
 			}
-			if = {
+			else_if = {
 				limit = {
 					has_tech = nuclear_reactor
 				}
-				55 = {
+				random_owned_controlled_state = {
+					limit = {
+						nuclear_reactor < 1
+					}
+
+					prioritize = { 55 }
 					add_building_construction = {
 						type = nuclear_reactor
 						level = 1
 						instant_build = yes
 					}
 				}
-				add_tech_bonus = {
-					name = GER_the_mannheim_project
-					bonus = 1.0
-					technology = nukes
+				add_breakthrough_progress = {
+					specialization = specialization_nuclear
+					value = 0.5
 				}
 			}
+			else = {
+				random_owned_controlled_state = {
+					limit = {
+						nuclear_reactor_heavy_water < 1
+					}
+
+					prioritize = { 55 }
+					add_building_construction = {
+						type = nuclear_reactor_heavy_water
+						level = 1
+						instant_build = yes
+					}
+				}
+				add_breakthrough_progress = {
+					specialization = specialization_nuclear
+					value = 0.5
+				}
+			}			
 		}
 	}
 
