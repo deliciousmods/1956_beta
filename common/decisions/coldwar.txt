@@ -923,12 +923,17 @@ CW_united_nations_security_council = {
 		target_trigger = {
 			FROM = {
 				has_war = yes
+				is_subject = no
 				NOT = {
+					has_country_flag = r56_UN_supported
 					any_enemy_country = {
 						has_country_flag = r56_invited_to_un_security_council
 					}
 				}
 				any_enemy_country = {	#if all UNSC members are at war with this country, don't show
+					NOT = {
+						has_country_flag = r56_UN_supported
+					}
 					any_country = {
 						has_country_flag = r56_invited_to_un_security_council
 						NOT = {
@@ -938,10 +943,57 @@ CW_united_nations_security_council = {
 				}
 			}
 		}
+		available = {	#duplicate with target_trigger, but target_trigger isn't checked often enough
+			FROM = {
+				any_enemy_country = {
+					NOT = {
+						has_country_flag = r56_UN_supported
+					}
+				}
+			}
+		}
 		remove_effect = {
-			add_relation_rule_override = {
-				target = FROM
-				can_send_volunteers = yes
+			add_to_variable = { FROM.r56_UN_support_votes = 1 }
+			if = {
+				limit = {
+					check_variable = { global.un_member_count = FROM.r56_UN_support_votes }
+				}
+				FROM = {
+					set_country_flag = r56_UN_supported
+				}
+				every_country = {
+					limit = {
+						has_country_flag = r56_invited_to_un_security_council
+					}
+					meta_effect = { #This effect doesn't support FROM
+						text = {
+							add_relation_rule_override = {
+								target = [SUPPORT_ID]
+								can_send_volunteers = yes
+							}
+						}
+						SUPPORT_ID = "[FROM.GetTag]"
+					}
+				}
+			}
+			else = {
+				custom_effect_tooltip = if_un_accepted_tt
+				effect_tooltip = {
+					every_country = {
+						limit = {
+							has_country_flag = r56_invited_to_un_security_council
+						}
+						meta_effect = { #This effect doesn't support FROM
+							text = {
+								add_relation_rule_override = {
+									target = [SUPPORT_ID]
+									can_send_volunteers = yes
+								}
+							}
+							SUPPORT_ID = "[FROM.GetTag]"
+						}
+					}
+				}
 			}
 		}
 	}
@@ -950,6 +1002,9 @@ CW_united_nations_security_council = {
 			clr_country_flag = r56_invited_to_un_security_council
 			remove_from_array = { global.members_of_un = ROOT.id }
 			set_country_flag = r56_resigned_from_unsc
+			hidden_effect = {
+				r56_calculate_un_members = yes
+			}
 		}
 	}
 	CW_vote_to_replace_council_member = {
@@ -967,17 +1022,27 @@ CW_united_nations_security_council = {
 			}
 		}
 		complete_effect = {
-			FROM = {
-				set_country_flag = r56_invited_to_un_security_council
-				add_to_array = {
-					global.members_of_un = THIS.id
+			add_to_variable = { FROM.r56_UN_replace_votes = 1 }
+			if = {
+				limit = {
+					set_temp_variable = { member_count_minus_1 = global.un_member_count }
+					subtract_from_temp_variable = { member_count_minus_1 = 1 }
+					check_variable = { member_count_minus_1 = FROM.r56_UN_replace_votes }
 				}
-				every_other_country = {
-					limit = {
-						original_tag = PREV
+				hidden_effect = {
+					FROM = {
+						set_country_flag = r56_invited_to_un_security_council
+						add_to_array = {
+							global.members_of_un = THIS.id
+						}
+						every_other_country = {
+							limit = {
+								original_tag = PREV
+							}
+							clr_country_flag = r56_invited_to_un_security_council
+							remove_from_array = { global.members_of_un = THIS.id }
+						}
 					}
-					clr_country_flag = r56_invited_to_un_security_council
-					remove_from_array = { global.members_of_un = ROOT.id }
 				}
 			}
 		}
@@ -997,6 +1062,14 @@ CW_united_nations_security_council = {
 			add_to_array = {
 				global.members_of_un = THIS.id
 			}
+		}
+	}
+	CW_debug_recalculate_UN_member_count = {
+		visible = {
+			is_debug = yes
+		}
+		complete_effect = {
+			r56_calculate_un_members = yes
 		}
 	}
 }
