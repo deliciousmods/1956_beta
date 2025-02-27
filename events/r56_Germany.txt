@@ -909,8 +909,49 @@ country_event = { #Resolves Europe Post Yalta
 				limit = {
 					has_global_flag = r56_CZE_in_yalta
 				}
-				SOV = {
-					puppet = CZE
+				CZE = {
+					if = {
+						limit = {
+							is_subject = yes
+						}
+						overlord = {
+							end_puppet = CZE
+						}
+					}
+					remove_ideas = {
+						edvard_benes
+					}
+					set_country_flag = yalta_unlock_focuses
+					set_country_flag = hide_interwar_diplomacy	#shouldve happened already, but just in case they allied with Germany or something
+					mark_focus_tree_layout_dirty = yes
+					
+					unlock_national_focus = CZKE_czechoslovak_government_reform
+
+					#intentionally not adding the ones above so research slot focus can be done if not already
+					unlock_national_focus = CZKE_soviet_treaties
+					unlock_national_focus = CZKE_acquire_access_for_soviets
+					if = {
+						limit = {
+							SOV = {
+								has_government = communism
+							}
+						}
+						retire_character = CZKE_radola_gajda	#incapacitated by Soviet torture
+						uncomplete_national_focus = {
+							focus = CZKE_sokol_movement
+							uncomplete_children = yes
+						}
+						unlock_national_focus = CZKE_empower_internationalism
+						SOV = {
+							country_event = cold_war.43
+						}
+					}
+					else = {
+						SOV = {
+							puppet = CZE
+						}
+					}
+
 				}
 				every_state = { 
 					limit = {
@@ -1171,6 +1212,21 @@ country_event = { #Resolves Europe Post Yalta
 						}
 					}
 				}
+				YUG = {
+					if = {
+						limit = {
+							is_subject = yes
+						}
+						overlord = {
+							set_autonomy = {
+								target = YUG
+								autonomous_state = autonomy_free
+								end_wars = no
+								end_civil_wars = no
+							}
+						}
+					}
+				}
 				if = {
 					limit = {
 						YUG = {
@@ -1183,7 +1239,7 @@ country_event = { #Resolves Europe Post Yalta
 							has_government = communism
 						}
 					}
-					YUG = {	
+					YUG = {
 						add_popularity = {
 							ideology = communism
 							popularity = 0.55
@@ -2266,16 +2322,26 @@ country_event = { #Historical post yalta fixing by marijn211
 			news_event = {
 				id = r56.news_event.30
 			}
-			USA = {
-				annex_country = {
-					target = WGR
-					transfer_troops = no
+			every_country = {
+				limit = {
+					original_tag = WGR
+				}
+				USA = {
+					annex_country = {
+						target = PREV
+						transfer_troops = no
+					}
 				}
 			}
-			SOV = {
-				annex_country = {
-					target = DDR
-					transfer_troops = no
+			every_country = {
+				limit = {
+					original_tag = DDR
+				}
+				SOV = {
+					annex_country = {
+						target = PREV
+						transfer_troops = no
+					}
 				}
 			}
 			#French occupation zone
@@ -2488,6 +2554,10 @@ country_event = { #Historical post yalta fixing by marijn211
 			ENG = {
 				activate_mission = occupation_of_iran_decision
 			}
+			PER = {
+				#set_country_flag = yalta_unlock_focuses	#TODO enable when content done
+				mark_focus_tree_layout_dirty = yes
+			}
 		}
 		if = {
 			limit = {
@@ -2678,6 +2748,12 @@ country_event = { #Historical post yalta fixing by marijn211
 					}
 					set_politics = {  #should be decently historical
 						ruling_party = communism
+					}
+					if = {
+						limit = {	#the Yugoslavs basically installed Hoxha
+							has_global_flag = r56_YUG_in_yalta
+						}
+						promote_character = ALB_enver_hoxha		#no longer default
 					}
 					set_popularities = {
 						democratic = 9
@@ -2871,6 +2947,15 @@ country_event = { #Historical post yalta fixing by marijn211
 			limit = {
 				has_global_flag = r56_ITA_in_yalta
 			}
+			if = {
+				limit = {
+					has_global_flag = r56_historical_occupation_yalta_allowed
+				}
+				ITA = {
+					set_country_flag = yalta_unlock_focuses
+					mark_focus_tree_layout_dirty = yes
+				}
+			}
 			ITA = {
 				if = {
 					limit = {
@@ -2897,20 +2982,9 @@ country_event = { #Historical post yalta fixing by marijn211
 				}
 				if = { #Fix Istria
 					limit = { #Havent seen broken Slovenia puppets yet
-						owns_state = 911
+						owns_state = 852
 						owns_state = 736
-						OR = {
-							911 = {
-								owner = {
-									is_ai = yes
-								}
-							}
-							736 = {
-								owner = {
-									is_ai = yes
-								}
-							}
-						}
+						is_ai = yes
 					}
 					if = {
 						limit = {
@@ -2931,7 +3005,7 @@ country_event = { #Historical post yalta fixing by marijn211
 						limit = {
 							country_exists = SLV
 						}
-						SLV = { transfer_state = 911 }
+						SLV = { transfer_state = 852 }
 					}
 					if = {
 						limit = {
@@ -2940,7 +3014,7 @@ country_event = { #Historical post yalta fixing by marijn211
 								country_exists = SLV
 							}
 						}
-						YUG = { transfer_state = 911 }
+						YUG = { transfer_state = 852 }
 					}
 				}
 				if = {
@@ -2968,6 +3042,16 @@ country_event = { #Historical post yalta fixing by marijn211
 					}
 					#announce referendum
 					country_event = { id = r56_italy.107 days = 2 }
+					if = {
+						limit = {
+							has_completed_focus = ITA_monarchia_d_italia
+							NOT = {
+								has_completed_focus = ITA_revoke_the_acerbo_law
+								has_completed_focus = ITA_power_to_the_king
+							}
+						}
+						set_country_flag = ITA_yalta_block_monarchy_focuses_until_referendum
+					}
 				}
 				if = { #fixes weird Italy owning things
 					limit = {
@@ -4423,13 +4507,16 @@ country_event = { #Germany proposes to aid Britain in exchange for some colonies
 		546 = {
 			set_state_owner_to = GER
 		}
-		1055 = {
-			set_state_owner_to = GER
-		}
 		541 = {
 			set_state_owner_to = GER
 		}
+		1096 = {
+			set_state_owner_to = GER
+		}
 		737 = {
+			set_state_owner_to = GER
+		}
+		725 = {
 			set_state_owner_to = GER
 		}
 		GER = {
@@ -5718,7 +5805,6 @@ country_event = {
 				add = 15
 			}			
 		}
-		complete_national_focus = GER_denounce_the_agreement
 		set_country_flag = GER_denounced_the_agreement
 	}
 	option = { #Let's do what they said
@@ -5742,7 +5828,6 @@ country_event = {
 				add = 10
 			}
 		}
-		complete_national_focus = GER_adhere_to_the_agreement
 		set_country_flag = GER_adhere_to_the_agreement
 	}
 }
