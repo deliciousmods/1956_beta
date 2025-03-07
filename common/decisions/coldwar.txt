@@ -1,0 +1,1145 @@
+CW_occupation_negotations = {
+	#opening decisions - I might regret this later, but there seems little need to make this dynamic
+	discuss_the_german_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			NOT = {
+				has_country_flag = r56_yalta_open_germany_category
+				has_country_flag = r56_yalta_fate_of_germany_decided
+			}
+		}
+		complete_effect = {
+			set_country_flag = r56_yalta_open_germany_category
+		}
+		ai_will_do = {
+			base = 1
+		}
+	}
+	close_the_german_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+		}
+		complete_effect = {
+			clr_country_flag = r56_yalta_open_germany_category
+		}
+		ai_will_do = {
+			base = 0
+		}
+	}
+	merge_occupation_zones_germany = {	#is there a point? probably just compliance gain, IRL it helped fix the famine to do economic coop, but you cant assume thered be in with in-game war
+		icon = hol_exchange_intelligence_data
+		days_re_enable = 30	#prevent request spam
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+		}
+		available = {
+			if = {			#dont allow sending to commie as NATO member
+				limit = {
+					NOT = {
+						has_government = communism
+					}
+				}
+				OR = {
+					FROM = {
+						NOT = {
+							has_government = communism
+						}
+					}
+					NOT = {
+						has_country_flag = TO_joined_brussels_treaty
+					}
+				}
+				else = {	#dont allow sending to NATO member as commie
+					FROM = {
+						NOT = {
+							has_country_flag = TO_joined_brussels_treaty
+						}
+					}
+				}
+			}
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				OR = {
+					is_ally_with = ROOT
+					AND = {
+						count_triggers = {
+							amount = 2
+							gives_military_access_to = ROOT
+							has_military_access_to = ROOT
+							has_non_aggression_pact_with = ROOT
+							AND = {
+								has_guaranteed = ROOT
+								is_guaranteed_by = ROOT
+							}
+						}
+					}
+				}
+			}
+		}
+		target_trigger = {
+			FROM = {
+				NOT = {	#when in group, let group approach this country instead
+					has_variable = r56_yalta_occupation_group
+				}
+				any_controlled_state = {
+					is_core_of = GER
+					NOT = {	#in case of CZE/AUS/POL/BEL owning German land
+						is_core_of = FROM
+					}
+					any_neighbor_state = {	#no discontinuous zone merge
+						is_owned_by = ROOT
+					}
+				}
+			}
+		}
+		complete_effect = { #set a variable that indicates which group the country is trying to form?
+			if = {
+				limit = {
+					OR = {
+						NOT = {
+							has_variable = r56_yalta_occupation_group
+						}
+						#all other nations in group have approved
+						NOT = {
+							any_other_country = {
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+								NOT = {
+									is_in_array = {
+										array = r56_yalta_approved_zone_occupation_merger
+										value = FROM.id
+									}
+								}
+							}
+						}
+					}
+				}
+				FROM = {
+					country_event = cold_war.41
+				}
+			}
+			else = {
+				add_to_array = {
+					array = r56_yalta_approved_zone_occupation_merger
+					value = FROM.id
+				}
+			}
+			custom_effect_tooltip = r56_shared_zone_action_required_tt
+			custom_effect_tooltip = r56_shared_zone_effect_tt
+		}
+		ai_will_do = {
+			base = 1
+			modifier = {
+				factor = 0
+				FROM = {
+					NOT = {
+						has_government = ROOT
+					}
+				}
+			}
+		}
+	}
+	prepare_formation_of_german_state_in_control_zone = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+			NOT = {
+				has_country_flag = r56_yalta_prepared_german_state
+			}
+		}
+		available = {
+		}
+		fire_only_once = yes
+		remove_effect = {
+			set_country_flag = r56_yalta_prepared_german_state
+			custom_effect_tooltip = r56_shared_zone_action_required_tt
+		}
+		ai_will_do = {
+			base = 1
+		}
+	}
+	approve_form_german_state_in_control_zone = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+			has_country_flag = r56_yalta_prepared_german_state
+		}
+		fire_only_once = yes
+		available = {
+			#will only have an effect if all countries in shared zone do this
+			OR = {
+				custom_trigger_tooltip = {
+					tooltip = r56_not_in_yalta_group_tt
+					NOT = {
+						has_variable = r56_yalta_occupation_group
+					}
+				}
+				AND = {
+					custom_trigger_tooltip = {
+						tooltip = r56_yalta_group_ready_tt
+						NOT = {		#all in group approved
+							any_other_country = {
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+								NOT = {
+									has_country_flag = r56_yalta_prepared_german_state
+								}
+							}
+						}
+					}
+					custom_trigger_tooltip = {
+						tooltip = r56_strongest_in_yalta_group_tt
+						NOT = {		#strongest in group
+							any_other_country = {
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+								ic_ratio = {
+									tag = ROOT
+									ratio > 1
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		days_remove = 360
+		remove_effect = {
+			if = {
+				limit = {
+					has_government = communism
+					DDR = {
+						exists = no
+					}
+				}
+				every_state = {
+					limit = {
+						OR = {
+							is_owned_by = ROOT
+							owner = {
+								has_variable = r56_yalta_occupation_group
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+							}
+						}
+						is_core_of = GER
+					}
+					add_core_of = DDR
+					transfer_state_to = DDR
+				}
+				set_autonomy = {
+					target = DDR
+					autonomy_state = autonomy_puppet
+					end_wars = no
+					end_civil_wars = no
+				}
+			}
+			else_if = {
+				limit = {
+					has_government = communism
+				}
+				create_dynamic_country = {
+					original_tag = DDR
+					copy_tag = ROOT
+					every_state = {
+						limit = {
+							OR = {
+								is_owned_by = ROOT
+								owner = {
+									has_variable = r56_yalta_occupation_group
+									check_variable = {
+										r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+									}
+								}
+							}
+							is_core_of = GER
+						}
+						transfer_state_to = PREV
+						add_core_of = PREV
+					}
+					set_variable = { r56_germany_releaser = ROOT.id }
+				}
+			}
+			else_if = {
+				limit = {
+					WGR = {
+						exists = no
+					}
+				}
+				every_state = {
+					limit = {
+						OR = {
+							is_owned_by = ROOT
+							owner = {
+								has_variable = r56_yalta_occupation_group
+								check_variable = {
+									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+							}
+						}
+						is_core_of = GER
+					}
+					add_core_of = WGR
+					transfer_state_to = WGR
+				}
+				set_autonomy = {
+					target = WGR
+					autonomy_state = autonomy_dominion
+					end_wars = no
+					end_civil_wars = no
+				}
+			}
+			else = {
+				create_dynamic_country = {
+					original_tag = WGR
+					copy_tag = ROOT
+					every_state = {
+						limit = {
+							OR = {
+								is_owned_by = ROOT
+								owner = {
+									has_variable = r56_yalta_occupation_group
+									check_variable = {
+										r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+									}
+								}
+							}
+							is_core_of = GER
+						}
+						transfer_state_to = PREV
+						add_core_of = PREV
+					}
+					set_variable = { r56_germany_releaser = ROOT.id }
+				}
+			}
+			every_country = {
+				limit = {
+					OR = {
+						original_tag = DDR
+						original_tag = WGR
+					}
+					check_variable = {
+						r56_germany_releaser = ROOT
+					}
+				}
+				ROOT = {
+					if = {
+						limit ={
+							has_government = democratic
+						}
+						set_autonomy = {
+							target = PREV
+							autonomy_state = autonomy_dominion
+						}
+					}
+					else = {
+						set_autonomy = {
+							target = PREV
+							autonomy_state = autonomy_puppet
+						}
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1
+				OR = {
+					country_exists = WGR
+					country_exists = DDR
+					country_exists = GER
+					has_war_with_major = yes
+					AND = {
+						NOT = {
+							has_government = communism
+						}
+						SOV = {
+							has_government = communism
+							has_added_tension_amount > 10
+						}
+					}
+				}
+				NOT = {
+					any_other_country = {
+						has_government = ROOT
+						any_controlled_state = {
+							is_core_of = GER
+						}
+						NOT = {
+							has_variable = r56_yalta_occupation_group
+						}
+					}
+				}
+			}
+		}
+	}
+	r56_yalta_propose_neutral_germany = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			has_country_flag = r56_yalta_open_germany_category
+			NOT = {
+				country_exists = GER
+			}
+		}
+		available = {
+			always = yes
+		}
+		days_re_enable = 360
+		cost = 25
+		complete_effect = {
+			country_event = cold_war.39
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1000	#need to be high since it costs pp
+				original_tag = SOV
+				NOT = {	#Soviets get to propose this once
+					has_country_flag = r56_yalta_proposing_undemocratic_germany
+				}
+			}
+		}
+ 	}
+	r56_yalta_neutral_germany_forming = {
+		allowed = {
+			always = no
+		}
+		is_good = yes
+		available = {
+			NOT = {
+				any_owned_state = {
+					is_core_of = GER
+				}
+			}
+		}
+		days_mission_timeout = 100 #a government already existed
+		timeout_effect = {	#probably put the effect on one side, and a tooltip on the rest
+			every_state = {
+				limit = {
+					is_core_of = GER
+					NOT = {
+						owner = {
+							PREV = {
+								is_core_of = PREV
+							}
+						}
+					}
+				}
+				transfer_state_to = GER
+			}
+			#put government in event so it doesnt need to be stored
+		}
+	}
+	dismantle_german_war_industry = {	#every 3 mils becomes 1 civ for GER, and 1 mil for the occupier
+		icon = generic_construction
+		state_target = yes
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
+			}
+			NOT = {
+				has_variable = r56_yalta_occupation_group
+			}
+			has_country_flag = r56_yalta_open_germany_category
+		}
+		target_trigger = {
+			FROM = {
+				is_owned_by = ROOT
+				is_fully_controlled_by = ROOT
+				is_core_of = GER
+				arms_factory > 0
+			}
+		}
+		days_remove = 200
+		remove_effect = {
+			if = {
+				limit = {
+					FROM = {
+						arms_factory > 2
+					}
+				}
+				FROM = {
+					remove_building = {
+						type = arms_factory
+						level = 3
+					}
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				random_owned_controlled_state = {
+					limit = {
+						is_core_of = ROOT
+						free_building_slots = {
+							building = arms_factory
+							size > 0
+							include_locked = no
+						}
+					}
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+			}
+			else = {
+				FROM = {
+					remove_building = {
+						type = arms_factory
+						level = building_level@arms_factory
+					}
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+			}
+			add_threat = -1
+		}
+		ai_will_do = {
+			base = 1
+			modifier = {
+				factor = 0
+				any_enemy_country = {
+					is_major = yes
+				}
+			}
+		}
+	}
+ 	discuss_the_austrian_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_austria_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			NOT = {
+				has_country_flag = r56_yalta_open_austria_category
+				has_country_flag = r56_yalta_fate_of_austria_decided
+			}
+		}
+		complete_effect = {
+			set_country_flag = r56_yalta_open_austria_category
+		}
+		ai_will_do = {
+			base = 1
+		}
+ 	}
+	close_the_austrian_issue = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_austria_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			has_country_flag = r56_yalta_open_austria_category
+		}
+		complete_effect = {
+			clr_country_flag = r56_yalta_open_austria_category
+		}
+		ai_will_do = {
+			base = 0
+		}
+ 	}
+	r56_yalta_propose_neutral_austria = {
+		visible = {
+			has_global_flag = r56_unlocked_fate_of_austria_decisions
+			any_controlled_state = {
+				is_core_of = AUS
+			}
+			has_country_flag = r56_yalta_open_austria_category
+			NOT = {
+				country_exists = AUS
+			}
+		}
+		days_re_enable = 360
+		cost = 25
+		complete_effect = {
+			country_event = cold_war.37
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1000	#need to be high since it costs pp
+				original_tag = SOV
+				OR = {
+					date > 1955.06.06
+					AND = {
+						NOT = {
+							has_country_leader = {
+								character = SOV_iosif_stalin
+								ruling_only = yes
+							}
+						}
+						date > 1952.06.06	#other leader before death of Stalin = earlier
+					}
+				}
+			}
+		}
+ 	}
+	r56_yalta_neutral_austria_forming = {
+		allowed = {
+			always = no
+		}
+		is_good = yes
+		available = {
+			NOT = {
+				any_owned_state = {
+					is_core_of = AUS
+				}
+			}
+		}
+		days_mission_timeout = 100 #a government already existed
+		timeout_effect = {	#Iran complains
+			every_state = {
+				limit = {
+					is_core_of = AUS
+					NOT = {
+						owner = {
+							PREV = {
+								is_core_of = PREV
+							}
+						}
+					}
+				}
+				transfer_state_to = AUS
+			}
+			AUS = {
+				load_focus_tree = generic_focus
+			}
+			#put government in event so it doesnt need to be stored
+		}
+	}
+	occupation_of_iran_decision = {	#itd be nicer if garrison divisions existed, so the decision below this wouldnt be needed, but no data
+		allowed = {
+			always = no
+		}
+		is_good = no
+		days_mission_timeout = 142
+		available = {
+			NOT = {
+				#has_subject = PER
+				any_owned_state = {
+					is_core_of = PER
+				}
+				any_subject_country = {	#includes Soviet puppets
+					any_owned_state = {
+						is_core_of = PER
+					}
+				}
+			}
+		}
+		timeout_effect = {	#Iran complains
+			add_threat = 5
+		}
+	}
+	withdraw_occupation_of_iran_decision = {
+		allowed = {
+			OR = {
+				original_tag = SOV
+				original_tag = ENG
+			}
+		}
+		icon = generic_prepare_civil_war
+		fire_only_once = yes	#this is so the category does not reappear if Iran is puppeted later
+		available = {
+			# if = {	#Ive made some scoping mistakes
+			# 	limit = {
+			# 		has_subject = PER
+			# 	}
+			# 	PER = {
+			# 		NOT = {
+			# 			any_owned_state = {
+			# 				ROOT = {
+			# 					divisions_in_state = {
+			# 						size < 1
+			# 						state = PREV
+			# 					}
+			# 				}
+			# 			}
+			# 		}
+			# 	}
+			# }
+			# else = {
+			# 	NOT = {
+			# 		any_owned_state = {
+			# 			is_core_of = PER
+			# 			PREV = {
+			# 				divisions_in_state = {
+			# 					size < 1
+			# 					state = PREV
+			# 				}
+			# 			}
+			# 		}
+			# 	}
+			# }
+		}
+		visible = {
+			PER = {
+				exists = yes
+			}
+			OR = {
+				has_subject = PER
+				any_owned_state = {
+					is_core_of = PER
+				}
+			}
+		}
+		remove_effect = {
+			every_owned_state = {
+				limit = {
+					is_core_of = PER
+				}
+				transfer_state_to = PER
+			}
+			if = {
+				limit = {
+					has_subject = PER
+				}
+				set_autonomy = {
+					target = PER
+					autonomous_state = autonomy_free
+					end_wars = no
+					end_civil_wars = no
+				}
+				PER = {
+					add_ideas = PER_anglo_iranian_oil_company
+				}
+			}
+			#if they dont have the mission that pressures for withdrawing, they failed it, so remove some of the tension they caused
+			if = {
+				limit = {
+					NOT = {
+						has_active_mission = occupation_of_iran_decision
+					}
+				}
+				add_threat = -3
+			}
+		}
+		ai_will_do = {	#UK should historically retreat from Germany
+			base = 0
+			modifier = {	#dont withdraw from Iran during WW2
+				add = 1
+				OR = {
+					has_war = no
+					has_active_mission = occupation_of_iran_decision
+				}
+			}			
+			modifier = {	#if UK is agressive ideology but got yalta, keep Iran
+				factor = 0
+				OR = {
+					has_government = neutrality
+					has_government = fascism
+				}
+			}
+			modifier = {	#Soviets shouldnt withdraw from Iran for a while, but do it later
+				factor = 0
+				original_tag = SOV
+				has_active_mission = occupation_of_iran_decision	#Soviets historically let it expire, then did it later anyway
+			}
+		}
+	}
+	SOV_release_AZE_puppet = {
+
+		icon = generic_nationalism
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		available = {
+			owns_state = 419
+			owns_state = 987
+			NOT = {
+				AZR = {
+					exists = yes
+				}
+			}
+		}
+
+		visible = {
+			any_controlled_state = {
+				is_core_of = PER
+			}
+		}
+
+		days_remove = 45
+		
+		fire_only_once = yes
+
+		remove_effect = {
+			AZR = {
+				transfer_state = 419
+				transfer_state = 987
+				set_cosmetic_tag = AZR_SOV_communism_subject	#this is so they remain this name even when USSR removes puppet with the decision below
+			}
+			set_autonomy = {
+				target = AZR
+				autonomy_state = autonomy_dominion
+				end_wars = no
+				end_civil_wars = no
+			}
+			if = {
+				limit = {
+					has_government = communism	#since puppet will become that too
+					PER = {
+						NOT = {
+							has_government = communism
+						}
+					}
+				}
+				PER = {
+					PER_Ja_Far_Pishevari = {
+						set_nationality = AZR
+						add_country_leader_role = {
+							promote_leader = yes
+							country_leader = {
+								ideology = stalinism
+								expire = "1947.1.1.1"
+								traits = { }
+							}
+						}
+					}
+				}
+			}
+		}			
+		ai_will_do = {
+			factor = 50
+		}
+	}
+	SOV_release_KUR_puppet = {
+
+		icon = generic_nationalism
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		available = {
+			owns_state = 988
+			NOT = {
+				KUR = {
+					exists = yes
+				}
+			}
+		}
+
+		visible = {
+			any_controlled_state = {
+				is_core_of = PER
+			}
+		}
+
+		days_remove = 45
+		
+		fire_only_once = yes
+
+		remove_effect = {
+			KUR = {
+				transfer_state = 988
+				set_cosmetic_tag = KUR_SOV_communism_subject	#this is so they remain this name even when USSR removes puppet with the decision below
+			}
+			set_autonomy = {
+				target = KUR
+				autonomy_state = autonomy_dominion
+				end_wars = no
+				end_civil_wars = no
+			}
+		}			
+		ai_will_do = {
+			factor = 50
+		}
+	}
+	SOV_withdraw_from_puppets_in_iran = {
+		allowed = {
+			original_tag = SOV
+		}
+		visible = {
+			OR = {
+				AND = {
+					has_subject = AZR
+					AZR = {
+						any_owned_state = {
+							is_core_of = PER
+						}
+					}
+				}
+				AND = {
+					has_subject = KUR
+					KUR = {
+						any_owned_state = {
+							is_core_of = PER
+						}
+					}
+				}
+			}
+		}
+		remove_effect = {
+			if = {
+				limit = {
+					has_subject = AZR
+				}
+				end_puppet = AZR
+				AZR = {
+					leave_faction = yes
+				}
+				PER = {
+					create_wargoal = {
+						type = annex_everything
+						target = AZR
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_subject = KUR
+				}
+				end_puppet = KUR
+				KUR = {
+					leave_faction = yes
+				}
+				PER = {
+					create_wargoal = {
+						type = annex_everything
+						target = KUR
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1
+				NOT = {
+					any_owned_state = {
+						is_core_of = PER
+					}
+				}
+			}
+		}
+	}
+}
+CW_united_nations_security_council = {
+	CW_vote_for_intervention = {
+		fire_only_once = yes
+		target_trigger = {
+			FROM = {
+				has_war = yes
+				is_subject = no
+				NOT = {
+					has_country_flag = r56_UN_supported
+					any_enemy_country = {
+						has_country_flag = r56_invited_to_un_security_council
+					}
+				}
+				any_enemy_country = {	#if all UNSC members are at war with this country, don't show
+					NOT = {
+						has_country_flag = r56_UN_supported
+					}
+					any_country = {
+						has_country_flag = r56_invited_to_un_security_council
+						NOT = {
+							has_war_with = PREV
+						}
+					}
+				}
+			}
+		}
+		available = {	#duplicate with target_trigger, but target_trigger isn't checked often enough
+			FROM = {
+				any_enemy_country = {
+					NOT = {
+						has_country_flag = r56_UN_supported
+					}
+				}
+			}
+		}
+		remove_effect = {
+			add_to_variable = { FROM.r56_UN_support_votes = 1 }
+			if = {
+				limit = {
+					check_variable = { global.un_member_count = FROM.r56_UN_support_votes }
+				}
+				FROM = {
+					set_country_flag = r56_UN_supported
+				}
+				every_country = {
+					limit = {
+						has_country_flag = r56_invited_to_un_security_council
+					}
+					meta_effect = { #This effect doesn't support FROM
+						text = {
+							add_relation_rule_override = {
+								target = [SUPPORT_ID]
+								can_send_volunteers = yes
+							}
+						}
+						SUPPORT_ID = "[FROM.GetTag]"
+					}
+				}
+			}
+			else = {
+				custom_effect_tooltip = if_un_accepted_tt
+				effect_tooltip = {
+					every_country = {
+						limit = {
+							has_country_flag = r56_invited_to_un_security_council
+						}
+						meta_effect = { #This effect doesn't support FROM
+							text = {
+								add_relation_rule_override = {
+									target = [SUPPORT_ID]
+									can_send_volunteers = yes
+								}
+							}
+							SUPPORT_ID = "[FROM.GetTag]"
+						}
+					}
+				}
+			}
+		}
+	}
+	CW_vote_to_place_embargo = {
+		fire_only_once = yes
+		target_trigger = {	
+			FROM = {
+				has_war = yes
+				NOT = {
+					has_country_flag = r56_UN_supported		#do not embargo after supporting
+				}
+			}
+		}
+		remove_effect = {
+			add_to_variable = { FROM.r56_UN_embargo_votes = 1 }
+			if = {
+				limit = {
+					check_variable = { global.un_member_count = FROM.r56_UN_embargo_votes }
+				}
+				every_country = {
+					limit = {
+						has_country_flag = r56_invited_to_un_security_council
+					}
+					send_embargo = FROM
+				}
+			}
+			else = {
+				custom_effect_tooltip = if_un_accepted_tt
+				effect_tooltip = {
+					every_country = {
+						limit = {
+							has_country_flag = r56_invited_to_un_security_council
+						}
+						send_embargo = FROM
+					}
+				}
+			}
+		}
+	}
+	CW_boycott_un = {
+		complete_effect = {
+			clr_country_flag = r56_invited_to_un_security_council
+			remove_from_array = { global.members_of_un = ROOT.id }
+			set_country_flag = r56_resigned_from_unsc
+			hidden_effect = {
+				r56_calculate_un_members = yes
+			}
+		}
+	}
+	CW_vote_to_replace_council_member = {
+		fire_only_once = yes
+		target_trigger = {
+			FROM = {
+				any_other_country = {
+					has_country_flag = r56_invited_to_un_security_council
+					original_tag = PREV
+					OR = {
+						exists = no
+						has_civil_war = yes
+						has_idea = KMT_retreat_to_taiwan_idea
+					}
+				}
+			}
+		}
+		complete_effect = {
+			add_to_variable = { FROM.r56_UN_replace_votes = 1 }
+			if = {
+				limit = {
+					set_temp_variable = { member_count_minus_1 = global.un_member_count }
+					subtract_from_temp_variable = { member_count_minus_1 = 1 }
+					check_variable = { member_count_minus_1 = FROM.r56_UN_replace_votes }
+				}
+				hidden_effect = {
+					FROM = {
+						set_country_flag = r56_invited_to_un_security_council
+						add_to_array = {
+							global.members_of_un = THIS.id
+						}
+						every_other_country = {
+							limit = {
+								original_tag = PREV
+							}
+							clr_country_flag = r56_invited_to_un_security_council
+							remove_from_array = { global.members_of_un = THIS.id }
+						}
+					}
+				}
+			}
+		}
+	}
+	CW_debug_accept_un_invite = {	#can use console command to add the flag, but this adds them to the array
+		visible = {
+			is_debug = yes
+			has_country_flag = r56_invited_to_un_security_council
+			NOT = {
+				is_in_array = {
+					array = global.members_of_un
+					value = THIS.id
+				}
+			}
+		}
+		complete_effect = {
+			add_to_array = {
+				global.members_of_un = THIS.id
+			}
+			r56_calculate_un_members = yes
+		}
+	}
+	CW_debug_recalculate_UN_member_count = {
+		visible = {
+			is_debug = yes
+		}
+		complete_effect = {
+			r56_calculate_un_members = yes
+		}
+	}
+}
