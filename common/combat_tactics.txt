@@ -8,11 +8,12 @@ phases = { # phase = no is the standard phase
 	tactical_withdrawal
 	seize_bridge
 	hold_bridge
-	complex_ambush
-	deadly_trap
-	break_line
+	street_fighting
+	complex_ambush #R56
+	deadly_trap #R56
+	break_line #R56
 }
-#mod tactics and phases first
+#R56 mod tactics and phases first
 
 #this marks the start of default tactics
 tactic_basic_attack = {
@@ -168,6 +169,7 @@ tactic_assault = {
 	trigger = {
 		is_attacker = yes
 		phase = no
+		has_artillery_ratio > 0.1
 	}
 	
 	active = yes
@@ -181,9 +183,9 @@ tactic_assault = {
 		}
 
 		modifier = {
-			add = 2
+			factor = 0.2
 
-			is_fighting_in_terrain = urban
+			NOT = { is_fighting_in_terrain = urban }
 		}
 	}
 	#Revisit ideally this should be more common in urban terrain
@@ -284,7 +286,7 @@ tactic_cc_withdraw = {
 	defender = -0.05
 }
 
-#modded CC
+#R56 modded CC starts here
 tactic_cc_flamethrower_attack = { 
 	is_attacker = yes
 	trigger = {
@@ -1261,11 +1263,17 @@ tactic_partisan_sweeps = {
     trigger = { # combined scope for both country and combatant
         is_attacker = yes
         phase = no
+        OR = {
+         	skill > 1
+        	has_trait = homeland_connoisseur
+			has_trait = commando
+			skill_advantage > 1
+        }
     }
     
     active = yes
 
-    base =  { factor = 2 } #ideally doesn't show up except when countering guerrila warfare
+    base = { factor = 1 } #ideally doesn't show up except when countering guerrila warfare
     
     picture = partisan_sweeps
     
@@ -2520,6 +2528,208 @@ tactic_dt_finish_them = {
 
 	picture = dt_finish_them
 	display_phase = deadly_trap
+}
+
+tactic_sf_storm = { #Basic Urban assault tactic
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = street_fighting
+	}
+	
+	active = yes
+	display_phase = street_fighting
+	
+	base =  {
+		factor = 2
+	}
+	picture = tactic_sf_storm
+	
+	attacker = 0.05
+	defender = 0.1
+	defender_org_damage_modifier = -0.05
+	combat_width = 0.05
+	
+}
+
+tactic_sf_barrage = { #Slow moving assault using heavy artillery barrage and artileery sniping
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = street_fighting
+		has_artillery_ratio > 0.1
+	}
+	
+	active = no
+	display_phase = street_fighting
+	
+	base =  {
+		factor = 2
+	}
+	picture = tactic_sf_barrage
+	
+	attacker = 0.1
+	defender = -0.05
+	combat_width = -0.05
+	defender_org_damage_modifier = -0.1
+	
+}
+
+tactic_sf_armor_supported_assault = { #Assault using specialist armoured vehicles
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = street_fighting
+		custom_trigger_tooltip = {
+			tooltip = has_flame_tank_units
+			OR = {
+				has_unit_type = light_flame_tank
+				has_unit_type = medium_flame_tank
+				has_unit_type = heavy_flame_tank
+			}
+		}
+	}
+	
+	active = yes 
+	display_phase = street_fighting
+	
+	base =  {
+		factor = 2
+	}
+	picture = tactic_sf_armor_supported_assault
+	
+	attacker = 0.15
+	combat_width = -0.1
+	defender_org_damage_modifier = -0.1
+}
+
+tactic_sf_mouse_holing = { #House to House assaul, avoiding open streets where possible # Counters fortify
+	is_attacker = yes
+	trigger = {
+		is_attacker = yes
+		phase = street_fighting
+		OR = {
+			has_unit_type = engineer
+			has_unit_type = pioneer_support
+		}
+	}
+	
+	active = yes
+	display_phase = street_fighting
+	
+	base =  {
+		factor = 2
+	}
+	picture = tactic_sf_mouse_holing
+	
+	#attacker = 0.05
+	defender = -0.1
+	attacker_movement_speed = -0.05
+	defender_org_damage_modifier = -0.1
+}
+
+#Vanilla Urban Tactics
+tactic_urban_defense = { 
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		is_fighting_in_terrain = urban
+		phase = no
+	}
+	
+	active = yes
+	
+	base =  {
+		factor = 2
+		modifier = {
+			factor = 0
+			NOT = { is_fighting_in_terrain = urban }
+		}
+		modifier = {
+			factor = 2
+			province_vp > 5
+		}
+		modifier = {
+			factor = 3
+			has_trait = urban_assault_specialist
+		}
+		modifier = {
+			factor = 1.5
+			has_trait = trait_engineer
+		}
+
+	} 
+	
+	picture = tactic_urban_defense
+	#countered_by = tactic_urban_defense
+	
+	phase = street_fighting #changes phase to Street Fighting
+	
+	attacker = -0.05
+	defender = 0.05
+	attacker_movement_speed = -0.05
+	attacker_org_damage_modifier = -0.1
+	#combat_width = -0.1
+}
+
+tactic_sf_defense = { #Basic Urban defensive tactic
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = street_fighting
+	}
+	
+	active = yes
+	display_phase = street_fighting
+	
+	base =  {
+		factor = 2
+	}
+	picture = tactic_sf_defense
+	
+	attacker = -0.05
+	defender = 0.1	
+	attacker_org_damage_modifier = -0.1
+}
+
+tactic_sf_fortify = { #countered by mouse holing
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = street_fighting
+	}
+	
+	active = yes
+	display_phase = street_fighting
+	
+	base =  {
+		factor = 2
+	}
+	picture = tactic_sf_fortify
+	countered_by = tactic_sf_mouse_holing
+	
+	attacker = -0.10
+	defender = 0.05	
+	attacker_org_damage_modifier = -0.15
+}
+
+tactic_sf_ambush = { #countered by mouse holing
+	is_attacker = no
+	trigger = {
+		is_attacker = no
+		phase = street_fighting
+	}
+	
+	active = no
+	display_phase = street_fighting
+	
+	base =  {
+		factor = 2
+	}
+	picture = tactic_sf_ambush
+	
+	defender = 0.25
+	attacker_org_damage_modifier = -0.10
 }
 
 ###Break Line
