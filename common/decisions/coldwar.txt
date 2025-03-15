@@ -465,6 +465,9 @@ CW_occupation_negotations = {
 			any_controlled_state = {
 				is_core_of = GER
 			}
+			NOT = {
+				has_variable = r56_yalta_occupation_group
+			}
 			has_country_flag = r56_yalta_open_germany_category
 		}
 		target_trigger = {
@@ -798,12 +801,36 @@ CW_occupation_negotations = {
 			AZR = {
 				transfer_state = 419
 				transfer_state = 987
+				set_cosmetic_tag = AZR_SOV_communism_subject	#this is so they remain this name even when USSR removes puppet with the decision below
 			}
 			set_autonomy = {
 				target = AZR
 				autonomy_state = autonomy_dominion
 				end_wars = no
 				end_civil_wars = no
+			}
+			if = {
+				limit = {
+					has_government = communism	#since puppet will become that too
+					PER = {
+						NOT = {
+							has_government = communism
+						}
+					}
+				}
+				PER = {
+					PER_Ja_Far_Pishevari = {
+						set_nationality = AZR
+						add_country_leader_role = {
+							promote_leader = yes
+							country_leader = {
+								ideology = stalinism
+								expire = "1947.1.1.1"
+								traits = { }
+							}
+						}
+					}
+				}
 			}
 		}			
 		ai_will_do = {
@@ -844,6 +871,7 @@ CW_occupation_negotations = {
 				hidden_effect = {
 					load_oob = "KUR_peshmerga"
 				}
+				set_cosmetic_tag = KUR_SOV_communism_subject	#this is so they remain this name even when USSR removes puppet with the decision below
 			}
 			set_autonomy = {
 				target = KUR
@@ -886,6 +914,9 @@ CW_occupation_negotations = {
 					has_subject = AZR
 				}
 				end_puppet = AZR
+				AZR = {
+					leave_faction = yes
+				}
 				PER = {
 					create_wargoal = {
 						type = annex_everything
@@ -898,6 +929,9 @@ CW_occupation_negotations = {
 					has_subject = KUR
 				}
 				end_puppet = KUR
+				KUR = {
+					leave_faction = yes
+				}
 				PER = {
 					create_wargoal = {
 						type = annex_everything
@@ -1311,6 +1345,200 @@ political_actions = {
 			custom_effect_tooltip = PRC_recruit_remnants_tt
 			add_war_support = -0.05
 			add_stability = -0.05
+		}
+	}
+}
+CW_united_nations_security_council = {
+	CW_vote_for_intervention = {
+		fire_only_once = yes
+		target_trigger = {
+			FROM = {
+				has_war = yes
+				is_subject = no
+				NOT = {
+					has_country_flag = r56_UN_supported
+					any_enemy_country = {
+						has_country_flag = r56_invited_to_un_security_council
+					}
+				}
+				any_enemy_country = {	#if all UNSC members are at war with this country, don't show
+					NOT = {
+						has_country_flag = r56_UN_supported
+					}
+					any_country = {
+						has_country_flag = r56_invited_to_un_security_council
+						NOT = {
+							has_war_with = PREV
+						}
+					}
+				}
+			}
+		}
+		available = {	#duplicate with target_trigger, but target_trigger isn't checked often enough
+			FROM = {
+				any_enemy_country = {
+					NOT = {
+						has_country_flag = r56_UN_supported
+					}
+				}
+			}
+		}
+		remove_effect = {
+			add_to_variable = { FROM.r56_UN_support_votes = 1 }
+			if = {
+				limit = {
+					check_variable = { global.un_member_count = FROM.r56_UN_support_votes }
+				}
+				FROM = {
+					set_country_flag = r56_UN_supported
+				}
+				every_country = {
+					limit = {
+						has_country_flag = r56_invited_to_un_security_council
+					}
+					meta_effect = { #This effect doesn't support FROM
+						text = {
+							add_relation_rule_override = {
+								target = [SUPPORT_ID]
+								can_send_volunteers = yes
+							}
+						}
+						SUPPORT_ID = "[FROM.GetTag]"
+					}
+				}
+			}
+			else = {
+				custom_effect_tooltip = if_un_accepted_tt
+				effect_tooltip = {
+					every_country = {
+						limit = {
+							has_country_flag = r56_invited_to_un_security_council
+						}
+						meta_effect = { #This effect doesn't support FROM
+							text = {
+								add_relation_rule_override = {
+									target = [SUPPORT_ID]
+									can_send_volunteers = yes
+								}
+							}
+							SUPPORT_ID = "[FROM.GetTag]"
+						}
+					}
+				}
+			}
+		}
+	}
+	CW_vote_to_place_embargo = {
+		fire_only_once = yes
+		target_trigger = {	
+			FROM = {
+				has_war = yes
+				NOT = {
+					has_country_flag = r56_UN_supported		#do not embargo after supporting
+				}
+			}
+		}
+		remove_effect = {
+			add_to_variable = { FROM.r56_UN_embargo_votes = 1 }
+			if = {
+				limit = {
+					check_variable = { global.un_member_count = FROM.r56_UN_embargo_votes }
+				}
+				every_country = {
+					limit = {
+						has_country_flag = r56_invited_to_un_security_council
+					}
+					send_embargo = FROM
+				}
+			}
+			else = {
+				custom_effect_tooltip = if_un_accepted_tt
+				effect_tooltip = {
+					every_country = {
+						limit = {
+							has_country_flag = r56_invited_to_un_security_council
+						}
+						send_embargo = FROM
+					}
+				}
+			}
+		}
+	}
+	CW_boycott_un = {
+		complete_effect = {
+			clr_country_flag = r56_invited_to_un_security_council
+			remove_from_array = { global.members_of_un = ROOT.id }
+			set_country_flag = r56_resigned_from_unsc
+			hidden_effect = {
+				r56_calculate_un_members = yes
+			}
+		}
+	}
+	CW_vote_to_replace_council_member = {
+		fire_only_once = yes
+		target_trigger = {
+			FROM = {
+				any_other_country = {
+					has_country_flag = r56_invited_to_un_security_council
+					original_tag = PREV
+					OR = {
+						exists = no
+						has_civil_war = yes
+						has_idea = KMT_retreat_to_taiwan_idea
+					}
+				}
+			}
+		}
+		complete_effect = {
+			add_to_variable = { FROM.r56_UN_replace_votes = 1 }
+			if = {
+				limit = {
+					set_temp_variable = { member_count_minus_1 = global.un_member_count }
+					subtract_from_temp_variable = { member_count_minus_1 = 1 }
+					check_variable = { member_count_minus_1 = FROM.r56_UN_replace_votes }
+				}
+				hidden_effect = {
+					FROM = {
+						set_country_flag = r56_invited_to_un_security_council
+						add_to_array = {
+							global.members_of_un = THIS.id
+						}
+						every_other_country = {
+							limit = {
+								original_tag = PREV
+							}
+							clr_country_flag = r56_invited_to_un_security_council
+							remove_from_array = { global.members_of_un = THIS.id }
+						}
+					}
+				}
+			}
+		}
+	}
+	CW_debug_accept_un_invite = {	#can use console command to add the flag, but this adds them to the array
+		visible = {
+			is_debug = yes
+			has_country_flag = r56_invited_to_un_security_council
+			NOT = {
+				is_in_array = {
+					array = global.members_of_un
+					value = THIS.id
+				}
+			}
+		}
+		complete_effect = {
+			add_to_array = {
+				global.members_of_un = THIS.id
+			}
+			r56_calculate_un_members = yes
+		}
+	}
+	CW_debug_recalculate_UN_member_count = {
+		visible = {
+			is_debug = yes
+		}
+		complete_effect = {
+			r56_calculate_un_members = yes
 		}
 	}
 }
