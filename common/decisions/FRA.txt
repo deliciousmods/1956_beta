@@ -374,11 +374,6 @@ FRA_vichy_france = {
 		activation = {
 			original_tag = FRA
 			has_government = fascism
-			is_puppet_of = GER
-			has_focus_tree = vichy_french_focus
-		}
-
-		visible = {
 			OR = {
 				is_subject_of = GER
 				has_focus_tree = vichy_french_focus
@@ -393,8 +388,45 @@ FRA_vichy_france = {
 		is_good = no
 
 		timeout_effect = {
+			# Remove states that should not go to Germany - then Germany annexes Vichy France
+			hidden_effect = {
+				random_country = {
+					limit = {
+						original_tag = FRA 
+						NOT = { tag = ROOT }
+						has_war_with = GER 
+					}
+					set_variable = { GER.transfer_target = THIS }
+					# transfer states to Free France if controlled by Free france
+					ROOT  = {
+						every_owned_state = {
+							if = {
+								limit = {
+									OR = {
+										is_controlled_by = PREV.PREV
+										controller = {	#r56: or an ally of Free France
+											is_ally_with = PREV.PREV.PREV
+										}
+									}
+								}
+								transfer_state_to = GER.transfer_target
+							}
+							else_if = {	#r56 - greatly condensed code that sets ownership of all colonial states to free France, instead of messing with control as well
+								limit = {
+									NOT = { is_core_of = FRA }
+								}
+								set_state_owner_to = GER.transfer_target
+							}
+						}
+					}
+				}
+				GER = { annex_country = { target = ROOT } }
+			}
+
 			transfer_navy = { target = GER }
-			GER = { annex_country = { target = ROOT } }
+			effect_tooltip = {
+				GER = { annex_country = { target = ROOT } }
+			}
 			if = {
 				limit = {
 					NOT = { has_country_flag = scuttled_fleet }

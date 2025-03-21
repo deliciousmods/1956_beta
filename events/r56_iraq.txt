@@ -1,0 +1,1351 @@
+﻿###########################
+# Iraq Events ############
+###########################
+
+add_namespace = r56_iraq
+add_namespace = r56_iraq_faction
+add_namespace = iraq_hist
+
+# Historical events
+
+country_event = { 
+	id = iraq_hist.1
+	title = iraq_hist.1.t
+	desc = iraq_hist.1.desc
+	picture = GFX_report_event_IRQ_golden_square_coup
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	trigger = {
+		has_country_leader = {
+			character = IRQ_Abd_al_Ilah
+			ruling_only = yes
+		}
+		has_government = neutrality
+		if = {
+			limit = { has_focus_tree = R56_iraqi_focus }
+			has_completed_focus = IRQ_reinforce_the_monarchy
+		}
+		else = {
+			# To-do, find DLC focus's that could suitably go here; make content match vanilla if applicable
+		}
+	}
+
+	option = {
+		name = iraq_hist.1.a # Golden Square takes over
+		set_country_flag = IRQ_historical_golden_square_coup
+		add_ideas = IRQ_golden_square_defense_government_idea
+		set_politics = {
+			ruling_party = fascism
+			elections_allowed = no
+		}
+		add_popularity = {
+			ideology = fascism
+			popularity = 0.25
+		}
+		add_stability = -0.1
+		ENG = {
+			add_opinion_modifier = {
+				target = IRQ
+				modifier = large_decrease
+			}
+		}
+		hidden_effect = {
+			every_neighbor_country = {
+				if = {
+					limit = {
+						NOT = {
+							tag = ENG
+						}
+					}
+					country_event = { id = iraq_hist.2 hours = 12 }
+				}
+			}
+			GER = {
+				country_event = { id = iraq_hist.2 hours = 12 }
+			}
+			ITA = {
+				country_event = { id = iraq_hist.2 hours = 12 }
+			}
+			if = {
+				limit = {
+					ENG = {
+						controls_state = 656
+						OR = {
+							has_completed_focus = ENG_the_kings_party
+							has_completed_focus = ENG_home_defence
+							has_completed_focus = ENG_global_defense
+						}
+					}
+				}
+				ENG = {
+					country_event = {
+						id = iraq_hist.6
+						days = 30
+						random_hours = 18
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = iraq_hist.1.b # Coup is defeated
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+		set_country_flag = IRQ_golden_square_coup_failed
+		add_political_power = -150
+		add_stability = 0.05
+		add_popularity = {
+			ideology = neutrality
+			popularity = -0.15
+		}
+	}
+}
+
+country_event = { # Notification of coup
+	id = iraq_hist.2
+	title = iraq_hist.2.t
+	desc = iraq_hist.2.desc
+	picture = GFX_report_event_IRQ_golden_square_coup
+
+	is_triggered_only = yes
+
+	option = {
+		name = iraq_hist.2.a # British option
+		trigger = {
+			tag = ENG
+		}
+		ENG = {
+			add_ai_strategy = {
+				type = prepare_for_war
+				id = IRQ
+				value = 200
+			}
+			add_ai_strategy = {
+				type = invade
+				id = IRQ
+				value = 50
+			}
+		}
+	}
+
+	option = {
+		name = iraq_hist.2.b # gasp!
+	}
+
+	option = {
+		name = iraq_hist.2.c # Axis reaction
+		trigger = {
+			NOT = {	#coup can happen during war
+				has_war_with = IRQ
+			}
+			OR = {
+				tag = GER
+				AND = {
+					is_major = yes
+					is_in_faction_with = GER
+				}
+				AND = {
+					original_tag = FRA
+					is_in_faction_with = GER
+				}
+			}
+		}
+		
+		IRQ = {
+			country_event = { id = iraq_hist.4 days = 1 random_hours = 16 }
+		}
+	}
+}
+
+news_event = { # British launch invasion
+	id = iraq_hist.3
+	title = iraq_hist.3.t
+	desc = iraq_hist.3.desc
+	picture = GFX_news_event_SOV_invasion_iran
+
+	is_triggered_only = yes
+
+	option = {
+		name = iraq_hist.3.a
+	}
+
+}
+
+country_event = { # Axis send guns
+	id = iraq_hist.4
+	title = iraq_hist.4.t
+	desc = iraq_hist.4.desc
+	picture = GFX_report_event_tur_machine_gunners
+
+	is_triggered_only = yes
+
+	option = {
+		name = iraq_hist.4.a
+		add_equipment_to_stockpile = {
+			type = infantry_equipment
+			amount = 500
+			producer = FROM
+		}
+	}
+}
+
+country_event = { # British victory, offer terms
+	id = iraq_hist.5
+	title = iraq_hist.5.t
+	desc = iraq_hist.5.desc
+	picture = GFX_report_event_generic_conference
+
+	is_triggered_only = yes
+
+	option = { ## Iraq agrees to terms
+		name = iraq_hist.5.a
+		white_peace = ENG
+		give_military_access = ENG
+		ENG = {
+			set_autonomy = {
+				target = IRQ
+				autonomy_state = autonomy_puppet
+				end_wars = yes
+			}
+			add_ai_strategy = {
+				type = ignore
+				id = IRQ
+				value = 100
+			}
+		}
+		set_country_flag = IRQ_british_occupation_flag
+		clr_country_flag = IRQ_historical_golden_square_coup
+		drop_cosmetic_tag = yes
+		set_politics = {
+			ruling_party = neutrality
+		}
+		add_popularity = {
+			ideology = neutrality
+			popularity = 0.3
+		}
+		swap_ideas = {
+			remove_idea = IRQ_golden_square_defense_government_idea
+			add_idea = IRQ_golden_square_defense_government_idea_2
+		}
+		#if = { ## doesn't work, but readd later
+			#limit = {
+			#	NOT = {
+			#		ENG = {
+			#			has_resources_rights = {
+			#				state = 291
+			#				resources = { oil }
+			#			}
+			#			has_resources_rights = {
+			#				state = 676 
+			#				resources = { oil }
+			#			}
+			#		}
+			#	}
+			#}
+			#give_resource_rights = {
+			#	state = 291
+			#	receiver = ENG
+			#	resources = { oil }
+			#}
+			#give_resource_rights = {
+			#	state = 676
+			#	receiver = ENG
+			#	resources = { oil }
+			#}
+			#ENG = {
+			#	remove_opinion_modifier = {
+			#		target = IRQ
+			#		modifier = sanctions
+			#	}
+			#}
+		#}
+	}
+
+	option = {
+		name = iraq_hist.5.b
+		remove_ideas = IRQ_golden_square_defense_government_idea
+		add_opinion_modifier = {
+			target = GER
+			modifier = medium_increase
+		}
+		add_ai_strategy = {
+			type = alliance
+			id = GER
+			value = 100
+		}
+		GER = {
+			add_opinion_modifier = {
+				target = IRQ
+				modifier = medium_increase
+			}
+			add_ai_strategy = {
+				type = alliance
+				id = IRQ
+				value = 100
+			}
+		}
+	}
+}
+
+country_event = {
+	id = iraq_hist.6 ## British launch invasion
+	title = iraq_hist.6.t
+	desc = iraq_hist.6.desc
+	picture = GFX_report_event_tur_machine_gunners
+
+	is_triggered_only = yes
+
+	option = {
+		name = iraq_hist.6.a
+		trigger = {
+			ENG = {
+				any_owned_state = {
+					is_on_continent = middle_east
+				}
+			}
+		}
+		ai_chance = {
+            base = 10
+        }
+		ENG = {
+			complete_national_focus = uk_iraq_focus
+		}
+		add_ai_strategy = {
+			type = declare_war
+			id = IRQ
+			value = 125
+		}
+	}
+
+	option = {
+		name = iraq_hist.6.b
+		ai_chance = {
+            base = 0
+        }
+	}
+}
+
+### END NEW EVENTS ###
+
+# German Military Mission (Germans)
+country_event = {
+	id = r56_iraq.1
+	title = r56_iraq.1.t
+	desc = r56_iraq.1.d
+	picture = GFX_report_event_physics_lab_01
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.1.a	#sounds good
+		IRQ = {
+			country_event = { days = 1 id = r56_iraq.2 }
+			add_opinion_modifier = {
+				target = ROOT
+				modifier = sov_ger_treaty
+			}
+			add_opinion_modifier = {
+				target = ROOT
+				modifier = sov_ger_treaty_trade
+			}
+		}
+		# REVISIT Balance research bonus
+		GER = { add_to_tech_sharing_group = ROM_invite_german_advisors_tech_group }
+		add_to_tech_sharing_group = ROM_invite_german_advisors_tech_group
+		add_tech_bonus = {
+			name = special_forces_bonus
+			bonus = 1
+			uses = 1
+			category = r56_desert_infantry_tech
+		}
+	}
+
+	option = {
+		name = r56_iraq.1.b	#no way
+		ai_chance = { base = 0 }
+		add_political_power = -10
+		add_opinion_modifier = { target = GER modifier = refused_help }# no pact
+	}
+}
+
+# German Military accept
+country_event = {
+	id = r56_iraq.2
+	title = r56_iraq.2.t
+	desc = r56_iraq.2.d
+	picture = GFX_report_event_physics_lab_02
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.2.a	#bah
+		# REVISIT Balance research bonus
+		GER = { add_to_tech_sharing_group = ROM_invite_german_advisors_tech_group }
+		add_to_tech_sharing_group = ROM_invite_german_advisors_tech_group
+		add_doctrine_cost_reduction = {
+			name = IRQ_german_military_mission
+			cost_reduction = 0.5
+			uses = 1
+			category = land_doctrine
+		}
+		GER = {
+			add_opinion_modifier = { target = IRQ modifier = offered_support }
+			add_opinion_modifier = { target = GER modifier = sov_ger_treaty_trade }
+		}
+	}
+}
+
+# Germans Reject
+country_event = {
+	id = r56_iraq.3
+	title = r56_iraq.3.t
+	desc = r56_iraq.3.d
+	picture = GFX_report_event_physics_lab_02
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.3.a
+		#add_opinion_modifier = { target = IRQ modifier = refused_help }# no pact
+	}
+}
+
+#Demand Levant
+country_event = {
+	id = r56_iraq.6
+	title = r56_iraq.6.t
+	desc = r56_iraq.6.d
+	picture = GFX_report_event_election_vote
+
+	is_triggered_only = yes
+
+	option = { # Accept
+		name = r56_iraq.6.a
+		ai_chance = { base = 85 }
+		IRQ = {
+			country_event = { id = r56_iraq.8 }
+		}
+	}
+	option = { # Refuse
+		name = r56_iraq.6.b
+	  ai_chance = { 
+		base = 15 
+		modifier = {
+			country_exists = ISR
+			factor = 100
+		}
+		}
+		IRQ = {
+			country_event = { id = r56_iraq.7 }
+		}
+	}
+}
+
+# ENG declines
+country_event = {
+	id = r56_iraq.7
+	title = r56_iraq.7.t
+	desc = r56_iraq.7.d
+	picture = GFX_event_turkey_alexandretta_march
+
+	is_triggered_only = yes
+
+	option = {
+	name = r56_iraq.7.a
+	every_other_country = {
+			limit = {
+				OR = {
+					owns_state = 454
+					owns_state = 1016
+					owns_state = 1017
+					owns_state = 949
+					owns_state = 966
+					owns_state = 455
+					owns_state = 1021
+					owns_state = 1022
+					owns_state = 453
+					owns_state = 656
+				}
+			}
+			IRQ = {
+				create_wargoal = {
+					type = annex_everything
+					target = PREV
+					expire = 0
+				}
+			}
+		}
+	}
+}
+
+# ENG Accepts
+country_event = {
+	id = r56_iraq.8
+	title = r56_iraq.8.t
+	desc = r56_iraq.8.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.8.a
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 455
+				}
+			}
+			transfer_state = 455
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 1022
+				}
+			}
+			transfer_state = 1022
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 1021
+				}
+			}
+			transfer_state = 1021
+		}
+		if = {
+			limit = {
+				OR = {
+					ENG = {
+						controls_state = 454
+					}
+					AND = {
+						MPL = {
+							controls_state = 454
+							is_puppet_of = ENG
+							is_ai = yes
+						}
+					}
+				}
+			}
+			transfer_state = 454
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 656
+				}
+			}
+			transfer_state = 656
+		}
+		if = {
+			limit = {
+				OR = {
+					ENG = {
+						controls_state = 1016
+					}
+					AND = {
+						MPL = {
+							controls_state = 1016
+							is_puppet_of = ENG
+							is_ai = yes
+						}
+					}
+				}
+			}
+			transfer_state = 1016
+		}
+		if = {
+			limit = {
+				OR = {
+					ENG = {
+						controls_state = 1017
+					}
+					AND = {
+						MPL = {
+							controls_state = 1017
+							is_puppet_of = ENG
+							is_ai = yes
+						}
+					}
+				}
+			}
+			transfer_state = 1017
+		}
+		if = {
+			limit = {
+				OR = {
+					ENG = {
+						controls_state = 949
+					}
+					AND = {
+						MPL = {
+							controls_state = 949
+							is_puppet_of = ENG
+							is_ai = yes
+						}
+					}
+				}
+			}
+			transfer_state = 949
+		}
+		if = {
+			limit = {
+				OR = {
+					ENG = {
+						controls_state = 966
+					}
+					AND = {
+						MPL = {
+							controls_state = 966
+							is_puppet_of = ENG
+							is_ai = yes
+						}
+					}
+				}
+			}
+			transfer_state = 966
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 453
+				}
+			}
+			transfer_state = 453
+		}
+			}
+		}
+
+	# Uprising In Egypt
+country_event = {
+	id = r56_iraq.9
+	title = r56_iraq.9.t
+	desc = r56_iraq.9.d
+	picture = GFX_report_event_spr_anarchist_uprising2
+
+	is_triggered_only = yes
+
+	option = { # Accept
+		name = r56_iraq.9.a
+		ai_chance = { base = 95 }
+		IRQ = {
+			country_event = { id = r56_iraq.11 }
+		}
+	}
+	option = { # Refuse
+		name = r56_iraq.9.b
+    ai_chance = { base = 5 }
+		IRQ = {
+			country_event = { id = r56_iraq.10 }
+			}
+		}
+	}
+
+# ENG Declines
+country_event = {
+	id = r56_iraq.10
+	title = r56_iraq.10.t
+	desc = r56_iraq.10.d
+	picture = GFX_event_turkey_alexandretta_march
+
+	is_triggered_only = yes
+
+		option = {
+			name = r56_iraq.10.a
+			every_other_country = {
+				limit = {
+					NOT = { is_in_faction_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					any_controlled_state = {
+						is_core_of = EGY
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						target = PREV
+						type = take_state
+						expire = 0
+					}
+				}
+			}
+		}
+	}
+
+# ENG Accepts
+country_event = {
+	id = r56_iraq.11
+	title = r56_iraq.11.t
+	desc = r56_iraq.11.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.11.a
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 552
+				}
+			}
+			transfer_state = 552
+		}
+
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 457
+				}
+			}
+			transfer_state = 457
+		}
+
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 456
+				}
+			}
+			transfer_state = 456
+		}
+
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 452
+				}
+			}
+			transfer_state = 452
+		}
+
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 447
+				}
+			}
+			transfer_state = 447
+		}
+
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 907
+				}
+			}
+			transfer_state = 907
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 911
+				}
+			}
+			transfer_state = 911
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 995
+				}
+			}
+			transfer_state = 995
+		}		
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 551
+				}
+			}
+			transfer_state = 551
+		}
+	}
+}
+
+	# Persia Gulf
+country_event = {
+	id = r56_iraq.12
+	title = r56_iraq.12.t
+	desc = r56_iraq.12.d
+	picture = GFX_event_turkey_alexandretta_march
+
+	is_triggered_only = yes
+
+	option = { # Accept
+		name = r56_iraq.9.a
+		ai_chance = { base = 95 }
+		IRQ = {
+			country_event = { id = r56_iraq.14 }
+		}
+	}
+	option = { # Refuse
+		name = r56_iraq.9.b
+    	ai_chance = { base = 5 }
+		IRQ = {
+			country_event = { id = r56_iraq.15 }
+			}
+	}
+}
+
+# ENG Declines
+country_event = {
+	id = r56_iraq.15
+	title = r56_iraq.15.t
+	desc = r56_iraq.15.d
+	picture = GFX_event_turkey_alexandretta_march
+
+	is_triggered_only = yes
+
+		option = {
+			name = r56_iraq.15.a
+			create_wargoal = {
+				type = take_state
+				target = ENG
+				generator = { 656 658 }
+			}
+		}
+	}
+
+# ENG Accepts
+country_event = {
+id = r56_iraq.14
+	title = r56_iraq.14.t
+	desc = r56_iraq.14.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.14.a
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 656
+				}
+			}
+			transfer_state = 656
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 658
+				}
+			}
+			transfer_state = 658
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 765
+				}
+			}
+			transfer_state = 765
+		}
+		if = {
+			limit = {
+				ENG = {
+					controls_state = 1007
+				}
+			}
+			transfer_state = 1007
+		}
+	}
+}
+
+	# Syria Demand (Fra)
+country_event = {
+	id = r56_iraq.17
+	title = r56_iraq.17.t
+	desc = r56_iraq.17.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = { # Accept
+		name = r56_iraq.17.a
+		ai_chance = { base = 75 }
+		IRQ = {
+			country_event = { id = r56_iraq.19 }
+		}
+	}
+	option = { # Refuse
+		name = r56_iraq.17.b
+		ai_chance = { base = 25 }
+		IRQ = {
+			country_event = { id = r56_iraq.18 }
+			}
+		}
+	}
+
+# FRA Declines
+country_event = {
+	id = r56_iraq.18
+	title = r56_iraq.18.t
+	desc = r56_iraq.18.d
+	picture = GFX_event_turkey_alexandretta_march
+
+	is_triggered_only = yes
+
+		option = {
+			name = r56_iraq.18.a
+			680 = {
+				controller = {
+					ROOT = {
+						create_wargoal = {
+							target = FROM
+							expire = 0
+							type = take_state_focus
+							generator = { 677 680 554 553 }
+						}
+					}
+				}
+			}			
+		}
+	}
+
+# FRA Accepts
+country_event = {
+	id = r56_iraq.19
+	title = r56_iraq.19.t
+	desc = r56_iraq.19.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.19.a
+		if = {
+			limit = {
+				FROM = { controls_state = 677 }
+			}
+			transfer_state = 677
+		}	
+		if = {
+			limit = {
+				FROM = { controls_state = 680 }
+			}
+			transfer_state = 680
+		}			
+		if = {
+			limit = {
+				FROM = { controls_state = 554 }
+			}
+			transfer_state = 554
+		}
+		if = {
+			limit = {
+				FROM = { controls_state = 799 }
+			}
+			transfer_state = 799
+		}
+		if = {
+			limit = {
+				FROM = { controls_state = 553 }
+			}
+			transfer_state = 553
+		}
+	}
+}
+
+		# Demand Cyprus
+country_event = {
+	id = r56_iraq.20
+	title = r56_iraq.20.t
+	desc = r56_iraq.20.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = { # Accept
+		name = r56_iraq.20.a
+		ai_chance = { base = 95 }
+		IRQ = {
+			country_event = { id = r56_iraq.22 }
+		}
+	}
+	option = { # Refuse
+		name = r56_iraq.20.b
+		ai_chance = { base = 5 }
+		IRQ = {
+			country_event = { id = r56_iraq.21 }
+		}
+	}
+}
+
+# Cyprus owner Declines
+country_event = {
+	id = r56_iraq.21
+	title = r56_iraq.21.t
+	desc = r56_iraq.21.d
+	picture = GFX_event_turkey_alexandretta_march
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.21.a
+		create_wargoal = {
+			type = take_state
+			target = 183.owner
+			generator = { 183 }
+		}
+	}
+}
+
+# Cyprus owner Accepts
+country_event = {
+	id = r56_iraq.22
+	title = r56_iraq.22.t
+	desc = r56_iraq.22.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq.19.a
+		if = {
+			limit = {
+				FROM = {
+					controls_state = 183
+				}
+			}
+			transfer_state = 183
+		}
+	}
+}
+
+#death of Ghazi I
+country_event = {
+	id = r56_iraq.26
+	title = r56_iraq.26.t
+	desc = r56_iraq.26.d
+	picture = GFX_report_event_europe_funeral
+
+	is_triggered_only = yes
+
+	fire_only_once = yes
+
+	trigger = {
+		original_tag = IRQ
+		has_country_leader = {
+			character = IRQ_ghazi_i
+			ruling_only = yes
+		}
+	}
+
+	option = {
+		name = r56_iraq.26.a
+		hidden_effect = {
+			kill_ideology_leader = neutrality
+		}
+		add_country_leader_role = {
+			character = IRQ_Abd_al_Ilah
+			promote_leader = yes
+			country_leader = {
+				ideology = despotism
+				expire = "1965.1.1.1"
+				traits = { EGY_regent }
+			}
+		}
+	}
+}
+#Faisal II old enough to rule
+country_event = {
+	id = r56_iraq.27
+	title = r56_iraq.27.t
+	desc = r56_iraq.27.d
+	picture = GFX_report_event_generic_read_write
+
+	trigger = {
+		original_tag = IRQ
+		has_country_leader = {
+			name = "Abd al-Ilah"
+		}
+		date > 1953.04.01
+		NOT = {
+			has_global_flag = irq_dlc_focus_tree
+		}
+	}
+
+	mean_time_to_happen = {
+		days = 490	#was 150
+	}
+
+	option = {
+		name = r56_iraq.27.a
+		hidden_effect = {
+			retire_ideology_leader = neutrality
+		}
+		create_country_leader = {
+			name = "Faisal II"
+			desc = ""
+			picture = "r56_portrait_IRQ_faisal_II.dds"
+			expire = "1965.1.1"
+			ideology = despotism
+			traits = {
+				inexperienced_monarch
+			}
+		}		
+	}
+}
+
+###########################
+# Arab Faction Events ##
+###########################
+
+# Iraq - Saudi Invite
+country_event = {
+	id = r56_iraq_faction.1
+	title = r56_iraq_faction.1.t
+	desc = r56_iraq_faction.1.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.1.a
+	ai_chance = { base = 90 }
+	IRQ = { add_to_faction = SAU }
+		SAU = {
+			add_ai_strategy = {
+				type = alliance
+				id = IRQ
+				value = 200
+			}
+		IRQ = {
+		country_event = { days = 1 id = r56_iraq_faction.2 }
+		}
+		}
+	}
+	option = {
+		name = r56_iraq_faction.1.b
+		ai_chance = { base = 10 }
+		IRQ = {
+			country_event = { days = 1 id = r56_iraq_faction.3 }
+		}
+	}
+}
+
+# Iraq - Saudi accept
+country_event = {
+	id = r56_iraq_faction.2
+	title = r56_iraq_faction.2.t
+	desc = r56_iraq_faction.2.d
+	picture = GFX_report_event_chinese_japanese_handshake
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.2.a
+			}
+	}
+
+	# IRQ - Sau
+	country_event = {
+	id = r56_iraq_faction.3
+	title = r56_iraq_faction.3.t
+	desc = r56_iraq_faction.3.d
+	picture = GFX_report_event_ANZAC_day
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.3.a
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = SAU
+		}
+	}
+}
+
+# Iraq - Oman
+country_event = {
+	id = r56_iraq_faction.4
+	title = r56_iraq_faction.4.t
+	desc = r56_iraq_faction.4.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.4.a
+		ai_chance = { base = 90 }
+		IRQ = { add_to_faction = OMA }
+		OMA = {
+			add_ai_strategy = {
+				type = alliance
+				id = IRQ
+				value = 200
+			}
+		IRQ = {
+			country_event = { days = 1 id = r56_iraq_faction.5 }
+		}
+		}
+	}
+	option = {
+		name = r56_iraq_faction.4.b
+		ai_chance = { base = 10 }
+		FROM = {
+		country_event = { days = 1 id = r56_iraq_faction.6 }
+		}
+	}
+}
+
+  # IRQ Oma accept
+country_event = {
+	id = r56_iraq_faction.5
+	title = r56_iraq_faction.5.t
+	desc = r56_iraq_faction.5.d
+	picture = GFX_report_event_chinese_japanese_handshake
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.5.a
+	}
+}
+
+# OMA Declines
+country_event = {
+	id = r56_iraq_faction.6
+	title = r56_iraq_faction.6.t
+	desc = r56_iraq_faction.6.d
+	picture = GFX_report_event_ANZAC_day
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.6.a
+	create_wargoal = {
+			type = puppet_wargoal_focus
+			target = OMA
+		}
+	}
+}
+
+# Iraq - Yemen
+country_event = {
+	id = r56_iraq_faction.7
+	title = r56_iraq_faction.7.t
+	desc = r56_iraq_faction.7.d
+	picture = GFX_report_event_generic_read_write
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.7.a
+		ai_chance = { base = 90 }
+		IRQ = { add_to_faction = YEM }
+		YEM = {
+			add_ai_strategy = {
+				type = alliance
+				id = IRQ
+				value = 200
+			}
+			IRQ = {
+				country_event = { days = 1 id = r56_iraq_faction.8 }
+			}
+		}
+	}
+	option = {
+		name = r56_iraq_faction.7.b
+		ai_chance = { base = 10 }
+		FROM = {
+			country_event = { days = 1 id = r56_iraq_faction.8 }
+		}
+	}
+}
+
+# IRQ Oma accept
+country_event = {
+	id = r56_iraq_faction.8
+	title = r56_iraq_faction.8.t
+	desc = r56_iraq_faction.8.d
+	picture = GFX_report_event_chinese_japanese_handshake
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.7.a
+	}
+}
+
+# OMA Declines
+country_event = {
+	id = r56_iraq_faction.9
+	title = r56_iraq_faction.9.t
+	desc = r56_iraq_faction.9.d
+	picture = GFX_report_event_ANZAC_day
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.8.a
+		create_wargoal = {
+			type = puppet_wargoal_focus
+			target = YEM
+		}
+	}
+}
+
+# Iraq national focus -  requests to join allies
+country_event = {
+	id = r56_iraq_faction.10
+	title = r56_iraq_faction.10.t
+	desc = r56_iraq_faction.10.d
+	picture = GFX_report_event_degaulle_churchill
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.10.a
+		ENG = { add_to_faction = IRQ }
+		IRQ = {
+			add_ai_strategy = {
+				type = alliance
+				id = "ENG"
+				value = 200
+			}
+		}
+	}
+	option = {
+		name = r56_iraq_faction.10.b
+		ai_chance = { base = 0 }
+	}
+}
+
+# Iraq national focus -  requests to join allies
+country_event = {
+	id = r56_iraq_faction.11
+	title = r56_iraq_faction.11.t
+	desc = r56_iraq_faction.11.d
+	picture = GFX_report_event_degaulle_churchill
+
+	is_triggered_only = yes
+
+	option = {
+		name = r56_iraq_faction.11.a
+		SOV = { add_to_faction = IRQ }
+		IRQ = {
+			add_ai_strategy = {
+				type = alliance
+				id = "SOV"
+				value = 200
+			}
+		}
+	}
+	option = {
+		name = r56_iraq_faction.11.b
+		ai_chance = { base = 0 }
+	}
+}
+
