@@ -950,9 +950,9 @@ GER_civil_war_make_this_fascist = {
 		tree = german_focus
 		keep_completed = yes
 	}
-	complete_national_focus = GER_denounce_versailles # force fascist path
-	remove_ideas = GER_denounce_versailles_idea # They dont really denounce versailles in the civil war
-	unlock_national_focus = GER_rhineland
+	#complete_national_focus = GER_denounce_versailles # force fascist path
+	#remove_ideas = GER_denounce_versailles_idea # They dont really denounce versailles in the civil war
+	unlock_national_focus = GER_remilitarize_the_rhineland
 
 	if = {
 		limit = {
@@ -1142,6 +1142,2301 @@ GER_civil_war_declare_wars = {
 				type = civil_war
 			}
 			add_civil_war_target = PREV
+		}
+	}
+}
+
+##WUW## 1.15 stuff starts here:
+GER_anschluss_modify_mefo_bills_or_economy_of_conquest = {
+	if = {
+		limit = { 
+			OR = {
+				has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+				has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+			}
+		}
+		custom_effect_tooltip = anschluss_mefo_bills_tt
+	}
+}
+
+GER_czechoslovakia_modify_mefo_bills_or_economy_of_conquest = {
+	if = {
+		limit = { 
+			OR = {
+				has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+				has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+			}
+		}
+		custom_effect_tooltip = end_of_czechoslovakia_mefo_bills_tt
+	}
+}
+
+GER_yugoslavia_modify_mefo_bills_or_economy_of_conquest = {
+	if = {
+		limit = { 
+			OR = {
+				has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+				has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+			}
+		}
+		custom_effect_tooltip = yugoslavia_mefo_bills_tt
+	}
+}
+
+GER_stop_rearmament = {
+	if = { 
+		limit = {
+			has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+		}
+		hidden_effect = { #The rearmament program has cost Germany dearly
+			remove_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+			add_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
+			set_variable = { #Reset CG to 0 so that you don't suffer doubly when paying back the MEFO Bills
+				GER_industrial_consumer_goods_factor = 0
+			}
+		}
+		GER_pay_back_mefo_bills = yes
+		
+		custom_effect_tooltip = generic_skip_one_line_tt
+		
+		custom_effect_tooltip = GER_replace_mefo_bills_with_recovering_economy_tt
+		add_to_variable = {
+			GER_mefo_bills_civilian_intel_to_others = 0.25
+			tooltip = civilian_intel_to_others_tt
+		}
+		add_to_variable = {
+			GER_mefo_bills_army_intel_to_others = 0.25
+			tooltip = army_intel_to_others_tt
+		}
+		add_to_variable = {
+			GER_mefo_bills_navy_intel_to_others = 0.25
+			tooltip = navy_intel_to_others_tt
+		}
+		add_to_variable = {
+			GER_mefo_bills_airforce_intel_to_others = 0.25
+			tooltip = airforce_intel_to_others_tt
+		}
+		add_to_variable = {
+			GER_industrial_production_speed_arms_factory_factor = -0.1
+			tooltip = production_speed_arms_factory_factor_tt
+		}
+		add_to_variable = {
+			GER_industrial_production_speed_dockyard_factor = -0.1
+			tooltip = production_speed_dockyard_factor_tt
+		}
+		add_to_variable = {
+			GER_industrial_industrial_capacity_factory = -0.1
+			tooltip = industrial_capacity_factory_tt
+		}
+		add_to_variable = {
+			GER_industrial_industrial_capacity_dockyard = -0.1
+			tooltip = industrial_capacity_dockyard_tt
+		}
+		effect_tooltip = { #Show the consequences once the MEFO Bills have been paid
+			custom_effect_tooltip = GER_after_mefo_bills_payment_tt
+			add_to_variable = { #These numbers must match the once set in GER_mefo_bills_ended idea 
+				GER_industrial_consumer_goods_factor = 0.75
+				tooltip = consumer_goods_factor_tt
+			}
+		}
+	}
+	else_if = { #In case you have Economy of Conquest and wanna do "Prioritize Economic Growth" more or less
+		limit = {
+			has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+		}
+		hidden_effect = { #The rearmament program has cost Germany dearly
+			remove_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+			add_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
+			set_variable = { #Reset CG to 0 so that you don't suffer doubly when paying back the MEFO Bills
+				GER_industrial_consumer_goods_factor = 0
+			}
+		}
+		custom_effect_tooltip = GER_replace_economy_of_conquest_with_recovering_economy_tt
+		add_to_variable = {
+			GER_industrial_production_speed_arms_factory_factor = -0.1
+			tooltip = production_speed_arms_factory_factor_tt
+		}
+		add_to_variable = {
+			GER_industrial_production_speed_dockyard_factor = -0.1
+			tooltip = production_speed_dockyard_factor_tt
+		}
+		add_to_variable = {
+			GER_industrial_industrial_capacity_factory = -0.1
+			tooltip = industrial_capacity_factory_tt
+		}
+		add_to_variable = {
+			GER_industrial_industrial_capacity_dockyard = -0.1
+			tooltip = industrial_capacity_dockyard_tt
+		}
+		effect_tooltip = { #Show the consequences once the MEFO Bills have been paid
+			custom_effect_tooltip = GER_after_mefo_bills_payment_tt
+			add_to_variable = { #These numbers must match the once set in GER_mefo_bills_ended idea 
+				GER_industrial_consumer_goods_factor = 0.75
+				tooltip = consumer_goods_factor_tt
+			}
+		}
+	}
+}
+
+GER_add_mefo_bills_penalty = {
+	clamp_variable = {
+		var = GER.GER_industrial_consumer_goods_factor
+		max = 1
+	}
+	if = { #Apply penalties if CG is 100% or more
+		limit = {
+			NOT = { has_country_flag = GER_mefo_bills_penalty_flag }
+			check_variable = { var = GER_industrial_consumer_goods_factor value = 1 compare = greater_than_or_equals }
+		}
+		set_country_flag = GER_mefo_bills_penalty_flag
+		add_to_variable = { GER_industrial_consumer_goods_expected_value = GER_expected_consumer_goods_penalty }
+		subtract_from_variable = { GER_industrial_industrial_capacity_factory = GER_factory_output_penalty }
+		subtract_from_variable = { GER_industrial_industrial_capacity_dockyard = GER_dockyard_output_penalty }
+	}
+}
+
+GER_reduce_mefo_bills_penalty = {
+	if = {
+		limit = {
+			has_country_flag = GER_mefo_bills_penalty_flag
+			check_variable = { GER_industrial_consumer_goods_factor < 1 }
+		}
+		clr_country_flag = GER_mefo_bills_penalty_flag
+		subtract_from_variable = { GER_industrial_consumer_goods_expected_value = GER_expected_consumer_goods_penalty }
+		add_to_variable = { GER_industrial_industrial_capacity_factory = GER_factory_output_penalty }
+		add_to_variable = { GER_industrial_industrial_capacity_dockyard = GER_dockyard_output_penalty }
+	}
+}
+
+GER_autarky_achieved_effects = {
+	if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+		}
+		hidden_effect = {
+			remove_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+			add_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
+		}
+		custom_effect_tooltip = GER_replace_mefo_bills_with_wirtschaftswunder_tt
+		add_to_variable = {
+			GER_mefo_bills_civilian_intel_to_others = 0.25
+			tooltip = civilian_intel_to_others_tt
+		}
+		add_to_variable = {
+			GER_mefo_bills_army_intel_to_others = 0.25
+			tooltip = army_intel_to_others_tt
+		}
+		add_to_variable = {
+			GER_mefo_bills_navy_intel_to_others = 0.25
+			tooltip = navy_intel_to_others_tt
+		}
+		add_to_variable = {
+			GER_mefo_bills_airforce_intel_to_others = 0.25
+			tooltip = airforce_intel_to_others_tt
+		}
+	}
+	else_if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+		}
+		hidden_effect = {
+			remove_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+			add_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
+		}
+		custom_effect_tooltip = GER_replace_economy_of_conquest_with_wirtschaftswunder_tt
+	}
+	else_if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
+		}
+		hidden_effect = {
+			remove_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
+			add_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
+		}
+		custom_effect_tooltip = GER_replace_recovering_economy_with_wirtschaftswunder_tt
+	}
+	#custom_effect_tooltip = GER_modify_wirtschaftswunder_modifier_tt
+	add_to_variable = {
+		GER_industrial_production_speed_arms_factory_factor = 0.05
+		tooltip = production_speed_arms_factory_factor_tt
+	}
+	add_to_variable = {
+		GER_industrial_production_speed_dockyard_factor = 0.05
+		tooltip = industrial_capacity_factory_tt
+	}
+	add_to_variable = {
+		GER_industrial_industrial_capacity_factory = 0.05
+		tooltip = industrial_capacity_factory_tt
+	}
+	add_to_variable = {
+		GER_industrial_industrial_capacity_dockyard = 0.05
+		tooltip = industrial_capacity_dockyard_tt
+	}
+	set_variable = {
+		GER_industrial_consumer_goods_factor = 0
+		tooltip = consumer_goods_factor_tt
+	}
+}
+
+GER_modify_industrial_modifier = {
+	if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+		}
+		custom_effect_tooltip = GER_modify_mefo_bills_modifier_tt
+	}
+	else_if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+		}
+		custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
+	}
+	else_if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
+		}
+		custom_effect_tooltip = GER_modify_recovering_economy_modifier_tt
+	}
+	else_if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
+		}
+		custom_effect_tooltip = GER_modify_wirtschaftswunder_modifier_tt
+	}
+}
+
+GER_modify_wirtschaftswunder_modifier = {
+	if = {
+		limit = {
+			OR = {
+				has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+				has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+				has_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
+			}
+		}
+		custom_effect_tooltip = GER_modify_recovering_economy_modifier_tt
+	}
+	else_if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
+		}
+		custom_effect_tooltip = GER_modify_wirtschaftswunder_modifier_tt
+	}
+}
+
+GER_modify_army_modifier = {
+	if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_army_modifier }
+		}
+		custom_effect_tooltip = GER_modify_army_modifier_tt
+	}
+	else_if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_army_communist_modifier }
+		}
+		custom_effect_tooltip = GER_modify_army_communist_modifier_tt
+	}
+}
+
+GER_modify_navy_modifier = {
+	if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_navy_fascist_modifier }
+		}
+		custom_effect_tooltip = GER_modify_navy_fascist_modifier_tt
+	}
+	else_if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_navy_democratic_modifier }
+		}
+		custom_effect_tooltip = GER_modify_navy_democratic_modifier_tt
+	}
+	else_if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_navy_imperial_modifier }
+		}
+		custom_effect_tooltip = GER_modify_navy_imperial_modifier_tt
+	}
+	else_if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_navy_communist_modifier }
+		}
+		custom_effect_tooltip = GER_modify_navy_communist_modifier_tt
+	}
+}
+
+GER_modify_airforce_modifier = {
+	if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_airforce_modifier }
+		}
+		custom_effect_tooltip = GER_modify_airforce_modifier_tt
+	}
+	else_if = {
+		limit = { 
+			has_dynamic_modifier = { modifier = GER_airforce_communist_modifier }
+		}
+		custom_effect_tooltip = GER_modify_airforce_communist_modifier_tt
+	}
+}
+
+GER_pay_back_mefo_bills = { #TODO_Danne see if this can be simplified!
+	if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 15 compare = less_than }
+		}
+		add_political_power = -20
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 60 }
+	}
+	#2
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 20 compare = equals }
+		}
+		add_political_power = -40
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 80 }
+	}
+	#3
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 30 compare = equals }
+		}
+		add_political_power = -60
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 100 }
+	}
+	#4
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 40 compare = equals }
+		}
+		add_political_power = -80
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 120 }
+	}
+	#5
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 50 compare = equals }
+		}
+		add_political_power = -100
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 140 }
+	}
+	#6
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 60 compare = equals }
+		}
+		add_political_power = -120
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 160 }
+	}
+	#7
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 70 compare = equals }
+		}
+		add_political_power = -140
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 180 }
+	}
+	#8
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 80 compare = equals }
+		}
+		add_political_power = -160
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 200 }
+	}
+	#9
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 90 compare = equals }
+		}
+		add_political_power = -180
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 220 }
+	}
+	#10
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 100 compare = equals }
+		}
+		add_political_power = -200
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 240 }
+	}
+	#11
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 110 compare = equals }
+		}
+		add_political_power = -220
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 260 }
+	}
+	#12
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 120 compare = equals }
+		}
+		add_political_power = -240
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 280 }
+	}
+	#13
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 130 compare = equals }
+		}
+		add_political_power = -260
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 300 }
+	}
+	#14
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 140 compare = equals }
+		}
+		add_political_power = -280
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 320 }
+	}
+	#15
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 150 compare = equals }
+		}
+		add_political_power = -300
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 340 }
+	}
+	#16
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 160 compare = equals }
+		}
+		add_political_power = -320
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 360 }
+	}
+	#17
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 170 compare = equals }
+		}
+		add_political_power = -340
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 380 }
+	}
+	#18
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 180 compare = equals }
+		}
+		add_political_power = -360
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 400 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { var = GER_mefo_bill_counter value = 180 compare = greater_than }
+		}
+		add_political_power = -380
+		add_timed_idea = { idea = GER_mefo_bills_ended days = 420 }
+	}
+}
+
+#Should only be used with Anschluss and similar situations!!
+GER_seize_gold_reserves_in_europe_peacefully = { #This will only work when ROOT is Germany, like in Events and targeted Decisions #TODO_Danne Add this to relevent events in alt-historical branches!
+	if = {
+		limit = { 
+			OR = {
+				has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+				has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+			}
+		}
+		if = {
+			limit = {
+				FROM = {
+					any_core_state = {
+						is_on_continent = europe
+						is_controlled_by = ROOT
+						NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
+					}
+				}
+			}
+			
+			ROOT = { set_temp_variable = { occupied_state_num_factory = 0 } } #This will show how many factories in total Germany controls from FROM's cores
+			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_military_factories_in_cores@GER }
+			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_civilian_factories_in_cores@GER }
+			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_naval_factories_in_cores@GER }
+			FROM = {
+				every_core_state = {
+					limit = {
+						is_on_continent = europe
+						is_fully_controlled_by = ROOT
+						NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
+					}
+					set_state_flag = GER_seize_gold_reserves_state_flag
+				}
+			}
+
+			ROOT = {			
+				divide_temp_variable = { occupied_state_num_factory = 200 } #This is necessary since a single factory will increase the occupied_state_num_factory number to 1, which in turn translates to -100% when subtracting from the Consumer Goods. Dividing it by 100 here will give you 1% instead, which is more like what we want.
+				multiply_temp_variable = { occupied_state_num_factory = -1 }
+				
+				if = {
+					limit = {
+						has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+					}
+					custom_effect_tooltip = GER_modify_mefo_bills_modifier_tt
+				}
+				else_if = {
+					limit = {
+						has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+					}
+					custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
+				}
+
+				add_to_variable = {
+					GER_industrial_consumer_goods_factor = occupied_state_num_factory
+					tooltip = consumer_goods_factor_tt
+				}
+				GER_reduce_mefo_bills_penalty = yes
+			}
+		}
+	}
+}
+
+GER_set_consumer_goods_war_reparations = { #Must be set in GER scope
+	if = {
+		limit = {
+			has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		set_country_flag = GER_french_war_reparations_flag
+
+		custom_effect_tooltip = GER_french_war_reparations_tt
+		subtract_from_variable = { GER_monthly_consumer_goods_increase = GER_change_monthly_CG_vichy_france }
+		
+		GER_modify_industrial_modifier = yes
+		custom_effect_tooltip = GER_reduce_increasing_consumer_goods_tt
+		
+		custom_effect_tooltip = generic_skip_one_line_tt
+	}
+}
+
+# Used to create wargoals against any coutnry controlling Sudetenland states, with the appropriate wargoal generator states. Use within hidden_effect and the country TAG scope.
+GER_set_array_of_sudetenland_targeted_states = {
+	if = {
+		limit = {
+			controls_state = 69
+		}
+		69 = {
+			add_to_array = {
+				array = PREV.sudetenland_states_for_wargoal
+				value = THIS
+			}
+		}
+	}
+	if = {
+		limit = {
+			controls_state = 972
+		}
+		972 = {
+			add_to_array = {
+				array = PREV.sudetenland_states_for_wargoal
+				value = THIS
+			}
+		}
+	}
+	if = {
+		limit = {
+			controls_state = 74
+		}
+		74 = {
+			add_to_array = {
+				array = PREV.sudetenland_states_for_wargoal
+				value = THIS
+			}
+		}
+	}
+}
+
+GER_setup_monroe_doctrine_countries_to_destabilize_array = { #If this is updated, also update GER_set_up_monroe_capitals_array
+	hidden_effect = {
+		for_each_scope_loop = {
+			array = global.countries
+			IF = {
+				limit = {
+					exists = yes
+					is_subject = no
+					NOT = {
+						is_in_array = {
+							array = global.monroe_doctrine_countries_to_destabilize
+							value = THIS
+						}
+					}
+					NOT = {
+						original_tag = USA
+					}
+					OR = {
+						has_idea = USA_monroe_doctrine_idea
+						is_guaranteed_by = USA
+					}
+					
+					capital_scope = {
+						OR = {
+							is_on_continent = south_america
+							is_on_continent = north_america
+						}
+						NOT = {
+							is_in_array = {
+								array = global.monroe_doctrine_capitals_to_destabilize
+								value = THIS
+							}
+						}
+					}
+				}
+
+				THIS = {
+					add_to_array = { global.monroe_doctrine_countries_to_destabilize = THIS }
+				}
+
+				THIS = {
+					capital_scope = {
+						add_to_array = { global.monroe_doctrine_capitals_to_destabilize = THIS }
+					}
+					
+				}
+			}
+		}
+	}
+}
+
+GER_setup_GER_sphere_of_influence_array = { #REMEMBER to update the focus tooltip if this is ever changed!
+	hidden_effect = {
+		for_each_scope_loop = {
+			array = global.states
+			IF = {
+				limit = {
+					is_on_continent = europe
+					OR = {
+						is_core_of = SWE
+						is_core_of = NOR
+						is_core_of = DEN
+						is_core_of = HUN
+
+						#WEST POLAND
+						state = 807
+						state = 85
+						state = 86
+						state = 87
+						state = 88
+						state = 90
+						state = 92
+						state = 98
+						state = 10
+						state = 762
+
+						#CZECHIA
+						state = 69
+						state = 972
+						state = 9
+						state = 75
+						state = 74
+						state = 72
+					}
+				}
+
+				THIS = {
+					add_to_array = { GER.GER_sphere_of_influence_array = THIS }
+				}
+			}
+		}
+	}
+}
+
+GER_setup_SOV_sphere_of_influence_array = { #REMEMBER to update the focus tooltip if this is ever changed!
+	hidden_effect = {
+		for_each_scope_loop = {
+			array = global.states
+			IF = {
+				limit = {
+					is_on_continent = europe
+					OR = {
+						is_core_of = FIN
+						is_core_of = EST
+						is_core_of = LAT
+						is_core_of = LIT
+						is_core_of = SLO
+						is_core_of = ROM
+						is_core_of = YUG
+						is_core_of = BUL
+
+						#EAST POLAND
+						state = 89
+						state = 91
+						state = 93
+						state = 94
+						state = 95
+						state = 96
+						state = 97
+					}
+				}
+				THIS = {
+					add_to_array = { GER.SOV_sphere_of_influence_array = THIS }
+				}
+			}
+		}
+	}
+}
+
+
+GER_improve_rosenbergs_trait_effect = {
+	add_to_variable = { GER_total_reichskommissariats = 1 }
+	if = {
+		limit = {
+			check_variable = { GER_count_down_alfred_rosenberg_upgrades > 0 }
+		}
+		#WARNING! If any of these values are changed - or other variables are added or removed - the same change must be done in the script block below, GER_worsen_rosenbergs_trait_effect, AND the loc string GER_rk_rosenberg_tt must be adjusted to reflect these changes
+		custom_effect_tooltip = GER_modify_GER_alfred_rosenberg_modifier_tt
+		add_to_variable = { GER_alfred_rosenberg_modifier_consumer_goods_factor = -0.005 tooltip = consumer_goods_factor_tt }
+		add_to_variable = { GER_alfred_rosenberg_modifier_production_speed_arms_factory_factor = 0.01 tooltip = production_speed_arms_factory_factor_tt }
+		add_to_variable = { GER_alfred_rosenberg_modifier_industrial_capacity_factory = 0.005 tooltip = industrial_capacity_factory_tt }
+
+		subtract_from_variable = { GER_count_down_alfred_rosenberg_upgrades = 1 }
+		custom_effect_tooltip = GER_times_GER_alfred_rosenberg_has_been_modified_tt
+
+		custom_effect_tooltip = generic_skip_one_line_tt
+		custom_effect_tooltip = GER_losing_rk_puppets_tt
+	}
+}
+
+GER_worsen_rosenbergs_trait_effect = {
+	add_to_variable = { GER_total_reichskommissariats = -1 }
+	if = {
+		limit = {
+			check_variable = { GER_count_down_alfred_rosenberg_upgrades < GER_max_alfred_rosenberg_upgrades } #Don't go over the initial maximum limit
+		}
+		custom_effect_tooltip = GER_modify_GER_alfred_rosenberg_modifier_tt
+		add_to_variable = { GER_alfred_rosenberg_modifier_consumer_goods_factor = 0.005 tooltip = consumer_goods_factor_tt }
+		add_to_variable = { GER_alfred_rosenberg_modifier_production_speed_arms_factory_factor = -0.01 tooltip = production_speed_arms_factory_factor_tt }
+		add_to_variable = { GER_alfred_rosenberg_modifier_industrial_capacity_factory = -0.005 tooltip = industrial_capacity_factory_tt }
+
+		add_to_variable = { GER_count_down_alfred_rosenberg_upgrades = 1 }
+		custom_effect_tooltip = GER_times_GER_alfred_rosenberg_has_been_modified_tt
+	}
+}
+
+GER_add_or_modify_wunderwaffen = {
+	if = {
+		limit = {
+			NOT = { has_dynamic_modifier = { modifier = GER_wunderwaffen_modifier }}
+		}
+		custom_effect_tooltip = GER_add_wunderwaffen_modifier_tt
+		hidden_effect = {
+			add_dynamic_modifier = { modifier = GER_wunderwaffen_modifier } 
+		}
+	}
+	else = {
+		custom_effect_tooltip = GER_modify_wunderwaffen_modifier_tt
+	}
+}
+
+GER_add_or_modify_wehrwirtschaft = {
+	if = {
+		limit = {
+			NOT = { has_dynamic_modifier = { modifier = GER_wehrwirtschaft_modifier }}
+		}
+		custom_effect_tooltip = GER_add_wehrwirtschaft_modifier_tt
+		hidden_effect = {
+			add_dynamic_modifier = { modifier = GER_wehrwirtschaft_modifier } 
+		}
+	}
+	else = {
+		custom_effect_tooltip = GER_modify_wehrwirtschaft_modifier_tt
+	}
+}
+
+GER_add_or_modify_military_intelligence_service = {
+	if = {
+		limit = {
+			NOT = { has_dynamic_modifier = { modifier = GER_military_intelligence_service_modifier } }
+		}
+		custom_effect_tooltip = GER_add_military_intelligence_service_modifier_tt
+		hidden_effect = {
+			add_dynamic_modifier = { modifier = GER_military_intelligence_service_modifier } 
+		}
+	}
+	else = {
+		custom_effect_tooltip = GER_modify_military_intelligence_service_modifier_tt
+	}
+}
+
+GER_add_or_modify_politburo = {
+	if = {
+		limit = {
+			NOT = { has_dynamic_modifier = { modifier = GER_politburo_modifier }}
+		}
+		custom_effect_tooltip = GER_add_politburo_modifier_tt
+		hidden_effect = {
+			add_dynamic_modifier = { modifier = GER_politburo_modifier } 
+		}
+	}
+	else = {
+		custom_effect_tooltip = GER_modify_politburo_modifier_tt
+	}
+}
+
+
+
+
+GER_setup_GER_asia_sphere_of_influence_array = {
+	hidden_effect = {
+		for_each_scope_loop = {
+			array = global.states
+			IF = {
+				limit = {
+					OR = {
+						is_core_of = AST
+						is_core_of = NZL
+						is_core_of = MAL
+						is_core_of = INS
+						is_core_of = PAP
+						is_core_of = PHI
+						is_core_of = GUM
+						is_core_of = FSM
+						is_core_of = HAW
+						is_core_of = SAM
+						is_core_of = SOL
+						is_core_of = TAH
+						is_core_of = FIJ
+						is_core_of = RAP
+						is_core_of = SRL
+						is_core_of = MLD
+
+						#Islands
+						state = 712 # Cocos
+						state = 711 # Christmas
+						state = 710 # Diego Garcia
+						state = 709 # Seychelles
+						state = 707 # Mauritius
+						state = 713 # Kerguelen
+						state = 706 # Reunion
+					}
+				}
+
+				THIS = {
+					add_to_array = { GER.GER_asia_sphere_of_influence_array = THIS }
+				}
+			}
+		}
+	}
+}
+
+GER_setup_CHI_sphere_of_influence_array = {
+	hidden_effect = {
+		for_each_scope_loop = {
+			array = global.states
+			IF = {
+				limit = {
+					OR = {
+						is_core_of = SIA
+						is_core_of = VIN
+						is_core_of = CAM
+						is_core_of = LAO
+						is_core_of = CHI
+						is_core_of = RAJ
+						is_core_of = PAK
+						is_core_of = BAN
+						is_core_of = BRM
+						is_core_of = NEP
+						is_core_of = TIB
+						is_core_of = BHU
+						is_core_of = KOR
+						is_core_of = JAP
+						is_core_of = MON
+					}
+				}
+				THIS = {
+					add_to_array = { GER.CHI_sphere_of_influence_array = THIS }
+				}
+			}
+		}
+	}
+}
+
+# Setup faction-wide effects where GER is FROM (Update here when new things are added)
+GER_setup_faction_wide_aoe_effects_from = {
+	
+	IF = {
+		limit = {
+			FROM = {
+				original_tag = GER
+				OR = {
+					has_completed_focus = GER_pool_technical_know_how_ww
+					has_completed_focus = GER_pool_technical_know_how
+				}
+			}
+			NOT = { has_idea = GER_pool_technical_know_how }
+		}
+		add_ideas = GER_pool_technical_know_how
+	}
+	IF = {
+		limit = {
+			FROM = {
+				original_tag = GER
+				OR = {
+					has_completed_focus = GER_shared_rd_programs_ww
+					has_completed_focus = GER_shared_rd_programs
+				}
+				is_in_tech_sharing_group = ger_dem_research
+			}
+		}
+		add_to_tech_sharing_group = ger_dem_research 
+		custom_effect_tooltip = generic_skip_one_line_tt
+	}
+	IF = {
+		limit = {
+			FROM = {
+				original_tag = GER
+				has_completed_focus = GER_mitteleuropa_cooperation_sphere
+				is_in_tech_sharing_group = ger_mitteleuropa_research
+			}
+		}
+		add_to_tech_sharing_group = ger_mitteleuropa_research 
+		custom_effect_tooltip = generic_skip_one_line_tt
+	}
+	IF = {
+		limit = {
+			FROM = {
+				original_tag = GER
+				has_completed_focus = GER_establish_a_customs_union
+			}
+			NOT = { has_idea = GER_mitteleuropa_customs_union_member }
+		}
+		add_ideas = GER_mitteleuropa_customs_union_member
+	}
+
+}
+
+# Setup faction-wide effects where GER is ROOT (Update here when new things are added)
+GER_setup_faction_wide_aoe_effects_root = {
+	
+	IF = {
+		limit = {
+			ROOT = {
+				original_tag = GER
+				OR = {
+					has_completed_focus = GER_pool_technical_know_how_ww
+					has_completed_focus = GER_pool_technical_know_how
+				}
+			}
+			NOT = { has_idea = GER_pool_technical_know_how }
+		}
+		FROM = {
+			add_ideas = GER_pool_technical_know_how
+		}
+	}
+	IF = {
+		limit = {
+			ROOT = {
+				original_tag = GER
+				OR = {
+					has_completed_focus = GER_shared_rd_programs_ww
+					has_completed_focus = GER_shared_rd_programs
+				}
+				is_in_tech_sharing_group = ger_dem_research
+			}
+		}
+		FROM = {
+			add_to_tech_sharing_group = ger_dem_research 
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+	}
+	IF = {
+		limit = {
+			ROOT = {
+				original_tag = GER
+				has_completed_focus = GER_mitteleuropa_cooperation_sphere
+				is_in_tech_sharing_group = ger_mitteleuropa_research
+			}
+		}
+		FROM = {
+			add_to_tech_sharing_group = ger_mitteleuropa_research 
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+	}
+	IF = {
+		limit = {
+			ROOT = {
+				original_tag = GER
+				has_completed_focus = GER_establish_a_customs_union
+			}
+			NOT = { has_idea = GER_mitteleuropa_customs_union_member }
+		}
+		FROM = {
+			add_to_tech_sharing_group = GER_mitteleuropa_customs_union_member 
+		}
+	}
+
+}
+
+GER_one_more_member_increase_rnd_program_strength = {
+		
+	IF = {
+		limit = {
+			check_variable = {
+				var = GER_rnd_programs_modifier_allies_count
+				value = 10
+				compare = less_than
+			}	
+		}
+
+		add_to_variable = { 
+			GER_rnd_programs_modifier_research_speed_factor = 0.01
+		}
+
+		add_to_variable = { 
+			GER_rnd_programs_modifier_allies_count = 1
+		}
+	}
+
+}
+
+GER_one_less_member_decrease_rnd_program_strength = {
+		
+	add_to_variable = { 
+		GER_rnd_programs_modifier_research_speed_factor = -0.01
+	}
+
+}
+
+
+########################
+### SPECIAL PROJECTS ###
+########################
+
+#AMERIKABOMBER - Focke-Wulf
+GER_amerika_bomber_focke_wulf_completion_MIO_effects = { #SCOPE IS MIO
+	add_mio_research_bonus = 0.15 #After project completion, MIO research goes back to normal #WARNING! Any change in this bonus needs to be applied on the penalty applied in the event GOT_GER_amerikabomber.01 
+	complete_mio_trait = GER_mio_trait_amerikabomber_learnings
+}
+
+GER_amerika_bomber_focke_wulf_completion_SP_effects = { #SCOPE IS GER
+	add_equipment_bonus = {
+		name = GER_amerikabomber_focke_wulf_name
+		bonus = {
+			strat_bomber_intercontinental_equipment_1 = {
+				maximum_speed = 0.1
+				build_cost_ic = 0.05
+				instant = yes
+			}
+		}
+	}
+}
+
+#AMERIKABOMBER - Heinkel
+GER_amerika_bomber_heinkel_completion_MIO_effects = { #SCOPE IS MIO
+	add_mio_research_bonus = 0.15 #After project completion, MIO research goes back to normal #WARNING! Any change in this bonus needs to be applied on the penalty applied in the event GOT_GER_amerikabomber.01 
+	complete_mio_trait = GER_mio_trait_amerikabomber_learnings
+}
+
+GER_amerika_bomber_heinkel_completion_SP_effects = { #SCOPE IS GER
+	add_equipment_bonus = {
+		name = GER_amerikabomber_heinkel_name
+		bonus = {
+			strat_bomber_intercontinental_equipment_1 = {
+				build_cost_ic = -0.1
+				instant = yes
+			}
+		}
+	}
+}
+
+#AMERIKABOMBER - Junkers
+GER_amerika_bomber_junkers_completion_MIO_effects = { #SCOPE IS MIO
+	add_mio_research_bonus = 0.15 #After project completion, MIO research goes back to normal #WARNING! Any change in this bonus needs to be applied on the penalty applied in the event GOT_GER_amerikabomber.01 
+	complete_mio_trait = GER_mio_trait_amerikabomber_learnings
+}
+
+GER_amerika_bomber_junkers_completion_SP_effects = { #SCOPE IS GER
+	add_equipment_bonus = {
+		name = GER_amerikabomber_junkers_name
+		bonus = {
+			strat_bomber_intercontinental_equipment_1 = {
+				reliability = -0.1
+				air_defence = 0.1
+				instant = yes
+			}
+		}
+	}
+}
+
+#AMERIKABOMBER - Messerschmitt
+GER_amerika_bomber_messerschmitt_completion_MIO_effects = { #SCOPE IS MIO
+	add_mio_research_bonus = 0.15 #After project completion, MIO research goes back to normal #WARNING! Any change in this bonus needs to be applied on the penalty applied in the event GOT_GER_amerikabomber.01 
+	complete_mio_trait = GER_mio_trait_amerikabomber_learnings
+}
+
+GER_amerika_bomber_messerschmitt_completion_SP_effects = { #SCOPE IS GER
+	add_equipment_bonus = {
+		name = GER_amerikabomber_messerschmitt_name
+		bonus = {
+			strat_bomber_intercontinental_equipment_1 = {
+				air_range = 0.1
+				air_bombing = 0.05
+				build_cost_ic = 0.1
+				instant = yes
+			}
+		}
+	}
+}
+
+
+
+##################
+### OPERATIVES ###
+##################
+
+GER_create_operative_nikolaus_ritter = { #Game Start
+	create_operative_leader = {
+		name = GER_nikolaus_ritter
+		GFX = GFX_portrait_nikolaus_ritter
+		traits = { operative_safe_cracker }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER }
+		gender = male
+	}
+}
+
+GER_create_operative_erich_gimpel = { #Game Start
+	create_operative_leader = {
+		name = GER_erich_gimpel
+		GFX = GFX_portrait_GER_erich_gimpel
+		traits = { operative_infiltrator }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER }
+		gender = male
+	}
+}
+
+GER_create_operative_fritz_duquesne = { #Game start
+	create_operative_leader = {
+		name = GER_fritz_duquesne
+		GFX = GFX_portrait_GER_fritz_joubert_duquesne
+		traits = { operative_commando operative_tough operative_escape_artist }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER SAF HOL USA }
+		gender = male
+	}
+}
+
+GER_create_operative_hans_haupt = { # Reorganize Secret Services
+	create_operative_leader = {
+		name = GER_hans_haupt
+		GFX = GFX_portrait_GER_herbert_hans_haupt
+		traits = { operative_demolition_expert }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER USA }
+		gender = male
+	}
+}
+
+GER_create_operative_otto_skorzeny = { #Anschluss
+	create_operative_leader = {
+		name = GER_otto_skorzeny
+		GFX = GFX_portrait_otto_skorenzy
+		traits = { operative_commando }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER AUS }
+		gender = male
+	}
+}
+
+GER_create_operative_norman_stewart = { #Operation Sea Lion
+	create_operative_leader = {
+		name = GER_norman_stewart
+		GFX = GFX_portrait_GER_norman_baillie_stewart
+		traits = { operative_natural_orator operative_tough }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { ENG SCO }
+		gender = male
+	}
+}
+
+GER_create_operative_johannes_becker = { #Influence in South America
+	create_operative_leader = {
+		name = GER_johannes_becker
+		GFX = GFX_portrait_GER_johannes_sigfried_becker
+		traits = { operative_natural_orator operative_linguist }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER AUS ARG BRA }
+		gender = male
+	}
+}
+
+GER_create_operative_eleysa_bazna = { #Absorb the Abwehr / Expand SS Security Duties
+	create_operative_leader = {
+		name = GER_eleysa_bazna
+		GFX = GFX_portrait_eleysa_bazna
+		traits = { operative_infiltrator }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER TUR KOS ALB }
+		gender = male
+	}
+}
+
+GER_create_operative_savitri_devi = { #Propaganda Master
+	create_operative_leader = {
+		name = GER_savitri_devi
+		GFX = GFX_portrait_GER_savitri_devi
+		traits = { operative_natural_orator operative_linguist operative_well_groomed }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GRE FRA RAJ }
+		gender = female
+	}
+}
+
+GER_create_operative_otto_von_bolschwing = { #Subversive Infiltrators
+	create_operative_leader = {
+		name = GER_otto_von_bolschwing
+		GFX = GFX_portrait_GER_otto_von_bolschwing
+		traits = { operative_natural_orator operative_well_groomed }
+		bypass_recruitment = no
+		available_to_spy_master = yes
+		nationalities = { GER PAL ROM }
+		gender = male
+	}
+}
+
+GER_create_operative_coco_chanel = { #Subversive Infiltrators + France occupied
+	create_operative_leader = {
+		name = GER_coco_chanel
+		GFX = GFX_portrait_GER_coco_chanel
+		traits = { operative_infiltrator operative_seducer }
+		bypass_recruitment = no
+		available_to_spy_master = no
+		nationalities = { FRA }
+		gender = female
+	}
+}
+
+
+
+
+
+
+		  ##################################
+#########################################################
+  ### #  # #  # ### ###       ##  ### ###   ##  #   ### 
+   #  ## # ## # #   #  #     #  #  #  #  # #  # #   #   
+   #  # ## # ## ##  ###      #     #  ###  #    #   ##  
+   #  #  # #  # #   #  #     #  #  #  #  # #  # #   #   
+  ### #  # #  # ### #  #      ##  ### #  #  ##  ### ### 
+#########################################################
+		  ##################################
+
+GER_remove_replaced_advisor_1_effects = {
+	custom_effect_tooltip = {
+		localization_key = replace_ascended_advisor_tt
+		CHARACTER = [GetAscendedAdvisorName1]
+		TRAIT = [GetAscendedAdvisorTrait1]
+	}
+	hidden_effect = {
+		if = { # TODT REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_1 = 1 }
+			}
+			GER_remove_todt_effects = yes
+		}
+		else_if = { # SPEER REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_1 = 2 }
+			}
+			GER_remove_speer_effects = yes
+		}
+		else_if = { # GÖRING REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_1 = 3 }
+			}
+			GER_remove_goring_effects = yes
+		}
+		else_if = { # HIMMLER REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_1 = 4 }
+			}
+			GER_remove_himmler_effects = yes
+		}
+		else_if = { # GOEBBELS REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_1 = 5 }
+			}
+			GER_remove_goebbels_effects = yes
+		}
+		else_if = { # HESS REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_1 = 6 }
+			}
+			GER_remove_hess_effects = yes
+		}
+		else_if = { # BORMANN REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_1 = 7 }
+			}
+			GER_remove_bormann_effects = yes
+		}
+		else = {
+			log = "Something bad happened trying to remove advisor [?GER_ascended_advisor_1] effects."
+		}
+	}
+}
+
+GER_remove_replaced_advisor_2_effects = {
+	custom_effect_tooltip = {
+		localization_key = replace_ascended_advisor_tt
+		CHARACTER = [GetAscendedAdvisorName2]
+		TRAIT = [GetAscendedAdvisorTrait2]
+	}
+	hidden_effect = {
+		if = { # TODT REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_2 = 1 }
+			}
+			GER_remove_todt_effects = yes
+		}
+		else_if = { # SPEER REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_2 = 2 }
+			}
+			GER_remove_speer_effects = yes
+		}
+		else_if = { # GÖRING REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_2 = 3 }
+			}
+			GER_remove_goring_effects = yes
+		}
+		else_if = { # HIMMLER REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_2 = 4 }
+			}
+			GER_remove_himmler_effects = yes
+		}
+		else_if = { # GOEBBELS REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_2 = 5 }
+			}
+			GER_remove_goebbels_effects = yes
+		}
+		else_if = { # HESS REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_2 = 6 }
+			}
+			GER_remove_hess_effects = yes
+		}
+		else_if = { # BORMANN REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_2 = 7 }
+			}
+			GER_remove_bormann_effects = yes
+		}
+		else = {
+			log = "Something bad happened trying to remove advisor [?GER_ascended_advisor_2] effects."
+		}
+	}
+}
+
+GER_remove_replaced_advisor_3_effects = {
+	custom_effect_tooltip = {
+		localization_key = replace_ascended_advisor_tt
+		CHARACTER = [GetAscendedAdvisorName3]
+		TRAIT = [GetAscendedAdvisorTrait3]
+	}
+	hidden_effect = {
+		if = { # TODT REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_3 = 1 }
+			}
+			GER_remove_todt_effects = yes
+		}
+		else_if = { # SPEER REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_3 = 2 }
+			}
+			GER_remove_speer_effects = yes
+		}
+		else_if = { # GÖRING REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_3 = 3 }
+			}
+			GER_remove_goring_effects = yes
+		}
+		else_if = { # HIMMLER REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_3 = 4 }
+			}
+			GER_remove_himmler_effects = yes
+		}
+		else_if = { # GOEBBELS REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_3 = 5 }
+			}
+			GER_remove_goebbels_effects = yes
+		}
+		else_if = { # HESS REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_3 = 6 }
+			}
+			GER_remove_hess_effects = yes
+		}
+		else_if = { # BORMANN REPLACED
+			limit = {
+				check_variable = { GER_ascended_advisor_3 = 7 }
+			}
+			GER_remove_bormann_effects = yes
+		}
+		else = {
+			log = "Something bad happened trying to remove advisor [?GER_ascended_advisor_3] effects."
+		}
+	}
+}
+
+# Adding the new advisor effects after having replaced someone else
+GER_add_replacing_advisor_effects = {
+	if = { # TODT ADDED
+		limit = {
+			check_variable = { GER_ascending_advisor = 1 }
+		}
+		GER_add_todt_effects = yes
+	}
+	else_if = { # SPEER ADDED
+		limit = {
+			check_variable = { GER_ascending_advisor = 2 }
+		}
+		GER_add_speer_effects = yes
+	}
+	else_if = { # GÖRING ADDED
+		limit = {
+			check_variable = { GER_ascending_advisor = 3 }
+		}
+		GER_add_goring_effects = yes
+	}
+	else_if = { # HIMMLER ADDED
+		limit = {
+			check_variable = { GER_ascending_advisor = 4 }
+		}
+		GER_add_himmler_effects = yes
+	}
+	else_if = { # GOEBBELS ADDED
+		limit = {
+			check_variable = { GER_ascending_advisor = 5 }
+		}
+		GER_add_goebbels_effects = yes
+	}
+	else_if = { # HESS ADDED
+		limit = {
+			check_variable = { GER_ascending_advisor = 6 }
+		}
+		GER_add_hess_effects = yes
+	}
+	else_if = { # BORMANN ADDED
+		limit = {
+			check_variable = { GER_ascending_advisor = 7 }
+		}
+		GER_add_bormann_effects = yes
+	}
+	else = {
+		log = "Something bad happened trying to add advisor [?GER_ascending_advisor] effects."
+	}
+}
+
+# ADD/REMOVE TODT EFFECTS
+GER_add_todt_effects = {
+	if = {
+		limit = {
+			has_completed_focus = GER_autonomous_organization_todt
+		}
+		add_ideas = GER_todt_reich_minister_of_armaments
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_ascension_of_todt
+		}
+		add_ideas = GER_todt_reich_engineer
+	}
+}
+
+GER_remove_todt_effects = {
+	if = {
+		limit = {
+			has_idea = GER_todt_reich_minister_of_armaments
+		}
+		remove_ideas = GER_todt_reich_minister_of_armaments
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_todt_reich_engineer
+		}
+		remove_ideas = GER_todt_reich_engineer
+	}
+	else = {
+		log = "NOTHING TO REMOVE FROM TODT"
+	}
+
+	if = { #STOP ANY FOCUS IN-PROGRESS (WITH SHINY EFFECT)
+		limit = {
+			has_shine_effect_on_focus = GER_form_organization_todt
+		}
+		deactivate_shine_on_focus = GER_form_organization_todt
+		clr_country_flag = GER_form_organization_todt_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_autonomous_organization_todt
+		}
+		deactivate_shine_on_focus = GER_autonomous_organization_todt
+		clr_country_flag = GER_autonomous_organization_todt_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_wunderwaffe
+			check_variable = { GER_wonder_weapons_focus_advisor = 1 }
+		}
+		deactivate_shine_on_focus = GER_wunderwaffe
+		clr_country_flag = GER_wunderwaffe_in_progress_flag
+		set_variable = { GER_wonder_weapons_focus_advisor = 0 }
+	}
+
+	#Uncomplete Ascension focus so that he can be picked later on
+	uncomplete_national_focus = {
+		focus = GER_ascension_of_todt
+		uncomplete_children = no
+		refund_political_power = no
+	}
+
+	if = { # REMOVE TODT FROM ASCENDED ADVISOR
+		limit = {
+			check_variable = { GER_ascended_advisor_1 = 1 }
+		}
+		set_variable = { GER_ascended_advisor_1 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_2 = 1 }
+		}
+		set_variable = { GER_ascended_advisor_2 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_3 = 1 }
+		}
+		set_variable = { GER_ascended_advisor_3 = 0 }
+	}
+}
+
+# ADD/REMOVE SPEER EFFECTS
+GER_add_speer_effects = {
+	if = {
+		limit = {
+			has_completed_focus = GER_plenipotentiary_of_armaments
+		}
+		add_ideas = GER_speer_reich_minister_of_armaments
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_ascension_of_speer
+		}
+		add_ideas = GER_speer_reich_architect
+	}
+}
+
+GER_remove_speer_effects = {
+	if = {
+		limit = {
+			has_idea = GER_speer_reich_minister_of_armaments
+		}
+		remove_ideas = GER_speer_reich_minister_of_armaments
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_speer_reich_architect
+		}
+		remove_ideas = GER_speer_reich_architect
+	}
+
+	if = { #STOP ANY FOCUS IN-PROGRESS (WITH SHINY EFFECT)
+		limit = {
+			has_shine_effect_on_focus = GER_employ_philipp_holzmann
+		}
+		deactivate_shine_on_focus = GER_employ_philipp_holzmann
+		clr_country_flag = GER_employ_philipp_holzmann_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_plenipotentiary_of_armaments
+		}
+		deactivate_shine_on_focus = GER_plenipotentiary_of_armaments
+		clr_country_flag = GER_plenipotentiary_of_armaments_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_wunderwaffe
+			check_variable = { GER_wonder_weapons_focus_advisor = 2 }
+		}
+		deactivate_shine_on_focus = GER_wunderwaffe
+		clr_country_flag = GER_wunderwaffe_in_progress_flag
+		set_variable = { GER_wonder_weapons_focus_advisor = 0 }
+	}
+
+	#Uncomplete Ascension focus so that he can be picked later on
+	uncomplete_national_focus = {
+		focus = GER_ascension_of_speer
+		uncomplete_children = no
+		refund_political_power = no
+	}
+
+	if = { # REMOVE SPEER FROM ASCENDED ADVISOR
+		limit = {
+			check_variable = { GER_ascended_advisor_1 = 2 }
+		}
+		set_variable = { GER_ascended_advisor_1 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_2 = 2 }
+		}
+		set_variable = { GER_ascended_advisor_2 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_3 = 2 }
+		}
+		set_variable = { GER_ascended_advisor_3 = 0 }
+	}
+}
+
+# ADD/REMOVE GÖRING EFFECTS
+GER_add_goring_effects = {
+	if = {
+		limit = {
+			has_completed_focus = GER_plenipotentiary_of_the_four_year_plan
+		}
+		add_ideas = GER_goring_four_year_plan_plenipotentiary
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_ascension_of_goring
+		}
+		add_ideas = GER_goring_overseer_four_year_plan
+	}
+}
+
+GER_remove_goring_effects = {
+	if = {
+		limit = {
+			has_idea = GER_goring_four_year_plan_plenipotentiary
+		}
+		remove_ideas = GER_goring_four_year_plan_plenipotentiary
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_goring_overseer_four_year_plan
+		}
+		remove_ideas = GER_goring_overseer_four_year_plan
+	}
+
+	if = { #STOP ANY FOCUS IN-PROGRESS (WITH SHINY EFFECT)
+		limit = {
+			has_shine_effect_on_focus = GER_prioritize_the_four_year_plan
+		}
+		deactivate_shine_on_focus = GER_prioritize_the_four_year_plan
+		clr_country_flag = GER_prioritize_the_four_year_plan_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_plenipotentiary_of_the_four_year_plan
+		}
+		deactivate_shine_on_focus = GER_plenipotentiary_of_the_four_year_plan
+		clr_country_flag = GER_plenipotentiary_of_the_four_year_plan_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_integration_of_puppet_economies
+		}
+		deactivate_shine_on_focus = GER_integration_of_puppet_economies
+		clr_country_flag = GER_integration_of_puppet_economies_in_progress_flag
+	}
+
+	#Uncomplete Ascension focus so that he can be picked later on
+	uncomplete_national_focus = {
+		focus = GER_ascension_of_goring
+		uncomplete_children = no
+		refund_political_power = no
+	}
+
+	if = { # REMOVE GÖRING FROM ASCENDED ADVISOR
+		limit = {
+			check_variable = { GER_ascended_advisor_1 = 3 }
+		}
+		set_variable = { GER_ascended_advisor_1 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_2 = 3 }
+		}
+		set_variable = { GER_ascended_advisor_2 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_3 = 3 }
+		}
+		set_variable = { GER_ascended_advisor_3 = 0 }
+	}
+}
+
+# ADD/REMOVE HIMMLER EFFECTS
+GER_add_himmler_effects = {
+	log ="ADDING HIMMLER"
+	if = {
+		limit = {
+			has_completed_focus = GER_strengthen_the_waffen_ss
+		}
+		add_ideas = GER_himmler_reichsfuhrer_ss
+	}
+	else_if = {
+		limit = {
+			OR = {
+				has_completed_focus = GER_expand_ss_security_duties
+				has_completed_focus = GER_absorb_the_abwehr
+			}
+		}
+		add_ideas = GER_himmler_director_reich_security
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_ascension_of_himmler
+		}
+		add_ideas = GER_himmler_chief_of_german_police
+	}
+
+	custom_effect_tooltip = generic_skip_one_line_tt
+
+	country_event = GER_inner_circle_himmler.00
+}
+
+GER_remove_himmler_effects = {
+	if = {
+		limit = {
+			has_idea = GER_himmler_reichsfuhrer_ss
+		}
+		remove_ideas = GER_himmler_reichsfuhrer_ss
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_himmler_director_reich_security
+		}
+		remove_ideas = GER_himmler_director_reich_security
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_himmler_chief_of_german_police
+		}
+		remove_ideas = GER_himmler_chief_of_german_police
+	}
+
+	if = { #STOP ANY FOCUS IN-PROGRESS (WITH SHINY EFFECT)
+		limit = {
+			has_shine_effect_on_focus = GER_expand_ss_security_duties
+		}
+		deactivate_shine_on_focus = GER_expand_ss_security_duties
+		clr_country_flag = GER_expand_ss_security_duties_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_strengthen_the_waffen_ss
+		}
+		deactivate_shine_on_focus = GER_strengthen_the_waffen_ss
+		clr_country_flag = GER_strengthen_the_waffen_ss_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_expand_gestapo
+		}
+		deactivate_shine_on_focus = GER_expand_gestapo
+		clr_country_flag = GER_expand_gestapo_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_absorb_the_abwehr
+		}
+		deactivate_shine_on_focus = GER_absorb_the_abwehr
+		clr_country_flag = GER_absorb_the_abwehr_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_hegemony_of_the_ss
+		}
+		deactivate_shine_on_focus = GER_hegemony_of_the_ss
+		clr_country_flag = GER_hegemony_of_the_ss_in_progress_flag
+	}
+
+	#Uncomplete Ascension focus so that he can be picked later on
+	uncomplete_national_focus = {
+		focus = GER_ascension_of_himmler
+		uncomplete_children = no
+		refund_political_power = no
+	}
+
+	if = { # REMOVE HIMMLER FROM ASCENDED ADVISOR
+		limit = {
+			check_variable = { GER_ascended_advisor_1 = 4 }
+		}
+		set_variable = { GER_ascended_advisor_1 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_2 = 4 }
+		}
+		set_variable = { GER_ascended_advisor_2 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_3 = 4 }
+		}
+		set_variable = { GER_ascended_advisor_3 = 0 }
+	}
+}
+
+# ADD/REMOVE GOEBBELS EFFECTS
+GER_add_goebbels_effects = {
+	if = {
+		limit = {
+			has_completed_focus = GER_propaganda_master
+		}
+		add_ideas = GER_goebbels_reich_minister_of_propaganda_master
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_fund_the_film_department
+		}
+		add_ideas = GER_goebbels_reich_minister_of_propaganda_film
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_ministry_of_public_enlightenment
+		}
+		add_ideas = GER_goebbels_reich_minister_of_propaganda_ministry
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_ascension_of_goebbels
+		}
+		add_ideas = GER_goebbels_reich_minister_of_propaganda
+	}
+}
+
+GER_remove_goebbels_effects = {
+	if = {
+		limit = {
+			has_idea = GER_goebbels_reich_minister_of_propaganda_master
+		}
+		remove_ideas = GER_goebbels_reich_minister_of_propaganda_master
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_goebbels_reich_minister_of_propaganda_film
+		}
+		remove_ideas = GER_goebbels_reich_minister_of_propaganda_film
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_goebbels_reich_minister_of_propaganda_ministry
+		}
+		remove_ideas = GER_goebbels_reich_minister_of_propaganda_ministry
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_goebbels_reich_minister_of_propaganda
+		}
+		remove_ideas = GER_goebbels_reich_minister_of_propaganda
+	}
+
+	if = { #STOP ANY FOCUS IN-PROGRESS (WITH SHINY EFFECT)
+		limit = {
+			has_shine_effect_on_focus = GER_ministry_of_public_enlightenment
+		}
+		deactivate_shine_on_focus = GER_ministry_of_public_enlightenment
+		clr_country_flag = GER_ministry_of_public_enlightenment_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_fund_the_film_department
+		}
+		deactivate_shine_on_focus = GER_fund_the_film_department
+		clr_country_flag = GER_fund_the_film_department_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_propaganda_master
+		}
+		deactivate_shine_on_focus = GER_propaganda_master
+		clr_country_flag = GER_propaganda_master_in_progress_flag
+	}
+
+	#Uncomplete Ascension focus so that he can be picked later on
+	uncomplete_national_focus = {
+		focus = GER_ascension_of_goebbels
+		uncomplete_children = no
+		refund_political_power = no
+	}
+
+	if = { # REMOVE GOEBBELS FROM ASCENDED ADVISOR
+		limit = {
+			check_variable = { GER_ascended_advisor_1 = 5 }
+		}
+		set_variable = { GER_ascended_advisor_1 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_2 = 5 }
+		}
+		set_variable = { GER_ascended_advisor_2 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_3 = 5 }
+		}
+		set_variable = { GER_ascended_advisor_3 = 0 }
+	}
+}
+
+# ADD/REMOVE HESS EFFECTS
+GER_add_hess_effects = {
+	if = {
+		limit = {
+			has_completed_focus = GER_total_control_over_domestic_affairs
+		}
+		if = {
+			limit = {
+				has_dlc = "Arms Against Tyranny"
+			}
+			add_ideas = GER_hess_first_among_equals
+		}
+		else = {
+			add_ideas = GER_hess_first_among_equals_no_aat
+		}
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_rally_the_industrialists
+		}
+		if = {
+			limit = {
+				has_dlc = "Arms Against Tyranny"
+			}
+			add_ideas = GER_hess_party_chancellor_improved
+		}
+		else = {
+			add_ideas = GER_hess_party_chancellor_improved_no_aat
+		}
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_party_chancellor_hess
+		}
+		add_ideas = GER_hess_party_chancellor
+	}
+}
+
+GER_remove_hess_effects = {
+	if = {
+		limit = {
+			OR = {
+				has_idea = GER_hess_first_among_equals
+				has_idea = GER_hess_first_among_equals_no_aat
+			}
+		}
+		if = {
+			limit = {
+				has_idea = GER_hess_first_among_equals
+			}
+			remove_ideas = GER_hess_first_among_equals
+		}
+		else = {
+			remove_ideas = GER_hess_first_among_equals
+		}
+	}
+	else_if = {
+		limit = {
+			OR = {
+				has_idea = GER_hess_party_chancellor_improved
+				has_idea = GER_hess_party_chancellor_improved_no_aat
+			}
+		}
+		if = {
+			limit = {
+				has_idea = GER_hess_party_chancellor_improved
+			}
+			remove_ideas = GER_hess_party_chancellor_improved
+		}
+		else = {
+			remove_ideas = GER_hess_party_chancellor_improved_no_aat
+		}
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_hess_party_chancellor
+		}
+		remove_ideas = GER_hess_party_chancellor
+	}
+
+	if = { #STOP ANY FOCUS IN-PROGRESS (WITH SHINY EFFECT)
+		limit = {
+			has_shine_effect_on_focus = GER_optimize_reich_labour_service
+			check_variable = { GER_optimize_reich_service_focus_advisor = 6 }
+		}
+		deactivate_shine_on_focus = GER_optimize_reich_labour_service
+		clr_country_flag = GER_optimize_reich_labour_service_in_progress_flag
+		set_variable = { GER_optimize_reich_service_focus_advisor = 0 }
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_rally_the_industrialists
+		}
+		deactivate_shine_on_focus = GER_rally_the_industrialists
+		clr_country_flag = GER_rally_the_industrialists_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_total_control_over_domestic_affairs
+			check_variable = { GER_total_control_over_domestic_affairs_focus_advisor = 6 }
+		}
+		deactivate_shine_on_focus = GER_total_control_over_domestic_affairs
+		clr_country_flag = GER_total_control_over_domestic_affairs_in_progress_flag
+		set_variable = { GER_total_control_over_domestic_affairs_focus_advisor = 0 }
+	}
+
+	#Uncomplete Ascension focus so that he can be picked later on
+	uncomplete_national_focus = {
+		focus = GER_party_chancellor_hess
+		uncomplete_children = no
+		refund_political_power = no
+	}
+
+	if = { # REMOVE HESS FROM ASCENDED ADVISOR
+		limit = {
+			check_variable = { GER_ascended_advisor_1 = 6 }
+		}
+		set_variable = { GER_ascended_advisor_1 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_2 = 6 }
+		}
+		set_variable = { GER_ascended_advisor_2 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_3 = 6 }
+		}
+		set_variable = { GER_ascended_advisor_3 = 0 }
+	}
+}
+
+# ADD/REMOVE BORMANN EFFECTS
+GER_add_bormann_effects = {
+	if = {
+		limit = {
+			has_completed_focus = GER_total_control_over_domestic_affairs
+		}
+		add_ideas = GER_bormann_brown_eminence
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_glorify_party_rallies
+		}
+		add_ideas = GER_bormann_secretary_to_the_fuhrer_improved
+	}
+	else_if = {
+		limit = {
+			has_completed_focus = GER_party_chancellor_bormann
+		}
+		add_ideas = GER_bormann_secretary_to_the_fuhrer
+	}
+}
+
+GER_remove_bormann_effects = {
+	if = {
+		limit = {
+			has_idea = GER_bormann_brown_eminence
+		}
+		remove_ideas = GER_bormann_brown_eminence
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_bormann_secretary_to_the_fuhrer_improved
+		}
+		remove_ideas = GER_bormann_secretary_to_the_fuhrer_improved
+	}
+	else_if = {
+		limit = {
+			has_idea = GER_bormann_secretary_to_the_fuhrer
+		}
+		remove_ideas = GER_bormann_secretary_to_the_fuhrer
+	}
+
+	if = { #STOP ANY FOCUS IN-PROGRESS (WITH SHINY EFFECT)
+		limit = {
+			has_shine_effect_on_focus = GER_optimize_reich_labour_service
+			check_variable = { GER_optimize_reich_service_focus_advisor = 7 }
+		}
+		deactivate_shine_on_focus = GER_optimize_reich_labour_service
+		clr_country_flag = GER_optimize_reich_labour_service_in_progress_flag
+		set_variable = { GER_optimize_reich_service_focus_advisor = 0 }
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_glorify_party_rallies
+		}
+		deactivate_shine_on_focus = GER_glorify_party_rallies
+		clr_country_flag = GER_glorify_party_rallies_in_progress_flag
+	}
+	else_if = {
+		limit = {
+			has_shine_effect_on_focus = GER_total_control_over_domestic_affairs
+			check_variable = { GER_total_control_over_domestic_affairs_focus_advisor = 7 }
+		}
+		deactivate_shine_on_focus = GER_total_control_over_domestic_affairs
+		clr_country_flag = GER_total_control_over_domestic_affairs_in_progress_flag
+		set_variable = { GER_total_control_over_domestic_affairs_focus_advisor = 0 }
+	}
+
+	#Uncomplete Ascension focus so that he can be picked later on
+	uncomplete_national_focus = {
+		focus = GER_party_chancellor_bormann
+		uncomplete_children = no
+		refund_political_power = no
+	}
+
+	if = { # REMOVE BORMANN FROM ASCENDED ADVISOR
+		limit = {
+			check_variable = { GER_ascended_advisor_1 = 7 }
+		}
+		set_variable = { GER_ascended_advisor_1 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_2 = 7 }
+		}
+		set_variable = { GER_ascended_advisor_2 = 0 }
+	}
+	else_if = {
+		limit = {
+			check_variable = { GER_ascended_advisor_3 = 7 }
+		}
+		set_variable = { GER_ascended_advisor_3 = 0 }
+	}
+}
+
+# For when Göring can be promoted to country leader via content outside of Inner Circle - make sure that if he was the prevailing industrialist but didn't complete focus, someone else will be enabled
+GER_replace_goring_as_prevailing_industrialist = {
+	#ASSIGN SOMEONE ELSE AS PREVAILING INDUSTRIALIST if he was chosen to prevail but didn't complete his focus before promoting to country leader. Pick a new Prevailing Advisor (very arbitrarily but better than nothing)
+	if = { #Only applicable if he was Prevailing Industrialist and didnt complete his focus before promoting
+		limit = {
+			check_variable = { GER_industrialist_prevailed = 2 }
+			NOT = {	has_completed_focus = GER_plenipotentiary_of_armaments }
+		}
+		if = { #SPEER IS ASCENDED -> PICK HIM FIRST
+			limit = {
+				OR = {
+					check_variable = { GER_ascended_advisor_1 = 2 }
+					check_variable = { GER_ascended_advisor_2 = 2 }
+					check_variable = { GER_ascended_advisor_3 = 2 }
+				}
+			}
+			set_variable = { GER_industrialist_prevailed = 2 }
+		}
+		else_if = { #TODT IS ASCENDED -> PICK HIM
+			limit = {
+				OR = {
+					check_variable = { GER_ascended_advisor_1 = 1 }
+					check_variable = { GER_ascended_advisor_2 = 1 }
+					check_variable = { GER_ascended_advisor_3 = 1 }
+				}
+			}
+			set_variable = { GER_industrialist_prevailed = 1 }
+		}
+		else_if = { #SPEER COMPLETED ANY FOCUS
+			limit = {
+				has_completed_focus = GER_employ_philipp_holzmann
+			}
+			set_variable = { GER_industrialist_prevailed = 2 }
+		}
+		else_if = { #TODT COMPLETED ANY FOCUS
+			limit = {
+				has_completed_focus = GER_form_organization_todt
+			}
+			set_variable = { GER_industrialist_prevailed = 1 }
+		}
+		else = { #NO ONE COMPLETED ANY FOCUS OR IS ASCENDED - PICK SPEER over Todt
+			set_variable = { GER_industrialist_prevailed = 2 }
+		}
+	}
+}
+
+GER_inner_circle_set_ascension_cd = {
+	set_country_flag = {
+		flag = GER_inner_circle_cd_flag
+		days = 175
+		value = 1
+	}
+}
+
+
+
+
+
+
+GER_set_up_colonial_resistance_states = {
+	
+	hidden_effect = {
+		for_each_scope_loop = {
+			array = global.countries 
+			IF = {
+				limit = {
+					# Find countries with cores in africa that do not already exist as free or puppeted nations
+					exists = no 
+					any_state = { 
+						is_core_of = PREV
+						OR = {
+							is_on_continent = africa 
+							is_on_continent = asia
+						}
+						OWNER = {
+							NOT = { is_in_faction_with = ROOT }
+							NOT = { tag = ROOT }
+						}
+					}
+				}
+
+				# add African state of theirs to the array
+				every_core_state = {
+					limit = {  
+						OR = {
+							is_on_continent = africa 
+							is_on_continent = asia
+							is_core_of = EGY
+						}	
+						has_resistance = yes
+						NOT = { # no point adding if already in there
+							is_in_array = {
+								array = GER.african_colonial_states_array
+								value = THIS 
+							}
+						}
+					}
+					add_to_array = { GER.african_colonial_states_array = THIS }
+				}
+			}	
 		}
 	}
 }

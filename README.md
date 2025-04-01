@@ -1,5 +1,5 @@
 # Road to 56 Beta Build
-## 1956_Gunnerside [1.14.* Compatibility]
+## 1956_Operation_Manstein [1.15.\*/1.16.* Compatibility]
 
 This is the Readme guide for using Github with Road to 56.
 
@@ -19,7 +19,7 @@ This is the Readme guide for using Github with Road to 56.
 12. Add your changes to the patch notes on the wiki.
 13. Also, check our wiki for all the standards we use. The file structure of 56 is not the same as vanilla, and we have some unusual naming conventions. If you don't follow these, there will be severe bugs and errors. Remember, only you can stop forest fires!
 
-If, for some reason, you need greater access rights to the Git, or don't understand any of the above, ask Greatexperiment on Discord.
+If, you need commit rights to the Git (as opposed to working through a fork), or don't understand any of the above, ask any lead *except Greatexperiment* on our Discord.
 
 ### IMPORTANT: Contributor & Developer Agreement
 * If a contributor or developer creates either original[^2] assets, code, or localization for 'Road to 56' and that work is published,[^1] 'Road to 56' retains the right to use that material even if said contributor or developer no longer wishes to be or have said work affiliated with 'Road to 56' under opensource development principles.
@@ -28,6 +28,10 @@ If, for some reason, you need greater access rights to the Git, or don't underst
 * The contributor or developer may ask to withdraw work if said work isn't published[^1] yet. 
 * To reiterate: 'Road to 56' retains the right to use all original contributor and developer work made for 'Road to 56.' Even if said contributor and developer wishes to be no longer affiliated with Road to 56 and asks for removal of assets, code, or localization made by them. Such requests are considered meritless under this agreement.
 * If you want to discuss particulars of this agreement, contact either Greatexperiment, Thinking_Waffle, SpicyAlfredo, or Abbus on Discord.
+
+### AI Usage Disclosure
+* AI tools have been used to enhance historical pictures and sources to aid in art asset creation on this project. AI tools have not been used to replace human work or creativity but only in the context of helping to make art assets that would not be possible without the assistance of these AI tools. 
+
 
 Thanks for reading! - The Road to 56 Team
 

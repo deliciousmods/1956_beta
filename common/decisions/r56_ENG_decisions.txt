@@ -41,6 +41,7 @@ war_measures = {
 			country_event = { id = r56_eng.10 }
 		}
 	}
+
 	r56_ENG_decision_support_percy_hobart = {
 
 		icon = generic_tank
@@ -48,7 +49,7 @@ war_measures = {
 		cost = 50
         fire_only_once = yes
 		
-		days_remove = 90
+		days_remove = 30
 		
 		custom_cost_text = percy_hobart_decision_cost
 		custom_cost_trigger = {
@@ -61,58 +62,116 @@ war_measures = {
 				tag = ENG
 				tag = CAN
 			}
-			
 		}
 	
 		available = {
-			has_army_experience > 99
-			OR = {
-				has_tech = improved_medium_art 
-				has_tech = improved_medium_spaa
-				has_tech = advanced_medium_art
-				has_tech = advanced_medium_spaa
-				has_tech = modern_art
-				has_tech = modern_spaa
-				has_tech = improved_heavy_art
-				has_tech = improved_heavy_spaa
+			hidden_trigger = {
+				has_army_experience > 99
+			}
+			ROOT = {
+				is_special_project_completed = sp:sp_land_military_engineering_vehicles
+				NOT = {
+					has_global_flag = r56_ENG_decision_support_percy_hobart_recruited
+				}
+				if = {
+					limit = {
+						tag = CAN
+					}
+					OR = {
+						is_puppet_of = ENG
+						AND = {
+							has_war_with = ENG
+							has_government = ENG
+							is_in_faction_with = ENG
+						}
+					}
+				}
 			}
 		}
 		
 		visible = {
-			AND = {
+			OR = {
 				tag = ENG
-				NOT = {
-					OR = {
-						has_completed_focus = ENG_opposition_to_the_national_government
-						has_completed_focus = ENG_concessions_to_the_trade_unions
-					}
-				}
-			}
-			AND = {
 				tag = CAN
-				ENG = {
-					OR = {
-						has_completed_focus = ENG_opposition_to_the_national_government
-						has_completed_focus = ENG_concessions_to_the_trade_unions
-					}					
+			}
+			NOT = {
+				has_global_flag = r56_ENG_decision_support_percy_hobart_recruited
+			}
+			if = {
+				limit = { #yes we are checking twice to be extra safe
+					tag = ENG
+					has_character = ENG_r56_percy_hobart
 				}
 			}
-			
-			
 		}
 		
 		remove_effect = {
-			create_corps_commander = {
-				name = "Percy Hobart"
-				portrait_path = "gfx/leaders/ENG/r56_portrait_ENG_percy_hobart.dds"
-				traits = { unpopular funnies_inventor panzer_leader trait_engineer fortress_buster expert_improviser}
-				skill = 5
-				attack_skill = 6
-				defense_skill = 3
-				planning_skill = 5
-				logistics_skill = 2	
+			if = { #CAN effect
+				limit = {
+					tag = CAN
+				}
+				create_corps_commander = {
+					name = "Percy Hobart"
+					portrait_path = "gfx/leaders/ENG/r56_portrait_ENG_percy_hobart.dds"
+					traits = {unpopular funnies_inventor panzer_leader trait_engineer fortress_buster expert_improviser}
+					skill = 5
+					attack_skill = 6
+					defense_skill = 3
+					planning_skill = 5
+					logistics_skill = 2	
+				}
+				ROOT = {
+					add_breakthrough_points = {
+						specialization = specialization_land
+						value = 1
+					}
+				}
+				ENG = {
+					if = {
+						limit = { #yes we are checking twice to be extra safe
+							ENG = {
+								has_character = ENG_r56_percy_hobart
+							}
+						}
+						ENG = {
+							ENG_r56_percy_hobart = {
+								add_scientist_xp = {
+									experience = 500
+									specialization = specialization_land
+								}
+							}
+						}
+					}
+				}
 			}
+			if = { #ENG effect
+				limit = { #yes we are checking twice to be extra safe
+					tag = ENG
+					has_character = ENG_r56_percy_hobart
+				}
+				add_corps_commander_role = {
+					character = ENG_r56_percy_hobart
+					traits = { unpopular funnies_inventor panzer_leader trait_engineer fortress_buster expert_improviser}
+					skill = 5
+					attack_skill = 6
+					defense_skill = 3
+					planning_skill = 5
+					logistics_skill = 2	
+				}
+				ENG_r56_percy_hobart = {
+					add_scientist_xp = {
+						experience = 500
+						specialization = specialization_land
+					}
+				}
+				add_breakthrough_points = {
+					specialization = specialization_land
+					value = 1
+				}	
+			}
+			set_global_flag = r56_ENG_decision_support_percy_hobart_recruited
 		}		
+
 		complete_effect = {
 			army_experience = -100		
 			add_political_power = -50

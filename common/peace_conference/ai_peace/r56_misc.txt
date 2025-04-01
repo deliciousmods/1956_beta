@@ -56,6 +56,9 @@ peace_ai_desires = {
                     #later additions
                     tag = KSH
                     tag = MPL #take it or release israel/palestine
+                    tag = PAP   #Papacy
+                    tag = THU   #Thuringen, vanilla German kingdom
+                    tag = RHI   #Rhineland, idem
                     AND = {
                         tag = ISR #dont puppet israel if you hate it
                         ROOT = {
@@ -110,26 +113,27 @@ peace_ai_desires = {
         ai_desire = -1000
     }
 
-    avoid_taking_if_ally_has_claim = {
-        peace_action_type = { take_states force_government puppet liberate }
-        enable = {
-            any_country = {
-                NOT = {
-                    tag = ROOT.FROM
-                }
-                exists = yes
-                pc_is_on_same_side_as = ROOT
-                ROOT.FROM.FROM.FROM = {
-                    is_claimed_by = PREV # Ally has claim on this state
-                    NOT = {
-                        is_claimed_by = ROOT # We dont claim this state as well
-                        is_core_of = ROOT
-                    }
-                }
-            }
-        }
-        ai_desire = -200
-    }
+    #CONFIRMED TO CAUSE CRASHES
+    # avoid_taking_if_ally_has_claim = {
+    #     peace_action_type = { take_states force_government puppet liberate }
+    #     enable = {
+    #         any_country = {
+    #             NOT = {
+    #                 tag = ROOT.FROM
+    #             }
+    #             exists = yes
+    #             pc_is_on_same_side_as = ROOT
+    #             ROOT.FROM.FROM.FROM = {
+    #                 is_claimed_by = PREV # Ally has claim on this state
+    #                 NOT = {
+    #                     is_claimed_by = ROOT # We dont claim this state as well
+    #                     is_core_of = ROOT
+    #                 }
+    #             }
+    #         }
+    #     }
+    #     ai_desire = -200
+    # }
 
     give_allys_claims_to_them = {
         peace_action_type = take_states
@@ -217,7 +221,12 @@ peace_ai_desires = {
                     }
                 }
                 OR = {  #If you dont exist yet or are a loser, then dont puppet/liberate
-                    pc_is_loser = yes
+                    AND = {
+                        pc_is_loser = yes
+                        NOT = {     #if YUG capitulated, its states may be in the peacedeal (and counted as loser), therefore, exclude it, so its land may be given back
+                            tag = YUG
+                        }
+                    }
                     exists = no
                 }
             }
@@ -226,5 +235,32 @@ peace_ai_desires = {
             }
         }
         ai_desire = -1000
+    }
+
+    #seeks to prevent countries remaining in 1 state because states without claims/cores are ignored by democratic AI
+    dem_take_states_without_cores = {
+        peace_action_type = { take_states }
+        enable = {
+            has_government = democratic
+            ROOT.FROM.FROM.FROM = { #confusing but compact way to check if any country has a core on the state in question
+                NOT = {
+                    any_country_with_core = {
+                        always = yes
+                    }
+                }
+            }
+        }
+        ai_desire = 100 #20 is too low, but dont make too high or theyll make it their top priority
+    }
+
+    #counteracts a vanilla strategy "dont_even_try_to_puppet_large_states" which works differently than what PDX must have intended
+    do_puppet_from_large_states = {
+        peace_action_type = { puppet }
+
+        enable = {
+            ROOT.FROM.FROM = { check_variable = { num_owned_states > 30 } }
+            ROOT.FROM.FROM = { NOT = { tag = GER } } #is in the vanilla equivalent too
+        }
+        ai_desire = 200
     }
 }
