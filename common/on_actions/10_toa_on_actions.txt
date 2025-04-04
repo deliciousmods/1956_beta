@@ -1,0 +1,881 @@
+
+on_actions = {
+	on_weekly_VEN = {
+		effect = {
+			
+			for_each_scope_loop = {
+				array = global.ven_blockade_countries
+				if = {
+					limit = {
+						ships_in_area = {
+							area = 53
+							type = capital_ship
+							size < 3
+						}
+					}
+
+					for_each_scope_loop = {
+						array = ven_countries_that_are_under_embargo
+						VEN = {
+							break_embargo = PREV
+							remove_opinion_modifier = {
+								target = PREV
+								modifier = VEN_embargoed
+							}
+							remove_opinion_modifier = {
+								target = PREV
+								modifier = VEN_embargoed_2
+							}
+						}
+					}
+
+					remove_from_array = {
+						array = global.ven_blockade_countries
+						value = THIS
+					}
+					clear_array = ven_countries_that_are_under_embargo
+				}
+			}
+
+			#if theres still at least 1 blockading country, keep up the blockade
+			if = {
+				limit = {
+					check_variable = { global.ven_blockade_countries^num > 0 }
+					VEN = {
+						NOT = {
+							has_idea = idea_VEN_blockade_active
+						}
+					}
+				}
+				VEN = { 
+					swap_ideas = {
+						remove_idea = idea_VEN_blockade_inactive
+						add_idea = idea_VEN_blockade_active
+					}
+				}
+			}
+			else_if = { #If not remove blockade
+				limit = {
+					check_variable = { global.ven_blockade_countries^num < 1 }
+					VEN = {
+						NOT = {
+							has_idea = idea_VEN_blockade_inactive
+						}
+					}
+				}
+				VEN = { 
+					swap_ideas = {
+						remove_idea = idea_VEN_blockade_active
+						add_idea = idea_VEN_blockade_inactive
+					}
+				}
+			}
+		}
+	}
+	on_ruling_party_change = {
+		effect = {
+			if = {
+				limit = {
+					has_dlc = "Trial of Allegiance"
+					OR = {
+						original_tag = URG
+						original_tag = PAR
+					}
+				}
+				if = {
+					limit = {
+						has_completed_focus = GUAY_the_permanent_leader
+						NOT = { has_country_leader_with_trait = JUNO_the_permanent_leader }
+					}
+
+					add_country_leader_trait = JUNO_the_permanent_leader
+				}
+
+				if = {
+					limit = {
+						has_completed_focus = GUAY_cult_of_personality
+						NOT = { has_country_leader_with_trait = JUNO_cult_of_personality }
+					}
+
+					add_country_leader_trait = JUNO_cult_of_personality
+				}
+
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					NOT = { has_dlc = "Trial of Allegiance" }
+					original_tag = URG
+					has_cosmetic_tag = URG_is_unaligned_URG_but_has_normal_URG_flag
+				}
+				drop_cosmetic_tag = yes
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					has_dlc = "Trial of Allegiance"
+					NOT = {
+						USA = {
+							has_government = communism
+						}
+					}
+					capital_scope = {
+						is_core_of = ROOT
+						OR = {
+							is_on_continent = north_america
+							is_on_continent = south_america
+						}
+					}
+					has_government = communism
+					date > 1936.05.1
+				}
+				USA = {
+					country_event = {
+						id = south_american_events.30
+						days = 7
+					}
+				}
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					has_dlc = "Trial of Allegiance"
+					BRA = {
+						has_completed_focus = BRA_expand_fordlandia
+						NOT = {	
+							OR = {
+								has_government = communism 
+								has_country_flag = BRA_ford_event_has_happened
+							}
+						}
+					}
+					USA = {
+						has_government = communism
+					}
+				}
+				BRA = {
+					country_event = {
+						id = JUNO_brazil_events.180
+						days = 14
+					}
+				}
+			}
+		}
+	}
+	on_startup = {
+		effect = {
+			if = {
+				limit = { 
+					has_dlc = "Trial of Allegiance" 
+				}
+
+				every_country = {	
+					limit = {
+						OR = {
+							original_tag = URG
+							original_tag = BRA
+							original_tag = PAR
+							original_tag = CHL
+							original_tag = BOL
+							original_tag = ARG
+							original_tag = PRU
+							original_tag = VEN
+							original_tag = ECU
+							original_tag = COL
+							
+						}
+					}
+
+					add_ai_strategy = { 
+						type = alliance 
+						id = JAP
+						value = -250
+					}
+
+					add_ai_strategy = { 
+						type = alliance 
+						id = CHI
+						value = -250
+					}
+
+					add_ai_strategy = { 
+						type = alliance 
+						id = PRC
+						value = -250
+					}
+
+					add_ai_strategy = { 
+						type = alliance 
+						id = USA
+						value = -15
+					}
+
+					add_ai_strategy = { 
+						type = alliance 
+						id = GER
+						value = -15
+					}
+
+					add_ai_strategy = { 
+						type = alliance 
+						id = ENG
+						value = -15
+					}
+
+					add_ai_strategy = { 
+						type = alliance 
+						id = SOV
+						value = -50
+					}
+
+				}
+			}
+		}
+		effect = {
+			#Monroe Doctrine
+			
+			every_country = {
+				limit = {
+					exists = yes
+					NOT = { tag = USA }
+					OR = {
+						capital_scope = { is_on_continent = south_america }
+						capital_scope = { is_on_continent = north_america }
+						tag = CUB
+						tag = DOM
+						tag = HAI
+					}
+				}
+				add_ideas = USA_monroe_doctrine_idea
+			}
+			
+		}
+	}
+	on_peaceconference_ended = {
+
+		# Make sure that Uruguay get's their cosmetic tag if it applies
+		effect = {
+			IF = {
+				limit = {
+					URG = {
+						NOT = {
+							has_cosmetic_tag = URG_german
+						}
+						is_subject = yes
+						is_subject_of = GER
+					}
+				}
+				URG = {
+					set_cosmetic_tag = URG_german
+				}
+			}
+		}	
+		# Make sure that Uruguay drops their cosmetic tag if it applies
+		effect = {
+			IF = {
+				limit = {
+					URG = {
+						has_cosmetic_tag = URG_german
+						is_subject = no
+					}
+				}
+				URG = {
+					drop_cosmetic_tag = yes
+				}
+			}
+		}	
+
+		# Make sure that Bolivia get's their araucanian cosmetic tag if it applies
+		effect = {
+			IF = {
+				limit = {
+					BOL = {
+						NOT = {
+							has_cosmetic_tag = BOL_orelia
+						}
+						is_subject = yes
+						is_subject_of = CHL
+						CHL = {
+							has_completed_focus = CHL_crown_antoine_as_sovereign_king
+						}
+					}
+				}
+				BOL = {
+					set_cosmetic_tag = BOL_orelia
+				}
+			}
+		}	
+		# Make sure that Bolivia drops their araucanian cosmetic tag if it applies
+		effect = {
+			IF = {
+				limit = {
+					BOL = {
+						has_cosmetic_tag = BOL_orelia
+						is_subject = no
+					}
+				}
+				BOL = {
+					drop_cosmetic_tag = yes
+				}
+			}
+		}	
+	}
+
+	on_puppet = { #ROOT = nation being puppeted, FROM = overlord
+		effect = {
+
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = URG
+					}
+					FROM = {
+						original_tag = GER
+					}
+				}
+				ROOT = {
+					set_cosmetic_tag = URG_german
+				}
+			}
+
+		}
+
+		# Make sure that Bolivia get's their araucanian cosmetic tag if it applies
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = BOL
+					}
+					FROM = {
+						original_tag = CHL
+					}
+					CHL = {
+						has_completed_focus = CHL_crown_antoine_as_sovereign_king
+					}
+				}
+				ROOT = {
+					set_cosmetic_tag = BOL_orelia
+				}
+			}
+		}	
+
+
+	}
+
+	on_release_as_puppet = { # ROOT is the nation being released, FROM is the overlord.
+
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = BOL
+					}
+					FROM = {
+						original_tag = CHL
+					}
+					CHL = {
+						has_completed_focus = CHL_crown_antoine_as_sovereign_king
+					}
+				}
+				ROOT = {
+					set_cosmetic_tag = BOL_orelia
+				}
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = URG
+					}
+					FROM = {
+						original_tag = GER
+					}
+				}
+				ROOT = {
+					set_cosmetic_tag = URG_german
+				}
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						tag = WLA
+					}
+				}
+				WLA = {
+					load_oob = "WLA_1936"
+				}
+			}
+		}
+	}
+
+	#ROOT is subject FROM is previous overlord
+	on_subject_free = {
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = URG
+					}
+					FROM = {
+						original_tag = GER
+					}
+				}
+				ROOT = {
+					drop_cosmetic_tag = yes
+				}
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = BOL
+					}
+					FROM = {
+						original_tag = CHL
+					}
+				}
+				ROOT = {
+					drop_cosmetic_tag = yes
+				}
+			}
+		}
+		effect = {
+			USA_add_monroe_doctrine_to_target = yes
+		}
+
+	}
+
+	# called when a country send volunteers to another
+	# ROOT is sender, FROM is receiver
+	on_send_volunteers = { #sets flag for whether Argentina has sent volunteers to Nationalist Spain
+		effect = {
+			if = { #Checks that sender is ARG and reciever is SPA
+				limit = {
+					original_tag = ARG
+					FROM = { 
+						tag = SPA
+					}
+				}
+				ROOT = { set_country_flag = ARG_argentinian_volunteers_in_spain }
+			}	
+		}
+		effect = {
+			if = { 
+				limit = {
+					ROOT = {
+						is_ai = no
+						OR = {
+							tag = CHL
+							tag = BOL
+							tag = PRU
+							tag = ECU
+							tag = VEN
+							tag = COL
+						}
+					}
+					FROM = {
+						tag = GER
+					}
+				}
+				set_global_flag = true_condor_legion_flag				
+			}	
+		}
+	}
+
+	#FROM is war target
+	#ROOT is country declaring war
+	on_declare_war = {
+
+		effect = {
+			IF = {
+				limit = {
+					has_dlc = "Trial of Allegiance"
+					ROOT = {
+						tag = ARG
+					}
+					FROM = { tag = URG }
+				}
+
+				BRA = {
+					country_event = {
+						id = ARG_political_events.110
+						hours = 5
+					}
+				}
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					has_dlc = "Trial of Allegiance"
+					ROOT = {
+						tag = BRA
+					}
+					FROM = { tag = URG }
+				}
+
+				ARG = {
+					country_event = {
+						id = ARG_political_events.110
+						hours = 5
+					}
+				}
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						NOT = { has_idea = SMB_organization_of_american_states_member }
+					}
+					FROM = { has_idea = SMB_organization_of_american_states_member }
+				}
+				set_variable = {
+					var = global.org_american_unity_attacked_country
+					value = FROM
+				}
+				every_other_country = {
+					limit = {
+						has_idea = SMB_organization_of_american_states_member
+						NOT = { has_war_with = FROM }
+						NOT = { tag = FROM }
+					}
+					country_event = {
+						id = JUNO_brazil_events.130
+						hours = 1
+					}
+				}
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						has_idea = SMB_organization_of_american_states_member
+					}
+					FROM = { has_idea = SMB_organization_of_american_states_member }
+				}
+				ROOT = {	
+					country_event = {
+						id = JUNO_brazil_events.133
+						hours = 1
+					}
+				}
+				set_variable = {
+					var = global.org_american_unity_attacked_country
+					value = FROM
+				}
+				every_other_country = {
+					limit = {
+						has_idea = SMB_organization_of_american_states_member
+						NOT = { has_war_with = FROM }
+						NOT = { tag = FROM }
+					}
+					country_event = {
+						id = JUNO_brazil_events.130
+						hours = 2
+					}
+				}
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						tag = PAR
+					}
+					FROM = {
+						NOT = {
+							has_country_flag = PAR_revenge_flag
+						}
+						OR = {
+							tag = BRA
+							tag = ARG
+							tag = URG
+						}
+					}
+				}
+				hidden_effect = {
+					FROM = { 
+						set_country_flag = PAR_revenge_flag 
+						country_event = {
+							id = south_american_events.56
+							days = 31
+						}
+					}
+				}
+			}
+		}
+	}
+
+	#ROOT = attacking side
+	#FROM = defending side
+	on_declare_war = {
+		effect = {
+			IF = {
+				limit = {
+					OR = {
+						FROM = {
+							has_government = communism
+							capital_scope = {
+								is_core_of = PREV
+								OR = {
+									is_on_continent = north_america
+									is_on_continent = south_america
+								}
+							}
+							has_civil_war = yes
+							original_tag = ROOT
+							NOT = {
+								has_government = ROOT
+							}
+						}
+						ROOT = {
+							has_government = communism
+							capital_scope = {
+								is_core_of = PREV
+								OR = {
+									is_on_continent = north_america
+									is_on_continent = south_america
+								}
+							}
+							has_civil_war = yes
+							original_tag = FROM
+							NOT = {
+								has_government = FROM
+							}
+						}
+					}
+				}
+				IF = {
+					limit = {
+						ROOT = {
+							has_government = communism
+						}
+					}
+					FROM = {
+						USA = {
+							country_event = {
+								id = south_american_events.32
+								days = 7
+								random_days = 5
+							}
+						}
+					}
+				}
+				ELSE_IF = {
+					limit = {
+						FROM = {
+							has_government = communism
+						}
+					}
+					ROOT = {
+						USA = {
+							country_event = {
+								id = south_american_events.32
+								days = 7
+								random_days = 5
+							}
+						}
+					}
+				}
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					NOT = {
+						OR = {
+							ROOT = {
+								tag = USA
+							}
+							FROM = {
+								tag = USA
+							}
+						}
+					}
+					USA = {
+						exists = yes
+						has_idea = USA_monroe_doctrine_enforcer
+						NOT = {
+							OR = { 
+								has_war_with = FROM
+								has_war_with = ROOT
+								is_in_faction_with = ROOT
+								is_in_faction_with = FROM
+							}
+						}
+					}
+					FROM = {
+						has_idea = USA_monroe_doctrine_idea
+						is_in_faction = no
+					}
+				}
+				# Both countries are in Americas
+				IF = {
+					limit = {
+						ROOT = {
+							has_idea = USA_monroe_doctrine_idea
+						}
+					}
+					# Do Nothing for now, may add more content here in future!
+				}
+				# Only defender is in Americas
+				ELSE = {
+					FROM = {
+						USA = {
+							set_variable = { monroe_defender = PREV }
+							country_event = {
+								id = south_american_events.50
+								days = 1
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	#ROOT is the nation being released, FROM is the overlord
+	on_release_as_free = { 
+		effect = {
+			USA_add_monroe_doctrine_to_target = yes
+		}
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						tag = WLA
+					}
+				}
+				WLA = {
+					load_oob = "WLA_1936"
+				}
+			}
+		}
+	}	
+
+	on_liberate = {
+		effect = {
+			USA_add_monroe_doctrine_to_target = yes
+		}
+	}
+
+	on_weekly_ECU = {
+
+		effect = {
+			
+			IF = {
+				limit = {
+					AND = {
+						649 = {
+							is_owned_and_controlled_by = ROOT
+						}
+						305 = {
+							NOT = {
+								is_owned_and_controlled_by = ROOT
+							}
+						}
+						490 = {
+							NOT = {
+								is_owned_and_controlled_by = ROOT
+							}
+						}
+					}
+					ROOT = {
+						NOT = {
+							has_cosmetic_tag = ECU_galapagos_regime
+						}
+					}
+				}
+				ROOT = {
+					set_cosmetic_tag = ECU_galapagos_regime
+				}
+			}
+			
+		}
+
+		effect = {
+			
+			IF = {
+				limit = {
+					305 = {
+						is_owned_and_controlled_by = ROOT
+					}
+					ROOT = {
+						has_cosmetic_tag = ECU_galapagos_regime
+					}
+				}
+				ROOT = {
+					drop_cosmetic_tag = yes
+				}
+			}
+			
+		}
+
+	}
+	# ROOT is capitulated country, FROM is winner
+	on_capitulation = {
+		effect = {
+			IF = {
+				limit = {
+					has_dlc = "Trial of Allegiance"
+					ROOT = {
+						original_tag = GER
+						has_government = fascism
+						has_country_leader = {
+							character = GER_adolf_hitler
+							ruling_only = yes
+						}
+					}
+					ARG = {
+						has_government = fascism
+					}
+				} 
+				ARG = {
+					country_event = {
+						id = ARG_political_events.120
+						days = 14
+					}
+				}
+			}
+		}
+
+		effect = {
+			if = {
+				limit = {
+					has_dlc = "Trial of Allegiance"
+					ROOT = {
+						original_tag = PAR
+					}
+				}
+
+				PAR = {
+					every_core_state = {
+						limit = {
+							has_dynamic_modifier = {
+								modifier = idea_PAR_river_navy
+							}
+						}
+
+						remove_dynamic_modifier = {
+							modifier = idea_PAR_river_navy
+						}
+					}
+				}
+			}
+		}
+	}
+}
