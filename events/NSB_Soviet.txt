@@ -40,7 +40,14 @@ country_event = {
 
 	immediate = {
 		hidden_effect = {
-			SOV_initiate_paranoia_effect = yes
+			if = {
+				limit = {
+					NOT = {
+						has_global_flag = sov_old_focus_tree
+					}
+				}
+				SOV_initiate_paranoia_effect = yes
+			}
 		}
 	}
 
@@ -49,6 +56,11 @@ country_event = {
 	}
 
 	option = { #GOOD TO KNOW, THANKS
+		trigger = {
+			NOT = {
+				has_global_flag = sov_old_focus_tree
+			}
+		}
 		name = NSB_soviet_paranoia_system_events.01.a
 		
 		custom_effect_tooltip = SOV_paranoia_system_intro_tt
@@ -61,6 +73,12 @@ country_event = {
 
 		#NKVD chiefs will make Political Paranoia worse
 		custom_effect_tooltip = SOV_paranoia_system_nkvd_trait_tt
+	}
+	option = { #NOT RELAVENT TO ME
+		trigger = {
+			has_global_flag = sov_old_focus_tree
+		}
+		name = SOV_oh_no_purge
 	}
 }
 
@@ -2232,7 +2250,7 @@ country_event = {
 			modifier = SOV_pressured_our_government
 		}
 		hidden_effect = {
-			country_event = { id = NSB_soviet_foreign_politics_events.152 hours = 1 }
+			FROM = { country_event = { id = NSB_soviet_foreign_politics_events.152 hours = 1 } }
 		}
 	}
 }
@@ -2986,6 +3004,9 @@ country_event = {
 				add = 1
 				FROM = { original_tag = PER }
 				original_tag = SOV
+				NOT = {		#r56
+					is_historical_focus_on = yes
+				}
 			}
 		}
 	}
@@ -3010,6 +3031,19 @@ country_event = {
 					}
 					surrender_progress > 0.25
 				}
+			}
+			modifier = {	#r56: if historical cooperation possible, do that instead, UK will simply refuse if theyre rather busy
+				factor = 0
+				is_historical_focus_on = yes
+				ENG = {
+					exists = yes
+					has_government = democratic	#option can be picked even if not, but no need to force it if UK isnt historical either
+					is_subject = no
+					NOT = {
+						has_war_with = ROOT
+					}
+				}
+				NOT = { is_justifying_wargoal_against = ENG }
 			}
 		}
 
@@ -3139,6 +3173,22 @@ country_event = {
 				factor = 100
 				is_in_faction_with = FROM
 			}
+			modifier = {	#r56
+				factor = 100
+				is_historical_focus_on = yes
+				OR = {
+					AND = {
+						has_subject = IRQ
+						IRQ = {
+							has_capitulated = no
+						}
+					}
+					controls_state = 291
+					any_allied_country = {
+						controls_state = 291
+					}
+				}
+			}
 			modifier = {
 				factor = 2
 				has_opinion = {
@@ -3168,9 +3218,9 @@ country_event = {
 					is_in_faction_with = PER
 					strength_ratio = {
 						tag = FROM
-						ratio < 0.6
+						ratio < 0.5				#r56: lowered slightly
 					}
-					surrender_progress > 0.5
+					surrender_progress > 0.15	#r56: lowered from 0.5, this is UK, if theyre at 50%, theyre screwed
 				}
 			}
 		}
@@ -3301,6 +3351,19 @@ country_event = {
 		411 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		412 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		413 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
+
+		if = {
+			limit = {	#sanity check
+				has_government = communism
+			}
+			PER = {
+				set_party_name = {
+					ideology = communism
+					name = PER_communism_party_alternate
+					long_name = PER_communism_party_alternate_long
+				}				
+			}
+		}
 	}
 }
 
@@ -3328,6 +3391,19 @@ country_event = {
 		411 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		412 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		413 = { set_state_flag = SOV_british_resource_rights_iran_flag }
+
+		if = {
+			limit = {	#sanity check
+				has_government = communism
+			}
+			PER = {
+				set_party_name = {
+					ideology = communism
+					name = PER_communism_party_alternate
+					long_name = PER_communism_party_alternate_long
+				}				
+			}
+		}
 	}
 }
 
@@ -3510,6 +3586,10 @@ country_event = {
 
 		ai_chance = {
 			base = 1
+			modifier = {	#r56, fixed them very rarely accepting on historical, feel free to add in exceptions
+				factor = 0
+				is_historical_focus_on = yes
+			}
 			modifier = {
 				add = 0.5
 				has_opinion = {
@@ -3598,10 +3678,6 @@ country_event = {
 
 		ai_chance = {
 			base = 20
-			modifier = {
-				factor = 2
-				is_historical_focus_on = yes
-			}
 		}
 
 		FROM = {

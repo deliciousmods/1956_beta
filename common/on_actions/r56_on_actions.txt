@@ -767,10 +767,7 @@ on_actions = {
 								has_country_flag = r56_ita_badoglio_is_leader
 							}
 						}
-						if = {
-							limit = { has_unit_leader = 690 }
-							remove_unit_leader = 690
-						}
+						if = { limit = { has_unit_leader = 690 } random_unit_leader = { limit = { has_id = 690 } retire = yes } }
 						create_country_leader = {
 							name = "Pietro Badoglio"
 							picture = "gfx/leaders/ITA/Portrait_Italy_Pietro_Badoglio.dds"
@@ -786,10 +783,7 @@ on_actions = {
 
 			if = {
 				limit = { original_tag = POL }
-				if = {
-					limit = { has_unit_leader = 3180 }
-					remove_unit_leader = 3180
-				}
+				if = { limit = { has_unit_leader = 3180 } random_unit_leader = { limit = { has_id = 3180 } retire = yes } }
 				if = {
 					limit = {
 						NOT = { has_completed_focus = POL_Draw_Closer_To_The_USSR }
@@ -1318,7 +1312,7 @@ on_actions = {
 						has_state_flag = r56_postwar_uprising_target
 						is_core_of = INS
 						INS = {
-							is_subject = yes
+							is_subject_of = HOL	#could be made more flexible
 							is_ai = yes			#just in case
 						}
 					}
@@ -1387,7 +1381,7 @@ on_actions = {
 						#some were cut from focuses
 						create_corps_commander = {
 							name = "Moestopo"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Moestopo.dds"
+							portrait_path = GFX_portrait_INS_Moestopo
 							traits = { jungle_rat }
 							skill = 2
 							attack_skill = 2
@@ -1397,7 +1391,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Suharto"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Suharto.dds"
+							portrait_path = GFX_portrait_INS_Suharto
 							traits = { politically_connected meticulous harsh_leader }
 							skill = 2
 							attack_skill = 2
@@ -1407,7 +1401,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Achmad Yani"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Achmad_Yani.dds"
+							portrait_path = GFX_portrait_INS_Achmad_Yani
 							traits = { artillerist }
 							skill = 3
 							attack_skill = 4
@@ -1417,7 +1411,7 @@ on_actions = {
 						}
 						create_field_marshal = {
 							name = "Soedirman"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Soedirman.dds"
+							portrait_path = GFX_portrait_INS_Soedirman
 							traits = { trickster guerilla_fighter }
 							skill = 3
 							attack_skill = 3
@@ -1427,7 +1421,7 @@ on_actions = {
 						}
 						create_navy_leader = {
 							name = "Yos Sudarso"
-							portrait_path = "gfx/leaders/Asia/Portrait_Asia_Generic_navy_1.dds"
+							portrait_path = GFX_Portrait_Asia_Generic_navy_1
 							traits = { inshore_fighter }
 							skill = 2
 							attack_skill = 2
@@ -1437,7 +1431,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Abdul Haris Nasution"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Abdul_Harris_Nasution.dds"
+							portrait_path = GFX_portrait_INS_Abdul_Harris_Nasution
 							traits = { politically_connected infantry_officer }
 							skill = 1
 							attack_skill = 1
@@ -1447,7 +1441,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Alexander Evert Kawilarang"
-							portrait_path = "gfx/leaders/INS/r56_portrait_INS_Alexander_Evert_Kawilarang.dds"
+							portrait_path = GFX_portrait_INS_Alexander_Evert_Kawilarang
 							traits = { guerilla_fighter }
 							skill = 2
 							attack_skill = 2
@@ -1455,15 +1449,10 @@ on_actions = {
 							planning_skill = 1
 							logistics_skill = 2
 						}
-						every_state = {	#all states are automatically given to INS, return allied-occupied ones to HOL
+						every_core_state = { # all states are automatically given to INS, return allied-occupied ones to HOL
 							limit = {
-								NOT = {
-									state = PREV.PREV
-								}
-								is_core_of = INS
-								NOT = {
-									has_state_flag = r56_postwar_uprising_target
-								}
+								NOT = { state = PREV.PREV }
+								NOT = { has_state_flag = r56_postwar_uprising_target }
 							}
 							set_state_controller_to = HOL
 						}
@@ -1504,6 +1493,9 @@ on_actions = {
 					FROM = {
 						original_tag = AFG
 						has_government = fascism
+					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
 					}
 				}
 				FROM = {
@@ -1675,16 +1667,54 @@ on_actions = {
 			}
 			if = {
 				limit = {
-					FROM = { original_tag = SPR }
+					original_tag = SPR
 					NOT = {
 						any_other_country = {
 							NOT = {
-								tag = ROOT
-								tag = FROM
+								tag = FROM	#loser still exists at time of evaluation
 							}
 							original_tag = SPR
 							exists = yes
 						}
+					}
+				}
+				every_state = {
+					limit = {
+						has_state_flag = SPR_core_of_spain_flag
+						OR = {
+							AND = {
+								ROOT = {
+									OR = {
+										tag = SPA
+										tag = SPB
+									}
+								}
+								has_state_flag = SPR_sided_with_republicans_flag
+							}
+							AND = {
+								ROOT = {
+									OR = {
+										tag = SPC
+										tag = SPD
+									}
+								}
+								has_state_flag = SPR_sided_with_nationalists_flag
+							}
+						}
+					}
+					add_dynamic_modifier = {
+						modifier = r56_SPR_post_civil_war_resistance
+					}
+				}
+				every_possible_country = {
+					limit = {
+						original_tag = SPR
+						NOT = {
+							tag = ROOT
+						}
+					}
+					every_core_state = {
+						remove_core_of = PREV
 					}
 				}
 				if = {
@@ -1962,14 +1992,20 @@ on_actions = {
 						original_tag = AFG
 						has_government = communism
 					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
-				country_event = { id = afghanistan.28 days = 7 random_days = 7 }
+				country_event = { id = r56_afghanistan.28 days = 7 random_days = 7 }
 			}
 			if = {
 				limit = {
 					ROOT = {
 						original_tag = AFG
 						has_government = communism
+					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
 					}
 				}
 				random_list = { # Royal Family Exiled
@@ -1985,7 +2021,7 @@ on_actions = {
 								}
 							}
 							ITA = {
-								country_event = { id = afghanistan.29 days = 7 random_days = 7 }
+								country_event = { id = r56_afghanistan.29 days = 7 random_days = 7 }
 							}
 							else_if = {
 								limit = {
@@ -1996,14 +2032,14 @@ on_actions = {
 									}
 								}
 								ENG = {
-									country_event = { id = afghanistan.29 days = 7 random_days = 7 }
+									country_event = { id = r56_afghanistan.29 days = 7 random_days = 7 }
 								}
 							}
 						}
 					}
 					25 = { # Royal Family Captured
 						AFG = {
-							country_event = { id = afghanistan.28 days = 2 random_days = 2 }
+							country_event = { id = r56_afghanistan.28 days = 2 random_days = 2 }
 						}
 					}
 				}
@@ -2036,6 +2072,9 @@ on_actions = {
 						has_government = fascism
 						has_completed_focus = AFG_waaidu
 					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
 				add_offsite_building = { type = arms_factory level = -1 }
 			}
@@ -2049,6 +2088,9 @@ on_actions = {
 							has_idea = AFG_lawless_emirate
 						}
 					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
 				if = {
 					limit = {
@@ -2057,7 +2099,7 @@ on_actions = {
 						}
 					}
 					ROOT = {
-						load_focus_tree = { tree = afghanistan_focus keep_completed = yes }
+						load_focus_tree = { tree = r56_afghanistan_focus keep_completed = yes }
 						mark_focus_tree_layout_dirty = yes
 						uncomplete_national_focus = {
 							focus = AFG_handle_the_king
@@ -2070,7 +2112,7 @@ on_actions = {
 					}
 				}
 			}
-			#Afghanistan Civil War Loss - skill issue you are monarchist now
+			#Mengukou Civil War Loss - skill issue you are monarchist now
 			if = {
 				limit = {
 					ROOT = {
@@ -2222,7 +2264,7 @@ on_actions = {
 				every_country = {
 					limit = { original_tag = SPR }
 					remove_ideas = SPR_r56_non_intervention_agreement
-					set_capital = { state = 41 }
+					if = { limit = { controls_state = 41 } set_capital = { state = 41 } } # for the case when SPR doesn't control Madrid when the anarchists capitulate
 				}
 			}
 
@@ -2544,6 +2586,16 @@ on_actions = {
 ###---> On Declare War <><> <><> <><>
 	on_declare_war = {
 		effect = {
+			if = {
+				limit = {
+					FROM = { tag = LUX }
+					any_country = { has_idea = r56_LUX_treaty_of_london_signatory }
+				}
+				every_country = {
+					limit = { has_idea = r56_LUX_treaty_of_london_signatory }
+					country_event = luxembourg.228
+				}
+			}
 			if = {	# Little Entente - Hungary war against
 				limit = {
 					ROOT = {
@@ -3479,9 +3531,11 @@ on_actions = {
 						FROM = { tag = CHI }
 						ROOT = { tag = CHI }
 					}
-					OR = {
-						has_idea = KMT_corrupted_government
-						has_idea = KMT_corrupted_government_lesser
+					CHI = {
+						OR = {
+							has_idea = KMT_corrupted_government
+							has_idea = KMT_corrupted_government_lesser
+						}
 					}
 				}
 				CHI = {
@@ -3749,6 +3803,9 @@ on_actions = {
 						character = AFG_ghulam_muhammad_ghubar
 						ruling_only = yes
 					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
 				remove_trait = {
 					character = AFG_ghulam_muhammad_ghubar
@@ -3869,17 +3926,16 @@ on_actions = {
 					}
 					is_subject = no
 				}
-				remove_unit_leader = 1211
-				#remove_unit_leader = 1212
-				#remove_unit_leader = 1113
-				#remove_unit_leader = 1114
-				#remove_unit_leader = 1115
-				#remove_unit_leader = 1116
-				remove_unit_leader = 1217
-				remove_unit_leader = 1218
-
-				remove_unit_leader = 1121
-				remove_unit_leader = 1122
+				if = { limit = { has_unit_leader = 1211 } random_unit_leader = { limit = { has_id = 1211 } retire = yes } }
+				# if = { limit = { has_unit_leader = 1212 } random_unit_leader = { limit = { has_id = 1212 } retire = yes } }
+				# if = { limit = { has_unit_leader = 1213 } random_unit_leader = { limit = { has_id = 1213 } retire = yes } }
+				# if = { limit = { has_unit_leader = 1214 } random_unit_leader = { limit = { has_id = 1214 } retire = yes } }
+				# if = { limit = { has_unit_leader = 1215 } random_unit_leader = { limit = { has_id = 1215 } retire = yes } }
+				# if = { limit = { has_unit_leader = 1216 } random_unit_leader = { limit = { has_id = 1216 } retire = yes } }
+				if = { limit = { has_unit_leader = 1217 } random_unit_leader = { limit = { has_id = 1217 } retire = yes } }
+				if = { limit = { has_unit_leader = 1218 } random_unit_leader = { limit = { has_id = 1218 } retire = yes } }
+				if = { limit = { has_unit_leader = 1121 } random_unit_leader = { limit = { has_id = 1221 } retire = yes } }
+				if = { limit = { has_unit_leader = 1122 } random_unit_leader = { limit = { has_id = 1222 } retire = yes } }
 				if = {
 					limit = {
 						has_cosmetic_tag = MAL_UK
@@ -4133,6 +4189,7 @@ on_actions = {
 					NOT = {
 						original_tag = MPL
 					}
+					any_owned_state = { is_capital = yes } # to prevent the following trigger from throwing an error in cases where the capital doesn't exist yet (anarchists in spanish civil war for example)
 					capital_scope = {
 						is_on_continent = middle_east
 					}
@@ -4294,6 +4351,7 @@ on_actions = {
 				limit = {
 					original_tag = ENG
 					has_government = democratic
+					has_capitulated = no
 				}
 				if = {
 					limit = {
@@ -4328,6 +4386,9 @@ on_actions = {
 				limit = {
 					FROM = { tag = USA }
 					USA = { has_government = communism }
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
 				if = {
 					limit = {
@@ -4347,6 +4408,9 @@ on_actions = {
 			if = {
 				limit = {
 					ROOT = { original_tag = AFG }
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
 				set_global_flag = achievement_AFG_has_been_puppeted
 			}
@@ -4996,7 +5060,7 @@ on_actions = {
 					is_subject_of = FRA
 				}
 				SAR = { set_cosmetic_tag = SAR_FRA }
-			}	
+			}
 
 			#Make Britain called England
 			if = {
@@ -5095,10 +5159,7 @@ on_actions = {
 			if = { #MOD. Compressed
 				limit = { tag = POL }
 				POL = { remove_ideas = POL_Sanacja_Government }
-				if = {
-					limit = { has_unit_leader = 3180 }
-					remove_unit_leader = 3180
-				}
+				if = { limit = { has_unit_leader = 3180 } random_unit_leader = { limit = { has_id = 3180 } retire = yes } }
 				if = {
 					limit = {
 						SOV = { has_completed_focus = SOV_the_military_conspiracy }		#arbitrary choice of purge to select, can be revisited
@@ -5197,34 +5258,20 @@ on_actions = {
 							logistics_skill = 1
 						}
 					}
-					if = { limit = { has_unit_leader = 3129 }
-						remove_unit_leader = 3129 }
-					if = { limit = { has_unit_leader = 3155 }
-						remove_unit_leader = 3155 }
-					if = { limit = { has_unit_leader = 3154 }
-						remove_unit_leader = 3154 }
-					if = { limit = { has_unit_leader = 3131 }
-						remove_unit_leader = 3131 }
-					if = { limit = { has_unit_leader = 3132 }
-						remove_unit_leader = 3132 }
-					if = { limit = { has_unit_leader = 3134 }
-						remove_unit_leader = 3134 }
-					if = { limit = { has_unit_leader = 3133 }
-						remove_unit_leader = 3133 }
-					if = { limit = { has_unit_leader = 3135 }
-						remove_unit_leader = 3135 }
-					if = { limit = { has_unit_leader = 3136 }
-						remove_unit_leader = 3136 }
-					if = { limit = { has_unit_leader = 3151 }
-						remove_unit_leader = 3151 }
-					if = { limit = { has_unit_leader = 3152 }
-						remove_unit_leader = 3152 }
-					if = { limit = { has_unit_leader = 3153 }
-						remove_unit_leader = 3153 }
-					if = { limit = { has_unit_leader = 3128 }
-						remove_unit_leader = 3128 }
-					if = { limit = { has_unit_leader = 3130 }
-						remove_unit_leader = 3130 }
+					if = { limit = { has_unit_leader = 3128 } random_unit_leader = { limit = { has_id = 3128 } retire = yes } }
+					if = { limit = { has_unit_leader = 3129 } random_unit_leader = { limit = { has_id = 3129 } retire = yes } }
+					if = { limit = { has_unit_leader = 3130 } random_unit_leader = { limit = { has_id = 3130 } retire = yes } }
+					if = { limit = { has_unit_leader = 3131 } random_unit_leader = { limit = { has_id = 3131 } retire = yes } }
+					if = { limit = { has_unit_leader = 3132 } random_unit_leader = { limit = { has_id = 3132 } retire = yes } }
+					if = { limit = { has_unit_leader = 3133 } random_unit_leader = { limit = { has_id = 3133 } retire = yes } }
+					if = { limit = { has_unit_leader = 3134 } random_unit_leader = { limit = { has_id = 3134 } retire = yes } }
+					if = { limit = { has_unit_leader = 3135 } random_unit_leader = { limit = { has_id = 3135 } retire = yes } }
+					if = { limit = { has_unit_leader = 3136 } random_unit_leader = { limit = { has_id = 3136 } retire = yes } }
+					if = { limit = { has_unit_leader = 3151 } random_unit_leader = { limit = { has_id = 3151 } retire = yes } }
+					if = { limit = { has_unit_leader = 3152 } random_unit_leader = { limit = { has_id = 3152 } retire = yes } }
+					if = { limit = { has_unit_leader = 3153 } random_unit_leader = { limit = { has_id = 3153 } retire = yes } }
+					if = { limit = { has_unit_leader = 3154 } random_unit_leader = { limit = { has_id = 3154 } retire = yes } }
+					if = { limit = { has_unit_leader = 3155 } random_unit_leader = { limit = { has_id = 3155 } retire = yes } }
 				}
 
 				if = { #GER
@@ -5817,7 +5864,7 @@ on_actions = {
 					}
 					create_country_leader = { #Russian fascist who lived in the USA
 						name = "Anastasy Vonsyatsky"
-						picture = "gfx/leaders/kr_generic/Portrait_Russia_Generic_land_1.dds"
+						picture = GFX_kr_portrait_russia_generic_land_1
 						expire = "1965.1.1"
 						ideology = fascism_ideology
 						traits = {
@@ -5973,6 +6020,34 @@ on_actions = {
 			}
 			if = {
 				limit = {
+					ROOT = { original_tag = BRM }
+					OVERLORD = {
+						original_tag = ENG
+						NOT = {
+							has_government = communism
+						}
+					}
+					NOT = {
+						any_other_country = {
+							has_country_leader = {
+								character = BRM_archibald_cochrane
+								ruling_only = no
+							}
+						}
+					}
+				}
+				add_country_leader_role = {	#governor of Burma from may 1936 added by PDX
+					character = BRM_archibald_cochrane
+					country_leader = {
+						ideology = conservatism
+						traits = { connected_citizen }		#little flavour
+						expire = "1965.3.1.1"
+					}
+					promote_leader = yes 
+				}
+			}
+			if = {
+				limit = {
 					ROOT = { original_tag = ENG }
 					OVERLORD = {
 						has_government = neutrality
@@ -5989,7 +6064,7 @@ on_actions = {
 				}
 				create_country_leader = { #grandpa of Boris Johnson
 					name = "Osman Kemal"
-					picture = "gfx/leaders/kr_generic/Portrait_Europe_Generic_new_13.dds"
+					picture = GFX_kr_portrait_europe_generic_13
 					expire = "1965.1.1"
 					ideology = conservatism_n
 					traits = {
@@ -6018,7 +6093,7 @@ on_actions = {
 					}
 					create_country_leader = { #pro fascist Ger American, Fritz Kuhn Otherwise?
 						name = "Gerhard Kunze"
-						picture = "gfx/leaders/kr_generic/Portrait_Europe_Generic_new_1.dds"
+						picture = GFX_kr_portrait_europe_generic_1
 						expire = "1965.1.1"
 						ideology = nazism
 						traits = {
@@ -6272,7 +6347,51 @@ on_actions = {
 				}
 				set_cosmetic_tag = SAR_FRA
 			}
-			if = {	#French Lebanon gets French puppet tag
+			#Make VLA JAP Protectorate
+			if = {
+				limit = {
+					tag = VLA
+					is_subject_of = JAP
+				}
+				VLA = { set_cosmetic_tag = VLA_JAP }
+			}
+			
+			#Make Nauru German again
+			if = {
+				limit = {
+					tag = NRU
+					is_subject_of = GER
+				}
+				NRU = { set_cosmetic_tag = NRU_GER }
+			}
+			
+			#Make Tahiti French again
+			if = {
+				limit = {
+					tag = TAH
+					is_subject_of = FRA
+				}
+				TAH = { set_cosmetic_tag = TAH_FRA }
+			}
+			
+			# Aftermath of the Good Will mission
+			if = {
+				limit = {
+					tag = SAM
+					is_subject_of = NZL
+				}
+				SAM = { set_cosmetic_tag = SAM_TWS }
+			}
+			
+			# Marshall Islands become German
+			if = {
+				limit = {
+					tag = MRS
+					is_subject_of = GER
+				}
+				MRS = { set_cosmetic_tag = MRS_GER }
+			}
+			if = {
 				limit = {
 					tag = ALS
 					is_puppet_of = GER
@@ -6568,7 +6687,7 @@ on_actions = {
 				}
 				create_country_leader = { #indian in japanese indian army but coulen't find better
 					name = "Caïlacha Subbiah"
-					picture = "gfx/leaders/kr_generic/Portrait_America_Generic_land_5.dds"
+					picture = GFX_kr_portrait_america_generic_land_5
 					expire = "1965.1.1"
 					ideology = stalinism
 				}
@@ -6589,7 +6708,7 @@ on_actions = {
 				}
 				create_country_leader = { #Representative of Pondichéry
 					name = "Deiva Zivarattinam"
-					picture = "gfx/leaders/kr_generic/Portrait_America_Generic_land_6.dds"
+					picture = GFX_kr_portrait_america_generic_land_6
 					expire = "1965.1.1"
 					ideology = controlled_democracy
 				}
@@ -6610,7 +6729,7 @@ on_actions = {
 				}
 				create_country_leader = { #indian in japanese indian army but coulen't find better
 					name = "Prem Sahgal" # may be his portrait, not sure.
-					picture = "gfx/leaders/kr_generic/Portrait_India_Generic_land_new_1.dds"
+					picture = GFX_kr_portrait_india_generic_land_1
 					expire = "1965.1.1"
 					ideology = fascism_ideology
 				}
@@ -6777,7 +6896,7 @@ on_actions = {
 				create_country_leader = {
 					name = "Hans Luther"
 					desc = " "
-					picture = "gfx/leaders/kr_generic/Portrait_Europe_Generic_new_3.dds"
+					picture = GFX_kr_portrait_europe_generic_3
 					expire = "1965.1.1"
 					ideology = oligarchism
 					traits = {
@@ -6981,7 +7100,7 @@ on_actions = {
 				}
 				create_country_leader = { #probaby pro nazi party founder, founded in 1937 see the NMB character file for notes
 					name = "Hans Hirsekorn"
-					picture = "gfx/leaders/kr_generic/Portrait_Europe_Generic_new_10.dds"
+					picture = GFX_kr_portrait_europe_generic_10
 					expire = "1965.1.1"
 					ideology = nazism
 					traits = {
@@ -7013,7 +7132,7 @@ on_actions = {
 				}
 				create_country_leader = { #probaby pro nazi party founder, founded in 1937 see the NMB character file for notes
 					name = "Edgar Sander"
-					picture = "gfx/leaders/kr_generic/Portrait_Europe_Generic_new_11.dds"
+					picture = GFX_kr_portrait_europe_generic_11
 					expire = "1965.1.1"
 					ideology = oligarchism
 					traits = {
@@ -7042,7 +7161,7 @@ on_actions = {
 				}
 				create_country_leader = { #
 					name = "Simon Frederiks"
-					picture = "gfx/leaders/kr_generic/Portrait_Africa_Generic_new_4.dds"
+					picture = GFX_kr_portrait_africa_generic_4
 					expire = "1965.1.1"
 					ideology = oligarchism
 					traits = {
@@ -7748,7 +7867,7 @@ on_actions = {
 					}
 					create_country_leader = {
 						name = "Manley Powers"
-						picture = "gfx/leaders/kr_generic/Portrait_Britain_Generic_navy_1.dds"
+						picture = GFX_kr_portrait_britain_generic_navy_1
 						expire = "1965.1.1"
 						ideology = despotism
 						traits = {
@@ -7757,7 +7876,7 @@ on_actions = {
 					}
 					create_country_leader = {
 						name = "Manley Powers"
-						picture = "gfx/leaders/kr_generic/Portrait_Britain_Generic_navy_1.dds"
+						picture = GFX_kr_portrait_britain_generic_navy_1
 						expire = "1965.1.1"
 						ideology = liberalism
 						traits = {
@@ -7766,7 +7885,7 @@ on_actions = {
 					}
 					create_country_leader = {
 						name = "Manley Powers"
-						picture = "gfx/leaders/kr_generic/Portrait_Britain_Generic_navy_1.dds"
+						picture = GFX_kr_portrait_britain_generic_navy_1
 						expire = "1965.1.1"
 						ideology = fascism_ideology
 						traits = {
@@ -7911,6 +8030,14 @@ on_actions = {
 				}
 				FROM = {
 					set_cosmetic_tag = CZE_ONLY
+					if = {
+						limit = { has_idea = CZE_divided_nation }
+						remove_ideas = CZE_divided_nation
+					}
+					if = {
+						limit = { has_idea = CZE_divided_nation_2 }
+						remove_ideas = CZE_divided_nation_2
+					}
 				}
 			}
 
@@ -8563,34 +8690,21 @@ on_actions = {
 							logistics_skill = 1
 						}
 					}
-					if = { limit = { has_unit_leader = 3129 }
-						remove_unit_leader = 3129 }
-					if = { limit = { has_unit_leader = 3155 }
-						remove_unit_leader = 3155 }
-					if = { limit = { has_unit_leader = 3154 }
-						remove_unit_leader = 3154 }
-					if = { limit = { has_unit_leader = 3131 }
-						remove_unit_leader = 3131 }
-					if = { limit = { has_unit_leader = 3132 }
-						remove_unit_leader = 3132 }
-					if = { limit = { has_unit_leader = 3134 }
-						remove_unit_leader = 3134 }
-					if = { limit = { has_unit_leader = 3133 }
-						remove_unit_leader = 3133 }
-					if = { limit = { has_unit_leader = 3135 }
-						remove_unit_leader = 3135 }
-					if = { limit = { has_unit_leader = 3136 }
-						remove_unit_leader = 3136 }
-					if = { limit = { has_unit_leader = 3151 }
-						remove_unit_leader = 3151 }
-					if = { limit = { has_unit_leader = 3152 }
-						remove_unit_leader = 3152 }
-					if = { limit = { has_unit_leader = 3153 }
-						remove_unit_leader = 3153 }
-					if = { limit = { has_unit_leader = 3128 }
-						remove_unit_leader = 3128 }
-					if = { limit = { has_unit_leader = 3130 }
-						remove_unit_leader = 3130 }
+					if = { limit = { has_unit_leader = 3128 } random_unit_leader = { limit = { has_id = 3128 } retire = yes } }
+					if = { limit = { has_unit_leader = 3129 } random_unit_leader = { limit = { has_id = 3129 } retire = yes } }
+					if = { limit = { has_unit_leader = 3130 } random_unit_leader = { limit = { has_id = 3130 } retire = yes } }
+					if = { limit = { has_unit_leader = 3131 } random_unit_leader = { limit = { has_id = 3131 } retire = yes } }
+					if = { limit = { has_unit_leader = 3132 } random_unit_leader = { limit = { has_id = 3132 } retire = yes } }
+					if = { limit = { has_unit_leader = 3133 } random_unit_leader = { limit = { has_id = 3133 } retire = yes } }
+					if = { limit = { has_unit_leader = 3134 } random_unit_leader = { limit = { has_id = 3134 } retire = yes } }
+					if = { limit = { has_unit_leader = 3135 } random_unit_leader = { limit = { has_id = 3135 } retire = yes } }
+					if = { limit = { has_unit_leader = 3136 } random_unit_leader = { limit = { has_id = 3136 } retire = yes } }
+					if = { limit = { has_unit_leader = 3151 } random_unit_leader = { limit = { has_id = 3151 } retire = yes } }
+					if = { limit = { has_unit_leader = 3152 } random_unit_leader = { limit = { has_id = 3152 } retire = yes } }
+					if = { limit = { has_unit_leader = 3153 } random_unit_leader = { limit = { has_id = 3153 } retire = yes } }
+					if = { limit = { has_unit_leader = 3154 } random_unit_leader = { limit = { has_id = 3154 } retire = yes } }
+					if = { limit = { has_unit_leader = 3155 } random_unit_leader = { limit = { has_id = 3155 } retire = yes } }
+
 				}
 				if = {
 					limit = { is_puppet_of = GER }
@@ -8830,6 +8944,34 @@ on_actions = {
 				limit = {
 					tag = SAR
 					has_cosmetic_tag = SAR_FRA
+				}
+				drop_cosmetic_tag = yes
+			}
+			if = {
+				limit = {
+					tag = VLA
+					has_cosmetic_tag = VLA_JAP
+				}
+				drop_cosmetic_tag = yes
+			}
+			if = {
+				limit = {
+					tag = NRU
+					has_cosmetic_tag = NRU_GER
+				}
+				drop_cosmetic_tag = yes
+			}
+			if = {
+				limit = {
+					tag = TAH
+					has_cosmetic_tag = TAH_FRA
+				}
+				drop_cosmetic_tag = yes
+			}
+			if = {
+				limit = {
+					tag = MRS
+					has_cosmetic_tag = MRS_GER
 				}
 				drop_cosmetic_tag = yes
 			}
@@ -9235,6 +9377,7 @@ on_actions = {
 				}
 				FROM = {
 					set_cosmetic_tag = CZE_ONLY
+					remove_ideas = CZE_divided_nation
 				}
 			}
 			if = {
@@ -9813,6 +9956,9 @@ on_actions = {
 			AFG = {
 				if = {
 					limit = {
+						NOT = {
+							has_global_flag = afg_dlc_focus_tree
+						}
 						OR = {
 							AND = {
 								is_historical_focus_on = no
@@ -9844,6 +9990,9 @@ on_actions = {
 				}
 				if = {
 					limit = {
+						NOT = {
+							has_global_flag = afg_dlc_focus_tree
+						}
 						AFG = {
 							OR = {
 								AND = {
@@ -9890,6 +10039,9 @@ on_actions = {
 				}
 				if = {
 					limit = {
+						NOT = {
+							has_global_flag = afg_dlc_focus_tree
+						}
 						AFG = {
 							OR = {
 								has_game_rule = {
@@ -9904,6 +10056,9 @@ on_actions = {
 				}
 				if = {
 					limit = {
+						NOT = {
+							has_global_flag = afg_dlc_focus_tree
+						}
 						AFG = {
 							OR = {
 								has_game_rule = {
@@ -10375,21 +10530,37 @@ on_actions = {
 					}
 				}
 			}
-			ITA = {
-				create_production_license = {
-					target = POL
-					equipment = {
-						type = motorized_equipment_1
-					}
-					cost_factor = 0
-				}
-			}
+			# commented to prevent weird error in log when loading any save after game start
+			# ITA = {
+			# 	create_production_license = {
+			# 		target = POL
+			# 		equipment = {
+			# 			type = motorized_equipment_1
+			# 		}
+			# 		cost_factor = 0
+			# 	}
+			# }
 			PER = {
 				if = {
 					limit = {
-						has_game_rule = {
-							rule = PER_ai_behavior
-							option = RANDOM
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = PER_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = PER_ai_behavior
+								option = RANDOM
+							}
+						}
+						AFG = {
+							is_ai = yes
+						}
+						IRQ = {
+							is_ai = yes
 						}
 					}
 					random_list = {
@@ -10397,6 +10568,29 @@ on_actions = {
 						10 = { set_country_flag = PER_AI_RANDOM_DEMOCRATIC }
 						10 = { set_country_flag = PER_AI_RANDOM_COMMUNIST}
 						10 = { set_country_flag = PER_AI_RANDOM_FASCIST }
+					}
+				}
+				else_if = { # Dont bomb-rush AFG or IRQ
+					limit = {
+						OR = {
+							AND = {
+								is_historical_focus_on = no
+								has_game_rule = {
+									rule = PER_ai_behavior
+									option = DEFAULT
+								}
+							}
+							has_game_rule = {
+								rule = PER_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						60 = { set_country_flag = PER_AI_RANDOM_MONARCHIST_HISTORICAL }
+						20 = { set_country_flag = PER_AI_RANDOM_DEMOCRATIC }
+						20 = { set_country_flag = PER_AI_RANDOM_COMMUNIST}
+						0 = { set_country_flag = PER_AI_RANDOM_FASCIST }
 					}
 				}
 			}
@@ -10531,15 +10725,16 @@ on_actions = {
 				}
 			}
 			###Give Sweden anti-tank tech
-			SWE = {
-				create_production_license = {
-					target = POL
-					equipment = {
-						type = anti_tank_equipment_1
-					}
-					cost_factor = 0
-				}
-			}
+			# commented to prevent weird error in log when loading any save after game start
+			# SWE = {
+			# 	create_production_license = {
+			# 		target = POL
+			# 		equipment = {
+			# 			type = anti_tank_equipment_1
+			# 		}
+			# 		cost_factor = 0
+			# 	}
+			# }
 			FRA = {
 				create_production_license = {
 					target = ROM
@@ -15436,6 +15631,7 @@ on_actions = {
 					release = SLO
 					release = RUT
 					set_cosmetic_tag = CZE_ONLY
+					remove_ideas = CZE_divided_nation
 				}
 			}
 			else_if = {
@@ -16535,6 +16731,9 @@ on_actions = {
 					transfer_state = 147
 					transfer_state = 666
 					transfer_state = 722
+					transfer_state = 1035
+					transfer_state = 1034
+					transfer_state = 1029
 					set_capital = { state = 144 }
 				}
 				144 = {	add_core_of = NOR }
@@ -16571,6 +16770,9 @@ on_actions = {
 					transfer_state = 147
 					transfer_state = 666
 					transfer_state = 722
+					transfer_state = 1035
+					transfer_state = 1034
+					transfer_state = 1029
 					set_capital = { state = 144 }
 					change_tag_from = NOR
 				}
@@ -17690,6 +17892,143 @@ on_actions = {
 					}
 				}
 			}
+			#Create VP renaming exception array
+			add_to_array = {
+				global.vp_rename_exceptions = 9833	#Instanbul
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 1086	#Jerusalem
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 3957	#Washington? - Has silly renames
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 587	#Can become Bonn
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 7381	#Jakarta/Batavia
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 12371	#Hollandia
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 2077
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 5121
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 2081
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 6332
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 3151
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 385
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 4112
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 947
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 1181
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 4206
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 1015
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 7107
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 12557
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 4361
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 5208
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 4696
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 9814
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 9671
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 12206
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 5151
+			}
+			#Soviet VPs, mostly destalinization
+			add_to_array = {
+				global.vp_rename_exceptions = 3529	#Stalingrad
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 6474	#Stalino
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 9461	#Voroshilovgrad
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 3151	#Leningrad
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 1384	#Stalinabad
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 6245	#Kalinin
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 11523
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 9432
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 6124
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 11375
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 9628
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 12583
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 9402
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 10627
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 6701
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 1821
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 13063
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 392
+			}
+			add_to_array = {
+				global.vp_rename_exceptions = 11225
+			}
 		}
 	}
 
@@ -17862,6 +18201,729 @@ on_actions = {
 						NOT = { has_state_flag = state_has_fallen }
 					}
 				}
+				if = {	#Fall of Warsaw - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 10
+							is_owned_by = POL
+						}
+						NOT = { has_global_flag = fall_of_warsaw_ger }
+					}
+					news_event = { id = news.100 }
+				}
+				if = {	#Fall of London - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 126
+							is_owned_by = ENG
+						}
+						NOT = { has_global_flag = fall_of_london_ger }
+					}
+					news_event = { id = news.102 }
+				}
+				if = {	#Fall of Leningrad - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 195	
+							is_owned_by = SOV
+						}
+						NOT = { has_global_flag = fall_of_leningrad }
+					}
+					news_event = { id = news.103 }
+				}
+				if = {	#Fall of Kiev - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 202
+							is_owned_by = SOV
+						}
+						SOV = {
+							has_government = communism
+						}
+						NOT = { has_global_flag = fall_of_kiev }
+					}
+					news_event = { id = news.104 }
+				}
+				if = {	#Fall of Stalingrad - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 217
+							is_owned_by = SOV
+						}
+
+						NOT = { has_global_flag = fall_of_stalingrad }
+					}
+					news_event = { id = news.105 }
+				}
+				if = {	#Fall of Moscow - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 219			
+							is_owned_by = SOV
+						}
+
+						NOT = { has_global_flag = fall_of_moscow }
+					}
+					news_event = { id = news.106 }
+				}
+				if = {	#Fall of Sebastopol - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 137			
+							is_owned_by = SOV
+						}
+
+						NOT = { has_global_flag = fall_of_sevastopol }
+					}
+					news_event = { id = news.107 }
+				}
+				if = {	#Fall of Baku - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 229			
+							is_owned_by = SOV
+						}
+
+						NOT = { has_global_flag = fall_of_baku }
+					}
+					news_event = { id = news.108 }
+				}
+				if = {	#Fall of Cairo - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 229
+							OR = {
+								is_owned_by = ENG
+								AND = {
+									is_owned_by = EGY
+									EGY = {
+										is_in_faction_with = ENG
+									}
+								}
+							}
+						}
+
+						NOT = { has_global_flag = fall_of_cairo }
+					}
+					news_event = { id = news.109 }
+				}
+
+
+				if = {	#Fall of Washington - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 361
+							is_owned_by = USA
+						}
+
+						NOT = { has_global_flag = fall_of_washington }
+					}
+					news_event = { id = news.110 }
+				}
+
+
+				if = {	#Fall of New York - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 358
+							is_owned_by = USA
+						}
+
+						NOT = { has_global_flag = fall_of_new_york }
+					}
+					news_event = { id = news.111 }
+				}
+
+				if = {	#Fall of Gibraltar - Germany # Base game
+					limit = {
+						ROOT = {
+							original_tag = GER
+						}
+						FROM.FROM = {
+							state = 118
+							is_owned_by = ENG
+						}
+
+						NOT = { has_global_flag = fall_of_gibraltar_ger }
+					}
+					news_event = { id = news.112 }
+				}
+
+				if = {	#Fall of Cairo - Italy # Base game
+					limit = {
+						ROOT = {
+							original_tag = ITA
+						}
+						FROM.FROM = {
+							state = 907
+							OR = {
+								is_owned_by = ENG
+								is_owned_by = EGY
+							}
+							
+						}
+
+						NOT = { has_global_flag = fall_of_cairo_ita }
+					}
+					news_event = { id = news.113 }
+				}
+		
+				# news.114 already covered somewhere below
+
+
+				if = {	#Fall of London - Italy # Base game
+					limit = {
+						ROOT = {
+							original_tag = ITA
+						}
+						FROM.FROM = {
+							state = 126
+							is_owned_by = ENG
+						}
+
+						NOT = { has_global_flag = fall_of_london_ita }
+					}
+					news_event = { id = news.115 }
+				}
+
+				if = {	#Fall of Gibraltar - Italy # Base game
+					limit = {
+						ROOT = {
+							original_tag = ITA
+						}
+						FROM.FROM = {
+							state = 118
+							is_owned_by = ENG
+						}
+
+						NOT = { has_global_flag = fall_of_gibraltar_ita }
+					}
+					news_event = { id = news.116 }
+				}
+
+
+				if = {	#Fall of Singapore - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 336
+							OR = {
+								is_owned_by = ENG
+								AND = {
+									is_owned_by = MAL
+									MAL = {
+										is_subject_of = ENG
+									}
+								}
+							}
+						}
+
+						NOT = { has_global_flag = fall_of_singapore }
+					}
+					news_event = { id = news.117 }
+				}
+
+				if = {	#Fall of Pearl Harbor - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 629
+							is_owned_by = USA
+						}
+
+						NOT = { has_global_flag = fall_of_pearl_harbor }
+					}
+					news_event = { id = news.118 }
+				}
+
+				if = {	#Fall of Sydney - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 285
+							is_owned_by = AST
+						}
+
+						NOT = { has_global_flag = fall_of_sydney }
+					}
+					news_event = { id = news.119 }
+				}
+
+
+				if = {	#Fall of Los Angeles - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 378
+							is_owned_by = USA
+						}
+
+						NOT = { has_global_flag = fall_of_los_angeles }
+					}
+					news_event = { id = news.120 }
+				}
+
+				if = {	#Nanjing - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 613
+							is_owned_by = CHI
+						}
+
+						NOT = { has_global_flag = fall_of_nanjing }
+					}
+					news_event = { id = news.121 }
+				}
+
+				if = {	#Vladivostok - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 408
+							OR ={
+								is_owned_by = GUK
+								is_owned_by = VLA
+								is_owned_by = SOV
+							}
+						}
+
+						NOT = { has_global_flag = fall_of_vladivostok }
+					}
+					news_event = { id = news.122 }
+				}
+
+
+				if = {	#Hong Kong - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 326
+							is_owned_by = ENG
+						}
+
+						NOT = { has_global_flag = fall_of_hong_kong }
+					}
+					news_event = { id = news.123 }
+				}
+
+
+				if = {	#Manilla - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 327
+							is_owned_by = PHI
+						}
+
+						NOT = { has_global_flag = fall_of_manila }
+					}
+					news_event = { id = news.124 }
+				}
+
+				if = {	#Calcutta - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 431
+							OR = {
+								is_owned_by = ENG
+								AND = {
+									is_owned_by = RAJ
+									RAJ = {
+										is_subject_of = ENG
+									}
+								}
+							}
+							
+						}
+
+						NOT = { has_global_flag = fall_of_calcutta }
+					}
+					news_event = { id = news.125 }
+				}
+
+				if = {	#New Delhi - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 439
+							OR = {
+								is_owned_by = ENG
+								AND = {
+									is_owned_by = RAJ
+									RAJ = {
+										is_subject_of = ENG
+									}
+								}
+							}
+						}
+
+						NOT = { has_global_flag = fall_of_new_delhi }
+					}
+					news_event = { id = news.126 }
+				}
+				if = {	#Panama Canal - Japan # Base game
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+						FROM.FROM = {
+							state = 685
+							is_owned_by = USA							}
+
+						NOT = { has_global_flag = fall_of_panama }
+					}
+					news_event = { id = news.127 }
+				}
+
+
+				if = {	#Berlin - USA # Base game
+					limit = {
+						ROOT = {
+							original_tag = USA
+						}
+						FROM.FROM = {
+							state = 64
+							is_owned_by = GER						}
+
+						NOT = { has_global_flag = fall_of_berlin_usa }
+					}
+					news_event = { id = news.128 }
+				}
+
+
+				if = {	#Berlin - USA # Base game
+					limit = {
+						ROOT = {
+							original_tag = USA
+						}
+						FROM.FROM = {
+							state = 64
+							is_owned_by = GER						}
+
+						NOT = { has_global_flag = fall_of_berlin_usa }
+					}
+					news_event = { id = news.128 }
+				}
+
+				if = {	#Berlin - ENG # Base game
+					limit = {
+						ROOT = {
+							original_tag = ENG
+						}
+						FROM.FROM = {
+							state = 64
+							is_owned_by = GER						}
+
+						NOT = { has_global_flag = fall_of_berlin_eng }
+					}
+					news_event = { id = news.129 }
+				}
+
+
+				if = {	#Berlin - FRA # Base game
+					limit = {
+						ROOT = {
+							original_tag = FRA
+						}
+						FROM.FROM = {
+							state = 64
+							is_owned_by = GER						}
+
+						NOT = { has_global_flag = fall_of_berlin_fra }
+					}
+					news_event = { id = news.130 }
+				}
+
+				if = {	#Berlin - POL # Base game
+					limit = {
+						ROOT = {
+							original_tag = POL
+						}
+						FROM.FROM = {
+							state = 64
+							is_owned_by = GER						}
+
+						NOT = { has_global_flag = fall_of_berlin_pol }
+					}
+					news_event = { id = news.131 }
+				}
+
+				if = {	#Rome - allies # Base game
+					limit = {
+						ROOT = {
+							original_tag = ENG
+							original_tag = USA
+							original_tag = AST
+							original_tag = NZL
+							original_tag = CAN
+							original_tag = SAF
+						
+						}
+						FROM.FROM = {
+							state = 2
+							OR = {
+								is_owned_by = ITA
+								is_owned_by = GER
+								is_owned_by = RSI
+							}
+					}
+
+						NOT = { has_global_flag = fall_of_rome_allies }
+					}
+					news_event = { id = news.132 }
+				}
+
+
+				if = {	#Rome - FRA # Base game
+					limit = {
+						ROOT = {
+							original_tag = FRA
+						}
+						FROM.FROM = {
+							state = 2
+							OR = {
+								is_owned_by = ITA
+								is_owned_by = RSI
+								is_owned_by = PAP
+							}
+						}
+						NOT = { has_global_flag = fall_of_rome_fra }
+					}
+					news_event = { id = news.133 }
+				}
+
+
+				if = {	#Tokyo - USA # Base game
+					limit = {
+						ROOT = {
+							original_tag = USA
+						}
+						FROM.FROM = {
+							state = 282
+							is_owned_by = JAP	
+						}
+
+						NOT = { has_global_flag = fall_of_tokyo_usa }
+					}
+					news_event = { id = news.135 }
+				}
+
+
+				if = {	#Moscow - allies # Base game
+					limit = {
+						ROOT = {
+							original_tag = ENG
+							original_tag = USA
+							original_tag = AST
+							original_tag = NZL
+							original_tag = CAN
+							original_tag = SAF
+							original_tag = FRA
+						
+						}
+						FROM.FROM = {
+							state = 219
+							is_owned_by = SOV
+					}
+
+						NOT = { has_global_flag = fall_of_moscow_allies }
+					}
+					news_event = { id = news.136 }
+				}
+
+
+
+				if = {	#Warsaw - SOV # Base game
+					limit = {
+						ROOT = {
+							original_tag = SOV
+						}
+						FROM.FROM = {
+							state = 10
+							is_owned_by = POL	
+						}
+
+						NOT = { has_global_flag = fall_of_warsaw_sov }
+					}
+					news_event = { id = news.138 }
+				}
+
+				if = {	#Berlin - SOV # Base game
+					limit = {
+						ROOT = {
+							original_tag = SOV
+						}
+						FROM.FROM = {
+							state = 64
+							is_owned_by = GER
+						}
+
+						NOT = { has_global_flag = fall_of_berlin_sov }
+					}
+					news_event = { id = news.140 }
+				}
+
+
+				if = {	#Rome - SOV # Base game
+					limit = {
+						ROOT = {
+							original_tag = SOV
+						}
+						FROM.FROM = {
+							state = 2
+							OR = {
+								is_owned_by = ITA
+								is_owned_by = RSI
+								is_owned_by = PAP
+							}
+						}
+
+						NOT = { has_global_flag = fall_of_rome_sov }
+					}
+					news_event = { id = news.141 }
+				}
+
+
+				#news.142 already done when I made this list.
+
+				if = {	#London - SOV # Base game
+					limit = {
+						ROOT = {
+							original_tag = SOV
+						}
+						FROM.FROM = {
+							state = 126
+							is_owned_by = ENG
+						}
+
+						NOT = { has_global_flag = fall_of_london_sov }
+					}
+					news_event = { id = news.144 }
+				}
+
+
+				if = {	#Tokyo - SOV # Base game
+					limit = {
+						ROOT = {
+							original_tag = SOV
+						}
+						FROM.FROM = {
+							state = 282
+							is_owned_by = JAP
+						}
+
+						NOT = { has_global_flag = fall_of_tokyo_sov }
+					}
+					news_event = { id = news.146 }
+				}
+
+				if = {	#Leningrad - FIN # Base game
+					limit = {
+						ROOT = {
+							original_tag = FIN
+						}
+						FROM.FROM = {
+							state = 195
+							is_owned_by = SOV
+						}
+
+						NOT = { has_global_flag = fall_of_leningrad_fin }
+					}
+					news_event = { id = news.147 }
+				}
+
+				if = {	#Tokyo - CHI # Base game
+					limit = {
+						ROOT = {
+							original_tag = CHI
+						}
+						FROM.FROM = {
+							state = 282
+							is_owned_by = JAP
+						}
+
+						NOT = { has_global_flag = fall_of_tokyo_chi }
+					}
+					news_event = { id = news.148 }
+				}
+
+				if = {	#Gibraltar - SPR # Base game
+					limit = {
+						ROOT = {
+							original_tag = SPR
+							NOT = {
+								AND = {
+									has_global_flag = spanish_civil_war
+									NOT = { has_global_flag = scw_over }
+								}
+							}
+						}
+						FROM.FROM = {
+							state = 118
+							is_owned_by = ENG
+						}
+
+						NOT = { has_global_flag = fall_of_gibraltar_spa }
+					}
+					news_event = { id = news.149 }
+				}
+
+				##### 
 				# London
 				if = {
 					limit = { FROM.FROM = { state = 126 } }
@@ -17885,729 +18947,7 @@ on_actions = {
 						news_event = { id = cityfall.69 }
 					}
 
-					if = {	#Fall of Warsaw - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 10
-								is_owned_by = POL
-							}
-							NOT = { has_global_flag = fall_of_warsaw_ger }
-						}
-						news_event = { id = news.100 }
-					}
-					if = {	#Fall of London - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 126
-								is_owned_by = ENG
-							}
-							NOT = { has_global_flag = fall_of_london_ger }
-						}
-						news_event = { id = news.102 }
-					}
-					if = {	#Fall of Leningrad - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 195	
-								is_owned_by = SOV
-							}
-							NOT = { has_global_flag = fall_of_leningrad }
-						}
-						news_event = { id = news.103 }
-					}
-					if = {	#Fall of Kiev - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 202
-								is_owned_by = SOV
-							}
-							SOV = {
-								has_government = communism
-							}
-							NOT = { has_global_flag = fall_of_kiev }
-						}
-						news_event = { id = news.104 }
-					}
-					if = {	#Fall of Stalingrad - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 217
-								is_owned_by = SOV
-							}
 
-							NOT = { has_global_flag = fall_of_stalingrad }
-						}
-						news_event = { id = news.105 }
-					}
-					if = {	#Fall of Moscow - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 219			
-								is_owned_by = SOV
-							}
-
-							NOT = { has_global_flag = fall_of_moscow }
-						}
-						news_event = { id = news.106 }
-					}
-					if = {	#Fall of Sebastopol - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 137			
-								is_owned_by = SOV
-							}
-
-							NOT = { has_global_flag = fall_of_sevastopol }
-						}
-						news_event = { id = news.107 }
-					}
-					if = {	#Fall of Baku - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 229			
-								is_owned_by = SOV
-							}
-
-							NOT = { has_global_flag = fall_of_baku }
-						}
-						news_event = { id = news.108 }
-					}
-					if = {	#Fall of Cairo - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 229
-								OR = {
-									is_owned_by = ENG
-									AND = {
-										is_owned_by = EGY
-										EGY = {
-											is_in_faction_with = ENG
-										}
-									}
-								}
-							}
-
-							NOT = { has_global_flag = fall_of_cairo }
-						}
-						news_event = { id = news.109 }
-					}
-
-
-					if = {	#Fall of Washington - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 361
-								is_owned_by = USA
-							}
-
-							NOT = { has_global_flag = fall_of_washington }
-						}
-						news_event = { id = news.110 }
-					}
-
-
-					if = {	#Fall of New York - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 358
-								is_owned_by = USA
-							}
-
-							NOT = { has_global_flag = fall_of_new_york }
-						}
-						news_event = { id = news.111 }
-					}
-
-					if = {	#Fall of Gibraltar - Germany # Base game
-						limit = {
-							ROOT = {
-								original_tag = GER
-							}
-							FROM.FROM = {
-								state = 118
-								is_owned_by = ENG
-							}
-
-							NOT = { has_global_flag = fall_of_gibraltar_ger }
-						}
-						news_event = { id = news.112 }
-					}
-
-					if = {	#Fall of Cairo - Italy # Base game
-						limit = {
-							ROOT = {
-								original_tag = ITA
-							}
-							FROM.FROM = {
-								state = 907
-								OR = {
-									is_owned_by = ENG
-									is_owned_by = EGY
-								}
-								
-							}
-
-							NOT = { has_global_flag = fall_of_cairo_ita }
-						}
-						news_event = { id = news.113 }
-					}
-			
-					# news.114 already covered somewhere below
-
-
-					if = {	#Fall of London - Italy # Base game
-						limit = {
-							ROOT = {
-								original_tag = ITA
-							}
-							FROM.FROM = {
-								state = 126
-								is_owned_by = ENG
-							}
-
-							NOT = { has_global_flag = fall_of_london_ita }
-						}
-						news_event = { id = news.115 }
-					}
-
-					if = {	#Fall of Gibraltar - Italy # Base game
-						limit = {
-							ROOT = {
-								original_tag = ITA
-							}
-							FROM.FROM = {
-								state = 118
-								is_owned_by = ENG
-							}
-
-							NOT = { has_global_flag = fall_of_gibraltar_ita }
-						}
-						news_event = { id = news.116 }
-					}
-
-
-					if = {	#Fall of Singapore - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 336
-								OR = {
-									is_owned_by = ENG
-									AND = {
-										is_owned_by = MAL
-										MAL = {
-											is_subject_of = ENG
-										}
-									}
-								}
-							}
-
-							NOT = { has_global_flag = fall_of_singapore }
-						}
-						news_event = { id = news.117 }
-					}
-
-					if = {	#Fall of Pearl Harbor - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 629
-								is_owned_by = USA
-							}
-
-							NOT = { has_global_flag = fall_of_pearl_harbor }
-						}
-						news_event = { id = news.118 }
-					}
-
-					if = {	#Fall of Sydney - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 285
-								is_owned_by = AST
-							}
-
-							NOT = { has_global_flag = fall_of_sydney }
-						}
-						news_event = { id = news.119 }
-					}
-
-
-					if = {	#Fall of Los Angeles - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 378
-								is_owned_by = USA
-							}
-
-							NOT = { has_global_flag = fall_of_los_angeles }
-						}
-						news_event = { id = news.120 }
-					}
-
-					if = {	#Nanjing - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 613
-								is_owned_by = CHI
-							}
-
-							NOT = { has_global_flag = fall_of_nanjing }
-						}
-						news_event = { id = news.121 }
-					}
-
-					if = {	#Vladivostok - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 408
-								OR ={
-									is_owned_by = GUK
-									is_owned_by = VLA
-									is_owned_by = SOV
-								}
-							}
-
-							NOT = { has_global_flag = fall_of_vladivostok }
-						}
-						news_event = { id = news.122 }
-					}
-
-
-					if = {	#Hong Kong - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 326
-								is_owned_by = ENG
-							}
-
-							NOT = { has_global_flag = fall_of_hong_kong }
-						}
-						news_event = { id = news.123 }
-					}
-
-
-					if = {	#Manilla - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 327
-								is_owned_by = PHI
-							}
-
-							NOT = { has_global_flag = fall_of_manila }
-						}
-						news_event = { id = news.124 }
-					}
-
-					if = {	#Calcutta - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 431
-								OR = {
-									is_owned_by = ENG
-									AND = {
-										is_owned_by = RAJ
-										RAJ = {
-											is_subject_of = ENG
-										}
-									}
-								}
-								
-							}
-
-							NOT = { has_global_flag = fall_of_calcutta }
-						}
-						news_event = { id = news.125 }
-					}
-
-					if = {	#New Delhi - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 439
-								OR = {
-									is_owned_by = ENG
-									AND = {
-										is_owned_by = RAJ
-										RAJ = {
-											is_subject_of = ENG
-										}
-									}
-								}
-							}
-
-							NOT = { has_global_flag = fall_of_new_delhi }
-						}
-						news_event = { id = news.126 }
-					}
-					if = {	#Panama Canal - Japan # Base game
-						limit = {
-							ROOT = {
-								original_tag = JAP
-							}
-							FROM.FROM = {
-								state = 685
-								is_owned_by = USA							}
-
-							NOT = { has_global_flag = fall_of_panama }
-						}
-						news_event = { id = news.127 }
-					}
-
-
-					if = {	#Berlin - USA # Base game
-						limit = {
-							ROOT = {
-								original_tag = USA
-							}
-							FROM.FROM = {
-								state = 64
-								is_owned_by = GER						}
-
-							NOT = { has_global_flag = fall_of_berlin_usa }
-						}
-						news_event = { id = news.128 }
-					}
-
-
-					if = {	#Berlin - USA # Base game
-						limit = {
-							ROOT = {
-								original_tag = USA
-							}
-							FROM.FROM = {
-								state = 64
-								is_owned_by = GER						}
-
-							NOT = { has_global_flag = fall_of_berlin_usa }
-						}
-						news_event = { id = news.128 }
-					}
-
-					if = {	#Berlin - ENG # Base game
-						limit = {
-							ROOT = {
-								original_tag = ENG
-							}
-							FROM.FROM = {
-								state = 64
-								is_owned_by = GER						}
-
-							NOT = { has_global_flag = fall_of_berlin_eng }
-						}
-						news_event = { id = news.129 }
-					}
-
-
-					if = {	#Berlin - FRA # Base game
-						limit = {
-							ROOT = {
-								original_tag = FRA
-							}
-							FROM.FROM = {
-								state = 64
-								is_owned_by = GER						}
-
-							NOT = { has_global_flag = fall_of_berlin_fra }
-						}
-						news_event = { id = news.130 }
-					}
-
-					if = {	#Berlin - POL # Base game
-						limit = {
-							ROOT = {
-								original_tag = POL
-							}
-							FROM.FROM = {
-								state = 64
-								is_owned_by = GER						}
-
-							NOT = { has_global_flag = fall_of_berlin_pol }
-						}
-						news_event = { id = news.131 }
-					}
-
-					if = {	#Rome - allies # Base game
-						limit = {
-							ROOT = {
-								original_tag = ENG
-								original_tag = USA
-								original_tag = AST
-								original_tag = NZL
-								original_tag = CAN
-								original_tag = SAF
-							
-							}
-							FROM.FROM = {
-								state = 2
-								OR = {
-									is_owned_by = ITA
-									is_owned_by = GER
-									is_owned_by = RSI
-								}
-						}
-
-							NOT = { has_global_flag = fall_of_rome_allies }
-						}
-						news_event = { id = news.132 }
-					}
-
-
-					if = {	#Rome - FRA # Base game
-						limit = {
-							ROOT = {
-								original_tag = FRA
-							}
-							FROM.FROM = {
-								state = 2
-								OR = {
-									is_owned_by = ITA
-									is_owned_by = RSI
-									is_owned_by = PAP
-								}
-							}
-							NOT = { has_global_flag = fall_of_rome_fra }
-						}
-						news_event = { id = news.133 }
-					}
-
-
-					if = {	#Tokyo - USA # Base game
-						limit = {
-							ROOT = {
-								original_tag = USA
-							}
-							FROM.FROM = {
-								state = 282
-								is_owned_by = JAP	
-							}
-
-							NOT = { has_global_flag = fall_of_tokyo_usa }
-						}
-						news_event = { id = news.135 }
-					}
-
-
-					if = {	#Moscow - allies # Base game
-						limit = {
-							ROOT = {
-								original_tag = ENG
-								original_tag = USA
-								original_tag = AST
-								original_tag = NZL
-								original_tag = CAN
-								original_tag = SAF
-								original_tag = FRA
-							
-							}
-							FROM.FROM = {
-								state = 219
-								is_owned_by = SOV
-						}
-
-							NOT = { has_global_flag = fall_of_moscow_allies }
-						}
-						news_event = { id = news.136 }
-					}
-
-
-
-					if = {	#Warsaw - SOV # Base game
-						limit = {
-							ROOT = {
-								original_tag = SOV
-							}
-							FROM.FROM = {
-								state = 10
-								is_owned_by = POL	
-							}
-
-							NOT = { has_global_flag = fall_of_warsaw_sov }
-						}
-						news_event = { id = news.138 }
-					}
-
-					if = {	#Berlin - SOV # Base game
-						limit = {
-							ROOT = {
-								original_tag = SOV
-							}
-							FROM.FROM = {
-								state = 64
-								is_owned_by = GER
-							}
-
-							NOT = { has_global_flag = fall_of_berlin_sov }
-						}
-						news_event = { id = news.140 }
-					}
-
-
-					if = {	#Rome - SOV # Base game
-						limit = {
-							ROOT = {
-								original_tag = SOV
-							}
-							FROM.FROM = {
-								state = 2
-								OR = {
-									is_owned_by = ITA
-									is_owned_by = RSI
-									is_owned_by = PAP
-								}
-							}
-
-							NOT = { has_global_flag = fall_of_rome_sov }
-						}
-						news_event = { id = news.141 }
-					}
-
-
-					#news.142 already done when I made this list.
-
-					if = {	#London - SOV # Base game
-						limit = {
-							ROOT = {
-								original_tag = SOV
-							}
-							FROM.FROM = {
-								state = 126
-								is_owned_by = ENG
-							}
-
-							NOT = { has_global_flag = fall_of_london_sov }
-						}
-						news_event = { id = news.144 }
-					}
-
-
-					if = {	#Tokyo - SOV # Base game
-						limit = {
-							ROOT = {
-								original_tag = SOV
-							}
-							FROM.FROM = {
-								state = 282
-								is_owned_by = JAP
-							}
-
-							NOT = { has_global_flag = fall_of_tokyo_sov }
-						}
-						news_event = { id = news.146 }
-					}
-
-					if = {	#Leningrad - FIN # Base game
-						limit = {
-							ROOT = {
-								original_tag = FIN
-							}
-							FROM.FROM = {
-								state = 195
-								is_owned_by = SOV
-							}
-
-							NOT = { has_global_flag = fall_of_leningrad_fin }
-						}
-						news_event = { id = news.147 }
-					}
-
-					if = {	#Tokyo - CHI # Base game
-						limit = {
-							ROOT = {
-								original_tag = CHI
-							}
-							FROM.FROM = {
-								state = 282
-								is_owned_by = JAP
-							}
-
-							NOT = { has_global_flag = fall_of_tokyo_chi }
-						}
-						news_event = { id = news.148 }
-					}
-
-					if = {	#Gibraltar - SPR # Base game
-						limit = {
-							ROOT = {
-								original_tag = SPR
-								NOT = {
-									AND = {
-										has_global_flag = spanish_civil_war
-										NOT = { has_global_flag = scw_over }
-									}
-								}
-							}
-							FROM.FROM = {
-								state = 118
-								is_owned_by = ENG
-							}
-
-							NOT = { has_global_flag = fall_of_gibraltar_spa }
-						}
-						news_event = { id = news.149 }
-					}
-
-					##### 
 					#####
 
 					if = {	#Fall of London - Belgium
@@ -20675,6 +21015,72 @@ on_actions = {
 	###---> On Uncapitulation <><> <><> <><>
 	on_uncapitulation = {
 		effect = {
+			#add "generic" conscription laws since no longer capitulated - Fantom - was triggered only by ending a peace conference, copied here to ensure consistency - waffle
+			if = {
+				limit = {
+					has_idea = influx_of_exiles_r56_law
+					has_war_support < 0.3
+				}
+				swap_ideas = {
+					remove_idea = influx_of_exiles_r56_law
+					add_idea = limited_conscription
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = influx_of_exiles_r56_law
+					has_war_support > 0.3
+					has_war_support < 0.6
+				}
+				swap_ideas = {
+					remove_idea = influx_of_exiles_r56_law
+					add_idea = extensive_conscription
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = influx_of_exiles_r56_law
+					has_war_support > 0.6
+				}
+				swap_ideas = {
+					remove_idea = influx_of_exiles_r56_law
+					add_idea = service_by_requirement
+				}
+			}
+
+			#add "generic" trade laws since no longer capitulated
+			if = {
+				limit = {
+					has_idea = full_host_reliance_r56_law
+				}
+				swap_ideas = {
+					remove_idea = full_host_reliance_r56_law
+					add_idea = limited_exports
+				}
+			}
+
+			#add "generic" economy laws since no longer capitulated
+			if = {
+				limit = {
+					has_idea = evacuated_assets_r56_law
+					has_war_support < 0.5
+				}
+				swap_ideas = {
+					remove_idea = evacuated_assets_r56_law
+					add_idea = partial_economic_mobilisation
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = evacuated_assets_r56_law
+					has_war_support > 0.5
+				}
+				swap_ideas = {
+					remove_idea = evacuated_assets_r56_law
+					add_idea = war_economy
+				}
+			}
+
 			if = { #MOD. OPT
 				limit = { original_tag = POL }
 				drop_cosmetic_tag = yes
@@ -21281,6 +21687,9 @@ on_actions = {
 					FROM = {
 						original_tag = SOV
 					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
 				AFG = {
 					add_timed_idea = {
@@ -21334,9 +21743,12 @@ on_actions = {
 							}
 						}
 					}
+					NOT = {
+						has_global_flag = afg_dlc_focus_tree
+					}
 				}
 				RAJ = {
-					country_event = { id = afghanistan.81 days = 450 random_days = 60 }
+					country_event = { id = r56_afghanistan.81 days = 450 random_days = 60 }
 				}
 			}
 			if = {		#Danzig can join Germany - from Polish tree
@@ -22069,6 +22481,12 @@ on_actions = {
 				}
 				set_country_flag = den_has_joined_faction
 			}
+			if = {
+				limit = {
+					original_tag = LUX
+				}
+				set_country_flag = lux_has_joined_faction
+			}
 			
 		}
 	}
@@ -22105,26 +22523,6 @@ on_actions = {
 						pak_influence = 0
 					}
 				}
-			}
-		}
-	}
-
-	on_weekly_IRQ = {	#was daily, changed to weekly, doesn't have to be checked thaaaat often
-		effect = {
-			if = {	### British peace offer
-				limit = {
-					has_country_flag = IRQ_historical_golden_square_coup
-					surrender_progress > 0.5
-					ENG = {						#sanity check to see if UK is powerful
-						is_subject = no
-						is_faction_leader = yes
-						has_war_with = ROOT
-					}
-					any_owned_state = {			#a check to see if UK is the one who is doing the pushing
-						is_controlled_by = ENG
-					}
-				}
-				country_event = { id = iraq_hist.5 }
 			}
 		}
 	}
@@ -22560,6 +22958,137 @@ on_actions = {
 				remove_ideas = KMT_warlord_cliques_6
 				remove_ideas = KMT_warlord_cliques_7
 				add_ideas = KMT_warlord_cliques_war
+			}
+		}
+	}
+
+	on_weekly_IRQ = {	#was daily, changed to weekly, doesn't have to be checked thaaaat often
+		effect = {
+			if = {	### British peace offer
+				limit = {
+					has_country_flag = IRQ_historical_golden_square_coup
+					surrender_progress > 0.5
+					ENG = {						#sanity check to see if UK is powerful
+						is_subject = no
+						is_faction_leader = yes
+						has_war_with = ROOT
+					}
+					any_owned_state = {			#a check to see if UK is the one who is doing the pushing
+						is_controlled_by = ENG
+					}
+				}
+				country_event = { id = iraq_hist.5 }
+			}
+		}
+	}
+	on_weekly_LUX = {
+		effect = {
+			if = {
+				limit = {
+					is_ai = no
+					has_country_flag = LUX_elections_starting
+					NOT = { has_country_flag = LUX_elections_over }
+				}
+
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_add_support_PD_3_f }
+					LUX_chamberofdeputies_add_support_PD_3 = yes
+				}
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_add_support_PD_15_f }
+					LUX_chamberofdeputies_add_support_PD_15 = yes
+				}
+
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_add_support_PRL_5_f }
+					LUX_chamberofdeputies_add_support_PRL_5 = yes
+				}
+
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_add_support_LSAP_5_f }
+					LUX_chamberofdeputies_add_support_LSAP_5 = yes
+				}
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_add_support_LSAP_15_f }
+					LUX_chamberofdeputies_add_support_LSAP_15 = yes
+				}
+
+				if = {		# passive ticks
+					limit = { has_country_flag = LUX_chamberofdeputies_PD_gov_support }
+					add_to_variable = { LUX.PRL_support = 0.05 }
+					add_to_variable = { LUX.LSAP_support = 0.05 }
+					add_to_variable = { LUX.KPL_support = 0.05 }
+					subtract_from_variable = { LUX.PD_support = 0.15 }
+				}
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_PRL_gov_support }
+					add_to_variable = { LUX.PD_support = 0.05 }
+					add_to_variable = { LUX.LSAP_support = 0.05 }
+					add_to_variable = { LUX.KPL_support = 0.05 }
+					subtract_from_variable = { LUX.PRL_support = 0.15 }
+				}
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_LSAP_gov_support }
+					add_to_variable = { LUX.PD_support = 0.05 }
+					add_to_variable = { LUX.PRL_support = 0.05 }
+					add_to_variable = { LUX.KPL_support = 0.05 }
+					subtract_from_variable = { LUX.LSAP_support = 0.15 }
+				}
+				if = {
+					limit = { has_country_flag = LUX_chamberofdeputies_KPL_gov_support }
+					add_to_variable = { LUX.PD_support = 0.05 }
+					add_to_variable = { LUX.PRL_support = 0.05 }
+					add_to_variable = { LUX.LSAP_support = 0.05 }
+					subtract_from_variable = { LUX.KPL_support = 0.15 }
+				}
+				if = {
+					limit = { check_variable = { LUX.turnout = 49.5 } }
+					set_variable = { LUX.turnout = 50 }
+				}
+				else_if = {
+					limit = { check_variable = { LUX.turnout < 50 } }
+					add_to_variable = { LUX.turnout = 0.5 }
+				}
+				if = {
+					limit = { check_variable = { LUX.turnout = 50.5 } }
+					set_variable = { LUX.turnout = 50 }
+				}
+				else_if = {
+					limit = { check_variable = { LUX.turnout > 50 } }
+					subtract_from_variable = { LUX.turnout = 0.5 }
+				}
+				if = {
+					limit = { check_variable = { LUX.confidence = 49.5 } }
+					set_variable = { LUX.confidence = 50 }
+				}
+				else_if = {
+					limit = { check_variable = { LUX.confidence < 50 } }
+					add_to_variable = { LUX.confidence = 0.5 }
+				}
+				if = {
+					limit = { check_variable = { LUX.confidence = 50.5 } }
+					set_variable = { LUX.confidence = 50 }
+				}
+				else_if = {
+					limit = { check_variable = { LUX.confidence > 50 } }
+					subtract_from_variable = { LUX.confidence = 0.5 }
+				}
+
+				set_variable = { LUX.stab_impact = LUX.turnout }
+				subtract_from_variable = { LUX.stab_impact = 50 }
+				divide_variable = { LUX.stab_impact = 2 }
+
+				set_variable = { LUX.demo_impact = LUX.confidence }
+				subtract_from_variable = { LUX.demo_impact = 50 }
+				divide_variable = { LUX.demo_impact = 2 }
+
+				set_variable = { LUX.PD_support_loc = LUX.PD_support }
+				set_variable = { LUX.PPRL_support_loc = LUX.PRL_support }
+				set_variable = { LUX.LSAP_support_loc = LUX.LSAP_support }
+				set_variable = { LUX.KPL_support_loc = LUX.KPL_support }
+
+				set_variable = { LUX.stab_impact_loc = LUX.stab_impact }
+				set_variable = { LUX.demo_impact_loc = LUX.demo_impact }
 			}
 		}
 	}

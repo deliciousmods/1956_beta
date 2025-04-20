@@ -646,52 +646,53 @@
 
 
 -- Supply Abbus: It punish less compare to vanilla
-	NDefines.NSupply.INFRA_TO_SUPPLY = 0.5  -- 0.3
-	NDefines.NSupply.VP_TO_SUPPLY_BASE = 0.1 --0.2
-	NDefines.NSupply.VP_TO_SUPPLY_BONUS_CONVERSION = 0.06 --0.05
+-- SpicyAlfredo: While it was the mod's philsophy to have noob friendly supply. That Era has passed and using Vanilla vaules in this relam is better for the mod's balance 'health' going forward.
+	-- NDefines.NSupply.INFRA_TO_SUPPLY = 0.5  -- 0.3
+	-- NDefines.NSupply.VP_TO_SUPPLY_BASE = 0.1 --0.2
+	-- NDefines.NSupply.VP_TO_SUPPLY_BONUS_CONVERSION = 0.06 --0.05
 	
-	NDefines.NSupply.CAPITAL_SUPPLY_BASE = 5.0 -- 5.0
-	NDefines.NSupply.CAPITAL_SUPPLY_CIVILIAN_FACTORIES = 0.5 -- 0.3
-	NDefines.NSupply.CAPITAL_SUPPLY_MILITARY_FACTORIES = 0.7 -- 0.6
-	NDefines.NSupply.CAPITAL_SUPPLY_DOCKYARDS = 0.6 -- 0.4
+	-- NDefines.NSupply.CAPITAL_SUPPLY_BASE = 5.0 -- 5.0
+	-- NDefines.NSupply.CAPITAL_SUPPLY_CIVILIAN_FACTORIES = 0.5 -- 0.3
+	-- NDefines.NSupply.CAPITAL_SUPPLY_MILITARY_FACTORIES = 0.7 -- 0.6
+	-- NDefines.NSupply.CAPITAL_SUPPLY_DOCKYARDS = 0.6 -- 0.4
 	
-	NDefines.NSupply.CAPITAL_INITIAL_SUPPLY_FLOW = 8.0 -- 5.0
-	NDefines.NSupply.CAPITAL_STARTING_PENALTY_PER_PROVINCE = 0.5 -- 0.5
-	NDefines.NSupply.CAPITAL_ADDED_PENALTY_PER_PROVINCE = 1.2 -- 1.2
-	NDefines.NSupply.NODE_INITIAL_SUPPLY_FLOW = 3.6 -- 2.8
-	NDefines.NSupply.NODE_STARTING_PENALTY_PER_PROVINCE = 0.50 -- 0.50
-	NDefines.NSupply.NODE_ADDED_PENALTY_PER_PROVINCE = 1.0 -- 0.70
-	NDefines.NSupply.NAVAL_BASE_INITIAL_SUPPLY_FLOW = 4.0 -- 3.5
-	NDefines.NSupply.NAVAL_BASE_STARTING_PENALTY_PER_PROVINCE = 0.8 -- 0.8
-	NDefines.NSupply.NAVAL_BASE_ADDED_PENALTY_PER_PROVINCE = 1.5 --1.0
+	-- NDefines.NSupply.CAPITAL_INITIAL_SUPPLY_FLOW = 8.0 -- 5.0
+	-- NDefines.NSupply.CAPITAL_STARTING_PENALTY_PER_PROVINCE = 0.5 -- 0.5
+	-- NDefines.NSupply.CAPITAL_ADDED_PENALTY_PER_PROVINCE = 1.2 -- 1.2
+	-- NDefines.NSupply.NODE_INITIAL_SUPPLY_FLOW = 3.6 -- 2.8
+	-- NDefines.NSupply.NODE_STARTING_PENALTY_PER_PROVINCE = 0.50 -- 0.50
+	-- NDefines.NSupply.NODE_ADDED_PENALTY_PER_PROVINCE = 1.0 -- 0.70
+	-- NDefines.NSupply.NAVAL_BASE_INITIAL_SUPPLY_FLOW = 4.0 -- 3.5
+	-- NDefines.NSupply.NAVAL_BASE_STARTING_PENALTY_PER_PROVINCE = 0.8 -- 0.8
+	-- NDefines.NSupply.NAVAL_BASE_ADDED_PENALTY_PER_PROVINCE = 1.5 --1.0
 	
-	NDefines.NSupply.FLOATING_HARBOR_BASE_SUPPLY = 20 -- 15
-	NDefines.NSupply.FLOATING_HARBOR_BASE_DURATION = 30 -- 21
-	NDefines.NSupply.FLOATING_HARBOR_INITIAL_SUPPLY_FLOW = 3.9 -- 2.6
-	NDefines.NSupply.FLOATING_HARBOR_STARTING_PENALTY_PER_PROVINCE = 0.8 -- 0.8
-	NDefines.NSupply.FLOATING_HARBOR_ADDED_PENALTY_PER_PROVINCE = 0.8 -- 0.8
-	
-	
-	NDefines.NSupply.SUPPLY_FLOW_DROP_REDUCTION_AT_MAX_INFRA = 0.60 -- 0.30
-	
-	NDefines.NSupply.SUPPLY_HUB_FULL_MOTORIZATION_BONUS = 4.0 -- 2.2
+	-- NDefines.NSupply.FLOATING_HARBOR_BASE_SUPPLY = 20 -- 15
+	-- NDefines.NSupply.FLOATING_HARBOR_BASE_DURATION = 30 -- 21
+	-- NDefines.NSupply.FLOATING_HARBOR_INITIAL_SUPPLY_FLOW = 3.9 -- 2.6
+	-- NDefines.NSupply.FLOATING_HARBOR_STARTING_PENALTY_PER_PROVINCE = 0.8 -- 0.8
+	-- NDefines.NSupply.FLOATING_HARBOR_ADDED_PENALTY_PER_PROVINCE = 0.8 -- 0.8
 	
 	
-	NDefines.NSupply.RAILWAY_BASE_FLOW = 10.0 -- 10.0
-	NDefines.NSupply.RAILWAY_FLOW_PER_LEVEL = 10 --5.0
-	NDefines.NSupply.RAILWAY_FLOW_PENALTY_PER_DAMAGED = 10 -- 5.0
+	-- NDefines.NSupply.SUPPLY_FLOW_DROP_REDUCTION_AT_MAX_INFRA = 0.60 -- 0.30
+	
+	-- NDefines.NSupply.SUPPLY_HUB_FULL_MOTORIZATION_BONUS = 4.0 -- 2.2
 	
 	
-	NDefines.NSupply.NODE_FLOW_BONUS_PER_RAIL_LEVEL = 0.8 -- 0.34
+	-- NDefines.NSupply.RAILWAY_BASE_FLOW = 10.0 -- 10.0
+	-- NDefines.NSupply.RAILWAY_FLOW_PER_LEVEL = 10 --5.0
+	-- NDefines.NSupply.RAILWAY_FLOW_PENALTY_PER_DAMAGED = 10 -- 5.0
 	
 	
-	NDefines.NSupply.NAVAL_BASE_FLOW = 15.0 -- 15.0 --used to also be NAVAL_FLOW_PER_LEVEL, presumed intended to be this
-	NDefines.NSupply.NAVAL_FLOW_PER_LEVEL = 5.0 --5.0
+	-- NDefines.NSupply.NODE_FLOW_BONUS_PER_RAIL_LEVEL = 0.8 -- 0.34
 	
 	
-	NDefines.NSupply.SUPPLY_PATH_MAX_DISTANCE = 15 --15
-	NDefines.NSupply.RAILWAY_DISTANCE_FACTOR_FOR_REINFORCEMENT_SPEED = 0.1 --0.3
-	NDefines.NSupply.SUPPLY_DISRUPTION_DAILY_RECOVERY = 3.0
+	-- NDefines.NSupply.NAVAL_BASE_FLOW = 15.0 -- 15.0 --used to also be NAVAL_FLOW_PER_LEVEL, presumed intended to be this
+	-- NDefines.NSupply.NAVAL_FLOW_PER_LEVEL = 5.0 --5.0
+	
+	
+	-- NDefines.NSupply.SUPPLY_PATH_MAX_DISTANCE = 15 --15
+	-- NDefines.NSupply.RAILWAY_DISTANCE_FACTOR_FOR_REINFORCEMENT_SPEED = 0.1 --0.3
+	-- NDefines.NSupply.SUPPLY_DISRUPTION_DAILY_RECOVERY = 3.0
 
 
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_TEX_MAX_SIZE = 2048
@@ -704,9 +705,9 @@
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_THIN_LEVEL_THRESHOLD = 1 -- Railway level 1 uses thin map arrow in supply map mode
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_MEDIUM_LEVEL_THRESHOLD = 5 -- Railway level 2-3 uses medium map arrow in supply map mode
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_THICK_LEVEL_THRESHOLD = 9 -- Railway level 4-5 uses thick map arrow in supply map mode
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_CAPITAL_CUTOFF_MAX = 1700.0 -- Capitals are special snowflakes, they need their own number
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {100, 250, 550} -- At what camera distance the VP name text disappears. 
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_CAPITAL_CUTOFF_MAX = 1500.0 -- Capitals are special snowflakes, they need their own number
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {150, 250, 500} -- At what camera distance the VP name text disappears. 
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MAX = 800.0-- Max range for victory point text 
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0  -- Max range for victory point text 
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MIN = 100.0 -- Min range for victory point text
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point text
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MIN = 100.0 -- Min range for victory point dot
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point dot
