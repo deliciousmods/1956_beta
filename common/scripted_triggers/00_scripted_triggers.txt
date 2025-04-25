@@ -68,6 +68,7 @@ check_has_focus_tree_to_switch_to_fascism = {
 	#NOT = { tag = MAN }
 	#NOT = { tag = ITA }
 	NOT = { tag = RAJ }
+	NOT = { tag = LUX }
 	NOT = {
 		OR = {
 			AND = {
@@ -261,7 +262,13 @@ check_has_focus_tree_to_switch_to_communism = {
 		}
 	}
 	NOT = {
-		original_tag = TUR
+		AND = {
+			original_tag = TUR
+			has_completed_focus = TUR_revolution_not_reform		#only for this, should be able to convert otherwise
+		}
+	}
+	NOT = {
+		original_tag = ROM
 	}
 }
 
@@ -273,6 +280,20 @@ is_controlled_by_ROOT_or_subject = {
 			OR = {
 				tag = ROOT
 				is_subject_of = ROOT
+			}
+		}
+	}
+}
+
+is_not_controlled_by_ROOT_or_subject = {
+	custom_trigger_tooltip = {
+		tooltip = is_not_controlled_by_ROOT_or_subject
+		CONTROLLER = {
+			NOT = {
+				OR = {
+					tag = ROOT
+					is_subject_of = ROOT
+				}
 			}
 		}
 	}
@@ -416,22 +437,6 @@ USA_is_on_historical_plan_trigger = {
 		}
 	}
 }
-ROM_is_on_historical_plan_trigger = {
-	OR = {
-		AND = {
-			is_historical_focus_on = yes
-			has_game_rule = {
-				rule = ROM_ai_behavior
-				option = DEFAULT
-			}
-		}
-		has_country_flag = ROM_AI_RANDOM_FASCIST_HISTORICAL
-		has_game_rule = {
-			rule = ROM_ai_behavior
-			option = FASCIST_HISTORICAL
-		}
-	}
-}
 HUN_is_on_historical_plan_trigger = {
 	OR = {
 		AND = {
@@ -464,7 +469,13 @@ ENG_is_on_historical_plan_trigger = {
 		}
 	}
 }
-
+ROM_is_on_historical_plan_trigger = {
+	is_historical_focus_on = yes
+	has_game_rule = {
+		rule = ROM_ai_behavior
+		option = DEFAULT
+	}
+}
 SOV_save_pp_for_manpower_trouble = {
 	has_manpower < 1000000
 	has_political_power < 200
@@ -560,37 +571,21 @@ enemy_has_equal_or_better_radar_tech_trigger = {
 				ROOT = { 
 					has_tech = radio_detection 
 					NOT = {
-						has_tech = decimetric_radar
+						has_tech = cavity_magnatron
 					}
 				} 
 			}
 			FROM = { 
 				OR = {
 					has_tech = radio_detection 
-					has_tech = decimetric_radar
+					has_tech = cavity_magnatron
 				}
 			}
 		}
 		else_if = {
 			limit = {
 				ROOT = { 
-					has_tech = decimetric_radar 
-					NOT = {
-						has_tech = improved_decimetric_radar
-					}
-				} 
-			}
-			FROM = { 
-				OR = {
-					has_tech = decimetric_radar 
-					has_tech = improved_decimetric_radar
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				ROOT = { 
-					has_tech = improved_decimetric_radar 
+					has_tech = cavity_magnatron 
 					NOT = {
 						has_tech = centimetric_radar
 					}
@@ -598,7 +593,7 @@ enemy_has_equal_or_better_radar_tech_trigger = {
 			}
 			FROM = { 
 				OR = {
-					has_tech = improved_decimetric_radar 
+					has_tech = cavity_magnatron 
 					has_tech = centimetric_radar
 				}
 			}
@@ -608,30 +603,46 @@ enemy_has_equal_or_better_radar_tech_trigger = {
 				ROOT = { 
 					has_tech = centimetric_radar 
 					NOT = {
-						has_tech = improved_centimetric_radar
+						has_tech = phased_array
 					}
 				} 
 			}
 			FROM = { 
 				OR = {
 					has_tech = centimetric_radar 
-					has_tech = improved_centimetric_radar
+					has_tech = phased_array
 				}
 			}
 		}
 		else_if = {
 			limit = {
 				ROOT = { 
-					has_tech = improved_centimetric_radar 
+					has_tech = phased_array 
 					NOT = {
-						has_tech = advanced_centimetric_radar
+						has_tech = monopulse_radar
 					}
 				} 
 			}
 			FROM = { 
 				OR = {
-					has_tech = improved_centimetric_radar 
-					has_tech = advanced_centimetric_radar
+					has_tech = phased_array 
+					has_tech = monopulse_radar
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				ROOT = { 
+					has_tech = monopulse_radar 
+					NOT = {
+						has_tech = future_radar
+					}
+				} 
+			}
+			FROM = { 
+				OR = {
+					has_tech = monopulse_radar 
+					has_tech = future_radar
 				}
 			}
 		}
@@ -1032,7 +1043,25 @@ is_alpine_state = {
 			state = 153 #Tyrol - AUS 
 			state = 152 #Upper Austria - AUS 
 			state = 1054 #Styria - AUS 
+			state = 1086 #Burgenland - AUS 
 			state = 4 #Lower Austria 
+		}
+	}
+}
+
+#State scope
+state_is_fully_controlled_by_ROOT_subject_or_faction_member = {
+	custom_trigger_tooltip = {
+		tooltip = state_is_fully_controlled_by_ROOT_subject_or_faction_member_tt
+		OR = {
+			is_fully_controlled_by = ROOT
+			controller = {
+				OR = {
+					is_subject_of = ROOT
+					is_in_faction_with = ROOT
+				}
+				has_full_control_of_state = PREV
+			}
 		}
 	}
 }
@@ -1124,6 +1153,8 @@ is_unlikely_country_tag = {
 		tag = KAR
 		tag = SIL
 		tag = KSH
+		tag = EIS
+		tag = PPA
 	}
 }
 
@@ -1439,6 +1470,11 @@ is_fascist_seller_trigger = {
 is_democracy_seller_trigger = {
 	NOT = { has_war_with = ROOT	}
 	has_government = democratic 
+}
+
+is_communist_seller_trigger = {
+	NOT = { has_war_with = ROOT }
+	has_government = communism
 }
 
 is_allied_seller_trigger = {

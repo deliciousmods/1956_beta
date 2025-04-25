@@ -1,4 +1,5 @@
 	NDefines.NGame.END_DATE = "1956.1.1.1" -- we are called r56 for a reason!
+	NDefines.NGame.HANDS_OFF_START_TAG = "YEM" --more central than vanilla's Haiti
 	
 	
 	NDefines.NDiplomacy.LICENSE_ACCEPTANCE_PUPPET_BASE = 20			-- Acceptance modifier for puppets requesting production licenses.
@@ -30,11 +31,11 @@
 			0.0, -- navy leaders
 			0.0, -- army leaders
 			0.6, -- operatives
+			0.5, -- scientists
 	}
 	NDefines.NCountry.STARTING_COMMAND_POWER = 10.0					-- starting command power for every country
 	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 1	--Starting level for exile leader  -- why 3?!
 	--NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Claimed to be the same as vanilla previously but BBA changed this value so commented this out
-	NDefines.NCountry.EVENT_PROCESS_OFFSET = 30 -- Vanilla is 20. Increased slightly to help aide with lag since we have alot more events with 'naked' checks compared to Vanilla. Slight downside is some events with naked checks will be a bit more delayed then Vanila. +2 Days. - SpicyAlfredo. Events are checked every X day per country or state (1 is ideal, but CPU heavy)
 
 
 	NDefines.NResistance.GARRISON_MANPOWER_LOST_BY_ATTACK = 0.005 	--WAS 0.018 Ratio of manpower lost by garrison at each attack on garrison (this number will be reduced by the hardness of garrison template)	
@@ -94,6 +95,8 @@
 	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_FRONT = 8.0
 	NDefines.NMilitary.PLAN_AREA_DEFENSE_ENEMY_CONTROLLER_SCORE = 30.0
 	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.60
+	NDefines.NMilitary.PEN_VS_AVERAGE = 0.9
+	NDefines.NMilitary.ARMOR_VS_AVERAGE = 0.2
 	
 	-- Addition with 1.3.2
 	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 18.0		-- increased from 12.0 ; Added importance for area defense province with a port
@@ -176,6 +179,8 @@
 			0.0, -- NAVAL_MINES_SWEEPING
 			0.0, -- MISSION_RECON
 			0.0, -- NAVAL_PATROL
+			0,0, -- SAM
+			0,0, -- BARRAGE
 		}
 		
 	NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0
@@ -273,7 +278,7 @@
 	NDefines.NAI.MAIN_ENEMY_FRONT_IMPORTANCE = 50.0
 	NDefines.NAI.RESERVE_TO_COMMITTED_BALANCE = 0.2
 	NDefines.NAI.FRONT_REASSIGN_DISTANCE = 250.0
-	NDefines.NAI.HOUR_BAD_COMBAT_REEVALUATE = 90                  -- reduced from 168 ; if we are in combat for this amount and it goes shitty then try skipping it 
+	NDefines.NAI.CANCEL_COMBAT_DISADVANTAGE_RATIO = 1.5 -- changed 1.15 ; if we are in combat for this amount and it goes shitty then try skipping it 
 	NDefines.NAI.UNIT_ASSIGNMENT_TERRAIN_IMPORTANCE = 20.0 -- Instead of 10 should improve terrain optimization
 
 --------------------------------------------------------------------------------------------------------------
@@ -563,7 +568,6 @@
 	NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 5		
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE = 0 --0.08			-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend.
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE_DEFENSIVE = 0 --0.4	-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend but while being a defensive country.
-	NDefines.NAI.INVASION_DISTANCE_RANDOMNESS = 150					-- This higher the value the more unpredictable the invasions. Compares to actual map distance in pixels. #BASE WAS 300
 	NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 12				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
 	NDefines.NAI.MAX_DISTANCE_NAVAL_INVASION = 400.0				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
 	NDefines.NAI.MAX_INVASION_SIZE = 18 --24									-- max invasion group size
@@ -700,9 +704,9 @@
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_THIN_LEVEL_THRESHOLD = 1 -- Railway level 1 uses thin map arrow in supply map mode
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_MEDIUM_LEVEL_THRESHOLD = 5 -- Railway level 2-3 uses medium map arrow in supply map mode
 	NDefines_Graphics.NGraphics.RAILWAY_MAP_ARROW_THICK_LEVEL_THRESHOLD = 9 -- Railway level 4-5 uses thick map arrow in supply map mode
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_CAPITAL_CUTOFF_MAX = 1700.0 -- Capitals are special snowflakes, they need their own number
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {100, 250, 550} -- At what camera distance the VP name text disappears. 
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_CAPITAL_CUTOFF_MAX = 1500.0 -- Capitals are special snowflakes, they need their own number
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF = {150, 250, 500} -- At what camera distance the VP name text disappears. 
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MAX = 800.0-- Max range for victory point text 
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0  -- Max range for victory point text 
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_TEXT_CUTOFF_MIN = 100.0 -- Min range for victory point text
-	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point text
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MIN = 100.0 -- Min range for victory point dot
+	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point dot
