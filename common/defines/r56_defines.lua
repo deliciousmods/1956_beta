@@ -341,6 +341,10 @@
 	NDefines.NAI.PRODUCTION_EQUIPMENT_SURPLUS_FACTOR = 0.15	-- Base value for how much of currently used equipment the AI will at least strive to have in stock
 
 	NDefines.NAI.GENERATE_WARGOAL_ANTAGONIZE_SCALE = 0.25 -- (Original value: 0.35) How likely the AI acts on claims to generated war goals. Baseline is 'min_threat - antagonize * scale.' So don't lower it below 0.25! 
+
+	NDefines.NAI.EQUIPMENT_MARKET_UPDATE_FREQUENCY_DAYS = 14 -- How often the AI runs its market logic
+
+	NDefines.NAI.RAIDS_CREATE_FREQUENCY_DAYS = 14 -- How often will AI run its raid creation logic. Lowering this number may decrease performance.
 	
 --------------------------------------------------------------------------------------------------------------
 -- ECONOMY
