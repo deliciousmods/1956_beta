@@ -1,0 +1,299 @@
+raid_trotskys_villa = { ### 1/50
+	icon = GFX_raid_trotskys_villa
+	map_icon = GFX_raid_trotskys_villa_map
+	name = raid_trotskys_villa
+	desc = raid_trotskys_villa_desc
+	days = 60
+
+	priority = 11
+
+	allowed = {
+		original_tag = SOV
+	}
+	available = { 
+		network_strength = {
+			target = MEX
+			state = 277
+			value > 50
+		}
+	}
+	visible = {
+		OR = {
+			has_completed_focus = SOV_behead_the_snake
+			has_completed_focus = SOV_nkvd_primacy_old
+		}
+		OR = {
+			has_global_flag = trotsky_exile_mexico
+			has_global_flag = flag_mexico_invited_trotsky_to_government
+		}
+		NOT = { has_global_flag = flag_trotsky_dead }
+		NOT = { has_global_flag = flag_trotsky_has_returned_to_ussr_from_mexico }
+		FROM = {
+			controls_state = 277
+		}
+	}
+
+	operatives = 1
+
+	# Integer [0-100] - Every operation has a hard requirement of network strength in the target country
+	network_strength = 50
+
+	equipment = {
+		infantry_equipment = 50
+		support_equipment = 50
+	}
+
+	on_start = {  # SCOPE_OPERATION
+		
+	}
+
+	outcome_modifiers = { operation_outcome }
+	cost_modifiers = { operation_cost }
+	risk_modifiers = { operation_risk }
+
+	outcome_potential = {
+		custom_effect_tooltip = raid_trotskys_villa_outcome_tt
+	}
+	risk_chance = 0.35
+	experience = 5
+	# outcome is an effect that runs when the operation has completed
+	outcome_execute = { # SCOPE_OPERATION
+		hidden_effect = {
+			ROOT = { set_country_flag = SOV_raided_trotskys_villa_flag } #For AI Strat
+		}
+		ROOT = { news_event = { id = nsb_news.100 } } #SUCCESS - Kill Trotsky and swap Trotskyite Plot NS
+	}
+
+	outcome_extra_chance = 0.50
+
+	outcome_extra_execute = {
+		hidden_effect = {
+			ROOT = { set_country_flag = SOV_raided_trotskys_villa_flag } #For AI Strat
+		}
+		ROOT = { news_event = { id = nsb_news.101 } } #FAILURE - Trotsky still alive
+	}
+
+	# This is where all the separate phases are defined
+	# Each phase for an operation may have a single actual phase assigned to it, which is determined here
+	phases = { #infiltration 
+		infiltration_border = { base = 60 }
+		infiltration_submarine = { base = 20 }
+		infiltration_diplomatic = {
+			base = 20
+			modifier = {
+				FROM = {
+					has_war_with = ROOT
+				}
+				factor = 0
+			}
+		}
+	}
+	phases = { 
+		raid_trotskys_villa_attack = { base = 100 }
+	}
+	phases = { 
+		exfiltration_border = { base = 40 }
+		exfiltration_go_to_ground = { base = 30 }
+		exfiltration_submarine_pickup = { base = 20 }
+		exfiltration_air_pickup = { 
+			base = 10
+			modifier = {
+				ROOT = { 
+					has_equipment = {
+						transport_plane_equipment < 1
+					}
+				}
+				factor = 0 #less likely if we have no transports
+			}
+		}
+	}
+}
+
+murder_trotsky = { ### 1/50
+	icon = GFX_murder_trotsky
+	map_icon = GFX_murder_trotsky_map
+	name = murder_trotsky
+	desc = murder_trotsky_desc
+	days = 270
+
+	priority = 10
+
+	allowed = {
+		original_tag = SOV
+	}
+	available = {
+
+	}
+	visible = {
+		OR = {
+			has_completed_focus = SOV_behead_the_snake
+			has_completed_focus = SOV_nkvd_primacy_old
+		}
+		NOT = { has_global_flag = flag_trotsky_dead }
+		NOT = { has_global_flag = flag_trotsky_has_returned_to_ussr_from_mexico }
+		NOT = { ROOT = { has_country_flag = SOV_trotskys_assassination_attempt_flag } } # This operation can only be done once
+		OR = {
+			AND = {
+				FROM = {
+					controls_state = 277 #MEXICO CITY
+				}
+				OR = {
+					has_global_flag = trotsky_exile_mexico
+					has_global_flag = flag_mexico_invited_trotsky_to_government
+				}	
+			}
+			AND = {
+				FROM = {
+					controls_state = 110 #OSTLANDET (Oslo) -> Trotsky not accepted in Mexico (or Soviets being super fast to kill him, which should be impossible btw)
+				}
+				NOT = {
+					has_global_flag = trotsky_exile_mexico
+					has_global_flag = flag_mexico_invited_trotsky_to_government
+				}
+			}
+		}	
+	}
+
+	operatives = 1
+
+	# Integer [0-100] - Every operation has a hard requirement of network strength in the target country
+	network_strength = 25
+
+	on_start = {  # SCOPE_OPERATION
+		
+	}
+
+	outcome_modifiers = { operation_outcome operation_infiltrate_outcome }
+	cost_modifiers = { operation_cost operation_infiltrate_cost }
+	risk_modifiers = { operation_risk operation_infiltrate_risk }
+
+	outcome_potential = {
+		custom_effect_tooltip = murder_trotsky_outcome_tt
+	}
+	risk_chance = 0.25
+	experience = 5
+	# outcome is an effect that runs when the operation has completed
+	outcome_execute = { # SCOPE_OPERATION
+		ROOT = { set_country_flag = SOV_trotskys_assassination_attempt_flag } # This operation can only be done once
+		ROOT = { news_event = { id = news.37 } }  #SUCCESS - Kill Trotsky and swap Trotskyite Plot NS
+	}
+	
+	# This is where all the separate phases are defined
+	# Each phase for an operation may have a single actual phase assigned to it, which is determined here
+	phases = { #infiltration 
+		murder_trotsky_infiltration = { base = 100 }
+	}
+	phases = { 
+		murder_trotsky_attack = { base = 100 }
+	}
+	phases = { 
+		exfiltration_border = { base = 40 }
+		exfiltration_go_to_ground = { base = 30 }
+		exfiltration_submarine_pickup = { base = 20 }
+		exfiltration_air_pickup = { 
+			base = 10
+			modifier = {
+				ROOT = { 
+					has_equipment = {
+						transport_plane_equipment < 1
+					}
+				}
+				factor = 0 #less likely if we have no transports
+			}
+		}
+	}
+}
+
+nuclear_espionage = { ### 1/50
+	icon = GFX_operations_steal_blueprints
+	map_icon = GFX_operations_steal_blueprints_map
+	name = nuclear_espionage
+	desc = nuclear_espionage_desc
+	days = 3
+
+	priority = 15
+
+	allowed = {
+		original_tag = SOV
+	}
+	available = {
+		FROM = {
+			has_tech = atomic_research
+			NOT = { has_war_with = ROOT }
+		}
+	}
+	visible = {
+		has_completed_focus = SOV_soviet_atomic_bomb_project
+		FROM = {
+			is_major = yes
+			NOT = { has_country_flag = SOV_nuclear_espionage_flag } # This operation can only be done once in a country
+			NOT = { has_war_with = ROOT }
+			has_tech = atomic_research
+		}
+	}
+
+	operatives = 1
+
+	# Integer [0-100] - Every operation has a hard requirement of network strength in the target country
+	network_strength = 75
+
+	on_start = {  # SCOPE_OPERATION
+		
+	}
+
+	outcome_modifiers = { operation_outcome operation_steal_tech_outcome }
+	cost_modifiers = { operation_cost }
+	risk_modifiers = { operation_risk operation_steal_tech_risk }
+
+	outcome_potential = {
+		custom_effect_tooltip = nuclear_espionage_outcome_tt
+	}
+	risk_chance = 0.25
+	experience = 5
+	# outcome is an effect that runs when the operation has completed
+	outcome_execute = { # SCOPE_OPERATION
+		FROM = { set_country_flag = SOV_nuclear_espionage_flag } # This operation can only be done once per country
+		ROOT = { country_event = NSB_soviet_atomic_bomb_project.1 }
+	}
+	
+	# This is where all the separate phases are defined
+	# Each phase for an operation may have a single actual phase assigned to it, which is determined here
+	phases = { #infiltration
+		infiltration_border = { base = 60 }
+		infiltration_submarine = { base = 20 }
+		infiltration_diplomatic = {
+			base = 20
+			modifier = {
+				FROM = {
+					has_war_with = ROOT
+				}
+				factor = 0
+			}
+		}
+	}
+	phases = { #gather vital info
+		steal_blueprints_bribe = { base = 40 }
+		steal_blueprints_seduction = { base = 40 }
+		steal_blueprints_middle_manager = { base = 20 }
+	}
+	phases = { #exfiltration
+		exfiltration_border = { base = 30 }
+		exfiltration_go_to_ground = { base = 30 }
+		exfiltration_submarine_pickup = { base = 25 }
+	}
+}
+
+
+
+
+
+#operation_infiltrate_risk
+#operation_infiltrate_outcome
+#operation_infiltrate_cost
+#
+#operation_steal_tech_risk
+#operation_steal_tech_outcome
+#
+#target_sabotage_factor
+#target_sabotage_risk
+#target_sabotage_cost
