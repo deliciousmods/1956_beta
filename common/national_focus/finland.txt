@@ -22,11 +22,16 @@ focus_tree = {
 	country = {
 		factor = 0
 		
+		#modifier = { #Pre-Unification
+		#	add = 15
+		#	tag = FIN
+		#	#in vanilla the neutrality tree is still free, maybe check if we wanna use parts
+		#	has_global_flag = FIN_use_DLC_tree
+		#}
+
 		modifier = {
-			add = 15
+			add = 10
 			tag = FIN
-			#in vanilla the neutrality tree is still free, maybe check if we wanna use parts
-			has_global_flag = FIN_use_DLC_tree
 		}
 	}
 	
@@ -41,8 +46,6 @@ focus_tree = {
 
 	shared_focus = NORDIC_form_joint_alliance
 
-
-
  ######   #######   ######  ####    ###    ##       ####  ######  ######## 
 ##    ## ##     ## ##    ##  ##    ## ##   ##        ##  ##    ##    ##    
 ##       ##     ## ##        ##   ##   ##  ##        ##  ##          ##    
@@ -51,7 +54,576 @@ focus_tree = {
 ##    ## ##     ## ##    ##  ##  ##     ## ##        ##  ##    ##    ##    
  ######   #######   ######  #### ##     ## ######## ####  ######     ##    
 
+	focus = {
+		id = fin_comfoc
+		text = fin_comfoc
+		icon = GFX_goal_FIN_comfoc
+		cost = 10
+		prerequisite = {
+			focus = fin_political_focus
+		}
+		mutually_exclusive = {
+			focus = fin_nationalismfoc
+			focus = FIN_finnish_neutrality
+		}
+		x = 3
+		y = 0
+		
+		available_if_capitulated = yes
 
+		allow_branch = {
+			NOT = {
+				has_dlc = "Arms Against Tyranny"
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = { has_completed_focus = FIN_finnish_neutrality }
+				NOT = { has_completed_focus = fin_nationalismfoc }
+			}
+		}
+		
+		ai_will_do = {
+			factor = 0.5
+			modifier = {
+				is_historical_focus_on = yes
+				factor = 0
+			}
+		}
+		
+		completion_reward = {
+			add_political_power = 50
+			add_ideas = communist_rev
+		
+			hidden_effect = {
+				if = {
+					limit = {
+						has_game_rule = {
+							rule = obsolete_focus_branches_visibility
+							option = HIDE
+						}
+					}
+					mark_focus_tree_layout_dirty = yes
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+
+	}
+	
+	focus = {
+		id = fin_restoreredguard
+		text = fin_restoreredguard
+		icon = GFX_goal_focus_communist_army
+		cost = 10
+		prerequisite = {
+			focus = fin_comfoc
+		}
+		mutually_exclusive = {
+			focus = fin_demcomunbanfoc
+		}
+		x = -1
+		y = 1
+		relative_position_id = fin_comfoc
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			add_ideas = red_guard_patrols
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
+
+	}
+	
+	focus = {
+		id = fin_revolutionfoc
+		text = fin_revolutionfoc
+		icon = GFX_goal_red_army
+		cost = 10
+		prerequisite = {
+			focus = fin_restoreredguard
+		}
+		
+		available = {
+			communism > 0.35
+		}
+		
+		bypass = {
+			has_government = communism
+		}
+
+		x = 0
+		y = 1
+		relative_position_id = fin_restoreredguard
+
+		continue_if_invalid = yes
+		
+		completion_reward = {
+			start_civil_war = {
+				ruling_party = communism
+				ideology = democratic
+				size = 0.4
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+
+	}
+	
+	focus = {
+		id = fin_demcomunbanfoc
+		text = fin_demcomunbanfoc
+		icon = GFX_goal_FIN_communist_party
+		cost = 5
+		prerequisite = {
+			focus = fin_comfoc
+		}
+		mutually_exclusive = {
+			focus = fin_restoreredguard
+		}
+		
+		available = {
+			communism > 0.15
+		}
+		
+		x = 1
+		y = 1
+		relative_position_id = fin_comfoc
+		
+		available_if_capitulated = yes
+		continue_if_invalid = yes
+		
+		completion_reward = {
+			remove_ideas = FIN_communism_banned
+			add_stability = -0.05
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+		}
+		search_filters = { FOCUS_FILTER_STABILITY }
+
+	}
+	
+	focus = {
+		id = fin_demandgovchange
+		text = fin_demandgovchange
+		icon = GFX_goal_generic_election_chaos
+		cost = 10
+		prerequisite = {
+			focus = fin_demcomunbanfoc
+		}
+		available = {
+			communism > 0.35
+		}
+		
+		x = 0
+		y = 1
+		relative_position_id = fin_demcomunbanfoc
+		
+		available_if_capitulated = yes
+		continue_if_invalid = yes 
+		
+		completion_reward = {
+			set_politics = { ruling_party = communism elections_allowed = no }
+			add_stability = -0.1
+			add_political_power = -100
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+
+	}
+	
+	focus = {
+		id = fin_banfascism
+		text = fin_banfascism
+		icon = GFX_focus_generic_anti_fascist_diplomacy
+		cost = 10
+		prerequisite = {
+			focus = fin_revolutionfoc
+			focus = fin_demandgovchange
+		}
+		
+		available = {
+			has_government = communism
+		}
+		x = 1
+		y = 1
+		relative_position_id = fin_revolutionfoc
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			add_ideas = fin_fascismban
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+
+	}
+	
+	focus = {
+		id = fin_ourownway
+		text = fin_ourownway
+		icon = GFX_goal_support_fourth_int
+		cost = 10
+		prerequisite = {
+			focus = fin_banfascism
+		}
+		mutually_exclusive = {
+			focus = fin_jointhecomintern
+		}
+		x = -2
+		y = 1
+		relative_position_id = fin_banfascism
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			EST = {
+				add_opinion_modifier = { target = FIN modifier = FIN_diplomats } }
+			LIT = {
+				add_opinion_modifier = { target = FIN modifier = FIN_diplomats } }
+			LAT = {
+				add_opinion_modifier = { target = FIN modifier = FIN_diplomats } }
+		}
+
+	}
+	
+	focus = {
+		id = fin_norrevolution
+		text = fin_norrevolution
+		icon = GFX_goal_generic_communist_government2
+		cost = 10
+		prerequisite = {
+			focus = fin_ourownway
+		}
+
+		x = 0
+		y = 1
+		relative_position_id = fin_ourownway
+
+		completion_reward = {
+			EST = { add_ideas = communist_rev }
+			LIT = { add_ideas = communist_rev }
+			LAT = { add_ideas = communist_rev }
+		
+		}
+
+	}
+
+	focus = {
+		id = fin_nordicom
+		text = fin_nordicom
+		icon = GFX_generic_goal_communist_reforms
+		cost = 10
+		
+		available = {
+			is_subject = no
+			is_in_faction = no
+		}
+		
+		prerequisite = {
+			focus = fin_norrevolution
+		}
+
+		x = 0
+		y = 1
+		relative_position_id = fin_norrevolution
+
+		completion_reward = {
+			set_rule = { can_create_factions = yes }
+			create_faction = baltic_internationale
+			
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE FOCUS_FILTER_POLITICAL }
+
+	}
+	
+	focus = {
+		id = fin_balticsafety
+		text = fin_balticsafety
+		icon = GFX_goal_SOV_baltic_aggression
+		cost = 10
+		prerequisite = {
+			focus = fin_nordicom
+		}
+		
+		available = {
+			owns_state = 146
+			is_in_faction_with = EST
+			is_in_faction_with = LAT
+			is_in_faction_with = LIT
+			OR = { 
+				GER = { has_completed_focus = GER_molotov_ribbentrop_pact }
+				SOV = { has_completed_focus = SOV_baltic_security }
+			}
+		}
+		
+		x = 0
+		y = 1
+		relative_position_id = fin_nordicom
+		
+		completion_reward = {
+				country_event = finland.75
+		}
+
+	}
+	
+	focus = {
+		id = fin_sovietcomfoc
+		text = fin_sovietcomfoc
+		icon = GFX_goal_generic_karl_marx
+		cost = 10
+		prerequisite = {
+			focus = fin_balticsafety
+		}
+
+		x = 0
+		y = 1
+		relative_position_id = fin_balticsafety
+		
+		available = {
+			r56_script_i_am_sane = yes
+			SOV = {
+				r56_script_target_is_sane = yes
+			}
+		}
+
+		bypass = {
+			SOV = {
+				r56_script_standard_bypass = yes
+			}
+		}
+
+		completion_reward = { 
+			create_wargoal = {
+				type = annex_everything
+				target = SOV
+				expire = 0
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+
+	}
+	
+	focus = {
+		id = fin_jointhecomintern
+		text = fin_jointhecomintern
+		icon = GFX_goal_support_communism
+		cost = 10
+		prerequisite = {
+			focus = fin_banfascism
+		}
+		mutually_exclusive = {
+			focus = fin_ourownway
+		}
+		available = {
+			has_government = communism
+			is_subject = no
+			is_in_faction = no
+			SOV = { exists = yes }
+			NOT = { has_war_with = SOV }
+		}
+		
+		x = 2
+		y = 1
+		relative_position_id = fin_banfascism
+
+		completion_reward = {
+			SOV = {
+				add_opinion_modifier = { target = FIN modifier = FIN_sov_diplomacy } 
+			}
+			FIN = {
+				add_opinion_modifier = { target = SOV modifier = FIN_sov_diplomacy } 
+			}
+		}
+
+	}
+	
+	focus = {
+		id = fin_unholyalliance
+		text = fin_unholyalliance
+		icon = GFX_focus_chi_mission_to_the_soviet_union
+		cost = 10
+		prerequisite = {
+			focus = fin_jointhecomintern
+		}
+		available = {
+			has_government = communism
+			is_subject = no
+			is_in_faction = no
+			SOV = { exists = yes }
+			NOT = { has_war_with = SOV }
+		}
+
+		bypass = {
+			is_in_faction_with = SOV
+		}
+
+		x = 0
+		y = 1
+		relative_position_id = fin_jointhecomintern
+
+		completion_reward = {
+			SOV = { country_event = { id = finland.36 } }
+		}
+		search_filters = { FOCUS_FILTER_ALLIANCE }
+
+	}
+
+	focus = {
+		id = fin_takedownaxis
+		text = fin_takedownaxis
+		icon = GFX_focus_attack_germany
+		cost = 10
+		prerequisite = {
+			focus = fin_unholyalliance
+		}
+		available = {
+			r56_script_i_am_sane = yes
+			GER = {
+				r56_script_target_is_sane = yes
+			}
+		}
+		bypass = {
+			GER = {
+				r56_script_standard_bypass = yes
+			}
+		}
+		x = -1
+		y = 1
+		relative_position_id = fin_unholyalliance
+
+		completion_reward = { 
+			create_wargoal = {
+				type = puppet_wargoal_focus
+				target = GER
+				expire = 0
+			}
+		
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+
+	}
+	
+	focus = {
+		id = fin_estoniaforkarjala
+		text = fin_estoniaforkarjala
+		icon = GFX_focus_generic_treaty
+		cost = 5
+		prerequisite = {
+			focus = fin_unholyalliance
+		}
+		available = {
+			has_government = communism
+			is_subject = no
+			is_in_faction = no
+			SOV = { 
+				exists = yes 
+				owns_state = 13
+				owns_state = 191
+			}
+			NOT = { has_war_with = SOV }
+		}
+
+		x = 1
+		y = 1
+		relative_position_id = fin_unholyalliance
+
+		completion_reward = {
+			SOV = { country_event = { id = finland.68 } }
+		}
+	}
+	
+	focus = {
+		id = fin_indoctrination
+		text = fin_indoctrination
+		icon = GFX_goal_generic_propaganda
+		cost = 10
+		prerequisite = {
+			focus = fin_comfoc
+		}
+		
+		available = {
+			has_government = communism
+		}
+		
+		x = -3
+		y = 1
+		relative_position_id = fin_comfoc
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			add_political_power = 125
+			add_ideas = fin_indocfocus
+		}
+		search_filters = {  FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+
+	}
+	
+	focus = {
+		id = fin_propaganda
+		text = fin_propaganda
+		icon = GFX_focus_propaganda_soviet
+		cost = 10
+		prerequisite = {
+			focus = fin_indoctrination
+		}
+		
+		available = {
+			has_government = communism
+		}
+		
+		x = 0
+		y = 1
+		relative_position_id = fin_indoctrination
+
+		available_if_capitulated = yes
+
+		completion_reward = {
+			add_political_power = 125
+			add_ideas = fin_propagandafocus
+			add_ideas = political_commissars_focus
+		}
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
+		
+	}
+	
+	focus = {
+		id = fin_wwrevol
+		text = fin_wwrevol
+		icon = GFX_focus_ger_great_red_menace
+		cost = 10
+		prerequisite = {
+			focus = fin_propaganda
+		}
+		
+		available = {
+			has_government = communism
+		}
+		
+		x = 0
+		y = 1
+		relative_position_id = fin_propaganda
+		
+		available_if_capitulated = yes
+
+		completion_reward = {
+			add_ideas = fin_revfocus
+		
+		}
+		
+	}
+
+ ######   #######   ######  ####    ###    ##       ####  ######  ########     ###       ###    ########
+##    ## ##     ## ##    ##  ##    ## ##   ##        ##  ##    ##    ##       ## ##     ## ##      ##   
+##       ##     ## ##        ##   ##   ##  ##        ##  ##          ##      ##   ##   ##   ##     ##   
+ ######  ##     ## ##        ##  ##     ## ##        ##   ######     ##     ##     ## ##     ##    ##   
+      ## ##     ## ##        ##  ######### ##        ##        ##    ##     ######### #########    ##   
+##    ## ##     ## ##    ##  ##  ##     ## ##        ##  ##    ##    ##     ##     ## ##     ##    ##   
+ ######   #######   ######  #### ##     ## ######## ####  ######     ##     ##     ## ##     ##    ##   
 
 	focus = {
 		id = FIN_suomalainen_sosialismi
@@ -4607,6 +5179,8 @@ focus_tree = {
 				}
 				NOT = { has_completed_focus = FIN_suomalainen_sosialismi }
 				NOT = { has_completed_focus = FIN_right_wing_policies }
+				NOT = { has_completed_focus = fin_comfoc }
+				NOT = { has_completed_focus = fin_nationalismfoc }
 			}
 		}
 
@@ -4618,15 +5192,39 @@ focus_tree = {
 			x = -16
 			y = 0
 			trigger = {
-				OR = {
-					NOT = { has_dlc = "Arms Against Tyranny" }
-					AND = {
-						has_game_rule = {
-							rule = obsolete_focus_branches_visibility
-							option = HIDE
-						}
-						has_completed_focus = FIN_finnish_neutrality
+				AND = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
 					}
+					has_completed_focus = FIN_finnish_neutrality
+				}
+			}
+		}
+
+		offset = {
+			x = 9
+			y = 0
+			trigger = {
+				NOT = {
+					has_dlc = "Arms Against Tyranny"
+				}
+				AND = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+					has_completed_focus = FIN_finnish_neutrality
+				}
+			}
+		}
+
+		offset = {
+			x = -9
+			y = 0
+			trigger = {
+				NOT = {
+					has_dlc = "Arms Against Tyranny"
 				}
 			}
 		}
@@ -4764,7 +5362,6 @@ focus_tree = {
 							rule = obsolete_focus_branches_visibility
 							option = HIDE
 						}
-						has_dlc = "Arms Against Tyranny"
 					}
 					mark_focus_tree_layout_dirty = yes
 				}
@@ -4806,7 +5403,7 @@ focus_tree = {
 	focus = {
 		id = FIN_align_the_agrarian_league
 		icon = GFX_focus_generic_workers
-		prerequisite = { focus = FIN_political_unity focus = FIN_social_democracy }
+		prerequisite = { focus = FIN_political_unity focus = FIN_social_democracy focus = fin_demcomunbanfoc }
 
 		x = -3
 		y = 1
@@ -4834,7 +5431,7 @@ focus_tree = {
 	focus = {
 		id = FIN_the_finnish_swedish_peoples_party
 		icon = GFX_focus_generic_industrialists
-		prerequisite = { focus = FIN_social_democracy focus = FIN_political_unity }
+		prerequisite = { focus = FIN_social_democracy focus = FIN_political_unity focus = fin_demcomunbanfoc }
 
 		x = 2
 		y = 0
@@ -6790,7 +7387,7 @@ focus_tree = {
 	focus = {
 		id = FIN_weapon_caches
 		icon = GFX_focus_FIN_weapon_caches
-		prerequisite = { focus = FIN_finnish_neutrality focus = FIN_right_wing_policies }
+		prerequisite = { focus = FIN_finnish_neutrality focus = FIN_right_wing_policies focus = fin_nationalismfoc }
 
 		x = 3
 		y = 0
@@ -6805,6 +7402,18 @@ focus_tree = {
 					option = HIDE
 				}
 				has_completed_focus = FIN_right_wing_policies
+			}
+		}
+
+		offset = {
+			x = -17
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = fin_nationalismfoc
 			}
 		}
 
@@ -6824,7 +7433,7 @@ focus_tree = {
 	focus = {
 		id = FIN_national_unity
 		icon = GFX_focus_EST_national_pride_in_finland
-		prerequisite = { focus = FIN_finnish_neutrality focus = FIN_right_wing_policies }
+		prerequisite = { focus = FIN_finnish_neutrality focus = FIN_right_wing_policies focus = fin_nationalismfoc }
 
 		x = 3
 		y = 0
@@ -7202,7 +7811,7 @@ focus_tree = {
 	focus = {
 		id = FIN_greater_finland
 		icon = GFX_focus_FIN_greater_finland
-		prerequisite = { focus = FIN_finnish_march_of_conquest focus = FIN_militarized_society focus = FIN_keepers_of_the_north }
+		prerequisite = { focus = FIN_finnish_march_of_conquest focus = FIN_militarized_society focus = FIN_keepers_of_the_north focus = fin_greatfinfoc }
 
 		x = 0
 		y = 1
@@ -7221,6 +7830,16 @@ focus_tree = {
 		completion_reward = {
 			FIN_bop_low_increase_effect = yes
 			custom_effect_tooltip = CHL_skip_one_line_tt
+			if = {
+				limit = {
+					has_idea = FIN_assimilation
+				}
+				swap_ideas = {
+					remove_idea = FIN_assimilation
+					add_idea = fin_greaterfinland
+				}
+				custom_effect_tooltip = CHL_skip_one_line_tt
+			}
 			213 = { #MURMANSK
 				add_core_of = ROOT
 			}
@@ -7267,8 +7886,635 @@ focus_tree = {
 ##       ##     ## ##    ## ##    ##  ##  ##    ##    ##    
 ##       ##     ##  ######   ######  ####  ######     ##    
 
+	focus = {
+		id = fin_nationalismfoc
+		text = fin_nationalismfoc
+		icon = GFX_focus_EST_national_pride_in_finland
+		#GFX_focus_fin_nationalism icon quite bad
+		cost = 10
+		mutually_exclusive = {
+			focus = FIN_finnish_neutrality
+			focus = fin_comfoc
+		}
+		
+		available = {
+		#	OR = {
+		#		has_government = neutrality
+		#		has_government = fascism
+		#	}		
+		}
+		
+		ai_will_do = {
+			factor = 0.5
+			modifier = {
+				is_historical_focus_on = yes
+				factor = 0
+			}
+		}
+
+		x = 13
+		y = 0
+		relative_position_id = FIN_finnish_neutrality
+
+		offset = {
+			x = -17
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = fin_nationalismfoc
+			}
+		}
+
+		allow_branch = {
+			NOT = {
+				has_dlc = "Arms Against Tyranny"
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
+					}
+				}
+				NOT = { has_completed_focus = FIN_finnish_neutrality }
+				NOT = { has_completed_focus = fin_comfoc }
+			}
+		}
+		
+		available_if_capitulated = yes
+		continue_if_invalid = yes
+		
+		completion_reward = {
+			add_political_power = 50
+			add_timed_idea = { idea = nationalism days = 1095 }
+
+			hidden_effect = {
+				if = {
+					limit = {
+						has_game_rule = {
+							rule = obsolete_focus_branches_visibility
+							option = HIDE
+						}
+					}
+					mark_focus_tree_layout_dirty = yes
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+
+	}
+	
+	focus = {
+		id = fin_axisalliancefoc
+		text = fin_axisalliancefoc
+		icon = GFX_focus_chi_mission_to_germany
+		cost = 10
+		prerequisite = {
+			focus = fin_nationalismfoc
+		}
+		mutually_exclusive = {
+			focus = fin_independent_diplomacy
+			focus = fin_fascist_british_alliance
+		}		
+		available = {
+			is_subject = no
+			is_in_faction = no
+			FIN = {
+				NOT = {
+					has_war_with = GER
+				}
+			}
+		}
+		bypass = {
+			is_in_faction = yes
+		}	
+		x = -3
+		y = 1
+		relative_position_id = fin_nationalismfoc
+		completion_reward = {		
+			GER = { country_event = { id = finland.27 } }
+		}
+	}
+
+	focus = {
+        id = fin_fascist_british_alliance
+        icon = GFX_goal_CAN_join_british
+        prerequisite = { focus = fin_nationalismfoc }
+		mutually_exclusive = {focus = fin_axisalliancefoc focus = fin_independent_diplomacy }
+		relative_position_id = fin_nationalismfoc
+        x = 0
+        y = 1
+        cost = 10
+		ai_will_do = {
+			factor = 2
+		}		
+		available = {
+			OR ={
+				has_government = fascism
+				has_government = neutrality
+			}
+			is_in_faction = no
+			is_subject = no
+			ENG = {
+				OR ={
+					has_government = fascism
+					has_government = neutrality
+				}
+				is_faction_leader = yes
+				has_civil_war = no
+				NOT = {
+					has_war_with = ROOT
+				}
+			}
+		}			
+        completion_reward = {
+			ENG = {
+                country_event = { id = finland.104 days = 1 }
+                custom_effect_tooltip = needs_approval
+			}
+            effect_tooltip = {
+                add_doctrine_cost_reduction = {
+                    name = naval_doc_bonus
+                    cost_reduction = 0.5
+                    uses = 2
+                    category = naval_doctrine
+                }
+				add_doctrine_cost_reduction = {
+					name = infantry_weapons_bonus
+					cost_reduction = 0.5
+					uses = 1
+					category = infantry_weapons					
+                }
+            }
+        }
+        search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
+    }
+
+	focus = {
+		id = fin_independent_diplomacy	
+		icon = GFX_focus_invite_finland
+		cost = 10
+		prerequisite = {
+			focus = fin_nationalismfoc
+		}
+		mutually_exclusive = {
+			focus = fin_axisalliancefoc
+			focus = fin_fascist_british_alliance
+		}		
+		available = {
+			is_subject = no
+			is_in_faction = no
+		}
+			
+		bypass = {
+			OR = {
+				is_in_faction = yes
+				is_subject = yes
+			}
+		}	
+		
+		x = 3
+		y = 1
+		relative_position_id = fin_nationalismfoc
+		
+		
+		
+		completion_reward = {
+			set_rule = { can_create_factions = yes }
+			add_ideas = FIN_fascist_diplomatic_effort
+		}
+	}
+	
+	focus = {
+		id = FIN_push_towards_scandinavia
+		icon = GFX_focus_fin_push_towards_scandinavia
+		cost = 10
+		prerequisite = {
+			focus = fin_axisalliancefoc focus = fin_independent_diplomacy focus = fin_fascist_british_alliance
+		}
+		
+		available = {
+				SWE  = { exists = yes }
+				NOR = { exists = yes }
+				DEN = { exists = yes }
+		}
+		
+		x = 1
+		y = 1
+		relative_position_id = fin_axisalliancefoc
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			add_state_claim = 144
+			add_state_claim = 666
+		}
+
+	}
+	
+	focus = {
+		id = fin_annexswefoc
+		text = fin_annexswefoc
+		icon = GFX_goal_generic_attack_sweden
+		cost = 10
+		prerequisite = {
+			focus = FIN_push_towards_scandinavia
+		}
+		
+		available = {
+			SWE = { exists = yes }
+			NOT = {
+				has_war_with = SWE
+				is_in_faction_with = SWE
+			}
+			is_subject = no
+		}
+		
+		bypass = {
+				controls_state = 666
+		}
+
+		x = -1
+		y = 1
+		relative_position_id = FIN_push_towards_scandinavia
+		
+		
+		
+		completion_reward = {
+			SWE = { country_event = finland.43 }
+		
+		}
+
+	}
+
+	focus = {
+		id = fin_annexnorfoc
+		icon = GFX_goal_generic_attack_norway
+		cost = 10
+		prerequisite = {
+			focus = FIN_push_towards_scandinavia
+		}
+		
+		available = {
+			NOR = { exists = yes }
+			NOT = {
+					has_war_with = NOR
+					is_in_faction_with = NOR
+				}
+				is_subject = no
+		}
+		
+		bypass = {
+				controls_state = 144
+		}
+	
+		x = 1
+		y = 1
+		relative_position_id = FIN_push_towards_scandinavia
+		
+		
+		completion_reward = {
+			NOR = { country_event = finland.47 }
+		
+		}
+
+	}
+	
+	
+	focus = {
+		id = fin_annexdenfoc
+		icon = GFX_goal_generic_attack_denmark
+		cost = 10
+		prerequisite = {
+			focus = fin_annexswefoc
+		}
+		prerequisite = {
+			focus = fin_annexnorfoc
+		}		
+		
+		available = {
+			DEN = { exists = yes }
+			NOT = {
+				has_war_with = DEN
+				is_in_faction_with = DEN
+			}
+			is_subject = no
+		}
+		
+		bypass = {
+			controls_state = 99
+			controls_state = 964
+		}	
+
+		x = 1
+		y = 1
+		relative_position_id = fin_annexswefoc
+
+		completion_reward = {
+			DEN = { country_event = finland.51 }
+		
+		}
+
+	}
+
+	focus = {
+		id = fin_annexicefoc
+		icon = GFX_goal_annexiceland
+		cost = 5.00
+		prerequisite = {
+			focus = fin_annexdenfoc
+		}
+		relative_position_id = fin_annexdenfoc
+		x = 0
+		y = 1
+		available = {
+			r56_script_i_am_sane = yes
+			ICE = {
+				r56_script_target_is_sane = yes
+				AND = {
+					exists = yes
+					is_subject = no
+				}
+			}
+		}
+		bypass = {
+			FIN = {
+					owns_state = 100
+			}
+		}
+		completion_reward = {
+			navy_experience = 10
+			create_wargoal = {
+				type = take_state_focus
+				target = ICE
+				expire = 0
+				generator = { 100 }
+			}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+	
+	focus = {
+		id = fin_greatfinfoc
+		text = fin_greatfinfoc
+		icon = GFX_focus_fin_greater_finland
+		cost = 10
+		prerequisite = {
+			focus = fin_annexicefoc
+			focus = fin_nazisovietfoc
+			focus = fin_estonia
+		}
+		relative_position_id = fin_nazisovietfoc
+		x = 1
+		y = 3
+		
+		available = {
+			controls_state = 213
+			controls_state = 215
+			controls_state = 216
+		}
+
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			add_ideas = fin_greaterfinland
+		}
+		search_filters = { FOCUS_FILTER_STABILITY }
+
+	}
+	
+	focus = {
+		id = fin_militarismfoc
+		text = fin_militarismfoc
+		icon = GFX_focus_fin_finnish_militarism
+		cost = 10
+		prerequisite = {
+			focus = fin_nationalismfoc
+		}
+		available = {
+			fascism > 0.35
+		}
+		x = 4
+		y = 2
+		relative_position_id = fin_nationalismfoc
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			add_ideas = militarism_focus
+		
+		}
+		search_filters = {  FOCUS_FILTER_MANPOWER }
+
+	}
+	
+	focus = {
+		id = fin_gertechsharingfoc
+		text = fin_gertechsharingfoc
+		icon = GFX_goal_research_silver_cooperation
+		cost = 10
+		prerequisite = {
+			focus = fin_axisalliancefoc
+		}
+		x = -1
+		y = 1
+		relative_position_id = fin_axisalliancefoc
+		
+		available = {
+				NOT = {
+					has_war_with = GER
+				}
+			is_in_faction_with = GER
+		}
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			country_event = finland.25
+		
+		}
+
+	}
+	
+	focus = {
+		id = fin_paramilitarism
+		text = fin_paramilitarism
+		icon = GFX_goal_generic_defence
+		cost = 10
+		prerequisite = {
+			focus = fin_militarismfoc
+		}
+		x = 0
+		y = 2
+		relative_position_id = fin_militarismfoc
+		
+		available_if_capitulated = yes
+		
+		completion_reward = {
+			add_ideas = paramilitarism_focus
+		
+		}
+
+	}
+	
+	focus = {
+		id = fin_lebensraumfoc
+		text = fin_lebensraumfoc
+		icon = GFX_goal_finnlebensraum
+		cost = 10
+		prerequisite = {
+			focus = fin_axisalliancefoc
+			focus = fin_independent_diplomacy
+			focus = fin_fascist_british_alliance
+		}
+		x = 2
+		y = 1
+		relative_position_id = fin_fascist_british_alliance
+		
+		available =  {
+				NOT = {
+					has_war_with = SOV
+					is_in_faction_with = SOV
+				}
+			is_subject = no
+		}
+		
+		completion_reward = {
+			add_state_claim = 213
+			add_state_claim = 215
+			add_state_claim = 216
+			SOV = { country_event = finland.59 }	
+		}
+
+	}
+	
+	focus = {
+		id = fin_germilhelpfoc
+		text = fin_germilhelpfoc
+		icon = GFX_focus_generic_manpower
+		cost = 10
+		prerequisite = {
+			focus = fin_gertechsharingfoc
+		}
+		
+		available = {
+			is_subject = no
+			is_in_faction_with = GER
+			GER = { exists = yes }
+		}
+		
+		x = 0
+		y = 2
+		relative_position_id = fin_gertechsharingfoc
+		
+		
+		
+		completion_reward = { #remember to add equipment!
+			custom_effect_tooltip = FIN_GER_Units
+			add_ideas = FIN_stopai
+			add_equipment_to_stockpile = {
+				type = infantry_equipment_1 #type of equipment, from file
+				amount = 1000 #amount
+				producer = GER #Name of country that "built" the equipment
+			}
+			add_equipment_to_stockpile = {
+				type = support_equipment_1 #type of equipment, from file
+				amount = 250 #amount
+				producer = GER #Name of country that "built" the equipment
+			}
+			add_equipment_to_stockpile = {
+				type = artillery_equipment_1 #type of equipment, from file
+				amount = 100 #amount
+				producer = GER #Name of country that "built" the equipment
+			}
+			hidden_effect = {
+				load_oob = "FIN_GER"
+				add_manpower = 10000
+			}			
+		}
+	search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_MILITARY_EQUIPMENT }
+	}
+	
+	focus = {
+		id = fin_nazisovietfoc
+		text = fin_nazisovietfoc
+		icon = GFX_goal_attack_communists
+		cost = 10
+		prerequisite = {
+			focus = fin_lebensraumfoc
+		}
+		mutually_exclusive = {
+			focus =	fin_estonia
+		}
+		
+		available = {
+			r56_script_i_am_sane = yes
+			SOV = {
+				r56_script_target_is_sane = yes
+			}
+		}
+		
+		bypass = {
+			SOV = {
+				r56_script_standard_bypass = yes
+			}
+		}
+		
+		x = -1
+		y = 1
+		relative_position_id = fin_lebensraumfoc
+
+		completion_reward = {
+				create_wargoal = {
+				type = annex_everything
+				target = SOV
+				expire = 0
+				}
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+
+	}
+	
+	focus = {
+		id = fin_estonia
+		text = fin_estonia
+		icon = GFX_goal_generic_attack_estonia
+		cost = 10
+		prerequisite = {
+			focus = fin_lebensraumfoc
+		}
+		mutually_exclusive = {
+			focus =	fin_nazisovietfoc
+		}
+		
+		available = {
+			EST = { exists = yes }
+			NOT = {
+				is_in_faction_with = EST
+			}
+		}
+		
+		x = 1
+		y = 1
+		relative_position_id = fin_lebensraumfoc
+		
+		completion_reward = {
+			EST = { country_event = finland.60 }
+		}
+
+	}
 
 
+########    ###     ######   ######  ####  ######  ########     ###       ###    ########
+##         ## ##   ##    ## ##    ##  ##  ##    ##    ##       ## ##     ## ##      ##   
+##        ##   ##  ##       ##        ##  ##          ##      ##   ##   ##   ##     ##   
+######   ##     ##  ######  ##        ##   ######     ##     ##     ## ##     ##    ##   
+##       #########       ## ##        ##        ##    ##     ######### #########    ##   
+##       ##     ## ##    ## ##    ##  ##  ##    ##    ##     ##     ## ##     ##    ##   
+##       ##     ##  ######   ######  ####  ######     ##     ##     ## ##     ##    ##   
 
 	focus = {
 		id = FIN_right_wing_policies
@@ -10005,15 +11251,12 @@ focus_tree = {
 			x = -14
 			y = 0
 			trigger = {
-				OR = {
-					NOT = { has_dlc = "Arms Against Tyranny" }
-					AND = {
-						has_game_rule = {
-							rule = obsolete_focus_branches_visibility
-							option = HIDE
-						}
-						has_completed_focus = FIN_finnish_neutrality
+				AND = {
+					has_game_rule = {
+						rule = obsolete_focus_branches_visibility
+						option = HIDE
 					}
+					has_completed_focus = FIN_finnish_neutrality
 				}
 			}
 		}
@@ -10027,6 +11270,30 @@ focus_tree = {
 					option = HIDE
 				}
 				has_completed_focus = FIN_suomalainen_sosialismi
+			}
+		}
+
+		offset = {
+			x = -27
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = fin_comfoc
+			}
+		}
+
+		offset = {
+			x = -21
+			y = 0
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = fin_nationalismfoc
 			}
 		}
 
