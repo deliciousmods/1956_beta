@@ -9638,7 +9638,6 @@ focus_tree = {
 
 	focus = {
 		id = ENG_embargo_japan
-		text = uk_sanction_japan_focus
 		prerequisite = { focus = ENG_war_with_ussr focus = ENG_reconciliation_with_ussr }
 
 		available = {
@@ -9650,7 +9649,7 @@ focus_tree = {
 			has_war_with = JAP
 		}
 		icon = GFX_goal_generic_trade
-		x = -2
+		x = -3
 		y = 1
 		relative_position_id = ENG_reconciliation_with_ussr
 		cost = 5
@@ -9668,6 +9667,12 @@ focus_tree = {
 					is_major = yes
 				}
 			}
+			modifier = {
+				factor = 0
+				JAP = {
+					is_in_faction_with = ENG
+				}
+			}
 		}
 
 		available_if_capitulated = yes
@@ -9679,7 +9684,7 @@ focus_tree = {
 	}
 
 	focus = {
-		id = uk_china_focus 
+		id = ENG_influence_china 
 		prerequisite = { focus = ENG_embargo_japan  }
 		available = {
 			CHI = { 
@@ -9756,6 +9761,142 @@ focus_tree = {
 			create_wargoal = {
 				type = puppet_wargoal_focus
 				target = JAP
+				expire = 0
+			} 
+		}
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+	}
+
+	focus = {
+		id = ENG_embargo_china
+		prerequisite = { focus = ENG_war_with_ussr focus = ENG_reconciliation_with_ussr }
+
+		available = {
+			event_target:WTT_current_china_leader = {
+				ENG_focus_available_embargo_sanction = yes
+				OR = {
+					has_government = communism
+					AND = {
+						is_in_faction_with = GER
+						GER = {
+							NOT = {
+								has_government = democratic
+							}
+						}
+					}
+				}
+			}
+		} 
+		bypass = {
+			has_war_with = event_target:WTT_current_china_leader
+		}
+		icon = GFX_goal_generic_trade
+		x = 3
+		y = 1
+		relative_position_id = ENG_war_with_ussr
+		cost = 5
+		ai_will_do = {
+			factor = 0.5
+			modifier = { #Go for the unthinkable asap
+				add = 25
+				ROOT = {
+					has_war = no
+					is_faction_leader = yes
+					is_major = yes
+				}
+			}
+			modifier = { #No on historical, let's not be crazy ;)
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+
+		available_if_capitulated = yes
+
+		completion_reward = {
+			send_embargo = event_target:WTT_current_china_leader
+			custom_effect_tooltip = embargo_relation_tt
+		}
+	}
+
+	focus = {
+		id = ENG_influence_japan
+		prerequisite = { focus = ENG_embargo_china }
+		available = {
+			JAP = { 
+				exists = yes
+				OR = {
+					is_puppet = no
+					JAP = {
+						OVERLORD = {
+							is_in_faction_with = ENG
+						}
+					}
+				}
+				
+			}
+			has_government = democratic
+		} 
+		cancel = {
+			JAP = { exists = no }
+		}
+		icon = GFX_focus_chi_collaboration_with_the_japanese
+		x = -1
+		y = 1
+		relative_position_id = ENG_embargo_china
+		cost = 5
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+		completion_reward = {
+			JAP = {
+				add_offsite_building = { type = arms_factory level = 2 }
+				add_opinion_modifier = { target = ENG modifier = democratic_leanings_good }
+				add_timed_idea = { idea = democratic_influence days = 1395 }
+				country_event = { id = generic.1 }
+				set_country_flag = ENG_influenced_by_britain_flag
+			}
+			every_other_country = {
+				limit = { 
+					NOT = { has_government = democratic }
+					num_of_factories > 30
+				}
+				add_opinion_modifier = { target = JAP modifier = democratic_leanings_bad }
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	focus = {
+		id = ENG_war_with_china
+		available = {
+			has_offensive_war = no
+			event_target:WTT_current_china_leader = {
+				ENG_focus_available_war = yes
+			}	
+			has_government = democratic
+		}
+		bypass = {
+			has_war_with = event_target:WTT_current_china_leader
+		}
+		will_lead_to_war_with = event_target:WTT_current_china_leader
+		prerequisite = { focus = ENG_embargo_china }
+		icon = GFX_focus_attack_china
+		x = 0
+		y = 2
+		relative_position_id = ENG_embargo_china
+		cost = 10
+		ai_will_do = {
+			factor = 1
+		}	
+		completion_reward = {
+			create_wargoal = {
+				type = puppet_wargoal_focus
+				target = event_target:WTT_current_china_leader
 				expire = 0
 			} 
 		}
