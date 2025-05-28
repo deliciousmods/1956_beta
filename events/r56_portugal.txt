@@ -2864,10 +2864,15 @@ country_event = {
 		}
 		add_ideas = POR_pan_iberian_trade_SPR
 		POR = {
-			diplomatic_relation = {
-				country = ROOT
-				relation = non_aggression_pact
-				active = yes
+			if = {
+				limit = { has_non_aggression_pact_with = ROOT }
+			}
+			else = {
+				diplomatic_relation = {
+					country = ROOT
+					relation = non_aggression_pact
+					active = yes
+				}
 			}
 			custom_effect_tooltip = CHL_skip_one_line_tt
 			country_event = {
@@ -2929,10 +2934,15 @@ country_event = {
 			base = 1
 		}
 		POR = {
-			diplomatic_relation = {
-				country = ROOT
-				relation = non_aggression_pact
-				active = yes
+			if = {
+				limit = { has_non_aggression_pact_with = ROOT }
+			}
+			else = {
+				diplomatic_relation = {
+					country = ROOT
+					relation = non_aggression_pact
+					active = yes
+				}
 			}
 		}
 		FROM = {
@@ -3511,7 +3521,14 @@ country_event = {		#Portugal demands direct integration
 				limit = { is_core_of = BRA }
 				set_resistance = 3
 				add_compliance = 20
-				remove_dynamic_modifier = { modifier = BRA_neglected_state_dynamic_modifier }
+				hidden_effect = {
+					if = {
+						limit = {
+							has_dynamic_modifier = { modifier = BRA_neglected_state_dynamic_modifier }
+						}
+						remove_dynamic_modifier = { modifier = BRA_neglected_state_dynamic_modifier }
+					}
+				}
 			}
 			news_event = { 
 				id = lar_news.26 
@@ -3539,11 +3556,22 @@ country_event = {		#Addressing the Galician Issue
 							has_government = fascism
 							has_government = neutrality
 						}
+						OR = {
+							has_completed_focus = SPR_restore_the_monarchy	#r56 tree
+							has_completed_focus = SPA_the_phalanx_ascendant
+							has_completed_focus = SPA_supremacy_of_the_communion
+							has_completed_focus = SPA_unify_the_nationalist_front
+						}
 					}
 				}
 			}
 			171 = {
-				owner = { country_event = portugal.52 }
+				owner = { 
+					country_event = {
+						id = portugal.52
+						hours = 5
+					}
+				}
 			}
 			custom_effect_tooltip = if_they_accept_tt
 			effect_tooltip = { add_ideas = POR_pan_iberian_trade_r56 }
@@ -3574,10 +3602,20 @@ country_event = {		#Addressing the Galician Issue
 			}
 		}
 		171 = {
-			owner = { country_event = portugal.63 }
+			owner = { 
+				country_event = {
+					id = portugal.78
+					hours = 5
+				}
+			}
 		}
-		add_state_claim = 171
-		unlock_decision_tooltip = POR_integrate_galicia
+		custom_effect_tooltip = if_they_accept_tt
+		effect_tooltip = {
+			transfer_state = 171 
+			unlock_decision_tooltip = POR_integrate_galicia
+			custom_effect_tooltip = CHL_skip_one_line_tt
+			add_ideas = POR_pan_iberian_trade_r56 
+		}
 		ai_chance = { base = 99 }
 	}
 	option = {
@@ -3614,7 +3652,14 @@ country_event = {		#Portugal Demands Galicia!
 		name = portugal.63.a	#Yes
 		171 = {
 			transfer_state_to = POR
-			remove_dynamic_modifier = { modifier = autonomous_state }
+			hidden_effect = {
+				if = {
+					limit = {
+						has_dynamic_modifier = { modifier = autonomous_state }
+					}
+					remove_dynamic_modifier = { modifier = autonomous_state }
+				}
+			}
 		} 
 		POR = { 
 			country_event = { id = portugal.65 } 
@@ -4204,10 +4249,15 @@ country_event = {
 				POR = { has_completed_focus = POR_restore_civil_liberties }
 			}
 		}
-		diplomatic_relation = {
-			country = POR
-			relation = non_aggression_pact
-			active = yes
+		if = {
+			limit = { has_non_aggression_pact_with = POR }
+		}
+		else = {
+			diplomatic_relation = {
+				country = POR
+				relation = non_aggression_pact
+				active = yes
+			}
 		}
 		custom_effect_tooltip = CHL_skip_one_line_tt
 		add_ideas = POR_pan_iberian_trade_SPR
@@ -4268,10 +4318,13 @@ country_event = {	#Portugal Wishes to Expand Defensive Cooperation
 				is_faction_leader = yes
 				NOT = { has_completed_focus = POR_portugal_first } 
 			}
-			NOT = { is_subject_of = POR }
+			is_in_faction = no
+			is_subject = no
 		}
 		ai_chance = { base = 50 }
-		effect_tooltip = { add_to_faction = POR }
+		POR = {
+			add_to_faction = ROOT
+		}
 		swap_ideas = {
 			remove_idea = POR_pan_iberian_trade_SPR
 			add_idea = POR_pan_iberian_cooperation_SPR
@@ -4290,6 +4343,12 @@ country_event = {	#Portugal Wishes to Expand Defensive Cooperation
 	}
 	option = { 		#Mutual Guarantees
 		name = portugal.75.b
+		trigger = {
+			OR = {
+				is_subject = no
+				is_subject_of = POR
+			}
+		}
 		ai_chance = { base = 50 }
 		give_guarantee = POR
 		swap_ideas = {
@@ -4327,10 +4386,6 @@ country_event = {	#FROM Agrees to an alliance
 	option = {
 		name = portugal.56.a
 		ai_chance = { base = 1 }
-		every_other_country = {		#Not sure if there is a better way to code this but scoping FROM doesn't seem to work
-			limit = { has_idea = POR_pan_iberian_cooperation_SPR }
-			add_to_faction = ROOT
-		}
 		swap_ideas = {
 			remove_idea = POR_pan_iberian_trade_r56
 			add_idea = POR_pan_iberian_cooperation_r56
@@ -4365,25 +4420,36 @@ country_event = {	#Portugal Offers Cooperation in Exchange For Galicia
 		name = portugal.55.a
 		trigger = { is_subject = no }
 		ai_chance = { base = 20 }
+		171 = {
+			transfer_state_to = POR
+			hidden_effect = {
+				if = {
+					limit = {
+						has_dynamic_modifier = { modifier = autonomous_state }
+					}
+					remove_dynamic_modifier = { modifier = autonomous_state }
+				}
+			}
+		}
+		custom_effect_tooltip = CHL_skip_one_line_tt
 		add_ideas = POR_pan_iberian_trade_SPR
 		custom_effect_tooltip = CHL_skip_one_line_tt
-		POR = {
+		if = {
+			limit = { has_non_aggression_pact_with = POR }
+		}
+		else = {
 			diplomatic_relation = {
-				country = ROOT
+				country = POR
 				relation = non_aggression_pact
 				active = yes
 			}
+		}
+		POR = {
 			country_event = {
 				id = portugal.79
 				hours = 5
 			}
 		}
-		custom_effect_tooltip = CHL_skip_one_line_tt
-		171 = {
-			transfer_state_to = POR
-			remove_dynamic_modifier = { modifier = autonomous_state }
-		}
-		custom_effect_tooltip = CHL_skip_one_line_tt
 	}
 	option = {
 		name = turkey.120.b	#No, this is a waste of our time.
@@ -4425,9 +4491,15 @@ country_event = {	#Portugal Suggests an Alliance
 	is_triggered_only = yes
 	option = {
 		name = portugal.47.a	#Our Cause is One!
-		trigger = { is_subject = no }
+		trigger = { 
+			is_subject = no
+			is_in_faction = no 
+		}
 		ai_chance = { base = 20 }
-		add_ideas = POR_pan_iberian_trade_r56
+		swap_ideas = {
+			remove_idea = POR_pan_iberian_trade_SPR
+			add_idea = POR_pan_iberian_cooperation_SPR
+		}
 		POR = {
 			country_event = {
 				id = portugal.76
@@ -4442,6 +4514,12 @@ country_event = {	#Portugal Suggests an Alliance
 	}
 	option = {
 		name = portugal.80.b	#An alliance is not in our interest, but we are open to cooperation.
+		trigger = { 
+			OR = {
+				is_subject = no
+				is_subject_of = POR
+			}
+		}
 		ai_chance = { base = 1 }
 		give_guarantee = POR
 		swap_ideas = {
