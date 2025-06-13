@@ -11,6 +11,7 @@ add_namespace = GOE_RAJ_navy
 add_namespace = GOE_RAJ_goa
 add_namespace = GOE_RAJ_generals
 add_namespace = GOE_RAJ_mughals_peace_deal
+add_namespace = GOE_RAJ_loyalist
 
 ##DESC
 #country_event = {
@@ -331,6 +332,7 @@ country_event = {
 		name = GOE_RAJ.10.a
 		ai_chance = {
 			base = 2.5
+
 		}
 		FROM = {
 			every_other_country = {
@@ -414,6 +416,11 @@ country_event = {
 			modifier = {
 				NOT = { has_full_control_of_state = 555 }
 				add = 1
+			}
+
+			modifier = {
+				has_war_with = RAJ
+				factor = 0
 			}
 		}
 	}
@@ -558,7 +565,7 @@ country_event = {
 		if = {
 			limit = {
 				FROM = {
-					has_full_control_of_state = 659
+					has_full_control_of_state = 659 #r56 was 992
 				}
 			}
 			FROM = {
@@ -566,11 +573,11 @@ country_event = {
 					value = 80
 				}
 			}
-			transfer_state = 659
-			659 = { # Now all of Aden encompasses the Federation of South Arabia
+			transfer_state = 659 #r56 was 992
+			659 = { # Now all of Aden encompasses the Federation of South Arabia  #r56 was 992
 				add_core_of = FSA
 			}
-			1103 = {
+			1103 = { #r56 was 1016
 				add_core_of = FSA
 				add_claim_by = YEM
 			}
@@ -824,6 +831,9 @@ country_event = {
 	#exit war
 	option = {
 		name = GOE_RAJ.24.a
+		RAJ = {
+			set_country_flag = stop_unrest_events
+		}
 		if = {
 			limit = {
 				659 = {
@@ -876,6 +886,19 @@ country_event = {
 				}
 			}
 			656 = { set_state_flag = azad_hind_move_to_raj }
+		}
+
+		for_each_scope_loop = {
+			array = RAJ.owned_states_at_game_start
+			if = {
+				limit = {
+					owner = {
+						is_subject_of = ENG
+						has_war_with = RAJ
+					}
+				}
+				set_state_flag = azad_hind_move_to_raj
+			}
 		}
 
 		white_peace = {
@@ -934,6 +957,40 @@ country_event = {
 				}
 			}
 			RAJ = { transfer_state =  656 }
+		}
+		RAJ = {
+			if = {
+				limit = {
+					has_variable = revolter_tag
+					var:revolter_tag = {
+						exists = yes
+						is_subject_of = ENG
+					}
+				}
+				var:revolter_tag = {
+
+					PREV = {
+						annex_country = {	
+							target = PREV
+							transfer_troops = yes
+						}
+					}
+				}
+
+			}
+
+			for_each_scope_loop = {
+				array = RAJ.owned_states_at_game_start
+				if = {
+					limit = {
+						has_state_flag = azad_hind_move_to_raj
+						owner = {
+							NOT = { tag = ROOT }
+						}
+					}
+					ROOT = { transfer_state = PREV }
+				}
+			}
 		}
 
 		if = {
@@ -1072,19 +1129,41 @@ country_event = {
 		ai_chance = {
 			base = 3
 		}
-		retire_country_leader = yes
-		add_country_leader_role = {
-			character =  RAJ_lord_linlithgow # optional if inside character scope
-			promote_leader = yes
-			country_leader={
-				ideology=centrism
-				expire="1965.1.1.1"
-				id=-1
-				traits = {
-					aloof_authority
+		remove_country_leader_role = { #r56
+			character = RAJ_freeman_freeman_thomas
+			ideology = centrism
+		}
+		if = {
+			limit = {
+				has_completed_focus = RAJ_his_majestys_loyal_government
+			}
+			add_country_leader_role = {
+				character =  RAJ_lord_linlithgow # optional if inside character scope
+				promote_leader = yes
+				country_leader={
+					ideology=centrism
+					expire="1965.1.1.1"
+					id=-1
+					traits = {
+						aloof_authority_alt
+					}
 				}
 			}
-		}	
+		}
+		else = {
+			add_country_leader_role = {
+				character =  RAJ_lord_linlithgow # optional if inside character scope
+				promote_leader = yes
+				country_leader={
+					ideology=centrism
+					expire="1965.1.1.1"
+					id=-1
+					traits = {
+						aloof_authority
+					}
+				}
+			}
+		}
 	}
 
 	#Keep Freeman-Freeman
@@ -1096,8 +1175,20 @@ country_event = {
 				is_historical_focus_on = no
 				add = 1
 			}
-
 		}
+
+		if = {
+			limit = {
+				has_completed_focus = RAJ_his_majestys_loyal_government
+			}
+			RAJ_freeman_freeman_thomas = {
+				swap_country_leader_traits = {
+					remove = staunch_imperialist
+					add = staunch_imperialist_alt
+					ideology = centrism
+				}
+			}
+		}		
 	}
 }
 
@@ -1113,14 +1204,36 @@ country_event = {
 		ai_chance = {
 			base = 1
 		}
+		was_raj_a_subject = yes
 		add_ideas = idea_RAJ_the_long_goodbye
-		effect_tooltip = {
-			if = {
-				limit = {
-					NOT = {
-						has_autonomy_state = autonomy_dominion
-					}
+		if = {
+			limit = {
+				is_subject = yes
+				OVERLORD = { has_government = fascism }
+				NOT = {
+					has_autonomy_state = autonomy_satellite
 				}
+			}
+			OVERLORD = {
+				set_autonomy = {
+					target=RAJ
+					autonomy_state = autonomy_satellite
+					freedom_level = 0 # 0-1 
+					end_wars  = no # default yes. will not cancel non civil wars if set to no
+					end_civil_wars = no # default yes. will not cancel civil wars if set to no
+				}
+			}
+			raj_was_a_subject_reset_party_ideology_after_independence = yes
+		}
+		if = {
+			limit = {
+				is_subject = yes
+				OVERLORD = { has_government = communism }
+				NOT = {
+					has_autonomy_state = autonomy_dominion
+				}
+			}
+			OVERLORD = {
 				set_autonomy = {
 					target=RAJ
 					autonomy_state = autonomy_dominion
@@ -1129,6 +1242,7 @@ country_event = {
 					end_civil_wars = no # default yes. will not cancel civil wars if set to no
 				}
 			}
+			raj_was_a_subject_reset_party_ideology_after_independence = yes
 		}
 	}
 
@@ -1254,7 +1368,7 @@ country_event = {
         	limit = {
         		has_completed_focus = RAJ_look_to_the_past
         	}
-        	1103 = {
+        	1103 = { #r56 was 988
         		add_extra_state_shared_building_slots = 1
 	        	add_building_construction = {
 	        		type = industrial_complex
@@ -1287,11 +1401,11 @@ country_event = {
             }
             
             ENG = {
-                transfer_state = 659
+                transfer_state = 659 #r56 was 922
                 659 = { # Now all of Aden encompasses the Federation of South Arabia
                     add_core_of = FSA
                 }
-                1103 = {
+                1103 = { #r56 was 1016
                     add_core_of = FSA
                     add_claim_by = YEM
                 }
@@ -1344,7 +1458,7 @@ country_event = {
 	picture = GFX_report_event_generic_sign_treaty2
 	is_triggered_only = yes
 	option = {
-		name = GOE_RAJ.32.a
+		name = GOE_RAJ.34.a
 		ai_chance = {
 			base = 1
 		}
@@ -1406,8 +1520,519 @@ country_event = {
 			 can_join_factions = yes 
 		}
 	}
-
 }
+
+country_event = {  #Warn about garrison not being set, hidden event
+	id = GOE_RAJ.36
+	is_triggered_only = yes
+	hidden = yes
+	immediate = {
+		if = {
+			limit = {
+				has_country_flag = RAJ_only_send_one_event
+			}
+			clr_country_flag = RAJ_only_send_one_event
+		}
+		
+		every_owned_state = {
+			limit = { has_resistance = yes }
+			if = {
+				limit = { 
+					RAJ = { NOT = { has_country_flag = RAJ_only_send_one_event } } 
+				}
+
+				if = {
+					limit = { occupation_law = no_garrison }
+					RAJ = { set_country_flag = RAJ_only_send_one_event }
+					if = {
+						limit = {
+							RAJ = { NOT = { has_country_flag = RAJ_has_been_warned_about_garrison } }
+						}
+						RAJ = { 
+							set_country_flag = RAJ_has_been_warned_about_garrison 
+							country_event = {
+								id = GOE_RAJ.37
+								hours = 2
+							}
+						} 
+					}
+					else = {
+						RAJ = { 
+							country_event = {
+								id = GOE_RAJ.38
+								hours = 2
+							}
+						} 
+					}
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				NOT = { has_completed_focus = RAJ_give_me_blood_and_i_will_grant_you_freedom } #Invoke itself
+			}
+
+			country_event = {
+				id = GOE_RAJ.36
+				days = 22
+				random_days = 15 
+			}
+		}
+
+		if = {
+			limit = {
+				has_country_flag = RAJ_only_send_one_event
+			}
+			clr_country_flag = RAJ_only_send_one_event
+		}
+	}
+}
+
+country_event = { #Warn once about garrison not being set 
+	id = GOE_RAJ.37
+	is_triggered_only = yes
+	title =  GOE_RAJ.37.t
+	desc =  GOE_RAJ.37.desc
+	option = {
+		name = GOE_RAJ.37.a
+        every_owned_state = {
+            limit = { 
+            	has_resistance = yes
+            	occupation_law = no_garrison 
+            	
+            }
+        	set_occupation_law = local_police_force_garrison
+
+        }
+	}
+}
+
+country_event = { #No more warning 
+	id = GOE_RAJ.38
+	is_triggered_only = yes
+	title =  GOE_RAJ.38.t
+	desc =  GOE_RAJ.38.desc
+	option = {
+		name = GOE_RAJ.38.a
+
+        every_owned_state = {
+        	limit = {
+        		has_resistance = yes
+        		occupation_law = no_garrison 
+        	}
+            set_occupation_law = local_police_force_garrison
+            set_resistance = 0
+
+        }
+        add_stability = -0.1
+	}
+}
+
+#communist seek help from the unions
+country_event = { 
+	id = GOE_RAJ.39
+	is_triggered_only = yes
+	title = GOE_RAJ.39.t
+	desc = GOE_RAJ.39.desc
+	picture = GFX_report_event_molotov_ribentrop_handshake
+	option = {
+		name = GOE_RAJ.39.a
+		set_country_flag = RAJ_communist_unions_promised_worker_safety 
+		add_to_variable = { RAJ_royal_indian_navy_mutiny_threshold = -0.1 tooltip = RAJ_royal_indian_navy_mutiny_threshold_tt }
+		custom_effect_tooltip = GOE_RAJ.39.a_tt
+		show_ideas_tooltip = idea_RAJ_increased_worker_safety
+
+	}
+
+
+	option = {
+		name = GOE_RAJ.39.b
+		set_country_flag = RAJ_communist_unions_promised_minimum_wage
+		add_to_variable = { RAJ_royal_indian_navy_mutiny_threshold = -0.1 tooltip = RAJ_royal_indian_navy_mutiny_threshold_tt }
+		custom_effect_tooltip = GOE_RAJ.39.b_tt
+		show_ideas_tooltip = idea_RAJ_guaranteed_minimum_wage
+
+	}
+
+	#Leave
+	option = {
+		name = GOE_RAJ.39.c
+		clr_country_flag = RAJ_communist_union_event_active
+		custom_effect_tooltip = GOE_RAJ.39.c_tt
+	}
+}
+
+
+
+#India starts border clahs with Pakistan punjab
+country_event = { 
+	id = GOE_RAJ.40
+	is_triggered_only = yes
+	title = GOE_RAJ.40.t
+	desc = GOE_RAJ.40.desc
+	picture = GFX_report_event_german_troops_paris
+	
+	option = {
+		name = GOE_RAJ.40.a
+
+	}
+}
+
+
+
+#India wins  Pakistan
+country_event = { 
+	id = GOE_RAJ.41
+	is_triggered_only = yes
+	title = GOE_RAJ.41.t
+	desc = GOE_RAJ.41.desc
+	picture = GFX_report_event_gre_city_siege
+	
+	option = {
+		name = GOE_RAJ.41.a
+		trigger = {
+			tag = RAJ
+		}
+
+		transfer_state = 1101 #r56 was 986
+		if = {
+			limit = {
+				has_truce_with = PAK
+			}
+			set_truce = {
+				target = PAK
+				days = 0
+			}
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.41.b
+		trigger = {
+			tag = PAK
+		}
+		effect_tooltip = {
+			986 = { set_state_owner_to = RAJ }
+		}
+	}
+}
+
+#
+#India starts border clash with Pakistan West Bengal
+country_event = { 
+	id = GOE_RAJ.42
+	is_triggered_only = yes
+	title = GOE_RAJ.42.t
+	desc = GOE_RAJ.42.desc
+	picture = GFX_report_event_bul_ff_troops_yugoslavia
+	
+	option = {
+		name = GOE_RAJ.42.a
+
+	}
+}
+
+
+
+#India wins  Pakistan West Bengal
+country_event = { 
+	id = GOE_RAJ.43
+	is_triggered_only = yes
+	title = GOE_RAJ.43.t
+	desc = GOE_RAJ.43.desc
+	picture = GFX_report_event_france_tank_production
+	
+	option = {
+		name = GOE_RAJ.43.a
+		trigger = {
+			tag = RAJ
+		}
+
+		transfer_state = 431
+		if = {
+			limit = {
+				has_truce_with = PAK
+			}
+			set_truce = {
+				target = PAK
+				days = 0
+			}
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.43.b
+		trigger = {
+			tag = PAK
+		}
+		effect_tooltip = {
+			431 = { set_state_owner_to = RAJ }
+		}
+	}
+}
+
+#India starts border clash with Pakistan Rajahstan
+country_event = { 
+	id = GOE_RAJ.44
+	is_triggered_only = yes
+	title = GOE_RAJ.44.t
+	desc = GOE_RAJ.42.desc
+	picture = GFX_report_event_bul_ff_troops_panzer
+	
+	option = {
+		name = GOE_RAJ.44.a
+
+	}
+}
+
+
+
+#India wins  Pakistan West Bengal
+country_event = { 
+	id = GOE_RAJ.45
+	is_triggered_only = yes
+	title = GOE_RAJ.45.t
+	desc = GOE_RAJ.45.desc
+	picture = GFX_report_event_france_tank_production
+	
+	option = {
+		name = GOE_RAJ.45.a
+		trigger = {
+			tag = RAJ
+		}
+
+		transfer_state = 433
+		if = {
+			limit = {
+				has_truce_with = PAK
+			}
+			set_truce = {
+				target = PAK
+				days = 0
+			}
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.45.b
+		trigger = {
+			tag = PAK
+		}
+		effect_tooltip = {
+			433 = { set_state_owner_to = RAJ }
+		}
+	}
+}
+# Communist civil war influenced by RAJ
+country_event = {
+	id = GOE_RAJ.46
+	title = GOE_RAJ.46.t
+	desc = GOE_RAJ.46.desc
+	picture = GFX_report_event_generic_bombers
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_variable = {
+			var = raj_total_com_size
+			value = party_popularity@communism
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.46.a
+		trigger = {
+			num_of_controlled_states > 1
+		}
+		ai_chance = { 
+			factor = 100
+		}
+		set_country_flag = had_raj_civil_war_flag
+		start_civil_war = {
+			ideology = communism
+			size = raj_total_com_size
+		}
+		every_other_country = {
+			limit = {
+				original_tag = ROOT
+				has_government = communism
+			}
+			FROM = {
+				set_autonomy = {
+					target=PREV
+					autonomy_state = autonomy_puppet
+					freedom_level = 0.1
+					end_wars = no
+					end_civil_wars = no
+				}
+			}
+		}
+
+		ai_chance = {
+			base = 5
+		}
+	}
+
+
+	option = {
+		name = GOE_RAJ.46.b
+		ai_chance = { 
+			factor = 0
+		}
+		set_politics = {
+			ruling_party = communism
+			elections_allowed = no
+		}
+		FROM = { puppet = PREV }
+		ai_chance = {
+			base = 3
+			modifier = {
+				communism > 0.5
+				factor = 3
+			}
+			modifier = {
+				communism > 0.75
+				factor = 5
+			}
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.46.c
+		trigger = {
+			is_ironman = no
+			difficulty < 3 
+		}
+		add_popularity = {
+			ideology = communism
+			popularity = 0.1
+		}
+
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+##
+# Notification that India is influencing us with spirit
+country_event = {
+	id = GOE_RAJ.47
+	title = GOE_RAJ.47.t
+	desc = GOE_RAJ.47.desc
+	picture = GFX_report_event_china_infiltration
+	
+	is_triggered_only = yes
+	immediate = {
+		hidden_effect = {
+			add_timed_idea = {
+				idea = idea_RAJ_communist_propaganda
+				days = 70
+			}
+		}
+	}
+	option = {
+		name = worrying
+		effect_tooltip = {
+			add_timed_idea = {
+				idea = idea_RAJ_communist_propaganda
+				days = 70
+			}
+		}
+	}
+}
+
+# Notification that India is influencing us
+country_event = {
+	id = GOE_RAJ.48
+	title = GOE_RAJ.48.t
+	desc = GOE_RAJ.48.desc
+	picture = GFX_report_event_generic_bombers
+	
+	is_triggered_only = yes
+	option = {
+		name = GOE_RAJ.48.a
+		add_popularity = {
+			ideology = communism
+			popularity = 0.06
+		}
+	}
+}
+
+
+
+
+
+#India loses Pakistan West Bengal
+country_event = { 
+	id = GOE_RAJ.49
+	is_triggered_only = yes
+	title = GOE_RAJ.49.t
+	desc = GOE_RAJ.49.desc
+	picture = GFX_report_event_france_tank_production
+	
+	option = {
+		name = GOE_RAJ.49.a
+		trigger = {
+			tag = RAJ
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.49.b
+		trigger = {
+			tag = PAK
+		}
+	}
+}
+
+#India loses Pakistan West Bengal
+country_event = { 
+	id = GOE_RAJ.50
+	is_triggered_only = yes
+	title = GOE_RAJ.50.t
+	desc = GOE_RAJ.50.desc
+	picture = GFX_report_event_france_tank_production
+	
+	option = {
+		name = GOE_RAJ.50.a
+		trigger = {
+			tag = RAJ
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.50.b
+		trigger = {
+			tag = PAK
+		}
+	}
+}
+
+#India loses  Pakistan
+country_event = { 
+	id = GOE_RAJ.51
+	is_triggered_only = yes
+	title = GOE_RAJ.51.t
+	desc = GOE_RAJ.51.desc
+	picture = GFX_report_event_gre_city_siege
+	
+	option = {
+		name = GOE_RAJ.51.a
+		trigger = {
+			tag = RAJ
+		}
+	}
+
+	option = {
+		name = GOE_RAJ.51.b
+		trigger = {
+			tag = PAK
+		}
+	}
+}
+
 ##########
 #Partition
 ##########
@@ -1979,6 +2604,46 @@ country_event = {
 				
 			}
 
+			MPU = { #Manipir
+				set_variable = { liberty_desire = 0 }
+
+				#Industry
+				set_variable = { industry = 0 }
+				set_variable = { industry = 1105.arms_factory_level } #r56 was 990
+				multiply_variable = { industry = 3 }
+
+				set_variable = { civs = 0 }
+				add_to_variable = { civs = 1105.industrial_complex_level } #r56 was 990
+				
+				multiply_variable = { civs = 1.75 }
+				add_to_variable = { industry = civs }
+
+				#Pop
+				set_variable = { total_pop = 1105.state_population_k } #r56 was 990
+				multiply_variable = { total_pop = 0.01 }
+
+
+				multiply_variable = { painful_memory = 3 }
+				add_to_variable = { liberty_desire = painful_memory }
+				add_to_variable = { liberty_desire = total_pop }
+				add_to_variable = { liberty_desire = industry }
+
+				if = {
+					limit = {
+						is_historical_focus_on = yes
+					}
+					set_variable = { base_value = 0 }
+				}
+				else = {
+					set_variable = { base_value = 5 }
+				}
+
+				add_to_variable = { liberty_desire = base_value }
+				set_variable = { historical_precedence = 0.75 }
+				multiply_variable = { liberty_desire = historical_precedence  }
+				
+			}
+
 			MYS = { #Mysore
 				set_variable = { liberty_desire = 0 }
 
@@ -2021,19 +2686,23 @@ country_event = {
 			NWF = { #North Western Frontier States
 				set_variable = { liberty_desire = 0 }
 
+
 				#Industry
 				set_variable = { industry = 0 }
 				set_variable = { industry = 442.arms_factory_level }
+				add_to_variable = { industry = 1102.arms_factory_level } #r56 was 987
 				multiply_variable = { industry = 3 }
 
 				set_variable = { civs = 0 }
 				add_to_variable = { civs = 442.industrial_complex_level }
+				add_to_variable = { civs = 1102.industrial_complex_level } #r56 was 987
 				
 				multiply_variable = { civs = 1.75 }
 				add_to_variable = { industry = civs }
 
 				#Pop
 				set_variable = { total_pop = 442.state_population_k }
+				add_to_variable = { total_pop = 1102.state_population_k } #r56 was 987
 				multiply_variable = { total_pop = 0.01 }
 
 
@@ -2065,16 +2734,19 @@ country_event = {
 				#Industry
 				set_variable = { industry = 0 }
 				set_variable = { industry = 433.arms_factory_level }
+				add_to_variable = { industry = 1104.arms_factory_level } #r56 was 989
 				multiply_variable = { industry = 3 }
 
 				set_variable = { civs = 0 }
 				add_to_variable = { civs = 433.industrial_complex_level }
+				add_to_variable = { civs = 1104.industrial_complex_level } #r56 was 989
 				
 				multiply_variable = { civs = 1.75 }
 				add_to_variable = { industry = civs }
 
 				#Pop
 				set_variable = { total_pop = 433.state_population_k }
+				add_to_variable = { total_pop = 1104.state_population_k } #r56 was 989
 				multiply_variable = { total_pop = 0.01 }
 
 				multiply_variable = { painful_memory = 3 }
@@ -2224,17 +2896,17 @@ country_event = {
 
 				#Industry
 				set_variable = { industry = 0 }
-				set_variable = { industry = 1098.arms_factory_level }
+				set_variable = { industry = 1098.arms_factory_level } #r56 was 982
 				multiply_variable = { industry = 3 }
 
 				set_variable = { civs = 0 }
-				add_to_variable = { civs = 1098.industrial_complex_level }
+				add_to_variable = { civs = 1098.industrial_complex_level } #r56 was 982
 				
 				multiply_variable = { civs = 1.75 }
 				add_to_variable = { industry = civs }
 
 				#Pop
-				set_variable = { total_pop = 1098.state_population_k }
+				set_variable = { total_pop = 1098.state_population_k } #r56 was 982
 				multiply_variable = { total_pop = 0.01 }
 
 
@@ -2555,6 +3227,41 @@ country_event = {
 									set_state_flag = prefers_pak
 									set_variable = { preference = 1.5 }
 								}
+							}
+						}
+					} 
+				}
+
+				#MPU
+				set_variable = { no_independence = 100 }
+				subtract_from_variable = { no_independence = MPU.liberty_desire }
+				random_list = {
+					seed = random 
+					var:no_independence = {   } 
+					var:MPU.liberty_desire = { 
+						release = MPU 
+						PAK = { 
+							add_to_variable = { pressure_left = 0.5 } 
+							set_variable = { default_pressure = pressure_left }
+						}
+
+						RAJ = {  
+							add_to_variable = { pressure_left = 0.8 } 
+							set_variable = { default_pressure = pressure_left }
+						}
+						if = {
+							limit = {
+								BAN = { exists = yes }
+							}
+							add_to_variable = { pressure_left = 0.25 }
+							set_variable = { default_pressure = pressure_left }
+
+						}
+						MPU = {
+							every_core_state = {
+								limit = { is_controlled_by = PREV }
+
+								add_to_array = { array = RAJ.states_in_play_partition }
 							}
 						}
 					} 
@@ -2904,29 +3611,29 @@ country_event = {
 			BAN = { overlord = { set_autonomy = { target = BAN autonomy_state = autonomy_free } } } 
 			log = "Error: Somehow BAN is a subject after partition. Please Check"
 		}
-
-		PAK = {
-			set_rule = {  can_declare_war_on_same_ideology = yes }
-			set_rule = {  can_only_justify_war_on_threat_country = no }
-			set_rule = { can_join_factions = no }
-			if = {
-				limit = { is_in_faction = yes }
-				leave_faction = yes
+		hidden_effect = {
+			PAK = {
+				set_rule = {  can_declare_war_on_same_ideology = yes }
+				set_rule = {  can_only_justify_war_on_threat_country = no }
+				set_rule = { can_join_factions = no }
+				if = {
+					limit = { is_in_faction = yes }
+					leave_faction = yes
+				}
+				add_ideas = neutrality_idea
 			}
-			add_ideas = neutrality_idea
-		}
 
-		BAN = {
-			set_rule = {  can_declare_war_on_same_ideology = yes }
-			set_rule = {  can_only_justify_war_on_threat_country = no }
-			set_rule = { can_join_factions = no }
-			if = {
-				limit = { is_in_faction = yes }
-				leave_faction = yes
+			BAN = {
+				set_rule = {  can_declare_war_on_same_ideology = yes }
+				set_rule = {  can_only_justify_war_on_threat_country = no }
+				set_rule = { can_join_factions = no }
+				if = {
+					limit = { is_in_faction = yes }
+					leave_faction = yes
+				}
+				add_ideas = neutrality_idea
 			}
-			add_ideas = neutrality_idea
 		}
-
 		for_each_scope_loop = {
 			array = RAJ.raj_releasables
 		
@@ -3473,6 +4180,983 @@ country_event = {
 }
 
 
+###########################
+##### LOYALIST BRANCH #####
+###########################
+
+#Leadership event - Loyalist Branch
+country_event = {
+	id = GOE_RAJ_partition.11
+	title = GOE_RAJ_partition.7.t #Intended
+	desc = GOE_RAJ_partition.11.desc
+	picture = GFX_report_event_generic_sign_treaty2
+	is_triggered_only = yes
+	option = { #Nehru
+		name = GOE_RAJ_partition.7.a #Intended
+
+		ai_chance = {
+			base = 10
+		}
+
+		if = {
+			limit = {
+				NOT = {
+					has_country_leader = {
+						ruling_only = yes
+						character = RAJ_GOE_jawaharlal_nehru 
+					}
+				}
+			}
+			add_country_leader_role = {
+				character =  RAJ_GOE_jawaharlal_nehru 
+				promote_leader = yes
+				country_leader={
+					ideology=liberalism
+					expire="1965.1.1.1"
+					traits = { socialist_modernizer top_down_heavy_policies }
+				}
+			}
+			set_politics = {
+				ruling_party = democratic
+				election_frequency = 48
+				elections_allowed = yes
+			}
+		}
+		else = {
+			add_country_leader_trait = socialist_modernizer
+			add_country_leader_trait = top_down_heavy_policies
+		}
+	}
+
+	#Gandhi
+	option = {
+		name =  GOE_RAJ_partition.7.b #Intended
+
+		ai_chance = {
+			base = 0
+			modifier = {
+				is_historical_focus_on = no
+				add = 10
+			}
+		}
+
+		if = {
+			limit = {
+				NOT = { has_government = democratic }
+			}
+			set_politics = {
+				ruling_party = democratic
+				election_frequency = 48
+				elections_allowed = yes
+			}
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+
+		#Tooltip will be just bad, so simplifying
+		effect_tooltip = {
+			add_country_leader_role = {
+				character =  RAJ_mahatma_mohandas_gandhi
+				promote_leader = yes
+				country_leader={
+					ideology=liberalism
+					expire="1965.1.1.1"
+					traits = { spiritual_leader skeptical_towards_industrialization }
+				}
+			}
+		}
+		hidden_effect = {
+			if = { #If no Country Leader role for whatever reason, add it.
+				limit = {
+					RAJ_mahatma_mohandas_gandhi = {
+						NOT = { has_ideology = liberalism }
+					}
+				}
+				add_country_leader_role = {
+					character =  RAJ_mahatma_mohandas_gandhi
+					promote_leader = yes
+					country_leader={
+						ideology=liberalism
+						expire="1965.1.1.1"
+						traits = { spiritual_leader skeptical_towards_industrialization }
+					}
+				}
+			}
+			else = {
+				# Promote Gandhi if necessary
+				if = {
+					limit = {
+						NOT = {
+							has_country_leader = {
+								ruling_only = no
+								character = RAJ_mahatma_mohandas_gandhi
+							}
+						}
+					}
+					promote_character = RAJ_mahatma_mohandas_gandhi 
+				}
+
+				# Add Traits
+				if = {
+					limit = {
+						NOT = { has_country_leader_with_trait = spiritual_leader }
+					}
+					add_country_leader_trait = spiritual_leader
+				}
+				if = {
+					limit = {
+						NOT = { has_country_leader_with_trait = skeptical_towards_industrialization }
+					}
+					add_country_leader_trait = skeptical_towards_industrialization
+				}
+			}
+		}
+	}
+}
+
+
+#Crown Commodities - RAJ grants CG bonus to UK and puppets - Event for UK and its puppets
+country_event = {
+	id = GOE_RAJ_loyalist.01
+	title = GOE_RAJ_loyalist.01.t
+	desc = GOE_RAJ_loyalist.01.desc
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+	
+	option = { #Ok cool tack
+		name = GOE_RAJ_loyalist.01.a
+
+		add_timed_idea = {
+			idea = RAJ_exports_for_the_empire
+			days = 1095
+		}
+	}
+}
+
+#The Empire's Workshop - RAJ grants civs to UK and puppets - Event for UK and its puppets
+country_event = {
+	id = GOE_RAJ_loyalist.02
+	title = GOE_RAJ_loyalist.02.t
+	desc = GOE_RAJ_loyalist.02.desc
+	picture = GFX_report_event_generic_construction_site
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			random_core_state = {
+				limit = {
+					is_fully_controlled_by = PREV
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				set_variable = { ROOT.RAJ_crown_commodities_civ_built_flag = THIS }
+			}
+		}
+	}
+	
+	option = { #Ok cool tack
+		name = GOE_RAJ_loyalist.02.a
+
+		if = {
+			limit = {
+				tag = ENG
+			}
+			var:RAJ_crown_commodities_civ_built_flag = {
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}
+		}
+		else = {
+			var:RAJ_crown_commodities_civ_built_flag = {
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+		}
+		clear_variable = RAJ_crown_commodities_civ_built_flag
+	}
+}
+
+
+#RAJ proposes to invade Iran preemptively - Event for UK (as overlord)
+country_event = {
+	id = GOE_RAJ_loyalist.03
+	title = GOE_RAJ_loyalist.03.t
+	desc = GOE_RAJ_loyalist.03.desc
+	picture = GFX_report_event_PER_iran_invasion
+	is_triggered_only = yes
+
+	option = { #Yes go ahead
+		name = GOE_RAJ_loyalist.03.a
+
+		ai_chance = {
+			base = 10
+			modifier = {
+				factor = 0.5
+				is_historical_focus_on = yes
+			}
+		}
+
+		effect_tooltip = {
+			FROM = {
+				declare_war_on = {
+					target = PER
+					type = annex_everything
+				}
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.04 hours = 8 random_hours = 2 } }
+		}
+	}
+
+	option = { #No way
+		name = GOE_RAJ_loyalist.03.b
+
+		ai_chance = {
+			base = 10
+			modifier = { #Say yes to player always
+				factor = 0
+				FROM = { is_ai = no }
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.05 hours = 8 random_hours = 2 } }
+		}
+	}
+}
+
+#RAJ proposes to invade Iran preemptively - UK accepts - Event for RAJ
+country_event = {
+	id = GOE_RAJ_loyalist.04
+	title = GOE_RAJ_loyalist.04.t
+	desc = GOE_RAJ_loyalist.04.desc
+	picture = GFX_report_event_PER_iran_invasion
+	is_triggered_only = yes
+
+	option = { #Yes go ahead
+		name = GOE_RAJ_loyalist.04.a
+
+		declare_war_on = {
+			target = PER
+			type = annex_everything
+		}
+	}
+}
+
+#RAJ proposes to invade Iran preemptively - UK refuses - Event for RAJ
+country_event = {
+	id = GOE_RAJ_loyalist.05
+	title = GOE_RAJ_loyalist.05.t
+	desc = GOE_RAJ_loyalist.05.desc
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	option = { #Yes go ahead
+		name = GOE_RAJ_loyalist.05.a
+
+		
+	}
+}
+
+#South East Asia Command - Pick Specialization - Event for RAJ
+country_event = {
+	id = GOE_RAJ_loyalist.06
+	title = GOE_RAJ_loyalist.06.t
+	desc = GOE_RAJ_loyalist.06.desc
+	picture = GFX_report_event_indian_soldiers
+	is_triggered_only = yes
+
+	option = { #Defensive
+		name = GOE_RAJ_loyalist.06.a
+
+		ai_chance = {
+			base = 10
+			modifier = {
+				add = 10
+				is_historical_focus_on = yes
+			}
+		}
+
+		custom_effect_tooltip = RAJ_modify_south_east_asia_command_dm_tt
+		add_to_variable = { RAJ_south_east_asia_command_dm_max_dig_in_factor = 0.1 tooltip = max_dig_in_factor_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_recon_factor_while_entrenched = 0.2 tooltip = recon_factor_while_entrenched_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_army_core_defence_factor = 0.1 tooltip = army_core_defence_factor_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_army_core_attack_factor = 0.1 tooltip = army_core_attack_factor_tt }
+		
+		custom_effect_tooltip = generic_skip_one_line_tt
+		army_experience = 50
+
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_tech_bonus = {
+			name = RAJ_south_east_asia_command
+			bonus = 0.7
+			uses = 2
+			category = cat_fortification
+			category = mio_cat_artillery
+		}
+	}
+
+	option = { #Offensive
+		name = GOE_RAJ_loyalist.06.b
+
+		ai_chance = {
+			base = 1
+		}
+
+		custom_effect_tooltip = RAJ_modify_south_east_asia_command_dm_tt
+		add_to_variable = { RAJ_south_east_asia_command_dm_army_attack_speed_factor = 0.1 tooltip = army_attack_speed_factor_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_breakthrough_factor = 0.05 tooltip = breakthrough_factor_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_coordination_bonus = 0.02 tooltip = coordination_bonus_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_max_planning_factor = 0.1 tooltip = max_planning_factor_tt }
+		
+		custom_effect_tooltip = generic_skip_one_line_tt
+		army_experience = 50
+
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_tech_bonus = {
+			name = RAJ_south_east_asia_command
+			bonus = 0.7
+			uses = 2
+			category = armor
+			category = support_tech
+		}
+	}
+
+	option = { #Airforce
+		name = GOE_RAJ_loyalist.06.c
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+
+		custom_effect_tooltip = RAJ_modify_south_east_asia_command_dm_tt
+		add_to_variable = { RAJ_south_east_asia_command_dm_air_mission_efficiency = 0.1 tooltip = air_mission_efficiency_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_navy_anti_air_attack_factor = 0.1 tooltip = navy_anti_air_attack_factor_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_air_ace_generation_chance_factor = 0.3 tooltip = air_ace_generation_chance_factor_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_static_anti_air_hit_chance_factor = 0.2 tooltip = static_anti_air_hit_chance_factor_tt }
+
+		custom_effect_tooltip = generic_skip_one_line_tt
+		air_experience = 50
+
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_tech_bonus = {
+			name = RAJ_south_east_asia_command
+			bonus = 0.7
+			uses = 2
+			category = air_equipment
+			category = cat_anti_air
+		}
+	}
+
+	option = { #Naval
+		name = GOE_RAJ_loyalist.06.d
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+
+		custom_effect_tooltip = RAJ_modify_south_east_asia_command_dm_tt
+		add_to_variable = { RAJ_south_east_asia_command_dm_industrial_capacity_dockyard = 0.1 tooltip = industrial_capacity_dockyard_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_navy_org_factor = 0.1 tooltip = navy_org_factor_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_naval_coordination = 0.1 tooltip = naval_coordination_tt }
+		add_to_variable = { RAJ_south_east_asia_command_dm_naval_morale_factor = 0.15 tooltip = naval_morale_factor_tt }
+		
+		custom_effect_tooltip = generic_skip_one_line_tt
+		navy_experience = 50
+
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_tech_bonus = {
+			name = RAJ_south_east_asia_command
+			bonus = 0.7
+			uses = 2
+			category = naval_equipment
+			category = marine_tech
+		}
+	}
+}
+
+#RAJ asks to annex MAL - Event for independent MAL
+country_event = {
+	id = GOE_RAJ_loyalist.07
+	title = GOE_RAJ_loyalist.07.t
+	desc = GOE_RAJ_loyalist.07.desc
+	picture = GFX_report_event_indian_parade
+	is_triggered_only = yes
+
+	option = { #Nope! -> So default option is NOT to hand over MAL (player MAL will never get this event anyways)
+		name = GOE_RAJ_loyalist.07.a
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 0.5
+				FROM = { is_ai = no }
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.09 hours = 8 random_hours = 2 } }
+		}
+	}
+
+	option = { #Alright sure!
+		name = GOE_RAJ_loyalist.07.b
+
+		ai_chance = {
+			base = 100
+			modifier = { #Do not annoy enemy players if RAJ is AI
+				factor = 0
+				any_enemy_country = {
+					is_ai = no
+				}
+				FROM = { is_ai = yes }
+			}
+		}
+
+		effect_tooltip = {
+			FROM = {
+				annex_country = {
+					target = ROOT
+					transfer_troops = yes
+				}
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.10 hours = 8 random_hours = 2 } }
+		}
+	}
+}
+
+#RAJ asks to annex MAL - Event for MAL's overlord (usually ENG)
+country_event = {
+	id = GOE_RAJ_loyalist.08
+	title = GOE_RAJ_loyalist.07.t #Intended
+	desc = GOE_RAJ_loyalist.08.desc
+	picture = GFX_report_event_indian_parade
+	is_triggered_only = yes
+
+	option = { #Nope! -> So default option is NOT to hand over MAL
+		name = GOE_RAJ_loyalist.08.a
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 0.5
+				FROM = { is_ai = no }
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.09 hours = 8 random_hours = 2 } }
+		}
+	}
+
+	option = { #Alright sure!
+		name = GOE_RAJ_loyalist.08.b
+
+		ai_chance = {
+			base = 100
+			modifier = { #Do not annoy enemy players if RAJ is AI
+				factor = 0
+				any_enemy_country = {
+					is_ai = no
+				}
+				FROM = { is_ai = yes }
+			}
+		}
+
+		effect_tooltip = {
+			FROM = {
+				annex_country = {
+					target = MAL
+					transfer_troops = yes
+				}
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.10 hours = 8 random_hours = 2 } }
+		}
+	}
+}
+
+#RAJ asks to annex BRM - Event for independent BRM
+country_event = {
+	id = GOE_RAJ_loyalist.77
+	title = GOE_RAJ_loyalist.77.t
+	desc = GOE_RAJ_loyalist.07.desc #Intended
+	picture = GFX_report_event_indian_parade
+	is_triggered_only = yes
+
+	option = { #Nope! -> So default option is NOT to hand over BRM (player BRM will never get this event anyways)
+		name = GOE_RAJ_loyalist.07.a
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 0.5
+				FROM = { is_ai = no }
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.09 hours = 8 random_hours = 2 } }
+		}
+	}
+
+	option = { #Alright sure!
+		name = GOE_RAJ_loyalist.07.b
+
+		ai_chance = {
+			base = 100
+			modifier = { #Do not annoy enemy players if RAJ is AI
+				factor = 0
+				any_enemy_country = {
+					is_ai = no
+				}
+				FROM = { is_ai = yes }
+			}
+		}
+
+		effect_tooltip = {
+			FROM = {
+				annex_country = {
+					target = ROOT
+					transfer_troops = yes
+				}
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.10 hours = 8 random_hours = 2 } }
+		}
+	}
+}
+
+#RAJ asks to annex BRM - Event for BRM's overlord (usually ENG)
+country_event = {
+	id = GOE_RAJ_loyalist.88
+	title = GOE_RAJ_loyalist.77.t #Intended
+	desc = GOE_RAJ_loyalist.08.desc #Intended
+	picture = GFX_report_event_indian_parade
+	is_triggered_only = yes
+
+	option = { #Nope! -> So default option is NOT to hand over BRM
+		name = GOE_RAJ_loyalist.08.a #Intended
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 0.5
+				FROM = { is_ai = no }
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.09 hours = 8 random_hours = 2 } }
+		}
+	}
+
+	option = { #Alright sure!
+		name = GOE_RAJ_loyalist.08.b #Intended
+
+		ai_chance = {
+			base = 100
+			modifier = { #Do not annoy enemy players if RAJ is AI
+				factor = 0
+				any_enemy_country = {
+					is_ai = no
+				}
+				FROM = { is_ai = yes }
+			}
+		}
+
+		effect_tooltip = {
+			FROM = {
+				annex_country = {
+					target = BRM
+					transfer_troops = yes
+				}
+			}
+		}
+
+		hidden_effect = {
+			FROM = { country_event = { id = GOE_RAJ_loyalist.10 hours = 8 random_hours = 2 } }
+		}
+	}
+}
+
+#Rejected MAL annexation - Event for RAJ (coming from independent MAL or MAL's Overlord)
+country_event = {
+	id = GOE_RAJ_loyalist.09
+	title = GOE_RAJ_loyalist.09.t
+	desc = GOE_RAJ_loyalist.09.desc
+	picture = GFX_report_event_generic_sign_treaty2
+	is_triggered_only = yes
+
+	option = { #Buuuuu lame
+		name = GOE_RAJ_loyalist.09.a
+
+		
+	}
+}
+
+#Accepted MAL annexation - Event for RAJ (coming from independent MAL or MAL's Overlord)
+country_event = {
+	id = GOE_RAJ_loyalist.10
+	title = GOE_RAJ_loyalist.10.t
+	desc = GOE_RAJ_loyalist.10.desc
+	picture = GFX_report_event_indian_parade
+	is_triggered_only = yes
+
+	option = { #Good stuff
+		name = GOE_RAJ_loyalist.10.a
+
+		if = {
+			limit = {
+				event_target:RAJ_annexing_country_target = {
+					tag = BRM
+				}
+			}
+			annex_country = {
+				target = BRM
+				transfer_troops = yes
+			}
+		}
+		else = {
+			annex_country = {
+				target = MAL
+				transfer_troops = yes
+			}
+		}
+	}
+}
+
+#The Jewel Becomes the Crown - Do we want Churchill?- Event for RAJ
+country_event = {
+	id = GOE_RAJ_loyalist.11
+	title = GOE_RAJ_loyalist.11.t
+	desc = GOE_RAJ_loyalist.11.desc
+	picture = GFX_report_event_degaulle_churchill
+	is_triggered_only = yes
+
+	option = { #Churchill as Country Leader
+		name = GOE_RAJ_loyalist.11.a
+
+		trigger = {
+			NOT = { has_completed_focus = RAJ_the_indian_parliament }
+		}
+
+		ai_chance = {
+			base = 100
+		}
+
+		if = {
+			limit = {
+				NOT = { has_government = democratic }
+			}
+			set_politics = {
+				ruling_party = democratic
+				last_election = "1936.1.1"
+				election_frequency = 48
+				elections_allowed = yes
+			}
+		}
+		ENG = {
+			#Store if Churchill was the country leader in the UK before being transferred, so he can come back
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_leader = {
+							character = ENG_winston_churchill
+							ruling_only = yes
+						}
+					}
+					set_country_flag = RAJ_churchill_was_leading_before_transfer_to_raj_flag
+				}
+				if = { #DO not send event if UK is already in a path where Churchill is useless
+					limit = {
+						NOT = {
+							has_completed_focus = ENG_organize_the_blackshirts
+							has_completed_focus = ENG_concessions_to_the_trade_unions
+						}
+					}
+					country_event = GOE_RAJ_loyalist.12
+				}
+			}
+			ENG_winston_churchill = {
+				set_character_flag = RAJ_churchill_as_country_leader_flag
+				set_nationality = ROOT
+				promote_character = yes
+			}
+		}
+	}
+
+	option = { #Churchill as Advisor
+		name = GOE_RAJ_loyalist.11.b
+
+		ai_chance = {
+			base = 1
+		}
+
+		ENG = {
+			#Store if Churchill was the country leader in the UK before being transferred, so he can come back
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_leader = {
+							character = ENG_winston_churchill
+							ruling_only = yes
+						}
+					}
+					set_country_flag = RAJ_churchill_was_leading_before_transfer_to_raj_flag
+				}
+				if = { #DO not send event if UK is already in a path where Churchill is useless
+					limit = {
+						NOT = {
+							has_completed_focus = ENG_organize_the_blackshirts
+							has_completed_focus = ENG_concessions_to_the_trade_unions
+						}
+					}
+					country_event = GOE_RAJ_loyalist.12
+				}
+			}
+
+			ENG_winston_churchill = {
+				set_nationality = ROOT
+			}
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = ENG_winston_churchill
+
+			# Hire Churchill directly, for free, if empty slot
+			effect_tooltip = { #Tooltip needs to be inside ENG scope, effect needs to be outside
+				if = {
+					limit = {
+						ROOT = {
+							amount_taken_ideas = {
+								slots = political_advisor
+								amount < 3
+							}
+						}
+					}
+					add_ideas = ENG_winston_churchill
+				}
+			}
+		}
+
+		hidden_effect = { #Effect needs to be hidden since Churchill is not in RAJ when tooltip is displayed
+			if = {
+				limit = {
+					has_character = ENG_winston_churchill
+					amount_taken_ideas = {
+						slots = political_advisor
+						amount < 3
+					}
+				}
+				add_ideas = ENG_winston_churchill
+			}
+		}
+	}
+
+	option = { #Yeet this man to outer space tack!
+		name = GOE_RAJ_loyalist.11.c
+
+		ai_chance = {
+			base = 1
+		}
+
+	}
+}
+
+#The Jewel Becomes the Crown - Churchill is gone! - Event for ENG (if player was using Churchill when he leaves)
+country_event = {
+	id = GOE_RAJ_loyalist.12
+	title = GOE_RAJ_loyalist.12.t
+	desc = GOE_RAJ_loyalist.12.desc
+	picture = GFX_report_event_degaulle_churchill
+	is_triggered_only = yes
+
+	option = { #Bye bye I guess
+		name = GOE_RAJ_loyalist.12.a
+
+		custom_effect_tooltip = { #MM: This is not an effect_tooltip due to the character being transferred in the previous event already, so there would be no Churchill in ENG
+			localization_key = generic_character_transferred_to_country_tt
+			CHARACTER = ENG_winston_churchill
+			ORIGINAL_COUNTRY_FLAG = [ENG.GetFlag]
+			TARGET_COUNTRY_FLAG = [ROOT.GetFlag]
+			TARGET_COUNTRY = [ROOT.GetNameDefCap]
+		}
+	}
+}
+
+#The Jewel Becomes the Crown - Churchill is back! - Event for ENG (if player was using Churchill when he left)
+country_event = {
+	id = GOE_RAJ_loyalist.13
+	title = GOE_RAJ_loyalist.13.t
+	desc = GOE_RAJ_loyalist.13.desc
+	picture = GFX_report_event_degaulle_churchill
+	is_triggered_only = yes
+
+	option = { #Put him back in charge!
+		name = GOE_RAJ_loyalist.13.a
+
+		ai_chance = {
+			base = 0
+		}
+
+		if = {
+			limit = {
+				has_country_flag = RAJ_churchill_was_leading_before_transfer_to_raj_flag
+			}
+			ENG_winston_churchill = { promote_character = yes }
+		}
+	}
+
+	option = { #We are good without him
+		name = GOE_RAJ_loyalist.13.b
+
+		ai_chance = {
+			base = 1
+		}
+	}
+}
+
+#Exploit the Frontier - RAJ wants resource rights on Burma's Tungsten - Event for BRM or ENG (if overlord of BRM)
+country_event = {
+	id = GOE_RAJ_loyalist.14
+	title = GOE_RAJ_loyalist.14.t
+	desc = GOE_RAJ_loyalist.14.desc
+	picture = GFX_report_event_FIN_petsamo_mine
+	is_triggered_only = yes
+
+	option = { #YES
+		name = GOE_RAJ_loyalist.14.a
+
+		ai_chance = {
+			base = 1
+		}
+
+		var:288.controller = {
+			give_resource_rights = {
+				receiver = FROM
+				state = 288
+				resources = { tungsten }
+			}
+		}
+
+		hidden_effect = {
+			#If this is overlord dealing with BRM resources, and BRM is a player, send them an event so they are aware
+			if = {
+				limit = {
+					var:288.controller = {
+						is_subject_of = ROOT
+					}
+				}
+				var:288.controller = { country_event = GOE_RAJ_loyalist.15 }
+			}
+
+			#Feedback event to RAJ
+			FROM = { country_event = { id = GOE_RAJ_loyalist.16 hours = 4 random_hours = 2 } }
+		}
+	}
+
+	option = { #NON
+		name = GOE_RAJ_loyalist.14.b
+
+		ai_chance = {
+			base = 0
+		}
+
+		hidden_effect = {
+			#Feedback event to RAJ
+			FROM = { country_event = { id = GOE_RAJ_loyalist.17 hours = 4 random_hours = 2 } }
+		}
+	}
+}
+
+#Exploit the Frontier - ENG granted resource rights on our Tungsten to the RAJ - Event for puppet BRM (if player) when overlord grants resource rights
+country_event = {
+	id = GOE_RAJ_loyalist.15
+	title = GOE_RAJ_loyalist.15.t
+	desc = GOE_RAJ_loyalist.15.desc
+	picture = GFX_report_event_FIN_petsamo_mine
+	is_triggered_only = yes
+
+	option = { #Bye Bye Tungsten!
+		name = GOE_RAJ_loyalist.15.a
+
+		effect_tooltip = {
+			give_resource_rights = {
+				receiver = RAJ
+				state = 288
+				resources = { tungsten }
+			}
+		}
+	}
+}
+
+#Exploit the Frontier - Resource rights granted! - Event for RAJ
+country_event = {
+	id = GOE_RAJ_loyalist.16
+	title = GOE_RAJ_loyalist.16.t
+	desc = GOE_RAJ_loyalist.16.desc
+	picture = GFX_report_event_FIN_petsamo_mine
+	is_triggered_only = yes
+
+	option = { #Hola Tungsten!
+		name = GOE_RAJ_loyalist.16.a
+
+		effect_tooltip = {
+			var:288.controller = {
+				give_resource_rights = {
+					receiver = ROOT
+					state = 288
+					resources = { tungsten }
+				}
+			}
+		}
+	}
+}
+
+#Exploit the Frontier - Resource rights denied! - Event for RAJ
+country_event = {
+	id = GOE_RAJ_loyalist.17
+	title = GOE_RAJ_loyalist.17.t
+	desc = GOE_RAJ_loyalist.17.desc
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	option = { #Hola Tungsten!
+		name = GOE_RAJ_loyalist.17.a
+
+	}
+}
+
+
+
+
+
 ##########
 # FAMINE #
 ##########
@@ -3490,7 +5174,7 @@ country_event = {
 		}
 	}
 
-	trigger = {
+	trigger = { #r56
 		has_dlc = "Graveyard of Empires"
 		has_idea = RAJ_risk_of_famine
 		original_tag = RAJ
@@ -4509,9 +6193,7 @@ country_event = {
 		RAJ = {  
 			transfer_state = event_target:RAJ_i_want_to_buy_this_land 
 			country_event = { id = GOE_RAJ_eic.9 hours = 2 }
-			hidden_effect = {
-				clr_country_flag = is_trying_to_buy_land 
-			}
+
 		}
 		hidden_effect = {
 
@@ -4534,6 +6216,9 @@ country_event = {
 
 	option = {
 		name = GOE_RAJ_eic.7.a
+		hidden_effect = {
+			clr_country_flag = is_trying_to_buy_land 
+		}
 	}
 }
 
@@ -4546,6 +6231,9 @@ country_event = {
 	is_triggered_only = yes
 	option = {
 		name = GOE_RAJ_eic.8.a
+		hidden_effect = {
+			clr_country_flag = is_trying_to_buy_land 
+		}
 	}
 }
 
@@ -4560,6 +6248,9 @@ country_event = {
 
 	option = {
 		name = GOE_RAJ_eic.9.a
+		hidden_effect = {
+			clr_country_flag = is_trying_to_buy_land 
+		}
 		if = {
 			limit = {
 				RAJ = { has_country_flag = use_rebate }
@@ -5052,6 +6743,16 @@ country_event = {
 	#			set_character_flag = is_mughal_emperor
 	#		}
 	#		promote_character = RAJ_maharaja_hari_singh
+	#	}	
+	#}
+	#option = {
+	#	name = GOE_RAJ_princely.2.c
+	#	MPU = {
+	#		RAJ_bodh_chandra_singh = {
+	#			set_nationality = RAJ
+	#			set_character_flag = is_mughal_emperor
+	#		}
+	#		promote_character = RAJ_bodh_chandra_singh
 	#	}	
 	#}
 	option = {
@@ -6115,7 +7816,7 @@ country_event = {
 					limit = {
 						OR = {
 							state = 440
-							state = 1101
+							state = 1101 #r56 was 986
 							state = 439
 							state = 441
 							state = 787
@@ -6125,6 +7826,14 @@ country_event = {
 					add_core_of = RAJ
 				}
 			}
+		}
+
+		every_state = {	
+			limit = {
+				has_state_flag = RAJ_mughal_captured_states
+			}
+			transfer_state_to = RAJ
+			add_core_of = RAJ
 		}
 	}
 }
