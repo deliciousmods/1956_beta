@@ -87,7 +87,7 @@ RAJ_GOE_independence_movement = {
 			}
 		}
 		on_map_mode = map_only
-		cost = 20
+		cost = 13
 		fire_only_once = no
 		days_remove = 90
 		ai_will_do = {
@@ -109,7 +109,8 @@ RAJ_GOE_independence_movement = {
 		}
 		complete_effect = {
 			FROM = {
-				add_resistance = 35
+				add_resistance = 60
+				add_compliance = -10
 			}
 			ROOT = {
 				army_experience = 5
@@ -311,8 +312,11 @@ RAJ_GOE_sikh_recruitment_cat = {
 		
 		state_target = yes
 		
-		visible = { 
-			has_completed_focus = RAJ_punjab_autonomy
+		visible = {
+			OR = {
+				has_completed_focus = RAJ_punjab_autonomy
+				has_completed_focus = RAJ_the_punjab_accord
+			}
 		}
 		
 		available = {
@@ -329,7 +333,10 @@ RAJ_GOE_sikh_recruitment_cat = {
 		
 		target_root_trigger = {
 			original_tag = RAJ
-			has_completed_focus = RAJ_punjab_autonomy
+			OR = {
+				has_completed_focus = RAJ_punjab_autonomy
+				has_completed_focus = RAJ_the_punjab_accord
+			}
 			NOT = { 
 				has_dynamic_modifier = {
 				 	modifier = idea_RAJ_sikh_approval_2
@@ -342,6 +349,13 @@ RAJ_GOE_sikh_recruitment_cat = {
 				FROM = { state = 433 }
 			}
 		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 440
+				state = 433
+			}
+		}
 		
 		cost = 30
 		fire_only_once = yes
@@ -350,26 +364,31 @@ RAJ_GOE_sikh_recruitment_cat = {
 			base = 1
 
 		}
-		complete_effect = {
-			division_template = {
-				name = "Sikh Division"
-				is_locked = yes
-				division_names_group = RAJ_INF_01 # optional
-				priority = 2 # optional 
-				
-				regiments = {
-					mountaineers = { x = 0 y = 0 }
-					mountaineers = { x = 0 y = 1 }
-					mountaineers = { x = 0 y = 2 }
-					mountaineers = { x = 0 y = 3 }
-					mountaineers = { x = 1 y = 0 }
-					mountaineers = { x = 1 y = 1 }
-					mountaineers = { x = 1 y = 2 }
-					mountaineers = { x = 1 y = 3 }
+		remove_effect = {
+			if = {
+				limit = {
+					NOT = {has_template = "Sikh Division"}
 				}
-				support = {
-					artillery = { x = 0 y = 0 }
-					engineer = { x = 0 y = 1 }
+				division_template = {
+					name = "Sikh Division"
+					is_locked = yes
+					division_names_group = RAJ_SIKH_01 # optional
+					priority = 2 # optional 
+					
+					regiments = {
+						mountaineers = { x = 0 y = 0 }
+						mountaineers = { x = 0 y = 1 }
+						mountaineers = { x = 0 y = 2 }
+						mountaineers = { x = 0 y = 3 }
+						mountaineers = { x = 1 y = 0 }
+						mountaineers = { x = 1 y = 1 }
+						mountaineers = { x = 1 y = 2 }
+						mountaineers = { x = 1 y = 3 }
+					}
+					support = {
+						artillery = { x = 0 y = 0 }
+						engineer = { x = 0 y = 1 }
+					}
 				}
 			}
 			FROM = {
@@ -806,6 +825,7 @@ political_actions = {
 		
 		available = {
 			check_variable = { amount_of_times_raised_taxes > 0 tooltip = RAJ_GOE_reduce_war_taxes_condition_tt}
+			has_war = yes
 		}
 
 		cancel_trigger = {
@@ -845,6 +865,14 @@ political_actions = {
 				has_idea = idea_RAJ_azad_hind_radio_fascism
 			}
 		}
+
+		available = {
+			NOT = {
+				has_decision = RAJ_GOE_azad_hind_radio_communism
+				has_decision = RAJ_GOE_azad_hind_radio_fascism
+			}
+		}
+
 		cost = 25
 		days_remove = 120
 
@@ -890,6 +918,14 @@ political_actions = {
 				has_idea = idea_RAJ_azad_hind_radio_communism
 			}
 		}
+
+		available = {
+			NOT = {
+				has_decision = RAJ_GOE_azad_hind_radio_communism
+				has_decision = RAJ_GOE_azad_hind_radio_unaligned
+			}
+		}
+
 		cost = 25
 		days_remove = 120
 
@@ -936,6 +972,14 @@ political_actions = {
 				has_idea = idea_RAJ_azad_hind_radio_fascism
 			}
 		}
+
+		available = {
+			NOT = {
+				has_decision = RAJ_GOE_azad_hind_radio_fascism
+				has_decision = RAJ_GOE_azad_hind_radio_unaligned
+			}
+		}
+		
 		cost = 25
 		days_remove = 120
 
@@ -1060,6 +1104,7 @@ RAJ_akhand_bharat_cat = {
 					tooltip = RAJ_akhand_bharat_availability_tt 
 				}
 			}
+			NOT = { has_dynamic_modifier = { modifier = idea_RAJ_famine_country } }
 		}
 
 		visible = {
@@ -1179,7 +1224,10 @@ RAJ_akhand_bharat_cat = {
 			OR = {
 				TIB = {
 					all_core_state = {
-						is_controlled_by = ROOT
+						OR = {
+							is_controlled_by = ROOT
+							state = 601
+						}
 					}
 				}
 				all_of_scopes = {
@@ -1309,6 +1357,99 @@ RAJ_akhand_bharat_cat = {
 		}	
 	}
 
+	RAJ_akhand_bharat_claim_princely = {
+		icon = generic_civil_support
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+		available = {
+			RAJ = {
+				all_of_scopes = {
+					array = RAJ.owned_states_at_game_start
+
+					if = {
+						limit = {
+							NOT = {
+								is_core_of = PAK
+								is_core_of = BAN
+							}
+						}
+						OR = {
+							is_controlled_by = RAJ
+							CONTROLLER = {
+								is_subject_of = RAJ
+							}
+						}
+						
+					}
+					tooltip = RAJ_akhand_bharat_availability_tt 
+				}
+			}
+		}
+
+		visible = {
+			any_of_scopes = {
+				array = RAJ.owned_states_at_game_start
+				NOT = { is_core_of = RAJ }
+				NOT = {
+					is_core_of = PAK
+					is_core_of = BAN
+				}
+			}	
+		}
+		cost = 175
+		days_re_enable = 0 
+		ai_will_do = {
+			factor = 10
+		}
+
+		highlight_states = {
+			highlight_states_trigger = {
+				AND = {
+					is_in_array = { array = RAJ.owned_states_at_game_start value = THIS } 
+					NOT = { is_core_of = ROOT }
+				}
+			}
+		}
+		complete_effect = {
+			every_state = {
+				limit = {
+					is_in_array = { array = RAJ.owned_states_at_game_start value = THIS }
+					NOT = {
+						is_core_of = PAK
+						is_core_of = BAN
+					}
+				}
+				ROOT = { 
+					add_to_array = {
+						array = claimed_by_akhand_bharat
+						value = PREV #optional, if not defined adds scope
+					} 
+				}
+				add_core_of = ROOT
+			}
+ 			
+
+			for_each_scope_loop = { #transfer state if already subject since its not a core
+				array = claimed_by_akhand_bharat
+				if = {
+					limit = { 
+						is_in_array = { array = RAJ.owned_states_at_game_start value = THIS }
+						NOT = {
+							is_core_of = PAK
+							is_core_of = BAN
+						}
+						owner = { is_subject_of = ROOT }
+					}
+
+					ROOT = { transfer_state = PREV }
+				}
+			}
+
+			RAJ = { custom_effect_tooltip = RAJ_akhand_bharat_annex_subject }
+		}	
+	}
+
 	RAJ_akhand_bharat_claim_pak = {
 		icon = generic_civil_support
 		allowed = { 
@@ -1327,6 +1468,7 @@ RAJ_akhand_bharat_cat = {
 					tooltip = RAJ_akhand_bharat_availability_tt 
 				}
 			}
+			NOT = { has_dynamic_modifier = { modifier = idea_RAJ_famine_country } }
 		}
 		highlight_states = {
 			highlight_states_trigger = {
@@ -1655,6 +1797,12 @@ RAJ_akhand_bharat_cat = {
 				}
 			}
 
+			all_of_scopes = {
+				array = RAJ.owned_states_at_game_start
+				is_fully_controlled_by = ROOT
+				is_core_of = ROOT
+			}
+
 		}
 
 		visible = {
@@ -1870,6 +2018,8 @@ RAJ_GOE_partition_cat = {
 	    	
 	    }
 	    timeout_effect = {
+			set_global_flag = RAJ_GOE_partition_is_over
+			set_country_flag = RAJ_allow_release_states
 	    	if = {
 	    		limit = {
 	    			NOT = { has_variable = princely_state_timeout_count  }
@@ -1889,15 +2039,19 @@ RAJ_GOE_partition_cat = {
 	    					is_controlled_by = PAK
 	    					is_controlled_by = BAN
 	    				}
+
+    					owner = {
+    						NOT = { has_war_with = ROOT }
+    					}
 	    			}
 	    			
 		    		set_temp_variable = { t_RAJ_pressure_scaled  = RAJ_pressure }
 		    		set_variable = { t_PAK_pressure_scaled  = PAK_pressure }
 		    		set_temp_variable = { t_BAN_pressure_scaled  = BAN_pressure }
 
-		    		multiply_temp_variable = { t_RAJ_pressure_scaled  = 1.5 }
-		    		multiply_variable = { t_PAK_pressure_scaled  = 1.5 }
-		    		multiply_temp_variable = { t_BAN_pressure_scaled  = 1.5 } #
+		    		multiply_temp_variable = { t_RAJ_pressure_scaled  = 1.25 }
+		    		multiply_variable = { t_PAK_pressure_scaled  = 1.25 }
+		    		multiply_temp_variable = { t_BAN_pressure_scaled  = 1.25 } #
 
 
 		    		if = {
@@ -1913,6 +2067,12 @@ RAJ_GOE_partition_cat = {
 		    			RAJ = {
 		    				transfer_state = PREV
 		    			}
+		    			if = {
+		    				limit = {
+		    					NOT = { is_core_of = RAJ }
+		    				}
+		    				add_core_of = RAJ
+		    			}
 		    		}
 		    		else_if = {
 		    			limit = {
@@ -1927,6 +2087,13 @@ RAJ_GOE_partition_cat = {
 		    			PAK = {
 		    				transfer_state = PREV
 		    			}
+
+		    			if = {
+		    				limit = {
+		    					NOT = { is_core_of = PAK }
+		    				}
+		    				add_core_of = PAK
+		    			}
 		    		}
 		    		else_if = {
 		    			limit = {
@@ -1935,27 +2102,34 @@ RAJ_GOE_partition_cat = {
 		    					is_subject = no
 		    				}
 		    				check_variable = { BAN_pressure > t_RAJ_pressure_scaled }
-		    				check_variable = { BAN_pressure > t_BAN_pressure_scaled }
+		    				check_variable = { BAN_pressure > t_PAK_pressure_scaled }
 		    				check_variable = { BAN_pressure > 0 }
 		    			}
 		    			BAN = {
 		    				transfer_state = PREV
 		    			}
+
+		    			if = {
+		    				limit = {
+		    					NOT = { is_core_of = BAN }
+		    				}
+		    				add_core_of = BAN
+		    			}
 		    		}
 		    	}
     		}
 
-    		if = {
-    			limit = { check_variable = { princely_state_timeout_count > 0 } } #WAS 3
-    			
-    			set_global_flag = RAJ_GOE_partition_is_over
-    			set_country_flag = RAJ_allow_release_states
-    		}
+
 
     		hidden_effect = {
-    		
-				set_rule = { can_declare_war_on_same_ideology = no }
-				set_rule = {  can_only_justify_war_on_threat_country = yes }
+    			if = {
+    				limit = {
+    					NOT = { has_completed_focus = RAJ_i_am_death }
+    				}
+
+					set_rule = { can_declare_war_on_same_ideology = no }
+					set_rule = { can_only_justify_war_on_threat_country = yes }
+    			}
     		}
 
     		if = {
@@ -1979,10 +2153,10 @@ RAJ_GOE_partition_cat = {
     						has_idea = neutrality_idea	
     					}
     				}
-    				remove_ideas = neutrality_idea
+    				PAK = { remove_ideas = neutrality_idea }
     			}
 
-    			set_rule = { can_join_factions = yes }
+    			PAK = { set_rule = { can_join_factions = yes } }
     		}
 
     		if = {
@@ -1998,14 +2172,14 @@ RAJ_GOE_partition_cat = {
     						has_idea = neutrality_idea	
     					}
     				}
-    				remove_ideas = neutrality_idea
+    				BAN = { remove_ideas = neutrality_idea }
     			}
 
-    			set_rule = { can_join_factions = yes }
+    			BAN = { set_rule = { can_join_factions = yes } }
     		}
 
     		for_each_scope_loop = {
-    			array = RAJ.raj_relesables
+    			array = RAJ.raj_releasables
     			
     			if = {
     				limit = {
@@ -2030,7 +2204,7 @@ RAJ_GOE_partition_cat = {
 
 	    icon = GFX_decision_mission_icon     # For GFX_decision_mission_icon
 	    is_good = no
-	    days_mission_timeout = 30
+	    days_mission_timeout = 40
 	    selectable_mission = no
 
 	    timeout_effect = {
@@ -2050,14 +2224,15 @@ RAJ_GOE_partition_cat = {
 
 	RAJ_GOE_cease_hostilities = {
 		priority = 30
-	    activation = {
-	    	always = no #enabled by on_action
-	    }
+
 	    available = {
-			always = no
+	    	has_war_with = PAK
+	    	
 	    }
 	    visible = {
+	    	
 	    	NOT = { has_completed_focus = RAJ_india_united }
+	    	NOT = { has_global_flag = RAJ_GOE_partition_is_over }
 	    }
 
 	    cost = 0
@@ -2127,7 +2302,7 @@ RAJ_GOE_partition_cat = {
 		
 		cost = 0
 		fire_only_once = no
-		days_remove = 15
+		days_remove = 8
 		ai_will_do = {
 			base = 1
 
@@ -2973,9 +3148,12 @@ RAJ_GOE_mughal_independence_category = {
 			original_tag = RAJ
 		}	
 		available = {
-			exists = no 
+			hidden_trigger = {
+				exists = no 
+			}
 		}
-		days_mission_timeout = 250
+		priority = 50
+		days_mission_timeout = 255
 		activation = {
 			RAJ = { has_country_flag = independence_war_mughals }
 		}
@@ -3009,9 +3187,10 @@ RAJ_GOE_mughal_independence_category = {
 			clr_country_flag = RAJ_mughal_uprising_started
 			IF = {
 				limit = {
-					440 = { is_controlled_by = ROOT }
-					442 = { is_controlled_by = ROOT }
-					439 = { is_controlled_by = ROOT }
+					440 = { is_controlled_by = RAJ }
+					#988 = { is_controlled_by = RAJ } #r56
+					442 = { is_controlled_by = RAJ }
+					439 = { is_controlled_by = RAJ }
 				}
 				set_country_flag = RAJ_mughal_captured_states
 			}
@@ -3031,10 +3210,25 @@ RAJ_GOE_mughal_independence_category = {
 				division_template = "Princely Personal Guard"
 				is_locked = no
 			}
-			
+
+			#hidden_effect = { #r56
+			#	every_state = {
+			#		limit = {
+			#			owner = { tag = BRM }
+			#		}
+			#		teleport_armies = { 
+			#			#only define one. if neither is defined will teleport to unit to their capital  
+			#			to_state = 988
+			#			to_province = 5105
+			#			limit = { 
+			#				tag = RAJ
+			#			}
+			#		}
+			#	}
+			#}
 		}
 	}
-	
+
 	RAJ_GOE_enforced_peace_decision_eng = {
 		icon = GFX_decision_revolt
 		allowed = {
@@ -3044,7 +3238,7 @@ RAJ_GOE_mughal_independence_category = {
 			RAJ = { exists = no }
 			#RAJ = { has_country_flag = independence_war_mughals }
 		}
-		days_mission_timeout = 365
+		days_mission_timeout = 255
 		activation = {
 			RAJ = { has_country_flag = independence_war_mughals }
 		}
@@ -3493,4 +3687,2692 @@ political_actions = {
 #
 	#}
 	
+}
+
+RAJ_GOE_communism_infiltration_cat = {
+	RAJ_communist_unions_promised_worker_safety_mission = {
+		icon = generic_civil_support
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+		activation = {
+			always = no
+		}
+		available = {
+			always = yes  #activated via focus
+		}
+		priority = 100
+		visible = {
+			always = no 
+		}
+		ai_will_do = {
+			factor = 100
+		}
+
+		is_good = no
+
+		fire_only_once = yes
+		days_mission_timeout = 180
+	    selectable_mission = yes
+	    complete_effect = {
+	    	add_ideas = idea_RAJ_increased_worker_safety
+	    	remove_mission = RAJ_communist_unions_promised_worker_safety_mission
+	    	set_country_flag = RAJ_hide_communist_infiltration
+	    }
+	    timeout_effect = {
+	    	add_stability = -0.2
+	    	add_popularity = {
+	    		ideology = communism 
+	    		popularity = -0.2
+	    	}
+	    	start_civil_war = {
+	    		ideology = neutrality
+	    		ruling_party = communism
+	    		size = 0.1 
+	    		army_ratio = 0.1
+	    		navy_ratio = 0
+	    		air_ratio = 0
+	    		keep_all_characters = yes
+	    		keep_political_leader = yes 
+	    		keep_political_party_members = no
+	    	}
+	    	set_country_flag = RAJ_hide_communist_infiltration
+	    }
+	}
+
+	RAJ_communist_unions_promised_minimum_wage_mission = {
+		icon = generic_civil_support
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+		activation = {
+			always = no #activated via focus
+		}
+		available = {
+			always = yes
+		}
+		priority = 100
+		visible = {
+			always = no 
+		}
+		ai_will_do = {
+			factor = 100
+		}
+
+		is_good = no
+
+		fire_only_once = yes
+		days_mission_timeout = 180
+	    selectable_mission = yes
+	    complete_effect = {
+	    	add_ideas = idea_RAJ_guaranteed_minimum_wage
+	    	remove_mission = RAJ_communist_unions_promised_minimum_wage_mission
+	    	set_country_flag = RAJ_hide_communist_infiltration
+	    }
+	    timeout_effect = {
+	    	set_country_flag = RAJ_hide_communist_infiltration
+	    	add_stability = -0.2
+	    	add_popularity = {
+	    		ideology = communism 
+	    		popularity = -0.2
+	    	}
+
+	    	start_civil_war = {
+	    		ideology = neutrality
+	    		ruling_party = communism
+	    		size = 0.1 
+	    		army_ratio = 0.1
+	    		navy_ratio = 0
+	    		air_ratio = 0
+	    		keep_all_characters = yes
+	    		keep_political_leader = yes #
+	    		keep_political_party_members = no 
+	    	}
+	    }
+	}
+	#
+
+	RAJ_GOE_undermine_gandhis_movement = {
+		icon = GFX_decision_generic_brainwash
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+		available = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			communism > 0.1
+			has_country_flag = has_infiltrated_congress
+		}
+		priority = 29
+		visible = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			NOT = { has_government = communism }
+		}
+		ai_will_do = {
+			factor = 10
+		}
+
+		modifier = { 
+			stability_weekly = -0.002
+			war_support_weekly = 0.007
+		}
+		
+		cost = 25
+		fire_only_once = no
+		days_remove = 60
+	}
+
+	RAJ_GOE_contact_dissenting_officers = {
+		icon = GFX_decision_generic_army_support
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+
+		available = {
+			has_war_support > 0.35
+			communism > 0.1
+			has_completed_focus = RAJ_red_in_the_shadows
+		}
+
+		visible = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			NOT = { has_government = communism }
+
+		}
+		priority = 14
+		ai_will_do = {
+			factor = 10
+		}
+
+		modifier = { 
+			experience_gain_navy = 0.1
+			experience_gain_army = 0.1
+			experience_gain_air = 0.1
+		}
+		
+		cost = 30
+		fire_only_once = yes
+		days_remove = 60
+		complete_effect = {
+			add_to_variable = { RAJ_royal_indian_navy_mutiny_threshold = -0.05 tooltip = RAJ_royal_indian_navy_mutiny_threshold_tt }
+			add_doctrine_cost_reduction = {
+				cost_reduction = 0.25
+				uses = 1
+				category = land_doctrine
+			}
+		}
+
+		remove_effect = {
+			set_country_flag = RAJ_has_contacted_dissenting_officers
+			unlock_decision_tooltip = {
+				decision = RAJ_GOE_spread_dissent_in_the_army
+				show_effect_tooltip = no 
+				show_modifiers = no 
+			}
+		}
+	}
+
+	RAJ_GOE_spread_dissent_in_the_army = {
+		icon = GFX_decision_SWE_set_army_budget
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+		available = {
+			has_war_support > 0.35
+			communism > 0.25
+			has_country_flag = RAJ_has_contacted_dissenting_officers
+		}
+
+		visible = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			NOT = { has_government = communism }
+		}
+		priority = 10
+		ai_will_do = {
+			factor = 10
+		}
+
+		modifier = { 
+			experience_gain_navy = 0.05
+			experience_gain_army = 0.05
+			experience_gain_air = 0.05
+		}
+		
+		cost = 40
+		fire_only_once = no
+		days_remove = 60
+		complete_effect = {
+			add_to_variable = { RAJ_royal_indian_navy_mutiny_threshold = -0.05 tooltip = RAJ_royal_indian_navy_mutiny_threshold_tt }
+		}
+	}
+
+
+	RAJ_GOE_seek_support_from_the_unions = {
+		icon = GFX_decision_eng_trade_unions_support
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+
+		available = {
+			communism > 0.1
+			has_completed_focus = RAJ_red_in_the_shadows
+		}
+
+		visible = {
+			NOT = {
+				has_country_flag = RAJ_communist_union_event_active
+			}
+			has_completed_focus = RAJ_red_in_the_shadows
+			NOT = { has_government = communism }
+		}
+		priority = 10
+		ai_will_do = {
+			factor = 10
+		}
+		
+		cost = 0
+		fire_only_once = no
+		complete_effect = {
+			set_country_flag = RAJ_communist_union_event_active
+			country_event = {
+				id = GOE_RAJ.39
+			}
+			custom_effect_tooltip = RAJ_GOE_seek_support_from_the_unions_tt
+		}
+	}
+
+	RAJ_GOE_orchestrate_train_robberies = {
+		icon = GFX_decision_generic_train
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+
+		available = {
+			has_completed_focus = RAJ_red_in_the_shadows
+
+		}
+
+		visible = {
+			NOT = {
+				has_idea = idea_RAJ_train_robberies
+				has_government = communism
+			}
+			has_completed_focus = RAJ_red_in_the_shadows
+
+		}
+		priority = 10
+		ai_will_do = {
+			factor = 10
+		}
+
+		cost = 10
+		complete_effect = {
+			add_ideas = idea_RAJ_train_robberies
+			custom_effect_tooltip = RAJ_GOE_orchestrate_train_robberies_tt
+		}
+	}
+
+	RAJ_GOE_accept_russian_muhajir_money = {
+		icon = GFX_decision_gre_paying_ifc_debt
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+
+		available = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			if = {
+				limit = {
+					SOU = {
+						has_government = communism
+					}
+				}
+				SOU = {
+					has_opinion = {
+						target = ROOT
+						value > 64 
+					}
+				}
+			}
+
+			custom_trigger_tooltip = {
+				tooltip = RAJ_has_met_with_kremlin_flag_tt
+				has_country_flag = RAJ_has_met_with_kremlin
+			}
+		}
+
+		visible = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			SOU = {
+				has_government = communism
+			}
+		}
+		priority = 8
+		ai_will_do = {
+			factor = 10
+		}
+
+		fire_only_once = yes
+		
+		cost = 30
+		complete_effect = {
+			add_offsite_building = {
+				type = industrial_complex 
+				level = 1
+			}
+
+			add_offsite_building = {
+				type = arms_factory 
+				level = 1
+			}
+		}
+	}
+
+	RAJ_GOE_meet_with_the_kremlin = {
+		icon = GFX_decision_eng_trade_unions_support
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+
+		available = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			if = {
+				limit = {
+					SOU = {
+						has_government = communism
+					}
+				}
+				SOU = {
+					has_opinion = {
+						target = ROOT
+						value > 64 
+					}
+				}
+			}
+			
+		}
+
+		visible = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			SOU = {
+				has_government = communism
+			}
+		}
+		priority = 9
+		ai_will_do = {
+			factor = 10
+		}
+		
+		cost = 30
+		fire_only_once = yes
+
+		complete_effect = {
+			set_country_flag = RAJ_has_met_with_kremlin
+			add_equipment_to_stockpile = { 
+				type = infantry_equipment
+				amount = 1500 
+				producer = SOV
+			}
+			if = {
+				limit = {
+					has_dlc = "Arms Against Tyranny"
+				}
+
+				add_equipment_subsidy = {
+					cic = 1000 
+					equipment_type = infantry_equipment
+					seller_tags = { SOU }
+				}
+			}
+
+			add_popularity = {
+				ideology = communism
+				popularity = 0.025
+			}
+		}
+	}
+
+	RAJ_GOE_infiltrate_the_national_congress = {
+		icon = GFX_decision_SWI_expand_covert_operations
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+
+		available = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			communism < 0.75
+		}
+
+		visible = {
+			has_completed_focus = RAJ_red_in_the_shadows
+			communism < 0.75
+			NOT = { has_government = communism }
+		}
+		priority = 30
+		ai_will_do = {
+			factor = 10
+		}
+
+		modifier = { 
+			political_power_gain = 0.05
+		}
+		
+		cost = 30
+		days_remove = 60
+
+		remove_effect = {	
+			if = {
+				limit = {
+					has_dynamic_modifier = { modifier = idea_RAJ_independence_movement }
+				}
+				custom_effect_tooltip = idea_modify_independence_movement_communism
+				add_to_variable = { RAJ_communism_drift_independence_movement = 0.1 tooltip = communism_drift_tt }
+			}
+			set_country_flag = has_infiltrated_congress
+		}
+	}
+
+	RAJ_GOE_communism_sway_bose = {
+		icon = generic_civil_support
+		allowed = { 
+			is_raj_or_raj_inheritor = yes
+		}
+
+		available = {
+			communism > 0.15
+			has_war_support > 0.2
+			has_country_flag = has_infiltrated_congress
+		}
+
+		visible = {
+			has_completed_focus = RAJ_red_in_the_shadows
+		}
+		priority = 18
+		cost = 25
+		fire_only_once = yes
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			set_country_flag = has_swayed_bose_to_communism 
+			if = {
+				limit = {
+					RAJ_subhas_chanda_bose = { has_trait = pragmatic_authoritarian }
+				}
+				remove_trait = {
+					character = RAJ_subhas_chanda_bose 
+					trait = pragmatic_authoritarian
+					slot = political_advisor
+				}
+			}
+			add_trait = {
+				character = RAJ_subhas_chanda_bose # optional if inside character scope
+				trait = red_tiger_of_bengal
+				slot = political_advisor 
+			}
+		}
+	}
+}
+
+RAJ_GOE_communism_border_clashes_cat = {
+	RAJ_secure_west_bengal_decision = {
+		icon = GFX_decision_infiltrate_state
+		visible = {
+			has_completed_focus = RAJ_strike_eastern_pakistan
+			PAK = {
+				exists = yes
+			}
+		}
+		available = {
+			PAK = {
+				controls_state = 431
+				exists = yes
+				NOT = { has_war_with = ROOT }
+			}
+			controls_state = 426
+			RAJ = { #scope for  tooltip
+				custom_trigger_tooltip = {
+					tooltip = TRIGGER_HAS_NOT_ANY_BORDER_WAR
+					has_border_war = no
+					NOT = { has_country_flag = RAJ_started_border_war }
+				}
+			}
+		}
+		highlight_states = {
+			highlight_state_targets = {
+				state = 431
+			}
+		}
+
+		
+		cost = 0
+		fire_only_once = yes
+		days_remove = 15
+		ai_will_do = {
+			base = 1
+		}
+		complete_effect = {
+			PAK = {
+				country_event = { id = GOE_RAJ.42 hours = 2 }
+			}
+			custom_effect_tooltip = RAJ_red_punjab_operation_decision_tt
+			hidden_effect = { set_country_flag = RAJ_started_border_war }
+		}
+		remove_effect = {
+			hidden_effect = {
+				clr_country_flag = RAJ_started_border_war
+            }
+            start_border_war = {
+                change_state_after_war = no #overrides the transfer of state at the end of war
+                combat_width = 180 #combat width for border war
+                minimum_duration_in_days = 40 #minimum duration for combat
+                attacker = {
+                	on_win = GOE_RAJ.43
+                	on_lose = GOE_RAJ.49
+                    state = 426 # state to start border war
+                    num_provinces = 1 #number of provinces we want border war to be
+                    #on_win = <event_id> #effect to call if wins
+                    #on_lose = <event_id> #effect to call if loses
+                    
+                    leader_score = { # Optional score for selecting a leader 
+                        base = 1
+                        modifier = {
+                            skill > 2
+                            factor = 5
+                        }
+                        modifier = {
+                            skill > 3
+                            factor = 10
+                        }
+                    }
+                    
+                    dig_in_factor = 0 #dig in modifier factor (default value: 1.0)
+                    terrain_factor = 0 #terrain modifier factor(default value: 1.0)
+                    }
+                
+                defender = {
+                    state = 431 # state to start border war
+                    num_provinces = 1 #number of provinces we want border war to be
+                   # on_win = <event_id> #effect to call if wins
+                   on_lose = GOE_RAJ.43
+                   on_win = GOE_RAJ.49
+                   # on_cancel = <event_id> #effect to call if cancels
+                }
+            }
+		}
+	}
+
+	RAJ_secure_rajahsthan_decision = {
+		icon = GFX_decision_generic_reorganize_irregulars
+		visible = {
+			has_completed_focus = RAJ_secure_rajahsthan
+			PAK = {
+				exists = yes
+			}
+		}
+		available = {
+			PAK = {
+				controls_state = 433
+				exists = yes
+				NOT = { has_war_with = ROOT }
+			}
+			controls_state = 437
+			RAJ = { #scope for  tooltip
+				custom_trigger_tooltip = {
+					tooltip = TRIGGER_HAS_NOT_ANY_BORDER_WAR
+					has_border_war = no
+					NOT = { has_country_flag = RAJ_started_border_war }
+				}
+			}
+		}
+		highlight_states = {
+			highlight_state_targets = {
+				state = 433
+				state = 437
+			}
+		}
+		
+		cost = 0
+		fire_only_once = yes
+		days_remove = 15
+		ai_will_do = {
+			base = 1
+		}
+		complete_effect = {
+			PAK = {
+				country_event = { id = GOE_RAJ.44 hours = 2 }
+			}
+			custom_effect_tooltip = RAJ_red_punjab_operation_decision_tt
+			hidden_effect = { set_country_flag = RAJ_started_border_war }
+		}
+		remove_effect = {
+			hidden_effect = {
+				clr_country_flag = RAJ_started_border_war
+            }
+            start_border_war = {
+                change_state_after_war = no #overrides the transfer of state at the end of war
+                combat_width = 180 #combat width for border war
+                minimum_duration_in_days = 40 #minimum duration for combat
+                attacker = {
+                	on_win = GOE_RAJ.45
+                	on_lose = GOE_RAJ.50
+                    state = 437 # state to start border war
+                    num_provinces = 1 #number of provinces we want border war to be
+                    #on_win = <event_id> #effect to call if wins
+                    #on_lose = <event_id> #effect to call if loses
+                    
+                    leader_score = { # Optional score for selecting a leader 
+                        base = 1
+                        modifier = {
+                            skill > 2
+                            factor = 5
+                        }
+                        modifier = {
+                            skill > 3
+                            factor = 10
+                        }
+                    }
+                    
+                    dig_in_factor = 0 #dig in modifier factor (default value: 1.0)
+                    terrain_factor = 0 #terrain modifier factor(default value: 1.0)
+                    }
+                
+                defender = {
+                    state = 433 # state to start border war
+                    num_provinces = 1 #number of provinces we want border war to be
+                   # on_win = <event_id> #effect to call if wins
+                   on_lose = GOE_RAJ.45
+                   on_win = GOE_RAJ.50
+                   # on_cancel = <event_id> #effect to call if cancels
+                }
+            }
+		}
+	}
+	RAJ_red_punjab_operation_decision = {
+		icon = GFX_decision_hol_war_on_pacifism
+		visible = {
+			has_completed_focus = RAJ_red_punjab_operation
+			PAK = {
+				exists = yes
+			}
+		}
+		available = {
+			PAK = {
+				controls_state = 986
+				exists = yes
+				NOT = { has_war_with = ROOT }
+			}
+			controls_state = 439
+			RAJ = { #scope for  tooltip
+				custom_trigger_tooltip = {
+					tooltip = TRIGGER_HAS_NOT_ANY_BORDER_WAR
+					has_border_war = no
+					NOT = { has_country_flag = RAJ_started_border_war }
+				}
+			}
+		}
+		highlight_states = {
+			highlight_state_targets = {
+				state = 986
+				state = 439
+			}
+		}
+		
+		cost = 0
+		fire_only_once = yes
+		days_remove = 15
+		ai_will_do = {
+			base = 1
+		}
+		complete_effect = {
+			PAK = {
+				country_event = { id = GOE_RAJ.40 hours = 2 }
+			}
+			custom_effect_tooltip = RAJ_red_punjab_operation_decision_tt
+			hidden_effect = { set_country_flag = RAJ_started_border_war }
+		}
+		remove_effect = {
+			hidden_effect = {
+				clr_country_flag = RAJ_started_border_war
+            }
+            start_border_war = {
+                change_state_after_war = no #overrides the transfer of state at the end of war
+                combat_width = 180 #combat width for border war
+                minimum_duration_in_days = 40 #minimum duration for combat
+                attacker = {
+                	on_win = GOE_RAJ.41
+                	on_lose = GOE_RAJ.51
+                    state = 439 # state to start border war
+                    num_provinces = 1 #number of provinces we want border war to be
+                    #on_win = <event_id> #effect to call if wins
+                    #on_lose = <event_id> #effect to call if loses
+                    
+                    leader_score = { # Optional score for selecting a leader 
+                        base = 1
+                        modifier = {
+                            skill > 2
+                            factor = 5
+                        }
+                        modifier = {
+                            skill > 3
+                            factor = 10
+                        }
+                    }
+                    
+                    dig_in_factor = 0 #dig in modifier factor (default value: 1.0)
+                    terrain_factor = 0 #terrain modifier factor(default value: 1.0)
+                    }
+                
+                defender = {
+                    state = 986 # state to start border war
+                    num_provinces = 1 #number of provinces we want border war to be
+                   # on_win = <event_id> #effect to call if wins
+                   on_lose = GOE_RAJ.41
+                   on_win = GOE_RAJ.51
+                   # on_cancel = <event_id> #effect to call if cancels
+                }
+            }
+		}
+	}
+}
+
+RAJ_peasant_uprisings_cat = {
+
+	# Nepal
+	RAJ_instigate_in_nepal = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		allowed = { original_tag = RAJ }
+		available = {
+			NOT = {
+				any_country = {
+					original_tag = NEP
+					has_government = communism
+				}
+			}
+			custom_trigger_tooltip = {
+			 	tooltip = RAJ_communist_coup_target_tt
+			 	NOT = { has_event_target = RAJ_communist_coup_target }
+			 }
+			 
+		}
+		highlight_states = {
+			highlight_states_trigger = {
+				is_owned_by = NEP
+			}
+		}
+		visible = {
+			original_tag = RAJ
+
+			any_country = {
+				original_tag = NEP
+				exists = yes
+				NOT = {
+					NEP = {
+						has_government = communism
+					}
+				}
+			}
+			NOT = {
+				any_country = {
+					original_tag = NEP
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		cost = 25
+		fire_only_once = yes
+		complete_effect = {
+			every_country = {
+				limit = { original_tag = NEP }
+				save_global_event_target_as = RAJ_communist_coup_target
+				country_event = { id = GOE_RAJ.48 hours = 2 }
+				event_option_tooltip = GOE_RAJ.48.a
+			}
+			
+			hidden_effect = { set_country_flag = instigating_a_coup }
+		}
+		ai_will_do = { factor = 100 }
+	}
+
+	RAJ_instigate_in_tib = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		allowed = { original_tag = RAJ }
+		available = {
+			NOT = {
+				any_country = {
+					original_tag = TIB
+					has_government = communism
+				}
+			}
+			custom_trigger_tooltip = {
+			 	tooltip = RAJ_communist_coup_target_tt
+			 	NOT = { has_event_target = RAJ_communist_coup_target }
+			 }
+			 
+		}
+		highlight_states = {
+			highlight_states_trigger = {
+				is_owned_by = TIB
+			}
+		}
+		visible = {
+			original_tag = RAJ
+
+			any_country = {
+				original_tag = TIB
+				exists = yes
+				NOT = {
+					TIB = {
+						has_government = communism
+					}
+				}
+			}
+			NOT = {
+				any_country = {
+					original_tag = TIB
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		cost = 25
+		fire_only_once = yes
+		complete_effect = {
+			every_country = {
+				limit = { original_tag = TIB }
+				save_global_event_target_as = RAJ_communist_coup_target
+				country_event = { id = GOE_RAJ.48 hours = 2 }
+				event_option_tooltip = GOE_RAJ.48.a
+			}
+			
+			hidden_effect = { set_country_flag = instigating_a_coup }
+		}
+		ai_will_do = { factor = 100 }
+	}
+
+	RAJ_instigate_in_brm = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		allowed = { original_tag = RAJ }
+		available = {
+			NOT = {
+				any_country = {
+					original_tag = TIB
+					has_government = communism
+				}
+			}
+			custom_trigger_tooltip = {
+			 	tooltip = RAJ_communist_coup_target_tt
+			 	NOT = { has_event_target = RAJ_communist_coup_target }
+			 }
+			 
+		}
+		highlight_states = {
+			highlight_states_trigger = {
+				is_owned_by = BRM
+			}
+		}
+		visible = {
+			original_tag = RAJ
+
+			any_country = {
+				original_tag = BRM
+				exists = yes
+				NOT = {
+					BRM = {
+						has_government = communism
+					}
+				}
+			}
+			NOT = {
+				any_country = {
+					original_tag = BRM
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		cost = 25
+		fire_only_once = yes
+		complete_effect = {
+			every_country = {
+				limit = { original_tag = BRM }
+				save_global_event_target_as = RAJ_communist_coup_target
+				country_event = { id = GOE_RAJ.48 hours = 2 }
+				event_option_tooltip = GOE_RAJ.48.a
+			}
+			
+			hidden_effect = { set_country_flag = instigating_a_coup }
+		}
+		ai_will_do = { factor = 100 }
+	}
+
+	RAJ_instigate_in_afg = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		allowed = { original_tag = RAJ }
+		available = {
+			NOT = {
+				any_country = {
+					original_tag = TIB
+					has_government = communism
+				}
+			}
+			custom_trigger_tooltip = {
+			 	tooltip = RAJ_communist_coup_target_tt
+			 	NOT = { has_event_target = RAJ_communist_coup_target }
+			 }
+			 
+		}
+		highlight_states = {
+			highlight_states_trigger = {
+				is_owned_by = AFG
+			}
+		}
+		visible = {
+			original_tag = RAJ
+
+			any_country = {
+				original_tag = AFG
+				exists = yes
+				NOT = {
+					AFG = {
+						has_government = communism
+					}
+				}
+			}
+			NOT = {
+				any_country = {
+					original_tag = AFG
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		cost = 25
+		fire_only_once = yes
+		complete_effect = {
+			every_country = {
+				limit = { original_tag = AFG }
+				save_global_event_target_as = RAJ_communist_coup_target
+				country_event = { id = GOE_RAJ.48 hours = 2 }
+				event_option_tooltip = GOE_RAJ.48.a
+			}
+			
+			hidden_effect = { set_country_flag = instigating_a_coup }
+		}
+		ai_will_do = { factor = 100 }
+	}
+
+	RAJ_instigate_in_per = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		allowed = { original_tag = RAJ }
+		available = {
+			NOT = {
+				any_country = {
+					original_tag = PER
+					has_government = communism
+				}
+			}
+			custom_trigger_tooltip = {
+			 	tooltip = RAJ_communist_coup_target_tt
+			 	NOT = { has_event_target = RAJ_communist_coup_target }
+			 }
+			 
+		}
+		highlight_states = {
+			highlight_states_trigger = {
+				is_owned_by = PER
+			}
+		}
+		visible = {
+			original_tag = RAJ
+
+			any_country = {
+				original_tag = PER
+				exists = yes
+				NOT = {
+					PER = {
+						has_government = communism
+					}
+				}
+			}
+			NOT = {
+				any_country = {
+					original_tag = PER
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		cost = 25
+		fire_only_once = yes
+		complete_effect = {
+			every_country = {
+				limit = { original_tag = PER }
+				save_global_event_target_as = RAJ_communist_coup_target
+				country_event = { id = GOE_RAJ.48 hours = 2 }
+				event_option_tooltip = GOE_RAJ.48.a
+			}
+			
+			hidden_effect = { set_country_flag = instigating_a_coup }
+		}
+		ai_will_do = { factor = 100 }
+	}
+
+	RAJ_instigate_in_sia = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		allowed = { original_tag = RAJ }
+		available = {
+			NOT = {
+				any_country = {
+					original_tag = SIA
+					has_government = communism
+				}
+			}
+			custom_trigger_tooltip = {
+			 	tooltip = RAJ_communist_coup_target_tt
+			 	NOT = { has_event_target = RAJ_communist_coup_target }
+			 }
+			 
+		}
+		highlight_states = {
+			highlight_states_trigger = {
+				is_owned_by = SIA
+			}
+		}
+		visible = {
+			original_tag = RAJ
+
+			any_country = {
+				original_tag = SIA
+				exists = yes
+				NOT = {
+					SIA = {
+						has_government = communism
+					}
+				}
+			}
+			NOT = {
+				any_country = {
+					original_tag = SIA
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		cost = 25
+		fire_only_once = yes
+		complete_effect = {
+			every_country = {
+				limit = { original_tag = SIA }
+				save_global_event_target_as = RAJ_communist_coup_target
+				country_event = { id = GOE_RAJ.48 hours = 2 }
+				event_option_tooltip = GOE_RAJ.48.a
+			}
+			
+			hidden_effect = { set_country_flag = instigating_a_coup }
+		}
+		ai_will_do = { factor = 100 }
+	}
+
+	RAJ_instigate_in_ins = {
+		icon = GFX_decision_eng_propaganda_campaigns
+		allowed = { original_tag = RAJ }
+		available = {
+			NOT = {
+				any_country = {
+					original_tag = INS
+					has_government = communism
+				}
+			}
+			custom_trigger_tooltip = {
+			 	tooltip = RAJ_communist_coup_target_tt
+			 	NOT = { has_event_target = RAJ_communist_coup_target }
+			 }
+			 
+		}
+		highlight_states = {
+			highlight_states_trigger = {
+				is_owned_by = INS
+			}
+		}
+		visible = {
+			original_tag = RAJ
+
+			any_country = {
+				original_tag = INS
+				exists = yes
+				NOT = {
+					INS = {
+						has_government = communism
+					}
+				}
+			}
+			NOT = {
+				any_country = {
+					original_tag = INS
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		cost = 25
+		fire_only_once = yes
+		complete_effect = {
+			every_country = {
+				limit = { original_tag = INS }
+				save_global_event_target_as = RAJ_communist_coup_target
+				country_event = { id = GOE_RAJ.48 hours = 2 }
+				event_option_tooltip = GOE_RAJ.48.a
+			}
+			
+			hidden_effect = { set_country_flag = instigating_a_coup }
+		}
+		ai_will_do = { factor = 100 }
+	}
+
+	RAJ_propaganda_in_target = {
+
+		icon = GFX_decision_POL_organize_strike_two
+
+		allowed = {
+			original_tag = RAJ
+		}
+		priority = 12
+		available = {
+			hidden_trigger = {
+				country_exists = event_target:RAJ_communist_coup_target
+			}
+			NOT = {
+				event_target:RAJ_communist_coup_target = {
+					OR = {
+						has_government = communism
+						has_idea = idea_RAJ_communist_propaganda
+					}
+				}
+			}
+		}
+		
+		visible = {
+			original_tag = RAJ
+			has_event_target = RAJ_communist_coup_target
+			event_target:RAJ_communist_coup_target = {
+				exists = yes
+				NOT = {
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		
+		cancel_trigger = {
+			NOT = {
+				has_country_flag = instigating_a_coup
+			}
+		}
+
+		cost = 25
+
+		modifier = {
+			political_power_gain = -0.05
+		}
+		days_remove = 70
+		
+		remove_effect = {}
+
+		complete_effect = {
+			effect_tooltip = {
+				event_target:RAJ_communist_coup_target = {
+					add_timed_idea = {
+						idea = idea_RAJ_communist_propaganda
+						days = 70
+					}
+				}
+			}
+
+			event_target:RAJ_communist_coup_target = {
+				country_event = { id = GOE_RAJ.47 }
+			}
+			
+		}
+
+		ai_will_do = {
+			factor = 100
+		}
+	}
+
+
+	RAJ_arm_communist_militants = {
+
+		icon = GFX_decision_POL_looming_peasants_strike
+
+		allowed = {
+			original_tag = RAJ
+		}
+		priority = 10
+		available = {
+			hidden_trigger = {
+				country_exists = event_target:RAJ_communist_coup_target
+			}
+			NOT = {
+				event_target:RAJ_communist_coup_target = {
+					OR = {
+						has_government = communism
+						has_idea = idea_RAJ_armed_communist_militants
+					}
+				}
+			}
+		}
+		
+		visible = {
+			original_tag = RAJ
+			has_event_target = RAJ_communist_coup_target
+			country_exists = event_target:RAJ_communist_coup_target
+			event_target:RAJ_communist_coup_target = {
+				NOT = {
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+					}
+				}
+			}
+		}
+		
+		cancel_trigger = {
+			NOT = {
+				has_country_flag = instigating_a_coup
+			}
+		}
+
+		cost = 25
+
+		custom_cost_trigger = {
+			has_equipment = { infantry_equipment > 499 }
+		}
+		custom_cost_text = decision_cost_ie_500
+
+		modifier = {
+			political_power_gain = -0.1
+		}
+		days_remove = 70
+		
+		remove_effect = {}
+
+		complete_effect = {
+
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = -500
+			}
+
+			event_target:RAJ_communist_coup_target = {
+				add_timed_idea = {
+					idea = idea_RAJ_armed_communist_militants
+					days = 180
+				}
+			}
+			
+		}
+
+		ai_will_do = {
+			factor = 100
+		}
+	}
+
+	RAJ_communist_coup = {
+
+		icon = decision_generic_agriculture
+
+		allowed = {
+			original_tag = RAJ
+		}
+		priority = 14
+
+		available = {
+			country_exists = event_target:RAJ_communist_coup_target
+			NOT = {
+				event_target:RAJ_communist_coup_target = {
+					has_government = communism
+				}
+			}
+			event_target:RAJ_communist_coup_target = {
+				communism > 0.3
+				has_stability < 0.35
+			}
+		}
+		
+		visible = {
+			original_tag = RAJ
+			has_event_target = RAJ_communist_coup_target
+			country_exists = event_target:RAJ_communist_coup_target
+			event_target:RAJ_communist_coup_target = {
+				NOT = {
+					OR = {
+						has_government = communism
+						has_country_flag = banned_communism_flag
+						has_country_flag = had_raj_civil_war_flag 
+					}
+				}
+			}
+		}
+
+		cost = 50
+
+		complete_effect = {
+			custom_effect_tooltip = RAJ_uprising_strength_tt
+			event_target:RAJ_communist_coup_target = {
+				country_event = { id = GOE_RAJ.46 }
+			}
+			hidden_effect = {
+				remove_decision_on_cooldown = RAJ_propaganda_in_target
+				remove_decision_on_cooldown = RAJ_arm_communist_militants
+				
+
+				clr_country_flag = instigating_a_coup
+				clear_global_event_target = RAJ_communist_coup_target
+			}
+		}
+
+		ai_will_do = {
+			factor = 100
+			modifier = {
+				event_target:RAJ_communist_coup_target = {
+					communism < 0.4
+				}
+				factor = 0
+			}
+		}
+	}
+
+	RAJ_abandon_communist_effort = {
+
+		icon = GFX_decision_BOL_reintegrate_litoral_department
+
+		allowed = {
+			original_tag = RAJ
+		}
+		priority = 5
+		available = {
+
+		}
+		
+		visible = {
+			original_tag = RAJ
+			has_event_target = RAJ_communist_coup_target
+		}
+
+		cost = 0
+
+		complete_effect = {
+			custom_effect_tooltip = RAJ_abandon_communist_effort_tt
+			hidden_effect = {
+				clear_global_event_target = RAJ_communist_coup_target
+				clr_country_flag = instigating_a_coup
+			}
+		}
+
+		ai_will_do = {
+			factor = 100
+			modifier = {
+				NOT = {
+					event_target:RAJ_communist_coup_target = {
+						OR = {
+							has_country_flag = banned_communism_flag
+							has_government = communism
+						}
+					}
+				}
+				factor = 0
+			}
+		}
+	}
+}
+
+
+### LOYALIST BRANCH ###
+
+political_actions = {
+	RAJ_return_churchill = {
+		priority = 100
+
+		icon = GFX_decision_generic_political_address
+
+		allowed = {
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_character = ENG_winston_churchill
+		}
+
+		available = {
+			ENG = { has_capitulated = no }
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		complete_effect = {
+			ENG_winston_churchill = { set_nationality = ENG } #Bon Voyage!
+
+			#Return Churchill back to office if he was country leader
+			hidden_effect = {
+				if = {
+					limit = {
+						ENG = {
+							has_country_flag = RAJ_churchill_was_leading_before_transfer_to_raj_flag
+						}
+					}
+					if = {
+						limit = {
+							ENG = {
+								is_ai = yes
+								has_character = ENG_winston_churchill
+							}
+						}
+						ENG_winston_churchill = { promote_character = yes }
+					}
+					else_if = {
+						limit = {
+							has_character = ENG_winston_churchill
+						}
+						country_event = { id = GOE_RAJ_loyalist.13 hours = 1 }
+					}
+				}
+			}
+		}
+	}
+}
+
+prospect_for_resources = {
+	RAJ_request_resource_rights_in_burma = {
+		priority = 100
+
+		icon = GFX_decision_eng_trade_unions_support
+
+		allowed = {
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_completed_focus = RAJ_exploit_the_frontier
+			288 = {
+				controller = {
+					is_ally_with = ROOT
+					OR = {
+						is_subject_of = ENG
+						is_subject = no
+					}
+				}
+			}
+		}
+
+		available = {
+			288 = {
+				controller = {
+					is_ally_with = ROOT
+				}
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		fire_only_once = yes
+
+		complete_effect = {
+			#Send event to OVERLORD (if any), otherwise to controller
+			if = {
+				limit = {
+					var:288.controller = {
+						is_subject_of = ENG
+					}
+				}
+				ENG = { country_event = { id = GOE_RAJ_loyalist.14 hours = 4 random_hours = 2 } }
+			}
+			else = {
+				var:288.controller = { country_event = { id = GOE_RAJ_loyalist.14 hours = 4 random_hours = 2 } }
+			}
+		}
+	}
+
+	develop_southern_madras_rubber_plantations = { #423 - SOUTHERN MADRAS
+		icon = rubber
+
+		allowed = {
+			has_dlc = "Graveyard of Empires"
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_completed_focus = RAJ_exploit_the_frontier
+			owns_state = 423
+			controls_state = 423
+			423 = {
+				NOT = {
+					has_state_flag = southern_madras_rubber_developed
+				}
+			}
+		}
+
+		available = {
+			owns_state = 423
+			controls_state = 423
+			num_of_civilian_factories_available_for_projects > 2
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 423
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 25
+		days_remove = 180
+
+		modifier = {
+			civilian_factory_use = 3
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = { #Too low MP we need to save PP for the laws
+				factor = 0
+				has_manpower < 10000
+				NOT = { has_idea = scraping_the_barrel }
+			}
+			modifier = { # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = rubber
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			423 = {
+				set_state_flag = southern_madras_rubber_developed
+			}
+			423 = {
+				add_resource = {
+					type = rubber
+					amount = 8
+				}
+			}
+		}
+	}
+
+	develop_arunachal_pradesh_tungsten_deposits = { #434 - ARUNACHAL PRADESH
+		icon = tungsten
+
+		allowed = {
+			has_dlc = "Graveyard of Empires"
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_completed_focus = RAJ_exploit_the_frontier
+			owns_state = 434
+			controls_state = 434
+			434 = {
+				NOT = {
+					has_state_flag = arunachal_pradesh_tungsten_developed
+				}
+			}
+		}
+
+		available = {
+			owns_state = 434
+			controls_state = 434
+			has_tech = excavation3
+			num_of_civilian_factories_available_for_projects > 2
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 434
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 25
+		days_remove = 180
+
+		modifier = {
+			civilian_factory_use = 3
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = { #Too low MP we need to save PP for the laws
+				factor = 0
+				has_manpower < 10000
+				NOT = { has_idea = scraping_the_barrel }
+			}
+			modifier = { # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = tungsten
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			434 = {
+				set_state_flag = arunachal_pradesh_tungsten_developed
+			}
+			434 = {
+				add_resource = {
+					type = tungsten
+					amount = 8
+				}
+			}
+		}
+	}
+
+	develop_bombay_tungsten_deposits = { #429 - BOMBAY
+		icon = tungsten
+
+		allowed = {
+			has_dlc = "Graveyard of Empires"
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_completed_focus = RAJ_exploit_the_frontier
+			owns_state = 429
+			controls_state = 429
+			429 = {
+				NOT = {
+					has_state_flag = bombay_tungsten_developed
+				}
+			}
+		}
+
+		available = {
+			owns_state = 429
+			controls_state = 429
+			has_tech = excavation3
+			num_of_civilian_factories_available_for_projects > 2
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 429
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 25
+		days_remove = 180
+
+		modifier = {
+			civilian_factory_use = 3
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = { #Too low MP we need to save PP for the laws
+				factor = 0
+				has_manpower < 10000
+				NOT = { has_idea = scraping_the_barrel }
+			}
+			modifier = { # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = tungsten
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			429 = {
+				set_state_flag = bombay_tungsten_developed
+			}
+			429 = {
+				add_resource = {
+					type = tungsten
+					amount = 8
+				}
+			}
+		}
+	}
+
+	develop_west_bengal_iron_mines = { #431 - WEST BENGAL
+		icon = steel
+
+		allowed = {
+			has_dlc = "Graveyard of Empires"
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_completed_focus = RAJ_exploit_the_frontier
+			owns_state = 431
+			controls_state = 431
+			431 = {
+				NOT = {
+					has_state_flag = west_bengal_steel_developed
+				}
+			}
+		}
+
+		available = {
+			owns_state = 431
+			controls_state = 431
+			has_tech = excavation3
+			num_of_civilian_factories_available_for_projects > 2
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 431
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 25
+		days_remove = 180
+
+		modifier = {
+			civilian_factory_use = 3
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = { #Too low MP we need to save PP for the laws
+				factor = 0
+				has_manpower < 10000
+				NOT = { has_idea = scraping_the_barrel }
+			}
+			modifier = { # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = steel
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			431 = {
+				set_state_flag = west_bengal_steel_developed
+			}
+			431 = {
+				add_resource = {
+					type = steel
+					amount = 8
+				}
+			}
+		}
+	}
+
+	expand_the_mines_in_orissa = { #426 - ORISSA
+		icon = steel
+
+		allowed = {
+			has_dlc = "Graveyard of Empires"
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_completed_focus = RAJ_exploit_the_frontier
+			owns_state = 426
+			controls_state = 426
+			426 = {
+				NOT = {
+					has_state_flag = orissa_mines_developed
+				}
+			}
+		}
+
+		available = {
+			owns_state = 426
+			controls_state = 426
+			has_tech = excavation4
+			num_of_civilian_factories_available_for_projects > 3
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 426
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 35
+		days_remove = 210
+
+		modifier = {
+			civilian_factory_use = 4
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = { #Too low MP we need to save PP for the laws
+				factor = 0
+				has_manpower < 10000
+				NOT = { has_idea = scraping_the_barrel }
+			}
+			modifier = { # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				OR = {
+					has_resources_in_country = {
+						resource = steel
+						amount < 1
+					}
+					has_resources_in_country = {
+						resource = chromium
+						amount < 1
+					}
+				}
+			}
+		}
+
+		remove_effect = {
+			426 = {
+				set_state_flag = orissa_mines_developed
+			}
+			426 = {
+				add_resource = {
+					type = steel
+					amount = 12
+				}
+				add_resource = {
+					type = chromium
+					amount = 8
+				}
+				add_resource = {
+					type = aluminium
+					amount = 4
+				}
+			}
+		}
+	}
+
+	expand_the_mines_in_hyderabad = { #427 - HYDERABAD
+		icon = chromium
+
+		allowed = {
+			has_dlc = "Graveyard of Empires"
+			original_tag = RAJ
+		}
+
+		visible = {
+			has_completed_focus = RAJ_exploit_the_frontier
+			owns_state = 427
+			controls_state = 427
+			427 = {
+				NOT = {
+					has_state_flag = hyderabad_mines_developed
+				}
+			}
+		}
+
+		available = {
+			owns_state = 427
+			controls_state = 427
+			has_tech = excavation4
+			num_of_civilian_factories_available_for_projects > 3
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 427
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 35
+		days_remove = 210
+
+		modifier = {
+			civilian_factory_use = 4
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = { #Too low MP we need to save PP for the laws
+				factor = 0
+				has_manpower < 10000
+				NOT = { has_idea = scraping_the_barrel }
+			}
+			modifier = { # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				OR = {
+					has_resources_in_country = {
+						resource = steel
+						amount < 1
+					}
+					has_resources_in_country = {
+						resource = chromium
+						amount < 1
+					}
+				}
+			}
+		}
+
+		remove_effect = {
+			427 = {
+				set_state_flag = hyderabad_mines_developed
+			}
+			427 = {
+				add_resource = {
+					type = chromium
+					amount = 12
+				}
+				add_resource = {
+					type = steel
+					amount = 8
+				}
+			}
+		}
+	}
+}
+
+RAJ_work_with_local_leaders_cat = {
+	RAJ_investments_from_local_leaders = {
+		icon = GFX_decision_generic_construction
+		allowed = {
+			original_tag = RAJ
+		}
+		visible = {
+			always = yes
+		}
+		is_good = yes
+		available = { hidden_trigger = { always = no } }
+
+		activation = {
+			has_completed_focus = RAJ_work_with_local_leaders 
+		}
+		days_mission_timeout = 270
+		timeout_effect = {
+
+			custom_effect_tooltip = RAJ_investments_from_local_leaders_tt
+
+			hidden_effect = {
+				#Pick Reward
+				random_list = {
+					seed = random 
+					1 = { #INFRA + SLOT (Basic)
+						modifier = { #Completing these focuses disables the basic reward in exchange for better ones
+							factor = 0
+							OR = {
+								has_completed_focus = RAJ_concessions_to_the_industrialists
+								has_completed_focus = RAJ_empower_provincial_authorities
+							}
+						}
+						
+						if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									infrastructure < 5
+								}
+							}
+							log = "IF"
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									infrastructure < 5
+								}
+								add_building_construction = {
+									type = infrastructure
+									level = 1
+									instant_build = yes
+								}
+								if = {
+									limit = {
+										free_building_slots = {
+											building = industrial_complex
+											size > 0
+											include_locked = yes
+										}
+									}
+									add_extra_state_shared_building_slots = 1
+								}
+								log = "Shit built in [THIS.GetName]"
+							}
+						}
+						else_if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = industrial_complex
+										size > 0
+										include_locked = yes
+									}
+								}
+							}
+							log = "ELSE IF"
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = industrial_complex
+										size > 0
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 1
+							}
+						}
+						else = {
+							log = "ELSE"
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									free_building_slots = {
+										building = industrial_complex
+										size > 0
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 1
+							}
+						}
+
+						#Manage vars for tooltips
+						add_to_variable = { RAJ_local_leaders_infra = 1 }
+					}
+					1 = { #INFRA + CIV
+						modifier = {
+							factor = 0
+							NOT = { has_completed_focus = RAJ_concessions_to_the_industrialists }
+							NOT = { has_completed_focus = RAJ_empower_provincial_authorities }
+						}
+						modifier = {
+							factor = 6
+							has_completed_focus = RAJ_concessions_to_the_industrialists
+						}
+						modifier = {
+							factor = 3.3
+							has_completed_focus = RAJ_empower_provincial_authorities
+						}
+
+						if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = industrial_complex
+										size > 0
+										include_locked = yes
+									}
+									infrastructure < 5
+								}
+							}
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+									infrastructure < 5
+								}
+								add_building_construction = {
+									type = infrastructure
+									level = 1
+									instant_build = yes
+								}
+								add_extra_state_shared_building_slots = 2
+								add_building_construction = {
+									type = industrial_complex
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+						else_if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+								}
+							}
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 2
+								add_building_construction = {
+									type = industrial_complex
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+						else_if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+								}
+							}
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 2
+								add_building_construction = {
+									type = industrial_complex
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+						else = {
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									free_building_slots = {
+										building = industrial_complex
+										size > 0
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 1
+								add_building_construction = {
+									type = industrial_complex
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+
+						#Manage vars for tooltips
+						add_to_variable = { RAJ_local_leaders_civs = 1 }
+					}
+					1 = { #INFRA + MIL
+						modifier = {
+							factor = 0
+							NOT = { has_completed_focus = RAJ_concessions_to_the_industrialists }
+							NOT = { has_completed_focus = RAJ_empower_provincial_authorities }
+						}
+						modifier = {
+							factor = 4
+							has_completed_focus = RAJ_concessions_to_the_industrialists
+						}
+						modifier = {
+							factor = 3.3
+							has_completed_focus = RAJ_empower_provincial_authorities
+						}
+
+						if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = arms_factory
+										size > 0
+										include_locked = yes
+									}
+									infrastructure < 5
+								}
+							}
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = arms_factory
+										size > 1
+										include_locked = yes
+									}
+									infrastructure < 5
+								}
+								add_building_construction = {
+									type = infrastructure
+									level = 1
+									instant_build = yes
+								}
+								add_extra_state_shared_building_slots = 2
+								add_building_construction = {
+									type = arms_factory
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+						else_if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = arms_factory
+										size > 1
+										include_locked = yes
+									}
+								}
+							}
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = {
+										building = arms_factory
+										size > 1
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 2
+								add_building_construction = {
+									type = arms_factory
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+						else_if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									free_building_slots = {
+										building = arms_factory
+										size > 1
+										include_locked = yes
+									}
+								}
+							}
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									free_building_slots = {
+										building = arms_factory
+										size > 1
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 2
+								add_building_construction = {
+									type = arms_factory
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+						else = {
+							random_owned_state = {
+								limit = {
+									is_fully_controlled_by = ROOT
+									free_building_slots = {
+										building = arms_factory
+										size > 0
+										include_locked = yes
+									}
+								}
+								add_extra_state_shared_building_slots = 1
+								add_building_construction = {
+									type = arms_factory
+									level = 1
+									instant_build = yes
+								}
+							}
+						}
+
+						#Manage vars for tooltips
+						add_to_variable = { RAJ_local_leaders_mils = 1 }
+					}
+					1 = { #DEFENSES: AIR BASE + AA + RADAR
+						modifier = {
+							factor = 0
+							NOT = { has_completed_focus = RAJ_empower_provincial_authorities }
+						}
+						modifier = {
+							factor = 3.3
+							has_completed_focus = RAJ_empower_provincial_authorities
+						}
+
+						if = {
+							limit = {
+								any_owned_state = {
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = { #AA is not granted and you can have 1 supply Hub per province so this is the only reliable limiting factor
+										building = air_base
+										size > 0
+									}
+								}
+							}
+							random_owned_state = {
+								limit = {	
+									is_fully_controlled_by = ROOT
+									is_in_array = {
+										array = ROOT.owned_states_at_game_start
+										value = THIS
+									}
+									free_building_slots = { #AA is not granted and you can have 1 supply Hub per province so this is the only reliable limiting factor
+										building = air_base
+										size > 0
+									}
+								}
+								# AIR BASE
+								add_building_construction = {
+									type = air_base
+									level = 2
+									instant_build = yes
+								}
+								
+								# AA
+								if = {
+									limit = {
+										ROOT = { has_tech = interwar_antiair }
+										anti_air_building < 5
+									}
+									add_building_construction = {
+										type = anti_air_building
+										level = 1
+										instant_build = yes
+									}
+								}
+
+								# RADAR
+								if = {
+									limit = {
+										ROOT = { is_special_project_completed = sp:sp_air_radar }
+										OR = {
+											radar_station < 1
+											AND = {
+												ROOT = { has_tech = cavity_magnatron }
+												radar_station < 2
+											}
+											AND = {
+												ROOT = { has_tech = centimetric_radar }
+												radar_station < 4
+											}
+											AND = {
+												ROOT = { has_tech = monopulse_radar }
+												radar_station < 6
+											}
+										}
+									}
+									add_building_construction = {
+										type = radar_station
+										level = 1
+										instant_build = yes
+									}
+								}
+							}
+						}
+						else = {
+							random_owned_state = {
+								limit = {	
+									is_fully_controlled_by = ROOT
+									free_building_slots = { #AA is not granted and you can have 1 supply Hub per province so this is the only reliable limiting factor
+										building = air_base
+										size > 0
+									}
+								}
+								# AIR BASE
+								add_building_construction = {
+									type = air_base
+									level = 2
+									instant_build = yes
+								}
+								
+								# AA
+								if = {
+									limit = {
+										ROOT = { has_tech = interwar_antiair }
+										anti_air_building < 5
+									}
+									add_building_construction = {
+										type = anti_air_building
+										level = 1
+										instant_build = yes
+									}
+								}
+
+								# RADAR
+								if = {
+									limit = {
+										ROOT = { is_special_project_completed = sp:sp_air_radar }
+										OR = {
+											radar_station < 1
+											AND = {
+												ROOT = { has_tech = cavity_magnatron }
+												radar_station < 2
+											}
+											AND = {
+												ROOT = { has_tech = centimetric_radar }
+												radar_station < 4
+											}
+											AND = {
+												ROOT = { has_tech = monopulse_radar }
+												radar_station < 6
+											}
+										}
+									}
+									add_building_construction = {
+										type = radar_station
+										level = 1
+										instant_build = yes
+									}
+								}
+							}
+						}
+
+						#Manage vars for tooltips
+						add_to_variable = { RAJ_local_leaders_defenses = 1 }
+					}
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			activate_mission = RAJ_investments_from_local_leaders
+		}
+	}
+}
+
+RAJ_concessions_to_the_congress_cat = {
+	####################
+	### DEFAULT DECS ###
+	####################
+
+	RAJ_congress_productivity_effort = {
+		priority = 100
+		icon = generic_factory
+
+		available = {
+			NOT = { has_idea = RAJ_congress_productivity_effort_ns }
+		}
+
+		cost = RAJ_congress_decision_cost
+
+		fire_only_once = no
+
+		ai_will_do = {
+			base = 0.1
+		}
+
+		complete_effect = {
+			add_timed_idea = { idea = RAJ_congress_productivity_effort_ns days = 180 }
+
+			RAJ_congress_demands_increase_decision_cost = yes
+		}
+	}
+
+	RAJ_congress_shipbuilding_effort = {
+		priority = 100
+		icon = generic_naval
+
+		available = {
+			NOT = { has_idea = RAJ_congress_shipbuilding_effort_ns }
+		}
+
+		cost = RAJ_congress_decision_cost
+
+		fire_only_once = no
+
+		ai_will_do = {
+			base = 0.1
+		}
+
+		complete_effect = {
+			add_timed_idea = { idea = RAJ_congress_shipbuilding_effort_ns days = 180 }
+
+			RAJ_congress_demands_increase_decision_cost = yes
+		}
+	}
+
+	RAJ_congress_construction_effort = {
+		priority = 100
+		icon = generic_construction
+
+		available = {
+			NOT = { has_idea = RAJ_congress_construction_effort_ns }
+		}
+
+		cost = RAJ_congress_decision_cost
+
+		fire_only_once = no
+
+		ai_will_do = {
+			base = 0.1
+		}
+
+		complete_effect = {
+			add_timed_idea = { idea = RAJ_congress_construction_effort_ns days = 180 }
+
+			RAJ_congress_demands_increase_decision_cost = yes
+		}
+	}
+
+	RAJ_congress_war_propaganda = {
+		priority = 100
+		icon = eng_propaganda_campaigns
+
+		available = {
+			NOT = { has_idea = RAJ_congress_war_propaganda_ns }
+			OR = {
+				has_war = yes
+				AND = {
+					is_subject = yes
+					OVERLORD = {
+						has_war = yes
+					}
+				}
+			}
+		}
+
+		cost = RAJ_congress_decision_cost
+
+		fire_only_once = no
+
+		ai_will_do = {
+			base = 0.1
+		}
+
+		complete_effect = {
+			add_stability = -0.05
+			add_timed_idea = { idea = RAJ_congress_war_propaganda_ns days = 180 }
+
+			RAJ_congress_demands_increase_decision_cost = yes
+		}
+	}
 }
