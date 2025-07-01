@@ -1179,14 +1179,21 @@ focus_tree = {
 			set_variable = { KPD_seats_f = KPD_seats }
 			set_country_flag = GER_no_gov
 			set_variable = { GER_total_seats = NRAF_seats_f }
+			IF = {
+				limit = { has_completed_focus = GER_demokratieschutzgesetz }
+				set_variable = { GER_total_seats = 0 }
+			}
 			add_to_variable = { GER_total_seats = DNVP_seats_f }
 			add_to_variable = { GER_total_seats = DVU_seats_f }
 			add_to_variable = { GER_total_seats = DVP_seats_f }
 			add_to_variable = { GER_total_seats = DSTP_seats_f }
 			add_to_variable = { GER_total_seats = Zentrum_seats_f }
 			add_to_variable = { GER_total_seats = SPD_seats_f }
-			add_to_variable = { GER_total_seats = SAPD_seats_f }
-			add_to_variable = { GER_total_seats = KPD_seats_f }
+			IF = {
+				limit = { NOT = { has_completed_focus = GER_reinstate_the_reichtagsbrandverordnung}}
+				add_to_variable = { GER_total_seats = SAPD_seats_f }
+				add_to_variable = { GER_total_seats = KPD_seats_f }
+			}
 			set_variable = { GER_majority_seats = GER_total_seats }
 			divide_variable = { GER_majority_seats = 2 }
 			round_variable = GER_majority_seats
@@ -1453,7 +1460,7 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_a_new_republic
-		icon = GFX_focus_GER_tend_to_the_future
+		icon = GFX_focus_GER_german_hegemony_in_the_middle_east_neutrality
 		cost = 5
 		prerequisite = { focus = GER_operation_valkyre}
 		prerequisite = { focus = GER_unite_the_right focus = GER_the_center_reforged}
@@ -1472,6 +1479,7 @@ focus_tree = {
 		}
 
 		available = {
+			has_civil_war = no
 			NOT = {
 				has_completed_focus = GER_secure_freikorps_remnants
 			}
@@ -1489,7 +1497,7 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_wehrhafte_demokratie
-		icon = GFX_focus_GER_tend_to_the_future
+		icon = GFX_focus_ARG_defense_and_democracy
 		cost = 4
 		prerequisite = { focus = GER_a_new_republic focus = GER_found_the_german_interim_government}
 
@@ -1527,7 +1535,7 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_undermine_the_military
-		icon = GFX_focus_GER_tend_to_the_future
+		icon = GFX_focus_GER_subdue_the_wehrmacht
 		cost = 4
 		prerequisite = { focus = GER_wehrhafte_demokratie}
 
@@ -1631,8 +1639,8 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_an_eye_to_the_left
-		icon = GFX_focus_GER_tend_to_the_future
-		cost = 10
+		icon = GFX_focus_ger_bulwark_against_bolshevism
+		cost = 4
 		prerequisite = { focus = GER_wehrhafte_demokratie}
 
 		x = 2
@@ -1650,6 +1658,7 @@ focus_tree = {
 					has_completed_focus = GER_kpd_in_coalition
 				}
 			}
+			NOT = { has_government = communism}
 			OR = {
 				NOT = { has_completed_focus = GER_an_eye_to_the_right}
 				has_completed_focus = GER_reinstate_the_reichtagsbrandverordnung
@@ -1658,13 +1667,19 @@ focus_tree = {
 		ai_will_do = {
 		}
 		completion_reward = {
+			add_ideas = GER_an_eye_to_the_left_idea
+			add_to_variable = { SAPD_seats = -5}
+			custom_effect_tooltip = GER_SAPD_-5_tt
+			add_to_variable = { KPD_seats = -5}
+			custom_effect_tooltip = GER_KPD_-5_tt
+			unlock_decision_tooltip = GER_anti_commie_propaganda
 		}
 
 	}
 	focus = {
 		id = GER_destroy_the_antifa
-		icon = GFX_focus_GER_tend_to_the_future
-		cost = 10
+		icon = GFX_focus_GER_end_european_communism
+		cost = 4
 		prerequisite = { focus = GER_an_eye_to_the_left}
 
 		x = 0
@@ -1676,16 +1691,50 @@ focus_tree = {
 		}
 
 		available = {
+			NOT = { 
+				OR = {
+					has_completed_focus = GER_kpd_in_coalition
+					has_completed_focus = GER_sapd_in_coalition
+				}
+			}
+			NOT = { has_government = communism }
+			custom_trigger_tooltip = {
+				tooltip = GER_KPD_less_than_30_tt
+				check_variable = {
+					var = KPD_seats
+					value = 30
+					compare = less_than
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = GER_SAPD_less_than_30_tt
+				check_variable = {
+					var = SAPD_seats
+					value = 30
+					compare = less_than
+				}
+			}
 		}
 		ai_will_do = {
 		}
 		completion_reward = {
+			IF = {
+				limit = { has_idea = GER_communist_resistance}
+				remove_ideas = GER_communist_resistance
+			}
+			64 = {
+				remove_dynamic_modifier = {
+					modifier  = GER_antifa_state_modifier
+					scope = 64
+				}
+			}
+			unlock_decision_tooltip = GER_drive_out_the_antifa
 		}
 
 	}
 	focus = {
 		id = GER_reinstate_the_reichtagsbrandverordnung
-		icon = GFX_focus_GER_tend_to_the_future
+		icon = GFX_goal_attack_communists
 		cost = 10
 		prerequisite = { focus = GER_destroy_the_antifa}
 
@@ -1698,16 +1747,79 @@ focus_tree = {
 		}
 
 		available = {
+			every_core_state = {
+				NOT = {
+					has_dynamic_modifier = {
+						modifier = GER_antifa_state_modifier
+					}
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = GER_KPD_less_than_15_tt
+				check_variable = {
+					var = KPD_seats
+					value = 15
+					compare = less_than
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = GER_SAPD_less_than_15_tt
+				check_variable = {
+					var = SAPD_seats
+					value = 15
+					compare = less_than
+				}
+			}
+			NOT = { has_country_flag = GER_no_gov }
+			NOT = { 
+				OR = {
+					has_completed_focus = GER_kpd_in_coalition
+					has_completed_focus = GER_sapd_in_coalition
+				}
+			}
+			NOT = { has_government = communism }
 		}
 		ai_will_do = {
 		}
 		completion_reward = {
+			remove_ideas = GER_an_eye_to_the_left_idea
+			custom_effect_tooltip = GER_ban_commies_tt
+			add_popularity = {
+				ideology = communism
+				popularity = -0.1
+			}
+			custom_effect_tooltip = GER_ban_commies_consequences
+			divide_variable = { SAPD_seats = -200}
+			hidden_effect = {
+				add_stability = SAPD_seats
+			}
+			divide_variable = { KPD_seats = -200}
+			hidden_effect = {
+				add_stability = KPD_seats
+			}
+			set_variable = { NRAF_seats = 0}
+			set_variable = { NRAF_seats_f = 0 }
+			set_variable = { GER_total_seats = NRAF_seats_f }
+			IF = {
+				limit = { has_completed_focus = GER_demokratieschutzgesetz }
+				set_variable = { GER_total_seats = 0 }
+			}
+			add_to_variable = { GER_total_seats = DNVP_seats_f }
+			add_to_variable = { GER_total_seats = DVU_seats_f }
+			add_to_variable = { GER_total_seats = DVP_seats_f }
+			add_to_variable = { GER_total_seats = DSTP_seats_f }
+			add_to_variable = { GER_total_seats = Zentrum_seats_f }
+			add_to_variable = { GER_total_seats = SPD_seats_f }
+			set_variable = { GER_majority_seats = GER_total_seats }
+			divide_variable = { GER_majority_seats = 2 }
+			round_variable = GER_majority_seats
+			add_to_variable = { GER_majority_seats = 1 }
 		}
 
 	}
 	focus = {
 		id = GER_an_eye_to_the_right
-		icon = GFX_focus_GER_tend_to_the_future
+		icon = GFX_focus_generic_anti_fascist_diplomacy
 		cost = 5
 		prerequisite = { focus = GER_wehrhafte_demokratie}
 
@@ -1724,7 +1836,7 @@ focus_tree = {
 				NOT = { has_completed_focus = GER_an_eye_to_the_right}
 				has_completed_focus = GER_reinstate_the_reichtagsbrandverordnung
 			}
-			NOT = { has_country_flag = GER_nraf_in_coalition}
+			NOT = { has_completed_focus = GER_nraf_in_coalition}
 			NOT = { has_government = fascism }
 		}
 		ai_will_do = {
@@ -1758,8 +1870,8 @@ focus_tree = {
 	}
 	focus = {
 		id = GER_fight_the_sa
-		icon = GFX_focus_GER_tend_to_the_future
-		cost = 10
+		icon = GFX_focus_spr_the_anti_fascist_workers_revolution
+		cost = 4
 		prerequisite = { focus = GER_an_eye_to_the_right}
 
 		x = 0
@@ -1771,7 +1883,7 @@ focus_tree = {
 		}
 
 		available = {
-			NOT = { has_country_flag = GER_nraf_in_coalition}
+			NOT = { has_completed_focus = GER_nraf_in_coalition}
 			NOT = { has_government = fascism }
 			custom_trigger_tooltip = {
 				tooltip = GER_NRAF_less_than_40_tt
@@ -1803,13 +1915,14 @@ focus_tree = {
 					scope = 64
 				}
 			}
+			unlock_decision_tooltip = GER_drive_out_the_sa
 		}
 
 	}
 	focus = {
 		id = GER_demokratieschutzgesetz
-		icon = GFX_focus_GER_tend_to_the_future
-		cost = 10
+		icon = GFX_goal_fascism_banned
+		cost = 5
 		prerequisite = { focus = GER_fight_the_sa}
 
 		x = 0
@@ -1821,7 +1934,23 @@ focus_tree = {
 		}
 
 		available = {
-			NOT = { has_country_flag = GER_nraf_in_coalition}
+			every_core_state = {
+				NOT = {
+					has_dynamic_modifier = {
+						modifier = GER_sa_state_modifier
+					}
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = GER_NRAF_less_than_20_tt
+				check_variable = {
+					var = NRAF_seats
+					value = 20
+					compare = less_than
+				}
+			}
+			NOT = { has_country_flag = GER_no_gov }
+			NOT = { has_completed_focus = GER_nraf_in_coalition}
 			NOT = { has_government = fascism }
 		}
 		ai_will_do = {
@@ -1840,6 +1969,26 @@ focus_tree = {
 			}
 			set_variable = { NRAF_seats = 0}
 			set_variable = { NRAF_seats_f = 0 }
+			set_variable = { GER_total_seats = NRAF_seats_f }
+			IF = {
+				limit = { has_completed_focus = GER_demokratieschutzgesetz }
+				set_variable = { GER_total_seats = 0 }
+			}
+			add_to_variable = { GER_total_seats = DNVP_seats_f }
+			add_to_variable = { GER_total_seats = DVU_seats_f }
+			add_to_variable = { GER_total_seats = DVP_seats_f }
+			add_to_variable = { GER_total_seats = DSTP_seats_f }
+			add_to_variable = { GER_total_seats = Zentrum_seats_f }
+			add_to_variable = { GER_total_seats = SPD_seats_f }
+			IF = {
+				limit = { NOT = { has_completed_focus = GER_reinstate_the_reichtagsbrandverordnung}}
+				add_to_variable = { GER_total_seats = SAPD_seats_f }
+				add_to_variable = { GER_total_seats = KPD_seats_f }
+			}
+			set_variable = { GER_majority_seats = GER_total_seats }
+			divide_variable = { GER_majority_seats = 2 }
+			round_variable = GER_majority_seats
+			add_to_variable = { GER_majority_seats = 1 }
 		}
 
 	}
