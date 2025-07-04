@@ -1,0 +1,796 @@
+####NO STEP BACK####
+EST_vaps_revolt_category = {
+
+	EST_vaps_uprising = {
+
+		allowed = { tag = EST }
+
+		icon = GFX_decision_revolt
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		days_mission_timeout = vaps_days_var
+		is_good = no
+		fire_only_once = yes
+
+		cancel_trigger = {
+			hidden_trigger = {
+				OR = {
+					has_completed_focus = EST_rally_the_nation
+					has_completed_focus = BALTIC_overthrow_the_government
+					has_government = fascism
+					has_country_flag = fought_vaps_flag
+				}
+			}
+		}
+
+		activation = {
+			has_completed_focus = EST_era_of_silence
+			NOT = {
+				has_completed_focus = EST_rally_the_nation
+				has_government = fascism
+				has_country_flag = fought_vaps_flag
+			}
+		}
+
+		visible = {
+			NOT = {
+				has_completed_focus = EST_rally_the_nation
+				has_government = fascism
+				has_country_flag = fought_vaps_flag
+			}
+		}
+
+		cancel_effect = {
+
+		}
+
+		timeout_effect = {
+			EST_vaps_down_effect = yes
+			activate_mission = EST_vaps_uprising
+		}
+
+		ai_will_do = {
+			factor = 200
+		}
+	}
+
+	EST_vaps_crackdown = {
+
+		allowed = { tag = EST }
+
+		icon = GFX_decision_oppression
+
+		available = {
+			OR = {
+				has_government = fascism
+				has_country_flag = fought_vaps_flag
+			}
+		}
+
+		days_mission_timeout = vaps_crackdown_var
+		is_good = yes
+		fire_only_once = yes
+
+		cancel_trigger = {
+			hidden_trigger = {
+				OR = {
+					has_completed_focus = EST_rally_the_nation
+					has_government = fascism
+					has_country_flag = fought_vaps_flag
+				}
+			}
+		}
+
+		activation = {
+			tag = EST
+			has_completed_focus = EST_era_of_silence
+			NOT = {
+				OR = {
+					has_completed_focus = EST_rally_the_nation
+					has_government = fascism
+					has_country_flag = fought_vaps_flag
+				}
+			}
+		}
+
+		visible = {
+			tag = EST
+			NOT = {
+				OR = {
+					has_completed_focus = EST_rally_the_nation
+					has_government = fascism
+					has_country_flag = fought_vaps_flag
+				}
+			}
+		}
+
+		cancel_effect = {
+
+		}
+
+		timeout_effect = {
+			set_country_flag = fought_vaps_flag
+			if = {
+				limit = { #Fallback in case the AI really sucks at handling this
+					is_ai = yes
+					OR = {
+						AND = {
+							is_historical_focus_on = yes
+							has_game_rule = {
+								rule = EST_ai_behavior
+								option = DEFAULT
+							}
+						}
+						has_country_flag = EST_AI_RANDOM_HISTORICAL
+						has_game_rule = {
+							rule = EST_ai_behavior
+							option = HISTORICAL
+						}
+					}
+				}
+				#Empty, we just want to remove the Vaps NS as we do below
+			}
+			else_if = {
+				limit = {
+					has_idea = EST_vaps_idea_4
+				}
+				start_civil_war = {
+					ideology = fascism
+					size = 0.6
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = EST_vaps_idea_3
+				}
+				start_civil_war = {
+					ideology = fascism
+					size = 0.35
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = EST_vaps_idea_2
+				}
+				add_popularity = {
+					ideology = fascism
+					popularity = -0.1
+				}
+				add_stability = -0.1
+			}
+			else = {
+				add_popularity = {
+					ideology = fascism
+					popularity = -0.2
+				}
+			}
+			remove_vaps_effect = yes
+		}
+
+		ai_will_do = {
+			factor = 200
+		}
+	}
+}
+
+EST_fight_vaps_decisions = {
+
+	#Permanently increase the days it takes for the Vaps spirit to level up
+	EST_divide_veterans_societies = {
+
+		allowed = {
+			original_tag = EST
+		}
+
+		days_remove = 100
+
+		available = {
+			has_active_mission = EST_vaps_uprising
+		}
+
+		custom_cost_trigger = {
+			command_power > 24
+		}
+
+		custom_cost_text = decision_cost_CP_25
+
+		ai_will_do = {
+			base = 10
+		}
+
+		visible = {
+			has_active_mission = EST_vaps_uprising
+		}
+		fire_only_once = yes
+		complete_effect = {
+			hidden_effect = { add_command_power = -25 }
+			custom_effect_tooltip = add_days_to_vaps_timer_tt
+			add_to_variable = {
+				var = vaps_days_var
+				value = 30
+			}
+		}
+	}
+
+	#Temporarily delay the Vaps uprising
+	EST_disrupt_vaps_recruitment = {
+
+		allowed = {
+			original_tag = EST
+		}
+
+		days_remove = 70
+
+		custom_cost_trigger = {
+			command_power > 14
+		}
+
+		custom_cost_text = decision_cost_CP_15
+
+		available = {
+			has_active_mission = EST_vaps_uprising
+		}
+
+		ai_will_do = {
+			base = 10
+		}
+
+		visible = {
+			has_active_mission = EST_vaps_uprising
+		}
+		fire_only_once = yes
+		complete_effect = {
+			hidden_effect = { add_command_power = -15 }
+			add_days_mission_timeout = {
+				mission = EST_vaps_uprising
+				days = 30
+			}
+		}
+	}
+
+	#Lower the Vaps spirit one peg
+	EST_crackdown_on_vaps = {
+
+		allowed = {
+			original_tag = EST
+		}
+
+		days_remove = 70
+
+		custom_cost_trigger = {
+			command_power > 49
+			has_political_power > 99
+		}
+
+		custom_cost_text = decision_cost_CP_50_PP_100
+
+		available = {
+			has_active_mission = EST_vaps_uprising
+			NOT = { has_idea = EST_vaps_idea_1 }
+		}
+
+		ai_will_do = {
+			base = 100
+			modifier = {
+				factor = 0
+				NOT = {
+					has_idea = EST_vaps_idea_3
+				}
+				NOT = {	has_idea = EST_vaps_idea_4 }
+			}
+		}
+
+		visible = {
+			has_active_mission = EST_vaps_uprising
+			NOT = { has_idea = EST_vaps_idea_1 }
+		}
+		fire_only_once = yes
+		complete_effect = {
+			hidden_effect = {
+				add_command_power = -50
+				add_political_power = -100
+			}
+			EST_vaps_up_effect = yes
+		}
+	}
+
+	#Reduces number of days for the Vaps removed effect
+	EST_put_vaps_leaders_on_trial = {
+
+		allowed = {
+			original_tag = EST
+		}
+
+		days_remove = 70
+
+		custom_cost_trigger = {
+			command_power > 14
+		}
+
+		custom_cost_text = decision_cost_CP_15
+
+		modifier = {
+			command_power_gain_mult = -0.25
+		}
+
+		available = {
+			has_active_mission = EST_vaps_uprising
+		}
+
+		ai_will_do = {
+			base = 100
+			modifier = {
+				factor = 0
+				NOT = {
+					has_idea = EST_vaps_idea_1
+				}
+				NOT = {	has_idea = EST_vaps_idea_2 }
+			}
+		}
+
+		visible = {
+			has_active_mission = EST_vaps_uprising
+		}
+		fire_only_once = yes
+		complete_effect = {
+			hidden_effect = { add_command_power = -15 }
+			add_days_mission_timeout = {
+				mission = EST_vaps_crackdown
+				days = -30
+			}
+		}
+	}
+
+	EST_launch_vaps_investigation = {
+
+		allowed = {
+			original_tag = EST
+		}
+
+		days_remove = 70
+
+		modifier = {
+			civilian_factory_use = 2
+		}
+
+		custom_cost_trigger = {
+			num_of_civilian_factories_available_for_projects > 1
+		}
+
+		custom_cost_text = decision_cost_civ_factory_2
+
+		available = {
+			has_active_mission = EST_vaps_uprising
+		}
+
+		ai_will_do = {
+			base = 10
+		}
+
+		visible = {
+			has_active_mission = EST_vaps_uprising
+		}
+		fire_only_once = yes
+		complete_effect = {
+			add_days_mission_timeout = {
+				mission = EST_vaps_uprising
+				days = 50
+			}
+		}
+	}
+
+	EST_anti_vaps_propaganda = {
+
+		allowed = {
+			original_tag = EST
+		}
+
+		days_remove = 70
+
+		cost = 50
+
+		modifier = {
+			political_power_factor = -0.15
+			fascism_drift = -0.1
+			democratic_drift = 0.5
+			communism_drift = 0.4
+		}
+
+		available = {
+			has_active_mission = EST_vaps_uprising
+		}
+
+		ai_will_do = {
+			base = 100
+			modifier = {
+				factor = 0
+				NOT = {
+					has_idea = EST_vaps_idea_1
+				}
+				NOT = {	has_idea = EST_vaps_idea_2 }
+			}
+		}
+
+		visible = {
+			has_active_mission = EST_vaps_uprising
+		}
+		fire_only_once = yes
+		complete_effect = {
+			add_days_mission_timeout = {
+				mission = EST_vaps_crackdown
+				days = -40
+			}
+		}
+	}
+
+	EST_delay_the_crackdown = {
+
+		allowed = {
+			original_tag = EST
+		}
+
+		days_remove = 70
+
+		cost = 25
+
+		modifier = {
+			neutrality_drift = -0.05
+		}
+
+		available = {
+			has_active_mission = EST_vaps_uprising
+		}
+
+		ai_will_do = {
+			base = 100
+			modifier = {
+				factor = 0
+				NOT = {
+					has_idea = EST_vaps_idea_1
+				}
+				NOT = {	has_idea = EST_vaps_idea_2 }
+			}
+		}
+
+		visible = {
+			has_active_mission = EST_vaps_uprising
+		}
+		fire_only_once = yes
+		complete_effect = {
+			add_days_mission_timeout = {
+				mission = EST_vaps_crackdown
+				days = 40
+			}
+		}
+	}
+}
+
+###Fascist Marches###
+march_through_estonia = {
+	EST_stomp_the_vaps = {
+
+		icon = GFX_decision_revolt
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		days_mission_timeout = 480
+		is_good = no
+		fire_only_once = yes
+
+		cancel_trigger = {
+			has_government = fascism
+		}
+
+		activation = {
+			has_completed_focus = EST_rally_the_nation
+		}
+
+		visible = {
+
+		}
+
+		cancel_effect = {
+
+		}
+
+		timeout_effect = {
+			effect_tooltip = {
+				start_civil_war = {
+					ruling_party = fascism
+					ideology = ROOT
+					size = 0.5
+				}
+			}
+			hidden_effect = {
+				country_event = EST_events.7
+			}
+		}
+
+		ai_will_do = {
+			factor = 200
+		}
+	}
+	EST_march_in_state = {
+
+		icon = hol_draw_up_staff_plans
+
+		state_target = yes
+
+		available = {
+			FROM = {
+				is_core_of = ROOT
+				owner = { tag = ROOT }
+				is_capital = no
+			}
+			NOT = { has_country_flag = marching_in_state_flag }
+			NOT = { has_country_flag = EST_vapsid_takeover } 
+
+		}
+		target_trigger = { 
+			FROM = {
+				is_core_of = ROOT
+				owner = { tag = ROOT }
+				is_capital = no
+				NOT = { has_state_flag = vaps_loyal_state }
+			}
+		}
+
+		visible = {
+		}
+
+		cancel_trigger = {
+			has_completed_focus = EST_march_on_talinn
+		}
+
+		fire_only_once = no
+		cost = 25
+
+		days_remove = 30
+		on_map_mode = map_only
+		complete_effect = {
+			set_country_flag = marching_in_state_flag
+		}
+
+		remove_effect = {
+			FROM = { set_state_flag = vaps_loyal_state }
+			random_list = {
+				50 = {
+					effect_tooltip = {
+						add_popularity = {
+							ideology = fascism
+							popularity = 0.1
+						}
+					}
+					hidden_effect = {
+						set_variable = { EST.vaps_from = FROM }	
+						country_event = EST_events.801
+					}
+				}
+				35 = {
+					effect_tooltip = {
+						add_popularity = {
+							ideology = fascism
+							popularity = 0.15
+						}
+					}
+					hidden_effect = {
+						set_variable = { EST.vaps_from = FROM }	
+						country_event = EST_events.802
+					}
+				}
+				15 = {
+					effect_tooltip = {
+						add_popularity = {
+							ideology = fascism
+							popularity = 0.2
+						}
+					}
+					hidden_effect = {
+						set_variable = { EST.vaps_from = FROM }	
+						country_event = EST_events.803
+					}
+				}
+			}
+		clr_country_flag = marching_in_state_flag
+		}
+
+		ai_will_do = {
+			base = 10
+		}
+	}
+}
+EST_convert_FIN_cat = {
+	EST_march_in_FIN_state = {
+
+		icon = hol_draw_up_staff_plans
+
+		state_target = yes
+
+		available = {
+			FROM = {
+				is_core_of = FIN
+				owner = {
+					tag = FIN
+					NOT = { has_country_flag = banned_fascism_flag } #So Finland can do something about this
+				}
+				is_capital = no
+			}
+			NOT = { has_country_flag = marching_in_state_flag }
+		}
+		target_trigger = {
+			FROM = {
+				is_core_of = FIN
+				owner = { tag = FIN }
+				controller = { tag = FIN }
+				is_capital = no
+				hidden_trigger = {			
+					owner = {
+						NOT = { has_country_flag = EST_vapsid_takeover_finland }
+					}
+				}
+				NOT = { has_state_flag = vaps_march_has_happened_here_flag }
+			}
+		}
+		target_root_trigger = {
+			ROOT = {
+				has_completed_focus = EST_national_pride_in_finland
+			}
+			FIN = {
+				NOT = { has_government = fascism }
+				NOT = { has_country_flag = banned_fascism_flag } #So Finland can do something about this
+			}
+		}
+
+		fire_only_once = no
+		cost = 25
+
+		days_remove = 20
+		on_map_mode = map_only
+
+		cancel_if_not_visible = yes
+
+		cancel_effect = {
+			clr_country_flag = marching_in_state_flag
+		}
+
+		complete_effect = {
+			set_country_flag = marching_in_state_flag
+		}
+
+		remove_effect = {
+			FROM = { 
+				set_state_flag = vaps_loyal_state
+				set_state_flag = vaps_march_has_happened_here_flag
+			}
+			random_list = {
+				50 = {
+					effect_tooltip = {
+						FIN = {
+							add_popularity = {
+								ideology = fascism
+								popularity = 0.05
+							}
+						}
+					}
+					hidden_effect = {
+						set_variable = { FIN.vaps_from = FROM }	
+						FIN = { country_event = EST_events.801 }
+					}
+				}
+				35 = {
+					effect_tooltip = {
+						FIN = {
+							add_popularity = {
+								ideology = fascism
+								popularity = 0.1
+							}
+						}
+					}
+					hidden_effect = {
+						set_variable = { FIN.vaps_from = FROM }	
+						FIN = { country_event = EST_events.802 }
+					}
+				}
+				15 = {
+					effect_tooltip = {
+						FIN = {
+							add_popularity = {
+								ideology = fascism
+								popularity = 0.15
+							}
+						}
+					}
+					hidden_effect = {
+						set_variable = { FIN.vaps_from = FROM }	
+						FIN = { country_event = EST_events.803 }
+					}
+				}
+			}
+			clr_country_flag = marching_in_state_flag
+		}
+
+		ai_will_do = {
+			base = 10
+		}
+	}
+
+	EST_march_in_FIN_capital = {
+
+		icon = hol_draw_up_staff_plans
+
+		state_target = yes
+
+		available = {
+			FROM = {
+				hidden_trigger = {
+					is_core_of = FIN
+					owner = {
+						tag = FIN
+					}
+					is_capital = yes
+				}
+				owner = { fascism > 0.4 }
+			}
+			NOT = { has_country_flag = marching_in_state_flag }
+		}
+		target_trigger = {
+			FROM = {
+				owner = { tag = FIN }
+				is_capital = yes
+			}
+		}
+		visible = {
+			ROOT = {
+				has_completed_focus = EST_national_pride_in_finland
+			}
+			FIN = {
+				NOT = { has_government = fascism }
+				NOT = { has_country_flag = banned_fascism_flag } #So Finland can do something about this
+			}
+		}
+
+		fire_only_once = no
+		cost = 25
+
+		days_remove = 30
+		#on_map_mode = map_only
+
+		cancel_if_not_visible = yes
+
+		cancel_effect = {
+			clr_country_flag = marching_in_state_flag
+		}
+
+		complete_effect = {
+			set_country_flag = marching_in_state_flag
+		}
+
+		remove_effect = {
+			effect_tooltip = {
+				FIN = {
+					start_civil_war = {
+						ideology = fascism
+						size = party_popularity@fascism
+					}
+				}
+			}
+			hidden_effect = {
+				FIN = {
+					country_event = { id = EST_events.9 hours = 4 } 
+				}
+			clr_country_flag = marching_in_state_flag
+				ROOT = {
+					set_country_flag = EST_vapsid_takeover_finland
+				}
+			}
+		}
+		ai_will_do = {
+			base = 100
+		}
+	}
+}
