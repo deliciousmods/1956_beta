@@ -13,10 +13,8 @@ focus_tree = {
 		factor = 0
 		
 		modifier = {
-			add = 9
+			add = 120
 			tag = EST
-			has_dlc = "No Step Back"
-			has_global_flag = EST_vanilla_focus_tree
 		}
 	}
 
@@ -75,10 +73,15 @@ focus_tree = {
 		id = EST_era_of_silence
 		icon = GFX_focus_EST_era_of_silence
 		mutually_exclusive = { focus = BALTIC_restore_workers_republic focus = EST_rally_the_nation }
-		x = 34
+		x = 36
 		y = 0
 
 		cost = 10
+
+		allow_branch = {
+            NOT = { has_completed_focus = EST_rally_the_nation }
+			NOT = { has_completed_focus = BALTIC_restore_workers_republic }
+        }
 
 		ai_will_do = {
 			factor = 1
@@ -90,6 +93,17 @@ focus_tree = {
 			add_stability = 0.1
 			activate_mission_tooltip = EST_vaps_uprising
 			activate_mission_tooltip = EST_vaps_crackdown
+			hidden_effect = {
+                if = {
+                    limit = {
+                        has_game_rule = {
+                            rule = obsolete_focus_branches_visibility
+                            option = HIDE
+                        }
+                    }
+                    mark_focus_tree_layout_dirty = yes
+                }
+            }
 		}
 	}
 
@@ -299,7 +313,7 @@ focus_tree = {
 		prerequisite = { focus = EST_modernize_capital }
 		prerequisite = { focus = EST_exploit_the_banks }
 		mutually_exclusive = { focus = EST_squash_the_opposition }
-		x = 0
+		x = -1
 		y = 1
 		relative_position_id = EST_modernize_capital
 
@@ -368,6 +382,77 @@ focus_tree = {
 				popularity = 0.1
 			}
 			remove_ideas = democratic_opposition_idea_2
+			add_stability = -0.075
+		}
+	}
+
+	focus = {
+		id = EST_ideas_of_finno_estonian_federation_nsb
+		icon = GFX_focus_generic_concessions
+		prerequisite = {  focus = EST_squash_the_opposition }
+		mutually_exclusive = { focus = EST_formalize_baltic_entente }
+		mutually_exclusive = { focus = EST_beyond_the_baltic }
+		x = 1
+		y = 1
+		relative_position_id = EST_squash_the_opposition
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 1
+			modifier = { #Don't mess with history (unless ppl are ignoring you)
+				factor = 0
+				date < 1942.1.1
+				OR = {
+					AND = {
+						is_historical_focus_on = yes
+						has_game_rule = {
+							rule = EST_ai_behavior
+							option = DEFAULT
+						}
+					}
+					has_country_flag = EST_AI_RANDOM_HISTORICAL
+					has_game_rule = {
+						rule = EST_ai_behavior
+						option = HISTORICAL
+					}
+				}
+			}
+		}
+
+		available = {
+			any_other_country = {
+				NOT = { has_war_with = ROOT }
+				is_faction_leader = yes
+				is_major = yes
+				has_government = democratic
+			}
+			NOT = {
+				any_other_country = {
+					is_in_faction_with = FIN
+					has_war_with = ROOT
+				}
+			}
+			is_in_faction = no
+		}
+
+		bypass = {
+			OR = {
+				is_in_faction_with = FIN
+				AND = {
+					is_in_faction = yes
+					any_other_country = {
+						is_faction_leader = yes
+						is_in_faction_with = ROOT
+						has_government = democratic
+					}
+				}
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			
 		}
 	}
 
@@ -376,7 +461,8 @@ focus_tree = {
 		icon = GFX_focus_generic_baltic_entente
 		prerequisite = { focus = EST_break_the_silence focus = EST_squash_the_opposition }
 		mutually_exclusive = { focus = EST_beyond_the_baltic }
-		x = 0
+		mutually_exclusive = { focus = EST_ideas_of_finno_estonian_federation_nsb }
+		x = -3
 		y = 1
 		relative_position_id = EST_squash_the_opposition
 
@@ -478,7 +564,7 @@ focus_tree = {
 		id = EST_look_north
 		icon = GFX_focus_generic_scandinavian_alliance
 		prerequisite = { focus = EST_formalize_baltic_entente }
-		x = 0
+		x = 2
 		y = 1
 		relative_position_id = EST_formalize_baltic_entente
 
@@ -510,7 +596,8 @@ focus_tree = {
 		icon = GFX_focus_generic_concessions
 		prerequisite = { focus = EST_break_the_silence focus = EST_squash_the_opposition }
 		mutually_exclusive = { focus = EST_formalize_baltic_entente }
-		x = 2
+		mutually_exclusive = { focus = EST_ideas_of_finno_estonian_federation_nsb }
+		x = -6
 		y = 1
 		relative_position_id = EST_squash_the_opposition
 
@@ -655,6 +742,63 @@ focus_tree = {
 		}
 	}
 
+	focus = {
+		id = EST_western_investements_nsb
+		icon = GFX_focus_renounce_the_treaty_of_trianon
+		prerequisite = { focus = EST_join_the_allies }
+		x = 0
+		y = 2
+		relative_position_id = EST_beyond_the_baltic
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			is_in_faction = yes
+			OR = { 
+			    has_government = neutrality
+			    has_government = democratic
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+					OR = {
+						is_in_home_area = yes
+						NOT = {
+							owner = {
+								any_owned_state = {
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+									is_in_home_area = yes
+								}
+							}
+						}
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}
+		}
+	}
+
 	###MILITARY GOVERNMENT###
 
 	focus = {
@@ -675,7 +819,7 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 		completion_reward = {
 			add_ideas = EST_national_council_idea
-			army_experience = 10
+			army_experience = 15
 		}
 	}
 
@@ -785,7 +929,7 @@ focus_tree = {
 		id = EST_corporate_chambers
 		icon = GFX_goal_molotov_ribbentrop_pact
 		prerequisite = { focus = EST_new_economic_policy }
-		x = 2
+		x = 1
 		y = 1
 		relative_position_id = EST_new_economic_policy
 
@@ -803,6 +947,7 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 		completion_reward = {
 			add_ideas = EST_corporate_chambers_idea
+			add_war_support = 0.05
 		}
 	}
 
@@ -902,10 +1047,10 @@ focus_tree = {
 	focus = {
 		id = EST_cave_to_enemy_pressure
 		icon = GFX_focus_CZE_german_puppet
-		prerequisite = { focus = EST_republican_defence_league }
+		prerequisite = { focus = EST_womens_defence_league }
 		mutually_exclusive = { focus = EST_fortify_the_border focus = EST_fortify_tallinn }
-		x = 2
-		y = 1
+		x = 1
+		y = 2
 		relative_position_id = EST_republican_defence_league
 
 		cost = 10
@@ -949,7 +1094,7 @@ focus_tree = {
 		id = EST_rally_the_nation
 		icon = GFX_focus_EST_rally_the_nation
 		mutually_exclusive = { focus = BALTIC_restore_workers_republic focus = EST_era_of_silence }
-		x = 45
+		x = 48
 		y = 0
 
 		cost = 10
@@ -958,14 +1103,44 @@ focus_tree = {
 			factor = 1
 		}
 
+		allow_branch = {
+            NOT = { has_completed_focus = EST_era_of_silence }
+			NOT = { has_completed_focus = BALTIC_restore_workers_republic }
+        }
+
+		offset = {
+            x = -9
+            y = 0
+            trigger = {
+                has_game_rule = {
+                    rule = obsolete_focus_branches_visibility
+                    option = HIDE
+                }
+                has_completed_focus = EST_rally_the_nation
+            }
+        }
+
 		search_filters = { FOCUS_FILTER_POLITICAL }
 		completion_reward = {
+			add_stability = -0.15
+			add_war_support = 0.05
 			add_popularity = {
 				ideology = fascism
 				popularity = 0.1
 			}
 			activate_decision = EST_stomp_the_vaps
 			unlock_decision_category_tooltip = march_through_estonia
+			hidden_effect = {
+                if = {
+                    limit = {
+                        has_game_rule = {
+                            rule = obsolete_focus_branches_visibility
+                            option = HIDE
+                        }
+                    }
+                    mark_focus_tree_layout_dirty = yes
+                }
+            }
 		}
 	}
 
@@ -1039,8 +1214,8 @@ focus_tree = {
 	}
 
 	focus = {
-		id = EST_glory_of_war
-		icon = GFX_focus_generic_military_academy
+		id = EST_veterans_government
+		icon = GFX_goal_support_fascism
 		prerequisite = { focus = EST_march_on_talinn }
 		x = -2
 		y = 1
@@ -1056,9 +1231,47 @@ focus_tree = {
 			has_government = fascism
 		}
 
+		bypass = {
+			
+		}
+
+		cancel_if_invalid = yes
+		continue_if_invalid = no
+		available_if_capitulated = no
+
+		search_filters = { FOCUS_FILTER_POLITICAL }
+		completion_reward = {
+			add_political_power = 150
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = EST_johan_pitka
+			show_ideas_tooltip = EST_hjalmar_mae
+			show_ideas_tooltip = EST_viktor_puskar
+		}
+	}
+
+	focus = {
+		id = EST_glory_of_war
+		icon = GFX_focus_generic_military_academy
+		prerequisite = { focus = EST_veterans_government }
+		x = 0
+		y = 1
+		relative_position_id = EST_veterans_government
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			has_government = fascism
+		}
+
 		search_filters = { FOCUS_FILTER_MANPOWER }
 		completion_reward = {
 			add_ideas = EST_veteran_training
+			add_war_support = 0.05
 			hidden_effect = {
 			    if = {
 				    limit = {
@@ -1098,6 +1311,90 @@ focus_tree = {
 	}
 
 	focus = {
+		id = EST_national_enterprises_nsb
+		icon = GFX_goal_EST_create_national_enterprises
+		prerequisite = { focus = EST_veterans_government }
+		x = -4
+		y = 2
+		relative_position_id = EST_march_on_talinn
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			has_government = fascism
+		}
+
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+		completion_reward = {
+			add_stability = 0.05
+            random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+					OR = {
+						is_in_home_area = yes
+						NOT = {
+							owner = {
+								any_owned_state = {
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+									is_in_home_area = yes
+								}
+							}
+						}
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}	
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+					OR = {
+						is_in_home_area = yes
+						NOT = {
+							owner = {
+								any_owned_state = {
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+									is_in_home_area = yes
+								}
+							}
+						}
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}
+		}
+	}
+
+	focus = {
 		id = EST_vapsid_youth
 		icon = GFX_goal_generic_wolf_pack
 		prerequisite = { focus = EST_glory_of_war }
@@ -1122,14 +1419,14 @@ focus_tree = {
 	}
 
 	focus = {
-		id = EST_veterans_government
-		icon = GFX_goal_support_fascism
+		id = EST_estonia_on_world_stage_nsb
+		icon = GFX_focus_EST_estonia_is_scandinavia
 		prerequisite = { focus = EST_march_on_talinn }
 		x = 2
 		y = 1
 		relative_position_id = EST_march_on_talinn
 
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
@@ -1137,28 +1434,24 @@ focus_tree = {
 
 		available = {
 			has_government = fascism
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL }
 		completion_reward = {
-			add_political_power = 150
-			custom_effect_tooltip = available_political_advisor
-			show_ideas_tooltip = EST_johan_pitka
-			custom_effect_tooltip = available_political_advisor
-			show_ideas_tooltip = EST_hjalmar_mae
-			custom_effect_tooltip = available_political_advisor
-			show_ideas_tooltip = EST_viktor_puskar
+			add_political_power = 25
+			add_war_support = 0.05
 		}
 	}
 
 	focus = {
 		id = EST_anti_communist_militia
 		icon = GFX_goal_anti_comintern_pact
-		prerequisite = { focus = EST_veterans_government }
+		prerequisite = { focus = EST_estonia_on_world_stage_nsb }
 		mutually_exclusive = { focus = EST_reach_out_to_germany }
-		x = -1
+		x = 0
 		y = 1
-		relative_position_id = EST_veterans_government
+		relative_position_id = EST_estonia_on_world_stage_nsb
 
 		cost = 10
 
@@ -1202,12 +1495,14 @@ focus_tree = {
 					division = "name = \"2. Anti-Soviet Division\" division_template = \"Anti-Soviet Division\" start_experience_factor = 0.5" 
 					owner = ROOT
 				}
+			}
+			random_owned_controlled_state = {
 				create_unit = { 
-					division = "name = \"3. Anti-Soviet Division\" division_template = \"Anti-Soviet Division\" start_experience_factor = 0.5" 
+					division = "name = \"1. Anti-Soviet Division\" division_template = \"Anti-Soviet Division\" start_experience_factor = 0.5" 
 					owner = ROOT
 				}
 				create_unit = { 
-					division = "name = \"4. Anti-Soviet Division\" division_template = \"Anti-Soviet Division\" start_experience_factor = 0.5" 
+					division = "name = \"2. Anti-Soviet Division\" division_template = \"Anti-Soviet Division\" start_experience_factor = 0.5" 
 					owner = ROOT
 				}
 			}
@@ -1217,11 +1512,11 @@ focus_tree = {
 	focus = {
 		id = EST_reach_out_to_germany
 		icon = GFX_focus_chi_mission_to_germany
-		prerequisite = { focus = EST_veterans_government }
+		prerequisite = { focus = EST_estonia_on_world_stage_nsb }
 		mutually_exclusive = { focus = EST_anti_communist_militia }
-		x = 1
+		x = 2
 		y = 1
-		relative_position_id = EST_veterans_government
+		relative_position_id = EST_estonia_on_world_stage_nsb
 
 		cost = 5
 
@@ -1313,7 +1608,7 @@ focus_tree = {
 		y = 1
 		relative_position_id = EST_reach_out_to_germany
 
-		cost = 10
+		cost = 8
 
 		ai_will_do = {
 			factor = 1
@@ -1393,11 +1688,35 @@ focus_tree = {
 					}
 				}
 			}
-			
+			is_subject = no
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL }
 		completion_reward = {
+			division_template = { 
+				name = "Baltic paramilitaries"
+				division_names_group = EST_INF_01
+				is_locked = no
+				regiments = { 
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 1 y = 0 }
+					infantry = { x = 2 y = 0 }
+
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 1 y = 1 }
+					infantry = { x = 2 y = 1 }
+				}
+			}
+			random_owned_controlled_state = {
+				create_unit = { 
+					division = "name = \"1. Baltic paramilitaries Division\" division_template = \"Baltic paramilitaries\" start_experience_factor = 0.2" 
+					owner = ROOT
+				}
+				create_unit = { 
+					division = "name = \"2. Baltic paramilitaries Division\" division_template = \"Baltic paramilitaries\" start_experience_factor = 0.2" 
+					owner = ROOT
+				}
+			}
 			if = {
 				limit = {
 					LIT = { has_government = fascism }
@@ -1451,9 +1770,9 @@ focus_tree = {
 	focus = {
 		id = EST_empower_finnish_militants
 		icon = GFX_focus_invite_finland
-		prerequisite = { focus = EST_march_on_talinn }
+		prerequisite = { focus = EST_estonia_on_world_stage_nsb }
 		x = 0
-		y = 1
+		y = 2
 		relative_position_id = EST_march_on_talinn
 
 		cost = 5
@@ -1464,6 +1783,7 @@ focus_tree = {
 
 		available = {
 			has_government = fascism
+			is_subject = no
 		}
 
 		bypass = {
@@ -1483,6 +1803,10 @@ focus_tree = {
 					idea = EST_vaps_organizing_in_FIN
 					days = 360
 				}
+				country_event = {
+                    id = finland.88
+                    days = 3
+                }
 			}
 		}
 	}
@@ -1492,7 +1816,7 @@ focus_tree = {
 		icon = GFX_focus_EST_national_pride_in_finland
 		prerequisite = { focus = EST_empower_finnish_militants }
 		x = 0
-		y = 3
+		y = 2
 		relative_position_id = EST_empower_finnish_militants
 
 		cost = 5
@@ -1503,6 +1827,7 @@ focus_tree = {
 
 		available = {
 			has_government = fascism
+			is_subject = no
 		}
 
 		bypass = {
@@ -1526,7 +1851,7 @@ focus_tree = {
 		icon = GFX_goal_generic_forceful_treaty
 		prerequisite = { focus = EST_national_pride_in_finland }
 		mutually_exclusive = { focus = EST_unite_our_nations }
-		x = 0
+		x = -1
 		y = 1
 		relative_position_id = EST_national_pride_in_finland
 
@@ -1592,7 +1917,7 @@ focus_tree = {
 		icon = GFX_goal_generic_dangerous_deal
 		prerequisite = { focus = EST_national_pride_in_finland }
 		mutually_exclusive = { focus = EST_finno_estonian_supremacy_league }
-		x = 2
+		x = 1
 		y = 1
 		relative_position_id = EST_national_pride_in_finland
 
@@ -1637,13 +1962,125 @@ focus_tree = {
 		}
 	}
 
+	focus = {
+		id = EST_joint_resource_extraction_nsb
+		icon = GFX_focus_generic_mining_industry
+		prerequisite = { focus = EST_finno_estonian_supremacy_league focus = EST_unite_our_nations}
+		x = 1
+		y = 1
+		relative_position_id = EST_finno_estonian_supremacy_league
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			has_government = fascism
+			is_subject = no
+			OR = {
+				has_full_control_of_state = 148
+				FIN = {
+					has_full_control_of_state = 148
+				}
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_INDUSTRY }
+		completion_reward = {
+            1039 = { #OULU
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+				add_resource = {
+					type = steel
+					amount = 6
+				}
+				add_resource = {
+					type = chromium
+					amount = 3
+				}
+			}
+		}
+	}
+
 	###ESTI IS SCANDI FOCUSES###
 	focus = {
-		id = EST_sieze_swedish_assets
-		icon = GFX_focus_generic_attack_sweden
+		id = EST_prepare_to_the_northern_march_nsb
+		icon = GFX_focus_chi_army_reform
 		prerequisite = { focus = EST_finno_estonian_supremacy_league }
 		x = -1
 		y = 1
+		relative_position_id = EST_finno_estonian_supremacy_league
+		will_lead_to_war_with = SWE
+
+		cost = 10
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			has_government = fascism
+			is_subject = no
+		}
+
+		bypass = {
+			SWE = {
+				OR = {
+					exists = no
+					is_subject_of = EST
+				}
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_ANNEXATION }
+		completion_reward = {
+            army_experience = 25
+			add_war_support = 0.05
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = arms_factory
+						size > 1
+						include_locked = yes
+					}
+					OR = {
+						is_in_home_area = yes
+						NOT = {
+							owner = {
+								any_owned_state = {
+									free_building_slots = {
+										building = arms_factory
+										size > 1
+										include_locked = yes
+									}
+									is_in_home_area = yes
+								}
+							}
+						}
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = arms_factory
+					level = 2
+					instant_build = yes
+				}
+			}
+		}
+	}
+
+	focus = {
+		id = EST_sieze_swedish_assets
+		icon = GFX_focus_generic_attack_sweden
+		prerequisite = { focus = EST_prepare_to_the_northern_march_nsb }
+		x = -1
+		y = 2
 		relative_position_id = EST_finno_estonian_supremacy_league
 		will_lead_to_war_with = SWE
 
@@ -1754,7 +2191,7 @@ focus_tree = {
 
 	focus = {
 		id = EST_form_scandinavia
-		icon = GFX_focus_EST_estonia_is_scandinavia
+		icon = GFX_goal_EST_northern_empire
 		prerequisite = { focus = EST_secure_the_straits }
 		prerequisite = { focus = EST_occupy_norway }
 		x = 1
@@ -1849,7 +2286,7 @@ focus_tree = {
 		y = 1
 		relative_position_id = EST_unite_our_nations
 
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
@@ -1867,6 +2304,7 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_ANNEXATION }
 		completion_reward = {
 			set_cosmetic_tag = EST_FIN
+			add_stability = 0.05
 			every_state = {
 				limit = {
 					is_core_of = FIN
@@ -1913,11 +2351,37 @@ focus_tree = {
 	}
 
 	focus = {
-		id = EST_unite_karelia
-		icon = GFX_goal_generic_more_territorial_claims
+		id = EST_make_friends_with_hungary
+		icon = GFX_goal_generic_befriend_hungary
 		prerequisite = { focus = EST_proclaim_finno_ugra }
 		x = 1
 		y = 1
+		relative_position_id = EST_proclaim_finno_ugra
+
+		cost = 5
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			has_government = fascism
+			is_subject = no
+		}
+
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_ANNEXATION }
+		completion_reward = {
+
+		}
+	}
+
+	focus = {
+		id = EST_unite_karelia
+		icon = GFX_goal_generic_more_territorial_claims
+		prerequisite = { focus = EST_unite_the_sami }
+		prerequisite = { focus = EST_make_friends_with_hungary }
+		x = 0
+		y = 2
 		relative_position_id = EST_proclaim_finno_ugra
 		will_lead_to_war_with = SOV
 
@@ -1948,7 +2412,7 @@ focus_tree = {
 		prerequisite = { focus = EST_unite_karelia }
 		prerequisite = { focus = EST_unite_the_sami }
 		x = 0
-		y = 2
+		y = 3
 		relative_position_id = EST_proclaim_finno_ugra
 
 		cost = 10
@@ -2182,16 +2646,27 @@ focus_tree = {
 	focus = {
 		id = EST_threat_on_our_border
 		icon = GFX_focus_generic_home_defense
-		prerequisite = { focus = EST_march_on_talinn focus = EST_fight_the_vaps }
-		x = -5
-		y = 2
-		relative_position_id = EST_march_on_talinn
+		prerequisite = { focus = EST_march_on_talinn focus = EST_republican_defence_league }
+		x = 42
+		y = 4
 
 		cost = 10
 
 		ai_will_do = {
 			factor = 1
 		}
+
+		offset = {
+            x = -9
+            y = 0
+            trigger = {
+                has_game_rule = {
+                    rule = obsolete_focus_branches_visibility
+                    option = HIDE
+                }
+                has_completed_focus = EST_rally_the_nation
+            }
+        }
 
 		available = {
 			OR = {
@@ -2228,6 +2703,18 @@ focus_tree = {
 		ai_will_do = {
 			factor = 1
 		}
+
+		offset = {
+            x = -2
+            y = 0
+            trigger = {
+                has_game_rule = {
+                    rule = obsolete_focus_branches_visibility
+                    option = HIDE
+                }
+                has_completed_focus = EST_rally_the_nation
+            }
+        }
 
 		available = {
 			owns_state = 13
@@ -2279,7 +2766,7 @@ focus_tree = {
 			}
 			set_victory_points = {
 				province = 185
-				value = 15
+				value = 8
 			}
 			set_victory_points = {
 				province = 3152
@@ -2302,6 +2789,18 @@ focus_tree = {
 		ai_will_do = {
 			factor = 1
 		}
+
+		offset = {
+            x = -2
+            y = 0
+            trigger = {
+                has_game_rule = {
+                    rule = obsolete_focus_branches_visibility
+                    option = HIDE
+                }
+                has_completed_focus = EST_rally_the_nation
+            }
+        }
 
 		bypass = {
 			is_subject = yes
@@ -2350,8 +2849,9 @@ focus_tree = {
 	focus = {
 		id = EST_long_push_east
 		icon = GFX_goal_tank_hunt
+		prerequisite = { focus = EST_fight_against_communism focus = EST_hold_saaremaa }
 		prerequisite = { focus = EST_fight_against_communism }
-		x = 0
+		x = -1
 		y = 1
 		relative_position_id = EST_fight_against_communism
 
@@ -2388,9 +2888,8 @@ focus_tree = {
 	focus = {
 		id = EST_prepare_for_the_inevitable
 		icon = GFX_goal_generic_military_sphere
-		prerequisite = { focus = EST_corporate_chambers focus = EST_unite_our_nations focus = EST_finno_estonian_supremacy_league }
 		x = 1
-		y = 2
+		y = 3
 		relative_position_id = EST_corporate_chambers
 
 		cost = 10
@@ -2399,7 +2898,28 @@ focus_tree = {
 			factor = 1
 		}
 
+		allow_branch = {
+			NOT = { has_completed_focus = BALTIC_restore_workers_republic }
+        }
+
+		offset = {
+            x = -7
+            y = 0
+            trigger = {
+                has_game_rule = {
+                    rule = obsolete_focus_branches_visibility
+                    option = HIDE
+                }
+                has_completed_focus = EST_rally_the_nation
+            }
+        }
+
 		available = {
+			OR = {
+				has_completed_focus = EST_corporate_chambers
+				has_completed_focus = EST_finno_estonian_supremacy_league
+			    has_completed_focus = EST_unite_our_nations
+			}
 			if = {
 				limit = {
 					has_DLC = "Man the Guns"
@@ -2536,7 +3056,7 @@ focus_tree = {
 		icon = GFX_goal_generic_consumer_goods
 		prerequisite = { focus = EST_formalize_baltic_entente }
 		prerequisite = { focus = EST_break_the_silence }
-		x = -2
+		x = 0
 		y = 1
 		relative_position_id = EST_formalize_baltic_entente
 
