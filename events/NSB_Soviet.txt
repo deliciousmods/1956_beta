@@ -40,7 +40,14 @@ country_event = {
 
 	immediate = {
 		hidden_effect = {
-			SOV_initiate_paranoia_effect = yes
+			if = {
+				limit = {
+					NOT = {
+						has_global_flag = sov_old_focus_tree
+					}
+				}
+				SOV_initiate_paranoia_effect = yes
+			}
 		}
 	}
 
@@ -49,6 +56,11 @@ country_event = {
 	}
 
 	option = { #GOOD TO KNOW, THANKS
+		trigger = {
+			NOT = {
+				has_global_flag = sov_old_focus_tree
+			}
+		}
 		name = NSB_soviet_paranoia_system_events.01.a
 		
 		custom_effect_tooltip = SOV_paranoia_system_intro_tt
@@ -61,6 +73,12 @@ country_event = {
 
 		#NKVD chiefs will make Political Paranoia worse
 		custom_effect_tooltip = SOV_paranoia_system_nkvd_trait_tt
+	}
+	option = { #NOT RELAVENT TO ME
+		trigger = {
+			has_global_flag = sov_old_focus_tree
+		}
+		name = SOV_oh_no_purge
 	}
 }
 
@@ -2232,7 +2250,7 @@ country_event = {
 			modifier = SOV_pressured_our_government
 		}
 		hidden_effect = {
-			country_event = { id = NSB_soviet_foreign_politics_events.152 hours = 1 }
+			FROM = { country_event = { id = NSB_soviet_foreign_politics_events.152 hours = 1 } }
 		}
 	}
 }
@@ -2986,6 +3004,9 @@ country_event = {
 				add = 1
 				FROM = { original_tag = PER }
 				original_tag = SOV
+				NOT = {		#r56
+					is_historical_focus_on = yes
+				}
 			}
 		}
 	}
@@ -3010,6 +3031,19 @@ country_event = {
 					}
 					surrender_progress > 0.25
 				}
+			}
+			modifier = {	#r56: if historical cooperation possible, do that instead, UK will simply refuse if theyre rather busy
+				factor = 0
+				is_historical_focus_on = yes
+				ENG = {
+					exists = yes
+					has_government = democratic	#option can be picked even if not, but no need to force it if UK isnt historical either
+					is_subject = no
+					NOT = {
+						has_war_with = ROOT
+					}
+				}
+				NOT = { is_justifying_wargoal_against = ENG }
 			}
 		}
 
@@ -3139,6 +3173,22 @@ country_event = {
 				factor = 100
 				is_in_faction_with = FROM
 			}
+			modifier = {	#r56
+				factor = 100
+				is_historical_focus_on = yes
+				OR = {
+					AND = {
+						has_subject = IRQ
+						IRQ = {
+							has_capitulated = no
+						}
+					}
+					controls_state = 291
+					any_allied_country = {
+						controls_state = 291
+					}
+				}
+			}
 			modifier = {
 				factor = 2
 				has_opinion = {
@@ -3168,9 +3218,9 @@ country_event = {
 					is_in_faction_with = PER
 					strength_ratio = {
 						tag = FROM
-						ratio < 0.6
+						ratio < 0.5				#r56: lowered slightly
 					}
-					surrender_progress > 0.5
+					surrender_progress > 0.15	#r56: lowered from 0.5, this is UK, if theyre at 50%, theyre screwed
 				}
 			}
 		}
@@ -3301,6 +3351,19 @@ country_event = {
 		411 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		412 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		413 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
+
+		if = {
+			limit = {	#sanity check
+				has_government = communism
+			}
+			PER = {
+				set_party_name = {
+					ideology = communism
+					name = PER_communism_party_alternate
+					long_name = PER_communism_party_alternate_long
+				}				
+			}
+		}
 	}
 }
 
@@ -3328,6 +3391,19 @@ country_event = {
 		411 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		412 = { set_state_flag = SOV_soviet_resource_rights_iran_flag }
 		413 = { set_state_flag = SOV_british_resource_rights_iran_flag }
+
+		if = {
+			limit = {	#sanity check
+				has_government = communism
+			}
+			PER = {
+				set_party_name = {
+					ideology = communism
+					name = PER_communism_party_alternate
+					long_name = PER_communism_party_alternate_long
+				}				
+			}
+		}
 	}
 }
 
@@ -3510,6 +3586,10 @@ country_event = {
 
 		ai_chance = {
 			base = 1
+			modifier = {	#r56, fixed them very rarely accepting on historical, feel free to add in exceptions
+				factor = 0
+				is_historical_focus_on = yes
+			}
 			modifier = {
 				add = 0.5
 				has_opinion = {
@@ -3598,10 +3678,6 @@ country_event = {
 
 		ai_chance = {
 			base = 20
-			modifier = {
-				factor = 2
-				is_historical_focus_on = yes
-			}
 		}
 
 		FROM = {
@@ -6261,15 +6337,15 @@ country_event = {
 			}
 			modifier = {
 				factor = 10
-				has_completed_focus = GER_mol_rib_pact
+				has_completed_focus = GER_molotov_ribbentrop_pact
 			}
 			modifier = {
 				factor = 10
-				has_completed_focus = GER_soviet_ally
+				has_completed_focus = GER_alliance_with_the_ussr
 			}
 			modifier = {
 				factor = 0.1
-				has_completed_focus = GER_anti_comitern_pact
+				has_completed_focus = GER_anti_comintern_pact
 			}
 			modifier = {
 				factor = 0
@@ -6277,7 +6353,7 @@ country_event = {
 					has_war_with = FROM
 					is_justifying_wargoal_against = FROM
 					has_completed_focus = GER_anti_soviet_pact
-					has_completed_focus = GER_ussr_war_goal
+					has_completed_focus = GER_war_with_the_ussr
 				}
 			}
 		}
@@ -7346,11 +7422,9 @@ country_event = {
 			limit = {
 				NOT = { has_tech = nukes }
 			}
-			add_tech_bonus = {
-				name = SOV_soviet_atomic_bomb_project
-				bonus = 1
-				uses = 1
-				category = nuclear
+			add_breakthrough_progress = {
+				specialization = specialization_nuclear
+				value = 0.4
 			}
 		}
 		else = {
@@ -7552,7 +7626,6 @@ unit_leader_event = {
 	desc = NSB_soviet_spanish_civil_war.1.desc
 	
 	is_triggered_only = yes
-	hidden = no
 
 	option = {
 		name = NSB_soviet_spanish_civil_war.1.a
@@ -7842,8 +7915,6 @@ country_event = {
 	desc = NSB_soviet_communist_civil_war.001.desc
 	picture = GFX_report_event_generic_battle
 	is_triggered_only = yes
-	hidden = no
-
 	immediate = {
 		hidden_effect = { SOV_initiate_civil_war = yes }
 	}
@@ -8245,8 +8316,6 @@ country_event = {
 	
 	is_triggered_only = yes
 	trigger = { NOT = { has_global_flag = SOV_soviet_civil_war } }
-
-	hidden = no
 
 	immediate = {
 		hidden_effect = { SOV_initiate_civil_war = yes }
@@ -8732,7 +8801,6 @@ news_event = {
 	desc = NSB_soviet_communist_civil_war.009.desc
 	picture = GFX_news_event_generic_funeral
 	is_triggered_only = yes
-	major = no 
 
 	option = {
 		name = NSB_soviet_communist_civil_war.009.a
@@ -8947,7 +9015,6 @@ unit_leader_event = {
 	desc = NSB_Soviet_fascist_civil_war.003.desc
 	# picture = GFX_report_event_SOV_mongolia_cavalry
 	is_triggered_only = yes
-	hidden = no 
 
 	immediate = {
 		
@@ -12507,7 +12574,7 @@ country_event = {
 	option = {
 		name = NSB_soviet_fascist_tsarist.15.a
 		effect_tooltip = {
-			promote_character = SOV_patriarch_meletius
+			promote_character = SOV_metropolitan_meletius
 		}
 		news_event = { id = nsb_news.404 hours = 12 }
 	}
@@ -12539,7 +12606,7 @@ country_event = {
 					NOT = { has_war_with = FROM }
 				}
 			}
-			FRA = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 12 random = 60 } }
+			FRA = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 12 random_hours = 6 } }
 		}
 		if = {
 			limit = {
@@ -12550,7 +12617,7 @@ country_event = {
 					NOT = { has_war_with = FROM }
 				}
 			}
-			ENG = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 12 random = 60 } }
+			ENG = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 1 random_hours = 6 } }
 		}
 	}
 
@@ -12585,14 +12652,14 @@ country_event = {
 					FROM = { tag = ENG }
 					FRA = { is_in_faction = no }
 				}
-				FRA = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 12 random = 60 } }
+				FRA = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 12 random_hours = 6 } }
 			}
 			if = {
 				limit = {
 					FROM = { tag = FRA }
 					ENG = { is_in_faction = no }
 				}
-				ENG = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 12 random = 60 } }
+				ENG = { country_event = { id = NSB_soviet_fascist_tsarist.19 hours = 12 random_hours = 6 } }
 			}
 		}
 		news_event = { id = nsb_news.407 hours = 12 }
