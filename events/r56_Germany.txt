@@ -8352,15 +8352,53 @@ country_event = {
 		multiply_variable = { GER_kpd_civil_war_size = -0.01 }
 		add_to_variable = { GER_kpd_civil_war_size = 1}
 		set_capital = { state = 989 }
-		start_civil_war = {
-			ideology = neutrality
-			ruling_party = communism
-			size = var:GER_kpd_civil_war_size
-			states = all
-			states_filter = {
-				NOT = { has_state_flag = GER_state_kpd_controlled}
+		create_dynamic_country = {
+			original_tag = GER
+			GER = {
+				every_controlled_state = {
+					limit = {
+						NOT = { has_state_flag = GER_state_kpd_controlled}
+
+					}
+					transfer_state_to = PREV.PREV
+				}
+				transfer_units_fraction= {
+					target = PREV
+					size = var:GER_kpd_civil_war_size
+					keep_unit_leaders_trigger = {
+						has_trait = trait_SPA_nationalist_sympathies
+					}
+				}
 			}
-			keep_all_characters = yes
+			set_popularities = {
+				fascism = 25
+				neutrality = 60
+				democratic = 25
+				communism = 15
+			}
+			set_politics = {
+				ruling_party = neutrality
+				elections_allowed = no
+			}
+			every_other_country = {
+				limit = {
+					original_tag = GER
+					has_war_with = ROOT
+				}
+				declare_war_on = {
+					target = PREV
+					type = annex_everything
+				}
+				add_civil_war_target = PREV
+			}
+			GER = {
+				every_owned_state = {
+					limit = {
+						NOT = { has_state_flag = GER_state_kpd_controlled}
+					}
+					set_state_owner_to = PREV.PREV					
+				}
+			}
 			load_focus_tree = {
 				tree = german_focus
 				keep_completed = yes
@@ -8370,21 +8408,83 @@ country_event = {
 				focus = GER_comintern_kpd_funding
 				uncomplete_children = yes
 			}
-			every_other_country = {
-				limit = {
-					original_tag = GER
-					NOT = {
-						has_war_with = ROOT
-					}
-				}
-				declare_war_on = {
-					target = ROOT
-					type = annex_everything
-				}
-				add_civil_war_target = ROOT
+			declare_war_on = {
+				target = ROOT
+				type = annex_everything
 			}
+			add_civil_war_target = ROOT
+		}
+		set_politics = {
+			ruling_party = communism
+			elections_allowed = no
 		}
 		#todo character split and spawn ins division and spawning
+		add_equipment_to_stockpile = {
+			type = infantry_equipment
+			amount = var:GER_commie_guns
+			producer = SOV
+		}
+		if = {
+			limit = {
+				has_completed_focus = GER_secure_control_over_the_brigades
+			}
+			every_other_country = {
+				limit = { original_tag = ROOT}
+				remove_ideas = GER_international_brigades_idea
+			}
+			division_template = {
+				name = "International Brigades"
+				is_locked = yes
+				priority = 2
+				regiments = {
+					militia = { x = 0 y = 0 }
+					militia = { x = 0 y = 1 }
+					militia = { x = 0 y = 2 }
+					infantry = { x = 0 y = 3 }
+					infantry = { x = 1 y = 0 }
+					infantry = { x = 1 y = 1 }
+					mountaineers = { x = 1 y = 2 }
+					mountaineers = { x = 1 y = 3 }
+					mountaineers = { x = 2 y = 0 }
+					shocktroop = { x = 2 y = 1 }
+					shocktroop = { x = 2 y = 2 }
+					shocktroop = { x = 2 y = 3 }
+				}
+				support = {
+					artillery = { x = 0 y = 0 }
+				}
+			}
+			random_owned_controlled_state = {
+				create_unit = {
+					division = "name = \"French Brigade\" division_template = \"International Brigades\" start_experience_factor = 1 start_equipment_factor = 1" 
+					owner = ROOT
+				}
+			}
+			random_owned_controlled_state = {
+				create_unit = {
+					division = "name = \"Balkan Brigade\" division_template = \"International Brigades\" start_experience_factor = 0.85 start_equipment_factor = 1" 
+					owner = ROOT
+				}
+			}
+			random_owned_controlled_state = {
+				create_unit = {
+					division = "name = \"First Soviet Brigade\" division_template = \"International Brigades\" start_experience_factor = 0.9 start_equipment_factor = 1" 
+					owner = ROOT
+				}
+			}
+			random_owned_controlled_state = {
+				create_unit = {
+					division = "name = \"Second Soviet Brigade\" division_template = \"International Brigades\" start_experience_factor = 0.8 start_equipment_factor = 1" 
+					owner = ROOT
+				}
+			}
+			random_owned_controlled_state = {
+				create_unit = {
+					division = "name = \"American Brigade\" division_template = \"International Brigades\" start_experience_factor = 0.95 start_equipment_factor = 1" 
+					owner = ROOT
+				}
+			}
+		}
 	}
 }
 country_event = {
@@ -8475,5 +8575,103 @@ country_event = {
 		custom_effect_tooltip = GER_SPD_-5_tt
 		unlock_national_focus = GER_choose_an_heir_for_wels
 		custom_effect_tooltip = GER_kpd_spd_coop_tt
+	}
+}
+country_event = {
+	id = new_ger.31
+	title = new_ger.31.t
+	desc = new_ger.31.d
+	#todo picture = GFX_report_event_ger_civil_war
+	is_triggered_only = yes
+	#civil war starts
+	option = {
+		name = new_ger.31.a
+		set_variable = { SOV_communist_support_before_puppet = party_popularity_100@communism }
+		set_variable = { SOV_democratic_support_before_puppet = party_popularity_100@democratic }
+		set_variable = { SOV_fascist_support_before_puppet = party_popularity_100@fascism }
+		set_variable = { SOV_neutrality_support_before_puppet = party_popularity_100@neutrality }
+		every_other_country = {
+			limit = {
+				original_tag = GER
+				has_war_with = ROOT
+			}
+			SOV = { 
+				declare_war_on = {
+					target = PREV
+					type = topple_government
+				}
+			}
+		}
+		FROM = {
+			set_autonomy = {
+				target = ROOT
+				autonomous_state = autonomy_dominion
+				end_wars  = no 
+				end_civil_wars = no
+			}
+		}
+		# Ensure Provisional government stays Non-aligned
+		hidden_effect = {
+			ROOT = {
+				set_politics = {
+					ruling_party = communism
+				}
+			}
+			# Reset popluarities to what they were before puppeting 
+			set_popularities = {
+				communism = GER.GER_communist_support_before_puppet
+				democratic = GER.GER_democratic_support_before_puppet
+				fascism = GER.GER_fascist_support_before_puppet
+				neutrality = GER.GER_neutrality_support_before_puppet
+			}
+			clear_variable = GER.GER_communist_support_before_puppet
+			clear_variable = GER.GER_democratic_support_before_puppet
+			clear_variable = GER.GER_fascist_support_before_puppet
+			clear_variable = GER.GER_neutrality_support_before_puppet
+		}
+	}
+}
+country_event = {
+	id = new_ger.32
+	title = new_ger.32.t
+	desc = new_ger.32.d
+	#todo picture = GFX_report_event_ger_civil_war
+	is_triggered_only = yes
+	#civil war starts
+	option = {
+		name = new_ger.32.a
+		custom_effect_tooltip = GER_sov_join_war_tt
+		FROM = { country_event = new_ger.31 }
+	}
+	option = {
+		name = new_ger.32.b
+		ai_chance = {
+			base = 0
+		}
+		FROM = { country_event = CHI_warlords.19 }
+	}
+}
+country_event = {
+	id = new_ger.33
+	title = new_ger.33.t
+	desc = new_ger.33.d
+	#todo picture = GFX_report_event_ger_civil_war
+	is_triggered_only = yes
+	#civil war starts
+	option = {
+		name = new_ger.33.a
+		set_country_flag = GER_pieck_kpd
+		promote_character = {
+			character = GER_wilhelm_pieck
+			ideology = stalinism
+		}
+	}
+	option = {
+		name = new_ger.33.b
+		set_country_flag = GER_ulbricht_kpd
+		promote_character = {
+			character = GER_walter_ulbricht
+			ideology = stalinism
+		}
 	}
 }
