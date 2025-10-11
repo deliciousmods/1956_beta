@@ -2650,7 +2650,7 @@ focus_tree = {
 		icon = GFX_goal_generic_construct_civilian
 		x = 0
 		y = 3
-		cost = 5
+		cost = 10
 		prerequisite = { focus = EST_promote_small_buisness }
 		prerequisite = { focus = EST_reforms_of_kaitselit focus = EST_combat_unemployment }
 		relative_position_id = EST_continue_liberal_reforms
@@ -3215,8 +3215,7 @@ focus_tree = {
 		x = 2
 		y = 5
 		cost = 10
-		prerequisite = { focus = EST_beacon_of_freedom_in_the_baltics }
-		prerequisite = { focus = EST_federalization_of_baltic_entente }
+		prerequisite = { focus = EST_beacon_of_freedom_in_the_baltics focus = EST_federalization_of_baltic_entente }
 		relative_position_id = EST_join_to_allies
 
 		ai_will_do = {
@@ -4340,10 +4339,40 @@ focus_tree = {
 						}
 					}
 				}
-				add_extra_state_shared_building_slots = 2
+				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = industrial_complex
-					level = 2
+					level = 1
+					instant_build = yes
+				}
+			}
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+					OR = {
+						is_in_home_area = yes
+						NOT = {
+							owner = {
+								any_owned_state = {
+									free_building_slots = {
+										building = industrial_complex
+										size > 1
+										include_locked = yes
+									}
+									is_in_home_area = yes
+								}
+							}
+						}
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
 					instant_build = yes
 				}
 			}
@@ -5008,6 +5037,34 @@ focus_tree = {
 	}
 
 	focus = {
+		id = EST_foreign_support
+		icon = GFX_goal_generic_construct_civilian
+		x = 2
+		y = 2
+		cost = 5
+		prerequisite = { focus = EST_create_paramilitary_formations }
+		relative_position_id = EST_gathering_of_nationalists
+
+        available = {
+			NOT = {
+				has_completed_focus = EST_destroy_weak_government
+			}
+		}
+		ai_will_do = {
+			factor = 10
+		}
+		completion_reward = {	
+			add_ideas = EST_estonian_fascists_paramillitary
+			add_popularity = {
+                ideology = fascism
+                popularity = 0.075
+            }
+			add_stability = -0.075
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
+	}
+
+	focus = {
 		id = EST_destroy_weak_government
 		icon = GFX_goal_generic_construct_civilian
 		x = 0
@@ -5077,12 +5134,12 @@ focus_tree = {
 			factor = 10
 		}
 		completion_reward = {
-		    add_stability = 0.075
-			remove_ideas = EST_estonian_fascists_paramillitary
+		    add_stability = 0.05
 			add_popularity = {
                 ideology = fascism
                 popularity = 0.05
             }
+			remove_ideas = EST_estonian_fascists_paramillitary
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -5124,14 +5181,13 @@ focus_tree = {
 	    completion_reward = {
 		    add_ideas = EST_land_ownership
 	    }
-
 	    search_filters = { FOCUS_FILTER_INDUSTRY }
     }
 
 	focus = {
 		id = EST_future_on_the_world_stage
 		icon = GFX_focus_EST_estonia_is_scandinavia
-		x = -3
+		x = 0
 		y = 7
 		cost = 2
 		prerequisite = { focus = EST_land_ownership }
@@ -5146,18 +5202,24 @@ focus_tree = {
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
-
+    
+	# Influence to the baltic state path
 	focus = {
 		id = EST_secure_the_baltics
 		icon = GFX_goal_generic_construct_civilian
 		mutually_exclusive = { focus = EST_join_to_axis }
-		x = 2
+		x = 0
 		y = 1
 		cost = 5
 		prerequisite = { focus = EST_future_on_the_world_stage }
 		relative_position_id = EST_future_on_the_world_stage
 
         available_if_capitulated = no
+
+		allow_branch = {
+            NOT = { has_completed_focus = EST_bring_valka_home }
+            NOT = { has_completed_focus = EST_join_to_axis }
+        }
 
 		available = {
 			has_government = fascism
@@ -5170,14 +5232,6 @@ focus_tree = {
 
 		completion_reward = {
 		    add_war_support = 0.025
-			create_wargoal = {
-                type = puppet_wargoal_focus
-                target = LAT
-            }
-			create_wargoal = {
-                type = puppet_wargoal_focus
-                target = LIT
-            }
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -5296,16 +5350,155 @@ focus_tree = {
 	}
 
 	focus = {
+		id = EST_bring_valka_home
+		icon = GFX_goal_generic_construct_civilian
+		mutually_exclusive = { focus = EST_join_to_axis }
+		x = 4
+		y = 1
+		cost = 5
+		prerequisite = { focus = EST_future_on_the_world_stage }
+		relative_position_id = EST_future_on_the_world_stage
+
+        available_if_capitulated = no
+
+		allow_branch = {
+            NOT = { has_completed_focus = EST_secure_the_baltics }
+            NOT = { has_completed_focus = EST_join_to_axis }
+        }
+
+		offset = {
+            x = -4
+            y = 0
+            trigger = {
+                has_completed_focus = EST_bring_valka_home
+            }
+        }
+
+		available = {
+			has_government = fascism
+			is_subject = no
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		completion_reward = {
+		    add_war_support = 0.025
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
+	}
+
+	focus = {
+		id = EST_proceed_further
+		icon = GFX_goal_generic_construct_civilian
+		x = 1
+		y = 1
+		cost = 5
+		prerequisite = { focus = EST_bring_valka_home }
+		relative_position_id = EST_bring_valka_home
+
+        available_if_capitulated = no
+
+		available = {
+			has_government = fascism
+			is_subject = no
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		completion_reward = {
+		    add_war_support = 0.025
+			create_wargoal = {
+                type = puppet_wargoal_focus
+                target = LAT
+            }
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
+	}
+
+	focus = {
+		id = EST_show_estonian_power
+		icon = GFX_goal_generic_construct_civilian
+		x = -1
+		y = 1
+		cost = 10
+		prerequisite = { focus = EST_bring_valka_home }
+		relative_position_id = EST_bring_valka_home
+
+        available_if_capitulated = no
+
+		available = {
+			has_government = fascism
+			is_subject = no
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		completion_reward = {
+		    add_manpower = 25000
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
+	}
+
+	focus = {
+		id = EST_lithuanian_subordination
+		icon = GFX_goal_generic_construct_civilian
+		x = 0
+		y = 2
+		cost = 10
+		prerequisite = { focus = EST_show_estonian_power }
+		prerequisite = { focus = EST_proceed_further }
+		relative_position_id = EST_bring_valka_home
+
+        available_if_capitulated = no
+
+		available = {
+			has_government = fascism
+			is_subject = no
+		}
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		completion_reward = {
+		   	create_wargoal = {
+                type = puppet_wargoal_focus
+                target = LIT
+            }
+		}
+		search_filters = { FOCUS_FILTER_RESEARCH }
+	}
+
+	focus = {
 		id = EST_join_to_axis
 		icon = GFX_goal_generic_construct_civilian
 		mutually_exclusive = { focus = EST_secure_the_baltics }
-		x = -2
+		x = -4
 		y = 1
 		cost = 5
 		prerequisite = { focus = EST_future_on_the_world_stage }
 		relative_position_id = EST_future_on_the_world_stage
 
 		available_if_capitulated = no
+
+		allow_branch = {
+            NOT = { has_completed_focus = EST_secure_the_baltics }
+            NOT = { has_completed_focus = EST_bring_valka_home }
+        }
+
+		offset = {
+            x = 4
+            y = 0
+            trigger = {
+                has_completed_focus = EST_join_to_axis
+            }
+        }
 
         available = { 
 		    is_in_faction = no
@@ -5384,23 +5577,26 @@ focus_tree = {
 			    category = land_doctrine
 		    }
 		}
-
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
 
 	focus = {
 		id = EST_help_finnish_fascists
 		icon = GFX_focus_ITA_generic_fascist_workers
-		x = 5
+		x = 10
 		y = 7
 		cost = 5
 		prerequisite = { focus = EST_land_ownership }
 		relative_position_id = EST_gathering_of_nationalists
 
+		allow_branch = {
+            has_global_flag = Estonian_more_paths_rule
+        }
 
 		ai_will_do = {
 			factor = 10
 		}
+
 		completion_reward = {
 		add_political_power = 100	
 		}
@@ -5410,7 +5606,7 @@ focus_tree = {
 	focus = {
 		id = EST_unite_countries
 		icon = GFX_goal_generic_dangerous_deal
-		x = 8
+		x = 12
 		y = 9
 		cost = 10
 		prerequisite = { focus = EST_help_finnish_fascists }
@@ -5571,7 +5767,7 @@ focus_tree = {
 		id = EST_create_a_union
 		icon = GFX_goal_generic_construct_civilian
 		mutually_exclusive = { focus = EST_unite_countries }
-		x = 2
+		x = 7
 		y = 9
 		cost = 10
 		prerequisite = { focus = EST_help_finnish_fascists }
@@ -6019,7 +6215,7 @@ focus_tree = {
 	}
 
 	focus = {
-		id = EST_christian_education_centers
+		id = EST_support_the_estonian_village
 		icon = GFX_focus_generic_military_academy
 		x = 2
 		y = 5
@@ -6052,7 +6248,6 @@ focus_tree = {
 
 		completion_reward = {
 		    add_stability = 0.075	
-
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
@@ -6060,7 +6255,7 @@ focus_tree = {
 	focus = {
 		id = EST_support_the_pagans
 		icon = GFX_goal_generic_construct_civilian
-		x = 11
+		x = 15
 		y = 4
 		cost = 5
 		prerequisite = { focus = EST_new_fascist_goverment }
@@ -6069,6 +6264,10 @@ focus_tree = {
 		ai_will_do = {
 			factor = 10
 		}
+
+		allow_branch = {
+            has_global_flag = Estonian_more_paths_rule
+        }
 
 		allow_branch = {
             NOT = { has_completed_focus = EST_support_lutheran_church }
@@ -6191,13 +6390,15 @@ focus_tree = {
 	focus = {
 		id = EST_estonian_anarchism
 		icon = GFX_goal_generic_construct_civilian
-		x = 90
-		y = 1
+		x = 8
+		y = 2
 		cost = 5
+        relative_position_id = EST_restore_estonian_commune
+		prerequisite = { focus = EST_preparation_for_the_uprising }
 
-		prerequisite = { focus = EST_future_of_estonia }
-
-
+		allow_branch = {
+            has_completed_focus = EST_preparation_for_the_uprising 
+        }
 
 		ai_will_do = {
 			factor = 10
