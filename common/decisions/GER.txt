@@ -325,12 +325,12 @@ GER_seize_gold_reserves_cat = {
 			ROOT = { has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }}
 		}
 		
-		fire_only_once = no
+		fire_only_once = yes
 
 		cost = 25
 
 		complete_effect = {
-			ROOT = { set_temp_variable = { occupied_state_num_factory = 0 } } #This will show how many factories in total Germany controls from FROM's cores
+			set_temp_variable = { occupied_state_num_factory = 0 } #This will show how many factories in total Germany controls from FROM's cores
 			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_military_factories_in_cores@GER }
 			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_civilian_factories_in_cores@GER }
 			add_to_temp_variable = { GER.occupied_state_num_factory = FROM.num_of_naval_factories_in_cores@GER }
@@ -341,35 +341,152 @@ GER_seize_gold_reserves_cat = {
 						is_fully_controlled_by = ROOT
 						NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
 					}
-
 					add_compliance = -5
 					add_resistance = 10
 					set_state_flag = GER_seize_gold_reserves_state_flag
 					add_dynamic_modifier = { modifier = GER_overburdened_state_modifier days = 90 }
 				}
 			}
-			ROOT = {			
+			
+			divide_temp_variable = { occupied_state_num_factory = 200 } #This is necessary since a single factory will increase the occupied_state_num_factory number to 1, which in turn translates to -100% when subtracting from the Consumer Goods. Dividing it by 100 here will give you 1% instead, which is more like what we want.
+			multiply_temp_variable = { occupied_state_num_factory = -1 }
+
+			#If Germany has seized Gold Reserves from Soviet states, deduct that amount when seizing the nation wide Gold Reserves from Soviet, so we're not double dipping
+			if = { 
+				limit = {
+					FROM = {
+						original_tag = SOV
+					}
+					#Check if Germany has seized Gold Reserves that needs to be deducted from the total amount
+					check_variable = { GER_reduce_russian_CG_bonus < 0 }
+				}
+				subtract_from_temp_variable = { occupied_state_num_factory = GER_reduce_russian_CG_bonus }
+			}
+			
+			custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
+			add_to_variable = {
+				GER_industrial_consumer_goods_factor = occupied_state_num_factory
+				tooltip = consumer_goods_factor_tt
+			}
+			GER_reduce_mefo_bills_penalty = yes
+		}
+	}
+	GER_seize_russian_citites_gold_reserves = {
+		priority = 1
+		icon = GFX_decision_generic_confiscation
+
+		ai_will_do = {
+			base = 10
+			modifier = {
+				factor = 3
+				check_variable = { GER_industrial_consumer_goods_factor > 0.25 }
+			}
+			modifier = {
+				factor = 3
+				check_variable = { GER_industrial_consumer_goods_factor > 0.5 }
+			}
+			modifier = {
+				factor = 3
+				check_variable = { GER_industrial_consumer_goods_factor > 0.75 }
+			}
+			modifier = {
+				factor = 5
+				check_variable = { GER_industrial_consumer_goods_factor > 0.99 }
+			}
+			modifier = {
+				factor = 1.5
+				has_war_with_major = yes
+			}
+			modifier = {
+				factor = 1.5
+				FROM = {
+					controller = {
+						is_major = yes
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				check_variable = { GER_industrial_consumer_goods_factor < 0.15 }
+			}
+		}
+
+		state_target = yes
+
+		targets = { 195 219 217 242 218 206 202 137 }
+		#States being targeted: Leningrad, Moscow, Stalingrad, Smolensk, Rostov, Minsk, Kyiv, Crimea
+
+		target_trigger = {
+			FROM = {
+				owner = {
+					original_tag = SOV
+					has_war_with = ROOT
+					NOT = { has_country_flag = GER_has_capitulated_to_germany }
+				}
+				NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
+				NOT = { is_core_of = ROOT }
+				OR = {
+					check_variable = { industrial_complex_level > 0 }
+					check_variable = { arms_factory_level > 0 }
+					check_variable = { building_level@dockyard > 0 }
+				}
+			}
+		}		
+
+		available = {
+			FROM = { #This is all for tooltip purposes
+				is_fully_controlled_by = ROOT
+				owner = {
+					NOT = { has_country_flag = GER_has_capitulated_to_germany }
+				}
+			}
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = FROM
+			}
+		}
+
+		fire_only_once = yes
+
+		cost = 10
+
+		complete_effect = {
+
+			#All temp variables need to be in the same scope to display the effect tooltip properly
+			FROM = {
+				set_temp_variable = { occupied_state_num_factory = 0 }
+				add_to_temp_variable = { occupied_state_num_factory = arms_factory_level }
+				add_to_temp_variable = { occupied_state_num_factory = industrial_complex_level }
+				add_to_temp_variable = { occupied_state_num_factory = building_level@dockyard }
+
+				add_resistance = 10
+				add_compliance = -5
+				set_state_flag = GER_seize_gold_reserves_state_flag
+				add_dynamic_modifier = { modifier = GER_overburdened_state_modifier days = 90 }
+				
 				divide_temp_variable = { occupied_state_num_factory = 200 } #This is necessary since a single factory will increase the occupied_state_num_factory number to 1, which in turn translates to -100% when subtracting from the Consumer Goods. Dividing it by 100 here will give you 1% instead, which is more like what we want.
 				multiply_temp_variable = { occupied_state_num_factory = -1 }
 
-				custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
 				if = {
 					limit = {
-						check_variable = { occupied_state_num_factory < 50 }
+						FROM = { is_fully_controlled_by = ROOT }
 					}
+					custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
 					add_to_variable = {
-						GER_industrial_consumer_goods_factor = occupied_state_num_factory
+						ROOT.GER_industrial_consumer_goods_factor = occupied_state_num_factory
 						tooltip = consumer_goods_factor_tt
 					}
 				}
 				else = {
-					add_to_variable = {
-						GER_industrial_consumer_goods_factor = -0.25
-						tooltip = consumer_goods_factor_tt
-					}
+					custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_russian_states_tt
 				}
-				GER_reduce_mefo_bills_penalty = yes
+
+				#Reduce future Soviet Gold Reserves Germany can seize
+				add_to_variable = { ROOT.GER_reduce_russian_CG_bonus = occupied_state_num_factory }
 			}
+			GER_reduce_mefo_bills_penalty = yes
 		}
 	}
 }
@@ -423,7 +540,7 @@ GER_operational_planning_category = {
 						#type = armor
 					}
 					divisions_in_state = {
-						state = 977
+						state = 1094
 						size > 5
 						#type = armor
 					}
@@ -1243,6 +1360,8 @@ GER_price_controls_cat = {
 				tooltip = consumer_goods_factor_tt
 			}
 			GER_reduce_mefo_bills_penalty = yes
+			custom_effect_tooltip = generic_skip_one_line_tt
+			r56_GER_ersatz_idea_upgrade = yes
 		}
 	}
 	GER_import_tariffs = {
@@ -1468,7 +1587,7 @@ GER_price_controls_cat = {
 		}
 	}
 }
-#TODO_rt56 fix the rest of this:
+#TODO_rt56 fix the rest of this: DONE?
 GER_fortify_the_vaterland_cat = {
 	GER_construct_the_westwall = {
 		icon = GFX_decision_generic_fortification
@@ -1518,7 +1637,7 @@ GER_fortify_the_vaterland_cat = {
 				is_fully_controlled_by = ROOT
 				is_demilitarized_zone = no
 			}
-			1053 = { #Sarland
+			1053 = { #Saarland
 				is_fully_controlled_by = ROOT
 				is_demilitarized_zone = no
 			}
@@ -1545,6 +1664,7 @@ GER_fortify_the_vaterland_cat = {
 				has_full_control_of_state = 51 #Rineland
 				has_full_control_of_state = 42 #Moselland
 				has_full_control_of_state = 923 #Baden
+				has_full_control_of_state = 1053 #Saarland
 			}
 		}
 
@@ -1601,8 +1721,8 @@ GER_fortify_the_vaterland_cat = {
 								province = {
 									id = 11470
 									id = 11435
-									id = 9575
-									id = 11531
+									#id = 9575
+									#id = 11531
 									id = 563
 									id = 3558
 								}
@@ -1619,8 +1739,8 @@ GER_fortify_the_vaterland_cat = {
 							province = {
 								id = 11470
 								id = 11435
-								id = 9575
-								id = 11531
+								#id = 9575
+								#id = 11531
 								id = 563
 								id = 3558
 							}
@@ -1628,6 +1748,32 @@ GER_fortify_the_vaterland_cat = {
 						}
 					}
 				}
+				if = {
+					limit = {
+						1053 = { #Moselland
+							any_province_building_level = {
+								province = {
+									id = 9575 #
+									id = 11531 #
+								}
+								building = bunker
+								level < 4 
+							}
+						}
+
+					}
+					1053 = { #Moselland
+						add_building_construction = {
+							type = bunker
+							level = 2
+							province = {
+								id = 9575 #
+								id = 11531 #
+							}
+							instant_build = yes
+						}
+					}
+				}				
 				if = {
 					limit = {
 						923 = { #Baden
@@ -2160,7 +2306,7 @@ GER_fortify_the_vaterland_cat = {
 		available = {
 			custom_trigger_tooltip = {
 				tooltip = GER_controls_norway_tt
-				925 = { #Finnmark
+				1035 = { #Finnmark #r56 was 925
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 				}
 				924 = { #Troms
@@ -2210,7 +2356,7 @@ GER_fortify_the_vaterland_cat = {
 			custom_trigger_tooltip = {
 				tooltip = GER_not_controls_norway_tt
 				OR = {
-					925 = { #Finnmark
+					1035 = { #Finnmark
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
 					924 = { #Troms
@@ -2262,16 +2408,16 @@ GER_fortify_the_vaterland_cat = {
 				limit = { 
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 					OR = { #From Finnmark to Västergötland
-						state = 925
-						state = 924
+						state = 1035 #r56 was 925
+						state = 1034 #r56 was 924
 						state = 144
-						state = 923
+						state = 1033 #r56 was 923
 						state = 143
 						state = 142
-						state = 922
+						state = 967 #r56 was 922
 						state = 1032
 						state = 110
-						state = 915
+						state = 969 #r56 was 915
 						state = 140
 					}
 					coastal_bunker < 10
@@ -2290,16 +2436,16 @@ GER_fortify_the_vaterland_cat = {
 				limit = { 
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 					OR = { #From Finnmark to Västergötland
-						state = 925
-						state = 924
+						state = 1035 #r56 was 925
+						state = 1034 #r56 was 924
 						state = 144
-						state = 923
+						state = 1033 #r56 was 923
 						state = 143
 						state = 142
-						state = 922
+						state = 967 #r56 was 922
 						state = 1032
 						state = 110
-						state = 915
+						state = 969 #r56 was 915
 						state = 140
 					}
 					coastal_bunker < 10
@@ -2353,7 +2499,7 @@ GER_fortify_the_vaterland_cat = {
 				99 = { #Jylland
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 				}
-				912 = { #Sonderjylland
+				964 = { #Sonderjylland
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 				}
 				998 = { #Schleswig
@@ -2380,7 +2526,7 @@ GER_fortify_the_vaterland_cat = {
 				6 = { #Vlaanderen
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 				}
-				977 = { #Antwerpen
+				1094 = { #Antwerpen
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 				}
 			}
@@ -2409,7 +2555,7 @@ GER_fortify_the_vaterland_cat = {
 					99 = { #Jylland
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
-					912 = { #Sonderjylland
+					964 = { #Sonderjylland
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
 					998 = { #Schleswig
@@ -2436,7 +2582,7 @@ GER_fortify_the_vaterland_cat = {
 					6 = { #Vlaanderen
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
-					977 = { #Antwerpen
+					1094 = { #Antwerpen
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
 				}
@@ -2465,7 +2611,7 @@ GER_fortify_the_vaterland_cat = {
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 					OR = { #From Jylland to Vlaanderen
 						state = 99
-						state = 912
+						state = 964
 						state = 998
 						state = 58 
 						state = 59
@@ -2474,7 +2620,7 @@ GER_fortify_the_vaterland_cat = {
 						state = 7
 						state = 35
 						state = 6
-						state = 977
+						state = 1094
 					}
 					coastal_bunker < 10
 					is_coastal = yes 
@@ -2493,7 +2639,7 @@ GER_fortify_the_vaterland_cat = {
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 					OR = { #From Jylland to Vlaanderen
 						state = 99
-						state = 912
+						state = 964
 						state = 998
 						state = 58 
 						state = 59
@@ -2502,7 +2648,7 @@ GER_fortify_the_vaterland_cat = {
 						state = 7
 						state = 35
 						state = 6
-						state = 977
+						state = 1094
 					}
 					coastal_bunker < 10
 					is_coastal = yes 
@@ -2576,6 +2722,9 @@ GER_fortify_the_vaterland_cat = {
 				806 = { #Pyrenees-Atlantique
 					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 				}
+				1076 = { #Channel-Islands
+					state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
+				}
 			}
 			NOT = { has_country_flag = GER_constructing_forts_flag }
 		}
@@ -2623,6 +2772,9 @@ GER_fortify_the_vaterland_cat = {
 					806 = { #Pyrenees-Atlantique
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
+					1076 = { #Channel-Islands
+						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
+					}
 				}
 			}
 		}
@@ -2656,6 +2808,7 @@ GER_fortify_the_vaterland_cat = {
 						state = 23
 						state = 19
 						state = 806
+						state = 1076
 					}
 					coastal_bunker < 10
 					is_coastal = yes 
@@ -2681,6 +2834,7 @@ GER_fortify_the_vaterland_cat = {
 						state = 23
 						state = 19
 						state = 806
+						state = 1076
 					}
 					coastal_bunker < 10
 					is_coastal = yes 
@@ -2969,7 +3123,7 @@ GER_fortify_the_vaterland_cat = {
 					153 = { #Tirol
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
-					976 = { #Steiremark
+					1054 = { #Steiremark = 1054 and not 976
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = no
 					}
 				}
@@ -3003,7 +3157,7 @@ GER_fortify_the_vaterland_cat = {
 							state = 847 #Western Swiss Alps
 							state = 151 #Eastern Swiss Alps
 							state = 153 #Tirol
-							state = 976 #Steiremark
+							state = 1054 #Steiremark
 						}
 					}
 					add_building_construction = {
@@ -3126,13 +3280,13 @@ GER_fortify_the_vaterland_cat = {
 			}
 			if = {
 				limit = { 
-					976 = {
+					1054 = {
 						state_is_fully_controlled_by_ROOT_subject_or_faction_member = yes
 						bunker < 10
 					}
 				}
 				hidden_effect = {
-					976 = {
+					1054 = {
 						add_building_construction = {
 							type = bunker
 							level = 1
@@ -4942,6 +5096,9 @@ GER_reichskommissariats = {
 				40 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
+				985 = {
+					is_controlled_by_ROOT_or_subject = yes
+				}
 			}
 		}
 
@@ -4970,6 +5127,7 @@ GER_reichskommissariats = {
 				state = 882
 				state = 654
 				state = 40
+				state = 985
 			}
 		}
 
@@ -6112,6 +6270,9 @@ GER_reichskommissariats = {
 			}
 			GEN = {
 				exists = no
+			}
+			NOT = {
+				has_subject = POL
 			}
 		}
 
@@ -7567,6 +7728,9 @@ GER_reichskommissariats = {
 				155 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
+				1104 = {
+					is_controlled_by_ROOT_or_subject = yes
+				}
 				913 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
@@ -7584,6 +7748,7 @@ GER_reichskommissariats = {
 				state = 154
 				state = 43
 				state = 155
+				state = 1104
 				state = 913
 			}
 		}
@@ -8407,6 +8572,27 @@ GER_reichskommissariats = {
 				893 = {
 				 	is_controlled_by_ROOT_or_subject = yes
 				}
+				1055 = {
+				 	is_controlled_by_ROOT_or_subject = yes
+				}
+				705 = {
+				 	is_controlled_by_ROOT_or_subject = yes
+				}
+				708 = {
+				 	is_controlled_by_ROOT_or_subject = yes
+				}
+				709 = {
+				 	is_controlled_by_ROOT_or_subject = yes
+				}
+				706 = {
+				 	is_controlled_by_ROOT_or_subject = yes
+				}
+				707 = {
+				 	is_controlled_by_ROOT_or_subject = yes
+				}
+				543 = {
+				 	is_controlled_by_ROOT_or_subject = yes
+				}
 			}
 		}
 
@@ -8479,6 +8665,12 @@ GER_reichskommissariats = {
 				state = 894
 				state = 541
 				state = 893
+				state = 1055
+				state = 705
+				state = 708
+				state = 709
+				state = 706
+				state = 707
 			}
 		}
 
@@ -9881,6 +10073,9 @@ GER_reichskommissariats = {
 				1023 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
+				650 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
 			}
 		}
 
@@ -9938,6 +10133,7 @@ GER_reichskommissariats = {
 				state = 992
 				state = 993
 				state = 1023
+				state = 650
 			}
 		}
 
@@ -10706,7 +10902,16 @@ GER_reichskommissariats = {
 				294 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
+				1102 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1103 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
 				949 = {
+					is_controlled_by_ROOT_or_subject = yes
+				}
+				979 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
 				966 = {
@@ -10737,6 +10942,12 @@ GER_reichskommissariats = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
 				1049 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1007 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				906 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
 			}
@@ -10770,8 +10981,11 @@ GER_reichskommissariats = {
 				state = 659
 				state = 293
 				state = 294
+				state = 1102
+				state = 1103
 				state = 949
 				state = 966
+				state = 979
 				state = 1016
 				state = 1017
 				state = 1021
@@ -10781,6 +10995,8 @@ GER_reichskommissariats = {
 				state = 1047
 				state = 1048
 				state = 1049
+				state = 906
+				state = 1007
 			}
 		}
 
@@ -11150,7 +11366,6 @@ GER_reichskommissariats = {
 				state = 982
 				state = 983
 				state = 984
-				state = 985
 				state = 986
 				state = 987
 				state = 988
@@ -11241,154 +11456,171 @@ GER_reichskommissariats = {
 			}
 			custom_trigger_tooltip = {
 				tooltip = GER_reichskommissariat_highlighted_required_states
-				439 = {
+				439 = { #Delhi
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				440 = {
+				440 = { #West Punjab
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				441 = {
+				441 = { #Kashmir
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				787 = {
+				787 = { #Northern Kashmir
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				442 = {
+				442 = { #Sarhad
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				445 = {
+				445 = { #Quetta
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				444 = {
+				444 = { #Balochistan
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				415 = {
+				415 = { #Herat
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				267 = {
+				267 = { #Kabul
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				443 = {
+				443 = { #East Sind
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				433 = {
+				433 = { #Rajastan
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				428 = {
+				428 = { #Gujarat
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				438 = {
+				438 = { #Lucknow
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				437 = {
+				437 = { #Indore
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				427 = {
+				427 = { #Hyderabad
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				429 = {
+				429 = { #Bombay
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				436 = {
+				436 = { #Jabalpur
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				425 = {
+				425 = { #Mysore
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				424 = {
+				424 = { #Andhra
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				423 = {
+				423 = { #Madras
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				320 = {
+				320 = { #Pondicherry
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				321 = {
+				321 = { #Goa
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				422 = {
+				422 = { #Ceylon
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				426 = {
+				426 = { #Orissa
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				435 = {
+				435 = { #Jharkhand
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				431 = {
+				431 = { #West Bengal
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				430 = {
+				430 = { #East Bengal (Bangladesh)
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				432 = {
+				432 = { #Assam
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				434 = {
+				434 = { #Lhoyu
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				640 = {
+				640 = { #Mandalay
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				288 = {
+				288 = { #Magway
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				323 = {
+				323 = { #Bagmati
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				324 = {
+				324 = { #Bhutan
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				758 = {
+				758 = { #Ngari Khorsum
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				322 = {
+				322 = { #Chang Tang
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				757 = {
+				757 = { #U Tsang
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				601 = {
+				601 = { #Western Kham
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1008 = {
+				1008 = { #Faryab
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1009 = {
+				1009 = { #Bamian
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1010 = {
+				1010 = { #Kandahar
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1011 = {
+				1011 = { #Badakhshan
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1013 = {
+				1013 = { #Sikkim
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1018 = {
+				1018 = { #Shan
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1019 = {
+				1019 = { #Sagaing
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1020 = {
+				1020 = { #Bago
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1090 = {
+				1090 = { #Uttarakhand
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1091 = {
+				1091 = { #Gandaki
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1092 = {
+				1092 = { #Bihar
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				1093 = {
+				1093 = { #West Sind
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				
+				1098 = { #Kochin
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1099 = { #Kolhapur and Deccan
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1100 = { #Bastar
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1101 = { #East Punjab
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				281 = { #Maldives
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				710 = { #Diego Garcia
+				    is_controlled_by_ROOT_or_subject = yes
+				}
 			}
 		}
 
@@ -11444,6 +11676,12 @@ GER_reichskommissariats = {
 				state = 1091
 				state = 1092
 				state = 1093
+				state = 1098
+				state = 1099
+				state = 1100
+				state = 1101
+				state = 281
+				state = 710
 			}
 		}
 
@@ -11864,21 +12102,6 @@ GER_reichskommissariats = {
 				627 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
-				647 = {
-				    is_controlled_by_ROOT_or_subject = yes
-				}
-				648 = {
-				    is_controlled_by_ROOT_or_subject = yes
-				}
-				646 = {
-				    is_controlled_by_ROOT_or_subject = yes
-				}
-				638 = {
-				    is_controlled_by_ROOT_or_subject = yes
-				}
-				632 = {
-				    is_controlled_by_ROOT_or_subject = yes
-				}
 				744 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
@@ -12030,7 +12253,6 @@ GER_reichskommissariats = {
 				state = 625
 				state = 626
 				state = 627
-				state = 647
 				state = 648
 				state = 646
 				state = 638
@@ -12206,9 +12428,6 @@ GER_reichskommissariats = {
 			}
 			custom_trigger_tooltip = {
 				tooltip = GER_reichskommissariat_highlighted_required_states
-				979 = {
-				    is_controlled_by_ROOT_or_subject = yes
-				}
 				523 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
@@ -12287,7 +12506,49 @@ GER_reichskommissariats = {
 				636 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
+				638 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				646 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				647 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				648 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				632 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
 				726 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1088 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1089 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				647 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1087 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				727 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				629 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				630 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				631 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				270 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
 				641 = {
@@ -12332,6 +12593,9 @@ GER_reichskommissariats = {
 				873 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
+				909 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
 				914 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
@@ -12359,7 +12623,13 @@ GER_reichskommissariats = {
 				978 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
+				1014 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
 				1096 = {
+				    is_controlled_by_ROOT_or_subject = yes
+				}
+				1074 = {
 				    is_controlled_by_ROOT_or_subject = yes
 				}
 			}
@@ -12419,7 +12689,25 @@ GER_reichskommissariats = {
 				state = 975
 				state = 976
 				state = 978
+				state = 1014
 				state = 1096
+				state = 1088
+				state = 1089
+				state = 638
+				state = 646
+				state = 648
+				state = 647
+				state = 1087
+				state = 648
+				state = 632
+				state = 727
+				state = 727
+				state = 629
+				state = 630
+				state = 631
+				state = 270
+				state = 909
+				state = 1074
 				### IMPASSABLE, for some reason they add them here but not for Mittelafrika...
 				state = 674
 				state = 977
@@ -13039,12 +13327,12 @@ GER_military_buildup = {
 					has_country_flag = GER_AI_RANDOM_COMMUNIST_STALINIST
 					has_game_rule = {
 						rule = GER_ai_behavior
-						option = GER_COMMUNIST_STALINIST
+						option = COMMUNIST_COMINTERN
 					}
 					has_country_flag = GER_AI_RANDOM_COMMUNIST_SPARTACUS
 					has_game_rule = {
 						rule = GER_ai_behavior
-						option = GER_COMMUNIST_SPARTACUS
+						option = COMMUNIST_WORLD_REVOLUTION
 					}
 				}
 			}
@@ -14243,8 +14531,10 @@ GER_rebuild_the_nation_cat = {
 			57 = { is_fully_controlled_by = ROOT }
 			55 = { is_fully_controlled_by = ROOT }
 			51 = { is_fully_controlled_by = ROOT }
-			51 = { is_fully_controlled_by = ROOT }
 			42 = { is_fully_controlled_by = ROOT }
+			989 = { is_fully_controlled_by = ROOT }
+			922 = { is_fully_controlled_by = ROOT }
+			1053 = { is_fully_controlled_by = ROOT }
 		}
 
 		cancel_trigger = { 
@@ -14256,6 +14546,9 @@ GER_rebuild_the_nation_cat = {
 				51 = { is_controlled_by = ROOT }
 				51 = { is_controlled_by = ROOT }
 				42 = { is_controlled_by = ROOT }
+				989 = { is_controlled_by = ROOT }
+				922 = { is_controlled_by = ROOT }
+				1053 = { is_controlled_by = ROOT }
 			} 
 		}
 
@@ -14267,6 +14560,9 @@ GER_rebuild_the_nation_cat = {
 				state = 55 #Hessen
 				state = 51 #Rhineland
 				state = 42 #Moselland
+				state = 989 #Ostrhineland
+				state = 922 #Frankfurt
+				state = 1053 #Saarland
 			}
 		}
 
@@ -14290,6 +14586,9 @@ GER_rebuild_the_nation_cat = {
 						state = 55 #Hessen
 						state = 51 #Rhineland
 						state = 42 #Moselland
+						state = 989 #Ostrhineland
+						state = 922 #Frankfurt
+						state = 1053 #Saarland
 					}
 				}
 				add_extra_state_shared_building_slots = 1
@@ -14332,10 +14631,10 @@ GER_rebuild_the_nation_cat = {
 			} 
 			if = {
 				limit = {
-					912 = { is_core_of = ROOT }
+					964 = { is_core_of = ROOT }
 				}
 				NOT = {
-					912 = { is_controlled_by = ROOT }
+					964 = { is_controlled_by = ROOT }
 				}
 			}
 		}
@@ -14347,7 +14646,7 @@ GER_rebuild_the_nation_cat = {
 				state = 61 #Mecklenburg
 				state = 62 #Vorpommern
 				state = 63 #Hinterpommern
-				state = 912 #Sonderjylland, hinting to the player they can develop this state too
+				state = 964 #Sonderjylland, hinting to the player they can develop this state too
 			}
 		}
 
@@ -14370,7 +14669,7 @@ GER_rebuild_the_nation_cat = {
 						state = 61 #Mecklenburg
 						state = 62 #Vorpommern
 						state = 63 #Hinterpommern
-						state = 912 #Sonderjylland
+						state = 964 #Sonderjylland
 					}
 				}
 				add_extra_state_shared_building_slots = 1
@@ -19097,7 +19396,7 @@ GER_realpolitik_cat = {
 					create_faction = GER_mitteleuropa_alliance
 				}
 				HOL = {
-					add_state_claim = 977
+					add_state_claim = 1094
 					add_state_claim = 6
 				}
 
@@ -20110,7 +20409,7 @@ GER_realpolitik_cat = {
 				34 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
-				977 = {
+				1094 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
 				29 = {
@@ -20123,7 +20422,7 @@ GER_realpolitik_cat = {
 			highlight_state_targets = {
 				state = 6
 				state = 34
-				state = 977
+				state = 1094
 				state = 29
 			}
 		}
@@ -20202,7 +20501,7 @@ GER_realpolitik_cat = {
 						OR = {
 							state = 6
 							state = 34
-							state = 977
+							state = 1094
 							state = 29
 						}
 					}
@@ -20549,18 +20848,18 @@ GER_realpolitik_cat = {
 				120 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
-				933 = {
-					is_controlled_by_ROOT_or_subject = yes
-				}
+				#933 = {
+				#	is_controlled_by_ROOT_or_subject = yes
+				#}
 				131 = {
 					is_controlled_by_ROOT_or_subject = yes
 				}
-				931 = {
-					is_controlled_by_ROOT_or_subject = yes
-				}
-				932 = {
-					is_controlled_by_ROOT_or_subject = yes
-				}
+				#971 = { # Orkney and Shetland islands are optional
+				#	is_controlled_by_ROOT_or_subject = yes
+				#}
+				#970 = {
+				#	is_controlled_by_ROOT_or_subject = yes
+				#}
 			}
 		}
 
@@ -20570,10 +20869,12 @@ GER_realpolitik_cat = {
 				state = 133
 				state = 136
 				state = 120
-				state = 933
+				#state = 933 # wrong
 				state = 131
-				state = 931
-				state = 932
+				#state = 931 # wrong
+				#state = 932 # wrong
+				state = 971
+				state = 970
 			}
 		}
 
@@ -20653,14 +20954,36 @@ GER_realpolitik_cat = {
 							state = 133
 							state = 136
 							state = 120
-							state = 933
+							#state = 933
 							state = 131
-							state = 931
-							state = 932
+							#state = 931
+							#state = 932
 						}
 					}
 					add_core_of = SCO
 					transfer_state_to = SCO
+				}
+				if = {
+					limit = {
+						970 = {
+							is_controlled_by_ROOT_or_subject = yes
+						}						
+					}
+					970 = {
+						add_core_of = SCO
+						transfer_state_to = SCO						
+					}
+				}
+				if = {
+					limit = {
+						971 = {
+							is_controlled_by_ROOT_or_subject = yes
+						}						
+					}
+					971 = {
+						add_core_of = SCO
+						transfer_state_to = SCO						
+					}
 				}
 
 				SCO = {
@@ -20677,10 +21000,8 @@ GER_realpolitik_cat = {
 					}	
 				}
 			}
-
 		}
 	}
-
 }
 
 GER_mitteleuropa_economic_integration_cat = {
@@ -22916,5 +23237,391 @@ GER_the_fading_eagle_category = {
 }
 
 
+GER_monarchist_balance_of_power_category = {
+	GER_bop_bolster_the_army = {
+		priority = 118
+		icon = GFX_decision_generic_army_support
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_restore_the_empire
+		}
+
+		available = {}
+
+		ai_hint_pp_cost = 15
+		custom_cost_trigger = {
+			has_political_power > 14
+			has_army_experience > 9
+		}
+		custom_cost_text = decision_cost_pp_15_ArmXP_10
+
+		days_re_enable = 30
+
+		complete_effect = {
+			GER_monarchist_bop_very_low_increase_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_30_days
+			hidden_effect = {
+				add_political_power = -15
+				army_experience = -10
+			}
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+
+	GER_bop_bolster_the_airforce = {
+		priority = 118
+		icon = GFX_decision_generic_air
+
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_restore_the_empire
+		}
+
+		available = {}
+
+		ai_hint_pp_cost = 15
+		custom_cost_trigger = {
+			has_political_power > 14
+			has_air_experience > 9
+		}
+		custom_cost_text = decision_cost_pp_15_AirXP_10
+
+		days_re_enable = 30
+
+		complete_effect = {
+			GER_monarchist_bop_very_low_increase_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_30_days
+			hidden_effect = {
+				add_political_power = -15
+				air_experience = -10
+			}
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+
+	GER_bop_bolster_the_navy = {
+		priority = 118
+		icon = GFX_decision_generic_naval
+
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_restore_the_empire
+		}
+
+		available = {}
+
+		ai_hint_pp_cost = 15
+		custom_cost_trigger = {
+			has_political_power > 14
+			has_navy_experience > 9
+		}
+		custom_cost_text = decision_cost_pp_15_NavXP_10
+
+		days_re_enable = 30
+
+		complete_effect = {
+			GER_monarchist_bop_very_low_increase_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_30_days
+			hidden_effect = {
+				add_political_power = -15
+				navy_experience = -10
+			}
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+
+	GER_bop_inspect_army = {
+		priority = 117
+		icon = GFX_decision_eng_trade_unions_support
+
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_restore_the_empire
+		}
+
+		available = {}
+
+		cost = 50
+
+		days_re_enable = 30
+
+		complete_effect = {
+			GER_monarchist_bop_very_low_decrease_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_30_days
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+
+	GER_bop_inspect_airforce = {
+		priority = 117
+		icon = GFX_decision_eng_trade_unions_support
+
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_restore_the_empire
+		}
+
+		available = {}
+
+		cost = 50
+
+		days_re_enable = 30
+
+		complete_effect = {
+			GER_monarchist_bop_very_low_decrease_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_30_days
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+
+	GER_bop_inspect_navy = {
+		priority = 117
+		icon = GFX_decision_eng_trade_unions_support
+
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_restore_the_empire
+		}
+
+		available = {}
+
+		cost = 50
+
+		days_re_enable = 30
+
+		complete_effect = {
+			GER_monarchist_bop_very_low_decrease_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_30_days
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+
+	GER_bop_prioritize_military_industry = {
+
+		icon = GFX_decision_ger_military_buildup
+
+		priority = 116
+
+		allowed = {
+			original_tag = GER
+		}
+
+		cost = 50
+
+		available = {
+			
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_prioritize_military_industry
+		}
+
+		fire_only_once = no
+
+		days_re_enable = 180
+
+		days_remove = 60
+
+		ai_will_do = {
+			base = 5
+			modifier = {
+				add = 15
+				has_political_power > 100
+			}
+		}
+
+		modifier = {
+			production_speed_arms_factory_factor = 0.1
+			production_speed_dockyard_factor = 0.1
+		}
+
+		remove_effect = {
+			remove_power_balance_modifier = {
+				id = GER_monarchist_power_balance
+				modifier = GER_monarchist_bop_prioritize_military_industry
+			}
+			custom_effect_tooltip = AFG_reactivates_in_180_days
+		}
+
+		complete_effect = {
+			add_power_balance_modifier = {
+				id = GER_monarchist_power_balance
+				modifier = GER_monarchist_bop_prioritize_military_industry
+			}
+		}
+	}
+	GER_bop_prioritize_civilian_industry = {
+
+		icon = GFX_decision_generic_consumer_goods
+
+		priority = 116
+
+		allowed = {
+			original_tag = GER
+		}
+
+		cost = 50
+
+		available = {
+			
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_prioritize_civilian_industry
+		}
+
+		fire_only_once = no
+
+		days_re_enable = 180
+
+		days_remove = 60
+
+		ai_will_do = {
+			base = 5
+			modifier = {
+				add = 15
+				has_political_power > 100
+			}
+		}
+
+		modifier = {
+			production_speed_industrial_complex_factor = 0.1
+			production_speed_infrastructure_factor = 0.1
+			production_speed_rail_way_factor = 0.1
+		}
+
+		remove_effect = {
+			remove_power_balance_modifier = {
+				id = GER_monarchist_power_balance
+				modifier = GER_monarchist_bop_prioritize_civilian_industry
+			}
+			custom_effect_tooltip = AFG_reactivates_in_180_days
+		}
+
+		complete_effect = {
+			add_power_balance_modifier = {
+				id = GER_monarchist_power_balance
+				modifier = GER_monarchist_bop_prioritize_civilian_industry
+			}
+		}
+	}
+
+	GER_bop_nationalistic_military_parade = {
+		priority = 119
+		icon = GFX_decision_generic_nationalism
+
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_galvanize_german_militarism
+		}
+
+		available = {}
+
+		cost = 50
+
+		custom_cost_trigger = {
+			has_political_power > 49
+			command_power > 9
+		}
+
+		custom_cost_text = EGY_decision_cost_command_power_4
+
+		days_re_enable = 30
+
+		complete_effect = {
+			add_war_support = 0.01
+			hidden_effect = {
+				add_command_power = -10
+			}
+			GER_monarchist_bop_low_increase_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_90_days
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+
+	GER_bop_rally_in_honour_of_the_kaiser = {
+		priority = 119
+		icon = GFX_decision_generic_monarchy
+
+		allowed = {
+			original_tag = GER
+		}
+
+		visible = {
+			has_government = neutrality
+			has_completed_focus = GER_gott_mit_uns
+		}
+
+		available = {}
+
+		cost = 75
+
+		days_re_enable = 90
+
+		complete_effect = {
+			add_stability = 0.01
+			hidden_effect = {
+				add_command_power = -10
+			}
+			GER_monarchist_bop_low_decrease_effect = yes
+			custom_effect_tooltip = AFG_reactivates_in_90_days
+		}
+
+		ai_will_do = {
+			base = 1
+		}
+	}
+}
 
 
