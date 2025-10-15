@@ -1,5 +1,5 @@
 # Road to 56 Beta Build
-## 1956_Operation_Manstein [1.15.* Compatibility]
+## 1956_Operation_Manstein [1.15.\*/1.16.* Compatibility]
 
 This is the Readme guide for using Github with Road to 56.
 
@@ -19,7 +19,7 @@ This is the Readme guide for using Github with Road to 56.
 12. Add your changes to the patch notes on the wiki.
 13. Also, check our wiki for all the standards we use. The file structure of 56 is not the same as vanilla, and we have some unusual naming conventions. If you don't follow these, there will be severe bugs and errors. Remember, only you can stop forest fires!
 
-If, for some reason, you need greater access rights to the Git, or don't understand any of the above, ask Greatexperiment on Discord.
+If, you need commit rights to the Git (as opposed to working through a fork), or don't understand any of the above, ask any lead *except Greatexperiment* on our Discord.
 
 ### IMPORTANT: Contributor & Developer Agreement
 * If a contributor or developer creates either original[^2] assets, code, or localization for 'Road to 56' and that work is published,[^1] 'Road to 56' retains the right to use that material even if said contributor or developer no longer wishes to be or have said work affiliated with 'Road to 56' under opensource development principles.
