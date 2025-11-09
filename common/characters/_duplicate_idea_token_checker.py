@@ -12,10 +12,8 @@ def removecomment(lineinput):
 
 def track_depth(lineinput):
 	global bracketdepth
-	if "{" in lineinput:
-		bracketdepth += 1
-	elif "}" in lineinput:
-		bracketdepth -= 1
+	bracketdepth += lineinput.count("{")
+	bracketdepth -= lineinput.count("}")
 
 for filename in os.listdir(os.getcwd()):
 	bracketdepth = 0
