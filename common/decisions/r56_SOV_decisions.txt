@@ -1,0 +1,1353 @@
+operations = {
+	SOV_follow_stipulations_of_pact_with_germany = {
+
+		icon = GFX_decision_generic_operation
+
+		priority = 10
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		available = {
+			POL = {
+				has_war_with = GER
+			}
+			has_global_flag = sov_yes_pact
+		}
+
+		visible = {
+			is_subject = no
+			NOT = {
+				is_in_faction_with = POL
+				has_war_with = POL
+			}
+			has_global_flag = sov_yes_pact
+		}
+
+		ai_will_do = {
+			factor = 1
+			modifier = {
+				factor = 1000
+				date > 1939.9.3					#very historical date
+				is_historical_focus_on = yes
+			}
+			modifier = {
+				factor = 0
+				surrender_progress > 0
+			}
+		}
+
+		custom_cost_text = r56_15_command_power_cost
+		custom_cost_trigger = {
+			command_power > 15
+		}
+		
+		days_remove = 14 #Soviets originally attacked on 17th of September 1939
+
+		fire_only_once = yes
+
+		complete_effect = {
+			hidden_effect = {
+				add_command_power = -15
+			}
+			every_other_country = {
+				limit = {
+					original_tag = POL
+				}
+				country_event = {
+					id = poland.215
+					hours = 6 random_hours = 24
+				}
+			}
+			add_ai_strategy = {
+				type = prepare_for_war
+				id = POL
+				value = 100
+			}
+			add_ai_strategy = {
+				type = invade
+				id = POL			
+				value = 100
+			}
+			POL = {
+				add_ai_strategy = {
+					type = prepare_for_war
+					id = SOV
+					value = 50				#Low priority
+				}
+			}
+			set_global_flag = SOV_complied_MR #use dedicated options in MR state transferring events
+		}
+		
+		remove_effect = {
+			if = {	#no NAP in case some were present
+				limit = {
+					POL = { has_non_aggression_pact_with = ROOT }
+				}
+				diplomatic_relation = {
+					country = POL
+					relation = non_aggression_pact
+					active = no
+				}
+			}	
+			POL = {
+				add_timed_idea = {
+					idea = POL_shock_from_surprised_attack_idea
+					days = 90
+				}
+				if = {
+					limit = {
+						is_in_faction = yes
+						is_faction_leader = no
+					}
+					faction_leader = {
+						country_event = poland.216
+					}
+				}
+			}
+			hidden_effect = {
+				POL = {
+					diplomatic_relation = { 
+						country = SOV
+						relation = war_relation
+						active = yes
+					}
+				}
+			}
+			effect_tooltip = {
+				add_to_war = {
+					targeted_alliance = GER
+					enemy = POL
+					hostility_reason = asked_to_join
+				}
+			}
+		}
+	}
+}	
+
+SOV_ukrainian_reclaimation = {
+	
+	SOV_reclaim_ukraine = {
+
+		icon = oppression
+
+		available = {
+			is_subject = no
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = yes
+		
+		days_remove = 60
+
+		ai_will_do = {
+			factor = 0
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+			NOT = {
+				has_war_with = UKR
+				has_global_flag = game_rule_SOV_fragmented
+				has_global_flag = game_rule_SOV_utterly_fragmented
+			}
+			UKR = {
+				exists = yes
+			}
+		}
+
+		modifier = {
+			political_power_gain = -0.1
+			war_support_weekly = 0.005
+		}
+		
+		remove_effect = {
+			if = {
+				limit = {
+					UKR = {
+						is_puppet_of = ROOT
+						surrender_progress < 0.01
+					}
+				}
+				ROOT = {
+					annex_country = {
+						target = UKR
+						transfer_troops = yes
+					}
+				}
+			}
+			else = {
+				create_wargoal = {
+					target = UKR
+					expire = 0
+					type = annex_everything
+				}
+			}		
+		}		
+	}
+
+	SOV_crush_ukrainian_opposition = {
+
+		icon = oppression
+
+		available = {
+			ROOT = {
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_SOV_UPA_decision_inprogress
+					}
+				}
+				OR = {	
+					has_completed_focus = SOV_the_zinovyevite_terrorist_center
+					if = {
+						limit = {
+							has_dlc = "No Step Back"
+						}
+						has_completed_focus = SOV_bringing_breakaways_back_to_the_fold
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_dlc = "No Step Back"
+							}
+						}
+						has_completed_focus = SOV_power_struggle
+					}
+					has_completed_focus = SOV_right_purges
+					has_completed_focus = SOV_left_purges
+				}		
+			}
+			any_controlled_state = {
+				is_core_of = UKR
+				compliance > 40	
+				NOT = {
+					OR = {
+						state  = 89
+						state  = 91
+						state  = 93
+						state  = 73
+						state  = 996
+					}
+				}
+				NOT = {
+					has_dynamic_modifier = {
+						modifier = r56_upa_state_modifier
+					}
+				}			
+			}			
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = no
+		days_re_enable = 180 #incase you need it again
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 9
+		}
+
+		visible = {
+			UKR = {
+				OR = {
+					exists = no
+					is_puppet_of = ROOT
+				}
+			}
+			any_controlled_state = { #if the main Ukrainian lands did not lose cores, only allow integration of Bessarabia to show up when its controlled
+				OR = {
+					is_core_of = UKR
+					is_core_of = RUT
+				}
+				NOT = {
+					OR = {
+						state = 89
+						state = 91
+						state = 93
+						state = 73
+						state = 996
+					}
+				}
+				NOT = {
+					is_core_of = ROOT
+				}
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+			stability_weekly = -0.002
+		}
+		
+		remove_effect = {	
+			every_state = {
+				limit = {
+					is_core_of = UKR
+					NOT = {
+						is_core_of = ROOT
+					}
+					NOT = {
+						state  = 89
+						state  = 91
+						state  = 93
+						state  = 73
+						state = 996
+					}			
+				}
+				add_core_of = ROOT
+			}
+			SOV_paranoia_low_decrease_effect = yes		
+		}		
+	}
+
+	SOV_defeat_the_upa_in_199 = {
+
+		icon = generic_police_action
+
+		on_map_mode = map_and_decisions_view
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 199
+			} 
+		}
+
+		available = {
+			ROOT = {
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_SOV_UPA_decision_inprogress
+					}
+				}
+				OR = {	
+					has_completed_focus = SOV_the_zinovyevite_terrorist_center
+					has_completed_focus = SOV_bringing_breakaways_back_to_the_fold
+					has_completed_focus = SOV_right_purges
+					has_completed_focus = SOV_left_purges
+				}		
+			}
+			199 = {
+				is_fully_controlled_by = ROOT
+				OR = {
+					is_core_of = UKR
+					is_core_of = RUT
+				}
+				OR = {
+					compliance > 10
+					is_core_of = ROOT
+				}
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}			
+			}			
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 24
+		}
+		
+		fire_only_once = yes
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			UKR = {
+				OR = {
+					exists = no
+					is_puppet_of = ROOT
+				}
+			}
+			199 = { #if the main Ukrainian lands did not lose cores, only allow integration of Bessarabia to show up when its controlled
+				is_core_of = UKR
+				is_controlled_by = SOV
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}		
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				set_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+		}
+		
+		remove_effect = {	
+			hidden_effect = {
+				add_command_power = -25
+				clr_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+			199 = {
+				remove_dynamic_modifier = { modifier = r56_upa_state_modifier } 
+			}					
+		}		
+	}
+
+	SOV_defeat_the_upa_in_91 = {
+
+		icon = generic_police_action
+
+		on_map_mode = map_and_decisions_view
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 91
+			} 
+		}
+
+		available = {
+			ROOT = {
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_SOV_UPA_decision_inprogress
+					}
+				}
+				OR = {	
+					has_completed_focus = SOV_the_zinovyevite_terrorist_center
+					has_completed_focus = SOV_bringing_breakaways_back_to_the_fold
+					has_completed_focus = SOV_right_purges
+					has_completed_focus = SOV_left_purges
+				}		
+			}
+			91 = {
+				is_fully_controlled_by = ROOT
+				is_core_of = RUT
+				OR = {
+					compliance > 10
+					is_core_of = ROOT
+				}
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}			
+			}			
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 24
+		}
+		
+		fire_only_once = yes
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			91 = { 
+				is_core_of = RUT
+				is_controlled_by = SOV
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}		
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				set_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+		}
+
+		
+		remove_effect = {	
+			hidden_effect = {
+				add_command_power = -25
+				hidden_effect = {
+					clr_country_flag = r56_SOV_UPA_decision_inprogress
+				}
+			}
+			91 = {
+				remove_dynamic_modifier = { modifier = r56_upa_state_modifier } 
+			}					
+		}		
+	}
+
+	SOV_defeat_the_upa_in_89 = {
+
+		icon = generic_police_action
+
+		on_map_mode = map_and_decisions_view
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 89
+			} 
+		}
+
+		available = {
+			ROOT = {
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_SOV_UPA_decision_inprogress
+					}
+				}
+				OR = {	
+					has_completed_focus = SOV_the_zinovyevite_terrorist_center
+					has_completed_focus = SOV_bringing_breakaways_back_to_the_fold
+					has_completed_focus = SOV_right_purges
+					has_completed_focus = SOV_left_purges
+				}		
+			}
+			89 = {
+				is_fully_controlled_by = ROOT
+				is_core_of = RUT
+				OR = {
+					compliance > 10
+					is_core_of = ROOT
+				}
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}			
+			}			
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 24
+		}
+		
+		fire_only_once = yes
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			89 = {
+				is_core_of = RUT
+				is_controlled_by = SOV
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}		
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				set_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+		}
+		
+		remove_effect = {	
+			hidden_effect = {
+				add_command_power = -25
+				clr_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+			89 = {
+				remove_dynamic_modifier = { modifier = r56_upa_state_modifier } 
+			}					
+		}		
+	}
+
+	SOV_defeat_the_upa_in_80 = {
+
+		icon = generic_police_action
+
+		on_map_mode = map_and_decisions_view
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 80
+			} 
+		}
+
+		available = {
+			ROOT = {
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_SOV_UPA_decision_inprogress
+					}
+				}
+				OR = {	
+					has_completed_focus = SOV_the_zinovyevite_terrorist_center
+					has_completed_focus = SOV_bringing_breakaways_back_to_the_fold
+					has_completed_focus = SOV_right_purges
+					has_completed_focus = SOV_left_purges
+				}		
+			}
+			80 = {
+				is_fully_controlled_by = ROOT
+				is_core_of = RUT
+				OR = {
+					compliance > 10
+					is_core_of = ROOT
+				}
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}			
+			}			
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 24
+		}
+		
+		fire_only_once = yes
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			80 = { 
+				is_core_of = RUT
+				is_controlled_by = SOV
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}		
+			}
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				set_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+		}
+		
+		remove_effect = {	
+			hidden_effect = {
+				add_command_power = -25
+				clr_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+			80 = {
+				remove_dynamic_modifier = { modifier = r56_upa_state_modifier } 
+			}					
+		}		
+	}
+	
+	SOV_defeat_the_upa_in_73 = {
+
+		icon = generic_police_action
+
+		on_map_mode = map_and_decisions_view
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 73
+			} 
+		}
+
+		available = {
+			ROOT = {
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_SOV_UPA_decision_inprogress
+					}
+				}
+				OR = {	
+					has_completed_focus = SOV_the_zinovyevite_terrorist_center
+					has_completed_focus = SOV_bringing_breakaways_back_to_the_fold
+					has_completed_focus = SOV_right_purges
+					has_completed_focus = SOV_left_purges
+				}		
+			}
+			73 = {
+				is_fully_controlled_by = ROOT
+				is_core_of = UKR
+				OR = {
+					compliance > 10
+					is_core_of = ROOT
+				}
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}			
+			}			
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 24
+		}
+		
+		fire_only_once = yes
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			73 = { 
+				is_core_of = RUT
+				is_controlled_by = SOV
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}		
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				set_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+		}
+		
+		remove_effect = {	
+			hidden_effect = {
+				add_command_power = -25
+				clr_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+			73 = {
+				remove_dynamic_modifier = { modifier = r56_upa_state_modifier } 
+			}					
+		}		
+	}	
+	
+	SOV_defeat_the_upa_in_996 = {
+
+		icon = generic_police_action
+
+		on_map_mode = map_and_decisions_view
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 996
+			} 
+		}
+
+		available = {
+			ROOT = {
+				hidden_trigger = {
+					NOT = {
+						has_country_flag = r56_SOV_UPA_decision_inprogress
+					}
+				}
+				OR = {	
+					has_completed_focus = SOV_the_zinovyevite_terrorist_center
+					has_completed_focus = SOV_bringing_breakaways_back_to_the_fold
+					has_completed_focus = SOV_right_purges
+					has_completed_focus = SOV_left_purges
+				}		
+			}
+			996 = {
+				is_fully_controlled_by = ROOT
+				is_core_of = UKR
+				OR = {
+					compliance > 10
+					is_core_of = ROOT
+				}
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}			
+			}			
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 25
+		custom_cost_text = r56_deploy_heavy_aa_capital_cost
+		custom_cost_trigger = {
+			command_power > 24
+		}
+		
+		fire_only_once = yes
+		
+		days_remove = 70
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			996 = { 
+				is_core_of = RUT
+				is_controlled_by = SOV
+				has_dynamic_modifier = {
+					modifier = r56_upa_state_modifier
+				}		
+			}
+		}
+
+		modifier = {
+			resistance_damage_to_garrison = 0.05
+		}
+
+		complete_effect = {
+			hidden_effect = {
+				set_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+		}
+		
+		remove_effect = {	
+			hidden_effect = {
+				add_command_power = -25
+				clr_country_flag = r56_SOV_UPA_decision_inprogress
+			}
+			996 = {
+				remove_dynamic_modifier = { modifier = r56_upa_state_modifier } 
+			}					
+		}		
+	}	
+}
+
+
+SOV_anti_bolshevik_revolt = {
+	
+	SOV_put_down_the_ukrainian_revolt = {
+
+		icon = oppression
+
+		available = {
+			has_full_control_of_state = 202
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+		
+		fire_only_once = yes
+
+		days_mission_timeout = 300
+
+		is_good = no
+
+		activation = {
+			always = no #Triggered from effect in ukraine.1
+		}
+
+		visible = {
+			original_tag = SOV
+		}
+
+		timeout_effect = {
+			country_event = ukraine.2
+		}
+
+		complete_effect = {
+			annex_country = { target = UKR }
+		}
+				
+	}
+
+}
+
+SOV_great_patriotic_war = {
+
+	ARM_retake_armenia = {
+
+		icon = oppression
+
+		available = {
+			has_full_control_of_state = 230
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = yes
+		
+		days_remove = 200
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+			ARM = {
+				exists = yes
+				has_war_with = SOV
+				owns_state = 230
+			}
+		}
+		
+		remove_effect = {
+			annex_country = { target = ARM }
+		}		
+	}
+	AZR_retake_azerbaijan = {
+
+		icon = oppression
+
+		available = {
+			has_full_control_of_state = 229 
+		}
+
+		cost = 50
+		
+		days_remove = 200
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+			AZR = {
+				exists = yes
+				has_war_with = SOV
+				owns_state = 229
+			}
+		}
+		
+		remove_effect = {
+			annex_country = { target = AZR }
+		}		
+	}
+	GEO_retake_georgia = {
+
+		icon = oppression
+
+		available = {
+			has_full_control_of_state = 231
+		}
+
+		cost = 50
+		
+		days_remove = 200
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+			GEO = {
+				exists = yes
+				has_war_with = SOV
+				owns_state = 231
+			}
+		}
+		
+		remove_effect = {
+			annex_country = { target = GEO }
+		}		
+	}
+	shatter_transcaucasia = {
+
+		icon = oppression
+
+		available = {
+			has_full_control_of_state = 229
+			has_full_control_of_state = 230
+			has_full_control_of_state = 231
+		}
+
+		cost = 100
+		
+		days_remove = 200
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+			OR = {
+				GEO = {
+					exists = yes
+					has_war_with = SOV
+					owns_state = 229
+					owns_state = 230
+					owns_state = 231
+				}
+				ARM = {
+					exists = yes
+					has_war_with = SOV
+					owns_state = 229
+					owns_state = 230
+					owns_state = 231
+				}
+				AZR = {
+					exists = yes
+					has_war_with = SOV
+					owns_state = 229
+					owns_state = 230
+					owns_state = 231
+				}				
+			}
+		}
+		
+		remove_effect = {
+			if = {
+				limit = {
+					ARM = {
+						owns_state = 229
+						owns_state = 230
+						owns_state = 231
+					}
+				}
+				annex_country = { target = ARM }
+			}
+			else_if = {
+				limit = {
+					AZR = {
+						owns_state = 229
+						owns_state = 230
+						owns_state = 231
+					}
+				}
+				annex_country = { target = AZR }
+			}
+			else_if = {
+				limit = {
+					GEO = {
+						owns_state = 229
+						owns_state = 230
+						owns_state = 231
+					}
+				}
+				annex_country = { target = GEO }
+			}			
+		}		
+	}
+}
+political_actions = {
+	SOV_move_capital_back = {
+
+		icon = generic_industry
+
+		available = {
+			has_completed_focus = SOV_move_capital_to_sverdlovsk
+			SOV = { surrender_progress < 0.01 }
+		}
+
+		visible = {
+			has_completed_focus = SOV_move_capital_to_sverdlovsk
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		fire_only_once = yes
+
+		cost = 0
+
+		complete_effect = {
+			set_capital = { state = 219 }
+		}
+
+		ai_will_do = {
+			base = 10
+		}
+	}
+}
+SOV_restore_the_union = {
+	
+	SOV_restore_order_in_the_caucasus = {
+
+		icon = oppression
+
+		available = {
+			controls_state = 229
+			controls_state = 230
+			controls_state = 231
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = yes
+		
+		days_remove = 60
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+		}
+		
+		remove_effect = {
+			add_state_core = 229
+			add_state_core = 230
+			add_state_core = 231
+			drop_cosmetic_tag = yes
+			clr_global_flag = SOV_became_russia				
+		}		
+	}
+	SOV_restore_order_in_belarus = {
+
+		icon = oppression
+
+		available = {
+			controls_state = 194
+			controls_state = 204
+			controls_state = 206
+			controls_state = 207
+			controls_state = 241
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = yes
+		
+		days_remove = 60
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+		}
+		
+		remove_effect = {
+			add_state_core = 194
+			add_state_core = 204
+			add_state_core = 206
+			add_state_core = 207
+			add_state_core = 241
+			drop_cosmetic_tag = yes
+			clr_global_flag = SOV_became_russia
+		}		
+	}
+	SOV_restore_order_in_ukraine = {
+
+		icon = oppression
+
+		available = {
+			controls_state = 201
+			controls_state = 199
+			controls_state = 198
+			controls_state = 192
+			controls_state = 202
+			controls_state = 203
+			controls_state = 193
+			controls_state = 225
+			controls_state = 259
+			controls_state = 197
+			controls_state = 226
+			controls_state = 196
+			controls_state = 200
+			controls_state = 221
+			controls_state = 227
+			controls_state = 228
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = yes
+		
+		days_remove = 60
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+		}
+		
+		remove_effect = {	
+			add_state_core = 201
+			add_state_core = 199
+			add_state_core = 198
+			add_state_core = 192
+			add_state_core = 202
+			add_state_core = 203
+			add_state_core = 193
+			add_state_core = 225
+			add_state_core = 259
+			add_state_core = 197
+			add_state_core = 226
+			add_state_core = 196
+			add_state_core = 200
+			add_state_core = 221
+			add_state_core = 227
+			add_state_core = 228
+			drop_cosmetic_tag = yes
+			clr_global_flag = SOV_became_russia			
+		}		
+	}
+	SOV_restore_order_in_kazakhstan = {
+
+		icon = oppression
+
+		available = {
+				controls_state = 587
+				controls_state = 589
+				controls_state = 590
+				controls_state = 407
+				controls_state = 583
+				controls_state = 586
+				controls_state = 588
+				controls_state = 402
+				controls_state = 404
+				controls_state = 406
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = yes
+		
+		days_remove = 60
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+		}
+		
+		remove_effect = {
+			add_state_core = 587
+			add_state_core = 589
+			add_state_core = 590
+			add_state_core = 407
+			add_state_core = 583
+			add_state_core = 586
+			add_state_core = 588
+			add_state_core = 402
+			add_state_core = 404
+			add_state_core = 406
+			drop_cosmetic_tag = yes
+			clr_global_flag = SOV_became_russia				
+		}		
+	}
+	SOV_restore_order_in_central_asia = {
+
+		icon = oppression
+
+		available = {
+			controls_state = 405
+			controls_state = 585
+			controls_state = 584
+			controls_state = 742
+			controls_state = 732
+		}
+
+		allowed = {
+			original_tag = SOV
+		}
+
+		cost = 50
+		
+		fire_only_once = yes
+		
+		days_remove = 60
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		visible = {
+			has_government = communism
+			original_tag = SOV
+		}
+		
+		remove_effect = {
+			add_state_core = 405
+			add_state_core = 585
+			add_state_core = 584
+			add_state_core = 742
+			add_state_core = 732
+			drop_cosmetic_tag = yes
+			clr_global_flag = SOV_became_russia
+		}		
+	}			
+}
