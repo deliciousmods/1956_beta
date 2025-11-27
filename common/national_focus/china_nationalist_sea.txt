@@ -1565,9 +1565,18 @@ focus_tree = {
 		cost = 10
 
 		available = {
-			has_war_support > 0.85
 			OR = {
-				has_war_with = JAP
+				has_war_support > 0.85
+				AND = {
+					has_war_with = JAP
+					has_defensive_war = yes
+					war_length_with = {
+					    tag = JAP
+					    months > 23
+					}
+				}
+			}
+			OR = {
 				is_faction_leader = yes
 				USA = {
 					is_faction_leader = yes
@@ -2053,6 +2062,10 @@ focus_tree = {
 		}
 	
 		completion_reward = {
+
+			add_research_slot = 1
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			
 			add_war_support = 0.1
 			add_stability = 0.1
@@ -3415,6 +3428,19 @@ focus_tree = {
 		ai_will_do = {
 			factor = 1
 		}
+		historical_ai = {
+			# Only if we have defeated our enemies
+			OR = {
+				NOT = {
+					any_neighbor_country = {
+						has_war_with = ROOT
+						has_capitulated = no
+					}
+				}
+				has_war_with_major = no
+			}
+		}
+		
 
 		will_lead_to_war_with = PRC
 
@@ -5115,11 +5141,20 @@ focus_tree = {
 		}
 	
 		completion_reward = {
-			add_faction_goal = faction_goal_subjugate_the_faction
-			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = CHI_from_many_to_one_tt
-			custom_effect_tooltip = CHI_from_many_to_one_faction_tt
-			custom_effect_tooltip = generic_skip_one_line_tt
+			IF = {
+				limit = {
+					OR = {
+						AND = {
+							is_in_faction = yes
+							is_faction_leader = yes
+						}
+					is_in_faction = no
+					}
+				}
+				custom_effect_tooltip = CHI_from_many_to_one_faction_tt
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
 			every_other_country = {
 				limit = {
 					is_literally_china = yes
@@ -5132,11 +5167,17 @@ focus_tree = {
 				GOALNAME = faction_goal_subjugate_the_faction_name
 			}
 			hidden_effect = {
+				add_faction_goal = faction_goal_subjugate_the_faction
 				add_faction_goal_slot = {
 					category  = medium_term # options: short_term, medium_term, long_term 
 					value = 1 
-				} 
-				set_faction_manifest = faction_manifest_china_territorial_integrity_chiang_upgraded
+				}
+				IF = {
+					limit = {
+						is_faction_leader = yes
+					}
+					set_faction_manifest = faction_manifest_china_territorial_integrity_chiang_upgraded
+				}
 			}
 		}
 	}
@@ -6443,7 +6484,10 @@ focus_tree = {
 		}
 		cost = 10
 		available = {
-			has_character = CHI_chiang_kaishek
+			has_country_leader = {
+				ruling_only = yes	
+				character = CHI_chiang_kaishek
+			}
 			PRC = { exists = no }
 		}
 	
@@ -7587,7 +7631,7 @@ focus_tree = {
 				tooltip = research_speed_factor_tt
 			}
 			add_to_variable = { 
-				CHI_new_life_movement_surrender_limit = 0.2
+				CHI_new_life_movement_surrender_limit = 0.1
 				tooltip = surrender_limit_tt
 			}
 			add_to_variable = { 
@@ -7766,6 +7810,12 @@ focus_tree = {
 				}
 			}
 			value = GFX_focus_ARG_fascist_researchers
+		}
+		icon = {
+			trigger = {
+				always = yes
+			}
+			value = GFX_focus_generic_spread_fascism
 		} 
 
 		prerequisite = { focus = CHI_outlaw_opposition_parties }
@@ -8536,7 +8586,7 @@ focus_tree = {
 				custom_effect_tooltip = generic_skip_one_line_tt
 			}
 
-			every_unit_leader = {
+			every_army_leader = {
 				random_select_amount = 3
 				limit = {
 					NOT = {
@@ -10913,7 +10963,6 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			custom_effect_tooltip = "Remove the state modifiers for lowered fortification"
 			IF = {
 				limit = {
 					608 = { is_fully_controlled_by = ROOT }
@@ -11374,7 +11423,7 @@ focus_tree = {
 
 			custom_effect_tooltip = CHI_modify_decisive_battle_idea_tt
 			add_to_variable = {
-				CHI_decisive_battle_CHI_decisive_battle_army_attack_factor = 0.025
+				CHI_decisive_battle_army_attack_factor = 0.025
 				tooltip = army_attack_factor_tt
 			}
 			add_to_variable = {
@@ -11385,6 +11434,8 @@ focus_tree = {
 				CHI_decisive_battle_org_loss_when_moving = -0.05
 				tooltip = org_loss_when_moving_tt
 			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = CHI_modify_corruption_in_the_armed_forces_tt
 			add_to_variable = {
 				CHI_corruption_in_the_armed_forces_army_morale_factor = 0.05
 				tooltip = army_morale_factor_tt
@@ -14057,7 +14108,8 @@ focus = CHI_long_range }
 		}
 	
 		completion_reward = {
-			custom_effect_tooltip = CHI_modify_corruption_in_the_administration_tt
+			CHI_corrupt_administration_improvement = yes
+			CHI_modify_administration_modifier = yes
 			add_to_variable = {
 				CHI_corruption_pp_gain = -0.05
 				tooltip = political_power_gain_tt
