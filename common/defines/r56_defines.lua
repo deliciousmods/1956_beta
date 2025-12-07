@@ -22,6 +22,9 @@
 	NDefines.NDiplomacy.OPINION_FOR_DEMO_FROM_WT_GENERATION = -1.0		-- How much less do democracies like us if we generate world tension
 	
 	
+	NDefines.NDiplomacy.PEACE_SCORE_TRANSFERRED_FROM_FACTION_INFLUENCE = 0 --R56: Influence is currently (12/2025) incredibly arbitrary, do not redistribute points based on it like vanilla
+
+
 	NDefines.NCountry.SPECIAL_FORCES_CAP_BASE = 0.1
 	NDefines.NCountry.SPECIAL_FORCES_CAP_MIN = 40
 	NDefines.NCountry.BASE_RESEARCH_SLOTS = 3
