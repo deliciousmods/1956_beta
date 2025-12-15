@@ -25,6 +25,7 @@
 	NDefines.NDiplomacy.PEACE_SCORE_TRANSFERRED_FROM_FACTION_INFLUENCE = 0 --R56: Influence is currently (12/2025) incredibly arbitrary, do not redistribute points based on it like vanilla
 
 	-- Tweak vanilla's shitty peacedeal changes in 1.17
+	NDefines.NDiplomacy.TENSION_CB_WAR = 7				-- R56: Lowered to balance out increase of peace conference tension
 	NDefines.NDiplomacy.TENSION_DEMILITARIZE_ZONE = 0	-- R56: Was negative, no free tension reduction from abusing this
 	NDefines.NDiplomacy.TENSION_ANNEX_NO_CLAIM = 0.6	-- R56: Was really low
 	NDefines.NDiplomacy.TENSION_ANNEX_CLAIM = 0.3		-- R56: Was really low
