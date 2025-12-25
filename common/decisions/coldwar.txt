@@ -959,6 +959,22 @@ CW_united_nations_security_council = {
 			FROM = {
 				has_war = yes
 				is_subject = no
+				OR = {
+					is_in_faction = no
+					is_faction_leader = yes
+					AND = {
+						is_in_faction = yes
+						faction_leader = {
+							PREV = {
+								any_enemy_country = {
+									NOT = {
+										has_war_with = PREV.PREV
+									}
+								}
+							}
+						}
+					}
+				}
 				NOT = {
 					has_country_flag = r56_UN_supported
 					any_enemy_country = {
@@ -1036,9 +1052,23 @@ CW_united_nations_security_council = {
 		fire_only_once = yes
 		target_trigger = {	
 			FROM = {
+				is_subject = no												#helps shorten the list, not sure how embargo behavior works towards puppets but don't remove this as the decision list becomes even longer
 				has_war = yes
 				NOT = {
-					has_country_flag = r56_UN_supported		#do not embargo after supporting
+					has_country_flag = r56_UN_supported						#do not embargo after supporting
+					has_country_flag = r56_invited_to_un_security_council	#you cannot get a UN member to vote to embargo itself
+				}
+			}
+		}
+		visible = {	#hide allies as options unless someone else initiated the vote
+			FROM = {
+				OR = {
+					NOT = {
+						is_ally_with = ROOT
+					}
+					check_variable = {
+						r56_UN_support_votes > 0
+					}
 				}
 			}
 		}
@@ -1064,6 +1094,18 @@ CW_united_nations_security_council = {
 						}
 						send_embargo = FROM
 					}
+				}
+			}
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {	#player wants to embargo someone we're at war with? support!
+				add = 1000	#despite not having a PP cost, this will still affect how quickly the AI 
+				check_variable = {
+					FROM.r56_UN_embargo_votes > 0
+				}
+				FROM = {
+					has_war_with = ROOT
 				}
 			}
 		}
