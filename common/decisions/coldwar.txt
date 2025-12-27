@@ -954,7 +954,6 @@ CW_occupation_negotations = {
 }
 CW_united_nations_security_council = {
 	CW_vote_for_intervention = {
-		fire_only_once = yes
 		target_trigger = {
 			FROM = {
 				has_war = yes
@@ -995,6 +994,17 @@ CW_united_nations_security_council = {
 			}
 		}
 		available = {	#duplicate with target_trigger, but target_trigger isn't checked often enough
+			custom_trigger_tooltip = {
+				tooltip = r56_UN_has_already_voted_tt
+				meta_trigger = {
+					text = {
+						NOT = {
+							has_country_flag = UN_voted_to_intervene_for_[TARGET]
+						}
+					}
+					TARGET = "[FROM.GetTag]"
+				}
+			}
 			FROM = {
 				any_enemy_country = {
 					NOT = {
@@ -1013,6 +1023,12 @@ CW_united_nations_security_council = {
 		}
 		remove_effect = {
 			add_to_variable = { FROM.r56_UN_support_votes = 1 }
+			meta_effect = {
+				text = {
+					set_country_flag = UN_voted_to_intervene_for_[TARGET]
+				}
+				TARGET = "[FROM.GetTag]"
+			}
 			if = {
 				limit = {
 					check_variable = { global.un_member_count = FROM.r56_UN_support_votes }
@@ -1055,9 +1071,25 @@ CW_united_nations_security_council = {
 				}
 			}
 		}
+		ai_will_do = {
+			base = 0
+			modifier = {	#player wants to intervene against someone we're at war with? support!
+				add = 1000
+				check_variable = {
+					FROM.r56_UN_support_votes > 0
+				}
+				FROM = {
+					OR = {
+						tag = ROOT
+						all_enemy_country = {
+							has_war_with = ROOT
+						}
+					}
+				}
+			}
+		}
 	}
 	CW_vote_to_place_embargo = {
-		fire_only_once = yes
 		target_trigger = {	
 			FROM = {
 				is_subject = no												#helps shorten the list, not sure how embargo behavior works towards puppets but don't remove this as the decision list becomes even longer
@@ -1080,7 +1112,26 @@ CW_united_nations_security_council = {
 				}
 			}
 		}
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = r56_UN_has_already_voted_tt
+				meta_trigger = {
+					text = {
+						NOT = {
+							has_country_flag = UN_voted_to_embargo_[TARGET]
+						}
+					}
+					TARGET = "[FROM.GetTag]"
+				}
+			}
+		}
 		remove_effect = {
+			meta_effect = {
+				text = {
+					set_country_flag = UN_voted_to_embargo_[TARGET]
+				}
+				TARGET = "[FROM.GetTag]"
+			}
 			add_to_variable = { FROM.r56_UN_embargo_votes = 1 }
 			if = {
 				limit = {
@@ -1108,7 +1159,7 @@ CW_united_nations_security_council = {
 		ai_will_do = {
 			base = 0
 			modifier = {	#player wants to embargo someone we're at war with? support!
-				add = 1000	#despite not having a PP cost, this will still affect how quickly the AI 
+				add = 1000
 				check_variable = {
 					FROM.r56_UN_embargo_votes > 0
 				}
@@ -1129,21 +1180,47 @@ CW_united_nations_security_council = {
 		}
 	}
 	CW_vote_to_replace_council_member = {
-		fire_only_once = yes
 		target_trigger = {
 			FROM = {
 				any_other_country = {
 					has_country_flag = r56_invited_to_un_security_council
-					original_tag = PREV
 					OR = {
 						exists = no
 						has_civil_war = yes
 						has_idea = KMT_retreat_to_taiwan_idea
 					}
+					OR = {
+						original_tag = PREV
+						AND = {
+							is_literally_china = yes
+							PREV = {
+								is_literally_china = yes
+							}
+						}
+					}
+				}
+			}
+		}
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = r56_UN_has_already_voted_tt
+				meta_trigger = {
+					text = {
+						NOT = {
+							has_country_flag = UN_voted_to_replace_[TARGET]
+						}
+					}
+					TARGET = "[FROM.GetTag]"
 				}
 			}
 		}
 		complete_effect = {
+			meta_effect = {
+				text = {
+					set_country_flag = UN_voted_to_replace_[TARGET]
+				}
+				TARGET = "[FROM.GetTag]"
+			}
 			add_to_variable = { FROM.r56_UN_replace_votes = 1 }
 			if = {
 				limit = {
