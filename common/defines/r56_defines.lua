@@ -2,9 +2,10 @@
 	NDefines.NGame.HANDS_OFF_START_TAG = "YEM" --more central than vanilla's Haiti
 	
 	
-	-- NDefines.NDiplomacy.LICENSE_ACCEPTANCE_PUPPET_BASE = 20			-- Acceptance modifier for puppets requesting production licenses.
-	-- NDefines.NDiplomacy.LICENSE_ACCEPTANCE_TECH_DIFFERENCE_BASE = 20    -- Acceptance base for tech difference
-	-- NDefines.NDiplomacy.LICENSE_ACCEPTANCE_SAME_FACTION = 30			-- Acceptance modifier for being in the same faction
+	NDefines.NDiplomacy.LICENSE_ACCEPTANCE_PUPPET_BASE = 20			-- Acceptance modifier for puppets requesting production licenses.
+	NDefines.NDiplomacy.LICENSE_ACCEPTANCE_TECH_DIFFERENCE = 2 		-- Acceptance modifier for each year of technology difference.
+	NDefines.NDiplomacy.LICENSE_ACCEPTANCE_TECH_DIFFERENCE_BASE = 20    -- Acceptance base for tech difference
+	NDefines.NDiplomacy.LICENSE_ACCEPTANCE_SAME_FACTION = 30			-- Acceptance modifier for being in the same faction
 	NDefines.NDiplomacy.MAX_TRUST_VALUE = 200									-- Vanilla is 100
 	NDefines.NDiplomacy.MIN_TRUST_VALUE = -200									-- Vanilla is -100
 	NDefines.NDiplomacy.MAX_OPINION_VALUE = 200								-- Vanilla is 100
@@ -12,11 +13,13 @@
 	NDefines.NDiplomacy.VERY_GOOD_OPINION = 100								-- Vanilla is 50
 	NDefines.NDiplomacy.VERY_BAD_OPINION = -100								-- Vanilla is -50
 	NDefines.NDiplomacy.FRONT_IS_DANGEROUS = 0									-- Vanilla is -100	
-	-- NDefines.NDiplomacy.MAX_REMEMBERED_LEASED_IC = 2000				-- Maximum of leased equipment value that is remembered for opinion bonus
-	-- NDefines.NDiplomacy.MAX_OPINION_FOR_LEASED_IC = 50					-- Positive opinion when remembering the MAX_REMEMBERED_LEASED_IC equipment
-	-- NDefines.NDiplomacy.MAX_OPINION_FROM_VOLUNTEERS = 50				-- Opinion bonus per one sent volunteer division
+	NDefines.NDiplomacy.TENSION_VOLUNTEER_FORCE_DIVISION = 0.1
+	NDefines.NDiplomacy.MAX_REMEMBERED_LEASED_IC = 2000				-- Maximum of leased equipment value that is remembered for opinion bonus
+	NDefines.NDiplomacy.MAX_OPINION_FOR_LEASED_IC = 50					-- Positive opinion when remembering the MAX_REMEMBERED_LEASED_IC equipment
+	NDefines.NDiplomacy.MONTHLY_LEASED_IC_DECAY = 35					-- How much of leased equipment is being "forgot" each month
+	NDefines.NDiplomacy.OPINION_PER_VOLUNTEER = 3						-- Opinion bonus per one sent volunteer division
+	NDefines.NDiplomacy.MAX_OPINION_FROM_VOLUNTEERS = 50				-- Opinion bonus per one sent volunteer division
 	NDefines.NDiplomacy.OPINION_FOR_DEMO_FROM_WT_GENERATION = -1.0		-- How much less do democracies like us if we generate world tension
-
 	
 	
 	NDefines.NDiplomacy.PEACE_SCORE_TRANSFERRED_FROM_FACTION_INFLUENCE = 0 --R56: Influence is currently (12/2025) incredibly arbitrary, do not redistribute points based on it like vanilla
@@ -32,28 +35,28 @@
 	NDefines.NCountry.SPECIAL_FORCES_CAP_MIN = 40
 	NDefines.NCountry.BASE_RESEARCH_SLOTS = 3
 	NDefines.NCountry.FEMALE_UNIT_LEADER_BASE_CHANCE = { 
-		-- applies as a factor to female unit leader randomization
-		-- the values needs to be zero if you don't actually have random portraits
-		0.0, -- navy leaders
-		0.0, -- army leaders
-		0.6, -- operatives
-		0.4, -- scientists
+			-- applies as a factor to female unit leader randomization
+			-- the values needs to be zero if you don't actually have random portraits
+			0.0, -- navy leaders
+			0.0, -- army leaders
+			0.6, -- operatives
+			0.5, -- scientists
 	}
 	NDefines.NCountry.STARTING_COMMAND_POWER = 10.0					-- starting command power for every country
-	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 1				 -- Starting level for exile leader -- why 3?!
+	NDefines.NCountry.GIE_EXILE_ARMY_LEADER_START_LEVEL = 1	--Starting level for exile leader  -- why 3?!
 	--NDefines.NCountry.AIR_SUPPLY_CONVERSION_SCALE = 0.05				-- Claimed to be the same as vanilla previously but BBA changed this value so commented this out
 
 
-	-- NDefines.NResistance.GARRISON_MANPOWER_LOST_BY_ATTACK = 0.005 	-- Vanilla: 0.016, ratio of manpower lost by garrison at each attack on garrison (this number will be reduced by the hardness of garrison template)	
+	NDefines.NResistance.GARRISON_MANPOWER_LOST_BY_ATTACK = 0.005 	--WAS 0.018 Ratio of manpower lost by garrison at each attack on garrison (this number will be reduced by the hardness of garrison template)	
 
 
 	NDefines.NPolitics.ARMY_LEADER_MAX_COST = 75				-- max cost BEFORE modifiers
-	NDefines.NPolitics.NAVY_LEADER_MAX_COST = 75				-- max cost BEFORE modifiers
+	NDefines.NPolitics.NAVY_LEADER_MAX_COST = 75		
 
-	NDefines.NMilitary.SUPPLY_GRACE = 84 					-- troops always carry 3 days of food and supply, and will remain hungry for another 12 hours
+	NDefines.NMilitary.SUPPLY_GRACE = 84 -- 72 3 days as they say and remain hungry for another 12
 	
 	NDefines.NMilitary.DEPLOY_TRAINING_MAX_LEVEL = 5
-	NDefines.NMilitary.UNIT_EXP_LEVELS = { 0.02, 0.04, 0.06, 0.08, 0.1, 0.14, 0.18, 0.22, 0.26, 0.3, 0.39, 0.48, 0.57, 0.66, 0.75, 0.78, 0.81, 0.84, 0.87, 0.9 }
+	NDefines.NMilitary.UNIT_EXP_LEVELS = {0.02, 0.04, 0.06, 0.08, 0.1, 0.14, 0.18, 0.22, 0.26, 0.3, 0.39, 0.48, 0.57, 0.66, 0.75, 0.78, 0.81, 0.84, 0.87, 0.9}
 	NDefines.NMilitary.ARMY_EXP_BASE_LEVEL = 5
 	NDefines.NMilitary.TRAINING_MAX_LEVEL = 10
 
@@ -68,15 +71,15 @@
 	NDefines.NMilitary.BASE_DIVISION_BRIGADE_CHANGE_COST = 4 -- Base cost to change a regiment column.
 	NDefines.NMilitary.BASE_DIVISION_SUPPORT_SLOT_COST = 10
 	
-	NDefines.NMilitary.BASE_LEADER_TRAIT_GAIN_XP = 0.6	  -- Was 0.7, Vanilla: 0.4
-	NDefines.NMilitary.UNIT_EXPERIENCE_PER_COMBAT_HOUR = 0.00015	-- Was 0.000175, Vanilla: 0.0001
-	NDefines.NMilitary.FIELD_EXPERIENCE_MAX_PER_DAY = 12	-- Vanilla: 1.2, any reason for 10x increase? - Dutch
+	NDefines.NMilitary.BASE_LEADER_TRAIT_GAIN_XP = 0.7
+	NDefines.NMilitary.UNIT_EXPERIENCE_PER_COMBAT_HOUR = 0.000175
+	NDefines.NMilitary.FIELD_EXPERIENCE_MAX_PER_DAY = 12
 	NDefines.NMilitary.ENCIRCLED_DISBAND_MANPOWER_FACTOR = 0.1
-	NDefines.NMilitary.PLAYER_ORDER_PLANNING_DECAY = 0.015	  -- Was 0.005, Vanilla: 0.3
+	NDefines.NMilitary.PLAYER_ORDER_PLANNING_DECAY = 0.005
 	NDefines.NMilitary.DISBAND_MANPOWER_LOSS = 0.0
 	NDefines.NMilitary.PLAN_SPREAD_ATTACK_WEIGHT = 4.1 --AI should concentrate forces more a bit experimental. Increased from 4.0 to combat issues with AI death stacks - SpicyAlfredo
 	
-	NDefines.NMilitary.FIELD_MARSHAL_XP_RATIO = 0.5 -- Was 0.7, Vanilla: 0.3
+	NDefines.NMilitary.FIELD_MARSHAL_XP_RATIO = 0.7
 	NDefines.NMilitary.COMMANDER_LEVEL_UP_STAT_WEIGHTS = {5, 5, 3, 4}
 	NDefines.NMilitary.NEW_COMMANDER_RANDOM_PERSONALITY_TRAIT_CHANCES = { -- Chances to gain a personality trait for new generals
 		0.80, --50% for first trait
@@ -85,55 +88,67 @@
 		0.01,
 	}
 	
-	-- NDefines.NMilitary.PLANNING_DECAY = 0.04	   -- Vanilla: 0.1
-	-- NDefines.NMilitary.PLANNING_GAIN = 0.08	  -- Vanilla: 0.2
-	-- NDefines.NMilitary.PLAN_PROVINCE_BASE_IMPORTANCE = 2.0
-	-- NDefines.NMilitary.PLAN_PROVINCE_LOW_VP_IMPORTANCE_AREA = 4.0	-- Don't exist in vanilla anymore - Dutch
-	-- NDefines.NMilitary.PLAN_PROVINCE_MEDIUM_VP_IMPORTANCE_AREA = 6.0	  -- Don't exist in vanilla anymore - Dutch
-	-- NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_AREA = 10.0	 -- Don't exist in vanilla anymore - Dutch
+	NDefines.NMilitary.PLANNING_DECAY = 0.04
+	NDefines.NMilitary.PLANNING_GAIN = 0.08
+	
+	-- PLAN_SPREAD_ATTACK_WEIGHT = 6.0
+	NDefines.NMilitary.BASE_DIVISION_BRIGADE_CHANGE_COST = 4	-- was 4 before... - Fantom
+	--This is a Trace to make sure mod is taken into account
+	
+	NDefines.NMilitary.PLAN_PROVINCE_BASE_IMPORTANCE = 2.0
+	NDefines.NMilitary.PLAN_PROVINCE_LOW_VP_IMPORTANCE_AREA = 4.0
+	NDefines.NMilitary.PLAN_PROVINCE_MEDIUM_VP_IMPORTANCE_AREA = 6.0 --Vanilla 5
+	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_AREA = 10.0 -- vanilla 10
 	NDefines.NMilitary.PLAN_PROVINCE_LOW_VP_IMPORTANCE_FRONT = 4.0
 	NDefines.NMilitary.PLAN_PROVINCE_MEDIUM_VP_IMPORTANCE_FRONT = 6.0
 	NDefines.NMilitary.PLAN_PROVINCE_HIGH_VP_IMPORTANCE_FRONT = 8.0
+	NDefines.NMilitary.PLAN_AREA_DEFENSE_ENEMY_CONTROLLER_SCORE = 30.0
+	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.60
 	NDefines.NMilitary.PEN_VS_AVERAGE = 0.9
 	NDefines.NMilitary.ARMOR_VS_AVERAGE = 0.2
 	
 	-- Addition with 1.3.2
-	-- NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 18.0		-- increased from 12.0 ; Added importance for area defense province with a port
-	-- NDefines.NMilitary.PLAN_PORVINCE_PORT_LEVEL_FACTOR = 0.5			-- Bonus factor for port level
+	NDefines.NMilitary.PLAN_PORVINCE_PORT_BASE_IMPORTANCE = 18.0		-- increased from 12.0 ; Added importance for area defense province with a port
+	NDefines.NMilitary.PLAN_PORVINCE_PORT_LEVEL_FACTOR = 0.5			-- Bonus factor for port level
+	NDefines.NMilitary.PLAN_PORVINCE_AIRFIELD_BASE_IMPORTANCE = 3.0	-- Added importance for area defense province with air field
+	NDefines.NMilitary.PLAN_PORVINCE_AIRFIELD_POPULATED_FACTOR = 1.5	-- Bonus factor when an airfield has planes on it
+	NDefines.NMilitary.PLAN_PORVINCE_AIRFIELD_LEVEL_FACTOR = 0.25		-- Bonus factor for airfield level
+	NDefines.NMilitary.PLAN_PORVINCE_RESISTANCE_BASE_IMPORTANCE = 10.0 -- Used when calculating the calue of defense area provinces for the battle plan system (factored by resistance level)
 		
-	-- These need to result in province value > 1.0 for it to matter.
 	NDefines.NMilitary.PLAN_AREA_DEFENSE_ENEMY_CONTROLLER_SCORE = 30.0	-- Score applied to provinces in the defense area order controlled by enemies
 	NDefines.NMilitary.PLAN_AREA_DEFENSE_ENEMY_UNIT_FACTOR = -1.5		-- Factor applied to province score in area defense order per enemy unit in that province
 	NDefines.NMilitary.PLAN_AREA_DEFENSE_FORT_IMPORTANCE = 0.30			-- Used when calculating the calue of defense area provinces for the battle plan system works as multipliers on the rest
-	NDefines.NMilitary.PLAN_AREA_DEFENSE_COASTAL_FORT_IMPORTANCE = 4.0	-- Used when calculating the calue of defense area provinces for the battle plan system
-	NDefines.NMilitary.PLAN_AREA_DEFENSE_COAST_NO_FORT_IMPORTANCE = 1.5	-- Used when calculating the calue of defense area provinces for the battle plan system
+	NDefines.NMilitary.PLAN_AREA_DEFENSE_COASTAL_FORT_IMPORTANCE = 5.0	-- Used when calculating the calue of defense area provinces for the battle plan system
+	NDefines.NMilitary.PLAN_AREA_DEFENSE_COAST_NO_FORT_IMPORTANCE = 2.0	-- Used when calculating the calue of defense area provinces for the battle plan system
 	
 	NDefines.NMilitary.PLAN_STICKINESS_FACTOR = 95.0					-- downed from 100; Factor used in unitcontroller when prioritizing units for locations
 	NDefines.NMilitary.PLAN_STICKINESS_IGNORE_STACK_LIMIT = 1			-- 1 == yes 0 == no. Alloes player to override prio to stack units where they want to.
 	
 	NDefines.NMilitary.PLAN_EXECUTE_CAREFUL_LIMIT = 6.0				-- reduced from 25 ; When looking for an attach target this score limit is required in the battle plan to consider province for attack
+	NDefines.NMilitary.PLAN_EXECUTE_BALANCED_LIMIT = 0				-- When looking for an attach target this score limit is required in the battle plan to consider province for attack
+	NDefines.NMilitary.PLAN_EXECUTE_RUSH = -200						-- When looking for an attach target this score limit is required in the battle plan to consider province for attack
 	NDefines.NMilitary.PLAN_EXECUTE_CAREFUL_MAX_FORT = 4				-- reduced from 5 ; If execution mode is set to careful units will not attack provinces with fort levels greater than or equal to this
 	
 	NDefines.NMilitary.PLAN_MAX_PROGRESS_TO_JOIN = 0.54				-- increased from 0.50 ; If Lower progress than this probably needs support
 	
 	NDefines.NMilitary.PLAN_BLITZ_OPTIMISM = 0.3						-- increased from 0.2 ; Additional combat balance value in favor of blitzing side when considering targets (not a combat bonus just offsets planning)
 	
-	-- NDefines.NMilitary.NEW_COMMANDER_RANDOM_BASIC_TRAIT_CHANCES = {  -- chances to gain a basic trait for new generals
-	-- }
+	NDefines.NMilitary.NEW_COMMANDER_RANDOM_BASIC_TRAIT_CHANCES = {  -- chances to gain a basic trait for new generals
+	}
 	
-	-- NDefines.NMilitary.NEW_COMMANDER_RANDOM_STATUS_TRAIT_CHANCES = {  -- chances to gain a status trait for new generals
-	-- }
+	NDefines.NMilitary.NEW_COMMANDER_RANDOM_STATUS_TRAIT_CHANCES = {  -- chances to gain a status trait for new generals
+	}
 	
-	-- NDefines.NMilitary.NEW_COMMANDER_RANDOM_SKILL_CHANCES = {  -- chances to give a random stat skill for new generals
-	-- }
+	NDefines.NMilitary.NEW_COMMANDER_RANDOM_SKILL_CHANCES = {  -- chances to give a random stat skill for new generals
+	}
 
-	-- NDefines.NMilitary.NEW_NAVY_LEADER_RANDOM_SKILL_CHANCES = { -- chances to give a random stat skill point for a new admiral
-	-- }
+	NDefines.NMilitary.NEW_NAVY_LEADER_RANDOM_SKILL_CHANCES = { -- chances to give a random stat skill point for a new admiral
+	}
 
+	NDefines.NAir.SUPPLY_NEED_FACTOR = 0.22 -- 0.28
 
-	-- NDefines.NAir.SUPPLY_NEED_FACTOR = 0.22
-	NDefines.NAir.AIR_WING_XP_LEVELS = { 20, 40, 60, 80, 100, 140, 180, 220, 260, 300, 390, 480, 570, 660, 750, 780, 810, 840, 870, 900 }
-	-- NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
+	NDefines.NAir.AIR_WING_XP_LEVELS = {20, 40, 60, 80, 100, 140, 180, 220, 260, 300, 390, 480, 570, 660, 750, 780, 810, 840, 870, 900}
+	NDefines.NAir.AIR_WING_XP_TRAINING_MAX = 300.0
 	NDefines.NAir.AIR_WING_XP_TRAINING_MISSION_GAIN_DAILY = 4.5
 	NDefines.NAir.AIR_WING_COUNTRY_XP_FROM_TRAINING_FACTOR = 0.01
 	NDefines.NAir.AIR_WING_XP_LOSS_WHEN_KILLED = 200
@@ -157,30 +172,29 @@
 	NDefines.NAir.AIR_WING_ATTACK_LOGISTICS_TRUCK_MAX_FACTOR = 0.3 -- was 0.03 Base 0.3
 	
 	NDefines.NAir.MISSION_COMMAND_POWER_COSTS = { -- command power cost per plane to create a mission
-		0.0, -- AIR_SUPERIORITY
-		0.0, -- CAS
-		0.0, -- INTERCEPTION
-		0.0, -- STRATEGIC_BOMBER
-		0.0, -- NAVAL_BOMBER
-		0.0, -- DROP_NUKE
-		0.0, -- PARADROP
-		0.0, -- NAVAL_KAMIKAZE
-		0.0, -- PORT_STRIKE
-		0.0, -- ATTACK_LOGISTICS
-		0.025, -- AIR_SUPPLY -- Was 0.05
-		0.0, -- TRAINING
-		0.0, -- NAVAL_MINES_PLANTING
-		0.0, -- NAVAL_MINES_SWEEPING
-		0.0, -- MISSION_RECON
-		0.0, -- NAVAL_PATROL
-		0,0, -- SAM
-		0,0, -- BARRAGE
-	}
+			0.0, -- AIR_SUPERIORITY
+			0.0, -- CAS
+			0.0, -- INTERCEPTION
+			0.0, -- STRATEGIC_BOMBER
+			0.0, -- NAVAL_BOMBER
+			0.0, -- DROP_NUKE
+			0.0, -- PARADROP
+			0.0, -- NAVAL_KAMIKAZE
+			0.0, -- PORT_STRIKE
+			0.0, -- ATTACK_LOGISTICS
+			0.025, -- AIR_SUPPLY --Was 0.05
+			0.0, -- TRAINING
+			0.0, -- NAVAL_MINES_PLANTING
+			0.0, -- NAVAL_MINES_SWEEPING
+			0.0, -- MISSION_RECON
+			0.0, -- NAVAL_PATROL
+			0,0, -- SAM
+			0,0, -- BARRAGE
+		}
 		
-	-- NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0	   -- Doesn't exist in vanilla anymore? - Dutch
+	NDefines.NAir.NAVAL_STRIKE_AIR_VS_AIR_PASS_CHANCE = 25.0
 
 	NDefines.NAir.AA_INDUSTRY_AIR_DAMAGE_FACTOR = -0.10				-- 5x levels = 50% defense from bombing. Reduced since Technology would otherwise give you above 100% damage reduction.
-
 --------------------------------------------------------------------------------------------------------------
 -- RESEARCH
 --------------------------------------------------------------------------------------------------------------
@@ -202,22 +216,22 @@
 	NDefines.NAI.DEFAULT_LEGACY_VARIANT_CREATION_XP_CUTOFF_NAVY = 49 --25	-- Same as above but for navy XP and navy_xp_spend_priority.
 	NDefines.NAI.DEFAULT_LEGACY_VARIANT_CREATION_XP_CUTOFF_AIR  = 199 --25	-- Same as above but for air XP and air_xp_spend_priority.
 
-	-- The AI uses the below values when selecting which design to make among the types that use the tank designer
-	-- (the tank designer DLC feature must be active). For each role the highest priority AI design that can be
-	-- created if any is assigned a weight. Any design with a weight of zero or a weight that falls below the
-	-- cutoff is dropped. A random design is then picked from the remaining.
-	-- Weight is calculated as AlternativeFactor * DemandFactor.
-	-- An "alternative" is a producible design of the same archetype (each specialized type is its own archetype).
+-- The AI uses the below values when selecting which design to make among the types that use the tank designer
+-- (the tank designer DLC feature must be active). For each role the highest priority AI design that can be
+-- created if any is assigned a weight. Any design with a weight of zero or a weight that falls below the
+-- cutoff is dropped. A random design is then picked from the remaining.
+-- Weight is calculated as AlternativeFactor * DemandFactor.
+-- An "alternative" is a producible design of the same archetype (each specialized type is its own archetype).
 
-	-- EAI: AI delays upgrading the main tank types too much because it wants to create absent types for its templates first
-	-- makes sense but I'd rather have it get its most used type upgraded first
+-- EAI: AI delays upgrading the main tank types too much because it wants to create absent types for its templates first
+-- makes sense but I'd rather have it get its most used type upgraded first
 	NDefines.NAI.LAND_DESIGN_ALTERNATIVE_ABSENT = 1 --1000000
 	NDefines.NAI.LAND_DESIGN_ALTERNATIVE_OF_LESSER_TECH = 1 --10000
 	NDefines.NAI.LAND_DESIGN_ALTERNATIVE_OF_EQUAL_TECH = 1 --100
 	NDefines.NAI.LAND_DESIGN_ALTERNATIVE_OF_GREATER_TECH = 1
 
-	-- If a template may be reinforced with the archetype it's considered to be "demanded". If multiple conditions
-	-- are met e.g. it's both in the field and in training the largest value is used.
+-- If a template may be reinforced with the archetype it's considered to be "demanded". If multiple conditions
+-- are met e.g. it's both in the field and in training the largest value is used.
 
 	NDefines.NAI.LAND_DESIGN_DEMAND_FIELD_DIVISION = 50
 	NDefines.NAI.LAND_DESIGN_DEMAND_TRAINING_DIVISION = 50
@@ -225,15 +239,15 @@
 	NDefines.NAI.LAND_DESIGN_DEMAND_UNUSED_TEMPLATE = 10 --1
 	NDefines.NAI.LAND_DESIGN_DEMAND_ABSENT = 10 --0
 	
-	-- The AI "desires" to spend XP on doctrines templates and equipment.
-	-- The desire is built up over time and when XP is available it spends it on the action that has the highest accumulated desire. After spending XP the desire is reset in effect balancing the desires.
-	-- Below is the daily desire gain for each action.
+-- The AI "desires" to spend XP on doctrines templates and equipment.
+-- The desire is built up over time and when XP is available it spends it on the action that has the highest accumulated desire. After spending XP the desire is reset in effect balancing the desires.
+-- Below is the daily desire gain for each action.
 
 	NDefines.NAI.DESIRE_USE_XP_TO_UNLOCK_LAND_DOCTRINE = 1    -- How quickly is desire to unlock land doctrines accumulated?
 	NDefines.NAI.DESIRE_USE_XP_TO_UNLOCK_NAVAL_DOCTRINE = 1   -- How quickly is desire to unlock naval doctrines accumulated?
 	NDefines.NAI.DESIRE_USE_XP_TO_UNLOCK_AIR_DOCTRINE = 1    -- How quickly is desire to unlock air doctrines accumulated?
 
-	--EAI: make sure land template desire is always at the top if the doctrine desire is high but the mod blocks it AI wont create templates
+--EAI: make sure land template desire is always at the top if the doctrine desire is high but the mod blocks it AI wont create templates
 	NDefines.NAI.DESIRE_USE_XP_TO_UPDATE_LAND_TEMPLATE = 100.0 --2.0    -- How quickly is desire to update/create templates accumulated?
 	
 	NDefines.NAI.DESIRE_USE_XP_TO_UPGRADE_LAND_EQUIPMENT = 2.0  -- How quickly is desire to update/create land equipment variants accumulated?
@@ -327,10 +341,6 @@
 	NDefines.NAI.PRODUCTION_EQUIPMENT_SURPLUS_FACTOR = 0.15	-- Base value for how much of currently used equipment the AI will at least strive to have in stock
 
 	NDefines.NAI.GENERATE_WARGOAL_ANTAGONIZE_SCALE = 0.25 -- (Original value: 0.35) How likely the AI acts on claims to generated war goals. Baseline is 'min_threat - antagonize * scale.' So don't lower it below 0.25! 
-
-	NDefines.NAI.EQUIPMENT_MARKET_UPDATE_FREQUENCY_DAYS = 14 -- How often the AI runs its market logic
-
-	NDefines.NAI.RAIDS_CREATE_FREQUENCY_DAYS = 14 -- How often will AI run its raid creation logic. Lowering this number may decrease performance.
 	
 --------------------------------------------------------------------------------------------------------------
 -- ECONOMY
@@ -373,7 +383,7 @@
 	NDefines.NAI.FALLBACK_LOSING_FACTOR = 0.0
 	NDefines.NAI.PLAN_MIN_SIZE_FOR_FALLBACK = 5000					                -- A country with less provinces than this will not draw fallback plans  but rather station their troops along the front
 
-	-- These are all 3 numbers for min desired max unit need weights for area defense
+-- these are all 3 numbers for min desired max unit need weights for area defense
 	NDefines.NAI.AREA_DEFENSE_CAPITAL_PEACE_VP_WEIGHT = { 1.0, 1.0, 1.0 }
 	NDefines.NAI.AREA_DEFENSE_CAPITAL_VP_WEIGHT = { 0.0, 1.0, 2.0 }
 	NDefines.NAI.AREA_DEFENSE_HOME_VP_WEIGHT = { 0.0, 0.5, 1.0 }
@@ -391,13 +401,12 @@
 
 
 	NDefines.NAI.ORG_UNIT_WEAK = 0.4						-- Organization % for unit to be considered weak
-	NDefines.NAI.STR_UNIT_WEAK = 0.4					    -- Strength (equipment) % for unit to be considered weak
+	NDefines.NAI.STR_UNIT_WEAK = 0.4					-- Strength (equipment) % for unit to be considered weak
 	
 	NDefines.NAI.ORG_UNIT_NORMAL = 0.7						-- Organization % for unit to be considered normal
 	NDefines.NAI.STR_UNIT_NORMAL = 0.7						-- Strength (equipment) % for unit to be considered normal
 	
-	NDefines.NAI.ORG_UNIT_STRONG = 0.80						-- Organization % for unit to be considered normal
-	NDefines.NAI.STR_UNIT_STRONG = 0.80					    -- Strength (equipment) % for unit to be considered strong
+	NDefines.NAI.ORG_UNIT_STRONG = 0.80
 	
 	NDefines.NAI.ATTACK_HEAVILY_DEFENDED_LIMIT = 0.8			-- reduced from 1.0 ; AI will not launch attacks against heavily defended fronts unless they consider to have this level of advantage (1.0 = 100%)
 	
@@ -509,7 +518,7 @@
 --------------------------------------------------------------------------------------------------------------
 -- NAVY
 --------------------------------------------------------------------------------------------------------------
-	-- NDefines.NAI.SUPPLY_NEED_FACTOR = 3 -- 4
+	NDefines.NAI.SUPPLY_NEED_FACTOR = 3 -- 4
 
 	NDefines.NAI.NAVY_PREFERED_MAX_SIZE = 50.0 -- Upgraded from 20.0
 	NDefines.NAI.MAX_SCREEN_TASKFORCES_FOR_MINE_SWEEPING = 0.10 -- maximum ratio of screens forces to be used in mine sweeping
@@ -560,12 +569,12 @@
 -------------------------
 -- NAVAL INVASIONS
 -------------------------
-	NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 4	  -- Was 5, Vanilla: 2.5		
+	NDefines.NAI.ENEMY_NAVY_STRENGTH_DONT_BOTHER = 5		
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE = 0 --0.08			-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend.
 	NDefines.NAI.RELATIVE_STRENGTH_TO_INVADE_DEFENSIVE = 0 --0.4	-- Compares the estimated strength of the country/faction compared to it's enemies to see if it should invade or stay at home to defend but while being a defensive country.
 	NDefines.NAI.INVASION_COASTAL_PROVS_PER_ORDER = 12				-- AI will consider one extra invasion per number of provinces stated here (num orders = total coast / this)
 	NDefines.NAI.MAX_DISTANCE_NAVAL_INVASION = 400.0				-- AI is extremely unwilling to plan naval invasions above this naval distance limit.
-	NDefines.NAI.MAX_INVASION_SIZE = 24 --18						-- max invasion group size
+	NDefines.NAI.MAX_INVASION_SIZE = 18 --24									-- max invasion group size
 	
 -------------------------
 -- AIR AI
@@ -640,8 +649,8 @@
 	NDefines.NTechnology.BASE_RESEARCH_POINTS_SAVED = 56.0 --#base game 30 changed to 50 and then why not 56?
 
 
-	-- Supply Abbus: It punish less compare to vanilla
-	-- SpicyAlfredo: While it was the mod's philsophy to have noob friendly supply. That Era has passed and using Vanilla vaules in this relam is better for the mod's balance 'health' going forward.
+-- Supply Abbus: It punish less compare to vanilla
+-- SpicyAlfredo: While it was the mod's philsophy to have noob friendly supply. That Era has passed and using Vanilla vaules in this relam is better for the mod's balance 'health' going forward.
 	-- NDefines.NSupply.INFRA_TO_SUPPLY = 0.5  -- 0.3
 	-- NDefines.NSupply.VP_TO_SUPPLY_BASE = 0.1 --0.2
 	-- NDefines.NSupply.VP_TO_SUPPLY_BONUS_CONVERSION = 0.06 --0.05
