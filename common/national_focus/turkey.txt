@@ -1,3 +1,4 @@
+#!gfx:interface\r56_goals.gfx
 focus_tree = {
 	id = turkish_focus
 
@@ -20,6 +21,9 @@ focus_tree = {
 		x = 20
 		y = 0
 	}
+
+	shared_focus = SSB_the_saadabad_pact
+
 	focus = {
 		id = TUR_one_party_many_faces
 		icon = GFX_goal_TUR_presidental_seal
@@ -909,27 +913,24 @@ focus_tree = {
 		}
 
 		bypass = {
-			ROOT = {
-				controls_state = 677
-				controls_state = 554
-				controls_state = 553
-				controls_state = 680
-			}
+			controls_state = 677
+			controls_state = 554
+			controls_state = 553
+			controls_state = 680
 		}
 
 		search_filters = { FOCUS_FILTER_ANNEXATION }
 		completion_reward = {
-			677 = {
-				controller = {
-					if = {
-						limit = {
-							controls_state = 554
-							controls_state = 553
-							controls_state = 680
-						}
-						country_event = { id = bftb_turkey.102 }
+			every_other_country = {
+				limit = {
+					OR = {
+						controls_state = 677
+						controls_state = 554
+						controls_state = 553
+						controls_state = 680
 					}
 				}
+				country_event = { id = bftb_turkey.102 }
 			}
 		}
 	}
@@ -1350,15 +1351,83 @@ focus_tree = {
 	focus = {
 		id = TUR_join_the_central_powers
 		icon = GFX_focus_ger_revive_kaiserreich
-		available = {
-			OR = {
-				GER = { has_completed_focus = GER_the_central_powers }
-				GER = { has_completed_focus = GER_restore_the_empire }
-				HUN = { has_completed_focus = HUN_proclaim_the_restoration_of_austria_hungary }
-				AND = {
-					AUS = { has_completed_focus = AUS_past_glories }
-					exists = yes
-				}	
+		available = {	#56
+			IF = {
+				limit = {
+					has_dlc = "Gotterdammerung"
+				}
+				OR = {
+					GER = {
+						if = {	#For those with the GER gamerule for the r56 monarchist tree
+							limit = { 
+								has_game_rule = {
+									rule = GER_focus_tree_selection
+									option = R56_TREE
+								}
+							}
+							has_completed_focus = GER_restore_the_empire
+						}
+						else = { has_completed_focus = GER_revive_the_kaiserreich_ww }
+						OR = {
+							is_in_faction = no
+							is_faction_leader = yes
+						}
+					}
+					HUN = {
+						has_completed_focus = wuw_HUN_the_lands_of_the_crown_of_saint_stephen
+						OR = {
+							is_in_faction = no
+							is_faction_leader = yes
+						}
+					}
+					AUS = {
+						if = {	#Support for default AUS tree
+							limit = { has_global_flag = aus_dlc_focus_tree }
+							has_completed_focus = AUS_reinstate_the_imperial_council
+						}
+						else = { has_completed_focus = AUS_past_glories }
+						OR = {
+							is_in_faction = no
+							is_faction_leader = yes
+						}
+					}
+				}
+			}
+			ELSE = {
+				OR = {
+					GER = {
+						has_completed_focus = GER_restore_the_empire
+						OR = {
+							is_in_faction = no
+							is_faction_leader = yes
+						}
+					}
+					HUN = {
+						OR = {
+							has_completed_focus = HUN_proclaim_the_restoration_of_austria_hungary 
+							has_completed_focus = HUN_moderate_restoration
+						}
+						OR = {
+							is_in_faction = no
+							is_faction_leader = yes
+						}
+					}
+					AND = {
+						custom_trigger_tooltip = {
+							tooltip = GRE_AUS_is_HUN_EMPIRE_tt
+							AUS = {
+								has_cosmetic_tag = HUN_EMPIRE
+							}
+						}
+						OR = {
+							is_in_faction = no
+							is_faction_leader = yes
+						}
+					}
+					AUS = {
+						has_completed_focus = AUS_past_glories
+					}
+				}
 			}
 		}
 		prerequisite = { focus = TUR_reclaiming_our_lost_empire }
@@ -1378,6 +1447,7 @@ focus_tree = {
 						OR = {
 							has_completed_focus = GER_the_central_powers
 							has_completed_focus = GER_restore_the_empire
+							has_completed_focus = GER_revive_the_kaiserreich_ww
 						}
 						
 						NOT = {
@@ -1395,8 +1465,12 @@ focus_tree = {
 			else_if = {
 				limit = {
 					GER = { 
+						is_faction_leader = no
 						has_government = neutrality
-						NOT = { has_completed_focus = GER_the_central_powers }
+						NOT = {
+							has_completed_focus = GER_the_central_powers
+							has_completed_focus = GER_mitteleuropa
+						}
 						NOT = {
 							is_subject = yes
 						}
@@ -1407,13 +1481,18 @@ focus_tree = {
 				}
 				GER = {
 					set_rule = { can_create_factions = yes }
-					create_faction = GER_central_powers_faction
+					create_faction_from_template = {
+						template = faction_template_GER_mitteleuropa_alliance
+						name = GER_central_powers_faction
+						icon = GFX_faction_logo_generic_13
+					}
 					country_event = { id = generic.2 }
 				}
 			}
 			else_if = {
 				limit = {
 					GER = { 
+						is_faction_leader = no
 						has_government = neutrality
 						NOT = { has_completed_focus = GER_restore_the_empire }
 						NOT = {
@@ -1423,21 +1502,33 @@ focus_tree = {
 				}
 				GER = {
 					set_rule = { can_create_factions = yes }
-					create_faction = GER_central_powers_faction
+					create_faction_from_template = {
+						template = faction_template_GER_mitteleuropa_alliance
+						name = GER_central_powers_faction
+						icon = GFX_faction_logo_generic_13
+					}
 					country_event = { id = generic.2 }
 				}
 			}
 			else_if = {
 				limit = {
-					HUN = { 
-						has_completed_focus = HUN_proclaim_the_restoration_of_austria_hungary
+					HUN = {
+						OR = {
+							has_completed_focus = HUN_proclaim_the_restoration_of_austria_hungary
+							has_completed_focus = HUN_moderate_restoration
+							has_completed_focus = wuw_HUN_the_lands_of_the_crown_of_saint_stephen
+						}
 						NOT = {
 							is_subject = yes
 						}					
 					}
 				}
 				set_rule = { can_create_factions = yes }
-				create_faction = GER_central_powers_faction
+				create_faction_from_template = {
+					template = faction_template_GER_mitteleuropa_alliance
+					name = GER_central_powers_faction
+					icon = GFX_faction_logo_generic_13
+				}
 				HUN = {
 					if = {
 						limit = { ROOT = { is_in_faction = yes } }
@@ -1463,6 +1554,7 @@ focus_tree = {
 			else_if = {
 				limit = {
 					PRE = { 
+						is_faction_leader = no
 						has_government = neutrality
 						NOT = {
 							is_subject = yes
@@ -1476,7 +1568,11 @@ focus_tree = {
 				}
 				PRE = {
 					set_rule = { can_create_factions = yes }
-					create_faction = GER_central_powers_faction
+					create_faction_from_template = {
+						template = faction_template_GER_mitteleuropa_alliance
+						name = GER_central_powers_faction
+						icon = GFX_faction_logo_generic_13
+					}
 					country_event = { id = generic.2 }
 				}
 			}
@@ -2173,6 +2269,10 @@ focus_tree = {
 					}
 				}
 			}
+		}
+
+		allow_branch = {
+			NOT = { has_dlc = "Graveyard of Empires" }
 		}
 
 		search_filters = { FOCUS_FILTER_POLITICAL }
@@ -7123,7 +7223,18 @@ focus_tree = {
 						}
 
 					}
-					create_faction = TUR_balkan_pact
+					IF = {
+						limit = {
+							has_dlc = "No Compromise, No Surrender"
+						}
+						set_rule = { can_create_factions = yes }
+						create_faction_from_template = faction_template_TUR_balkan_pact
+						add_faction_initiative = 1
+					}
+					ELSE = {
+						set_rule = { can_create_factions = yes }
+						create_faction = TUR_balkan_pact
+					}
 					every_country = {
 						limit = {
 							OR = {
@@ -9539,7 +9650,7 @@ focus_tree = {
 						is_core_of = MON
 						is_core_of = MEN
 						is_core_of = TAN
-						is_core_of = TNG
+						is_core_of = KHM
 					}
 				}
 				add_claim_by = TUR
@@ -9591,11 +9702,56 @@ focus_tree = {
 			}
 			if = { 
 				limit = {
-					TNG = { exists = yes }
+					KHM = { exists = yes }
 				}
 				create_wargoal = {
 					type = annex_everything
-					target = TNG
+					target = KHM
+				}
+			}
+			if = { 
+				limit = {
+					SIC = { exists = yes }
+				}
+				create_wargoal = {
+					type = annex_everything
+					target = SIC
+				}
+			}
+			if = { 
+				limit = {
+					XIC = { exists = yes }
+				}
+				create_wargoal = {
+					type = annex_everything
+					target = XIC
+				}
+			}
+			if = { 
+				limit = {
+					GDC = { exists = yes }
+				}
+				create_wargoal = {
+					type = annex_everything
+					target = GDC
+				}
+			}
+			if = { 
+				limit = {
+					HBC = { exists = yes }
+				}
+				create_wargoal = {
+					type = annex_everything
+					target = HBC
+				}
+			}
+			if = { 
+				limit = {
+					SND = { exists = yes }
+				}
+				create_wargoal = {
+					type = annex_everything
+					target = SND
 				}
 			}
 			if = { 
@@ -10463,11 +10619,12 @@ focus_tree = {
 				uses = 1
 				category = ss_tech
 			}
-			add_doctrine_cost_reduction = {
-				name = TUR_the_path_of_the_wolf
-				cost_reduction = 0.35
-				uses = 2
-				category = trade_interdiction_tree
+			add_mastery_bonus = {
+				name = flexible_navy
+				bonus = 0.2
+				days = 180
+				grand_doctrine = new_convoy_raiding
+				track = submarines
 			}
 		}
 	}
