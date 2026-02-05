@@ -29,6 +29,7 @@
 	NDefines.NDiplomacy.TENSION_DEMILITARIZE_ZONE = 0	-- R56: Was negative, no free tension reduction from abusing this
 	NDefines.NDiplomacy.TENSION_ANNEX_NO_CLAIM = 0.6	-- R56: Was really low
 	NDefines.NDiplomacy.TENSION_ANNEX_CLAIM = 0.3		-- R56: Was really low
+	NDefines.NDiplomacy.TENSION_ANNEX_CORE = 0			-- R56: Civil wars no longer reduce tension
 	NDefines.NDiplomacy.TENSION_PUPPET = 0.3			-- R56: Puppeting caused no tension, what?
 
 	NDefines.NCountry.SPECIAL_FORCES_CAP_BASE = 0.1
