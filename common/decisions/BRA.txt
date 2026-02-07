@@ -14,7 +14,7 @@ BRA_industrial_decisions = {
 			has_completed_focus = BRA_financial_stimulation
 			#any_core_state = {}
 		}
-		state_target = yes
+		state_target = any_controlled_state
 	    target_trigger = {
 	        FROM = {
 	           	is_fully_controlled_by = ROOT
@@ -130,11 +130,11 @@ BRA_ensure_support_cat = {
 				has_completed_focus = BRA_estado_novo
 			}
 		}
-		state_target = yes
+		state_target = any_controlled_state
 		target_trigger = {
 		    FROM = {
-		    	is_fully_controlled_by = ROOT
 		    	is_core_of = ROOT
+				is_fully_controlled_by = ROOT
 		       	NOT = {
 		       		has_state_flag = BRA_gained_support
 		       	}
@@ -200,7 +200,7 @@ BRA_ensure_support_cat = {
 		visible = {
 			has_completed_focus = BRA_anaue
 		}
-		state_target = yes
+		state_target = any_controlled_state
 		target_trigger = {
 		    FROM = {
 		    	is_fully_controlled_by = ROOT
@@ -351,7 +351,7 @@ BRA_cangaceiro_decision_cat = {
 				has_stability < 0.4
 			}
 		}
-		state_target = yes
+		state_target = any_controlled_state
 		target_trigger = {
 		    FROM = {
 		    	is_fully_controlled_by = ROOT
@@ -461,11 +461,13 @@ BRA_cangaceiro_decision_cat = {
 				30 = {
 					modifier = {
 						factor = 0
-						937 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
-						935 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
-						498 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
-						936 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
-						499 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
+						AND = {
+							937 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
+							935 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
+							498 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
+							936 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
+							499 = { has_dynamic_modifier = { modifier = BRA_cangaceiro_state }}
+						}
 					}
 					set_country_flag = BRA_cangaceiro_spread_flag
 					event_option_tooltip = JUNO_brazil_events.150.c
@@ -530,7 +532,7 @@ BRA_mercosul_decisions = {
 		allowed = {
 			original_tag = BRA
 		}
-		visible = {
+		target_root_trigger = {	#r56: was visible, this is a tiny bit better for performance
 			has_completed_focus	= BRA_form_mercosul
 		}
 		available = {
@@ -550,7 +552,7 @@ BRA_mercosul_decisions = {
 		    FROM = { 
 		    	AND = {
 		    		NOT = { 
-		    			has_country_flag = BRA_mercosul_member_flag 
+		    			is_in_faction_with = ROOT
 		    			tag = ROOT
 		    		}
 		    		OR = { 
@@ -611,7 +613,7 @@ BRA_amazonian_settlement_cat = {
 			has_completed_focus = BRA_amazonian_settlement
 		}
 
-		state_target = yes
+		state_target = any_owned_state
 
 		target_trigger = {
 			FROM = {
@@ -832,12 +834,11 @@ BRA_sway_the_neighbors_cat = {
 			}
 		}
 
-		state_target = yes
+		state_target = south_america
 		on_map_mode = map_and_decisions_view
 		target_trigger = {
 			FROM = {
 				is_capital = yes
-				is_on_continent = south_america
 				is_core_of = OWNER
 				OWNER = {
 					NOT = {
@@ -1099,6 +1100,7 @@ BRA_us_of_south_america_cat = {
 			FROM = {
 				exists = yes
 				OR = {
+					has_country_flag = BRA_target_which_is_currently_being_integrated
 					is_in_faction_with = ROOT
 					is_subject_of = ROOT
 				}
@@ -1114,6 +1116,21 @@ BRA_us_of_south_america_cat = {
 				}			
 			}
 		}
+
+		cancel_trigger = {
+			hidden_trigger = {
+				any_country = {
+					has_country_flag = BRA_target_which_is_currently_being_integrated
+					NOT = {
+						OR = {
+							is_in_faction_with = ROOT
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}	
+		}
+
 		cost = 100
 		fire_only_once = no
 		days_remove = 30
@@ -1133,8 +1150,24 @@ BRA_us_of_south_america_cat = {
 			}
 		}
 		complete_effect = {
-			set_country_flag = BRA_invite_country_in_progress	
+			set_country_flag = BRA_invite_country_in_progress
+			FROM = {
+				set_country_flag = BRA_target_which_is_currently_being_integrated
+			}
 		}
+
+		cancel_effect = {
+			hidden_effect = {
+				clr_country_flag = BRA_invite_country_in_progress
+				every_country = {
+					limit = {
+						has_country_flag = BRA_target_which_is_currently_being_integrated
+					}
+					clr_country_flag = BRA_target_which_is_currently_being_integrated
+				}
+			}
+		}
+
 		remove_effect = {
 			custom_effect_tooltip = BRA_invite_to_organization_of_american_states_tt
 			FROM = {
@@ -1257,5 +1290,64 @@ BRA_foreign_legion_cat = {
 				clr_country_flag = BRA_foreign_legion_recruitment_in_progress
 			}
 		}
+	}
+}
+
+political_actions = { 
+
+
+	# Establish the Federal Territory of Rondônia
+	rename_guapore_to_rondonia_decision  = {
+
+		priority = 15
+
+		icon = GFX_decision_eng_trade_unions_support
+
+		on_map_mode = decision_view_only
+
+		ai_will_do = {
+			base = 50
+		}
+
+		visible = {
+			1058 = { # R56
+				is_owned_and_controlled_by = ROOT
+			}
+		}
+	
+		available = {
+			has_completed_focus = BRA_federal_development
+			BRA_candido_mariano = {
+				skill > 4
+			}
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 1058 # R56
+			}
+		}
+
+		#days_remove = 70
+
+		#days_re_enable = 180
+
+		cost = 50
+
+		complete_effect = { 
+
+			add_war_support = 0.1
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			1058 = { # R56
+				set_state_name = 1058_rondonia_name
+				add_extra_state_shared_building_slots = 3
+			}
+
+		}
+
+		fire_only_once = yes
+
 	}
 }
