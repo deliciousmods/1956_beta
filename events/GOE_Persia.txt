@@ -63,6 +63,7 @@ country_event = { #Iran sells oil
 				add_offsite_building = { type = industrial_complex  level = 3 }
 			}
 		}
+		custom_effect_tooltip = PER_resource_rights_on_war_tt
 		
 		hidden_effect = {
 			FROM = { 
@@ -108,7 +109,10 @@ country_event = { #Iran gives away resource rights
 
 	option = { #Great
 		name = PER_industrial_events.2.a
-		FROM = { give_guarantee = ROOT }
+		FROM = { 
+			give_guarantee = ROOT 
+			set_country_flag = PER_has_PER_resource_rights
+		}
 		ROOT = {
 			give_resource_rights = {
 				receiver = FROM
@@ -116,6 +120,8 @@ country_event = { #Iran gives away resource rights
 			}
 		}
 		add_offsite_building = { type = industrial_complex  level = 3 }
+		set_country_flag = PER_sold_oil_flag
+		custom_effect_tooltip = PER_resource_rights_on_war_tt
 	}
 }
 country_event = { #FROM doesn't want our oil
@@ -843,6 +849,10 @@ country_event = { #Negotiating Capitulations ENG
 		name = PER_imperial_events.120.b
 		ai_chance = {
 			base = 5
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
 		}
 		PER = {
 			country_event = {
@@ -968,14 +978,28 @@ country_event = { #Negotiating Capitulations SOV
 			}
 			white_peace = {
 				tag = PER
+			}
+
+			PER = {
+				every_owned_state = {
+					limit = {
+						OR = {
+							state = 420
+							state = 987
+							state = 419
+							state = 988
+							state = 983
+							state = 984
+							state = 416
+							is_controlled_by = SOU
+						}
+					}
+					display_individual_scopes = yes
+					SOU = {
+						transfer_state = PREV
+					}
 				}
-			transfer_state = 420
-			transfer_state = 987
-			transfer_state = 419
-			transfer_state = 988
-			transfer_state = 983
-			transfer_state = 984
-			transfer_state = 416
+			}
 		}		
 	}
 
@@ -991,6 +1015,10 @@ country_event = { #Negotiating Capitulations SOV
 		name = PER_imperial_events.130.b
 		ai_chance = {
 			base = 5
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
 		}
 				PER = {
 					country_event = {
@@ -1029,13 +1057,26 @@ country_event = { #Negotiating Capitulations SOV
 			white_peace = {
 				tag = PER
 				}
-			transfer_state = 420
-			transfer_state = 987
-			transfer_state = 419
-			transfer_state = 988
-			transfer_state = 983
-			transfer_state = 984
-			transfer_state = 416
+			PER = {
+				every_owned_state = {
+					limit = {
+						OR = {
+							state = 420
+							state = 987
+							state = 419
+							state = 988
+							state = 983
+							state = 984
+							state = 416
+							is_controlled_by = SOU
+						}
+					}
+					display_individual_scopes = yes
+					SOU = {
+						transfer_state = PREV
+					}
+				}
+			}
 		}
 	}
 }
@@ -1896,18 +1937,27 @@ country_event = { #Pushing Negotiations
 		}
 		custom_effect_tooltip = if_they_accept_tt
 		effect_tooltip = {
-			FROM = {
-				give_resource_rights = {
-					receiver = ROOT
-					state = 413
+			IF = {
+				limit = {
+					has_country_flag = PER_invading_country_flag
 				}
-				give_resource_rights = {
-					receiver = ROOT
-					state = 412
+				FROM = {
+					give_resource_rights = {
+						receiver = ROOT
+						state = 413
+					}
+					give_resource_rights = {
+						receiver = ROOT
+						state = 412
+					}
+					white_peace = {
+						tag = ROOT
+					}
 				}
-				white_peace = {
-					tag = ROOT
-				}
+			}
+			ELSE = {
+				add_political_power = 100
+				add_war_support = 0.05
 			}
 		}
 	}
@@ -1943,18 +1993,27 @@ country_event = { #Pushing Negotiations Accepted
 			base = 90
 		}
 
-		ROOT = {
-			give_resource_rights = {
-				receiver = FROM
-				state = 413
+		IF = {
+			limit = {
+				FROM = { has_country_flag = PER_invading_country_flag }
 			}
-			give_resource_rights = {
-				receiver = FROM
-				state = 412
+			ROOT = {
+				give_resource_rights = {
+					receiver = FROM
+					state = 413
+				}
+				give_resource_rights = {
+					receiver = FROM
+					state = 412
+				}
+				white_peace = {
+					tag = FROM
+				}
 			}
-			white_peace = {
-				tag = FROM
-			}
+		}
+		ELSE = {
+			add_political_power = 100
+			add_war_support = 0.05
 		}
 
 		every_country = {
@@ -2104,6 +2163,7 @@ country_event = {
 		add_war_support = 0.05
 		hidden_effect = {
 			event_target:SSB_leader = { country_event = { id = PER_imperial_events.202 hours = 6 random = 8 } }
+			set_country_flag = saadabad_pact_rejected
 		}
 	}
 }
@@ -2286,6 +2346,12 @@ country_event = {
 			character = PER_mohammad_mosaddegh 
 			ideology = conservatism 
 		}
+
+		set_party_name = {
+			ideology = democratic
+			long_name = PER_iran_party_dem_long
+			name = PER_iran_party_dem
+		}
 	}
 	# guy 2
 	option = {
@@ -2297,6 +2363,12 @@ country_event = {
 		promote_character = {
 			character = PER_mohammad_ali_foroughi 
 			ideology = conservatism 
+		}
+
+		set_party_name = {
+			ideology = democratic
+			long_name = PER_revival_party_dem_long
+			name = PER_revival_party_dem
 		}
 	}
 	# guy 3
@@ -2313,8 +2385,319 @@ country_event = {
 	#}
 }
 
+# Qajar Event Chain
+country_event = {
+	id = PER_imperial_events.230
+	title = PER_imperial_events.230.t
+	desc = PER_imperial_events.230.desc
+	picture = GFX_report_event_generic_read_write
+	fire_only_once = yes
+	is_triggered_only = yes
+
+	# No Monarch in Power
+	option = {
+		name = PER_imperial_events.230.a
+		ai_chance = {
+			base = 0
+		}
+
+		trigger = {
+			PER = {
+				OR = {
+					has_government = communism
+					has_government = democratic
+					has_government = fascism
+				}
+			}
+		}
+		hidden_effect = { 
+			retire_country_leader = yes
+		}
+		set_party_name = {
+				ideology = neutrality
+				long_name = PER_qajar_dynasty_party_long
+				name = PER_qajar_dynasty_party
+			}
+		promote_character = {
+			character = PER_mohammad_hassan_mirza 
+			ideology = despotism 
+		}
+		set_cosmetic_tag = PER_persia
+		
+		IF = {
+			limit = {
+				has_idea = PER_constitutional_shah
+			}
+			remove_ideas = PER_constitutional_shah
+		}
+		
+		PER = {
+			country_event = {
+				id = PER_imperial_events.233
+				hours = 1
+			}
+		}
+	}
+
+	# Depose the Pahlavis
+	option = {
+		name = PER_imperial_events.230.b
+		ai_chance = {
+			base = 0
+		}
+
+		trigger = {
+			NOT = {
+				PER = {
+					OR = {
+						has_government = communism
+						has_government = democratic
+						has_government = fascism
+					}
+				}
+			}
+		}
+
+		effect_tooltip = {
+			hidden_effect = { 
+				retire_country_leader = yes
+				set_country_flag = PER_pahlavis_deposed_flag
+			}
+			promote_character = {
+				character = PER_mohammad_hassan_mirza 
+				ideology = despotism 
+			}
+			set_party_name = {
+				ideology = neutrality
+				long_name = PER_qajar_dynasty_party_long
+				name = PER_qajar_dynasty_party
+			}
+			set_cosmetic_tag = PER_persia
+			custom_effect_tooltip =	generic_skip_one_line_tt
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = PER_reza_shah_pahlavi
+			PER_mohammed_reza_pahlavi = {
+				remove_trait = {
+					trait = compassionate_gentleman
+					slot = political_advisor
+				}
+				add_trait = {
+					trait = PER_disinherited_heir_trait
+					slot = political_advisor
+				} 
+			}
+		}
+		PER = {
+			country_event = {
+				id = PER_imperial_events.231
+				hours = 1
+			}
+		}
+	}
+
+	# Exile the Pahlavis
+	option = {
+		name = PER_imperial_events.230.c
+		ai_chance = {
+			base = 10
+		}
+		trigger = {
+			NOT = {
+				PER = {
+					OR = {
+						has_government = communism
+						has_government = democratic
+						has_government = fascism
+					}
+				}
+			}
+		}
+		effect_tooltip = {
+			hidden_effect = { 
+				retire_country_leader = yes
+				set_global_flag = PER_pahlavis_exiled_flag
+			}
+			promote_character = {
+				character = PER_mohammad_hassan_mirza 
+				ideology = despotism 
+			}
+			set_party_name = {
+				ideology = neutrality
+				long_name = PER_qajar_dynasty_party_long
+				name = PER_qajar_dynasty_party
+			}
+			set_cosmetic_tag = PER_persia
+			custom_effect_tooltip =	generic_skip_one_line_tt
+			PER_reza_shah_pahlavi = {
+				set_nationality = SAF
+			}
+			PER_mohammed_reza_pahlavi = {
+				set_nationality = SAF
+				remove_trait = {
+					trait = compassionate_gentleman
+					slot = political_advisor
+				}
+				add_trait = {
+					trait = PER_disinherited_heir_trait
+					slot = political_advisor
+				} 
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_autonomy_score = {
+				value = 75
+				localization = PER_reinstate_qajars
+			}
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		PER = {
+			country_event = {
+				id = PER_imperial_events.232
+				hours = 1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = PER_imperial_events.231
+	title = PER_imperial_events.231.t
+	desc = PER_imperial_events.231.desc
+	picture = GFX_report_event_generic_sign_treaty2
+	fire_only_once = yes
+	is_triggered_only = yes
+	# Yes we have Deposed the Pahlavis
+	option = {
+		name = PER_imperial_events.231.a
+		ai_chance = {
+			base = 10
+		}
+
+		hidden_effect = { 
+				retire_country_leader = yes
+				set_country_flag = PER_pahlavis_deposed_flag
+			}
+			promote_character = {
+				character = PER_mohammad_hassan_mirza 
+				ideology = despotism 
+			}
+			set_party_name = {
+				ideology = neutrality
+				long_name = PER_qajar_dynasty_party_long
+				name = PER_qajar_dynasty_party
+			}
+			custom_effect_tooltip =	generic_skip_one_line_tt
+			set_cosmetic_tag = PER_persia
+			custom_effect_tooltip =	generic_skip_one_line_tt
+			custom_effect_tooltip = available_political_advisor
+			show_ideas_tooltip = PER_reza_shah_pahlavi
+			PER_mohammed_reza_pahlavi = {
+				remove_trait = {
+					trait = compassionate_gentleman
+					slot = political_advisor
+				}
+				add_trait = {
+					trait = PER_disinherited_heir_trait
+					slot = political_advisor
+				} 
+			}
+			PER = {
+				country_event = {
+					id = PER_imperial_events.233
+					hours = 3
+				}
+			}
+		}
+	}
+
+country_event = {
+	id = PER_imperial_events.232
+	title = PER_imperial_events.232.t
+	desc = PER_imperial_events.232.desc
+	picture = GFX_report_event_generic_sign_treaty2
+	fire_only_once = yes
+	is_triggered_only = yes
+	# Yes we have exiled the Pahlavis
+	option = {
+		name = PER_imperial_events.232.a
+		ai_chance = {
+			base = 10
+		}
+
+		hidden_effect = { 
+				retire_country_leader = yes
+				set_global_flag = PER_pahlavis_exiled_flag
+			}
+			set_party_name = {
+				ideology = neutrality
+				long_name = PER_qajar_dynasty_party_long
+				name = PER_qajar_dynasty_party
+			}
+			promote_character = {
+				character = PER_mohammad_hassan_mirza 
+				ideology = despotism 
+			}
+			set_cosmetic_tag = PER_persia
+			custom_effect_tooltip =	generic_skip_one_line_tt
+			PER_reza_shah_pahlavi = {
+				set_nationality = SAF
+			}
+			PER_mohammed_reza_pahlavi = {
+				set_nationality = SAF
+				remove_trait = {
+					trait = compassionate_gentleman
+					slot = political_advisor
+				}
+				add_trait = {
+					trait = PER_disinherited_heir_trait
+					slot = political_advisor
+				} 
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_autonomy_score = {
+				value = 75
+				localization = PER_reinstate_qajars
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+		PER = {
+			country_event = {
+				id = PER_imperial_events.233
+				hours = 3
+			}
+		}
+	}
+}
+
+country_event = {
+	id = PER_imperial_events.233
+	title = PER_imperial_events.233.t
+	desc = PER_imperial_events.233.desc
+	picture = GFX_report_event_generic_military_parade
+	fire_only_once = yes
+	is_triggered_only = yes
+
+	# Fully reinstate the Qajars
+	option = {
+		name = PER_imperial_events.233.a
+		ai_chance = {
+			base = 10
+		}
+
+		set_politics = {
+			ruling_party = neutrality
+			elections_allowed = no 
+		}	
+
+		add_popularity = {
+			ideology = neutrality
+			popularity = 0.2
+		}	
+
+	}
+}
+
 ################################
-#### OOPERATION COUNTENANCE ####
+#### OPERATION COUNTENANCE ####
 ################################
 
 # Ultimatum to Iran - Event for Iran
@@ -3182,7 +3565,7 @@ country_event = {
 	}
 	# back down
 	option = {
-		name = PER_communist_events.10.a
+		name = PER_communist_events.10.b
 		ai_chance = {
 			base = 3
 			modifier = {
@@ -3345,6 +3728,61 @@ country_event = {
 			}
 			clr_country_flag = PER_communist_air_tech_delivered
 		}		
+	}
+}
+
+country_event = {
+	id = PER_communist_events.20
+	title = PER_communist_events.20.t
+	desc = PER_communist_events.20.desc
+	picture = GFX_report_event_generic_read_write
+	fire_only_once = yes
+	is_triggered_only = yes
+	# Release the Republic of Mahabad
+	option = {
+		name = PER_communist_events.20.a
+		ai_chance = {
+			base = 50
+		}
+		custom_effect_tooltip = PER_republic_of_mahabad_tt
+		hidden_effect = {
+			SOU = {
+			release = KUR
+			puppet = KUR
+		}
+			KUR = {
+				set_politics = {
+					ruling_party = communism
+					elections_allowed = no
+				}
+				add_popularity = {
+					ideology = communism
+					popularity = 0.51
+				}
+				set_cosmetic_tag = KUR_republic_of_mahabad_communism
+			}
+			IRQ = {
+				IRQ_mustafa_barzani = {
+					set_nationality = KUR
+				}
+				IRQ_ahmed_barzani = {
+					set_nationality = KUR
+				}
+			}
+			set_global_flag = kurdistan_exists_flag
+			set_country_flag = IRQ_has_become_kurdistan_flag
+		}
+	}
+	# Do not Release the Republic of Mahabad
+	option = {
+		name = PER_communist_events.20.b
+		ai_chance = {
+			base = 10
+			modifier = {
+				is_historical_focus_on = yes
+				factor = 100
+			}
+		}
 	}
 }
 
