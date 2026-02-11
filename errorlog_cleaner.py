@@ -7,7 +7,7 @@ logs_folder = os.path.expandvars("%userprofile%\Documents\Paradox Interactive\He
 os.chdir(logs_folder)
 with open( "error.log", "r", encoding='utf8' ) as errorlog:
 	errorlogtext = errorlog.read()
-
+   
 errorlog_lines = errorlogtext.split("\n")
 new_errorlog = []
 for error in errorlog_lines:
