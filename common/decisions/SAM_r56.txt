@@ -1,0 +1,734 @@
+r56_SAM_mau_new_zealand_war_category = {
+	r56_SAM_until_america_intervenes = {
+		icon = GFX_decision_generic_ignite_civil_war
+		days_mission_timeout = 100
+		priority = 50
+
+		allowed = {
+			OR = {
+				original_tag = SAM
+				original_tag = NZL
+			}
+		}
+
+		available = {
+			hidden_trigger = { 
+				always = no
+			}
+		}
+
+		#activation = {
+		#	has_country_flag = r56_SAM_mau_new_zealand_war_flag
+		#}
+
+		fire_only_once = yes
+		cancel_if_not_visible = no
+		is_good = no
+		
+		timeout_effect = {
+			USA = { country_event = r56_goodwill_war.2 }
+	    }
+	}
+	
+	r56_SAM_mau_offer_ceaseefire = {
+		icon = GFX_decision_eng_trade_unions_support
+		fire_only_once = yes
+		priority = 25
+
+		allowed = {
+			original_tag = SAM
+		}
+
+		available = {
+			NOT = { has_country_flag = r56_SAM_war_must_continue }
+			casualties > 2500
+		}
+		
+		complete_effect = {
+			NZL = {
+				country_event = {
+					id = r56_goodwill_war.4
+					days = 7
+					random_hours = 12
+					random_days = 7
+				}
+			}
+		}
+	}
+
+	r56_SAM_raid_police_station = {
+		icon = GFX_decision_eng_blackshirt_march
+		fire_only_once = yes
+		priority = 25
+		days_remove = 3
+
+		allowed = { original_tag = SAM }
+		custom_cost_trigger = { command_power > 14 }
+		custom_cost_text = EGY_decision_cost_command_power
+
+		available = {
+			controls_state = 726
+			has_army_size = { size > 0 }
+		}
+
+		ai_will_do = {
+			base = 100
+			modifier = {
+				add = 10
+				command_power > 15
+			}
+		}
+		
+		complete_effect = { add_command_power = -15 }
+		remove_effect = { country_event = r56_goodwill_war.8 }
+	}
+
+	r56_SAM_seek_help_from_japan_decision = {
+		icon = GFX_decision_jap_pacific_guardian
+		fire_only_once = yes
+		cost = 25
+		priority = 25
+
+		allowed = {
+			original_tag = SAM
+		}
+
+		available = {
+			has_capitulated = no
+			NOT = { has_war_with = JAP }
+		}
+		
+		complete_effect = {
+			JAP = {
+				country_event = {
+					id = r56_samoa.14
+					days = 5
+				}
+			}
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = {
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = 750
+					producer = JAP
+				}
+
+				add_opinion_modifier = {
+					target = JAP
+					modifier = r56_SAM_accepted_to_support_opinion
+				}
+			}
+
+			custom_effect_tooltip = if_they_refuse_tt
+			effect_tooltip = {
+				add_opinion_modifier = {
+					target = JAP
+					modifier = r56_SAM_refused_to_support_opinion
+				}
+			}
+		}
+	}
+	
+	r56_SAM_new_zealand_offer_ceasefire = {
+		icon = GFX_decision_eng_trade_unions_support
+		fire_only_once = yes
+		priority = 25
+
+		allowed = {
+			original_tag = NZL
+		}
+
+		available = {
+			NOT = { has_country_flag = r56_SAM_war_must_continue }
+			casualties > 2500
+		}
+		
+		complete_effect = {
+			SAM = {
+				country_event = {
+					id = r56_goodwill_war.4
+					days = 7
+					random_hours = 12
+					random_days = 7
+				}
+			}
+		}
+	}
+}
+
+r56_SAM_goodwill_mission_negotiations_tracker_category = {
+	r56_SAM_mission_duration = {
+		icon = GFX_decision_generic_speech
+		days_mission_timeout = 40
+		priority = 25
+
+		allowed = {
+			OR = {
+				original_tag = SAM
+				original_tag = NZL
+			}
+		}
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		visible = {
+			#has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag
+		}
+
+		activation = { has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag }
+
+		fire_only_once = yes
+		cancel_if_not_visible = no
+		is_good = no
+		
+		timeout_effect = {
+			clr_country_flag = r56_SAM_goodwill_mission_has_arrived_flag
+			set_country_flag = r56_SAM_goodwill_mission_has_concluded_flag
+			if = { # Ended in Favor of Samoa
+				limit = {
+					check_variable = {
+						var = NZL.r56_SAM_mau_treaty_influence 
+						value = SAM.r56_SAM_mau_treaty_influence 
+						compare = less_than
+					}
+					NOT = {
+						OR = {
+							has_country_flag = r56_SAM_goodwill_mission_concludes_infavour_of_new_zealand_flag
+							has_country_flag = r56_SAM_goodwill_mission_concludes_with_a_compromise_flag
+						}
+					}
+				}
+				set_country_flag = r56_SAM_goodwill_mission_concludes_infavour_of_mau_flag
+				SAM = { country_event = { id = r56_goodwill_outcome.3  } }
+				NZL = { country_event = { id = r56_goodwill_outcome.4  } }
+			}
+
+			else_if = { # In favour of NZL, aka independence. more violent tho
+				limit = {
+					NOT = {
+						OR = {
+							has_country_flag = r56_SAM_goodwill_mission_concludes_infavour_of_mau_flag
+							has_country_flag = r56_SAM_goodwill_mission_concludes_with_a_compromise_flag
+						}
+					}
+					check_variable = {
+						var = NZL.r56_SAM_mau_treaty_influence 
+						value = SAM.r56_SAM_mau_treaty_influence 
+						compare = greater_than
+					}
+				}
+				set_country_flag = r56_SAM_goodwill_mission_concludes_infavour_of_new_zealand_flag
+				SAM = { country_event = { id = r56_goodwill_outcome.6  } }
+			}
+
+			else_if = { #Compromise
+				limit = {
+					NOT = {
+						OR = {
+							has_country_flag = r56_SAM_goodwill_mission_concludes_infavour_of_new_zealand_flag
+							has_country_flag = r56_SAM_goodwill_mission_concludes_infavour_of_mau_flag
+						}
+					}
+					check_variable = {
+						var = NZL.r56_SAM_mau_treaty_influence 
+						value = SAM.r56_SAM_mau_treaty_influence 
+						compare = equals
+					}
+				}
+				set_country_flag = r56_SAM_goodwill_mission_compromise_flag #Aka samoa goes colonial
+				SAM = { country_event = { id = r56_goodwill_outcome.1  } }
+				NZL = { country_event = { id = r56_goodwill_outcome.2  } }
+			}
+		}
+	}
+	
+	r56_SAM_offer_cacao_trade = {
+		icon = GFX_decision_ger_mefo_bills
+		fire_only_once = yes
+		priority = 10
+		cost = 35
+
+		allowed = { original_tag = SAM }
+
+		available = {
+			has_idea = r56_SAM_cacao_industry
+			NZL = { NOT = { has_idea = r56_SAM_cacao_trade_with_new_zealand } }
+		}
+
+		visible = {
+			has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag
+		}
+		
+		complete_effect = {
+			r56_SAM_mau_influence_medium_increase_effect = yes
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_offsite_building = { type = industrial_complex level = 1 }
+			NZL = {
+				add_timed_idea = {
+					idea = r56_SAM_cacao_trade_with_new_zealand
+					days = 365
+				}
+			}
+		}
+	}
+	
+	r56_SAM_mau_political_concessions = {
+		icon = GFX_decision_concessions
+		fire_only_once = yes
+		cost = 15
+		priority = 8
+
+		allowed = { original_tag = SAM }
+
+		available = {
+
+		}
+
+		visible = {
+			has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag
+			SAM = { exists = yes }
+			NZL = { exists = yes }
+		}
+		
+		complete_effect = {
+			r56_SAM_mau_influence_low_increase_effect = yes
+		}
+	}
+	
+	r56_SAM_new_zealand_invest_in_samoa = {
+		icon = GFX_decision_generic_consumer_goods
+		fire_only_once = yes
+		cost = 25
+		priority = 10
+		days_remove = 20
+
+		allowed = { original_tag = NZL }
+
+		available = {
+			num_of_civilian_factories > 1
+		}
+
+		visible = {
+			has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag
+			SAM = { exists = yes }
+			NZL = { exists = yes }
+		}
+		
+		complete_effect = {
+			add_timed_idea = {
+				idea = r56_SAM_new_zealand_invested_into_samoa
+				days = 20
+			}
+		}
+		
+		remove_effect = {
+			r56_SAM_new_zealand_influence_high_increase_effect = yes
+			SAM = {
+				add_offsite_building = {
+					type = industrial_complex
+					level = 1
+				}
+			}
+		}
+	}
+	
+	r56_SAM_new_zealand_political_concessions = {
+		icon = GFX_decision_concessions
+		fire_only_once = yes
+		cost = 15
+		priority = 8
+
+		allowed = {
+			original_tag = NZL
+		}
+
+		available = {
+		}
+
+		visible = {
+			has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag
+			SAM = { exists = yes }
+			NZL = { exists = yes }
+		}
+		
+		complete_effect = {
+			r56_SAM_new_zealand_influence_low_increase_effect = yes
+		}
+	}
+}
+
+r56_SAM_new_zealand_reminder_to_do_goodwill = {
+	r56_SAM_time_until_goodwill = {
+		icon = GFX_decision_generic_civil_support
+		days_mission_timeout = 151
+		priority = 25
+		
+		fire_only_once = yes
+		cancel_if_not_visible = no
+		is_good = no
+
+		allowed = { original_tag = NZL }
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		visible = {
+			NOT = { has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag }
+			NZL = { exists = yes }
+			#SAM = {
+			#	exists = yes
+			#	is_subject_of = NZL
+			#}
+		}
+
+		activation = {
+		}
+		
+		cancel_trigger = {
+			OR = {
+				has_completed_focus = NZL_the_goodwill_mission
+				SAM = { NOT = { is_subject_of = ROOT } } #Should be adjusted to gamerules
+			}
+		}
+		
+		timeout_effect = {
+			add_popularity = {
+				ideology = ROOT
+				popularity = -0.05
+			}
+			custom_effect_tooltip = SAM_samoa_will_be_buffed_in_negotiations
+			set_country_flag = r56_NZL_no_goodwill_in_time_flag
+			SAM = { set_country_flag = r56_NZL_no_goodwill_in_time_flag }
+		}
+	}
+	
+	r56_SAM_time_until_goodwill_final_straw = {
+		icon = GFX_decision_SWI_consolidate_council_power
+		days_mission_timeout = 206
+		priority = 25
+		
+		fire_only_once = yes
+		cancel_if_not_visible = no
+		is_good = no
+
+		allowed = { original_tag = NZL }
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		visible = {
+			NOT = { has_country_flag = r56_SAM_goodwill_mission_has_arrived_flag }
+			has_country_flag = r56_NZL_no_goodwill_in_time_flag
+			NZL = { exists = yes }
+			#SAM = {
+			#	exists = yes
+			#	is_subject_of = NZL
+			#}
+		}
+
+		activation = { has_country_flag = r56_NZL_no_goodwill_in_time_flag }
+		
+		cancel_trigger = {
+			OR = {
+				has_completed_focus = NZL_the_goodwill_mission
+				SAM = { NOT = { is_subject_of = ROOT } }
+			}
+		}
+		
+		timeout_effect = {
+			add_popularity = {
+				ideology = ROOT
+				popularity = -0.05
+			}
+			SAM = { country_event = r56_goodwill_outcome.8 }
+		}
+	}
+}
+
+economy_decisions = {
+	r56_SAM_stop_chinese_immigration = {
+		icon = GFX_decision_generic_break_treaty
+		fire_only_once = yes
+		priority = 100
+
+		allowed = { original_tag = SAM }
+		#available = { has_idea = r56_SAM_chinese_migration_idea }
+		visible = {
+			has_idea = r56_SAM_chinese_migration_idea  
+			has_completed_focus = r56_SAM_encourage_chinese_immigration 
+		}
+
+		complete_effect = { 
+			remove_ideas = r56_SAM_chinese_migration_idea 
+		}
+	}
+
+	r56_SAM_loan_for_university = {
+		icon = GFX_decision_generic_research
+		fire_only_once = yes
+		days_remove = 120
+		priority = 80
+		cost = 25
+
+		allowed = { original_tag = SAM }
+		visible = { has_completed_focus = r56_SAM_take_loan }
+		available = {
+			NOT = { has_country_flag = r56_SAM_constructing_smt_flag }
+			any_country = {
+				OR = {
+					original_tag = ENG
+					original_tag = USA
+					original_tag = FRA
+					original_tag = GER
+					original_tag = JAP
+					original_tag = SOV
+				}
+				NOT = { has_war_with = SAM }
+				has_opinion = {
+					target = ROOT
+					value > 39
+				}
+			}
+		}
+
+		complete_effect = { set_country_flag = r56_SAM_constructing_smt_flag }
+
+		modifier = {
+			consumer_goods_factor = 0.15
+			political_power_factor = -0.1
+		}
+		
+		remove_effect = {
+			clr_country_flag = r56_SAM_constructing_smt_flag
+			add_research_slot = 1
+		}
+	}
+
+	r56_SAM_loan_for_civ = {
+		icon = GFX_decision_generic_consumer_goods
+		fire_only_once = yes
+		days_remove = 120
+		priority = 80
+		cost = 25
+
+		allowed = { original_tag = SAM }
+		visible = { has_completed_focus = r56_SAM_take_loan }
+		available = {
+			NOT = { has_country_flag = r56_SAM_constructing_smt_flag }
+			any_country = {
+				OR = {
+					original_tag = ENG
+					original_tag = USA
+					original_tag = FRA
+					original_tag = GER
+					original_tag = JAP
+					original_tag = SOV
+				}
+				NOT = { has_war_with = SAM }
+				has_opinion = {
+					target = ROOT
+					value > 39
+				}
+			}
+		}
+
+		complete_effect = { set_country_flag = r56_SAM_constructing_smt_flag }
+
+		modifier = {
+			consumer_goods_factor = 0.15
+			political_power_factor = -0.1
+		}
+		
+		remove_effect = {
+			clr_country_flag = r56_SAM_constructing_smt_flag
+			add_offsite_building = { type = industrial_complex level = 1 }
+		}
+	}
+
+	r56_SAM_loan_for_mil = {
+		icon = GFX_decision_generic_factory
+		fire_only_once = yes
+		days_remove = 120
+		priority = 80
+		cost = 25
+
+		allowed = { original_tag = SAM }
+		visible = { has_completed_focus = r56_SAM_take_loan }
+		available = {
+			NOT = { has_country_flag = r56_SAM_constructing_smt_flag }
+			any_country = {
+				OR = {
+					original_tag = ENG
+					original_tag = USA
+					original_tag = FRA
+					original_tag = GER
+					original_tag = JAP
+					original_tag = SOV
+				}
+				NOT = { has_war_with = SAM }
+				has_opinion = {
+					target = ROOT
+					value > 39
+				}
+			}
+		}
+
+		complete_effect = { set_country_flag = r56_SAM_constructing_smt_flag }
+
+		modifier = {
+			consumer_goods_factor = 0.15
+			political_power_factor = -0.1
+		}
+		
+		remove_effect = {
+			clr_country_flag = r56_SAM_constructing_smt_flag
+			add_offsite_building = { type = arms_factory level = 1 }
+		}
+	}
+}
+
+r56_SAM_smuggle_operations = {
+	r56_SAM_smuggle_operation_decision = {
+		icon = GFX_decision_generic_industry
+		cost = 25
+		days_remove = 50
+
+		fire_only_once = no
+		fixed_random_seed = no
+
+		ai_will_do = {
+			factor = 100
+		}
+
+		allowed = {
+			original_tag = SAM
+		}
+
+		available = {
+		}
+
+		highlight_states = { 
+			highlight_state_targets = {
+				state = 1088 # American Samoa
+			}
+		}
+		
+		remove_effect = {
+			custom_effect_tooltip = r56_SAM_launch_operation_into_pago_pago
+			hidden_effect = {
+				random_list = {
+					75 = {
+						random_list = {
+							30 = {
+								country_event = { id = r56_samoa_smuggle_stuffs.1 }
+							}
+							25 = {
+								country_event = { id = r56_samoa_smuggle_stuffs.4 }
+							}
+							20 = {
+								country_event = { id = r56_samoa_smuggle_stuffs.3 }
+							}
+							15 = {
+								country_event = { id = r56_samoa_smuggle_stuffs.1 }
+							}
+							10 = {
+								country_event = { id = r56_samoa_smuggle_stuffs.5 }
+							}
+						}
+					}
+					25 = {
+						country_event = { id = r56_samoa_smuggle_stuffs.6 }
+					}
+				}
+			}
+		}
+		
+		complete_effect = {
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = -50
+			}
+		}
+	}
+}
+
+political_actions = {
+	r56_SAM_put_down_unrest_in_palauli = {
+		icon = GFX_decision_generic_military
+
+		allowed = {
+			original_tag = SAM
+		}
+
+		cost = 25
+		days_remove = 30
+		fire_only_once = yes
+
+		visible = {
+			has_country_flag = SAM_can_into_palauli
+			has_idea = r56_SAM_palauli_rebelion
+			OR = {
+				has_idea = r56_SAM_goodwill_mission_compromise
+				has_idea = r56_SAM_goodwill_mission
+			}
+		}
+
+		available = {
+			has_full_control_of_state = 726
+			num_divisions > 0
+			NOT = { has_idea = r56_SAM_malietoa_opposition }
+		}
+		
+		complete_effect = {
+			add_stability = -0.05
+			remove_ideas = r56_SAM_palauli_rebelion
+		}
+		
+		ai_will_do = {
+			factor = 0
+		}
+	}
+
+	r56_SAM_request_american_samoa = {
+		icon = GFX_decision_generic_nationalism
+
+		allowed = {
+			original_tag = SAM
+		}
+
+		cost = 25
+		fire_only_once = yes
+		visible = {
+			has_country_flag = when_i_decide_to_make_focus
+			#has_completed_focus = SAM_extend_a_hand_to_america
+		}
+		
+		highlight_states = { 
+			highlight_state_targets = {
+				state = 1088 # American Samoa
+			}
+		}
+		
+		complete_effect = {
+			every_other_country = {
+				limit = {
+					owns_state = 1088
+				}
+				country_event = {
+					id = r56_samoa.2
+					days = 5
+					random_hours = 12
+					random_days = 10
+				}
+			}
+		}
+		
+		ai_will_do = {
+			factor = 100
+		}
+	}
+}
