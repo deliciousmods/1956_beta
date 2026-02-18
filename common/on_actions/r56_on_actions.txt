@@ -1299,6 +1299,27 @@ on_actions = {
 					}
 				}
 			}
+			ROOT = {
+				IF = {
+					limit = {
+						original_tag = IRE
+						119 = {
+							owner = {
+								has_war_with = IRE
+								tag = FROM
+							}
+							controller = {
+								tag = FROM
+							}
+						}
+						IRE = {
+							is_in_faction_with = GER
+							has_country_flag = GER_ireland_deal_flag
+						}
+					}
+					119 = { set_state_owner_to = IRE}
+				}
+			}
 		}
 		effect = {			#return RK states if Germany is defeated, weirdly PDX sets the flags but doesnt use them
 			FROM = {
@@ -1357,6 +1378,17 @@ on_actions = {
 						}
 					}
 				}
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					GER = {
+						has_war_with_major = yes
+						has_civil_war = no
+					}
+				}
+				set_country_flag = GER_neue_wache_flag
 			}
 		}
 	}
@@ -2710,6 +2742,9 @@ on_actions = {
 						FROM = {
 							NOT = { has_government = democratic }
 						}
+						NOT = { #blocks it from the rt56 tree
+							has_completed_focus = GER_die_letzte_verschwoerung
+						}
 					}
 					ROOT = {
 						set_politics = {
@@ -2781,6 +2816,26 @@ on_actions = {
 ###---> On Declare War <><> <><> <><>
 	on_declare_war = {
 		effect = {
+			IF = {
+				limit = {
+					FROM = { original_tag = SOV }
+					ROOT = {
+						original_tag = GER
+					}
+					any_other_country = {
+						has_country_flag = GER_ready_to_strike_russia_with_germany
+					}
+				}
+				every_country = {
+					limit = {
+						has_country_flag = GER_ready_to_strike_russia_with_germany
+					}
+					declare_war_on = {
+						target = SOV
+						type = annex_everything
+					}
+				}
+			}
 			if = {
 				limit = {
 					FROM = { tag = LUX }
@@ -4492,15 +4547,19 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = GER
-					has_government = democratic
-					if = {
-						limit = {
-							has_completed_focus = GER_restore_weimar
-						}
-						has_completed_focus = GER_establish_bundesrepublik
+					has_completed_focus = GER_hold_new_elections
+					NOT = {
+						has_completed_focus = GER_collapse_our_institutions
+					}
+					NOT = {
+						has_country_flag = GER_nsl_passed
+
+					}
+					NOT = {
+						has_country_flag = GER_no_elections_pls_flag
 					}
 				}
-				country_event = r56.ger.60
+				country_event = new_ger.22
 			}
 			if = {
 				limit = {
@@ -10094,6 +10153,84 @@ on_actions = {
 ###---> On Startup <><> <><> <><>
 	on_startup = {
 		effect = {
+			### German Advisors ###
+			IF = {
+				limit = {
+					NOT = {
+						has_game_rule = {
+							rule = GER_focus_tree_selection
+							option = R56_TREE
+						}
+					}
+				}
+				GER = {
+					add_trait = {
+						character = GER_otto_strasser
+						slot = political_advisor
+						trait = GER_revolutionary_nationalist_advisor
+					}
+					remove_trait = {
+						character = GER_otto_strasser
+						slot = political_advisor
+						trait = GER_revolutionary_nationalist
+					}
+					add_trait = {
+						character = GER_ernst_thalmann
+						slot = political_advisor
+						trait = GER_proletarian_leader
+					}
+					remove_trait = {
+						character = GER_ernst_thalmann
+						slot = political_advisor
+						trait = GER_militant_communist
+					}
+					add_trait = {
+						character = GER_kurt_schumacher
+						slot = political_advisor
+						trait = democratic_reformer
+					}
+					remove_trait = {
+						character = GER_kurt_schumacher
+						slot = political_advisor
+						trait = GER_firey_ex_prisoner
+					}
+					remove_trait = {
+						character = GER_kurt_schumacher
+						slot = political_advisor
+						trait = anti_communist
+					}
+					remove_trait = {
+						character = GER_wilhelm_pieck
+						slot = political_advisor
+						trait = staunch_stalinist
+					}
+					remove_trait = {
+						character = GER_carl_friedrich_goerdeler
+						slot = political_advisor
+						trait = GER_mayor_of_leipzig
+					}
+					add_trait = {
+						character = GER_theodor_heuss
+						slot = political_advisor
+						trait = liberal_journalist
+					}
+					remove_trait = {
+						character = GER_theodor_heuss
+						slot = political_advisor
+						trait = GER_reviver_of_german_liberalism
+					}
+					add_trait = {
+						character = GER_Josef_Muller
+						slot = political_advisor
+						trait = devouted_anti_fascist
+					}
+					remove_trait = {
+						character = GER_Josef_Muller
+						slot = political_advisor
+						trait = GER_opportunistic_lawyer
+					}
+				}
+			}
 			### Ma warlord character update with NCND dlc ###
 			if = {
 				limit = {
@@ -22303,6 +22440,14 @@ on_actions = {
 	#Taken from vanilla, shall work for getting peace
 	on_peace = {
 		effect = {
+			if = {
+				limit = {
+					has_country_flag = GER_elections_halted
+					original_tag = GER
+					has_war = no
+				}
+				country_event = new_ger.25
+			}
 			#Applies in case when AI was annexed mid-game without peace conference and thus kept some laws - preventing stucking in that law and making someone OP
 			#add "generic" conscription laws since no longer capitulated - Fantom
 			if = {
@@ -22479,6 +22624,37 @@ on_actions = {
 				}
 				CHI = { add_timed_idea = { idea = KMT_prepare_for_foreign_inasion_idea days = 200 } }
 				CHI = { set_country_flag = KMT_foreign_invader_fired}
+			}
+			IF = {
+				limit = {
+					GER = { has_war_with = JAP }
+					GER = { has_country_flag = GER_befriended_japan }
+				}
+				GER = { clr_country_flag = GER_befriended_japan}
+			}
+			else_if = {
+				limit = {
+					GER = { has_war_with = CHI }
+					GER = { has_country_flag = GER_befriended_china }
+				}
+				GER = { clr_country_flag = GER_befriended_china }
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = GER_focus_tree_selection
+						option = R56_TREE
+					}
+					GER = {
+						has_war_with_major = yes
+						has_elections = yes
+						NOT = {
+							has_country_flag = GER_elections_halted
+							has_country_flag = GER_military_rebuffed
+						}
+					}
+				}
+				GER = { country_event = new_ger.24 }
 			}
 			if = {			#add this to prevent released countries from disobeying game rules		-	check for other game rules too! - Fantom
 				limit = {	#should hopefully work for rebels and random nation released via events
@@ -23366,6 +23542,34 @@ on_actions = {
 
 	on_join_faction = {
 		effect = {
+			IF = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					any_allied_country = { has_idea = GER_europe_around_the_reich_idea }
+				}
+				add_ideas = GER_europe_around_the_reich_idea
+			}
+			else_if = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					GER = { has_idea = GER_sovereign_europe_idea }
+				}
+				add_ideas = GER_sovereign_europe_idea
+			}
+			else_if = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					GER = { has_idea = GER_european_coal_and_steel_community }
+				}
+				add_ideas = GER_european_coal_and_steel_community
+			}
+			else_if = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					GER = { has_idea = GER_european_coal_and_steel_community_2 }
+				}
+				add_ideas = GER_european_coal_and_steel_community_2
+			}
 			#Franco American Fascist alliance
 			if = {
 				limit = {
@@ -23704,6 +23908,25 @@ on_actions = {
 					den_stratas_enabled = yes
 				}
 				den_calculate_eqilibirum_monthly = yes
+			}
+		}
+	}
+	on_monthly_GER = {
+		effect = {
+			IF = {
+				limit = {
+					any_country = { 
+						original_tag = GER
+						has_dynamic_modifier = { modifier = GER_broken_national_socialist_fervor }
+					}
+				}
+				every_country = {
+					limit = {
+						original_tag = GER
+						has_dynamic_modifier = { modifier = GER_broken_national_socialist_fervor}
+					}
+					add_to_variable = { GER_bnsf_stats = -0.05 }
+				}
 			}
 		}
 	}
