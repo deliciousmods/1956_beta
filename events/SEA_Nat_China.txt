@@ -6,6 +6,7 @@ add_namespace = SEA_china
 add_namespace = SEA_china_improvement
 add_namespace = SEA_china_warlords
 add_namespace = SEA_china_democratic 
+add_namespace = SEA_china_misc
 
 
 country_event = {
@@ -585,6 +586,10 @@ country_event = { # Event for Chiang get's killed
 		OR = {
 			has_completed_focus = CHI_prepare_for_a_change_in_leadership
 			has_completed_focus = CHI_strengthening_our_resolve
+			AND = {
+				has_completed_focus = CHI_denounce_feudalism
+				has_global_flag = early_united_front 	
+			}
 		}
 		has_global_flag = chiang_needs_to_die
 	}
@@ -1310,6 +1315,39 @@ country_event = { # China tries to stall war with Japan, HBC and SND get the cha
 	}
 }
 
+country_event = { # Event for imprisoning Xuang Xueliang
+	id = SEA_china.29
+	title = SEA_china.29.t
+	desc = SEA_china.29.desc
+	picture = GFX_report_event_generic_sign_treaty1
+	is_triggered_only = yes
+
+	option = { # Imprison him!
+		name = SEA_china.29.a
+		ai_chance = {
+			base = 10
+		}
+
+		retire_character = CHI_zhang_xueliang
+	}
+
+	option = { # We can't afford to lose him
+		name = SEA_china.29.b
+		ai_chance = {
+			base = 10
+			modifier = {
+				is_historical_focus_on = yes
+				factor = 0
+			}
+			modifier = {
+				has_country_leader = { character = CHI_chiang_kaishek }
+				factor = 0.1
+			}
+		}
+
+		add_political_power = -75
+	}
+}
 
 country_event = { # Event for increasing conscription factor
 	id = SEA_china_improvement.1
@@ -1322,9 +1360,10 @@ country_event = { # Event for increasing conscription factor
 		name = SEA_china_improvement.1.a
 		custom_effect_tooltip = CHI_modify_corruption_in_the_armed_forces_tt
 		add_to_variable = { 
-			CHI_corruption_in_the_armed_forces_conscription_factor = 0.02
+			CHI_corruption_in_the_armed_forces_conscription_factor = CHI_corruption_in_the_armed_forces_conscription_factor_improvement
 			tooltip = conscription_factor_tt
 		}
+		custom_effect_tooltip = SEA_china_improvement
 		hidden_effect = {
 			country_event = {
 				id = SEA_china_improvement.4
@@ -1417,7 +1456,7 @@ country_event = { # Hidden  for increasing conscription factor
 		name = SEA_china_improvement.4.a
 		custom_effect_tooltip = CHI_modify_corruption_in_the_armed_forces_tt
 		add_to_variable = { 
-			CHI_corruption_in_the_armed_forces_conscription_factor = 0.02
+			CHI_corruption_in_the_armed_forces_conscription_factor = CHI_corruption_in_the_armed_forces_conscription_factor_improvement
 			tooltip = conscription_factor_tt
 		}
 		IF = {
@@ -1685,14 +1724,12 @@ country_event = { # Warlord accepts event
 		}
 		
 		effect_tooltip = {
-			FROM = {
-				set_autonomy = {
-					target=ROOT
-					autonomy_state = autonomy_sea_warlord_subject
-					freedom_level = 0.65 # 0-1 
-					end_wars  = no 
-					end_civil_wars = no 
-				}
+			set_autonomy = {
+				target = FROM
+				autonomy_state = autonomy_sea_warlord_subject
+				freedom_level = 0.65 # 0-1 
+				end_wars  = no 
+				end_civil_wars = no 
 			}
 		}
 
@@ -1701,7 +1738,9 @@ country_event = { # Warlord accepts event
 				has_completed_focus = CHI_appoint_sympathetic_judges
 				FROM = { NOT = { has_idea = idea_CHI_sympathetic_judges } }
 			}
-			add_ideas = idea_CHI_sympathetic_judges
+			FROM = {
+				add_ideas = idea_CHI_sympathetic_judges
+			}
 		}
 
 		if = {
@@ -2098,8 +2137,26 @@ country_event = {
 	option = {
 		name = SEA_china_democratic.3.a
 
-		add_to_faction = FROM
-
+		IF = {
+			limit = {
+				is_faction_leader = yes 
+			}
+			add_to_faction = FROM
+		}
+		ELSE_IF = {
+			limit = {
+				is_in_faction = yes
+				is_faction_leader = no
+			}
+			random_country = {
+				limit = {
+					is_in_faction_with = ROOT
+					is_faction_leader = yes 
+				}
+				add_to_faction = FROM
+			}
+		}
+		
 	}
 
 }
@@ -2878,3 +2935,36 @@ country_event = { # [FROM.GetNameDefCap] Demands Application of Mínquán!
 	}
 }
 
+
+country_event = { #China is losing against PRC
+	id = SEA_china_misc.1
+	title = SEA_china_misc.1.t
+	desc = SEA_china_misc.1.desc 
+	picture = GFX_report_event_chinese_soldiers_fighting
+
+	trigger = {
+		original_tag = CHI
+		is_subject = no
+		has_completed_focus = CHI_dang_guo
+		has_war_with = PRC
+		surrender_progress > 0.7
+		524 = { is_fully_controlled_by = ROOT}
+		1035 = { state_is_fully_controlled_by_ROOT_or_subject = no }
+		1037 = { state_is_fully_controlled_by_ROOT_or_subject = no }
+	}
+
+	fire_only_once = yes
+
+	option = { #Flee to Taiwan!
+		name = SEA_warlords.67.a #Intentional	
+		
+		effect_tooltip = {
+			unlock_national_focus = CHI_retreat_to_taiwan
+		}
+
+		hidden_effect = {
+			set_country_flag = CHI_unlock_retreat_to_taiwan_focus
+			mark_focus_tree_layout_dirty = yes
+		}
+	}
+}
