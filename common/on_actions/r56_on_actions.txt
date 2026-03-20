@@ -658,13 +658,18 @@ on_actions = {
 							tag = XSM
 							tag = YUN
 							tag = SIK
-							tag = TNG
+							tag = KHM
+							tag = SIC
+							tag = XIC
+							tag = GDC
+							tag = HBC
+							tag = SND
 							tag = CHI
 						}
 						has_country_flag = is_warlords
 						is_in_faction_with = PRC
 						has_idea = KMT_united_front
-						has_completed_focus = CHI_cooperation_with_the_communists2
+						has_completed_focus = CHI_cooperation_with_the_communists
 					}
 				}
 				PRC = {
@@ -681,14 +686,19 @@ on_actions = {
 							tag = XSM
 							tag = YUN
 							tag = SIK
-							tag = TNG
+							tag = KHM
+							tag = SIC
+							tag = XIC
+							tag = GDC
+							tag = HBC
+							tag = SND
 							tag = CHI
 						}
 						has_country_flag = is_warlords
 						is_in_faction_with = event_target:KMT_central_gov_tag
 						has_idea = KMT_united_front
 						NOT = {
-							has_completed_focus = CHI_cooperation_with_the_communists2
+							has_completed_focus = CHI_cooperation_with_the_communists
 						}
 					}
 				}
@@ -703,7 +713,7 @@ on_actions = {
 						tag = MAN
 						is_subject_of = JAP
 						has_country_leader = {
-							character = MAN_puyi
+							character = MAN_aisin_gioro_puyi
 							ruling_only = yes
 						}
 					}
@@ -727,7 +737,7 @@ on_actions = {
 							tag = PGR
 							has_cosmetic_tag = HCPC
 						}
-						is_puppet_of = CHI
+						is_subject_of = CHI
 					}
 				}
 				CHI = {
@@ -793,7 +803,7 @@ on_actions = {
 				}
 				if = {
 					limit = {
-						POL = { is_puppet = no }
+						POL = { is_subject = no }
 					}
 					POL = { set_party_name = { ideology = fascism long_name = POL_KN_party_long name = POL_KN_party } }
 					POL = { set_party_name = { ideology = neutrality long_name = POL_ZWZ_party_long name = POL_ZWZ_party } }
@@ -803,7 +813,7 @@ on_actions = {
 					limit = {
 						POL = {
 							has_civil_war = no
-							is_puppet = no
+							is_subject = no
 							is_in_faction = yes
 							NOT = { has_country_flag = POL_Exile_Government_Formed }
 						}
@@ -909,7 +919,7 @@ on_actions = {
 						disband = yes
 					}
 					delete_unit_template_and_units = {
-						division_template = "Heeresgruppe"
+						division_template = "Ersatzheer"
 						disband = yes
 					}
 				}
@@ -1150,10 +1160,36 @@ on_actions = {
 		}
 	}
 
+	on_peaceconference_started = {
+		effect = {		#Fix control of Poland flipping back to them when the Soviets have a white peace with Iran/Romania/etc
+			if = {
+				limit = {
+					NOT = {
+						original_tag = POL
+						FROM = {
+							original_tag = POL
+						}
+						POL = {
+							has_war_with = SOV
+						}
+					}
+				}
+				POL = {
+					every_owned_state = {
+						limit = {
+							is_fully_controlled_by = SOV
+						}
+						set_state_flag = SOV_ignore_state_for_whitepeace
+					}
+				}
+			}
+		}
+	}
+
 	on_before_peace_conference_start = {
-		effect = {
+		effect = {			#colonial uprisings if Japan capped in a somewhat historical manner
 			FROM = {
-				if = {	#colonial uprisings if Japan capped in a somewhat historical manner
+				if = {
 					limit = {
 						original_tag = JAP
 						OR = {
@@ -1170,7 +1206,7 @@ on_actions = {
 							set_state_flag = r56_postwar_uprising_target
 						}
 					}
-					#restore FRI, cannot be done before peacedeal, but save states for afterwards
+					#restore FRI
 					if = {
 						limit = {
 							FRA = {
@@ -1239,6 +1275,120 @@ on_actions = {
 						transfer_state_to = SOV
 					}
 				}
+				IF = {
+					limit = {
+						original_tag = PRC
+						SHX = { has_country_flag = KMT_SHX_deal }
+					}
+					every_owned_state = {
+						limit = {
+							OR = {					
+								state = 1125
+								state = 622
+								state = 1111
+							}
+							controller = {
+								OR = {
+									original_tag = CHI
+									is_ally_with = CHI
+									original_tag = SHX
+								}
+							}
+						}
+						transfer_state_to = SHX
+					}
+				}
+			}
+			ROOT = {
+				IF = {
+					limit = {
+						original_tag = IRE
+						119 = {
+							owner = {
+								has_war_with = IRE
+								tag = FROM
+							}
+							controller = {
+								tag = FROM
+							}
+						}
+						IRE = {
+							is_in_faction_with = GER
+							has_country_flag = GER_ireland_deal_flag
+						}
+					}
+					119 = { set_state_owner_to = IRE}
+				}
+			}
+		}
+		effect = {			#return RK states if Germany is defeated, weirdly PDX sets the flags but doesnt use them
+			FROM = {
+				if = {
+					limit = {
+						original_tag = GER
+					}
+					every_country = {
+						limit = {
+							OR = {
+								tag = RKG
+								tag = RKN
+								tag = RKB
+								tag = RKO
+								tag = RKU
+								tag = RKK
+								tag = RKT
+								tag = RKM
+								tag = GEN
+								tag = RKH
+								tag = RKI
+								tag = RKC
+								tag = RGB
+								tag = RNA
+								tag = RKA
+								tag = RKV
+								tag = RAN
+								tag = RCO
+								tag = RUS
+								tag = RAR
+								tag = RHD
+								tag = ROA
+								tag = RAA
+							}
+						}
+						every_other_country = {
+							limit = {
+								meta_trigger = {
+									text = {
+										has_country_flag = GER_RK_capital_state_trasferred_[RK_TAG]_victim_flag
+									}
+									RK_TAG = "[PREV.GetTag]"
+								}
+							}
+							every_state = {
+								limit = {
+									meta_trigger = {
+										text = {
+											has_state_flag = GER_RK_capital_state_trasferred_[RK_TAG]_flag
+										}
+										RK_TAG = "[PREV.PREV.GetTag]"
+									}
+								}
+								transfer_state_to = PREV
+							}
+						}
+					}
+				}
+			}
+		}
+		effect = {
+			IF = {
+				limit = {
+					GER = {
+						has_war_with_major = yes
+						has_civil_war = no
+					}
+				}
+				set_country_flag = GER_neue_wache_flag
 			}
 		}
 	}
@@ -1394,7 +1544,7 @@ on_actions = {
 						#some were cut from focuses
 						create_corps_commander = {
 							name = "Moestopo"
-							portrait_path = GFX_portrait_INS_Moestopo
+							gfx = GFX_portrait_INS_Moestopo
 							traits = { jungle_rat }
 							skill = 2
 							attack_skill = 2
@@ -1404,7 +1554,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Suharto"
-							portrait_path = GFX_portrait_INS_Suharto
+							gfx = GFX_portrait_INS_Suharto
 							traits = { politically_connected meticulous harsh_leader }
 							skill = 2
 							attack_skill = 2
@@ -1414,7 +1564,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Achmad Yani"
-							portrait_path = GFX_portrait_INS_Achmad_Yani
+							gfx = GFX_portrait_INS_Achmad_Yani
 							traits = { artillerist }
 							skill = 3
 							attack_skill = 4
@@ -1424,7 +1574,7 @@ on_actions = {
 						}
 						create_field_marshal = {
 							name = "Soedirman"
-							portrait_path = GFX_portrait_INS_Soedirman
+							picture = GFX_portrait_INS_Soedirman
 							traits = { trickster guerilla_fighter }
 							skill = 3
 							attack_skill = 3
@@ -1434,7 +1584,7 @@ on_actions = {
 						}
 						create_navy_leader = {
 							name = "Yos Sudarso"
-							portrait_path = GFX_Portrait_Asia_Generic_navy_1
+							gfx = GFX_Portrait_Asia_Generic_navy_1
 							traits = { inshore_fighter }
 							skill = 2
 							attack_skill = 2
@@ -1444,7 +1594,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Abdul Haris Nasution"
-							portrait_path = GFX_portrait_INS_Abdul_Harris_Nasution
+							gfx = GFX_portrait_INS_Abdul_Harris_Nasution
 							traits = { politically_connected infantry_officer }
 							skill = 1
 							attack_skill = 1
@@ -1454,7 +1604,7 @@ on_actions = {
 						}
 						create_corps_commander = {
 							name = "Alexander Evert Kawilarang"
-							portrait_path = GFX_portrait_INS_Alexander_Evert_Kawilarang
+							gfx = GFX_portrait_INS_Alexander_Evert_Kawilarang
 							traits = { guerilla_fighter }
 							skill = 2
 							attack_skill = 2
@@ -1490,6 +1640,30 @@ on_actions = {
 					}
 					FRA = {
 						country_event = cold_war.9
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+					 	original_tag = POL
+						FROM = {
+							original_tag = POL
+						}
+						POL = {
+							has_war_with = SOV
+						}
+					}
+				}
+				POL = {
+					every_owned_state = {
+						limit = {
+							has_state_flag = SOV_ignore_state_for_whitepeace
+						}
+						SOV = {
+							set_state_controller = PREV
+						}
+						clr_state_flag = SOV_ignore_state_for_whitepeace
 					}
 				}
 			}
@@ -1832,8 +2006,8 @@ on_actions = {
 			}
 			if = {
 				limit = {
-					tag = SAR
-					has_cosmetic_tag = SAR_FRA
+					tag = SAA
+					has_cosmetic_tag = SAA_FRA
 				}
 				drop_cosmetic_tag = yes
 			}
@@ -2568,6 +2742,9 @@ on_actions = {
 						FROM = {
 							NOT = { has_government = democratic }
 						}
+						NOT = { #blocks it from the rt56 tree
+							has_completed_focus = GER_die_letzte_verschwoerung
+						}
 					}
 					ROOT = {
 						set_politics = {
@@ -2639,6 +2816,26 @@ on_actions = {
 ###---> On Declare War <><> <><> <><>
 	on_declare_war = {
 		effect = {
+			IF = {
+				limit = {
+					FROM = { original_tag = SOV }
+					ROOT = {
+						original_tag = GER
+					}
+					any_other_country = {
+						has_country_flag = GER_ready_to_strike_russia_with_germany
+					}
+				}
+				every_country = {
+					limit = {
+						has_country_flag = GER_ready_to_strike_russia_with_germany
+					}
+					declare_war_on = {
+						target = SOV
+						type = annex_everything
+					}
+				}
+			}
 			if = {
 				limit = {
 					FROM = { tag = LUX }
@@ -2678,7 +2875,10 @@ on_actions = {
 						limit = {
 							is_in_faction = no
 						}
-						create_faction = "Little Entente"
+						create_faction_from_template = {
+							template = faction_template_the_little_entente
+							name = little_entente
+						}
 					}
 					every_other_country = {
 						limit = {
@@ -2705,7 +2905,18 @@ on_actions = {
 						limit = {
 							is_in_faction = no
 						}
-						create_faction = "Balkan Pact"
+						IF = {
+							limit = {
+								has_dlc = "No Compromise, No Surrender"
+							}
+							set_rule = { can_create_factions = yes }
+							create_faction_from_template = faction_template_TUR_balkan_pact
+							add_faction_initiative = 1
+						}
+						ELSE = {
+							set_rule = { can_create_factions = yes }
+							create_faction_from_template = faction_template_TUR_balkan_pact
+						}
 					}
 					every_other_country = {
 						limit = {
@@ -3098,7 +3309,7 @@ on_actions = {
 				limit = {
 					FROM = {
 						original_tag = INS
-						is_puppet_of = HOL
+						is_subject_of = HOL
 					}
 				}
 				ROOT = {
@@ -3114,7 +3325,7 @@ on_actions = {
 				limit = {
 					ROOT = {
 						original_tag = INS
-						is_puppet_of = HOL
+						is_subject_of = HOL
 					}
 				}
 				FROM = {
@@ -3134,7 +3345,7 @@ on_actions = {
 						original_tag = CHI
 						has_government = fascism
 						has_country_leader = {
-							character = CHI_chiang_kai_shek
+							character = CHI_chiang_kaishek
 							ruling_only = yes
 						}
 					}
@@ -3142,7 +3353,7 @@ on_actions = {
 						original_tag = CHI
 						has_government = neutrality
 						has_country_leader = {
-							character = CHI_chiang_kai_shek
+							character = CHI_chiang_kaishek
 							ruling_only = yes
 						}
 					}
@@ -3210,7 +3421,7 @@ on_actions = {
 					FROM = {
 						original_tag = RAJ
 						has_government = neutrality
-						is_puppet_of = ENG
+						is_subject_of = ENG
 					}
 				}
 				FROM = {
@@ -3228,7 +3439,7 @@ on_actions = {
 						exists = yes
 						has_government = neutrality
 						is_major = yes
-						has_completed_focus = JAP_prepare_for_war_with_the_soviet_union
+						has_completed_focus = JAP_kantokuen
 					}
 				}
 				hidden_effect = {
@@ -3321,7 +3532,7 @@ on_actions = {
 					if = {
 						limit = {
 							ICE = {
-								is_puppet_of = DEN
+								is_subject_of = DEN
 							}
 						}
 						ICE = {
@@ -3361,7 +3572,7 @@ on_actions = {
 					if = {
 						limit = {
 							COG = {
-								is_puppet_of = BEL
+								is_subject_of = BEL
 							}
 						}
 						COG = {
@@ -4047,12 +4258,12 @@ on_actions = {
 					limit = {
 						NOT = {
 							has_country_leader = {
-								character = MAN_puyi
+								character = MAN_aisin_gioro_puyi
 								ruling_only = yes
 							}
 						}
 					}
-					MAN_puyi = {
+					MAN_aisin_gioro_puyi = {
 						set_character_flag = MAN_manchu_monarchist_flag
 						set_nationality = FAK
 					}
@@ -4336,15 +4547,19 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = GER
-					has_government = democratic
-					if = {
-						limit = {
-							has_completed_focus = GER_restore_weimar
-						}
-						has_completed_focus = GER_establish_bundesrepublik
+					has_completed_focus = GER_hold_new_elections
+					NOT = {
+						has_completed_focus = GER_collapse_our_institutions
+					}
+					NOT = {
+						has_country_flag = GER_nsl_passed
+
+					}
+					NOT = {
+						has_country_flag = GER_no_elections_pls_flag
 					}
 				}
-				country_event = r56.ger.60
+				country_event = new_ger.22
 			}
 			if = {
 				limit = {
@@ -4543,7 +4758,7 @@ on_actions = {
 			## Add flag so USA can warn Germany if it rushes puppet/annex the netherlands/indonesia
 			if = { #MOD. Compressed
 				limit = {
-					is_puppet_of = GER
+					is_subject_of = GER
 					GER = {
 						NOT = { has_government = democratic }
 					}
@@ -4676,6 +4891,11 @@ on_actions = {
 							original_tag = GXC
 							original_tag = YUN
 							original_tag = SHX
+							original_tag = SIC
+							original_tag = XIC
+							original_tag = GDC
+							original_tag = HBC
+							original_tag = SND
 							original_tag = XSM
 							original_tag = SIK
 						}
@@ -4930,6 +5150,11 @@ on_actions = {
 									original_tag = MAN
 									original_tag = PRE
 									original_tag = SHX
+									original_tag = SIC
+									original_tag = XIC
+									original_tag = GDC
+									original_tag = HBC
+									original_tag = SND
 									original_tag = SIK
 									original_tag = GUK
 									original_tag = GXC
@@ -4996,6 +5221,11 @@ on_actions = {
 									original_tag = MAN
 									original_tag = PRE
 									original_tag = SHX
+									original_tag = SIC
+									original_tag = XIC
+									original_tag = GDC
+									original_tag = HBC
+									original_tag = SND
 									original_tag = SIK
 									original_tag = GUK
 									original_tag = GXC
@@ -5055,10 +5285,10 @@ on_actions = {
 			#Make Saarland French Protectorate Tag
 			if = {
 				limit = {
-					tag = SAR
+					tag = SAA
 					is_subject_of = FRA
 				}
-				SAR = { set_cosmetic_tag = SAR_FRA }
+				SAA = { set_cosmetic_tag = SAA_FRA }
 			}
 
 			#Make Britain called England
@@ -5124,7 +5354,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RUT
-					is_puppet_of = HUN
+					is_subject_of = HUN
 					HUN = { has_government = neutrality }
 				}
 				create_country_leader = {
@@ -5175,7 +5405,7 @@ on_actions = {
 				}
 				if = { #SOV
 					limit = {
-						is_puppet_of = SOV
+						is_subject_of = SOV
 						POL = {
 							has_government = communism
 							NOT = { has_completed_focus = POL_The_Endecja_Movement }
@@ -5275,7 +5505,7 @@ on_actions = {
 
 				if = { #GER
 					limit = { 
-						is_puppet_of = GER 
+						is_subject_of = GER 
 						GER = {
 							has_government = fascism
 						}
@@ -5295,7 +5525,7 @@ on_actions = {
 				}
 				if = { #GER
 					limit = { 
-						is_puppet_of = GER 
+						is_subject_of = GER 
 						GER = {
 							has_government = neutrality
 						}
@@ -6372,16 +6602,16 @@ on_actions = {
 			if = {	#French Lebanon gets French puppet tag
 				limit = {
 					tag = LEB
-					is_puppet_of = FRA
+					is_subject_of = FRA
 				}
 				set_cosmetic_tag = LEB_FRA
 			}
 			if = {
 				limit = {
-					tag = SAR
+					tag = SAA
 					is_subject_of = FRA
 				}
-				set_cosmetic_tag = SAR_FRA
+				set_cosmetic_tag = SAA_FRA
 			}
 			#Make VLA JAP Protectorate
 			if = {
@@ -6430,7 +6660,7 @@ on_actions = {
 			if = {
 				limit = {
 					tag = ALS
-					is_puppet_of = GER
+					is_subject_of = GER
 					GER = {
 						has_government = neutrality
 					}
@@ -6678,7 +6908,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = MLI
-					is_puppet_of = FRA
+					is_subject_of = FRA
 
 				}
 				set_cosmetic_tag = MLI_FRA
@@ -6686,7 +6916,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = MOR
-					is_puppet_of = SPR
+					is_subject_of = SPR
 
 				}
 				set_cosmetic_tag = MOR_SPR
@@ -6694,7 +6924,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = MOR
-					is_puppet_of = FRA
+					is_subject_of = FRA
 
 				}
 				set_cosmetic_tag = MOR_FRA
@@ -6702,7 +6932,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = FRA
+					is_subject_of = FRA
 
 				}
 				set_cosmetic_tag = RAJ_FRA
@@ -6710,7 +6940,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = FRA
+					is_subject_of = FRA
 					has_government = communism
 					NOT = {
 						any_other_country = {
@@ -6731,7 +6961,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = FRA
+					is_subject_of = FRA
 					has_government = neutrality
 					NOT = {
 						any_other_country = {
@@ -6752,7 +6982,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = FRA
+					is_subject_of = FRA
 					has_government = fascism
 					NOT = {
 						any_other_country = {
@@ -6773,7 +7003,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = POR
+					is_subject_of = POR
 
 				}
 				set_cosmetic_tag = RAJ_POR
@@ -6781,7 +7011,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = POR
+					is_subject_of = POR
 					has_government = fascism
 					NOT = {
 						any_other_country = {
@@ -6807,7 +7037,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = POR
+					is_subject_of = POR
 					has_government = democratic
 					NOT = {
 						any_other_country = {
@@ -6833,7 +7063,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = RAJ
-					is_puppet_of = POR
+					is_subject_of = POR
 					has_government = neutrality
 					NOT = {
 						any_other_country = {
@@ -6892,7 +7122,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = SEN
-					is_puppet_of = FRA
+					is_subject_of = FRA
 
 				}
 				set_cosmetic_tag = SEN_FRA
@@ -6900,7 +7130,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = TOG
-					is_puppet_of = FRA
+					is_subject_of = FRA
 
 				}
 				set_cosmetic_tag = TOG_FRA
@@ -6908,7 +7138,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = GAB
-					is_puppet_of = FRA
+					is_subject_of = FRA
 
 				}
 				set_cosmetic_tag = GAB_FRA
@@ -6916,7 +7146,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = GER
-					is_puppet_of = FRA
+					is_subject_of = FRA
 					FROM = {
 						has_government = neutrality
 					}
@@ -7241,7 +7471,7 @@ on_actions = {
 
 			##### GER claims
 			if = { #MOD. Compressed
-				limit = { is_puppet_of = GER }
+				limit = { is_subject_of = GER }
 				if = {
 					limit = {
 						original_tag = CZE
@@ -7260,7 +7490,7 @@ on_actions = {
 						limit = {
 							AUS = {
 								OR = {
-									is_puppet_of = GER
+									is_subject_of = GER
 									is_in_faction_with = GER
 								}
 							}
@@ -7348,7 +7578,7 @@ on_actions = {
 				}
 			}
 			if = { #Same but for Prussia
-				limit = { is_puppet_of = PRE }
+				limit = { is_subject_of = PRE }
 				if = {
 					limit = {
 						original_tag = CZE
@@ -7438,7 +7668,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = CZE
-					is_puppet_of = AUS
+					is_subject_of = AUS
 
 					controls_state = 69
 					controls_state = 1075
@@ -7459,7 +7689,7 @@ on_actions = {
 			###
 			##### HUN claims
 			if = { #MOD. Compressed
-				limit = { is_puppet_of = HUN }
+				limit = { is_subject_of = HUN }
 				if = {
 					limit = {
 						OR = {
@@ -7516,7 +7746,7 @@ on_actions = {
 			###
 			##### ITA claims
 			if = { #MOD. Compressed
-				limit = { is_puppet_of = ITA }
+				limit = { is_subject_of = ITA }
 				if = {	#if Italy neighbours in Litorale, grant Istria
 					limit = {
 						OR = {
@@ -7568,7 +7798,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = CZE
-					is_puppet_of = POL
+					is_subject_of = POL
 					controls_state = 72
 					POL = {
 						controls_state = 88
@@ -7583,7 +7813,7 @@ on_actions = {
 			if = { #// Was duplicated.
 				limit = {
 					original_tag = SYR
-					is_puppet_of = TUR
+					is_subject_of = TUR
 					controls_state = 799
 					TUR = {
 						controls_state = 344
@@ -7597,7 +7827,7 @@ on_actions = {
 			if = { #// Was duplicated.
 				limit = {
 					original_tag = ECU
-					is_puppet_of = PER
+					is_subject_of = PER
 					controls_state = 490
 					PER = {
 						controls_state = 491
@@ -7609,7 +7839,7 @@ on_actions = {
 			###
 			##### UKR claims
 			if = { #MOD. Compressed
-				limit = { is_puppet_of = UKR }
+				limit = { is_subject_of = UKR }
 				if = {
 					limit = {
 						original_tag = POL
@@ -7689,7 +7919,7 @@ on_actions = {
 			if = { #MOD. Compressed
 				limit = {
 					original_tag = ROM
-					is_puppet_of = SOV
+					is_subject_of = SOV
 				}
 				if = {
 					limit = {
@@ -7727,7 +7957,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = POL
-					is_puppet_of = LIT
+					is_subject_of = LIT
 					controls_state = 784
 					UKR = {
 						controls_state = 11
@@ -7740,7 +7970,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = ENG
-					is_puppet_of = IRE
+					is_subject_of = IRE
 					controls_state = 119
 					IRE = {
 						OR = {
@@ -7754,7 +7984,7 @@ on_actions = {
 
 			##### BUL claims
 			if = { #MOD. Compressed
-				limit = { is_puppet_of = BUL }
+				limit = { is_subject_of = BUL }
 				if = {
 					limit = {
 						OR = {
@@ -7806,7 +8036,7 @@ on_actions = {
 
 			##### BOL claims
 			if = { #MOD. Compressed
-				limit = { is_puppet_of = BOL}
+				limit = { is_subject_of = BOL}
 				if = {
 					limit = {
 						original_tag = CHL
@@ -7830,7 +8060,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = FRA
-					is_puppet_of = BEL
+					is_subject_of = BEL
 					controls_state = 29
 					BEL = {
 						OR = {
@@ -7854,7 +8084,7 @@ on_actions = {
 			if = {
 				limit = {
 					original_tag = NAV
-					is_puppet_of = FRA
+					is_subject_of = FRA
 					controls_state = 806
 					num_of_controlled_states > 1
 					FRA = {
@@ -7877,7 +8107,7 @@ on_actions = {
 					}
 
 
-					is_puppet_of = JAP
+					is_subject_of = JAP
 
 					controls_state = 655
 					JAP = {
@@ -8384,7 +8614,7 @@ on_actions = {
 			#if = {
 			#	limit = {
 			#		tag = KOR
-			#		is_puppet_of = JAP
+			#		is_subject_of = JAP
 			#		NOT = {
 			#			has_government = communism
 			#		}
@@ -8402,10 +8632,15 @@ on_actions = {
 							original_tag = ENG
 							original_tag = FRA
 							original_tag = SHX
+							original_tag = SIC
+							original_tag = XIC
+							original_tag = GDC
+							original_tag = HBC
+							original_tag = SND
 							original_tag = GXC
 							original_tag = XSM
 							original_tag = YUN
-							original_tag = TNG
+							original_tag = KHM
 							original_tag = CHI
 							original_tag = PRC
 						}
@@ -8653,7 +8888,7 @@ on_actions = {
 				}
 				if = {
 					limit = {
-						is_puppet_of = SOV
+						is_subject_of = SOV
 						has_government = communism
 						NOT = { has_completed_focus = POL_Draw_Closer_To_The_USSR }
 						NOT = { has_completed_focus = POL_Seek_Autonomy }
@@ -8739,7 +8974,7 @@ on_actions = {
 
 				}
 				if = {
-					limit = { is_puppet_of = GER }
+					limit = { is_subject_of = GER }
 					POL = { set_cosmetic_tag = POLG }
 					POL = { set_party_name = { ideology = fascism long_name = GER_fascism_party_long name = GER_fascism_party } }
 					create_country_leader = {
@@ -8804,7 +9039,7 @@ on_actions = {
 							tag = VNZ
 							tag = NAP
 							tag = SAD
-							tag = SIC
+							tag = SCI
 						}
 					}
 				}
@@ -9027,8 +9262,8 @@ on_actions = {
 			}
 			if = {
 				limit = {
-					tag = SAR
-					has_cosmetic_tag = SAR_FRA
+					tag = SAA
+					has_cosmetic_tag = SAA_FRA
 				}
 				drop_cosmetic_tag = yes
 			}
@@ -9632,7 +9867,7 @@ on_actions = {
 							tag = VNZ
 							tag = NAP
 							tag = SAD
-							tag = SIC
+							tag = SCI
 						}
 					}
 				}
@@ -9918,6 +10153,146 @@ on_actions = {
 ###---> On Startup <><> <><> <><>
 	on_startup = {
 		effect = {
+			### German Advisors ###
+			IF = {
+				limit = {
+					NOT = {
+						has_game_rule = {
+							rule = GER_focus_tree_selection
+							option = R56_TREE
+						}
+					}
+				}
+				GER = {
+					add_trait = {
+						character = GER_otto_strasser
+						slot = political_advisor
+						trait = GER_revolutionary_nationalist_advisor
+					}
+					remove_trait = {
+						character = GER_otto_strasser
+						slot = political_advisor
+						trait = GER_revolutionary_nationalist
+					}
+					add_trait = {
+						character = GER_ernst_thalmann
+						slot = political_advisor
+						trait = GER_proletarian_leader
+					}
+					remove_trait = {
+						character = GER_ernst_thalmann
+						slot = political_advisor
+						trait = GER_militant_communist
+					}
+					add_trait = {
+						character = GER_kurt_schumacher
+						slot = political_advisor
+						trait = democratic_reformer
+					}
+					remove_trait = {
+						character = GER_kurt_schumacher
+						slot = political_advisor
+						trait = GER_firey_ex_prisoner
+					}
+					remove_trait = {
+						character = GER_kurt_schumacher
+						slot = political_advisor
+						trait = anti_communist
+					}
+					remove_trait = {
+						character = GER_wilhelm_pieck
+						slot = political_advisor
+						trait = staunch_stalinist
+					}
+					remove_trait = {
+						character = GER_carl_friedrich_goerdeler
+						slot = political_advisor
+						trait = GER_mayor_of_leipzig
+					}
+					add_trait = {
+						character = GER_theodor_heuss
+						slot = political_advisor
+						trait = liberal_journalist
+					}
+					remove_trait = {
+						character = GER_theodor_heuss
+						slot = political_advisor
+						trait = GER_reviver_of_german_liberalism
+					}
+					add_trait = {
+						character = GER_Josef_Muller
+						slot = political_advisor
+						trait = devouted_anti_fascist
+					}
+					remove_trait = {
+						character = GER_Josef_Muller
+						slot = political_advisor
+						trait = GER_opportunistic_lawyer
+					}
+				}
+			}
+			### Ma warlord character update with NCND dlc ###
+			if = {
+				limit = {
+					has_dlc = "No Compromise, No Surrender"
+				}
+				XSM = {
+					XSM_ma_hongbin = {
+						set_nationality = GSM
+					}
+					XSM_ma_dunjing = {
+						set_nationality = GSM
+					}
+					XSM_cai_chengxiang = {
+						set_nationality = GSM
+					}
+					XSM_ge_wujie = {
+						set_nationality = GSM
+					}
+					XSM_ma_chengxiang = {
+						set_nationality = GSM
+					}
+					XSM_wu_zhiming = {
+						set_nationality = GSM
+					}
+					XSM_zhang_desheng = {
+						set_nationality = GSM
+					}
+					XSM_xiang_chaozhong = {
+						set_nationality = GSM
+					}
+
+					XSM_ma_baolin = {
+						set_nationality = NXM
+					}
+					XSM_ma_buyuan = {
+						set_nationality = NXM
+					}
+					XSM_ma_dongjing = {
+						set_nationality = NXM
+					}
+					XSM_ma_duijing = {
+						set_nationality = NXM
+					}
+					XSM_ma_guangtian = {
+						set_nationality = NXM
+					}
+					XSM_ma_peiqing = {
+						set_nationality = NXM
+					}
+					XSM_ma_rulong = {
+						set_nationality = NXM
+					}
+					XSM_hu_songshan = {
+						set_nationality = NXM
+					}
+					XSM_pan_zili = {
+						set_nationality = NXM
+					}
+				}
+			}
+
+
 			### Balkan Pact ###
 			every_country = {
 				limit = {
@@ -10298,58 +10673,6 @@ on_actions = {
 					}
 					RAJ_create_INA_generals = yes
 				}
-				every_owned_state = {
-					limit = {
-						OR = {
-							state = 444
-							state = 787
-							state = 441
-							state = 427
-							state = 433
-							state = 428
-							state = 425
-							state = 426
-							state = 437
-							state = 1013
-							state = 442
-							state = 1018
-							state = 640
-						}
-					}
-					set_state_flag = princely_state
-					add_dynamic_modifier = { modifier = princely_state_mod }
-				}
-				every_owned_state = {
-					limit = {
-						is_core_of = PAK
-						NOT = {
-							state = 441
-						}
-					}
-					set_state_flag = muslim_state
-					add_dynamic_modifier = { 
-						modifier = marginalized_muslims
-					}
-				}	
-				every_owned_state = {
-					limit = {
-						OR = {
-							state = 441
-							state = 439
-							state = 431
-							state = 432
-							state = 1019
-							state = 288
-							state = 640
-							state = 1018
-							state = 1020
-							state = 1013
-						}
-					}
-					add_dynamic_modifier = { 
-						modifier = slight_religious_minority 
-					}
-				}
 				if = {
 					limit = {
 						has_dlc = "Graveyard of Empires"
@@ -10425,8 +10748,8 @@ on_actions = {
 					remove_core_of = OCC
 					remove_core_of = OVO
 					remove_core_of = SAD
-					remove_core_of = SIC
-					remove_core_of = SWK
+					remove_core_of = SCI
+					remove_core_of = SAR
 					remove_core_of = SZK
 					remove_core_of = TAT
 					remove_core_of = TAY
@@ -10477,8 +10800,8 @@ on_actions = {
 					remove_claim_by = OVO
 					remove_claim_by = SAD
 					remove_claim_by = SIL
-					remove_claim_by = SIC
-					remove_claim_by = SWK
+					remove_claim_by = SCI
+					remove_claim_by = SAR
 					remove_claim_by = SZK
 					remove_claim_by = TAT
 					remove_claim_by = TAY
@@ -10496,28 +10819,26 @@ on_actions = {
 			}
 			if = {
 				limit = {
-					AND = {
+					has_game_rule = {
+						rule = minor_releasables_status
+						option = REMOVE_SOME_RELEASABLES
+					}
+					NOT = {
 						has_game_rule = {
-							rule = minor_releasables_status
-							option = REMOVE_SOME_RELEASABLES
+							rule = pol_fragmentation_status
+							option = POL_WHOLE_FRAGMENTED
 						}
-						NOT = {
-							has_game_rule = {
-								rule = pol_fragmentation_status
-								option = POL_WHOLE_FRAGMENTED
-							}
-							has_game_rule = {
-								rule = pol_fragmentation_status
-								option = POL_WHOLE_DECENTRALIZED
-							}
-							has_game_rule = {
-								rule = pol_fragmentation_status
-								option = POL_WEST_FRAGMENTED
-							}
-							has_game_rule = {
-								rule = pol_fragmentation_status
-								option = POL_WEST_DECENTRALIZED
-							}
+						has_game_rule = {
+							rule = pol_fragmentation_status
+							option = POL_WHOLE_DECENTRALIZED
+						}
+						has_game_rule = {
+							rule = pol_fragmentation_status
+							option = POL_WEST_FRAGMENTED
+						}
+						has_game_rule = {
+							rule = pol_fragmentation_status
+							option = POL_WEST_DECENTRALIZED
 						}
 					}
 				}
@@ -10572,7 +10893,7 @@ on_actions = {
 					limit = {
 						has_game_rule = {
 							rule = CHI_ai_behavior
-							option = CHI_NEUTRALITY
+							option = HISTORICAL
 						}
 					}
 					set_country_flag = CHI_non_aligned_ai_flag
@@ -10581,7 +10902,7 @@ on_actions = {
 					limit = {
 						has_game_rule = {
 							rule = CHI_ai_behavior
-							option = CHI_DEMOCRATIC_NEW
+							option = DEMOCRATIC_SEA
 						}
 					}
 					set_country_flag = CHI_demo_ai_flag
@@ -10590,7 +10911,7 @@ on_actions = {
 					limit = {
 						has_game_rule = {
 							rule = CHI_ai_behavior
-							option = CHI_WJW
+							option = WANG_JINGWEI_SEA
 						}
 					}
 					set_country_flag = KMT_wjw_ai_path
@@ -10599,10 +10920,32 @@ on_actions = {
 					limit = {
 						has_game_rule = {
 							rule = CHI_ai_behavior
-							option = CHI_BLUE
+							option = FASCIST_SEA
 						}
 					}
 					set_country_flag = KMT_will_go_blueshirt
+				}
+				else_if = {
+					limit = {
+						has_dlc = "No Compromise, No Surrender"
+						has_game_rule = {
+							rule = CHI_focus_tree_selection
+							option = STANDARD_TREE
+						}
+						OR = {
+							is_historical_focus_on = no
+							has_game_rule = {
+								rule = CHI_ai_behavior
+								option = RANDOM
+							}
+						}
+					}
+					random_list = {
+						40 = { CHI = { set_country_flag = CHI_AI_RANDOM_HISTORICAL_SEA } }
+						20 = { CHI = { set_country_flag = CHI_AI_RANDOM_WANG_JINGWEI } }
+						20 = { CHI = { set_country_flag = CHI_AI_RANDOM_FASCIST } }
+						20 = { CHI = { set_country_flag = CHI_AI_RANDOM_DEMOCRATIC_SEA } }
+					}
 				}
 				else_if = {
 					limit = {
@@ -10616,7 +10959,7 @@ on_actions = {
 					}
 					random_list = {
 						50 = {
-
+							set_country_flag = CHI_AI_RANDOM_HISTORICAL
 						}
 						25 = {
 							set_country_flag = KMT_will_go_blueshirt
@@ -10929,11 +11272,10 @@ on_actions = {
 					}
 					random_list = {
 						40 = { set_country_flag = SIA_AI_RANDOM_FASCIST_HISTORICAL }
-						20 = { set_country_flag = SIA_AI_RANDOM_DEMOCRATIC_LIBERAL }
+						15 = { set_country_flag = SIA_AI_RANDOM_DEMOCRATIC_LIBERAL }
 						15 = { set_country_flag = SIA_AI_RANDOM_DEMOCRATIC_CONSERVATIVE }
 						15 = { set_country_flag = SIA_AI_RANDOM_COMMUNIST_SOVIET }
-						20 = { set_country_flag = SIA_AI_RANDOM_COMMUNIST_PEASANT }
-						25 = { set_country_flag = SIA_AI_RANDOM_MONARCHIST }
+						15 = { set_country_flag = SIA_AI_RANDOM_MONARCHIST }
 					}
 				}
 			}
@@ -12491,7 +12833,6 @@ on_actions = {
 					}
 				}
 				set_global_flag = game_rule_flag_germany_fragmented
-				change_tag_from = GER
 				WGR = {
 					add_state_core = 42
 					add_state_core = 1053
@@ -14522,7 +14863,11 @@ on_actions = {
 						}
 					}
 
-					create_faction = "Potsdam Pact"
+					create_faction_from_template = {
+						template = faction_template_anti_communist
+						name = potsdam_pact
+						icon = GFX_faction_logo_generic_5
+					}
 					change_tag_from = GER
 				}
 				GER = {
@@ -14767,7 +15112,7 @@ on_actions = {
 				}
 				ITA = {
 					release = SAD
-					release = SIC
+					release = SCI
 					release = NAP
 					release = VNZ
 					transfer_units_fraction = {
@@ -14779,7 +15124,7 @@ on_actions = {
 						size = 0.15
 					}
 					transfer_units_fraction = {
-						target = SIC
+						target = SCI
 						size = 0.05
 					}
 					transfer_units_fraction = {
@@ -14868,7 +15213,7 @@ on_actions = {
 						set_nationality = ITA
 					}
 				}
-				SIC = {
+				SCI = {
 					every_unit_leader = {
 						limit = {
 							OR = {
@@ -14967,7 +15312,7 @@ on_actions = {
 				}
 				ITA = {
 					release = SAD
-					release = SIC
+					release = SCI
 					release = NAP
 					release = VNZ
 					transfer_units_fraction = {
@@ -14979,7 +15324,7 @@ on_actions = {
 						size = 0.2
 					}
 					transfer_units_fraction = {
-						target = SIC
+						target = SCI
 						size = 0.05
 					}
 					transfer_units_fraction = {
@@ -15082,7 +15427,7 @@ on_actions = {
 						set_nationality = ITA
 					}
 				}
-				SIC = {
+				SCI = {
 					every_unit_leader = {
 						limit = {
 							OR = {
@@ -15264,7 +15609,7 @@ on_actions = {
 						set_nationality = ITA
 					}
 				}
-				SIC = {
+				SCI = {
 					every_unit_leader = {
 						limit = {
 							OR = {
@@ -15471,7 +15816,7 @@ on_actions = {
 						set_nationality = ITA
 					}
 				}
-				SIC = {
+				SCI = {
 					every_unit_leader = {
 						limit = {
 							OR = {
@@ -15568,7 +15913,7 @@ on_actions = {
 				}
 				ITA = {
 					release_puppet = SAD
-					release_puppet = SIC
+					release_puppet = SCI
 					release_puppet = NAP
 					release_puppet = VNZ
 					transfer_units_fraction = {
@@ -15580,7 +15925,7 @@ on_actions = {
 						size = 0.1
 					}
 					transfer_units_fraction = {
-						target = SIC
+						target = SCI
 						size = 0.05
 					}
 					transfer_units_fraction = {
@@ -15666,7 +16011,7 @@ on_actions = {
 						set_nationality = ITA
 					}
 				}
-				SIC = {
+				SCI = {
 					every_unit_leader = {
 						limit = {
 							OR = {
@@ -17436,7 +17781,7 @@ on_actions = {
 				}
 				CHI = {
 					every_other_country = { #Compressed for readability
-						limit = { OR = { tag = XSM tag = SHX tag = YUN tag = GXC tag = TNG tag = SIK } }
+						limit = { OR = { tag = XSM tag = SHX tag = YUN tag = GXC tag = KHM tag = SIK tag = SIC tag = XIC tag = GDC tag = HBC tag = SND} }
 						CHI = {
 							annex_country = {
 								target = PREV
@@ -17444,6 +17789,19 @@ on_actions = {
 							}
 						}
 						every_unit_leader = { set_nationality = CHI }
+					}
+					if = {
+						limit = { has_dlc = "No Compromise, No Surrender" }
+						every_other_country = { #Compressed for readability
+							limit = { OR = { tag = XIC tag = SND tag = NXM tag = GSM tag = GDC tag = HBC } }
+							CHI = {
+								annex_country = {
+									target = PREV
+									transfer_troops = yes
+								}
+							}
+							every_unit_leader = { set_nationality = CHI }
+						}
 					}
 					annex_country = { target = PRC transfer_troops = yes }
 					if = {
@@ -17545,7 +17903,17 @@ on_actions = {
 					annex_country = { target = SHX transfer_troops = yes }
 					annex_country = { target = YUN transfer_troops = yes }
 					annex_country = { target = XSM transfer_troops = yes }
-					annex_country = { target = TNG transfer_troops = yes }
+					annex_country = { target = KHM transfer_troops = yes }
+					annex_country = { target = SIC transfer_troops = yes }
+					if = {
+						limit = { has_dlc = "No Compromise, No Surrender" }
+						annex_country = { target = HBC transfer_troops = yes }
+						annex_country = { target = XIC transfer_troops = yes }
+						annex_country = { target = GSM transfer_troops = yes }
+						annex_country = { target = NXM transfer_troops = yes }
+						annex_country = { target = SND transfer_troops = yes }
+						annex_country = { target = GDC transfer_troops = yes }
+					}
 					if = {
 						limit = {
 							OR = {
@@ -17654,11 +18022,21 @@ on_actions = {
 					annex_country = { target = SHX transfer_troops = yes }
 					annex_country = { target = YUN transfer_troops = yes }
 					annex_country = { target = XSM transfer_troops = yes }
-					annex_country = { target = TNG transfer_troops = yes }
+					annex_country = { target = KHM transfer_troops = yes }
 					annex_country = { target = SIK transfer_troops = yes }
 					annex_country = { target = MEN transfer_troops = yes }
+					annex_country = { target = SIC transfer_troops = yes }
 					annex_country = { target = TIB }
 					transfer_state = 609 # East Hebei
+					if = {
+						limit = { has_dlc = "No Compromise, No Surrender" }
+						annex_country = { target = HBC transfer_troops = yes }
+						annex_country = { target = XIC transfer_troops = yes }
+						annex_country = { target = GSM transfer_troops = yes }
+						annex_country = { target = NXM transfer_troops = yes }
+						annex_country = { target = SND transfer_troops = yes }
+						annex_country = { target = GDC transfer_troops = yes }
+					}
 					if = {
 						limit = {
 							OR = {
@@ -17769,7 +18147,7 @@ on_actions = {
 								}
 							}
 						}
-						complete_national_focus = MAN_assertiveness
+						complete_national_focus = MAN_the_qing_restoration	#Hopefully an okay equivalent to MAN_assertiveness? Ideally it'd be nice if there was a flag of sorts we could use to check if Manchu is engaged with the conspiracy.
 						complete_national_focus = MAN_five_equal_peoples
 						complete_national_focus = MAN_bolster_nationalism
 						complete_national_focus = MAN_purge_the_general_affairs_council
@@ -17826,18 +18204,25 @@ on_actions = {
 				}
 				CHI = {
 					every_other_country = { #Compressed for readability
-						limit = { OR = { tag = XSM tag = SHX tag = YUN tag = GXC tag = TNG } }
+						limit = { OR = { tag = XSM tag = SHX tag = YUN tag = GXC tag = KHM tag = SIC tag = HBC tag = NXM tag = GSM tag = SND tag = GDC tag = XIC } }
 						every_unit_leader = { set_nationality = CHI }
 					}
 					annex_country = { target = GXC transfer_troops = yes }
+					annex_country = { target = GDC transfer_troops = yes }
 					annex_country = { target = YUN transfer_troops = yes }
+					annex_country = { target = SND transfer_troops = yes }
+					annex_country = { target = HBC transfer_troops = yes }
 				}
 				PRC = {
 					SIK = { every_unit_leader = { set_nationality = PRC } }
 					annex_country = { target = SIK transfer_troops = yes }
-					annex_country = { target = TNG transfer_troops = yes }
+					annex_country = { target = KHM transfer_troops = yes }
 					annex_country = { target = XSM transfer_troops = yes }
 					annex_country = { target = SHX transfer_troops = yes }
+					annex_country = { target = XIC transfer_troops = yes }
+					annex_country = { target = GSM transfer_troops = yes }
+					annex_country = { target = NXM transfer_troops = yes }
+					annex_country = { target = SIC transfer_troops = yes }
 				}
 			}
 			####################### Chinese unification options END
@@ -18256,6 +18641,9 @@ on_actions = {
 				}
 				set_state_flag = r56_SWI_swiss_fortifications_flag
 			}
+			AST = {	#Remove placeholder shown in country selection
+                remove_ideas = AST_R56_economy_placeholder
+            }
 			#Create VP renaming exception array
 			add_to_array = {
 				global.vp_rename_exceptions = 9833	#Instanbul
@@ -18887,7 +19275,7 @@ on_actions = {
 							original_tag = JAP
 						}
 						FROM.FROM = {
-							state = 613
+							state = 1114
 							is_owned_by = CHI
 						}
 
@@ -21299,6 +21687,32 @@ on_actions = {
 				}
 				DEN = { set_country_flag = den_lost_core_state }
 			}
+			if = {
+				limit = {
+					FROM = { tag = AST }
+					FROM.FROM = {
+						state = 725
+					}
+					NOT = { FROM = { has_country_flag = AST_lost_725 } }
+				}
+				FROM = {
+					set_country_flag = AST_lost_725
+					add_to_variable = { AST_industry_local_resources_factor = -0.1 }
+				}
+			}
+			if = {
+				limit = {
+					ROOT = { tag = AST }
+					FROM.FROM = {
+						state = 725
+					}
+					ROOT = { has_country_flag = AST_lost_725 } 
+				}
+				ROOT = {
+					clr_country_flag = AST_lost_725
+					add_to_variable = { AST_industry_local_resources_factor = 0.1 }
+				}
+			}
 		}
 	}
 
@@ -21477,14 +21891,14 @@ on_actions = {
 				else = {
 					if = {
 						limit = {
-							NOT = { is_puppet_of = SOV }
+							NOT = { is_subject_of = SOV }
 							NOT = { has_government = communism }
 						}
 						set_party_name = { ideology = democratic long_name = POL_democratic_party_long name = POL_democratic_party }
 					}
 					else_if = {
 						limit = {
-							is_puppet_of = SOV
+							is_subject_of = SOV
 							has_government = communism
 						}
 						POL = { set_party_name = { ideology = democratic long_name = POL_PSL_long name = POL_PSL_party } }
@@ -21670,7 +22084,7 @@ on_actions = {
 							original_tag = NAP
 							original_tag = VNZ
 							original_tag = SAD
-							original_tag = SIC
+							original_tag = SCI
 						}
 					}
 				}
@@ -21745,11 +22159,8 @@ on_actions = {
 					}
 					is_in_faction = yes
 					is_faction_leader = no
-					NOT = {
-						is_subject = yes #that should be the same thing alright?
-						is_puppet = yes #Fun fact: no. It depends on the level of autonomy, as some have "puppet = yes" and other don't. Only those that do are puppets, the rest subjects. I'm unclear if puppets are also subjects, but light testing suggest no.
-						has_capitulated = yes
-					}
+					is_subject = no
+					has_capitulated = no
 					NOT = {
 						AND = {
 							OR = {
@@ -21828,9 +22239,9 @@ on_actions = {
 			# Could we not? This messes up so much in the game with puppets randomly declaring independence - The Brit
 			#if = {
 			#	limit = {
-			#		OR = { #that should be the same thing alright? But is_puppet doesn't work?
+			#		OR = { #that should be the same thing alright? But is_subject doesn't work?
 			#			is_subject = yes
-			#			is_puppet = yes
+			#			is_subject = yes
 			#		}
 			#		any_other_country = {
 			#			ROOT = {
@@ -21877,6 +22288,14 @@ on_actions = {
 	#Taken from vanilla, shall work for getting peace
 	on_peace = {
 		effect = {
+			if = {
+				limit = {
+					has_country_flag = GER_elections_halted
+					original_tag = GER
+					has_war = no
+				}
+				country_event = new_ger.25
+			}
 			#Applies in case when AI was annexed mid-game without peace conference and thus kept some laws - preventing stucking in that law and making someone OP
 			#add "generic" conscription laws since no longer capitulated - Fantom
 			if = {
@@ -22013,6 +22432,37 @@ on_actions = {
 	#fired when two countries end up at war with each other (on_war is fired when a country goes to war against anyone and is not fired again when it enters war against another country unless it went to peace first)
 	on_war_relation_added = {
 		effect = {
+			IF = {
+				limit = {
+					GER = { has_war_with = JAP }
+					GER = { has_country_flag = GER_befriended_japan }
+				}
+				GER = { clr_country_flag = GER_befriended_japan}
+			}
+			else_if = {
+				limit = {
+					GER = { has_war_with = CHI }
+					GER = { has_country_flag = GER_befriended_china }
+				}
+				GER = { clr_country_flag = GER_befriended_china }
+			}
+			if = {
+				limit = {
+					has_game_rule = {
+						rule = GER_focus_tree_selection
+						option = R56_TREE
+					}
+					GER = {
+						has_war_with_major = yes
+						has_elections = yes
+						NOT = {
+							has_country_flag = GER_elections_halted
+							has_country_flag = GER_military_rebuffed
+						}
+					}
+				}
+				GER = { country_event = new_ger.24 }
+			}
 			if = {			#add this to prevent released countries from disobeying game rules		-	check for other game rules too! - Fantom
 				limit = {	#should hopefully work for rebels and random nation released via events
 					has_game_rule = {
@@ -22185,7 +22635,12 @@ on_actions = {
 						tag = YUN
 						tag = GXC
 						tag = XSM
-						tag = TNG	#them too, right?
+						tag = KHM	#them too, right?
+						tag = SIC
+						tag = XIC
+						tag = GDC
+						tag = HBC
+						tag = SND
 					}
 					is_subject = no #just making sure they are not allied to anybody else
 					NOT = {
@@ -22221,12 +22676,17 @@ on_actions = {
 						tag = YUN
 						tag = GXC
 						tag = XSM
-						tag = TNG	#them too, right?
+						tag = KHM	#them too, right?
+						tag = SIC
+						tag = XIC
+						tag = GDC
+						tag = HBC
+						tag = SND
 					}
 					is_subject = no #just making sure they are not allied to anybody else
 					NOT = {
 						has_country_flag = event325_fired
-						has_global_flag = KMT_united_front_enabled
+						has_country_flag = CHI_new_cuf_flag_to_be_sure_its_not_already_taken_lol
 					}
 				}
 				country_event = {
@@ -22245,9 +22705,14 @@ on_actions = {
 						original_tag = PRC
 						original_tag = XSM
 						original_tag = SIK
-						original_tag = TNG
+						original_tag = KHM
 						original_tag = YUN
 						original_tag = GXC
+						original_tag = SIC
+						original_tag = XIC
+						original_tag = GDC
+						original_tag = HBC
+						original_tag = SND
 					}
 				}
 				ROOT = {
@@ -22357,7 +22822,6 @@ on_actions = {
 						}
 					}
 					69 = {
-						log = "sus"
 						create_unit = {
 							division = "name = \"Sudeten Rebels\" division_template = \"Sudeten Rebels\" start_experience_factor = 0.05 start_equipment_factor = 0.9" 
 							owner = AUS
@@ -22524,6 +22988,61 @@ on_actions = {
 
 	on_unit_leader_created = {
 		effect = {
+			if = { # backup system so your first admiral is also your chief of navy if you have none.
+				limit = {
+					ROOT = {
+						is_navy_leader = yes
+					}
+					FROM = {
+						NOT = {
+							any_character = {
+								has_advisor_role = navy_chief
+							}
+						}
+					}
+				}
+				FROM = {
+					add_advisor_role = {
+						character = ROOT
+						activate = no
+						advisor = {
+							slot = navy_chief
+							cost = 50
+							#idea_token = GENERATED_character_token_air_chief
+							traits = {
+								navy_chief_maneuver_1
+							}
+						}
+					}
+				}
+			}
+			if = { # backup system so your first general is also your chief of navy if you have none.
+				limit = {
+					ROOT = {
+						is_army_leader = yes
+					}
+					FROM = {
+						NOT = {
+							any_character = {
+								has_advisor_role = army_chief
+							}
+						}
+					}
+				}
+				FROM = {
+					add_advisor_role = {
+						character = ROOT
+						activate = no
+						advisor = {
+							slot = army_chief
+							cost = 50
+							traits = {
+								army_chief_morale_1
+							}
+						}
+					}
+				}
+			}
 			if = {
 				limit = {
 					FROM = {
@@ -22830,6 +23349,34 @@ on_actions = {
 
 	on_join_faction = {
 		effect = {
+			IF = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					any_allied_country = { has_idea = GER_europe_around_the_reich_idea }
+				}
+				add_ideas = GER_europe_around_the_reich_idea
+			}
+			else_if = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					GER = { has_idea = GER_sovereign_europe_idea }
+				}
+				add_ideas = GER_sovereign_europe_idea
+			}
+			else_if = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					GER = { has_idea = GER_european_coal_and_steel_community }
+				}
+				add_ideas = GER_european_coal_and_steel_community
+			}
+			else_if = {
+				limit = {
+					faction_leader = { original_tag = GER }
+					GER = { has_idea = GER_european_coal_and_steel_community_2 }
+				}
+				add_ideas = GER_european_coal_and_steel_community_2
+			}
 			#Franco American Fascist alliance
 			if = {
 				limit = {
@@ -23316,14 +23863,29 @@ on_actions = {
 						YUN = { is_in_faction_with = CHI }
 						XSM = { is_in_faction_with = CHI }
 						SHX = { is_in_faction_with = CHI }
+						SIC = { is_in_faction_with = CHI }
+						XIC = { is_in_faction_with = CHI }
+						GDC = { is_in_faction_with = CHI }
+						HBC = { is_in_faction_with = CHI }
+						SND = { is_in_faction_with = CHI }
 						GXC = { exists = no }
 						YUN = { exists = no }
 						XSM = { exists = no }
 						SHX = { exists = no }
+						SIC = { exists = no }
+						XIC = { exists = no }
+						GDC = { exists = no }
+						HBC = { exists = no }
+						SND = { exists = no }
 						GXC = { has_war_together_with = ROOT }
 						YUN = { has_war_together_with = ROOT }
 						XSM = { has_war_together_with = ROOT }
 						SHX = { has_war_together_with = ROOT }
+						SIC = { has_war_together_with = ROOT }
+						XIC = { has_war_together_with = ROOT }
+						GDC = { has_war_together_with = ROOT }
+						HBC = { has_war_together_with = ROOT }
+						SND = { has_war_together_with = ROOT }
 					}
 				}
 				remove_ideas = KMT_warlord_cliques_pre_war
@@ -23579,6 +24141,44 @@ on_actions = {
 					den_stratas_enabled = yes
 				}
 				den_calculate_eqilibirum_monthly = yes
+			}
+		}
+	}
+	on_monthly_GER = {
+		effect = {
+			IF = {
+				limit = {
+					any_country = { 
+						original_tag = GER
+						has_dynamic_modifier = { modifier = GER_broken_national_socialist_fervor }
+					}
+				}
+				every_country = {
+					limit = {
+						original_tag = GER
+						has_dynamic_modifier = { modifier = GER_broken_national_socialist_fervor}
+					}
+					add_to_variable = { GER_bnsf_stats = -0.05 }
+				}
+			}
+			IF = {
+				limit = {
+					has_cosmetic_tag = GER_emp
+					NOT = {
+						has_completed_focus = GER_renegotiate_versailles_new
+					}
+				}
+				every_owned_state = {
+					limit = {
+						is_controlled_by = ROOT
+						NOT = { is_on_continent = europe }
+						NOT = { is_core_of = ROOT }
+					}
+					add_to_variable = {
+						var = GER.GER_col_state_counter 
+						value = 1
+					}
+				}
 			}
 		}
 	}

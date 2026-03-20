@@ -1,0 +1,2650 @@
+
+#debug_decisions = { 
+#	
+#	PHI_american_intervention_increase_time_DEBUG = {
+#
+#		allowed = {
+#			original_tag = PHI
+#		}
+#
+#		complete_effect = {
+#			add_days_mission_timeout = {
+#				mission = PHI_american_intervention_declare_war_mission
+#				days = 55
+#			}
+#		}
+#	}
+#
+#	PHI_american_intervention_add_value_debug = {
+#
+#		allowed = {
+#			original_tag = PHI
+#		}
+#
+#		complete_effect = {
+#			set_variable = { PHI_american_intervention_value_to_add = 5 }
+#			PHI_american_intervention_change_value = yes
+#		}
+#	}
+#
+#	PHI_american_intervention_subtract_value_debug = {
+#
+#		allowed = {
+#			original_tag = PHI
+#		}
+#
+#		complete_effect = {
+#			set_variable = { PHI_american_intervention_value_to_add = -5 }
+#			PHI_american_intervention_change_value = yes
+#		}
+#		
+#	}
+#
+#		
+#	PHI_convoys_for_infastructure_decision_debug_add_convoys = { 
+#
+#		allowed = {
+#			original_tag = PHI
+#		}
+#		
+#		complete_effect = { 
+#			add_equipment_to_stockpile = { 
+#				type = convoy_1
+#				amount = 50
+#				producer = PHI
+#			}
+#		}
+#	}
+#
+#	PHI_debug_macarthur = { 
+#
+#		allowed = {
+#			original_tag = PHI
+#		}
+#		
+#		complete_effect = { 
+#			mark_focus_tree_layout_dirty = yes
+#			set_country_flag = PHI_military_emergency_flag
+#		}
+#	}
+#
+#	PHI_debug_mios = { 
+#
+#		allowed = {
+#			original_tag = PHI
+#		}
+#		
+#		fire_only_once = no
+#		cost = 0
+#
+#		complete_effect = { 
+#			complete_national_focus = PHI_align_with_the_usa
+#			complete_national_focus = PHI_align_with_japan
+#		}
+#	}
+#}
+
+
+PHI_american_intervention_category = {
+		
+	## Key mission - US will declare war if reach 0
+	PHI_american_intervention_declare_war_mission = {
+
+		icon = GFX_decision_generic_prepare_civil_war
+
+		fire_only_once = yes ## Fixes UI issue
+
+		is_good = yes
+
+		days_mission_timeout = PHI_american_intervention_original_timer ## Is set in PHI history, is variable to be able to adjust timer length 
+
+		allowed = {	#is overriden by manual activation of the focus PHI_the_red_sun_over_manila
+			always = no
+		}
+
+		available = { 
+			has_war_with_major = yes
+			USA = { has_war_with_major = yes }
+		}
+
+
+		cancel_trigger = { ## Is needed here. 
+			OR = {
+				has_country_flag = PHI_american_intervention_is_over
+				has_completed_focus = PHI_treaty_of_manila
+			}
+		}
+
+
+		timeout_effect = {
+			USA = {
+				country_event = {
+					id = SEA_PHI_political_events.13
+				}
+			}
+			custom_effect_tooltip = PHI_america_declare_war
+			set_country_flag = PHI_american_intervention_is_over ## Removes the decision category
+		}
+	}
+
+
+### To create more missions, see debug missions to see what to call. Set the variable for much it should adjust, and then call the scripted effect adjust value. 
+# To communicate this to the player we have a few custom tooltips, SmallIncrease, MediumIncrease, and SmallDecrease etc. Can't use one because the variable PHI_american_intervention_value_to_add changes. 
+
+	PHI_american_intervention_donate_us_senate = {
+
+		icon = GFX_decision_hol_exchange_intelligence_data
+
+		cost = 75
+
+		days_re_enable = 60
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = -15 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_medium_decrease_tt
+
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = PHI_has_bribed_senate
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				set_country_flag =  PHI_has_bribed_senate
+
+				add_days_mission_timeout = {
+					mission = PHI_american_intervention_declare_war_mission
+					days = 60
+				}
+				custom_effect_tooltip = PHI_repeatable_except_delay
+			}
+		}
+
+		ai_will_do = {
+			base = 250
+			modifier = {
+				add = -50
+				has_country_flag = PHI_has_bribed_senate
+			}
+		}
+	}
+
+	PHI_american_intervention_ban_communist_paper = {
+		icon = GFX_decision_generic_police_action
+
+		cost = 25
+
+		days_re_enable = 60
+
+		visible = {
+			NOT = {
+				has_country_flag = PHI_block_paper_banning
+			}
+		}
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = -10 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_small_decrease_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = PHI_has_banned_paper
+					}
+				}
+				set_country_flag =  PHI_has_banned_paper
+
+				
+				add_days_mission_timeout = {
+					mission = PHI_american_intervention_declare_war_mission
+					days = 90
+				}
+				custom_effect_tooltip = PHI_repeatable_except_delay
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+				custom_effect_tooltip = PHI_american_interference_dynamic_modifier_tt		
+				add_to_variable = {
+					PHI_american_interference_communism = -0.02
+					tooltip = communism_drift_tt
+				}
+			}
+			else = {
+				custom_effect_tooltip = PHI_american_interference_dynamic_modifier_tt		
+				add_to_variable = {
+					PHI_american_interference_communism = -0.01
+					tooltip = communism_drift_tt
+				}
+				set_country_flag = PHI_block_paper_banning	#wouldnt want to get too much drift
+			}
+		}
+
+		ai_will_do = {
+			base = 250
+			modifier = {
+				add = -50
+				has_country_flag = PHI_has_banned_paper
+			}
+			modifier = {	#saving up for bribing senate but insufficient time to get pp? do this instead
+				add = 5
+				NOT = {
+					has_country_flag = PHI_has_banned_paper
+				}
+				check_variable = { days_mission_timeout@PHI_american_intervention_declare_war_mission < 50 }
+			}
+		}
+	}
+
+	PHI_american_intervention_forbid_advisor = {
+
+		icon = GFX_decision_generic_arrest
+
+		fire_only_once = yes
+
+
+		visible = {
+			has_completed_focus = PHI_anti_intervention_strategies
+		}
+
+		cost = 25
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = -15 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_medium_decrease_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_days_mission_timeout = {
+				mission = PHI_american_intervention_declare_war_mission
+				days = 60
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			if = {
+				limit = {
+					has_country_leader = {
+						character = PHI_pedro_abad_santos
+						ruling_only = yes
+					}
+				}
+				custom_effect_tooltip = {
+					localization_key = remove_character_as_tt
+					CHARACTER = PHI_cristanto_evangelista
+					ROLE = political_advisor
+				}
+				hidden_effect = {
+					PHI_cristanto_evangelista = {
+						set_character_flag = PHI_sent_away
+					}
+				}
+			}
+			else = {
+				custom_effect_tooltip = {
+					localization_key = remove_character_as_tt
+					CHARACTER = PHI_pedro_abad_santos
+					ROLE = political_advisor
+				}
+				hidden_effect = {
+					PHI_pedro_abad_santos = {
+						set_character_flag = PHI_sent_away
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			base = 200
+		}
+	}
+
+	PHI_american_intervention_promise_bases = {
+
+		icon = GFX_decision_SWE_set_army_budget
+
+		fire_only_once = yes
+
+
+		visible = {
+			has_completed_focus = PHI_anti_intervention_strategies
+		}
+
+		cost = 100
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = -25 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_large_decrease_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_days_mission_timeout = {
+				mission = PHI_american_intervention_declare_war_mission
+				days = 60
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			set_country_flag = PHI_permanent_usa_land_bases
+			custom_effect_tooltip = {
+				localization_key = DIPLO_FORBID_REVOKE_ACCESS
+				TYPE = DIPLOMACY_MILACC
+				TARGET = "[USA.GetAdjective]"
+			}
+			hidden_effect = {
+				give_military_access = USA
+			}
+						set_country_flag = PHI_permanent_usa_naval_bases
+			custom_effect_tooltip = {
+				localization_key = DIPLO_FORBID_REVOKE_ACCESS
+				TYPE = DIPLOMACY_DOCKING_RIGHTS
+				TARGET = "[USA.GetAdjective]"
+			}
+			hidden_effect = {
+				USA = {
+					diplomatic_relation = {
+						country = ROOT
+						relation = docking_rights
+						active = yes
+					}
+				}
+			}
+			set_country_flag = PHI_permanent_usa_air_bases
+			custom_effect_tooltip = {
+				localization_key = DIPLO_FORBID_REVOKE_ACCESS
+				TYPE = DIPLOMACY_AIR_BASE_ACCESS
+				TARGET = "[USA.GetAdjective]"
+			}
+			hidden_effect = {
+				USA = {
+					diplomatic_relation = {
+						country = ROOT
+						relation = air_base_access
+						active = yes
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			base = 200
+		}
+	}
+
+	PHI_american_intervention_host_training_exercise = {
+
+
+		icon = GFX_decision_generic_military 
+
+		fire_only_once = yes
+
+		visible = {
+			has_completed_focus = PHI_anti_intervention_strategies
+		}
+
+		custom_cost_trigger = {
+			AND = {
+				has_army_experience > 34
+				command_power > 24	
+			}
+		}
+		custom_cost_text = decision_cost_CP_25_army_exp_35
+
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = -15 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_medium_decrease_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_days_mission_timeout = {
+				mission = PHI_american_intervention_declare_war_mission
+				days = 30
+			}
+
+			hidden_effect = {
+				army_experience = -35
+				add_command_power = -25
+			}
+		}
+
+		ai_will_do = {
+			base = 200
+		}
+	}
+
+
+
+### Antagonize US to gain things at a cost for the American intervention value 
+
+
+	PHI_american_intervention_invite_us_communists = {
+		icon = GFX_decision_generic_political_rally 
+
+		fire_only_once = yes
+
+		cost = 15
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = 5 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_small_increase_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_days_mission_timeout = {
+				mission = PHI_american_intervention_declare_war_mission
+				days = -30
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			custom_effect_tooltip = PHI_american_interference_dynamic_modifier_tt		
+			add_to_variable = {
+				PHI_american_interference_communism = 0.04
+				tooltip = communism_drift_tt
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+	}
+
+
+
+	PHI_american_intervention_nationalize_railways = {
+		icon = GFX_decision_generic_construction
+
+		fire_only_once = yes
+
+		cost = 45
+
+		days_remove = 60
+
+		visible = {
+			ROOT = {
+				controls_state = 623 
+				controls_state = 327 
+				controls_state = 627 
+				controls_state = 1109 
+			}
+		}
+
+		cancel_if_not_visible = yes
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = 10 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_medium_increase_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_days_mission_timeout = {
+				mission = PHI_american_intervention_declare_war_mission
+				days = -15
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			custom_effect_tooltip = PHI_american_interference_dynamic_modifier_tt ## Currently in American Interference dynamic modifier, can move it elsewhere if nice
+			add_to_variable = {
+				PHI_american_interference_production_speed_rail_way_factor = 0.1
+				tooltip = production_speed_rail_way_factor_tt
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+		}
+
+		remove_effect = {
+			build_railway = {
+				level = 2
+				fallback = yes
+				path = { 12213 10298 7325 4233 1388 1288 7323 10265 }
+			}
+			build_railway = {
+				level = 1
+				fallback = yes
+				path = { 4241 1407 10328 1379 12188 12160 10214 10243 }
+			}
+		}
+
+		ai_will_do = {
+			base = 300
+			modifier = {
+				factor = 0
+				OR = {
+					check_variable = { PHI_american_intervention_icon_value > 80 }
+					check_variable = { days_mission_timeout@PHI_american_intervention_declare_war_mission < 200 }
+				}
+			}
+		}
+	}
+
+
+	PHI_american_intervention_nationalize_industries = {
+		icon = GFX_decision_generic_factory
+
+		fire_only_once = yes
+
+		cost = 55
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = 15 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_large_increase_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_days_mission_timeout = {
+				mission = PHI_american_intervention_declare_war_mission
+				days = -60
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			IF = {
+				limit = {
+					327 = { ## Manila
+						free_building_slots = {
+							building = industrial_complex
+							size > 2
+							include_locked = yes
+						}	
+					}
+				}
+				327 = { ## Manila
+					add_extra_state_shared_building_slots = 2
+					add_building_construction = {
+						type = industrial_complex
+						level = 2
+						instant_build = yes
+					}
+				}
+			}
+		}
+
+		ai_will_do = {
+			base = 300
+			modifier = {
+				factor = 0
+				OR = {
+					check_variable = { PHI_american_intervention_icon_value > 80 }
+					check_variable = { days_mission_timeout@PHI_american_intervention_declare_war_mission < 200 }
+				}
+			}
+		}
+	}
+
+
+	PHI_american_intervention_recognize_unions = {
+		icon = GFX_decision_generic_political_rally
+
+		fire_only_once = yes
+
+		cost = 50
+
+		complete_effect = {
+			set_variable = { PHI_american_intervention_value_to_add = 15 }
+			PHI_american_intervention_change_value = yes
+			custom_effect_tooltip = PHI_american_intervention_change_value_large_increase_tt
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_days_mission_timeout = {
+				mission = PHI_american_intervention_declare_war_mission
+				days = -25
+			}
+
+
+			add_timed_idea = {
+				idea = PHI_recognize_unions_timed_idea
+				days = 365
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+	}
+}
+
+
+
+
+
+
+prospect_for_resources = { 
+		
+	#PHI_gold_prospecting_decision = { 
+
+		#state_target = yes
+
+		#allowed = {
+		#	original_tag = PHI
+		#}
+
+		#fire_only_once = yes
+
+
+
+		#visible = {
+		#	has_completed_focus = PHI_expand_gold_mining
+		#}
+
+
+		## Effect 
+
+	#}
+
+	PHI_mineral_prospecting_chromium_small_decision = { 
+
+		icon = chromium
+
+		allowed = {
+			original_tag = PHI
+		}
+
+		available = {
+			has_tech = excavation1 
+			num_of_civilian_factories_available_for_projects > 1
+			owns_state = 623
+			controls_state = 623
+		}
+		
+		highlight_states = {
+			highlight_state_targets = {
+				state = 623
+			}
+		}
+
+		visible = {
+			623 = {
+				is_owned_and_controlled_by = ROOT
+			}
+			has_completed_focus = PHI_mineral_prospecting
+		}
+
+		fire_only_once = yes
+		cost = 25
+		days_remove = 60
+
+		modifier = {
+			civilian_factory_use = 2
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = {  # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = chromium
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			623 = {
+				add_resource = {
+					type = chromium
+					amount = 12
+				}
+			}
+			623 = { 
+				set_state_flag = PHI_has_completed_decision_chromium_prospecting_flag
+			}
+		}
+	}
+
+
+	PHI_mineral_prospecting_chromium_large_decision = { 
+
+		icon = chromium
+
+		allowed = {
+			original_tag = PHI
+		}
+
+		available = {
+			has_tech = excavation3
+			num_of_civilian_factories_available_for_projects > 2
+			owns_state = 623
+			controls_state = 623
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 623
+			}
+		}
+
+		visible = {
+			623 = {
+				is_owned_and_controlled_by = ROOT
+			}
+			has_completed_focus = PHI_mineral_prospecting
+			623 = { 
+				has_state_flag = PHI_has_completed_decision_chromium_prospecting_flag 
+			}
+			623 = {
+				NOT = {
+					has_state_flag = PHI_has_completed_decision_chromium_prospecting_flag_2
+				}
+			}
+		}
+
+		fire_only_once = yes
+		cost = 25
+		days_remove = 90
+
+		modifier = {
+			civilian_factory_use = 3
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = {  # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = chromium
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			623 = {
+				add_resource = {
+					type = chromium
+					amount = 24
+				}
+			}
+
+			623 = { 
+				set_state_flag = PHI_has_completed_decision_chromium_prospecting_flag_2
+			}
+		}
+	}
+
+	PHI_mineral_prospecting_steel_repeatable_decision_1 = { 
+
+		icon = steel
+
+		allowed = {
+			original_tag = PHI
+		}
+
+		available = {
+			has_tech = excavation1
+			num_of_civilian_factories_available_for_projects > 1
+			owns_state = 624
+			controls_state = 624
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 624
+			}
+		}
+
+		visible = {
+			624 = {
+				is_owned_and_controlled_by = ROOT
+			}
+			has_completed_focus = PHI_mineral_prospecting
+		}
+
+		fire_only_once = yes
+		cost = 25
+		days_remove = 90
+
+		modifier = {
+			civilian_factory_use = 2
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = {  # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = steel
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			624 = {
+				add_resource = {
+					type = steel
+					amount = 8
+				}
+			}
+
+			624 = {
+				set_state_flag = PHI_steel_developed
+			}
+		}
+	}
+	
+	PHI_mineral_prospecting_steel_repeatable_decision_2 = { 
+
+		icon = steel
+
+		allowed = {
+			original_tag = PHI
+		}
+
+		available = {
+			has_tech = excavation3
+			num_of_civilian_factories_available_for_projects > 2
+			owns_state = 624
+			controls_state = 624
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 624
+			}
+		}
+
+		visible = {
+			624 = {
+				is_owned_and_controlled_by = ROOT
+			}
+			has_completed_focus = PHI_mineral_prospecting
+			624 = {
+				has_state_flag = PHI_steel_developed
+			}
+			624 = {
+				NOT = {
+					has_state_flag = PHI_steel_developed_2
+				}
+			}
+		}
+
+		fire_only_once = yes
+		cost = 50
+		days_remove = 180
+
+		modifier = {
+			civilian_factory_use = 3
+		}
+
+		ai_will_do = {
+			base = 0.3
+			modifier = {  # Too low PP
+				factor = 0.5
+					has_political_power < 80
+			}
+			modifier = { #We have plenty of PP, avanti!
+				factor = 3
+				has_political_power > 200
+			}
+			modifier = { #Running out of the stuff, need more!
+				factor = 5
+				has_resources_in_country = {
+					resource = steel
+					amount < 1
+				}
+			}
+		}
+
+		remove_effect = {
+			624 = {
+				add_resource = {
+					type = steel
+					amount = 8
+				}
+			}
+
+			624 = {
+				set_state_flag = PHI_steel_developed_2
+			}
+		}
+	}
+	
+}
+
+PHI_convoys_for_infrastructure_decision_cat = {  
+
+	PHI_convoys_for_infastructure_decision = { 
+		
+		available = {
+			NOT = {		#can otherwise start with the event that taken them away open
+				has_country_flag = PHI_purchasing_weapons
+			}
+			FROM = {
+				infrastructure < 5
+			}
+		}
+
+		state_target = yes
+		targets = { 624 626 625 628 1108 }
+		on_map_mode = map_only
+
+		icon = GFX_decision_generic_naval
+
+		custom_cost_trigger = {
+			has_equipment = {
+				convoy_1 > PHI_convoy_vars_small_cost ## Make sure consistent with cost in complete effect
+			}
+		}
+
+		target_trigger = {
+			FROM = {
+				is_owned_by = ROOT
+				is_controlled_by = ROOT
+				infrastructure < 5
+			}
+		}
+
+		custom_cost_text = PHI_decision_cost_convoys_icon_small ## Make sure consistent with cost in complete effect
+
+		days_remove = 45
+		fire_only_once = yes
+
+		complete_effect = {
+			add_equipment_to_stockpile = { 
+				type = convoy_1
+				amount = PHI_convoy_vars_small_cost_negative 
+				producer = PHI 
+			}
+		}
+
+		remove_effect = {
+			FROM = {
+				add_building_construction = {
+					type = infrastructure
+					level = 1
+					instant_build = yes
+				}	
+			}
+		}
+	}
+
+
+
+
+
+
+	PHI_convoys_for_consumer_goods = {
+		allowed = {
+			NOT = {
+				has_dlc = "Arms Against Tyranny"
+			}
+		}
+
+		fire_only_once = yes
+
+		custom_cost_trigger = {
+			has_equipment = {
+				convoy_1 > PHI_convoy_vars_medium_cost ## Make sure consistent with cost in complete effect
+			}
+		}
+
+		available = {	#can otherwise start with the event that taken them away open
+			NOT = {
+				has_country_flag = PHI_purchasing_weapons
+			}
+		}
+
+		custom_cost_text = PHI_decision_cost_convoys_icon_medium ## Make sure consistent with cost in complete effect
+
+		complete_effect = {
+			add_equipment_to_stockpile = { 
+				type = convoy_1
+				amount = PHI_convoy_vars_medium_cost_negative ## Make sure consistent with cost, just negative
+				producer = PHI 
+			}
+			add_timed_idea = {
+				idea = PHI_convoys_for_consumer_goods_idea
+				days = 180
+			}
+		}
+	}
+
+
+	PHI_convoys_for_guns = {
+		icon = generic_prepare_civil_war
+
+		fire_only_once = yes
+
+		custom_cost_text = PHI_decision_cost_convoys_icon_medium ## Make sure consistent with cost in complete effect
+
+		custom_cost_trigger = {
+			has_equipment = {
+				convoy_1 > PHI_convoy_vars_medium_cost ## Make sure consistent with convoy amount  in complete effect
+			}
+		}
+
+		targets = { USA JAP }
+
+		target_trigger = {
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				if = {
+					limit = {
+						original_tag = JAP
+						country_exists = USA
+					}
+					NOT = {
+						check_variable = {
+							var = USA.opinion@PHI 
+							value = JAP.opinion@PHI 
+							compare = greater_than_or_equals
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						original_tag = USA
+						country_exists = JAP
+					}
+					check_variable = {
+						var = USA.opinion@PHI 
+						value = JAP.opinion@PHI 
+						compare = greater_than_or_equals
+					}
+				}
+			}
+		}
+
+		available = {
+			NOT = {
+				has_country_flag = PHI_purchasing_weapons
+			}
+			FROM = {
+				has_equipment = {
+					infantry_equipment > 999
+				}
+			}
+		}
+
+		complete_effect = {
+			## Has to be set in complete because if not then what if complete another after it has been set 
+			set_variable = { PHI_convoy_vars_convoy_amount = PHI_convoy_vars_medium_cost }
+			set_variable = { PHI_convoy_vars_convoy_amount_negative = PHI_convoy_vars_medium_cost_negative } 	#negative amount of convoys "added" when we pay
+			set_variable = { PHI_convoy_vars_equipment_type = 0 } # Tried using meta effect but did not work	infantry_equipment_1 
+			set_variable = { PHI_convoy_vars_equipment_amount = 1000 }
+			set_variable = { PHI_convoy_vars_equipment_amount_negative = -1000 }								#negative amount of equipment "added" when they pay
+
+			set_country_flag = PHI_purchasing_weapons	#critical to avoid multiple events getting their variables mixed up
+
+			FROM = {
+				country_event = { 
+					id = SEA_PHI_political_events.9
+					hours = 3 
+					random_hours = 6
+				}
+			}
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = { 
+				add_equipment_to_stockpile = { 
+					type = convoy_1
+					amount = PHI_convoy_vars_medium_cost_negative ## Have to hard code because it's not set until complete effect see above. So make sure values are the same
+					producer = PHI 
+				}
+				add_equipment_to_stockpile = { 
+					type = infantry_equipment_1
+					amount = 1000 ## Have to hard code because it's not set until complete effect see above. So make sure values are the same
+					producer = FROM
+				}
+			}
+		}
+	}
+
+
+	PHI_convoys_for_trucks = {
+
+		icon = GFX_decision_generic_trucks
+
+		fire_only_once = yes
+
+		custom_cost_text = PHI_decision_cost_convoys_icon_medium ## Make sure consistent with cost in complete effect
+
+		custom_cost_trigger = {
+			has_equipment = {
+				convoy_1 > PHI_convoy_vars_medium_cost ## Make sure consistent with convoy amount in complete effect
+			}
+		}
+
+
+		available = {
+			NOT = {
+				has_country_flag = PHI_purchasing_weapons
+			}
+			FROM = {
+				has_equipment = {
+					motorized_equipment > 149
+				}
+			}
+		}
+
+		targets = { USA JAP }
+
+		target_trigger = {
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				if = {
+					limit = {
+						original_tag = JAP
+						country_exists = USA
+					}
+					NOT = {
+						check_variable = {
+							var = USA.opinion@PHI 
+							value = JAP.opinion@PHI 
+							compare = greater_than_or_equals
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						original_tag = USA
+						country_exists = JAP
+					}
+					check_variable = {
+						var = USA.opinion@PHI 
+						value = JAP.opinion@PHI 
+						compare = greater_than_or_equals
+					}
+				}
+			}
+		}
+
+		complete_effect = {
+			set_variable = { PHI_convoy_vars_convoy_amount = PHI_convoy_vars_medium_cost } 
+			set_variable = { PHI_convoy_vars_convoy_amount_negative = PHI_convoy_vars_medium_cost_negative } 	#negative amount of convoys "added" when we pay
+			set_variable = { PHI_convoy_vars_equipment_type = 1 } ## motorized_equipment_0 
+			set_variable = { PHI_convoy_vars_equipment_amount = 150 }
+			set_variable = { PHI_convoy_vars_equipment_amount_negative = -150 }									#negative amount of equipment "added" when they pay
+
+			set_country_flag = PHI_purchasing_weapons	#critical to avoid multiple events getting their variables mixed up
+
+			### Sell to Japan/US - need to give Japan/USA chance to respond 
+			FROM = {
+				country_event = { 
+					id = SEA_PHI_political_events.9
+					hours = 3 
+					random_hours = 6
+				}
+			}
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = { 
+				add_equipment_to_stockpile = { 
+					type = convoy_1
+					amount = PHI_convoy_vars_medium_cost_negative ## Have to hard code because it's not set until complete effect see above. So make sure values are the same 
+					producer = PHI 
+				}
+				add_equipment_to_stockpile = { 
+					type = motorized_equipment_0
+					amount = 150 ## Have to hard code because it's not set until complete effect see above. So make sure values are the same
+					producer = FROM
+				}
+			}
+		}
+		
+	}
+
+	PHI_convoys_for_artillery = {
+		icon = ger_military_buildup
+
+		fire_only_once = yes
+
+		custom_cost_text = PHI_decision_cost_convoys_icon_medium ## Make sure consistent with cost in complete effect
+
+		custom_cost_trigger = {
+			has_equipment = {
+				convoy_1 > PHI_convoy_vars_medium_cost ## Make sure consistent with convoy amount in complete effect
+			}
+		}
+
+		available = {
+			NOT = {
+				has_country_flag = PHI_purchasing_weapons
+			}
+			FROM = {
+				has_equipment = {
+					artillery_equipment > 99
+				}
+			}
+		}
+
+		targets = { USA JAP }
+
+		target_trigger = {
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				if = {
+					limit = {
+						original_tag = JAP
+						country_exists = USA
+					}
+					NOT = {
+						check_variable = {
+							var = USA.opinion@PHI 
+							value = JAP.opinion@PHI 
+							compare = greater_than_or_equals
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						original_tag = USA
+						country_exists = JAP
+					}
+					check_variable = {
+						var = USA.opinion@PHI 
+						value = JAP.opinion@PHI 
+						compare = greater_than_or_equals
+					}
+				}
+			}
+		}
+
+		complete_effect = {
+			
+			set_variable = { PHI_convoy_vars_convoy_amount = PHI_convoy_vars_medium_cost } 
+			set_variable = { PHI_convoy_vars_convoy_amount_negative = PHI_convoy_vars_medium_cost_negative } 	#negative amount of convoys "added" when we pay
+			set_variable = { PHI_convoy_vars_equipment_type = 2 } # artillery_equipment_1 
+			set_variable = { PHI_convoy_vars_equipment_amount = 100 }
+			set_variable = { PHI_convoy_vars_equipment_amount_negative = -100 }									#negative amount of equipment "added" when they pay
+
+			set_country_flag = PHI_purchasing_weapons	#critical to avoid multiple events getting their variables mixed up
+
+
+			### Sell to Japan/US - need to give Japan/USA chance to respond 
+			FROM = {
+				country_event = {
+					id = SEA_PHI_political_events.9
+					hours = 3 
+					random_hours = 6
+				}
+			}
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = { 
+				add_equipment_to_stockpile = { 
+					type = convoy_1
+					amount = PHI_convoy_vars_medium_cost_negative ## Have to hard code because it's not set until complete effect see above. So make sure values are the same 
+					producer = PHI 
+				}
+				add_equipment_to_stockpile = { 
+					type = artillery_equipment_1
+					amount = 100 ## Have to hard code because it's not set until complete effect see above. So make sure values are the same 
+					producer = FROM
+				}
+			}
+		}
+	}
+
+	PHI_convoys_for_light_tanks = {
+		icon = GFX_decision_generic_tank
+
+		fire_only_once = yes
+
+		custom_cost_text = PHI_decision_cost_convoys_icon_large ## Make sure consistent with cost in complete effect
+
+		custom_cost_trigger = {
+			has_equipment = {
+				convoy_1 > PHI_convoy_vars_large_cost ## Make sure consistent with convoy amount in complete effect
+			}
+		}
+
+		available = {
+			NOT = {		#can otherwise start with the event that taken them away open
+				has_country_flag = PHI_purchasing_weapons
+			}
+		}
+
+		targets = { USA JAP }
+
+		target_trigger = {
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				if = {
+					limit = {
+						original_tag = JAP
+						country_exists = USA
+					}
+					NOT = {
+						check_variable = {
+							var = USA.opinion@PHI 
+							value = JAP.opinion@PHI 
+							compare = greater_than_or_equals
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						original_tag = USA
+						country_exists = JAP
+					}
+					check_variable = {
+						var = USA.opinion@PHI 
+						value = JAP.opinion@PHI 
+						compare = greater_than_or_equals
+					}
+				}
+			}
+		}
+
+		complete_effect = {
+			add_equipment_to_stockpile = { 
+				type = convoy_1
+				amount = PHI_convoy_vars_large_cost_negative
+				producer = PHI 
+			}
+			if = {
+				limit = {
+					has_dlc = "No Step Back"
+				}
+				if = {
+					limit = {
+						FROM = {
+							original_tag = USA
+						}
+					}
+					add_equipment_to_stockpile = { 
+						type = light_tank_chassis_1
+						variant_name = "M2A2"
+						amount = 100
+						producer = FROM
+					}
+				}
+				else = {
+					add_equipment_to_stockpile = { 
+						type = light_tank_chassis_1
+						variant_name = "Type 95 Ha-Go"
+						amount = 100
+						producer = FROM
+					}
+				}
+			}
+			else = {
+				add_equipment_to_stockpile = { 
+					type = light_tank_equipment_1
+					amount = 100
+					producer = FROM
+				}
+			}
+		}
+	}
+
+
+}
+
+
+
+
+PHI_sugar_barons_category = {
+	
+	PHI_sugar_excise_general = {
+
+		fire_only_once = yes
+
+		available = {
+			has_war = no
+		}
+
+		allowed = {
+			original_tag = PHI
+		}
+
+		cost = 50
+
+		days_remove = 60 
+
+		remove_effect = {
+			random_army_leader = {
+				limit = {
+					NOT = {
+						AND = {
+							ROOT = {
+								has_character = USA_dwight_d_eisenhower
+							}
+							is_character = USA_dwight_d_eisenhower
+						}
+						AND = {
+							ROOT = {
+								has_character = USA_douglas_macarthur
+							}
+							is_character = USA_douglas_macarthur
+						}
+					}
+				}
+				add_planning = 2
+			}
+			army_experience = 25
+		}
+
+
+	}
+
+
+
+	PHI_sugar_excise_divisions = {
+
+		fire_only_once = yes
+
+		available = {
+			has_war = no
+		}
+
+		allowed = {
+			original_tag = PHI
+		}
+
+
+		days_remove = 60
+
+		cost = 50
+
+		remove_effect = {
+			every_country_division = {
+				add_divisional_commander_xp = 200 
+			}
+			army_experience = 50
+		}
+
+	}
+
+
+
+
+
+}
+
+PHI_integration_category = {
+	PHI_integrate_conquests = {
+		icon = GFX_decision_infiltrate_state
+
+		cost = 15
+
+		fire_only_once = yes
+
+		days_remove = 30
+
+		target_root_trigger = {
+			OR = {
+				has_completed_focus = PHI_reunite_madagascar
+				has_completed_focus = PHI_take_pacific_islands
+				has_completed_focus = PHI_malayo_polynesia
+			}
+		}
+		target_trigger = {
+			FROM = {
+				NOT = {		#Maphilindo will bypass a few of these
+					is_core_of = ROOT
+				}
+			}
+			OR = {
+				AND = {
+					has_completed_focus = PHI_reunite_madagascar
+					FROM = {
+						OR = {
+							state = 708
+							state = 543
+							state = 706
+							state = 707
+						}
+					}
+				}
+				AND = {
+					has_completed_focus = PHI_take_pacific_islands
+					FROM = {
+						OR = {
+							state = 629
+							state = 630
+							state = 631
+							state = 632
+							state = 633
+							state = 638
+							state = 639
+							state = 641
+							state = 642
+							state = 643
+							state = 646
+							state = 647
+							state = 648
+							state = 684
+							state = 725
+							state = 727
+							state = 737 #Bismark
+							state = 634 #Solomon Islands
+							state = 734 #Nendo
+						}
+					}
+				}
+				AND = {
+					has_completed_focus = PHI_malayo_polynesia
+					FROM = {
+						OR = {
+							state = 634		#Solomon Islands
+							state = 734		#Nendo
+							state = 916	#Sabah
+							state = 334		#Kalimantan
+							state = 333		#Sarawak
+							state = 673		#Sulawesi
+							state = 914		#Malaya
+							state = 915		#Malaya
+							state = 916		#Malaya
+							state = 960		#Malaya
+							state = 672		#Sumatra
+							state = 335		#Java
+							state = 667		#Lesser Sunda Islands
+							state = 1014	#Brunei
+							state = 336	#Singapore
+							state = 979		#Kaiser_wilhelmsland
+							state = 668		#Moluccas
+							state = 669		#West Papua
+							state = 738		#Aru Islands
+							state = 721		#Portuguese Timor
+						}
+					}
+				}
+			}
+		}
+		state_target = any_controlled_state
+		on_map_mode = map_and_decisions_view
+
+		remove_effect = {
+			FROM = {
+				add_core_of = ROOT
+				if = {
+					limit = {
+						OR = {
+							state = 334
+							state = 333
+							state = 916
+						}
+						NOT = {
+							977 = {
+								is_core_of = ROOT
+							}
+						}
+					}
+					add_core_of = 977	#free core, inaccessible
+				}
+			}
+		}
+	}
+}
+
+PHI_department_of_foreign_affairs_category = {	#sanity checks are already in the decision category checks
+	PHI_create_faction = {
+		cost = 50
+		remove_effect = {
+			set_rule = {
+				can_create_factions = yes
+			}
+			create_faction_from_template = {
+				template = faction_template_asian_dominance
+				name = PHI_asia_treaty_faction
+				icon = GFX_faction_logo_generic_15
+			}
+		}
+		visible = {
+			is_faction_leader = no
+		}
+		available = {
+			is_in_faction = no
+		}
+		fire_only_once = yes
+		icon = GFX_decision_generic_form_nation
+		ai_will_do = {
+			base = 0
+		}
+	}
+	PHI_decrease_japanese_ideological_influence = {
+		cost = 75
+		remove_effect = {
+			if = {
+				limit = {
+					check_variable = { PHI_jap_alignment_value > 0.05 }
+				}
+				set_temp_variable = { PHI_jap_alignment_value_change = -0.05 }
+	
+				PHI_check_japanese_ideology_and_adapt = yes
+			}
+			else = {
+				remove_dynamic_modifier = {
+					modifier = PHI_japan_aligned_ideology
+				}
+			}
+		}
+		visible = {
+			has_dynamic_modifier = {
+				modifier = PHI_japan_aligned_ideology
+			}
+		}
+		available = {
+			
+		}
+		icon = GFX_decision_generic_form_nation
+		ai_will_do = {
+			base = 0
+			modifier = {
+				NOT = {
+					has_government = JAP
+				}
+				add = 1000
+			}
+		}
+	}
+	PHI_join_other_faction = {
+		cost = 10
+		fire_only_once = yes
+		target_root_trigger = {
+			is_in_faction = no
+		}
+		target_trigger = {
+			FROM = {
+				is_faction_leader = yes
+				NOT = {
+					has_war_with = ROOT
+				}
+			}
+		}
+		remove_effect = {
+			FROM = {
+				country_event = generic.2
+			}
+		}
+		ai_will_do = {
+			base = 50
+			modifier = {
+				factor = 2
+				FROM = {
+					has_government = ROOT
+				}
+			}
+			modifier = {
+				factor = 1.5
+				FROM = {
+					capital_scope = {
+						is_on_continent = asia
+					}
+				}
+			}
+			modifier = {
+				factor = 4
+				FROM = {
+					has_war_together_with = ROOT
+				}
+			}
+			modifier = {
+				factor = 0
+				NOT = {
+					has_government = communism
+					has_war_together_with = FROM
+				}
+				FROM = {
+					has_government = communism
+				}
+			}
+			modifier = {
+				factor = 0
+				NOT = {
+					has_government = fascism
+					has_war_together_with = FROM
+				}
+				FROM = {
+					has_government = fascism
+				}
+			}
+		}
+	}
+}
+
+PHI_government_in_exile_cat = {
+
+	PHI_request_equipment = {
+		icon = GFX_decision_generic_industry
+
+		cost = 50
+
+		fire_only_once = no
+
+		days_remove = 30
+
+		remove_effect = {
+			var:host = {
+				country_event = {
+					id = ww_BEL_event_diplomatic.15
+					hours = 6
+				}
+			}
+
+			custom_effect_tooltip = if_they_accept_tt
+			event_option_tooltip = ww_BEL_event_diplomatic.15.a
+		}
+	}
+
+	PHI_share_military_experience = {
+		icon = GFX_decision_hol_exchange_intelligence_data
+
+		cost = 50
+
+		fire_only_once = yes
+
+		days_remove = 30
+
+		remove_effect = {
+			var:host = {
+				country_event = {
+					id = ww_BEL_event_diplomatic.17
+					hours = 6
+				}
+			}
+
+			custom_effect_tooltip = if_they_accept_tt
+			event_option_tooltip = ww_BEL_event_diplomatic.17.a
+		}
+	}
+}
+
+political_actions = {
+	PHI_peace_with_philippines = {
+		allowed = {
+			original_tag = USA
+		}
+		icon = GFX_decision_eng_trade_unions_support
+		available = {
+			surrender_progress < 0.05
+		}
+		visible = {
+			has_country_flag = PHI_unlock_peace_decision
+			has_war_with = PHI
+		}
+		cost = 25
+		priority = 12
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 1000
+				OR = {
+					AND = {
+						has_war = yes
+						any_enemy_country = {
+							is_major = yes
+							NOT = {
+								is_in_faction_with = JAP
+							}
+						}
+					}
+					AND = {
+						all_enemy_country = {
+							OR = {
+								is_in_faction_with = PHI
+								has_guaranteed = PHI
+							}
+						}
+						OR = {
+							war_length_with = {
+								tag = PHI
+								months > 12
+							}
+							AND = {
+								war_length_with = {
+									tag = PHI
+									months > 6
+								}
+								owns_state = 638
+								NOT = {
+									controls_state = 638
+								}
+								owns_state = 632
+								NOT = {
+									controls_state = 632
+								}
+							}
+						}
+						PHI = {
+							has_capitulated = no
+						}
+					}
+				}
+			}
+		}
+		complete_effect = {
+			clr_country_flag = PHI_unlock_peace_decision
+			every_enemy_country = {
+				limit = {
+					has_defensive_war_with = ROOT
+					OR = {
+						is_in_faction_with = PHI
+						has_country_flag = PHI_japan_independence_help
+						has_guaranteed = PHI
+					}
+				}
+				white_peace = ROOT
+			}
+			every_country = {
+				limit = {
+					OR = {
+						tag = ROOT
+						tag = PHI
+						is_ally_with = ROOT
+						is_ally_with = PHI
+					}
+				}
+				country_event = SEA_PHI_political_events.59
+			}
+		}
+	}
+	PHI_defend_against_USA = {
+		icon = generic_operation
+		allowed = {
+			always = no
+		}
+		priority = 12
+		available = {
+			NOT = {
+				has_war_with = USA
+			}
+		}
+		is_good = yes
+		days_mission_timeout = 360
+		timeout_effect = {
+			USA = {
+				white_peace = ROOT
+				country_event = SEA_PHI_political_events.59
+				every_allied_country = {
+					white_peace = ROOT
+					country_event = SEA_PHI_political_events.59
+				}
+			}
+
+			country_event = SEA_PHI_political_events.59
+			every_allied_country = {
+				country_event = SEA_PHI_political_events.59
+			}
+		}
+	}
+	PHI_request_indefinite_stay_for_macarthur = {
+		allowed = {
+			original_tag = PHI
+		}
+		visible = {
+			has_completed_focus = PHI_utang_na_loob
+			has_character = USA_douglas_macarthur
+			NOT = {		#for leadership he can be recalled automatically, but don't lose him as leader for military command
+				has_country_leader = {
+					character = USA_douglas_macarthur
+					ruling_only = yes
+				}
+			}
+		}
+		fire_only_once = yes
+		cost = 35
+		priority = 11
+		remove_effect = {
+			set_country_flag = PHI_request_macarthur_stay
+			set_variable = { USA.USA_recall_macarthur_cost = 50 }
+			custom_effect_tooltip = PHI_request_macarthur_stay_tt
+		}
+		ai_will_do = {
+			base = 20
+		}
+	}
+	PHI_recall_eisenhower = {
+		allowed = {
+			original_tag = USA
+		}
+		visible = {
+			PHI = {
+				has_character = USA_dwight_d_eisenhower
+			}
+		}
+		fire_only_once = yes
+		cost = 15
+		priority = 11
+		remove_effect = {
+			set_global_flag = PHI_eisenhower_recalled_early
+			PHI = {
+				country_event = SEA_PHI_political_events.52
+			}
+		}
+		ai_will_do = {	#will auto-return after 2 years
+			base = 0
+		}
+	}
+	PHI_recall_macarthur = {
+		allowed = {
+			original_tag = USA
+		}
+		visible = {
+			PHI = {
+				has_character = USA_douglas_macarthur
+				NOT = {		#for leadership he can be recalled automatically, but don't lose him as leader for military command
+					has_country_leader = {
+						character = USA_douglas_macarthur
+						ruling_only = yes
+					}
+				}
+			}
+		}
+		fire_only_once = yes
+		cost = USA_recall_macarthur_cost	#25 by default, 50 if PHI does decision
+		priority = 11
+		remove_effect = {
+			PHI = {
+				country_event = SEA_PHI_political_events.51
+			}
+		}
+		ai_will_do = {
+			base = 0
+			modifier = {
+				add = 100
+				has_war = yes
+			}
+			modifier = {
+				add = 100
+				has_war_with_major = yes
+			}
+			modifier = {
+				add = -90
+				PHI = {
+					has_country_flag = PHI_request_macarthur_stay
+				}
+			}
+		}
+	}
+}
+
+USA_war_plans = {
+	USA_execute_war_plan_brown = {
+		icon = generic_operation
+		allowed = {
+			always = no
+		}
+		available = {
+			PHI = {
+				NOT = {
+					has_war_with = ROOT
+				}
+			}
+		}
+		days_mission_timeout = 360
+		timeout_effect = {
+			effect_tooltip = {
+				white_peace = PHI
+			}
+		}
+	}
+}
+
+economy_decisions = {
+	PHI_investment_plan_1 = {		#Infrastructure
+		allowed = {
+			always = no
+		}
+		days_mission_timeout = 240
+		is_good = yes
+		available = {
+			hidden_trigger = {
+				always = no
+			}
+		}
+		timeout_effect = {
+			set_country_flag = PHI_completed_investment_plan_1
+			custom_effect_tooltip = PHI_every_state_with_new_railway_connection
+			every_owned_state = {
+				visible_when_empty = yes
+				limit = {
+					NOT = {
+						has_state_flag = PHI_railway_present
+					}
+					any_neighbor_state = {
+						ROOT = {
+							has_railway_connection = {
+								start_state = PREV
+								target_state = PREV.PREV
+							}
+						}
+					}
+				}
+				set_state_flag = PHI_improved_railway
+				add_dynamic_modifier = {
+					modifier = PHI_investment_plan_1_building_bonus
+					days = 720
+				}
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			random_owned_state = {
+				limit = {
+					is_core_of = PHI
+					is_fully_controlled_by = PHI
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}
+			random_owned_state = {
+				limit = {
+					has_state_flag = PHI_improved_railway
+					is_core_of = PHI
+					is_fully_controlled_by = PHI
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}
+			}
+		}
+	}
+	PHI_investment_plan_2 = {		#Trade
+		allowed = {
+			always = no
+		}
+		days_mission_timeout = 180
+		is_good = no
+		available = {
+			#I would prefer to check convoys, but building those is entirely dependent on your amount of dockyards
+			custom_trigger_tooltip = {
+				tooltip = PHI_has_built_at_least_one_dockyard
+				check_variable = { num_of_naval_factories > PHI_dockyards_pre_investment }
+			}
+			any_controlled_state = {
+				naval_base > 5
+			}
+			count_triggers = {
+				amount = 3
+				ENG = {
+					has_opinion = {
+						target = ROOT
+						value > 49
+					}
+				}
+				FRA = {
+					has_opinion = {
+						target = ROOT
+						value > 49
+					}
+				}
+				AST = {
+					has_opinion = {
+						target = ROOT
+						value > 49
+					}
+				}
+				CHI = {
+					has_opinion = {
+						target = ROOT
+						value > 49
+					}
+				}
+				JAP = {
+					has_opinion = {
+						target = ROOT
+						value > 49
+					}
+				}
+				if = {
+					limit = {
+						INS = {
+							is_subject_of = HOL
+						}
+					}
+					HOL = {
+						has_opinion = {
+							target = ROOT
+							value > 49
+						}
+					}
+				}
+				else = {
+					INS = {
+						has_opinion = {
+							target = ROOT
+							value > 49
+						}
+					}
+				}
+			}
+		}
+		complete_effect = {
+			random_owned_controlled_state = {
+				limit = {
+					is_core_of = PHI
+					is_fully_controlled_by = PHI
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 2
+					instant_build = yes
+				}	
+			}
+			random_owned_controlled_state = {
+				limit = {
+					is_core_of = PHI
+					is_fully_controlled_by = PHI
+					free_building_slots = {
+						building = arms_factory
+						size > 0
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = arms_factory
+					level = 2
+					instant_build = yes
+				}	
+			}
+			set_country_flag = PHI_completed_investment_plan_2
+		}
+		timeout_effect = {
+			random_owned_controlled_state = {
+				limit = {
+					is_core_of = PHI
+					is_fully_controlled_by = PHI
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}	
+			}
+			random_owned_controlled_state = {
+				limit = {
+					is_core_of = PHI
+					is_fully_controlled_by = PHI
+					free_building_slots = {
+						building = arms_factory
+						size > 0
+						include_locked = yes
+					}
+				}
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}	
+			}
+			set_country_flag = PHI_completed_investment_plan_2
+		}
+	}
+	PHI_investment_plan_3 = {		#Overall production
+		allowed = {
+			always = no
+		}
+		priority = 12
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = PHI_infrastructure_points_requirement_tt
+				check_variable = { PHI_infrastructure_points > 4 }
+			}
+			1110 = {
+				OR = {
+					infrastructure > 4
+					custom_trigger_tooltip = {
+						tooltip = PHI_has_built_at_least_one_infrastructure
+						check_variable = { building_level@infrastructure > PHI_infrastructure_pre_investment }
+					}
+				}
+			}
+			624 = {
+				OR = {
+					infrastructure > 4
+					custom_trigger_tooltip = {
+						tooltip = PHI_has_built_at_least_one_infrastructure
+						check_variable = { building_level@infrastructure > PHI_infrastructure_pre_investment }
+					}
+				}
+			}
+		}
+		days_mission_timeout = 360
+		is_good = no
+		complete_effect = {
+			add_resource = {
+				type = chromium
+				amount = 4
+				state = 1110
+			}
+			add_resource = {
+				type = steel
+				amount = 4
+				state = 624
+			}
+			327 = {
+				if = {
+					limit = {
+						free_building_slots = {
+							building = industrial_complex
+							size > 1
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 2
+					add_building_construction = {
+						type = industrial_complex
+						level = 2
+						instant_build = yes
+					}
+				}
+
+				add_building_construction = {
+					type = dam
+					level = 1
+					instant_build = yes
+					province = {
+						id = 10236	#Caliraya Dam
+					}
+				}
+			}
+			custom_effect_tooltip = {
+				localization_key = building_state_modifier|dam
+				INDENT = "    "
+			}
+		}
+		timeout_effect = {
+			add_resource = {
+				type = chromium
+				amount = 2
+				state = 1110
+			}
+			add_resource = {
+				type = steel
+				amount = 2
+				state = 624
+			}
+
+			327 = {
+				if = {
+					limit = {
+						free_building_slots = {
+							building = industrial_complex
+							size > 1
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 2
+					add_building_construction = {
+						type = industrial_complex
+						level = 2
+						instant_build = yes
+					}
+				}
+			}
+		}
+	}
+	PHI_establish_reserve_transport_fleet = {
+		visible = {
+			has_active_mission = PHI_investment_plan_3
+		}
+		available = {
+			NOT = {
+				custom_trigger_tooltip = {
+					tooltip = PHI_infrastructure_points_requirement_tt
+					check_variable = { PHI_infrastructure_points > 4 }
+				}
+			}
+		}
+		days_remove = 90	#gotta do at least 1 or 2 of the other types, otherwise it won't fit in the time
+		remove_effect = {
+			add_to_variable = { PHI_infrastructure_points = 1 }
+			custom_effect_tooltip = PHI_add_one_infra_point
+		}
+		complete_effect = {
+			add_equipment_to_stockpile = { 
+				type = convoy_1
+				amount = -15
+			}
+		}
+		custom_cost_trigger = {
+			has_equipment = {
+				convoy_1 > 14
+			}
+		}
+		custom_cost_text = PHI_decision_cost_convoys_icon_very_small
+		icon = GFX_decision_generic_merge_plant_ship
+	}
+	PHI_establish_new_train_connections = {
+		visible = {
+			has_active_mission = PHI_investment_plan_3
+		}
+		available = {
+			NOT = {
+				custom_trigger_tooltip = {
+					tooltip = PHI_infrastructure_points_requirement_tt
+					check_variable = { PHI_infrastructure_points > 4 }
+				}
+			}
+		}
+		days_remove = 90	#gotta do at least 1 or 2 of the other types, otherwise it won't fit in the time
+		remove_effect = {
+			add_to_variable = { PHI_infrastructure_points = 1 }
+			custom_effect_tooltip = PHI_add_one_infra_point
+		}
+		complete_effect = {
+			add_equipment_to_stockpile = { 
+				type = train_equipment
+				amount = -15
+			}
+		}
+		custom_cost_trigger = {
+			has_equipment = {
+				train_equipment > 14
+			}
+		}
+		custom_cost_text = PHI_decision_cost_icon_train
+		icon = GFX_decision_generic_train
+	}
+	PHI_inspect_road_network = {
+		visible = {
+			has_active_mission = PHI_investment_plan_3
+		}
+		available = {
+			NOT = {
+				custom_trigger_tooltip = {
+					tooltip = PHI_infrastructure_points_requirement_tt
+					check_variable = { PHI_infrastructure_points > 4 }
+				}
+			}
+		}
+		days_remove = 90	#gotta do at least 1 or 2 of the other types, otherwise it won't fit in the time
+		remove_effect = {
+			add_to_variable = { PHI_infrastructure_points = 1 }
+			custom_effect_tooltip = PHI_add_one_infra_point
+		}
+		complete_effect = {
+			add_equipment_to_stockpile = { 
+				type = motorized_equipment
+				amount = -100
+			}
+		}
+		custom_cost_text = PHI_decision_cost_icon_truck
+		custom_cost_trigger = {
+			has_equipment = {
+				motorized_equipment > 99
+			}
+		}
+		icon = GFX_decision_generic_trucks
+	}
+}
+
+PHI_relations_with_spanish_america = {
+	PHI_propose_treaty_of_mutual_assistance = {
+		targets = { ARG URG PAR BOL PRU ECU COL CHL VEN PAN DOM HAI JAM CUB NIC HON ELS GUA BLZ MEX RAP YUC RIG SPR PUE SPA SPD SPB SPC }	#Spanish America + Spain
+		target_trigger = {
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+				}
+				is_in_faction = no
+				is_subject = no
+				has_civil_war = no
+				if = {
+					limit =  {
+						original_tag = SPR
+					}
+					ROOT = {
+						has_completed_focus = PHI_reconciliation_with_spain
+					}
+				}
+			}
+		}
+		target_root_trigger = {
+			has_completed_focus = PHI_hispanic_overtures
+			OR = {
+				is_faction_leader = yes
+				NOT = {
+					has_completed_focus = PHI_war_of_independence
+				}
+			}
+		}
+		available = {	#these need to be updated more often than daily
+			FROM = {
+				is_subject = no
+				NOT = {
+					has_war_with = ROOT
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 100
+			modifier = {	#you have obtained support for indepence, other important things may now take priority
+				has_completed_focus = PHI_war_of_independence
+				add = -97
+			}
+			modifier = {
+				FROM = {
+					OR = {
+						has_government = neutrality
+						has_government = fascism
+					}
+				}
+				factor = 3
+			}
+			modifier = {
+				FROM = {
+					OR = {
+						original_tag = SPR
+						original_tag = CUB
+					}
+				}
+				factor = 5
+			}
+			modifier = {	#bit too OP for AI to be doing
+				FROM = {
+					original_tag = MEX
+				}
+				factor = 0
+			}
+		}
+		fire_only_once = yes
+		cost = 35
+		complete_effect = {
+			FROM = {
+				country_event = SEA_PHI_political_events.66
+			}
+		}
+	}
+	PHI_propose_unification = {
+		targets = { ARG URG PAR BOL PRU ECU COL CHL VEN PAN DOM HAI JAM CUB NIC HON ELS GUA BLZ MEX RAP YUC RIG SPR PUE SPA SPD SPB SPC }	#Spanish America + Spain
+		target_trigger = {
+			FROM = {
+				is_in_faction_with = ROOT
+				OR = {
+					is_subject = no
+					is_subject_of = ROOT
+				}
+			}
+		}
+		target_root_trigger = {
+			has_completed_focus = PHI_reino_de_filipinas
+		}
+		available = {
+			NOT = {
+				has_idea = PHI_integration_efforts
+				has_country_flag = PHI_awaiting_response
+			}
+			FROM = {
+				is_in_faction_with = ROOT	#update leaving quicker, and better tooltip since the check below otherwise shows empty space
+			}
+		}
+		fire_only_once = yes
+		cost = 50
+		complete_effect = {
+			set_country_flag = PHI_awaiting_response
+
+			FROM = {
+				country_event = SEA_PHI_political_events.69
+			}
+
+			custom_effect_tooltip = if_they_accept_newline_tt
+
+			#copy of SEA_PHI_political_events.70.a
+			effect_tooltip = {
+				FROM = {
+					every_core_state = {
+						add_core_of = ROOT
+					}
+				}
+				annex_country = {
+					target = FROM
+					transfer_troops = yes
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_cosmetic_tag = PHI_hispanic_empire_tag
+						}
+					}
+					set_cosmetic_tag = PHI_hispanic_empire_tag
+				}
+				if = {
+					limit = {
+						FROM = {
+							original_tag = SPR
+							has_dlc = "La Resistance"
+							any_owned_state = {
+								has_state_flag = SPR_original_core
+								NOT = {
+									is_core_of = PREV
+								}
+							}
+						}
+					}
+					unlock_decision_tooltip = SPR_eliminate_guerrillas
+				}
+				add_timed_idea = {
+					idea = PHI_integration_efforts
+					days = 120
+				}
+			}
+		}
+	}
+	PHI_force_unification = {
+		targets = { ARG URG PAR BOL PRU ECU COL CHL VEN PAN DOM HAI JAM CUB NIC HON ELS GUA BLZ MEX RAP YUC RIG SPR PUE SPA SPD SPB SPC }	#Spanish America + Spain
+		target_root_trigger = {
+			has_completed_focus = PHI_reino_de_filipinas
+		}
+		target_trigger = {
+			FROM = {
+				NOT = {
+					has_war_with = ROOT
+					is_ally_with = ROOT
+				}
+			}
+		}
+		available = {
+			custom_trigger_tooltip = {
+    			tooltip = PHI_force_unification_tt	
+				has_cosmetic_tag = PHI_hispanic_empire_tag
+			}
+			if = {
+				limit = {
+					NOT = {
+						FROM = {
+							original_tag = SPR
+						}
+					}
+				}
+				FROM = {
+					OR = {
+						is_neighbor_of = ROOT
+						any_allied_country = {
+							is_neighbor_of = ROOT
+						}
+					}
+				}
+			}
+		}
+		fire_only_once = yes
+		cost = 25
+		complete_effect = {
+			FROM = {
+				if = {
+					limit = {
+						has_dlc = "La Resistance"
+						original_tag = SPR
+					}
+					every_owned_state = {
+						limit = {
+							has_state_flag = SPR_original_core
+						}
+						add_core_of = ROOT
+					}
+				}
+				else = {
+					every_core_state = {
+						limit = {
+							NOT = {
+								is_core_of = ROOT
+							}
+						}
+						add_core_of = ROOT
+					}
+				}
+			}
+		}
+	}
+}
