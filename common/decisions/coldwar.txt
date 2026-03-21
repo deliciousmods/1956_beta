@@ -37,10 +37,6 @@ CW_occupation_negotations = {
 		icon = hol_exchange_intelligence_data
 		days_re_enable = 30	#prevent request spam
 		visible = {
-			has_global_flag = r56_unlocked_fate_of_germany_decisions
-			any_controlled_state = {
-				is_core_of = GER
-			}
 			has_country_flag = r56_yalta_open_germany_category
 		}
 		available = {
@@ -103,6 +99,12 @@ CW_occupation_negotations = {
 						is_owned_by = ROOT
 					}
 				}
+			}
+		}
+		target_root_trigger = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_controlled_state = {
+				is_core_of = GER
 			}
 		}
 		complete_effect = { #set a variable that indicates which group the country is trying to form?
@@ -242,6 +244,13 @@ CW_occupation_negotations = {
 								has_variable = r56_yalta_occupation_group
 								check_variable = {
 									r56_yalta_occupation_group = ROOT.r56_yalta_occupation_group
+								}
+							}
+						}
+						owner = {						#country
+							PREV = {					#state
+								NOT = {
+									is_core_of = PREV	#country
 								}
 							}
 						}
@@ -459,16 +468,18 @@ CW_occupation_negotations = {
 	}
 	dismantle_german_war_industry = {	#every 3 mils becomes 1 civ for GER, and 1 mil for the occupier
 		icon = generic_construction
-		state_target = yes
+		state_target = any_owned_state
 		visible = {
-			has_global_flag = r56_unlocked_fate_of_germany_decisions
-			any_controlled_state = {
-				is_core_of = GER
-			}
 			NOT = {
 				has_variable = r56_yalta_occupation_group
 			}
 			has_country_flag = r56_yalta_open_germany_category
+		}
+		target_root_trigger = {
+			has_global_flag = r56_unlocked_fate_of_germany_decisions
+			any_owned_state = {
+				is_core_of = GER
+			}
 		}
 		target_trigger = {
 			FROM = {
@@ -827,7 +838,6 @@ CW_occupation_negotations = {
 							country_leader = {
 								ideology = stalinism
 								expire = "1947.1.1.1"
-								traits = { }
 							}
 						}
 					}
@@ -952,11 +962,26 @@ CW_occupation_negotations = {
 }
 CW_united_nations_security_council = {
 	CW_vote_for_intervention = {
-		fire_only_once = yes
 		target_trigger = {
 			FROM = {
 				has_war = yes
 				is_subject = no
+				OR = {
+					is_in_faction = no
+					is_faction_leader = yes
+					AND = {
+						is_in_faction = yes
+						faction_leader = {
+							PREV = {
+								any_enemy_country = {
+									NOT = {
+										has_war_with = PREV.PREV
+									}
+								}
+							}
+						}
+					}
+				}
 				NOT = {
 					has_country_flag = r56_UN_supported
 					any_enemy_country = {
@@ -977,6 +1002,17 @@ CW_united_nations_security_council = {
 			}
 		}
 		available = {	#duplicate with target_trigger, but target_trigger isn't checked often enough
+			custom_trigger_tooltip = {
+				tooltip = r56_UN_has_already_voted_tt
+				meta_trigger = {
+					text = {
+						NOT = {
+							has_country_flag = UN_voted_to_intervene_for_[TARGET]
+						}
+					}
+					TARGET = "[FROM.GetTag]"
+				}
+			}
 			FROM = {
 				any_enemy_country = {
 					NOT = {
@@ -985,8 +1021,22 @@ CW_united_nations_security_council = {
 				}
 			}
 		}
+		visible = {	#hide intervention option while at war unless others are voting for it
+			OR = {
+				has_war = no
+				check_variable = {
+					FROM.r56_UN_support_votes > 0
+				}
+			}
+		}
 		remove_effect = {
 			add_to_variable = { FROM.r56_UN_support_votes = 1 }
+			meta_effect = {
+				text = {
+					set_country_flag = UN_voted_to_intervene_for_[TARGET]
+				}
+				TARGET = "[FROM.GetTag]"
+			}
 			if = {
 				limit = {
 					check_variable = { global.un_member_count = FROM.r56_UN_support_votes }
@@ -1029,18 +1079,67 @@ CW_united_nations_security_council = {
 				}
 			}
 		}
+		ai_will_do = {
+			base = 0
+			modifier = {	#player wants to intervene against someone we're at war with? support!
+				add = 1000
+				check_variable = {
+					FROM.r56_UN_support_votes > 0
+				}
+				FROM = {
+					OR = {
+						tag = ROOT
+						all_enemy_country = {
+							has_war_with = ROOT
+						}
+					}
+				}
+			}
+		}
 	}
 	CW_vote_to_place_embargo = {
-		fire_only_once = yes
 		target_trigger = {	
 			FROM = {
+				is_subject = no												#helps shorten the list, not sure how embargo behavior works towards puppets but don't remove this as the decision list becomes even longer
 				has_war = yes
 				NOT = {
-					has_country_flag = r56_UN_supported		#do not embargo after supporting
+					has_country_flag = r56_UN_supported						#do not embargo after supporting
+					has_country_flag = r56_invited_to_un_security_council	#you cannot get a UN member to vote to embargo itself
+				}
+			}
+		}
+		visible = {	#hide allies as options unless someone else initiated the vote
+			FROM = {
+				OR = {
+					NOT = {
+						is_ally_with = ROOT
+					}
+					check_variable = {
+						r56_UN_support_votes > 0
+					}
+				}
+			}
+		}
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = r56_UN_has_already_voted_tt
+				meta_trigger = {
+					text = {
+						NOT = {
+							has_country_flag = UN_voted_to_embargo_[TARGET]
+						}
+					}
+					TARGET = "[FROM.GetTag]"
 				}
 			}
 		}
 		remove_effect = {
+			meta_effect = {
+				text = {
+					set_country_flag = UN_voted_to_embargo_[TARGET]
+				}
+				TARGET = "[FROM.GetTag]"
+			}
 			add_to_variable = { FROM.r56_UN_embargo_votes = 1 }
 			if = {
 				limit = {
@@ -1065,6 +1164,18 @@ CW_united_nations_security_council = {
 				}
 			}
 		}
+		ai_will_do = {
+			base = 0
+			modifier = {	#player wants to embargo someone we're at war with? support!
+				add = 1000
+				check_variable = {
+					FROM.r56_UN_embargo_votes > 0
+				}
+				FROM = {
+					has_war_with = ROOT
+				}
+			}
+		}
 	}
 	CW_boycott_un = {
 		complete_effect = {
@@ -1077,21 +1188,47 @@ CW_united_nations_security_council = {
 		}
 	}
 	CW_vote_to_replace_council_member = {
-		fire_only_once = yes
 		target_trigger = {
 			FROM = {
 				any_other_country = {
 					has_country_flag = r56_invited_to_un_security_council
-					original_tag = PREV
 					OR = {
 						exists = no
 						has_civil_war = yes
 						has_idea = KMT_retreat_to_taiwan_idea
 					}
+					OR = {
+						original_tag = PREV
+						AND = {
+							is_literally_china = yes
+							PREV = {
+								is_literally_china = yes
+							}
+						}
+					}
+				}
+			}
+		}
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = r56_UN_has_already_voted_tt
+				meta_trigger = {
+					text = {
+						NOT = {
+							has_country_flag = UN_voted_to_replace_[TARGET]
+						}
+					}
+					TARGET = "[FROM.GetTag]"
 				}
 			}
 		}
 		complete_effect = {
+			meta_effect = {
+				text = {
+					set_country_flag = UN_voted_to_replace_[TARGET]
+				}
+				TARGET = "[FROM.GetTag]"
+			}
 			add_to_variable = { FROM.r56_UN_replace_votes = 1 }
 			if = {
 				limit = {
