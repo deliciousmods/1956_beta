@@ -10936,6 +10936,10 @@ focus_tree = {
 
 			custom_effect_tooltip = JAP_the_surrender_broadcast_tt
 
+			hidden_effect = {
+				set_global_flag = JAP_surrendered_through_their_focus_flag 
+			}
+
 		}
 	}
 
@@ -11166,6 +11170,10 @@ focus_tree = {
 					owns_state = 621
 					owns_state = 746
 				}
+			}
+			NOT = {
+				has_country_flag = JAP_suiyuan_campaign_has_started_flag
+				has_country_flag = JAP_suiyuan_campaign_has_ended_flag
 			}
 		}
 
@@ -11877,14 +11885,30 @@ focus_tree = {
 				has_government = neutrality
 				has_government = fascism
 			}
-			613 = {
+			1114 = {
 				state_is_fully_controlled_by_ROOT_or_subject = yes
 			}
 		}
 
 		bypass = {
-			MAN = {
-				has_completed_focus = MAN_tsr_national_cooperation_government
+			OR = {
+				IF = {
+					limit = {
+						MAN = { is_subject_of = ROOT }
+					}
+					MAN = {
+						OR = {
+							has_completed_focus = MAN_reclaim_the_empire_2
+							has_completed_focus = MAN_the_kwantung_connection_2
+						}
+					}
+				}
+				CHI = {
+					is_subject_of = ROOT
+				}
+				PRC = { is_subject_of = ROOT }
+				any_subject_country = { has_completed_focus = CHI_a_japanese_national_government }
+				any_subject_country = { has_completed_focus = CHI_proclaim_rival_government }
 			}
 		}
 
@@ -11897,13 +11921,15 @@ focus_tree = {
 		completion_reward = {
 
 			# Establishes the Reorganized National Government
-			613 = {
+			1114 = {
 				add_core_of = RNG
 				transfer_state_to = RNG
 			}
-			CHI = {
-				every_core_state = {
-					add_claim_by = RNG
+			hidden_effect = {
+				CHI = {
+					every_core_state = {
+						set_state_flag = is_state_rng_wants_flag 
+					}
 				}
 			}
 
@@ -11981,6 +12007,33 @@ focus_tree = {
 				}
 				custom_effect_tooltip = generic_skip_one_line_tt
 				USA = { add_war_support = 0.05 }
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+
+			CHI = {
+				every_core_state = {
+					limit = {
+						is_owned_and_controlled_by = ROOT
+						NOT = {
+							state = 745 # Kwantung Leased Territory
+							state = 609 # Easty Hebei
+							state = 611 # South Chahar
+							state = 612 # Chahar
+							region = 155 # West Manchuria
+							region = 242 # North Manchuria
+							region = 243 # East Manchuria
+							state = 728 # Gouangzhouwan
+							state = 729 # Macau
+							state = 326 # Hong Kong
+							state = 743 # Qingdao
+							state = 524 # Taiwan
+							state = 1039 # Hebei-Chahar
+							state = 591 # Hainan
+						}
+					}
+					add_core_of = RNG
+					transfer_state_to = RNG
+				}
 			}
 
 			hidden_effect = {
@@ -13568,10 +13621,22 @@ focus_tree = {
 			
 			671 = {
 				OWNER = {
-					country_event = {
-						id = SEA_japan_foreign_policy.10
-						days = 1
-						random_days = 2
+					if = {	#56 - Vanilla didn't account for French Indochina or puppet Vietnam existing
+						limit = { is_subject = yes }
+						overlord = {
+							country_event = {
+								id = SEA_japan_foreign_policy.10
+								days = 1
+								random_days = 2
+							}
+						}
+					}
+					else = {	#56 - Vanilla didn't account for French Indochina or puppet Vietnam existing	
+						country_event = {
+							id = SEA_japan_foreign_policy.10
+							days = 1
+							random_days = 2
+						}
 					}
 				}
 			}
@@ -13746,6 +13811,7 @@ focus_tree = {
 		will_lead_to_war_with = CAM
 		will_lead_to_war_with = LAO
 		will_lead_to_war_with = CHM
+		will_lead_to_war_with = FRI	#56
 
 		cancel_if_invalid = yes
 		continue_if_invalid = no
@@ -13819,12 +13885,15 @@ focus_tree = {
 								original_tag = FRA
 								is_subject_of = FRA
 								is_subject_of = VIC
+								original_tag = SIA	#56 - They have a focus right next to this to eat Siam if they so wish
+								is_subject_of = SIA	#56 - They have a focus right next to this to eat Siam if they so wish
 							}
 							OR = {
 								original_tag = VIN
 								original_tag = CAM
 								original_tag = LAO
 								original_tag = CHM
+								original_tag = FRI	#56
 								original_tag = SIA
 								original_tag = BRM
 								original_tag = GXC
@@ -13847,12 +13916,15 @@ focus_tree = {
 							original_tag = FRA
 							is_subject_of = FRA
 							is_subject_of = VIC
+							original_tag = SIA	#56 - They have a focus right next to this to eat Siam if they so wish
+							is_subject_of = SIA	#56 - They have a focus right next to this to eat Siam if they so wish
 						}
 						OR = {
 							original_tag = VIN
 							original_tag = CAM
 							original_tag = LAO
 							original_tag = CHM
+							original_tag = FRI	#56
 							original_tag = SIA
 							original_tag = BRM
 							original_tag = GXC
@@ -14077,6 +14149,7 @@ focus_tree = {
 		will_lead_to_war_with = BRN
 		will_lead_to_war_with = BRM
 		will_lead_to_war_with = WPG
+		will_lead_to_war_with = SIA	#56
 
 		cancel_if_invalid = no
 		continue_if_invalid = yes
@@ -14361,6 +14434,26 @@ focus_tree = {
 				add_ai_strategy = {
 					type = conquer
 					id = BRN
+					value = 200
+				}
+			}
+			IF = {	#56 - Adding support for SIA rework
+				limit = {
+					country_exists = SIA
+					NOT = {
+						is_ally_with = SIA
+						has_war_with = SIA
+						has_wargoal_against = SIA
+					}
+				}
+				create_wargoal = {
+					target = SIA
+					type = annex_everything
+					expire = 0
+				}
+				add_ai_strategy = {
+					type = conquer
+					id = SIA
 					value = 200
 				}
 			}
@@ -14996,7 +15089,7 @@ focus_tree = {
 
 	focus = {
 		id = JAP_strenghten_manchukuo_imperial_army
-		icon = GFX_focus_JAP_strenghten_manchukuo_imperial_army
+		icon = GFX_goal_MAN_coa_army
 		#mutually_exclusive = { focus = JAP_the_harakiri_debate }
 		x = -2
 		y = 1
@@ -15062,7 +15155,7 @@ focus_tree = {
 
 	focus = {
 		id = JAP_strenghten_manchukuo_imperial_airforce
-		icon = GFX_focus_JAP_strenghten_manchukuo_imperial_airforce
+		icon = GFX_goal_MAN_coa_air_force
 		#mutually_exclusive = { focus = JAP_the_harakiri_debate }
 		x = 0
 		y = 1
@@ -23058,7 +23151,7 @@ focus_tree = {
 
 		prerequisite = { focus = JAP_crush_the_internal_factions } 
 
-		cost = 10
+		cost = 5
 
 		ai_will_do = {
 			factor = 1
@@ -23128,8 +23221,6 @@ focus_tree = {
 					generator = { 610 716 328 715 714 717 }
 				}
 			}
-			unlock_decision_tooltip = JAP_return_manchuria
-			custom_effect_tooltip = JAP_liberate_manchuria_tt
 			
 		}
 	}
@@ -29462,7 +29553,7 @@ focus_tree = {
 
 	focus = {
 		id = JAP_army_weapons_administration_headquarters
-		icon = GFX_focus_JAP_army_weapons_administration_hq
+		icon = GFX_goal_JAP_flag_army
 		
 		#mutually_exclusive = {
 		#	focus = 
@@ -30558,7 +30649,7 @@ focus_tree = {
 		continue_if_invalid = no
 		available_if_capitulated = no
 
-		search_filters = { FOCUS_FILTER_AIR_XP FOCUS_FILTER_MILITARY_CHARACTER }
+		search_filters = { FOCUS_FILTER_ARMY_XP FOCUS_FILTER_MILITARY_CHARACTER }
 
 		completion_reward = {
 
@@ -30591,7 +30682,7 @@ focus_tree = {
 
 	focus = {
 		id = JAP_sea_unify_the_air_forces
-		icon = GFX_focus_JAP_unify_the_air_forces
+		icon = GFX_goal_JAP_coa_air_force
 		
 		#mutually_exclusive = {
 		#	focus = 
@@ -31943,7 +32034,7 @@ focus_tree = {
 
 	focus = {
 		id = JAP_naval_armaments_program
-		icon = GFX_focus_JAP_naval_armaments_program
+		icon = GFX_goal_JAP_new_naval_estimates
 
 		#mutually_exclusive = {
 		#	focus = 
@@ -32046,7 +32137,7 @@ focus_tree = {
 						creator = "JAP"
 						version_name = "Shokaku Class"
 					}
-					name = "Zaikaku"
+					name = "Zuikaku"
 					requested_factories = 1
 					progress = 0.75
 					amount = 1
