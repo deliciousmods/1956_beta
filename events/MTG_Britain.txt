@@ -9,7 +9,6 @@ country_event = {
 
 	trigger = {
 		tag = ENG
-		has_dlc = "Man the Guns"
 		has_country_flag = ENG_king_died
 		date > 1936.6.1
 		NOT = { has_country_flag = ENG_edward_abdicating }
@@ -318,15 +317,45 @@ country_event = {
 				limit = {
 					RAJ = { has_country_flag = ENG_abdication_crisis_dominion_will_leave }
 				}
-				set_autonomy = { target = RAJ autonomy_state = autonomy_free }
-				#Tied to Raj
-				#set_autonomy = { target = BHU autonomy_state = autonomy_free }
-				#set_autonomy = { target = NEP autonomy_state = autonomy_free }
-				#Gave those tags a choice 
-				RAJ = {
-					drop_cosmetic_tag = yes
-					retire_country_leader = yes
-					remove_from_tech_sharing_group = commonwealth_research
+				if = {
+					limit = { NOT = { has_global_flag = raj_dlc_focus_tree } }	#56
+					set_autonomy = { target = RAJ autonomy_state = autonomy_free }
+					RAJ = {
+						drop_cosmetic_tag = yes
+						retire_country_leader = yes
+						remove_from_tech_sharing_group = commonwealth_research
+					}
+				}
+				else = {
+					if = {
+						limit = {
+							RAJ = {
+								is_subject_of = ENG
+							}
+						}
+						RAJ = { 
+							country_event = { id = GOE_RAJ.30 hours = 2 } 
+							remove_from_tech_sharing_group = commonwealth_research
+							effect_tooltip = {
+								add_ideas = idea_RAJ_the_long_goodbye
+							}
+							if = {
+								limit = {
+									NOT = {
+										has_autonomy_state = autonomy_dominion
+									}
+								}
+								set_autonomy = {
+									target=RAJ
+									autonomy_state = autonomy_dominion
+									freedom_level = 0 # 0-1 
+									end_wars  = no # default yes. will not cancel non civil wars if set to no
+									end_civil_wars = no # default yes. will not cancel civil wars if set to no
+								}
+							}
+						} 
+						custom_effect_tooltip =  GOE_RAJ.30_we_are_leaving_tt
+					}
 				}
 				if = {
 					limit = {
@@ -367,9 +396,9 @@ country_event = {
 				}
 				CAN = {
 					create_faction_from_template = {
-						template = faction_template_defensive_democratic
+						template = faction_template_allies
 						name = ENG_commonwealth_of_nations
-						icon = GFX_faction_logo_generic_17
+						icon = GFX_faction_logo_generic_2
 					}
 					if = {
 						limit = {
@@ -476,7 +505,10 @@ country_event = {
 			}
 			if = {
 				limit = {
-					RAJ = { has_country_flag = ENG_abdication_crisis_dominion_will_leave }
+					RAJ = {
+						has_country_flag = ENG_abdication_crisis_dominion_will_leave
+						NOT = { has_completed_focus = RAJ_great_depression_price_controls }
+					}
 				}
 				RAJ = {
 					country_event = { id = mtg_britain.16 }
@@ -1395,9 +1427,64 @@ country_event = {
 			limit = {
 				tag = RAJ
 			}
-			FROM = { set_autonomy = { target = RAJ autonomy_state = autonomy_free } }
+			if = {
+				limit = {
+					NOT = { has_global_flag = raj_dlc_focus_tree }	#56
+				}
+				FROM = { set_autonomy = { target = RAJ autonomy_state = autonomy_free } }
+				ENG = { remove_from_faction = RAJ }
+				RAJ = {
+					drop_cosmetic_tag = yes
+					retire_country_leader = yes
+					remove_from_tech_sharing_group = commonwealth_research
+					give_guarantee = NEP #my sphere now
+					give_guarantee = BHU #my sphere now
+					set_country_flag = r56_Linlithgow_path_check_allowed
+					if = {
+						limit = {
+							NOT = {
+								AND = {
+									has_completed_focus = RAJ_Linlithgows_Reign
+									has_government = neutrality
+								}
+							}
+						}
+						retire_country_leader = yes #don't want to yeet Linlithgows if he's doubling down
+					}
+					if = {
+						limit = {
+							owns_state = 659
+						}
+						ENG = {
+							transfer_state = 659
+						}
+					}
+					if = {
+						limit = {
+							has_completed_focus = RAJ_Linlithgows_Reign
+							has_government = neutrality
+							CAN = {
+								has_country_flag = r56_Can_leads_commonwealth_now
+							}
+						}
+						effect_tooltip = {
+							CAN = {
+								add_to_faction = RAJ
+							}
+						}
+					}
+				}
+			}
+			else = {
+				RAJ = {
+					country_event = {
+						id = GOE_RAJ.30 hours = 2
+					}
+				}
+				custom_effect_tooltip = GOE_RAJ.30_we_are_leaving_tt
+			}
+
 			ENG = { 
-				remove_from_faction = RAJ 
 				if = {
 					limit = {
 						OMA = { has_country_flag = ENG_abdication_crisis_dominion_will_leave }
@@ -1426,46 +1513,6 @@ country_event = {
 						SAF = { has_country_flag = ENG_abdication_crisis_dominion_will_leave }
 					}
 					release = SWA
-				}
-			}
-			RAJ = {
-				drop_cosmetic_tag = yes
-				remove_from_tech_sharing_group = commonwealth_research
-				give_guarantee = NEP #my sphere now
-				give_guarantee = BHU #my sphere now
-				set_country_flag = r56_Linlithgow_path_check_allowed
-				if = {
-					limit = {
-						NOT = {
-							AND = {
-								has_completed_focus = RAJ_Linlithgows_Reign
-								has_government = neutrality
-							}
-						}
-					}
-					retire_country_leader = yes #don't want to yeet Linlithgows if he's doubling down
-				}
-				if = {
-					limit = {
-						owns_state = 659
-					}
-					ENG = {
-						transfer_state = 659
-					}
-				}
-				if = {
-					limit = {
-						has_completed_focus = RAJ_Linlithgows_Reign
-						has_government = neutrality
-						CAN = {
-							has_country_flag = r56_Can_leads_commonwealth_now
-						}
-					}
-					effect_tooltip = {
-						CAN = {
-							add_to_faction = RAJ
-						}
-					}
 				}
 			}
 		}
@@ -1695,7 +1742,40 @@ country_event = {
 				}
 				set_autonomy = { target = RAJ autonomy_state = autonomy_dominion }
 			}
-			retire_country_leader = yes
+			if = {
+				limit = {
+					NOT = { has_global_flag = raj_dlc_focus_tree }	#56
+				}
+				retire_country_leader = yes
+			}
+			else = {
+				if = {
+					limit = {
+						has_country_leader = {
+							character = RAJ_lord_linlithgow
+						}
+
+						has_country_leader_with_trait = aloof_authority
+					}
+
+					remove_country_leader_trait = {
+						trait = aloof_authority 
+					}
+				}
+				else_if = {
+					limit = {
+						has_country_leader = {
+							character = RAJ_freeman_freeman_thomas
+						}
+
+						has_country_leader_with_trait = staunch_imperialist
+					}
+					remove_country_leader_trait = {
+						trait = staunch_imperialist 
+					}
+
+				}
+			}
 		}
 	}
 }
@@ -2074,6 +2154,7 @@ country_event = {
 
 	immediate = {
 		hidden_effect = {
+			was_raj_a_subject = yes
 			add_stability = 30
 			every_state = {
 				limit = {
@@ -2301,12 +2382,27 @@ country_event = {
 				BHU = {
 					leave_faction = yes
 				}
-			}			
-			RAJ = {
-				leave_faction = yes
-				drop_cosmetic_tag = yes
-				retire_country_leader = yes
-			}			
+			}	
+			if = {	
+				limit = {
+					has_global_flag = raj_dlc_focus_tree	#56
+				}
+				RAJ = {
+					country_event = {
+						id = GOE_RAJ.30
+						hours = 2
+					}
+				}
+				raj_was_a_subject_reset_party_ideology_after_independence = yes #Resets the status of the political parties 
+			}
+			else = {
+				RAJ = {
+					leave_faction = yes
+					drop_cosmetic_tag = yes
+					retire_country_leader = yes
+				}
+			}	
+			
 			MAL = {
 				drop_cosmetic_tag = yes
 				retire_country_leader = yes
@@ -5098,7 +5194,6 @@ country_event = {
 	picture = GFX_report_event_generic_sign_treaty3
 
 	trigger = {
-		has_dlc = "Man the Guns"
 		OR = {
 			tag = CAN
 			tag = SAF
@@ -5141,13 +5236,37 @@ country_event = {
 	# We will leave
 	option = {
 		name = mtg_britain.66.b
-		leave_faction = yes
-		ENG = {
-			set_autonomy = {
-			    target = ROOT
-			    autonomy_state = autonomy_free
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						NOT = { original_tag = RAJ }
+						has_global_flag = raj_dlc_focus_tree	#56
+					}
+					NOT = { has_global_flag = raj_dlc_focus_tree }	#56
+				}
+			}
+			leave_faction = yes
+		}
+		
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						NOT = { original_tag = RAJ }
+						has_global_flag = raj_dlc_focus_tree	#56
+					}
+					NOT = { has_global_flag = raj_dlc_focus_tree }	#56
+				}
+			}
+			ENG = {
+				set_autonomy = {
+			    	target = ROOT
+			    	autonomy_state = autonomy_free
+				}
 			}
 		}
+
 		if = {
 			limit = {
 				has_idea = ENG_guided_by_britain_1
@@ -5175,13 +5294,37 @@ country_event = {
 		if = {
 			limit = {
 				tag = RAJ
+				NOT = {
+					has_global_flag = raj_dlc_focus_tree	#56
+				}
 			}
 			drop_cosmetic_tag = yes
 			retire_country_leader = yes
 		}
+
+		if = {
+			limit = {
+				tag = RAJ
+				has_global_flag = raj_dlc_focus_tree	#56
+				
+			}
+			country_event = { id = GOE_RAJ.30 hours = 2 }
+		}
+
 		remove_from_tech_sharing_group = commonwealth_research
 		set_country_flag = ENG_already_left_faction_flag
-		ENG = { country_event = { id = mtg_britain.67 } }
+		
+		if = {
+			limit = {
+				OR = {
+					NOT = { has_global_flag = raj_dlc_focus_tree }	#56
+					NOT = { tag = RAJ }
+				}
+			}
+			ENG = { country_event = { id = mtg_britain.67 } }
+		}
+
+
 		hidden_effect = { news_event = { id = mtg_news.63 days = 1 } }
 	}
 }
@@ -5389,7 +5532,6 @@ country_event = {
 	picture = GFX_report_event_generic_riot
 
 	trigger = {
-		has_dlc = "Man the Guns"
 		tag = RAJ
 		NOT = { country_exists = PAK }
 		NOT = { has_country_flag = RAJ_civil_war }
@@ -5400,6 +5542,7 @@ country_event = {
 			}
 		}
 		is_subject = no
+		NOT = { has_global_flag = raj_dlc_focus_tree }	#56
 	}
 
 	mean_time_to_happen = { days = 60 }
@@ -6108,13 +6251,13 @@ country_event = {
 	picture = GFX_report_event_ger_civil_war
 
 	trigger = {
-		has_dlc = "Man the Guns"
 		tag = PAK
 		NOT = { country_exists = BAN }
 		NOT = { has_country_flag = PAK_civil_war }
 		NOT = { ENG = { has_completed_focus = ENG_the_three_nation_solution } }
 		is_subject = no
 		has_war = no
+		NOT = { has_global_flag = raj_dlc_focus_tree }	#56
 	}
 	
 	fire_only_once = yes
@@ -8241,7 +8384,6 @@ country_event = {
 	trigger = {
 		tag = ENG
 		has_country_flag = ENG_king_died
-		has_dlc = "Man the Guns"
 		has_country_flag = ENG_abdication_crisis_morganatic_marriage
 		has_country_flag = edward_viii_married_wallis_simpson
 		126 = {
