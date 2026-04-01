@@ -10,7 +10,7 @@ shared_focus = {
 	x = 47
 	y = 0 
 	offset = {
-		x = -20
+		x = -23
 		y = 0
 		trigger = {
 			has_focus_tree = r56_indian_revolt_focus
@@ -1716,7 +1716,7 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_Further_British_Investments
 	icon = GFX_1_6_goal_ENG_sun_never_sets
-	cost = 10
+	cost = 6
 	ai_will_do = { factor = 1 }
 	prerequisite = {
 		focus = RAJ_Reinvigorate_Imperial_Shipping
@@ -1725,6 +1725,11 @@ shared_focus = {
 	y = 3
 	relative_position_id = RAJ_Reform_the_Colonial_Economy
 	completion_reward = {
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = -100 }
+			custom_effect_tooltip = generic_skip_one_line_tt
+		}
 		random_owned_controlled_state = {
 			prioritize = {
 				431
@@ -2023,6 +2028,13 @@ shared_focus = {
 	y = 0
 	relative_position_id = RAJ_Establish_the_Planning_Commission
 	offset = {
+		x = -8
+		y = 0
+		trigger = {
+			has_focus_tree = r56_indian_revolt_focus
+		}
+	}
+	offset = {
 		x = -3
 		trigger = {
 			has_completed_focus = RAJ_Establish_the_Planning_Commission
@@ -2036,6 +2048,7 @@ shared_focus = {
 			has_focus_autohide_rule_trigger_r56 = yes
 		}
 	}
+	available_if_capitulated = yes
 	completion_reward = {
 		add_doctrine_cost_reduction = {
 			name = RAJ_prepare_an_autonomous_defense_r56
@@ -2044,7 +2057,7 @@ shared_focus = {
 			category = land_doctrine
 		}
 		custom_effect_tooltip = generic_skip_one_line_tt
-		add_ideas = RAJ_deterrence 
+		add_ideas = RAJ_deterrence
 	}
 }
 
@@ -2116,12 +2129,23 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_safeguard_the_interior_r56
 	icon = GFX_focus_SWE_hedgehog_defense
-	cost = 10
+	cost = 8
 	ai_will_do = { base = 1 }
 	y = 2
 	prerequisite = { focus = RAJ_prepare_an_autonomous_defense_r56 }
 	relative_position_id = RAJ_prepare_an_autonomous_defense_r56
 	completion_reward = {
+		add_tech_bonus = {
+			name = RAJ_safeguard_the_interior_r56
+			bonus = 0.75
+			uses = 1
+			category = cat_fortification
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		swap_ideas = {
+			remove_idea = RAJ_deterrence
+			add_idea = RAJ_deterrence_2_r56
+		}
 	}
 }
 
@@ -2135,12 +2159,47 @@ shared_focus = {
 	prerequisite = { focus = RAJ_prepare_an_autonomous_defense_r56 }
 	relative_position_id = RAJ_prepare_an_autonomous_defense_r56
 	bypass = {
-		ENG = { has_completed_focus = uk_burma_focus }
+		OR = {
+			ENG = { has_completed_focus = uk_burma_focus }
+			BRM = {
+				NOT = { is_ally_with = ROOT }
+				controls_state = 1019
+				controls_state = 640
+			}
+		}
+	}
+	available = {
+		1019 = { is_controlled_by_ROOT_or_ally = yes }	#Sagaing
+		640 = { is_controlled_by_ROOT_or_ally = yes }	#Mandalay
+		CUG = {
+			any_enemy_country = {
+				is_major = yes
+				NOT = { 
+					original_tag = BRM 
+					is_in_faction_with = RAJ
+					original_tag = RAJ
+				}
+			}
+			exists = yes
+			is_subject = no
+		}
 	}
 	completion_reward = {
 		if = {
 			limit = { is_subject = yes }
 			add_autonomy_score = { value = 50 }
+			custom_effect_tooltip = generic_skip_one_line_tt
+		}
+		CUG = { add_ideas = RAJ_burmese_supply_route_r56 }
+		YUN = {
+			if = {
+				limit = {
+					is_ally_with = CUG
+					NOT = { has_war_with = ROOT }
+					has_war_with_major = yes 
+				}
+				add_ideas = RAJ_burmese_supply_route_r56 
+			}
 		}
 	}
 }
@@ -2154,31 +2213,140 @@ shared_focus = {
 	y = 1
 	prerequisite = { focus = RAJ_the_burma_railroad_r56 }
 	relative_position_id = RAJ_the_burma_railroad_r56
-	bypass = {
+	available = {
+		432 = { is_controlled_by_ROOT_or_ally = yes }	#Assam
+		CUG = {
+			any_enemy_country = {
+				is_major = yes
+				NOT = { 
+					original_tag = BRM 
+					is_in_faction_with = RAJ
+					original_tag = RAJ
+				}
+			}
+			exists = yes
+			is_subject = no
+		}
+		OR = {	#Burma Railroad has been closed
+			AND = {
+				288 = { #Burma
+					has_state_flag = CHI_burma_road_closed_state
+					OR = {
+						is_controlled_by = ROOT
+						CONTROLLER = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+			AND = {
+				325 = { #Yunnan
+					has_state_flag = CHI_burma_road_closed_state
+					OR = {
+						is_controlled_by = ROOT
+						CONTROLLER = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+			AND = {
+				640 = { #Mandalay
+					has_state_flag = CHI_burma_road_closed_state
+					OR = {
+						is_controlled_by = ROOT
+						CONTROLLER = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+		}
 	}
 	completion_reward = {
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = 50 }
+		}
+		every_country = {
+			limit = { has_country_flag = give_burmese_supply_route_back_upon_reopening_r56 }
+			add_ideas = RAJ_burmese_supply_route_r56
+			clr_country_flag = give_burmese_supply_route_back_upon_reopening_r56
+		}
 	}
 }
 
 shared_focus = {
 	id = RAJ_commit_to_an_indian_china_airlift_r56
 	icon = GFX_goal_generic_air_land_coordination
-	cost = 10
+	cost = 8
 	ai_will_do = { base = 1 }
 	x = 1
 	y = 1
 	prerequisite = { focus = RAJ_the_burma_railroad_r56 }
 	relative_position_id = RAJ_the_burma_railroad_r56
-	bypass = {
+	available = {
+		CUG = {
+			any_enemy_country = {
+				is_major = yes
+				NOT = { 
+					original_tag = BRM 
+					is_in_faction_with = RAJ
+					original_tag = RAJ
+				}
+			}
+			exists = yes
+			is_subject = no
+		}
+		OR = {	#Burma Railroad has been closed
+			AND = {
+				288 = { #Burma
+					has_state_flag = CHI_burma_road_closed_state
+					OR = {
+						is_controlled_by = ROOT
+						CONTROLLER = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+			AND = {
+				325 = { #Yunnan
+					has_state_flag = CHI_burma_road_closed_state
+					OR = {
+						is_controlled_by = ROOT
+						CONTROLLER = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+			AND = {
+				640 = { #Mandalay
+					has_state_flag = CHI_burma_road_closed_state
+					OR = {
+						is_controlled_by = ROOT
+						CONTROLLER = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+		}
 	}
 	completion_reward = {
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = 50 }
+		}
+		CUG = { add_ideas = RAJ_himalayan_supply_route_r56 }
 	}
 }
 
 shared_focus = {
 	id = RAJ_send_troops_to_the_front_r56
 	icon = GFX_focus_generic_mountain_troops
-	cost = 5
+	cost = 4
 	ai_will_do = { base = 1 }
 	x = 0
 	y = 2
@@ -2200,24 +2368,38 @@ shared_focus = {
 			limit = { is_subject_of = ENG }
 			OR = {
 				is_subject = no
+				has_autonomy_state = autonomy_dominion
 				ENG = { has_completed_focus = ENG_embargo_japan }
 			}
 		}
-		else = {
-			is_subject = no
-		}
+		else = { is_subject = no }
 	}
 	completion_reward = {
 		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = 50 }
+		}
+		if = {
 			limit = {	#If you are communist, prioritize supporting communist China
 				has_government = communism
-				PRC = { has_government = communism }
+				PRC = {
+					exists = yes
+					has_government = communism
+				}
 				NOT = {
 					CUG = { has_government = communism }
 				}
 			}
+			add_relation_rule_override = {
+				target = PRC
+				can_send_volunteers = yes 
+			}
 		}
 		else = {	#Prioritize supporting CUG
+			add_relation_rule_override = {
+				target = CUG
+				can_send_volunteers = yes 
+			}
 		}
 	}
 }
@@ -2230,6 +2412,7 @@ shared_focus = {
 	x = 6
 	y = 0
 	relative_position_id = RAJ_prepare_an_autonomous_defense_r56
+	available_if_capitulated = yes
 	completion_reward = {
 		army_experience = 50
 		add_command_power = 10
@@ -2253,7 +2436,11 @@ shared_focus = {
 		has_200_land_doctrine_mastery = yes
 	}
 	completion_reward = {
-		add_command_power = 25
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = 50 }
+		}
+		else = { add_command_power = 25 }
 		random_owned_controlled_state = {
 			limit = {
 				is_core_of = ROOT
@@ -2285,6 +2472,7 @@ shared_focus = {
 		focus = RAJ_accelerate_military_indianization_r56
 		focus = RAJ_expand_the_national_air_force_r56
 	}
+	available_if_capitulated = yes
 	completion_reward = {
 		if = {
 			limit = { has_dlc = "Arms Against Tyranny" }
@@ -2333,6 +2521,8 @@ shared_focus = {
 		effect_tooltip = {
 			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = upon_the_completion_of_focus_expand_the_indian_military_academy_we_will_receive_r56_tt
+			every_army_leader = { add_logistics = 1 }
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_ideas = RAJ_decentralized_armed_forces_r56
 		}
 	}
@@ -2359,6 +2549,8 @@ shared_focus = {
 		effect_tooltip = {
 			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = upon_the_completion_of_focus_expand_the_indian_military_academy_we_will_receive_r56_tt
+			every_army_leader = { add_planning = 1 }
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_ideas = RAJ_standardized_armed_forces_r56
 		}
 	}
@@ -2371,8 +2563,10 @@ shared_focus = {
 	ai_will_do = { base = 4 }
 	y = 2
 	relative_position_id = RAJ_accelerate_military_indianization_r56
-	prerequisite = { focus = RAJ_legacy_of_the_regional_armies_r56 }
-	prerequisite = { focus = RAJ_push_for_standardized_training_r56 }
+	prerequisite = {
+		focus = RAJ_legacy_of_the_regional_armies_r56
+		focus = RAJ_push_for_standardized_training_r56
+	}
 	available = {
 		has_subdoctrine_in_track = infantry
 		has_subdoctrine_in_track = combat_support
@@ -2380,7 +2574,11 @@ shared_focus = {
 		has_subdoctrine_in_track = operations
 	}
 	completion_reward = {
-		add_command_power = 25 
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = 50 }
+		}
+		else = { add_command_power = 25 }
 		if = {
 			limit = { has_completed_focus = RAJ_legacy_of_the_regional_armies_r56 }
 			every_army_leader = { add_logistics = 1 }
@@ -2418,6 +2616,7 @@ shared_focus = {
 	x = 3
 	y = 1
 	relative_position_id = RAJ_prepare_an_autonomous_defense_r56
+	available_if_capitulated = yes
 	completion_reward = {
 		add_tech_bonus = {
 			name = RAJ_begin_equipment_standardization_r56
@@ -2465,6 +2664,7 @@ shared_focus = {
 	x = 4
 	y = 2
 	relative_position_id = RAJ_prepare_an_autonomous_defense_r56
+	available_if_capitulated = yes
 	completion_reward = {
 		if = {
 			limit = { has_tech = motorised_infantry }
@@ -2545,6 +2745,7 @@ shared_focus = {
 		focus = RAJ_towards_an_offensive_footing_r56
 		focus = RAJ_prioritize_support_on_the_ground_r56
 	}
+	available_if_capitulated = yes
 	completion_reward = {
 		set_technology = { bicycle_infantry = 1 }
 		add_tech_bonus = {
@@ -2566,6 +2767,7 @@ shared_focus = {
 	x = 2
 	y = 2
 	relative_position_id = RAJ_prepare_an_autonomous_defense_r56
+	available_if_capitulated = yes
 	completion_reward = {
 		if = {
 			limit = { has_tech = radio }
@@ -2587,7 +2789,7 @@ shared_focus = {
 		add_tech_bonus = {
 			name = SIA_modern_troop_support_systems_r56
 			uses = 3
-			bonus = 1
+			bonus = 0.75
 			category = support_tech
 		}
 		custom_effect_tooltip = generic_skip_one_line_tt
@@ -2620,36 +2822,54 @@ shared_focus = {
 		focus = RAJ_towards_an_offensive_footing_r56
 		focus = RAJ_prioritize_support_on_the_ground_r56
 	}
+	available_if_capitulated = yes
 	completion_reward = {
-		add_tech_bonus = {
-			name = RAJ_cheap_counters_for_expensive_vehicles_r56
-			uses = 2
-			bonus = 1.25
-			category = anti_air_tech
-			category = cat_anti_tank
+		if = {
+			limit = { has_tech = interwar_antitank }
+			add_tech_bonus = {
+				name = RAJ_cheap_counters_for_expensive_vehicles_r56
+				uses = 1
+				bonus = 0.75
+				category = cat_anti_tank
+			}
+		}
+		else = {
+			set_technology = { interwar_antitank = 1 }
+		}
+		if = {
+			limit = { has_tech = interwar_antiair }
+			add_tech_bonus = {
+				name = RAJ_cheap_counters_for_expensive_vehicles_r56
+				uses = 1
+				bonus = 0.75
+				category = anti_air_tech
+			}
+		}
+		else = {
+			set_technology = { interwar_antiair = 1 }
 		}
 		custom_effect_tooltip = generic_skip_one_line_tt
 		if = {
 			limit = { is_ally_with = ENG }
 			add_equipment_to_stockpile = {
-				type = anti_air_equipment
+				type = anti_tank_equipment
 				amount = 100
 				producer = ENG
 			}
 			add_equipment_to_stockpile = {
-				type = anti_tank_equipment
+				type = anti_air_equipment
 				amount = 100
 				producer = ENG
 			}
 		}
 		else = {
 			add_equipment_to_stockpile = {
-				type = anti_air_equipment
+				type = anti_tank_equipment
 				amount = 100
 				producer = RAJ
 			}
 			add_equipment_to_stockpile = {
-				type = anti_tank_equipment
+				type = anti_air_equipment
 				amount = 100
 				producer = RAJ
 			}
@@ -2726,6 +2946,7 @@ shared_focus = {
 	y = 1
 	relative_position_id = RAJ_develop_a_mass_mechanization_plan_r56
 	prerequisite = { focus = RAJ_develop_a_mass_mechanization_plan_r56 }
+	available_if_capitulated = yes
 	completion_reward = {
 		if = {
 			limit = { has_subdoctrine_in_track = armor }
@@ -2772,6 +2993,7 @@ shared_focus = {
 			track = combat_support
 		}
 	}
+	available_if_capitulated = yes
 	completion_reward = {
 		add_tech_bonus = {
 			name = RAJ_improve_the_engineer_and_logistical_units_r56
@@ -2878,7 +3100,7 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_achieve_military_industrial_independence_r56
 	icon = GFX_focus_generic_military_industry
-	cost = 5
+	cost = 4
 	ai_will_do = { base = 1 }
 	y = 2
 	relative_position_id = RAJ_modernize_our_artillery_r56
@@ -2889,7 +3111,7 @@ shared_focus = {
 	}
 	available = {
 		is_subject = no
-		arms_factory > 69
+		arms_factory > 59
 		OR = {
 			has_resources_in_country = {
 				resource = steel
@@ -2906,13 +3128,26 @@ shared_focus = {
 		}
 	}
 	completion_reward = {
+		add_war_support = 0.1
+		if = {
+			limit = { has_dlc = "Arms Against Tyranny" }
+			every_military_industrial_organization = {
+				add_mio_funds = 500
+			}
+		}
+		else = {
+			add_timed_idea = {
+				idea = PRC_the_party_builds_the_nation_timed_idea
+				days = 365
+			}
+		}
 	}
 }
 
 shared_focus = {
 	id = RAJ_elevate_the_school_of_military_engineering_r56
 	icon = GFX_goal_generic_double_research
-	cost = 10
+	cost = 8
 	ai_will_do = { base = 1 }
 	x = 1
 	y = 1
@@ -2928,11 +3163,6 @@ shared_focus = {
 			bonus = 0.75
 			uses = 3
 			category = r56_special_research_division
-		}
-		custom_effect_tooltip = generic_skip_one_line_tt
-		add_breakthrough_progress = {
-			specialization = specialization_land
-			value = 0.25
 		}
 		custom_effect_tooltip = generic_skip_one_line_tt
 		if = {
@@ -2962,6 +3192,27 @@ shared_focus = {
 	relative_position_id = RAJ_achieve_military_industrial_independence_r56
 	prerequisite = { focus = RAJ_achieve_military_industrial_independence_r56 }
 	completion_reward = {
+		add_breakthrough_progress = {
+			specialization = specialization_nuclear
+			value = 0.75
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		random_owned_controlled_state = {
+			limit = {
+				is_coastal = yes
+				air_facility < 1
+				land_facility < 1
+				naval_facility < 1
+				nuclear_facility < 1
+			}
+			prioritize = { 429 }	#Bombay
+			add_building_construction = {
+				type = nuclear_facility
+				level = 1
+				instant_build = yes
+				province = 1349	#Bombay
+			}
+		}
 	}
 }
 
@@ -3034,6 +3285,7 @@ shared_focus = {
 	y = 1
 	relative_position_id = RAJ_focus_on_infantry_production_r56
 	prerequisite = { focus = RAJ_focus_on_infantry_production_r56 }
+	available_if_capitulated = yes
 	completion_reward = {
 		if = {
 			limit = { has_subdoctrine_in_track = armor }
@@ -3058,29 +3310,38 @@ shared_focus = {
 }
 
 shared_focus = {
-	id = RAJ_prepare_to_field_a_mass_army_r56
+	id = RAJ_innovations_on_the_battlefield_r56
 	icon = GFX_focus_generic_limited_social_mobilization
-	cost = 5
+	cost = 6
 	ai_will_do = { base = 1 }
 	x = 1
 	y = 1
 	relative_position_id = RAJ_focus_on_infantry_production_r56
-	prerequisite = { focus = RAJ_focus_on_infantry_production_r56 }
+	prerequisite = {
+		focus = RAJ_focus_on_infantry_production_r56
+		focus = RAJ_modernize_our_artillery_r56
+	}
 	available = {
 		has_mastery = {
 			amount = 300
 			track = infantry
 		}
 	}
+	available_if_capitulated = yes
 	search_filters = {}
 	completion_reward = {
 		add_tech_bonus = {
-			name = RAJ_prepare_to_field_a_mass_army_r56
+			name = RAJ_innovations_on_the_battlefield_r56
 			ahead_reduction = 1.5
-			uses = 1
+			uses = 2
 			category = infantry_weapons
+			category = artillery
 		}
-		add_ideas = RAJ_preparations_for_a_mass_army_r56
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_breakthrough_progress = {
+			specialization = specialization_land
+			value = 0.75
+		}
 	}
 }
 
@@ -3093,11 +3354,11 @@ shared_focus = {
 	y = 0
 	relative_position_id = RAJ_accelerate_military_indianization_r56
 	completion_reward = {
-		navy_experience = 50
+		navy_experience = 35
 		add_doctrine_cost_reduction = {
 			name = RAJ_Reform_the_Royal_Indian_Navy
-			cost_reduction = 0.25
-			uses = 2
+			cost_reduction = 0.5
+			uses = 1
 			category = naval_doctrine
 		}
 		custom_effect_tooltip = generic_skip_one_line_tt
@@ -3178,6 +3439,11 @@ shared_focus = {
 		has_subdoctrine_in_track = capital_ships
 	}
 	completion_reward = {
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = 50 }
+		}
+		else = { add_command_power = 25 }
 		random_owned_controlled_state = {
 			limit = {
 				is_coastal = yes
@@ -3211,7 +3477,7 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_Coastal_Defence_Fleet
 	icon = GFX_focus_generic_destroyer
-	cost = 5
+	cost = 6
 	ai_will_do = { base = 3 }
 	x = 1
 	y = 1
@@ -3225,13 +3491,38 @@ shared_focus = {
 	prerequisite = { focus = RAJ_Reform_the_Royal_Indian_Navy }
 	relative_position_id = RAJ_Reform_the_Royal_Indian_Navy
 	completion_reward = {
+		if = {
+			limit = { has_subdoctrine_in_track = screens }
+			add_daily_mastery = {
+				name = RAJ_Coastal_Defence_Fleet
+				amount = 0.2
+				days = 180
+				track = screens
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+		}
+		else = {
+			add_doctrine_cost_reduction = {
+				name = RAJ_Coastal_Defence_Fleet
+				cost_reduction = 0.5
+				uses = 1
+				category = naval_doctrine
+			}
+		}
+		add_tech_bonus = {
+			name = RAJ_Coastal_Defence_Fleet
+			bonus = 0.75
+			uses = 2
+			category = dd_tech
+			category = cl_tech
+		}
 	}
 }
 
 shared_focus = {
 	id = RAJ_towards_an_economical_merchant_fleet_r56
 	icon = GFX_goal_generic_navy_cruiser
-	cost = 5
+	cost = 8
 	ai_will_do = { base = 1 }
 	x = 0
 	y = 2
@@ -3284,7 +3575,7 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_Floating_Fortresses
 	icon = GFX_focus_generic_navy_battleship2
-	cost = 5
+	cost = 6
 	ai_will_do = { base = 1 }
 	x = 3
 	y = 1
@@ -3298,13 +3589,49 @@ shared_focus = {
 		}
 	}
 	completion_reward = {
+		if = {
+			limit = { has_subdoctrine_in_track = carriers }
+			add_daily_mastery = {
+				name = RAJ_Floating_Fortresses
+				amount = 0.4
+				days = 180
+				track = carriers
+			}
+		}
+		else = {
+			add_doctrine_cost_reduction = {
+				name = RAJ_Floating_Fortresses
+				cost_reduction = 0.5
+				uses = 1
+				category = naval_doctrine
+			}
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_tech_bonus = {
+			name = RAJ_Floating_Fortresses
+			bonus = 1
+			uses = 1
+			category = ca_tech
+			category = bb_tech
+			category = bc_tech
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_tech_bonus = {
+			name = RAJ_Floating_Fortresses
+			bonus = 0.75
+			uses = 2
+			technology = basic_medium_battery
+			technology = improved_medium_battery
+			technology = basic_heavy_battery
+			technology = improved_heavy_battery
+		}
 	}
 }
 
 shared_focus = {
 	id = RAJ_asias_regional_naval_power_r56
 	icon = GFX_focus_generic_large_navy
-	cost = 5
+	cost = 8
 	ai_will_do = { base = 1 }
 	x = 0
 	y = 2
@@ -3342,6 +3669,8 @@ shared_focus = {
 				instant_build = yes
 			}
 		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_ideas = RAJ_aggressive_naval_buildup_r56
 	}
 }
 
@@ -3357,20 +3686,23 @@ shared_focus = {
 		focus = RAJ_towards_an_economical_merchant_fleet_r56
 		focus = RAJ_asias_regional_naval_power_r56
 	}
-	completion_reward = {
-	}
+	completion_reward = { add_ideas = ENG_expand_the_repair_yards }
 }
 
 shared_focus = {
 	id = RAJ_prioritize_new_shipyard_centers_56
 	icon = GFX_focus_generic_shipbuilding
-	cost = 8
+	cost = 10
 	ai_will_do = { base = 1 }
 	x = 1
 	y = 1
 	relative_position_id = RAJ_asias_regional_naval_power_r56
 	prerequisite = { focus = RAJ_asias_regional_naval_power_r56 }
 	completion_reward = {
+		swap_ideas = {
+			remove_idea = RAJ_aggressive_naval_buildup_r56
+			add_idea = RAJ_aggressive_naval_buildup_2_r56
+		}
 		random_owned_controlled_state = {
 			limit = {
 				is_coastal = yes
@@ -3684,25 +4016,98 @@ shared_focus = {
 	y = 1
 	prerequisite = { focus = RAJ_study_imported_hawker_bombers_r56 }
 	relative_position_id = RAJ_study_imported_hawker_bombers_r56
+	available = {
+		if = {
+			limit = { has_dlc = "By Blood Alone" }
+			OR = {
+				has_tech = heavy_bombs
+				has_tech = air_torpedoe_2
+			}
+		}
+		else = {
+			OR = {
+				has_tech = tactical_bomber1
+				has_tech = CAS1
+				has_tech = naval_bomber1
+				has_tech = strategic_bomber1
+			}
+		}
+	}
 	completion_reward = {
+		if = {
+			limit = {
+				has_dlc = "Arms Against Tyranny"
+				has_dlc = "Graveyard of Empires"
+			}
+			mio:RAJ_hawker_organization = { add_mio_size = 2 }
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = yes
+					}
+				}
+				prioritize = { 439 }	#Delhi
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
+		}
+		else = {
+			random_owned_controlled_state = {
+				limit = {
+					free_building_slots = {
+						building = industrial_complex
+						size > 1
+						include_locked = yes
+					}
+				}
+				prioritize = { 439 }	#Delhi
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = arms_factory
+					level = 2
+					instant_build = yes
+				}
+			}
+		}
 	}
 }
 
 shared_focus = {
 	id = RAJ_cultivate_indian_air_officers_r56
 	icon = GFX_focus_generic_air_partners
-	cost = 10
+	cost = 8
 	ai_will_do = { base = 3 }
 	y = 2
 	prerequisite = { focus = RAJ_expand_the_national_air_force_r56 }
 	relative_position_id = RAJ_expand_the_national_air_force_r56
 	completion_reward = {
-		add_doctrine_cost_reduction = {
-			name = RAJ_study_imported_hawker_bombers_r56
-			cost_reduction = 0.25
-			uses = 2
-			category = air_doctrine
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = 50 }
+			add_doctrine_cost_reduction = {
+				name = RAJ_study_imported_hawker_bombers_r56
+				cost_reduction = 0.25
+				uses = 1
+				category = air_doctrine
+			}
 		}
+		else = {
+			add_command_power = 25
+			add_doctrine_cost_reduction = {
+				name = RAJ_study_imported_hawker_bombers_r56
+				cost_reduction = 0.25
+				uses = 2
+				category = air_doctrine
+			}
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_ideas = RAJ_indianization_of_the_air_force_r56
 	}
 }
 
@@ -3847,7 +4252,7 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_kickstart_a_submarine_program_r56
 	icon = GFX_goal_ROM_torpedo_submarines
-	cost = 5
+	cost = 8
 	ai_will_do = { base = 1 }
 	x = 0
 	y = 2
@@ -3868,6 +4273,31 @@ shared_focus = {
 	}
 	completion_reward = {
 		mark_focus_tree_layout_dirty_r56 = yes
+		if = {
+			limit = { has_subdoctrine_in_track = submarines }
+			add_daily_mastery = {
+				name = RAJ_kickstart_a_submarine_program_r56
+				amount = 0.2
+				days = 180
+				track = submarines
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+		}
+		else = {
+			add_doctrine_cost_reduction = {
+				name = RAJ_kickstart_a_submarine_program_r56
+				cost_reduction = 0.5
+				uses = 1
+				category = naval_doctrine
+			}
+		}
+		add_tech_bonus = {
+			name = RAJ_kickstart_a_submarine_program_r56
+			bonus = 0.75
+			uses = 1
+			category = ss_tech
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
 		random_owned_controlled_state = {
 			limit = {
 				is_coastal = yes
@@ -3891,7 +4321,7 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_bring_terror_to_the_vital_trade_routes_r56
 	icon = GFX_goal_generic_navy_anti_submarine
-	cost = 5
+	cost = 8
 	ai_will_do = { base = 1 }
 	x = -1
 	y = 1
@@ -3899,6 +4329,22 @@ shared_focus = {
 	mutually_exclusive = { focus = RAJ_diversify_the_fleet_r56 }
 	prerequisite = { focus = RAJ_kickstart_a_submarine_program_r56 }
 	completion_reward = {
+		add_tech_bonus = {
+			name = RAJ_bring_terror_to_the_vital_trade_routes_r56
+			bonus = 0.75
+			uses = 1
+			category = ss_tech
+		}
+		add_tech_bonus = {
+			name = RAJ_bring_terror_to_the_vital_trade_routes_r56
+			bonus = 0.75
+			uses = 2
+			technology = basic_submarine_snorkel
+			technology = improved_submarine_snorkel
+			category = cat_torpedoes
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_ideas = RAJ_submarine_primacy_r56
 	}
 }
 
@@ -3916,13 +4362,15 @@ shared_focus = {
 		focus = RAJ_towards_an_economical_merchant_fleet_r56
 	}
 	completion_reward = {
+		set_technology = { cruiser_submarines = 1 }
+		set_technology = { midget_submarines = 1 }
 	}
 }
 
 shared_focus = {
 	id = RAJ_the_heart_of_the_commonwealth_r56
 	icon = GFX_goal_RAJ_british_india_army
-	cost = 5
+	cost = 4
 	x = 2
 	y = 2
 	relative_position_id = RAJ_accelerate_military_indianization_r56
@@ -3936,6 +4384,7 @@ shared_focus = {
 		}
 		RAJ_the_heart_of_the_commonwealth_r56_branch_trigger = yes
 	}
+	available_if_capitulated = yes
 	allow_branch = {
 		NOT = {
 			has_completed_focus = RAJ_Indian_National_Congress
@@ -3944,13 +4393,18 @@ shared_focus = {
 		}
 	}
 	completion_reward = {
+		add_war_support = 0.05
+		every_country = {
+			limit = { is_ally_with = ROOT }
+			add_ideas = RAJ_Common_Defence_Policy
+		}
 	}
 }
 
 shared_focus = {
 	id = RAJ_utilize_the_british_dependency_r56
 	icon = GFX_focus_RAJ_british_investors
-	cost = 5
+	cost = 4
 	ai_will_do = { base = 1 }
 	prerequisite = { focus = RAJ_the_heart_of_the_commonwealth_r56 }
 	y = 1
@@ -3958,33 +4412,50 @@ shared_focus = {
 	search_filters = {
 		FOCUS_FILTER_INDUSTRY FOCUS_FILTER_MILITARY_EQUIPMENT
 	}
-	bypass = {
-		NOT = {
-			is_in_faction_with = ENG
-		}
-		NOT = {
-			is_subject_of = ENG
-		}
-	}
 	available = { RAJ_the_heart_of_the_commonwealth_r56_branch_trigger = yes }
+	available_if_capitulated = yes
 	completion_reward = {
-		RAJ = {
-			add_equipment_to_stockpile = {
-				type = infantry_equipment
-				amount = 5000
-				producer = ENG
+		if = {
+			limit = { is_subject = yes }
+			add_autonomy_score = { value = -100 }
+		}
+		add_opinion_modifier = {
+			target = ENG
+			modifier = RAJ_Weapon_Shipments
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_equipment_to_stockpile = {
+			type = infantry_equipment
+			amount = 5000
+			producer = ENG
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		if = {
+			limit = {
+				NOT = { has_dlc = "By Blood Alone" }
 			}
-			add_opinion_modifier = {
-				target = ENG
-				modifier = RAJ_Weapon_Shipments
+			if = {
+				limit = {
+					not = { has_tech = fighter1 }
+				}
+				set_technology = { fighter1 = 1 }
 			}
+			add_equipment_to_stockpile = { type = fighter_equipment_1 amount = 100 producer = ENG }
+		}
+		else = {
+			if = {
+				limit = {
+					not = { has_tech = basic_small_airframe  }
+				}
+				set_technology = { basic_small_airframe = 1 }
+			}
+			add_equipment_to_stockpile = { type = small_plane_airframe_1 amount = 100 producer = ENG variant_name = "Hawker Hurricane"}
 		}
 	}
-
 }
 
 shared_focus = {
-	id = RAJ_the_defense_of_the_empire_r56
+	id = RAJ_organize_a_defense_of_the_pacific_r56
 	icon = GFX_focus_generic_jungle_training
 	cost = 10
 	ai_will_do = { base = 1 }
@@ -4006,15 +4477,66 @@ shared_focus = {
 shared_focus = {
 	id = RAJ_take_the_fight_overseas_r56
 	icon = GFX_focus_generic_surrender
-	cost = 10
+	cost = 8
 	ai_will_do = { base = 1 }
 	prerequisite = { focus = RAJ_the_heart_of_the_commonwealth_r56 }
 	x = 1
 	y = 2
 	relative_position_id = RAJ_the_heart_of_the_commonwealth_r56
-	available = {
-	}
+	available = { has_capitulated = yes }
+	available_if_capitulated = yes
 	completion_reward = {
+		RAJ = {
+			random_core_state = {
+				limit = {
+					industrial_complex > 1
+					is_controlled_by_ROOT_or_ally = no
+				}
+				add_building_construction = {
+					type = industrial_complex
+					level = -2
+					instant_build = yes
+				}
+			}
+			random_core_state = {
+				limit = {
+					arms_factory > 1
+					is_controlled_by_ROOT_or_ally = no
+				}
+				add_building_construction = {
+					type = arms_factory
+					level = -2
+					instant_build = yes
+				}
+			}
+			random_core_state = {
+				limit = {
+					dockyard > 0
+					is_controlled_by_ROOT_or_ally = no
+				}
+				add_building_construction = {
+					type = dockyard
+					level = -1
+					instant_build = yes
+				}
+			}
+		}
+
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_offsite_building = {
+			type = industrial_complex
+			level = 2
+		}
+		add_offsite_building = {
+			type = arms_factory
+			level = 2
+		}
+		add_offsite_building = {
+			type = dockyard
+			level = 1
+		}
+		custom_effect_tooltip = generic_skip_one_line_tt
+		add_ideas = RAJ_taking_the_fight_overseas_r56
 	}
 }
 
