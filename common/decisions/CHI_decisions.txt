@@ -3548,7 +3548,11 @@ CHI_industrial_evacuations = {
 			}
 		}
 		visible = {
-			has_completed_focus = KMT_industrial_evacuations	
+			has_completed_focus = KMT_industrial_evacuations
+			CHI_zhu_jiahua = { is_hired_as_advisor = no}
+			NOT = {
+				FROM = { has_state_flag = KMT_no_more_excav }
+			}
 		}
 
 		fire_only_once = yes
@@ -3556,6 +3560,295 @@ CHI_industrial_evacuations = {
 
 		days_remove = 15
 
+		remove_effect = {
+			if = {
+				limit = {
+					controls_state = FROM
+				}
+				FROM = {
+					set_variable = {
+						var = af_level
+						value = arms_factory_level
+					}
+					set_variable = {
+						var = af_to_move
+						value = arms_factory_level
+					}
+					multiply_variable = {
+						var = af_to_move
+						value = global.CHI_industrial_evacuations_amount_factor
+					}
+	
+					set_variable = {
+						var = ic_level
+						value = industrial_complex_level
+					}
+					set_variable = {
+						var = ic_to_move
+						value = industrial_complex_level
+					}
+					multiply_variable = {
+						var = ic_to_move
+						value = global.CHI_industrial_evacuations_amount_factor
+					}
+	
+					custom_effect_tooltip = CHI_industrial_evacuations_remove_AF
+					custom_effect_tooltip = CHI_industrial_evacuations_remove_IC
+					hidden_effect = {				
+						remove_building = {
+							type = arms_factory
+							level = af_level
+						}
+						remove_building = {
+							type = industrial_complex
+							level = ic_level
+						}
+					}
+	
+					#Move AF
+					CONTROLLER = {
+						random_owned_controlled_state = {
+							prioritize = { 605 603 748 }
+							limit = {
+								is_fully_controlled_by = ROOT
+								any_neighbor_state = {
+									is_controlled_by = ROOT
+								}
+								free_building_slots = {
+									building = arms_factory
+									size > 2
+									include_locked = yes
+								}
+							}
+	
+							custom_effect_tooltip = CHI_industrial_evacuations_add_AF						
+							hidden_effect = {
+								add_extra_state_shared_building_slots = af_to_move
+								add_building_construction = {
+									type = arms_factory
+									level = af_to_move
+									instant_build = yes
+								}
+								CONTROLLER = { set_country_flag = CHI_industrial_evacuations_moved_AF }
+							}
+						}
+	
+						#If no states are really safe or all safe are filled
+						#Move to random controlled state
+						if = {
+							limit = {
+								NOT = { has_country_flag = CHI_industrial_evacuations_moved_AF }
+								NOT = {
+									any_controlled_state = {
+										is_fully_controlled_by = ROOT
+										any_neighbor_state = {
+											is_controlled_by = ROOT
+										}
+										free_building_slots = {
+											building = arms_factory
+											size > 2
+											include_locked = yes
+										}
+									}
+								}
+							}
+							random_owned_controlled_state = {
+								prioritize = { 605 603 748 }
+								limit = {
+									is_controlled_by = ROOT
+									free_building_slots = {
+										building = arms_factory
+										size > 2
+										include_locked = yes
+									}
+								}
+	
+								custom_effect_tooltip = CHI_industrial_evacuations_add_AF						
+								hidden_effect = {
+									add_extra_state_shared_building_slots = af_to_move
+									add_building_construction = {
+										type = arms_factory
+										level = af_to_move
+										instant_build = yes
+									}
+								}
+							}
+						}
+						clr_country_flag = CHI_industrial_evacuations_moved_AF
+	
+	
+						#Move IC
+						random_owned_controlled_state = {
+							prioritize = { 605 603 748 }
+							limit = {
+								is_fully_controlled_by = ROOT
+								any_neighbor_state = {
+									is_controlled_by = ROOT
+								}
+								free_building_slots = {
+									building = industrial_complex
+									size > 2
+									include_locked = yes
+								}
+							}
+							
+							custom_effect_tooltip = CHI_industrial_evacuations_add_IC
+							hidden_effect = {
+								add_extra_state_shared_building_slots = ic_to_move
+								add_building_construction = {
+									type = industrial_complex
+									level = ic_to_move
+									instant_build = yes
+								}
+								CONTROLLER = { set_country_flag = CHI_industrial_evacuations_moved_IC }
+							}
+						}
+	
+						#If no states are really safe or all safe are filled
+						#Move to random controlled state
+						if = {
+							limit = {
+								NOT = { has_country_flag = CHI_industrial_evacuations_moved_IC }
+								NOT = {
+									any_controlled_state = {
+										is_fully_controlled_by = ROOT
+										any_neighbor_state = {
+											is_controlled_by = ROOT
+										}
+										free_building_slots = {
+											building = industrial_complex
+											size > 2
+											include_locked = yes
+										}
+									}
+								}
+							}
+							random_owned_controlled_state = {
+								prioritize = { 605 603 748 }
+								limit = {
+									is_controlled_by = ROOT
+									free_building_slots = {
+										building = industrial_complex
+										size > 2
+										include_locked = yes
+									}
+								}
+	
+								custom_effect_tooltip = CHI_industrial_evacuations_add_IC
+								hidden_effect = {
+									add_extra_state_shared_building_slots = ic_to_move
+									add_building_construction = {
+										type = industrial_complex
+										level = ic_to_move
+										instant_build = yes
+									}
+								}
+							}
+						}
+						clr_country_flag = CHI_industrial_evacuations_moved_IC
+					}			
+				}
+			}
+		}
+		complete_effect = {
+			FROM = { set_state_flag = KMT_no_more_excav }
+		}
+
+		ai_will_do = {
+			factor = 1
+		}
+	}
+
+	#Originally available for 283 591 592 593 594 595 596 597 598 599 600 602 606 607 608 613 614 616 620 743
+	CHI_industrial_evacuations_from_FROM_2 = { 
+		icon = generic_scorched_earth
+		available = {
+			FROM = {
+				OR = {
+					arms_factory > 0
+					industrial_complex > 0
+				}
+			}
+		}
+		highlight_states = {
+			highlight_state_targets = {
+				state = 283
+				state = 591
+				state = 592
+				state = 593
+				state = 594
+				state = 595
+				state = 596
+				state = 597
+				state = 598
+				state = 599
+				state = 600
+				state = 602
+				state = 606
+				state = 607
+				state = 608
+				state = 613
+				state = 614
+				state = 616
+				state = 620
+				state = 743			
+			}
+		}
+		on_map_mode = map_and_decisions_view
+
+		state_target = yes
+		target_trigger = {	#originally were 283 591 592 593 594 595 596 597 598 599 600 602 606 607 608 613 614 616 620 743
+			FROM = {
+				OR = {
+					state = 283
+					state = 591
+					state = 592
+					state = 593
+					state = 594
+					state = 595
+					state = 596
+					state = 597
+					state = 598
+					state = 599
+					state = 600
+					state = 602
+					state = 606
+					state = 607
+					state = 608
+					state = 613
+					state = 614
+					state = 616
+					state = 620
+					state = 743
+				}
+				is_controlled_by = ROOT
+				OR ={
+					NOT ={
+						is_fully_controlled_by = ROOT
+					}
+					any_neighbor_state = {
+						controller = {
+							has_war_with = ROOT
+						}
+					}
+				}
+			}
+		}
+		visible = {
+			has_completed_focus = KMT_industrial_evacuations
+			CHI_zhu_jiahua = { is_hired_as_advisor = yes}
+			NOT = {
+				FROM = { has_state_flag = KMT_no_more_excav }
+			}
+		}
+
+		fire_only_once = yes
+		cost = 10
+
+		days_remove = 15
+		complete_effect = {
+			FROM = { set_state_flag = KMT_no_more_excav }
+		}
 		remove_effect = {
 			if = {
 				limit = {
