@@ -9,6 +9,7 @@
 
 **Bugfixes**
 - If an Afghan Cross-border Tie decision Promote Resistance is cancelled, transfer can no longer be suggested.
+- [NCNS] Cuban focus 'American Air Bases' now correctly grants Cuba air base access.
 - [PFOT] Prague and Bojnice Castle landmarks now appear on the map.
 
 **AI**
