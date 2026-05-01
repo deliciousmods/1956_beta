@@ -23,3 +23,4 @@
 
 **Internal**
 - Improved code quality regarding the Venezuelan Civil War.
+- Abkhaz fascist leader is now random random.
