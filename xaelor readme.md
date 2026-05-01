@@ -8,7 +8,7 @@
 - null
 
 **Bugfixes**
-- null
+- [PFOT] Prague and Bojnice Castle landmarks now appear on the map.
 
 **AI**
 - null
