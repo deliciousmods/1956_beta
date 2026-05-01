@@ -8,6 +8,7 @@
 - null
 
 **Bugfixes**
+- If an Afghan Cross-border Tie decision Promote Resistance is cancelled, transfer can no longer be suggested.
 - [PFOT] Prague and Bojnice Castle landmarks now appear on the map.
 
 **AI**
