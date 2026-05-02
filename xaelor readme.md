@@ -5,7 +5,7 @@
 - Added an unused Terek Cossack releasable.
 
 **Adjustments**
-- null
+- Added generic advisors for the Venezuelan National Government.
 
 **Bugfixes**
 - If an Afghan Cross-border Tie decision Promote Resistance is cancelled, transfer can no longer be suggested.
@@ -21,6 +21,7 @@
 
 **Localization**
 - Liechtensteiner event 'Switzerland/Austria Stages a Sucessful Intervenion Within our Nation' is now correctly localized depending who executes the border war.
+- Added a name list for the Venezuelan National Government.
 
 **Internal**
 - Improved code quality regarding the Venezuelan Civil War.
