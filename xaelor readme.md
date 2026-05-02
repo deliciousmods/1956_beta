@@ -22,6 +22,7 @@
 **Localization**
 - Liechtensteiner event 'Switzerland/Austria Stages a Sucessful Intervenion Within our Nation' is now correctly localized depending who executes the border war.
 - Added a name list for the Venezuelan National Government.
+- Added name for the Kalmyk facist party.
 
 **Internal**
 - Improved code quality regarding the Venezuelan Civil War.
