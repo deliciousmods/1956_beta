@@ -9,6 +9,7 @@
 
 **Bugfixes**
 - If an Afghan Cross-border Tie decision Promote Resistance is cancelled, transfer can no longer be suggested.
+- 'Promote Infrastructure Development' and 'Promote Construction Development' decisions are now available for Italian East Africa.
 - [NCNS] Cuban focus 'American Air Bases' now correctly grants Cuba air base access.
 - [PFOT] Prague and Bojnice Castle landmarks now appear on the map.
 
