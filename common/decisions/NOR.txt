@@ -8,7 +8,7 @@
 		}
 
  		complete_effect = {
-			create_faction_from_template = {
+			create_faction_from_template = { #R56
 				template = faction_template_defensive_democratic
 				name = NORDICSSSSSS
 				icon = GFX_faction_logo_generic_democratic
@@ -666,6 +666,7 @@ NOR_exile_decisions_category = { # Unique versions of normal in exile decisiosn 
 	NOR_foment_resistance_in_state = {
 		icon = GFX_decision_generic_civil_support
 
+		days_remove = 90 
 		available = {
 			has_legitimacy > 50
 			FROM = {
@@ -905,11 +906,7 @@ NOR_democratic_preparation_decisions_category = {
 	NOR_focus_on_training = {
 		
 		visible = {
-			has_completed_focus = NOR_rearm_for_defense
-			OR = {
-				has_country_flag = NOR_going_dem_historical
-				has_country_flag = NOR_going_dem_allied
-			}		
+			has_completed_focus = NOR_rearm_for_defense		
 		}
 
 		available = {
@@ -951,11 +948,7 @@ NOR_democratic_preparation_decisions_category = {
 	NOR_public_investment_drive = {
 		
 		visible = {
-			has_completed_focus = NOR_restart_public_investment
-			OR = {
-				has_country_flag = NOR_going_dem_historical
-				has_country_flag = NOR_going_dem_allied
-			}		
+			has_completed_focus = NOR_coastal_defense		
 		}
 
 		available = {
@@ -1006,14 +999,16 @@ NOR_democratic_preparation_decisions_category = {
 		}
 
 		available = {
-			custom_trigger_tooltip = {
-				tooltip = NOR_country_prep_modernize_armed_forces_TT
-				check_variable = {
-					var = NOR_country_preparedness
-					value > 15 
+			OR = {
+				custom_trigger_tooltip = {
+					tooltip = NOR_country_prep_modernize_armed_forces_TT
+					check_variable = {
+						var = NOR_country_preparedness
+						value > 15 
+					}
 				}
+				longest_war_length > 3
 			}
-			
 		}
 		custom_cost_text = decision_cost_modernize_armed_forces_convoy_cp
 
@@ -1103,6 +1098,67 @@ NOR_democratic_preparation_decisions_category = {
 }
 
 NOR_historical_deploy_prep_decisions_category = {
+	NOR_modernize_armed_forces_decision_wartime = {
+		name = NOR_modernize_armed_forces_decision
+		
+		visible = {
+			has_completed_focus = NOR_rearm_for_defense
+			OR = {
+				has_idea = NOR_obsolete_armed_forces_ns_1
+				has_idea = NOR_obsolete_armed_forces_ns_2
+			}
+		}
+
+		available = {
+			OR = {
+				custom_trigger_tooltip = {
+					tooltip = NOR_country_prep_modernize_armed_forces_TT
+					check_variable = {
+						var = NOR_country_preparedness
+						value > 15 
+					}
+				}
+				longest_war_length > 3
+			} 
+			
+		}
+		custom_cost_text = decision_cost_modernize_armed_forces_convoy_cp
+
+		custom_cost_trigger = {
+			command_power > 29
+			has_equipment = {
+				convoy > 99
+			}
+		}
+
+		days_remove = 60
+
+		complete_effect = {
+			add_command_power = -25
+			add_equipment_to_stockpile = { 
+				type = convoy_1
+				amount = -100
+			}
+		}
+
+		remove_effect = {
+			if = {
+				limit = {
+					has_idea = NOR_obsolete_armed_forces_ns_1
+				}
+				swap_ideas = {
+					remove_idea = NOR_obsolete_armed_forces_ns_1
+					add_idea = NOR_obsolete_armed_forces_ns_2
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = NOR_obsolete_armed_forces_ns_2
+				}
+				remove_ideas = { NOR_obsolete_armed_forces_ns_2	}
+			}
+		}
+	}
 	
 	NOR_deploy_state_preparation_historical = { # Decision to deploy the preparation of the state 
 		
@@ -1379,15 +1435,25 @@ NOR_historical_deploy_prep_decisions_category = {
 		}
 		custom_cost_trigger = {
 			has_equipment = {
-				convoy_1 > 49
+				convoy_1 > 50
 			}
-			has_army_experience > 79
+			has_army_experience > 80
 		}
 
 		custom_cost_text = decision_cost_convy_army_xp
 
 		days_remove = 30
 
+		complete_effect = {
+			hidden_effect = {
+				add_equipment_to_stockpile = { 
+					type = convoy_1
+					amount = -50
+					producer = NOR
+				}
+				army_experience = -80 
+			}
+		}
 		remove_effect = {
 			NOR_make_militias_into_regulars = yes 
 		}
@@ -1671,12 +1737,15 @@ NOR_allied_democratic_preparation_decisions_category = {
 		}
 
 		available = {
-			custom_trigger_tooltip = {
-				tooltip = NOR_country_prep_modernize_armed_forces_TT
-				check_variable = {
-					var = NOR_country_preparedness
-					value > 15 
+			OR = {
+				custom_trigger_tooltip = {
+					tooltip = NOR_country_prep_modernize_armed_forces_TT
+					check_variable = {
+						var = NOR_country_preparedness
+						value > 15 
+					}
 				}
+				longest_war_length > 3
 			}
 			
 		}
@@ -1717,8 +1786,153 @@ NOR_allied_democratic_preparation_decisions_category = {
 			}
 		}
 	}
+	NOR_alt_dem_focus_on_training = {
+		
+		visible = {
+			has_completed_focus = NOR_rearm_for_defense
+		}
+
+		available = {
+			NOT = {
+				ROOT = {
+					has_country_flag = NOR_ongoing_countrywide_program
+				}
+			}
+			has_equipment = {
+				convoy > NOR_prep_his_program_min_convoy
+			}		
+		}
+
+		cost = 50
+		
+		days_remove = 45 
+
+		complete_effect = {
+			ROOT = { set_country_flag = NOR_ongoing_countrywide_program }
+		}
+
+		modifier = {
+			training_time_factor = -0.15
+			consumer_goods_factor = 0.05
+			production_factory_max_efficiency_factor = -0.1
+		}
+
+		remove_effect = {
+			ROOT = { clr_country_flag = NOR_ongoing_countrywide_program }
+		}
+
+		cancel_effect = {
+			hidden_effect = {
+				clr_country_flag = NOR_ongoing_countrywide_program
+			} 
+		}
+	}
+
+	NOR_alt_dem_public_investment_drive = {
+		
+		visible = {
+			has_completed_focus = NOR_coastal_defense		
+		}
+
+		available = {
+			NOT = {
+				ROOT = {
+					has_country_flag = NOR_ongoing_countrywide_program
+				}
+			}
+			has_equipment = {
+				convoy > NOR_prep_his_program_min_convoy
+			}		
+		}
+
+		cost = 50
+
+		days_remove = 45 
+
+		complete_effect = {
+			ROOT = { set_country_flag = NOR_ongoing_countrywide_program }
+		}
+
+		modifier = { 
+			production_speed_buildings_factor = 0.2
+			training_time_factor = 0.10
+			production_factory_max_efficiency_factor = -0.1
+			industrial_capacity_factory = -0.15
+		} 
+
+		remove_effect = {
+			ROOT = { clr_country_flag = NOR_ongoing_countrywide_program }
+		}
+
+		cancel_effect = {
+			hidden_effect = {
+				clr_country_flag = NOR_ongoing_countrywide_program
+			} 
+		}
+	}
 }
 NOR_allied_democratic_deploy_prep_decisions_category = {
+	NOR_alt_dem_modernize_armed_forces_decision_wartime = {
+		name = NOR_alt_dem_modernize_armed_forces_decision
+		
+		visible = {
+			has_completed_focus = NOR_reform_the_army 
+			OR = {
+				has_idea = NOR_obsolete_armed_forces_ns_1
+				has_idea = NOR_obsolete_armed_forces_ns_2
+			}
+		}
+
+		available = {
+			OR = {
+				custom_trigger_tooltip = {
+					tooltip = NOR_country_prep_modernize_armed_forces_TT
+					check_variable = {
+						var = NOR_country_preparedness
+						value > 15 
+					}
+				}
+				longest_war_length > 3
+			}
+			
+		}
+		custom_cost_text = decision_cost_modernize_armed_forces_convoy_cp
+
+		custom_cost_trigger = {
+			command_power > 29
+			has_equipment = {
+				convoy > 99
+			}
+		}
+
+		days_remove = 45
+
+		complete_effect = {
+			add_command_power = -25
+			add_equipment_to_stockpile = { 
+				type = convoy_1
+				amount = -100
+			}
+		}
+
+		remove_effect = {
+			if = {
+				limit = {
+					has_idea = NOR_obsolete_armed_forces_ns_1
+				}
+				swap_ideas = {
+					remove_idea = NOR_obsolete_armed_forces_ns_1
+					add_idea = NOR_obsolete_armed_forces_ns_2
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = NOR_obsolete_armed_forces_ns_2
+				}
+				remove_ideas = { NOR_obsolete_armed_forces_ns_2	}
+			}
+		}
+	}
 	NOR_alt_dem_expedite_training = {
 		
 		visible = {
@@ -1906,15 +2120,25 @@ NOR_allied_democratic_deploy_prep_decisions_category = {
 		}
 		custom_cost_trigger = {
 			has_equipment = {
-				convoy_1 > 49
+				convoy_1 > 50
 			}
-			has_army_experience > 79
+			has_army_experience > 80
 		}
 
 		custom_cost_text = decision_cost_convy_army_xp
 
 		days_remove = 3
 
+		complete_effect = {
+			hidden_effect = {
+				add_equipment_to_stockpile = { 
+					type = convoy_1
+					amount = -50
+					producer = NOR
+				}
+				army_experience = -80 
+			}
+		}
 		remove_effect = {
 			NOR_make_militias_into_regulars = yes 
 		}
@@ -2066,27 +2290,36 @@ NOR_fascist_preparation_decisions_category = {
 	NOR_invite_fascist_to_invade = {
 		
 		visible = {
-			if = {
-				limit = {
-					var:GLOBAL.platonic_fascist_bully = {
-						capital_scope = {
-							is_on_continent = europe 
-						}
-					}		
-				}
-				var:GLOBAL.platonic_fascist_bully = {
-					ROOT = {
-						NOT = { has_country_flag = NOR_already_asked_a_fascist@PREV } 
-					}
+			#if = {
+			#	limit = {
+			#		var:GLOBAL.platonic_fascist_bully = {
+			#			capital_scope = {
+			#				is_on_continent = europe 
+			#			}
+			#		}		
+			#	}
+			#	var:GLOBAL.platonic_fascist_bully = {
+			#		ROOT = {
+			#			NOT = { has_country_flag = NOR_already_asked_a_fascist@PREV } 
+			#		}
+			#	}
+			#}
+			#else = {
+			#	var:platonic_local_dangerous_fascist = {
+			#		ROOT = {
+			#			NOT = { has_country_flag = NOR_already_asked_a_fascist@PREV } 
+			#		}
+			#	}
+			#}
+			
+			any_country = {
+				original_tag = GER
+				has_government = fascism
+				ROOT = {
+					NOT = { has_country_flag = NOR_already_asked_a_fascist@PREV } 
 				}
 			}
-			else = {
-				var:platonic_local_dangerous_fascist = {
-					ROOT = {
-						NOT = { has_country_flag = NOR_already_asked_a_fascist@PREV } 
-					}
-				}
-			}
+				
 			has_country_flag = NOR_going_fascist
 			has_completed_focus = NOR_nasjonal_samling
 			has_war = no
@@ -2098,17 +2331,14 @@ NOR_fascist_preparation_decisions_category = {
 		}
 
 		complete_effect = {
-			find_global_platonic_countries = yes
+			#find_global_platonic_countries = yes
 			if = {
 				limit = {
-					has_variable = GLOBAL.platonic_fascist_bully
-					var:GLOBAL.platonic_fascist_bully = {
-						capital_scope = {
-							is_on_continent = europe 
-						}
+					GER = {
+						has_government = fascism	
 					}
 				}
-				var:GLOBAL.platonic_fascist_bully = {
+				GER = {
 					country_event = {
 						id = AAT_norway_fascist.1
 						hours = 3 
@@ -2143,36 +2373,6 @@ NOR_fascist_preparation_decisions_category = {
 						}
 					}				
 				}
-			}
-			else_if = {
-				limit = {
-					has_variable = platonic_local_dangerous_fascist
-				}
-				var:platonic_local_dangerous_fascist = {
-					country_event = {
-						id = AAT_norway_fascist.1
-						hours = 3 
-					}
-					hidden_effect = {
-						ROOT = {
-							set_country_flag = NOR_already_asked_a_fascist@PREV
-						}
-					}				
-				}
-			}
-			else = {
-				var:GLOBAL.platonic_fascist_bully = {
-					country_event = {
-						id = AAT_norway_fascist.1
-						hours = 3 
-					}
-					hidden_effect = {
-						ROOT = {
-							set_country_flag = NOR_already_asked_a_fascist@PREV
-
-						}
-					}					
-				}	
 			}
 		}
 	}
@@ -2380,7 +2580,7 @@ NOR_communist_preparation_decisions_category = {
 		}
 
 		visible = {  
-			has_war = no 
+			has_civil_war = no 
 			has_completed_focus = NOR_the_seeds_of_the_revolution
 		}
 
@@ -2391,7 +2591,7 @@ NOR_communist_preparation_decisions_category = {
 			}
 			FROM = {
 				OR = {
-					infrastructure > 2
+					infrastructure > 1
 					non_damaged_building_level = {
 						building = arms_factory
 						level > 1
@@ -2458,9 +2658,9 @@ NOR_communist_preparation_decisions_category = {
 			}
 		}
 
-		cost = 50   
+		cost = 25   
 		
-		days_remove = 30 
+		days_remove = 28 
 	 
 		complete_effect = {
 			FROM = { 
@@ -2481,6 +2681,21 @@ NOR_communist_preparation_decisions_category = {
 		}
 
 		cost = 60 
+		ai_will_do = {
+			base = 50
+			modifier = {
+				factor = 50
+	 			communism < 0.4
+			}	
+			modifier = {
+				factor = 0
+	 			communism > 0.5
+			}
+			modifier = {
+				factor = 0
+	 			has_completed_focus = NOR_workers_and_farmers_rise
+			}
+		}
 
 		days_remove = 45
 
@@ -2739,11 +2954,9 @@ economy_decisions = {
 		days_remove = 14
 
 		complete_effect = {
-			hidden_effect = {
-				add_equipment_to_stockpile = { 
-					type = convoy_1
-					amount = -4
-				}
+			add_equipment_to_stockpile = { 
+				type = convoy_1
+				amount = -4
 			}
 			set_country_flag = {
 				flag = nor_building_ship

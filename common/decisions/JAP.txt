@@ -383,9 +383,19 @@ JAP_intervene_in_china = {
 			}
 		}
 
-		cost = 50
+		custom_cost_trigger = {
+			has_political_power > 74 
+			command_power > 99
+		}
+		custom_cost_text = decision_cost_CP_100_pp_75
+
+		ai_hint_pp_cost = 75 
 
 		complete_effect = {
+			hidden_effect = {
+				add_political_power = -75
+				add_command_power = -100
+			}
 			IF = {
 				limit = {
 					USA = {
@@ -393,6 +403,7 @@ JAP_intervene_in_china = {
 					}
 				}
 				USA = { add_war_support = 0.1 }
+				custom_effect_tooltip = generic_skip_one_line_tt
 			}
 			IF = {
 				limit = {
@@ -410,6 +421,7 @@ JAP_intervene_in_china = {
 				}
 			}
 				
+			custom_effect_tooltip = generic_skip_one_line_tt
 			activate_mission_tooltip = JAP_conquer_china
 			set_country_flag = JAP_conquer_china_activate
 		}
@@ -447,7 +459,7 @@ JAP_intervene_in_china = {
 		days_mission_timeout = 365
 		
 		timeout_effect = {
-			add_stability = -0.05
+			add_stability = -0.1
 			add_war_support = -0.15
 		}
 
@@ -1017,6 +1029,13 @@ foreign_politics = {
 
 		target_array = enemies
 
+		target_root_trigger = {
+			NOT = { has_country_flag = JAP_offered_china_white_peace_flag }
+			is_subject = no
+			any_enemy_country = {
+				is_literally_china = yes
+			}
+		}
 		target_trigger = {
 			#Target is FROM
 			FROM = {
@@ -1030,10 +1049,6 @@ foreign_politics = {
 				exists = yes 
 				is_subject = no
 			}
-			is_subject = no
-			any_enemy_country = {
-				is_literally_china = yes
-			}
 		}
 
 		cost = 0
@@ -1045,6 +1060,7 @@ foreign_politics = {
 		}
 
 		complete_effect = {
+			set_country_flag = JAP_offered_china_white_peace_flag
 			event_target:WTT_current_china_leader = {
 				country_event = { 
 					id = wtt_japan.126 
@@ -2170,7 +2186,17 @@ JAP_pacific_guardian = {
 			has_completed_focus = JAP_create_greater_east_asian_treaty_organization
 		}
 		available = {
-			
+			is_subject = no 
+			OR = {
+				is_faction_leader = yes
+				AND = {
+					is_faction_leader = no
+					any_allied_country = {
+						is_faction_leader = yes
+						has_government = democratic 
+					}
+				}
+			}
 		}
 
 		target_array = global.asian_and_oceanian_countries
@@ -3531,7 +3557,12 @@ operations = {
 		allowed = { always = no } #Activated from effect
 
 		available = {
-			has_border_war_with = SOV # Japan shouldn't lose war support if they actually use the window of opportunity
+			hidden_trigger = {
+				OR = {
+					has_border_war_with = SOV # Japan shouldn't lose war support if they actually use the window of opportunity
+					has_country_flag = JAP_did_the_border_war_flag
+				}
+			}
 		}
 
 		highlight_states = {
@@ -3975,6 +4006,452 @@ operations = {
 			declare_war_on = { target = SOV type = annex_everything }
 			GER = { country_event = { id = wtt_japan.115 hours = 6 } }
 		}		
+	}
+	### TAURAN INCIDENT ### 
+
+	# Mission for tauran owner to escalate or incident is automatically lost
+	JAP_tauran_border_incident_forgotten_1 = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		visible = {
+			has_global_flag = tauran_incident_has_begun_flag 
+			OR = {
+				AND = {
+					owns_state = 761
+					is_subject = no
+				}
+				AND = {
+					any_subject_country = {
+						owns_state = 761
+					}
+				}
+			}
+		}
+
+		available = {
+				
+			OR = {
+				has_border_war_with = MON # Japan/MAN shouldn't lose war support if they actually use the window of opportunity
+				has_global_flag = initial_tauran_decision_taken_flag
+			}
+				
+		}
+
+		highlight_states = {
+	 		highlight_state_targets = {
+				state = 819
+				state = 761
+			} 
+		}
+
+		ai_will_do = {
+			base = 0
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			add_political_power = -25 
+			add_war_support = -0.05 #Shameful Display
+			MON = {
+				country_event = {
+					id = SEA_border_incidents_events.8
+					days = 1
+				}	
+			}
+			hidden_effect = {
+				set_global_flag = failed_to_assault_in_time_flag
+			}
+		}
+	}
+
+	# First border incident
+	JAP_assault_tauran_decision = {
+		icon = border_war
+
+		allowed = {
+			OR = {
+				original_tag = JAP
+				original_tag = MAN
+			}
+		}
+
+		visible = {
+			OR = {
+				AND = {
+					761 = {
+						is_owned_and_controlled_by = ROOT
+					}
+					is_subject = no
+				}
+				AND = {
+					any_subject_country = {
+						761 = {
+							is_owned_and_controlled_by = PREV
+						}
+					}
+				}
+			}
+			819 = {
+				is_owned_and_controlled_by = MON
+			}
+			NOT = {
+				has_global_flag = failed_to_assault_in_time_flag 
+			}
+			has_global_flag = tauran_incident_has_begun_flag 
+		}
+
+		available = {
+			NOT = {
+				has_war_with = MON
+				is_in_faction_with = MON
+				has_non_aggression_pact_with = MON
+				MON = { is_puppet_of = ROOT }
+			}
+			761 = {
+				any_neighbor_state = {
+					is_controlled_by = MON
+				}
+			}
+		}
+
+		highlight_states = {
+	 		highlight_state_targets = {
+				state = 819
+				state = 761
+			} 
+		}
+		
+		fire_only_once = yes
+
+		ai_will_do = {
+			base = 250
+		}
+
+		cost = 5
+
+		days_remove = 30  
+
+		war_with_on_remove = MON
+
+		complete_effect = {
+			761 = {
+				save_event_target_as = MAN_MON_attacker_state
+				set_state_flag = border_incident_active
+			}
+			819 = {
+				save_event_target_as = MAN_MON_defender_state
+				set_state_flag = border_incident_active
+			}
+			MON = {
+				country_event = { id = SEA_border_incidents_events.4 days = 1 }
+				activate_targeted_decision = { target = ROOT decision = JAP_tauran_border_conflict_warning_MON }
+			}
+			hidden_effect = {
+				set_global_flag = initial_tauran_decision_taken_flag 
+			}
+		}
+		remove_effect = {
+			activate_targeted_decision = { target = MON decision = JAP_tauran_border_incident_forgotten }
+			activate_targeted_decision = { target = MON decision = JAP_escalate_incident_to_border_conflict_MON }
+		}
+	}
+
+	# Mission for defender warning that a conflict with FROM is coming
+	JAP_tauran_border_conflict_warning_MON = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			hidden_trigger = { always = no }
+		}
+
+		war_with_target_on_timeout = yes
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 30 
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			custom_effect_tooltip = escalation_possible_tooltip_for_defender
+			custom_effect_tooltip = effects_if_border_conflict_is_lost
+			effect_tooltip = {
+				add_war_support = -0.05
+				add_political_power = -50
+			}
+			hidden_effect = {
+				IF = {
+					limit = {
+						761 = {
+							is_owned_and_controlled_by = MAN
+						}
+						MAN = {
+							is_subject = no
+						}
+					}
+					remove_targeted_decision = { target = MAN decision = JAP_tauran_border_conflict_warning_MON }
+					activate_targeted_decision = { target = MAN decision = JAP_border_conflict_escalation_warning_MON }
+				}
+				ELSE_IF = {
+					limit = {
+						761 = {
+							is_owned_and_controlled_by = MAN
+						}
+						MAN = {
+							is_subject_of = JAP
+						}
+					}
+					remove_targeted_decision = { target = JAP decision = JAP_tauran_border_conflict_warning_MON }
+					activate_targeted_decision = { target = JAP decision = JAP_border_conflict_escalation_warning_MON }
+				}
+				ELSE_IF = {
+					limit = {
+						761 = {
+							is_owned_and_controlled_by = JAP
+						}
+					}
+					remove_targeted_decision = { target = JAP decision = JAP_tauran_border_conflict_warning_MON }
+					activate_targeted_decision = { target = JAP decision = JAP_border_conflict_escalation_warning_MON }
+				}
+			}
+		}
+	}
+
+	# Mission for defender warning FROM can escalate to war at any point is coming
+	JAP_border_conflict_escalation_warning_MON = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+		visible = { 
+			hidden_trigger = { 
+				NOT = { 
+					has_border_war_with = JAP 
+					has_border_war_with = MAN 
+				} 
+			} 
+		}
+		cancel_if_not_visible = yes 
+
+		available = {
+			#var:ROOT.defender_state_vs_@FROM = {
+			#	has_ROOT_at_least_1_div_in_current_state_scope = yes
+			#}
+			hidden_trigger = { always = no }
+		}
+
+		war_with_target_on_timeout = yes
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+
+		timeout_effect = {
+			custom_effect_tooltip = from_cannot_escalate
+			custom_effect_tooltip = effects_if_border_conflict_is_lost
+			effect_tooltip = {
+				add_war_support = -0.05
+				add_political_power = -50
+			}
+		}		
+	}
+
+	# Mission for attacker to escalate or incident is forgotten
+	JAP_tauran_border_incident_forgotten = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			
+			hidden_trigger = {
+				OR = {
+					has_border_war_with = MON # Japan shouldn't lose war support if they actually use the window of opportunity
+					has_global_flag = JAP_did_the_tauran_border_war_flag
+				}
+			}
+				
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 819 
+				state = 761
+			} 
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 30
+
+		fire_only_once = yes
+
+		is_good = no
+		
+		timeout_effect = {
+			remove_targeted_decision = { target = MON decision = JAP_escalate_incident_to_border_conflict_MON }
+			add_political_power = -50
+			add_war_support = -0.05 #Shameful Display
+			MON = {
+				country_event = {
+					id = SEA_border_incidents_events.8
+					days = 1
+				}	
+			}
+			hidden_effect = {
+				MON = { remove_targeted_decision = { target = ROOT decision = JAP_border_conflict_escalation_warning_MON } }
+				MON = {
+					761 = {
+						clr_state_flag = border_incident_active
+					}
+					819 = {
+						clr_state_flag = border_incident_active
+					}
+				}
+			}
+		}
+	}
+
+	#Decision to escalate incident on border with MON to border conflict
+	JAP_escalate_incident_to_border_conflict_MON = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			761 = {
+				OR = {
+					is_fully_controlled_by = ROOT
+					CONTROLLER = {
+						is_subject_of = ROOT
+					}
+					CONTROLLER = {
+						is_in_faction_with = ROOT
+					}
+				}
+			}
+			divisions_in_border_state = {
+				state = 761
+				border_state = 819
+				size > 0
+			}
+		}
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 761
+				state = 819	
+			} 
+		}
+
+		ai_will_do = {
+			base = 25 
+			modifier = { 
+				has_war = no
+				factor = 10
+			}
+		}
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+			remove_targeted_decision = { target = MON decision = JAP_tauran_border_incident_forgotten }
+			activate_mission = JAP_tauran_border_conflict_time_until_cancelled
+			start_border_war = {
+				change_state_after_war = no
+				attacker = {
+					state = 761
+					num_provinces = 4
+					on_win = SEA_border_incidents_events.5
+					on_lose = SEA_border_incidents_events.6
+					on_cancel = SEA_border_incidents_events.7
+				}
+				
+				defender = {
+					state = 819
+					num_provinces = 4
+					on_win = SEA_border_incidents_events.6
+					on_lose = SEA_border_incidents_events.5
+					on_cancel = SEA_border_incidents_events.7
+				}
+			}
+		}
+	}
+
+	#Mission for attacker to win border war against FROM in X days
+	JAP_tauran_border_conflict_time_until_cancelled = {
+
+		icon = border_war
+
+		allowed = { always = no } #Activated from effect
+
+		available = {
+			819 = { has_border_war = no }
+			761 = { has_border_war = no }
+		}
+		
+		highlight_states = {
+			highlight_state_targets = {
+				state = 819
+				state = 761
+			} 
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				
+			}
+		}
+
+		days_mission_timeout = 90
+		is_good = no
+
+		fire_only_once = yes #Reactivation handled in effect
+
+		complete_effect = {
+
+		}
+
+		timeout_effect = {
+			cancel_border_war = {
+				defender = 819
+				attacker = 761
+			}
+		}
 	}
 }
 
@@ -11325,31 +11802,43 @@ JAP_the_co_prosperity_sphere_decisions = {
 
 			custom_effect_tooltip = if_they_accept_tt
 
-			effect_tooltip = {
-				FROM = {
+			FROM = {
+				effect_tooltip = {
 					add_tech_bonus = {
 						bonus = 0.5
 						uses = 2
 						category = industry
 					}
 				}
-				random_state = {
+				random_core_state = {
 					limit = {
 						is_owned_and_controlled_by = FROM
-						is_core_of = FROM
 						free_building_slots = {
 							building = industrial_complex
-							size > 2
+							size > 1
 							include_locked = yes
-						}	
+						}
 					}
-					add_extra_state_shared_building_slots = 2
-					add_building_construction = {
-						type = industrial_complex
-						level = 2
-						instant_build = yes
-					}	
-				}		 
+					set_state_flag = JAP_state_development_target
+					effect_tooltip = {
+						add_extra_state_shared_building_slots = 2
+						add_building_construction = {
+							type = industrial_complex
+							level = 2
+							instant_build = yes
+						}	
+						IF = {
+							limit = {
+								infrastructure < 5
+							}
+							add_building_construction = {
+								type = infrastructure
+								level = 1
+								instant_build = yes
+							}	
+						}
+					}
+				}
 			}
 		}
 	}
@@ -11761,6 +12250,21 @@ JAP_the_co_prosperity_sphere_decisions = {
 				}
 			}
 			ELSE = {
+				hidden_effect = {
+					BRM = {
+						every_core_state = {
+							limit = {
+								controller = {
+									OR = {
+										original_tag = ROOT
+										is_subject_of = ROOT
+									}
+								}
+							}
+							set_state_flag = is_state_that_should_go_to_japanese_burma_flag 
+						}
+					}
+				}
 				BRM = {
 					country_event = {
 						id = SEA_japan_foreign_policy.60
@@ -16742,5 +17246,171 @@ war_measures = {
 
 
 
+
+}
+
+# The Burmah Oil Company's Oil Fields - for blowing up and repairing the Burmese oil fields 
+BRM_burmah_oils_oil_fields = {
+	
+	BRM_blow_up_the_oil_fields = {
+
+		icon = GFX_decision_generic_ignite_civil_war
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 288 
+			} 
+		}
+
+		allowed = { 
+			
+		}
+
+		visible = {
+				
+			288 = {
+				is_controlled_by_ROOT_or_subject = yes
+			}
+			
+			is_subject = no
+			has_capitulated = no
+
+			NOT = {
+				288 = {
+					has_dynamic_modifier = { modifier = BRM_blown_up_oil_fields }
+				}
+			}
+			
+		}
+
+		available = {
+			has_war = yes
+			288 = {
+				any_neighbor_state = {
+					controller = {
+						has_war_with = ROOT
+					}
+				}	
+			}	
+		}
+
+		cost = 25
+		
+		cancel_trigger = {
+			OR = {
+				has_war = no
+				288 = {
+					is_controlled_by_ROOT_or_subject = no
+				}
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				controls_state = 288
+				surrender_progress > 0.15
+				add = 150
+			}
+			modifier = {
+				any_subject_country = {
+					is_subject_of = ROOT
+					controls_state = 288
+					surrender_progress > 0.15
+				}
+				add = 150
+			}
+			modifier = {
+				288 = {
+					state_is_fully_controlled_by_ROOT_or_subject = no
+				}
+				add = 100
+			}
+		}
+
+		days_remove = 20
+
+		remove_effect = {
+
+			288 = {
+				add_dynamic_modifier = {
+					modifier = BRM_blown_up_oil_fields
+				}
+			}
+
+		}
+
+	}
+
+	BRM_repair_the_oil_fields = {
+
+		icon = GFX_decision_generic_construction
+
+		highlight_states = {
+			highlight_state_targets = {
+				state = 288 
+			} 
+		}
+
+		visible = {
+
+			288 = {
+				is_controlled_by_ROOT_or_subject = yes
+				has_dynamic_modifier = { modifier = BRM_blown_up_oil_fields }
+			}
+			
+			has_capitulated = no
+			is_subject = no 
+		}
+
+		modifier = {
+			civilian_factory_use = 10
+		}
+
+		available = {
+			num_of_civilian_factories_available_for_projects > 9
+		}
+
+		cost = 25
+
+		cancel_trigger = {
+			288 = {
+				is_controlled_by_ROOT_or_subject = no
+			}
+		}
+
+		ai_will_do = {
+			base = 0
+			modifier = {
+				controls_state = 288
+				has_war = no
+				add = 150
+			}
+			modifier = {
+				any_subject_country = {
+					is_subject_of = ROOT
+					controls_state = 288
+				}
+				has_war = no
+				add = 150
+			}
+			modifier = {
+				surrender_progress < 0.1
+				add = 50 
+			}
+		}
+
+		days_remove = 120
+
+		remove_effect = {
+
+			288 = {
+				remove_dynamic_modifier = {
+					modifier = BRM_blown_up_oil_fields
+				}
+			}
+
+		}
+	}
 
 }

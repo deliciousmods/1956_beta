@@ -130,20 +130,47 @@ on_actions = {
 			
 		}
 
+		#MONGOLIA - Launch event that will lead to the Tauran incident and the border war against Manchukuo 
+		effect = {
+			
+			IF = {
+				limit = {
+					date < "1936.2.2"
+				}
+				MON = {
+					# Our Troops Move on Tauran 
+					country_event = {
+						id = SEA_border_incidents_events.1
+						days = 61 
+					}	
+				}
+			}
+			
+		}
 		#KOREA/JAPAN - Set up the resistance DMs 
 		effect = {
-			every_state = {
+			IF = {
 				limit = {
-					OR = {
-						state = 919
-						state = 920
-						state = 918
-						state = 527
-						#r56: assuming its intentional there's a state missing here, worth verifying later
+					NOT = {
+						has_game_rule = {
+							rule = asia_colonization_status
+							option = ASIA_DECOLONIZED
+						}
 					}
 				}
-				add_dynamic_modifier = {
-					modifier = KOR_resistance_against_colonial_rule_dm
+				every_state = {
+					limit = {
+						OR = {
+							state = 919
+							state = 920
+							state = 918
+							state = 527
+							#r56: assuming its intentional there's a state missing here, worth verifying later
+						}
+					}
+					add_dynamic_modifier = {
+						modifier = KOR_resistance_against_colonial_rule_dm
+					}
 				}
 			}
 		}
@@ -1830,6 +1857,30 @@ on_actions = {
 							}
 						}
 					}
+					FROM = { ## Checks if all states are taken, fixes edge case with taking an entire nation resulting in not calling any allies
+						if = {
+							limit = {
+								all_controlled_state = {
+									is_core_of = PRC
+									has_dynamic_modifier = {
+										modifier = PRC_infiltrated_state_3
+										scope = PRC 
+									}	
+								}
+							}
+							every_allied_country = {
+								limit = {
+									NOT = {
+										has_war_with = PRC
+									}
+								}
+								add_to_war = {
+									targeted_alliance = PREV
+									enemy = PRC
+								}
+							}
+						}
+					}
 					#log = "PRC attacked!"
 					FROM = {
 						every_controlled_state = {
@@ -1879,6 +1930,30 @@ on_actions = {
 								militia = { x = 2 y = 1 }
 							}
 							priority = 1
+						}
+					}
+					ROOT = { ## Checks if all states are taken, fixes edge case with taking an entire nation resulting in not calling any allies
+						if = {
+							limit = {
+								all_controlled_state = {
+									is_core_of = PRC
+									has_dynamic_modifier = {
+										modifier = PRC_infiltrated_state_3
+										scope = PRC 
+									}	
+								}
+							}
+							every_allied_country = {
+								limit = {
+									NOT = {
+										has_war_with = PRC
+									}
+								}
+								add_to_war = {
+									targeted_alliance = PREV
+									enemy = PRC
+								}
+							}
 						}
 					}
 					#log = "PRC defends!" 
@@ -3889,6 +3964,62 @@ on_actions = {
                     remove_ideas = BEL_surrender_ns
                 }
             }
+        }
+		effect = {
+            FROM = {
+                IF = {    #This prevents Japan from capping again after just having been puppeted
+                    limit = {
+                        has_idea = JAP_accepted_the_potsdam_agreement
+                    }
+                    remove_ideas = JAP_accepted_the_potsdam_agreement
+                }
+            }
+        }
+
+        effect = {
+            FROM = {
+                IF = {    # This prevents Japan from having a non-allowed eco modifier after being puppeted etc 
+                    limit = {
+                        has_idea = national_defense_state
+                    }
+                    swap_ideas = {
+                    	remove_idea = national_defense_state
+                    	add_idea = partial_economic_mobilisation
+                    }	
+                }
+            }
+        }
+		# Merging of accidental leftover Japan into American Japanese puppet government if there is one, if Japan surrendered through the focus  
+        effect = {
+        	IF = {
+        		limit = {
+        			# USA is a winner and has the JAP as their puppet 
+        			ROOT = {
+        				original_tag = USA
+        			}
+        			# One of the losers if a Japan that should be made a part of the other one 
+        			FROM = {
+        				original_tag = JAP  
+        				is_subject = no
+        				OR = {
+        					has_government = neutrality
+        					has_government = fascism
+        				}
+         			}
+         			has_global_flag = JAP_surrendered_through_their_focus_flag
+        		}
+        		ROOT = {
+        			random_subject_country = {
+        				limit = {
+        					original_tag = JAP 
+        				}
+    					annex_country = {
+    						target = FROM
+    						transfer_troops = yes
+    					}	
+        			}
+        		}
+        	}
         }
     }
 
