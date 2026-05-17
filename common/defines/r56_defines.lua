@@ -699,6 +699,12 @@
 	-- NDefines.NSupply.RAILWAY_DISTANCE_FACTOR_FOR_REINFORCEMENT_SPEED = 0.1 --0.3
 	-- NDefines.NSupply.SUPPLY_DISRUPTION_DAILY_RECOVERY = 3.0
 
+--------------------------------------------------------------------------------------------------------------
+-- FACTIONS
+--------------------------------------------------------------------------------------------------------------
+	NDefines.NFactions.AI_MIN_POWER_PROJECTION_SCORE = -20					-- Min AI score for Power Projection - r56: was 100 which made people do basically anything for majors
+	NDefines.NFactions.AI_MAX_POWER_PROJECTION_SCORE = 20					-- Max AI score for Power Projection - r56: was 100 which made people do basically anything for majors
+
 
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_TEX_MAX_SIZE = 2048
 	NDefines_Graphics.NGraphics.COUNTRY_FLAG_SMALL_TEX_MAX_SIZE = 512
