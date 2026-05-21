@@ -1,0 +1,534 @@
+on_actions = {
+	on_startup = {
+		effect = {
+			CZE = {
+				every_state = {
+					limit = {
+						OR = {
+							region = 5		#Benelux
+							region = 21		#Alps
+							region = 7		#West Germany
+							region = 6		#North-West Germany
+							region = 8		#East Germany
+							state = 161		#Emilia Romagna
+							state = 162		#Toscana
+							state = 28		#Alsace
+							state = 735		#Savoy
+							state = 58		#Holstein
+							state = 909		#Schleswig
+							state = 102		#North Slovenia
+							state = 853		#Ljubljana
+							state = 736		#Litorale
+							state = 852		#Istria
+						}
+					}
+					add_to_array = { HRE_states = THIS }
+				}
+			}
+		}
+	}
+
+	on_state_control_changed = {
+		effect = {
+			if = {
+				limit = {
+					FROM.FROM = { state = 73 }
+				}
+				if =  {
+					limit = {
+						FROM = {
+							original_tag = RUT
+							is_ai = yes #Don't remove core from player
+						}
+					}
+					FROM.FROM = {
+						if = {
+							limit = {
+								is_core_of = RUT
+							}
+							remove_core_of = RUT
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM.FROM = { state = 73 }
+				}
+				if =  {
+					limit = {
+						FROM = {
+							original_tag = SDL
+							is_ai = yes #Don't remove core from player
+						}
+					}
+					FROM.FROM = {
+						if = {
+							limit = {
+								is_core_of = SDL
+							}
+							remove_core_of = SDL
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM.FROM = {
+						OR = {
+							state = 9
+							state = 74
+						}
+					}
+				}
+				if =  {
+					limit = {
+						FROM = {
+							tag = RKH
+							is_ai = yes #Don't remove core from player
+						}
+					}
+					FROM.FROM = {
+						if = {
+							limit = {
+								is_core_of = RKH
+							}
+							remove_core_of = RKH
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM.FROM = {
+						OR = {
+							state = 73
+							state = 71
+						}
+					}
+				}
+				if =  {
+					limit = {
+						FROM = {
+							OR = {
+								original_tag = SLO
+								original_tag = HUN
+							}
+							has_border_war_between = {
+    							attacker = 73
+    							defender = 71
+							}
+						}
+					}
+					FROM = {
+						cancel_border_war = {
+    						dont_fire_events = no
+							attacker = 73
+ 							defender = 71
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	# ROOT is capitulated country, FROM is winner
+	on_capitulation = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = GER
+					FROM = { tag = CZE }
+				}
+				CZE = { set_country_flag = CZE_capitulated_germany }
+			}
+		}
+	}
+	# on_capitulation = {
+    # 	effect = {
+	# 		if = {
+	# 			limit = {
+	# 				ROOT = {
+	# 					original_tag = RUT
+	# 					is_ai = yes
+	# 				}
+	# 				73 = {
+	# 					is_core_of = RUT
+	# 				}
+	# 			}
+	# 			73 = {
+	# 				if = {
+	# 					limit = {
+	# 						is_core_of = RUT
+	# 					}
+	# 					remove_core_of = RUT
+	# 				}
+	# 			}
+	# 		}
+	# 		if = {
+	# 			limit = {
+	# 				ROOT = {
+	# 					tag = RKH
+	# 				}
+	# 				OR = {
+	# 					9 = {
+	# 						is_core_of = RKH
+	# 					}
+	# 					75 = {
+	# 						is_core_of = RKH
+	# 					}
+	# 				}
+	# 			}
+	# 			75 = {
+	# 				if = {
+	# 					limit = {
+	# 						is_core_of = RKH
+	# 					}
+	# 					remove_core_of = RKH
+	# 				}
+	# 			}
+	# 			9 = {
+	# 				if = {
+	# 					limit = {
+	# 						is_core_of = RKH
+	# 					}
+	# 					remove_core_of = RKH
+	# 				}
+	# 			}
+	# 		}
+	# 	}
+	# }
+	on_government_change = { 
+		effect = { 
+			if = {
+				limit = {
+					original_tag = CZE
+				}
+				mark_focus_tree_layout_dirty = yes #So dynamic focus icons update right away and don't stick around for a few ticks or when game is paused
+				every_character = { #Remove trait spam to stop a continuity error with Benes's lacky trait after gov change by removing the trait from advisors who have it
+					limit = {
+						is_advisor = yes
+						has_trait = CZE_benes_lackey
+					}
+					remove_trait = {
+						character = THIS
+						slot = political_advisor
+						trait = CZE_benes_lackey
+					}
+				}
+			}
+		}
+	}
+
+	on_monthly_CZE = {
+		effect = {
+			if = {
+				limit = {
+					any_country_with_original_tag = { 
+						original_tag_to_check = CZE
+           				exists = yes
+        			}
+					has_global_flag = CZE_skoda_focus_activation
+					NOT = {
+						has_country_flag = CZE_recently_changed_skoda_focus
+					}
+					OR = {
+						NOT = {
+							has_country_flag = CZE_bimonthly_flag
+						}
+						has_country_flag = CZE_skoda_optimization_raise_fast
+					}
+					check_variable = {
+						skoda_optimization_tier < skoda_max_optimization_tier
+					}
+				}
+				add_to_variable = {
+					skoda_optimization_tier = 1
+				}
+				set_country_flag = { #This turns the on_monthly into a bi-monthly thing
+					flag = CZE_bimonthly_flag
+					days = 35
+					value = 1
+				}
+				CZE_update_skoda_tier = yes
+			}
+		}
+	}
+
+	on_civil_war_end_before_annexation = {
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SPR
+						has_volunteers_amount_from = {
+							tag = CZE
+							count > 0
+						}
+					}
+				}
+				CZE = {
+					set_country_flag = CZE_support_scw_faction_lost
+					country_event = MUN_czech.1025
+				}
+			}
+			if = {
+				limit = {
+					original_tag = SPR
+					has_volunteers_amount_from = {
+						tag = CZE
+						count > 0
+					}
+					NOT = {
+						any_other_country = {
+							original_tag = SPR
+							NOT = {
+								tag = FROM
+							}
+						}
+					}
+				}
+				save_event_target_as = CZE_supported_spanish_faction
+				CZE = {
+					set_country_flag = CZE_support_scw_faction_won
+					country_event = MUN_czech.1025
+				}
+			}
+		}
+	}
+
+	on_declare_war = {
+		effect = {
+			if = {
+				limit = {
+					threat < 0.76
+					OR = {
+						tag = HUN
+						has_country_flag = CZE_pfot_rut_war_news_event_flag
+					}
+					FROM = {
+						tag = RUT
+						is_subject = no
+						is_in_faction = no
+						has_idea = CZE_back_against_the_mountains_RUT
+					}
+				}
+				every_country = {
+					limit = {
+						exists = yes
+						OR = {
+							capital_scope = {
+								is_on_continent = europe
+							}
+							is_subject_of = ROOT
+						}
+					}
+					news_event = {
+						id = MUN_czech.news.2
+						hours = 1
+					}
+				}
+			}
+		}
+	}
+
+	on_release_as_puppet = {
+    	effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = CZE
+						has_completed_focus = CZE_negotiations_with_the_autonomous_bloc
+						NOT = {
+							has_completed_focus = CZE_form_a_federation
+						}
+					}
+				}
+				ROOT = {
+					set_cosmetic_tag = CZE_puppet
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = CZE
+						has_completed_focus = CZE_form_a_federation
+					}
+				}
+				ROOT = {
+					set_cosmetic_tag = CZE_CEF_puppet
+					if = {
+						limit = {
+							NOT = {
+								has_idea = CZE_federalization_agreement_puppets
+							}
+						}
+						add_ideas = CZE_federalization_agreement_puppets
+					}
+				}
+			}
+		}
+	}
+
+	on_war_relation_added = {
+    	effect = {
+			if = {
+				limit = {
+					ROOT = {
+						original_tag = CZE
+						NOT = {
+							has_completed_focus = CZE_lessons_of_war
+						}
+					}
+					FROM = {
+						is_major = yes
+					}
+				}
+				ROOT = {
+					set_country_flag = CZE_lessons_of_war_i_had_war_with_major_flag
+				}
+			}
+			else_if = {
+				limit = {
+					FROM = {
+						original_tag = CZE
+						NOT = {
+							has_completed_focus = CZE_lessons_of_war
+						}
+					}
+					ROOT = {
+						is_major = yes
+					}
+				}
+				FROM = {
+					set_country_flag = CZE_lessons_of_war_i_had_war_with_major_flag
+				}
+			}
+			if = {
+				limit = {
+					ROOT = {
+						exists = yes
+						OR = {
+							original_tag = HUN
+							original_tag = SLO
+						}
+						NOT = {
+							AND = {
+								controls_state = 73
+								controls_state = 71
+							}
+						}
+						has_border_war_between = {
+    						attacker = 73
+    						defender = 71
+						}
+					}
+				}
+				ROOT = {
+					cancel_border_war = {
+    					dont_fire_events = no
+						attacker = 73
+ 						defender = 71
+					}
+				}
+			}
+		}
+		effect = {
+			CZE = {
+				if = {
+					limit = {
+						has_resources_rights = {
+							state = 155
+						}
+						OR = {
+							FROM = { original_tag = HUN }
+							ROOT = { original_tag = HUN }
+						}
+						has_war_with = HUN
+					}
+					remove_resource_rights = 155
+				}
+				if = {
+					limit = {
+						has_resources_rights = {
+							state = 106
+						}
+						OR = {
+							FROM = { original_tag = YUG }
+							ROOT = { original_tag = YUG }
+						}
+						has_war_with = YUG
+					}
+					remove_resource_rights = 106
+				}
+				if = {
+					limit = {
+						has_resources_rights = {
+							state = 202
+						}
+						OR = {
+							FROM = { original_tag = SOV }
+							ROOT = { original_tag = SOV }
+						}
+						has_war_with = SOV
+					}
+					remove_resource_rights = 202
+				}
+			}
+		}
+	}
+	
+	on_civil_war_end = {
+    	effect = {
+			FROM = {
+				if = {
+					limit = {
+						has_country_flag = CZE_remove_cores
+					}
+					every_core_state = {
+						remove_core_of = PREV
+					}
+				}
+			}
+		}
+	}
+
+	on_ruling_party_change = {
+		effect = {
+			FROM = {		#Hlinka should never be used as country leader, his name is only there for flavor
+				if = {
+					limit = {
+						original_tag = CZE
+						has_character = CZE_andrej_hlinka
+						has_country_leader = {
+							character = CZE_andrej_hlinka
+							ruling_only = yes
+						}
+						has_character = CZE_emil_hacha
+					}
+					promote_character = CZE_emil_hacha
+				}
+				if = {
+					limit = {
+						original_tag = CZE
+						NOT = {
+							has_government = fascism
+						}
+						has_cosmetic_tag = CZE_fascist_color
+					}
+					drop_cosmetic_tag = yes
+				}
+				if = {
+					limit = {
+						original_tag = CZE
+						NOT = {
+							has_government = neutrality
+						}
+						has_cosmetic_tag = CZE_first_monarchy_color
+					}
+					drop_cosmetic_tag = yes
+				}
+			}
+		}
+	}
+}
