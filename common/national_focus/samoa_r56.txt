@@ -397,12 +397,38 @@ focus_tree = {
 	focus = {
         id = r56_SAM_seek_international_recognition
         icon = GFX_goal_befriend_samoa
-		#prerequisite = { focus = r56_SAM_declaration_of_independence }
+		prerequisite = { focus = r56_SAM_declaration_of_independence }
 		relative_position_id = r56_SAM_declaration_of_independence
 
         cost = 4
-        x = -25
-        y = 15
+        x = 9
+        y = 1
+
+		offset = {
+			x = -11
+			y = 0
+
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = r56_SAM_dissolve_the_fono
+			}
+		}
+
+		offset = {
+			x = -11
+			y = 0
+
+			trigger = {
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
+				}
+				has_completed_focus = r56_SAM_westernize_faasamoa
+			}
+		}
 
         available = { has_war = no is_subject = no }
         ai_will_do = { factor = 1 }
@@ -827,6 +853,8 @@ focus_tree = {
 				}
 			}
         }
+
+		search_filters = { FOCUS_FILTER_STABILITY FOCUS_FILTER_POLITICAL }
     }
 
 	# Establish the University of [CAPITAL]
@@ -857,23 +885,38 @@ focus_tree = {
 
 	# Purchase Obsolete Japanese Naval Vessels
 	focus = {
-        id = r56_SAM_purchase_japanese_ships
+        id = r56_SAM_acquire_obsolete_japanese_naval_vessels
         icon = GFX_focus_generic_refit_civilian_ships
         prerequisite = { focus = r56_SAM_confiscate_foreign_plantations }
+		mutually_exclusive = { focus = r56_SAM_purchase_australian_guns }
 		relative_position_id = r56_SAM_confiscate_foreign_plantations
 
-        cost = 10
+        cost = 7.2
         x = 1
         y = 1
 
-        available = { has_full_control_of_state = 726 }
+        available = { 
+			JAP = {
+				exists = yes
+				has_capitulated = no
+				NOT = { has_war_with = ROOT }
+			}
+		}
+
         ai_will_do = { factor = 1 }
 
         completion_reward = {
+			#add decision that grants dockyard output boost ata the expense of consumers
 			navy_experience = 25
 			add_equipment_to_stockpile = {
 				type = convoy
 				amount = 50
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			unlock_decision_tooltip = {
+				decision = r56_SAM_direct_funds_to_naval_production
+				show_modifiers = yes
 			}
 
 			custom_effect_tooltip = generic_skip_one_line_tt
@@ -894,7 +937,6 @@ focus_tree = {
 					category = naval_doctrine
 				}
 				add_doctrine_cost_reduction = {
-					name = NZL_destroyer_production
 					cost_reduction = 0.75
 					uses = 3
 					category = cat_fleet_in_being
@@ -916,82 +958,186 @@ focus_tree = {
 		search_filters = { FOCUS_FILTER_NAVY_XP FOCUS_FILTER_RESEARCH FOCUS_FILTER_MILITARY_EQUIPMENT }
     }
 
+	# Purchase Australian Guns
+	focus = {
+        id = r56_SAM_purchase_australian_guns
+        icon = GFX_goal_AST_red_australia
+        prerequisite = { focus = r56_SAM_confiscate_foreign_plantations }
+		mutually_exclusive = { focus = r56_SAM_acquire_obsolete_japanese_naval_vessels }
+		relative_position_id = r56_SAM_confiscate_foreign_plantations
+
+        cost = 7.2
+        x = 3
+        y = 1
+
+		available = { 
+			AST = {
+				exists = yes
+				has_capitulated = no
+				NOT = { has_war_with = ROOT }
+			}
+		}
+
+        ai_will_do = { factor = 1 }
+
+        completion_reward = {
+			#add decision that grants factory output boost ata the expense of consumers
+			army_experience = 25
+			add_equipment_to_stockpile = {
+				type = convoy
+				amount = 50
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			unlock_decision_tooltip = {
+				decision = r56_SAM_direct_funds_to_arms_production
+				show_modifiers = yes
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			AST = {
+				country_event = {
+					id = r56_samoa.28
+					days = 2
+				}
+			}
+
+			custom_effect_tooltip = if_they_accept_tt
+			effect_tooltip = {
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = 1500
+					producer = AST
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				add_equipment_to_stockpile = {
+					type = support_equipment
+					amount = 100
+					producer = AST
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				add_equipment_to_stockpile = {
+					type = artillery_equipment
+					amount = 250
+					producer = AST
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				add_doctrine_cost_reduction = {
+					cost_reduction = 0.85
+					uses = 1
+					category = land_doctrine
+				}
+				add_doctrine_cost_reduction = {
+					cost_reduction = 0.75
+					uses = 3
+					category = infantry_weapons
+					category = support_tech
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				if = { #Best to do afterDLC?
+					limit = { has_dlc = "Arms Against Tyranny" }
+					unlock_military_industrial_organization_tooltip = mio:JAP_mitsubishi_kobe_shipyard_organization
+					custom_effect_tooltip = generic_skip_one_line_tt
+					mio:JAP_mitsubishi_kobe_shipyard_organization = { 
+						add_mio_size = 1
+						add_mio_funds = 1000
+					}
+				}
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_NAVY_XP FOCUS_FILTER_RESEARCH FOCUS_FILTER_MILITARY_EQUIPMENT }
+    }
+
 	# Western Samoa Staging Base
 	focus = {
-        id = r56_SAM_samoa_staging_base
-        icon = GFX_focus_PHI_preemptive_strikes
-        prerequisite = { focus = r56_SAM_purchase_japanese_ships }
-		relative_position_id = r56_SAM_purchase_japanese_ships
+        id = r56_SAM_utilise_the_war_fleet_of_manono
+        icon = GFX_goal_generic_multiple_ships
+        prerequisite = { focus = r56_SAM_acquire_obsolete_japanese_naval_vessels }
+		relative_position_id = r56_SAM_acquire_obsolete_japanese_naval_vessels
 
         cost = 6
-        x = 1
+        x = -1
         y = 1
 
         available = { has_full_control_of_state = 726 }
         ai_will_do = { factor = 1 }
 
         completion_reward = {
-			navy_experience = 10
-			726 = {
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = dockyard
-					level = 1
-					instant_build = yes
-				}
-				add_building_construction = {
-					type = air_base
-					level = 2
-					instant_build = yes
-				}
-				add_building_construction = {
-					type = naval_base
-					province = 7290
-					level = 2
-					instant_build = yes
-				}
-			}
+			
         }
 
-		search_filters = { FOCUS_FILTER_NAVY_XP FOCUS_FILTER_INDUSTRY }
+		search_filters = { }
+    }
+
+	# Prepare for an Island Hopping Campaign
+	focus = {
+        id = r56_SAM_prepare_for_an_island_hopping_campaign
+        icon = GFX_focus_por_luso_tropicalism
+        prerequisite = { focus = r56_SAM_purchase_australian_guns }
+		relative_position_id = r56_SAM_purchase_australian_guns
+
+        cost = 10
+        x = 1
+        y = 1
+
+        ai_will_do = { factor = 1 }
+
+        completion_reward = {
+			army_experience = 10
+			if = { 
+				limit = { has_dlc = "Arms Against Tyranny" }
+				add_doctrine_cost_reduction = {
+					cost_reduction = 0.5
+					uses = 2
+					category = cat_marines_doctrine
+				}
+			}
+			add_tech_bonus = {
+				name = special_forces_bonus
+				ahead_reduction = 1
+				uses = 1
+				category = r56_marines_infantry_tech
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = SAM_marines_tt
+			add_to_variable = { var:SAM_marine_attack = 0.1 }
+			add_to_variable = { var:SAM_marine_unit_design_cost = -0.25 }
+			add_to_variable = { var:SAM_naval_invasion_penalty = -0.05 }
+        }
+
+		search_filters = { FOCUS_FILTER_ARMY_XP FOCUS_FILTER_RESEARCH FOCUS_FILTER_MILITARY_IMPROVEMENT }
     }
 
 	# Invite Japanese Investors
 	focus = {
         id = r56_SAM_invite_japanese_investors
-        icon = GFX_goal_JAP_co_prosperity_sphere
-        prerequisite = { focus = r56_SAM_purchase_japanese_ships }
-		relative_position_id = r56_SAM_purchase_japanese_ships
+        icon = GFX_focus_mex_privatisation
+        prerequisite = { focus = r56_SAM_acquire_obsolete_japanese_naval_vessels focus = r56_SAM_purchase_australian_guns }
+		relative_position_id = r56_SAM_acquire_obsolete_japanese_naval_vessels
 
         cost = 7.2
-        x = -1
+        x = 1
         y = 1
 
         available = {
-			country_exists = JAP
-			NOT = { has_war_with = JAP }
+			
 		}
 
         ai_will_do = { factor = 1 }
 
         completion_reward = {
-			add_tech_bonus = {
-				bonus = 0.35
-				uses = 2
-				category = industry
-			}
-			custom_effect_tooltip = generic_skip_one_line_tt
-			custom_effect_tooltip = available_industrial_concern
-			show_ideas_tooltip = r56_SAM_south_seas_development_company
+			
+			
         }
 
-		search_filters = { FOCUS_FILTER_INDUSTRY FOCUS_FILTER_RESEARCH }
+		search_filters = {  }
     }
 
-	# Towards a Greater Samoan Confederacy
+	# Towards a United Samoan Realm
 	focus = {
         id = r56_SAM_towards_a_greater_samoan_confederacy
-        icon = GFX_focus_por_reclaim_crown_jewel
+        icon = GFX_focus_SWE_counter_revolution
         prerequisite = { focus = r56_SAM_fate_of_malietoa }
 		prerequisite = { focus = r56_SAM_confiscate_foreign_plantations }
 		relative_position_id = r56_SAM_dissolve_the_fono
@@ -1022,8 +1168,6 @@ focus_tree = {
         x = -3 #-5 = move here only incase manua path unlocked
         y = 1
 
-		bypass = { controls_state = 1088 }
-
         available = {
 			is_subject = no
 			any_country = {
@@ -1032,18 +1176,76 @@ focus_tree = {
 			}
 		}
 
+		bypass = { controls_state = 1088 }
+		bypass_effect = {
+			#event to elect manua
+		}
+
         ai_will_do = { factor = 1 }
+		will_lead_to_war_with = USA
+		select_effect = { JAP = { country_event = r56_samoa_manua.3 } }
 
         completion_reward = {
+			custom_effect_tooltip = SOV_focus_select_effect_tt
+			effect_tooltip = { JAP = { country_event = r56_samoa_manua.3 } }
+			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = r56_SAM_better_with_japan_tt
 			custom_effect_tooltip = generic_skip_one_line_tt
 
+			custom_effect_tooltip = r56_SAM_effects_upon_focus_completion
 			every_other_country = {
 				limit = {
 					controls_state = 1088
 					NOT = { has_war_with = ROOT } 
 				}
-				country_event = r56_samoa.10
+				country_event = {
+					id = r56_samoa.10
+					days = 5
+				}
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_SAM_usa_manua_tt
+
+			custom_effect_tooltip = r56_possible_event_effects
+			effect_tooltip = {
+				add_popularity = {
+					ideology = ROOT
+					popularity = 0.1
+				}
+				country_event = r56_samoa_manua.6
+				custom_effect_tooltip = generic_skip_one_line_tt
+				1088 = { transfer_state_to = ROOT }
+			}
+
+			custom_effect_tooltip = r56_alternative_event_effects
+			effect_tooltip = {
+				add_war_support = 0.1
+				start_border_war = {
+					change_state_after_war = yes
+					attacker = {
+						state = 726
+						num_provinces = 2
+						#on_win = japan_border_conflict.2
+						#on_lose = japan_border_conflict.3
+						#on_cancel = japan_border_conflict.4
+						#modifier = 0.1
+						#dig_in_factor = 0
+						#terrain_factor = 0
+					}	
+					defender = {
+						state = 1088
+						num_provinces = 1
+						#on_win = japan_border_conflict.3
+						#on_lose = japan_border_conflict.2
+						#on_cancel = japan_border_conflict.4
+					}
+				}
+			}
+
+			custom_effect_tooltip = r56_alternative_event_effects
+			effect_tooltip = {
+				add_political_power = -100
+				add_stability = -0.1
 			}
         }
 		#just reminder for later but make event for electing tuimanua and have cook islands canadate
@@ -1053,13 +1255,13 @@ focus_tree = {
 
 	# Join Japan
 	focus = {
-        id = r56_SAM_join_japan
+        id = r56_SAM_join_the_east_asian_hegemon
         icon = GFX_focus_jap_spiritual_mobilization
         prerequisite = { focus = r56_SAM_towards_a_greater_samoan_confederacy }
-		mutually_exclusive = { focus = r56_SAM_join_the_nauru_pact }
+		mutually_exclusive = { focus = r56_SAM_entrance_into_the_nauru_pact }
 		relative_position_id = r56_SAM_towards_a_greater_samoan_confederacy
 
-        cost = 4
+        cost = 2
         x = 1
         y = 1
 
@@ -1095,13 +1297,13 @@ focus_tree = {
 
 	# Join the Nauru Pact
 	focus = {
-        id = r56_SAM_join_the_nauru_pact
+        id = r56_SAM_entrance_into_the_nauru_pact
         icon = GFX_goal_AST_australia_first
         prerequisite = { focus = r56_SAM_towards_a_greater_samoan_confederacy }
-		mutually_exclusive = { focus = r56_SAM_join_japan }
+		mutually_exclusive = { focus = r56_SAM_join_the_east_asian_hegemon }
 		relative_position_id = r56_SAM_towards_a_greater_samoan_confederacy
 
-        cost = 4
+        cost = 2
         x = -1
         y = 1
 
@@ -1138,8 +1340,8 @@ focus_tree = {
 	focus = {
         id = r56_SAM_support_japan_conquest
         icon = GFX_focus_JAP_isolate_oceania
-        prerequisite = { focus = r56_SAM_join_japan }
-		relative_position_id = r56_SAM_join_japan
+        prerequisite = { focus = r56_SAM_join_the_east_asian_hegemon }
+		relative_position_id = r56_SAM_join_the_east_asian_hegemon
 
         cost = 10
         x = -1
@@ -1182,17 +1384,24 @@ focus_tree = {
 
 		available = {
 			num_of_controlled_states > 0
-			JAP = {
-				is_in_faction_with = ROOT
-				has_government = fascism
-				is_major = yes
+			OR = {
+				JAP = {
+					is_in_faction_with = ROOT
+					has_government = fascism
+					is_major = yes
+				}
+
+				AST = {
+					is_in_faction_with = ROOT
+					has_government = fascism
+					is_major = yes
+				}
 			}
 		}
 		
         ai_will_do = { factor = 1 }
 
         completion_reward = {
-			r56_SAM_increase_japanese_influence = yes
 			custom_effect_tooltip = generic_skip_one_line_tt
 			random_owned_controlled_state = {
 				limit = { is_core_of = ROOT }
@@ -1214,13 +1423,38 @@ focus_tree = {
 				}
 			}
         }
+
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+    }
+
+	focus = {
+        id = r56_SAM_the_means_to_wage_war
+        icon = GFX_focus_generic_reorient_production
+        prerequisite = { focus = r56_SAM_request_japanese_industrial_aid }
+		relative_position_id = r56_SAM_request_japanese_industrial_aid
+
+        cost = 10
+        x = 1
+        y = 1
+		
+        ai_will_do = { factor = 1 }
+
+        completion_reward = {
+			#ns with factory and dockyard output and maybe war eco and mio improvemnets
+			add_timed_idea = {
+				idea = r56_SAM_means_to_wage_war_idea
+				days = 720
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			upgrade_economy_law = yes
+        }
     }
 
 	focus = {
         id = r56_SAM_acquire_japanese_machinery
         icon = GFX_focus_generic_public_works
-        prerequisite = { focus = r56_SAM_request_japanese_industrial_aid }
-		relative_position_id = r56_SAM_request_japanese_industrial_aid
+        prerequisite = { focus = r56_SAM_the_means_to_wage_war }
+		relative_position_id = r56_SAM_the_means_to_wage_war
 
         cost = 5
         x = 1
@@ -1248,37 +1482,10 @@ focus_tree = {
     }
 
 	focus = {
-        id = r56_SAM_the_means_to_wage_war
-        icon = GFX_focus_generic_reorient_production
-        prerequisite = { focus = r56_SAM_acquire_japanese_machinery }
-		relative_position_id = r56_SAM_acquire_japanese_machinery
-
-        cost = 10
-        x = 1
-        y = 1
-
-		available = {
-			
-		}
-		
-        ai_will_do = { factor = 1 }
-
-        completion_reward = {
-			#ns with factory and dockyard output and maybe war eco and mio improvemnets
-			add_timed_idea = {
-				idea = r56_SAM_means_to_wage_war_idea
-				days = 720
-			}
-			custom_effect_tooltip = generic_skip_one_line_tt
-			upgrade_economy_law = yes
-        }
-    }
-
-	focus = {
         id = r56_SAM_japplaceholder
         #icon = GFX_focus_generic_reorient_production
-        prerequisite = { focus = r56_SAM_acquire_japanese_machinery }
-		relative_position_id = r56_SAM_acquire_japanese_machinery
+        prerequisite = { focus = r56_SAM_the_means_to_wage_war }
+		relative_position_id = r56_SAM_the_means_to_wage_war
 
         cost = 10
         x = -1
@@ -1373,6 +1580,8 @@ focus_tree = {
 				}
 			}
         }
+
+		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY }
     }
 
 	focus = {
@@ -1424,43 +1633,18 @@ focus_tree = {
 		
         ai_will_do = { factor = 1 }
 
-        completion_reward = { #yoinked
-			if = { 
-				limit = {
-					has_dlc = "Arms Against Tyranny"
-				}
-				add_tech_bonus = {
-					name = uk_amphibious_focus
-					bonus = 1.0
-					uses = 1
-					category = marine_tech
-				}
-			}
-			else = {
-				add_tech_bonus = {
-					name = uk_amphibious_focus
-					bonus = 1.0
-					uses = 1
-					category = marine_tech
-					category = r56_special_forces_training_tech 
-				}
-			}	
+        completion_reward = { #yoinked	
 			add_tech_bonus = {
 				name = uk_amphibious_focus
 				bonus = 1.0
 				uses = 1
 				category = tp_tech
 			}
-			if = {
-				limit = {
-					has_dlc = "Man the Guns"
-				}
-				add_tech_bonus = {
-					name = JAP_expand_the_snlf
-					bonus = 1
-					uses = 1
-					category = amphibious_armor_tech
-				}				
+			add_tech_bonus = {
+				name = JAP_expand_the_snlf
+				bonus = 1
+				uses = 1
+				category = amphibious_armor_tech
 			}
 		}
     }
@@ -1498,10 +1682,7 @@ focus_tree = {
         x = -2
         y = 2
 
-		available = {
-			has_capitulated = yes
-		}
-		
+		available = { is_government_in_exile = yes }
         ai_will_do = { factor = 1 }
 
         completion_reward = {
@@ -1511,14 +1692,15 @@ focus_tree = {
 					has_intelligence_agency = no
 				}
 				create_intelligence_agency = yes
-			}			
-			if = {
-				limit = { 
-					has_dlc = "La Resistance"
-					has_intelligence_agency = yes 
+
+				else_if = {
+					limit = {
+						has_dlc = "La Resistance"
+						has_intelligence_agency = yes
+					}
+					gain_random_agency_upgrade = yes
 				}
-				gain_random_agency_upgrade = yes
-			}
+			}			
 			custom_effect_tooltip = generic_skip_one_line_tt
 			add_ideas = r56_SAM_resistance_idea
 			custom_effect_tooltip = generic_skip_one_line_tt
@@ -1526,13 +1708,14 @@ focus_tree = {
 				type = infantry_equipment_0
 				amount = 3500
 			}
-			#add national spirit that boosts resistance and weekly war support
         }
+
+		search_filters = { FOCUS_FILTER_MILITARY_EQUIPMENT FOCUS_FILTER_ESPIONAGE }
     }
 
 	focus = {
         id = r56_SAM_we_will_return
-        icon = GFX_goal_SAM_independence_fight
+        icon = GFX_focus_ETH_freedom_at_gunpoint
         prerequisite = { focus = r56_SAM_establish_resistance_contacts }
 		relative_position_id = r56_SAM_establish_resistance_contacts
 
@@ -1572,10 +1755,7 @@ focus_tree = {
         x = 1
         y = 1
 
-		available = {
-			has_capitulated = yes
-		}
-		
+		available = { is_government_in_exile = yes }
         ai_will_do = { factor = 1 }
 
         completion_reward = {
@@ -1592,16 +1772,19 @@ focus_tree = {
 				level = 1
 			}
         }
+
+		search_filters = { FOCUS_FILTER_INDUSTRY }
     }
 
 	focus = {
         id = r56_SAM_conquer_the_oppressor
         icon = GFX_goal_generic_attack_new_zealand
-        prerequisite = { focus = r56_SAM_join_japan focus = r56_SAM_join_the_nauru_pact }
-		relative_position_id = r56_SAM_join_japan
+        prerequisite = { focus = r56_SAM_join_the_east_asian_hegemon focus = r56_SAM_entrance_into_the_nauru_pact }
+		mutually_exclusive = { focus = r56_SAM_alliance_with_the_nzl_legion }
+		relative_position_id = r56_SAM_join_the_east_asian_hegemon
     
-        cost = 10
-        x = -3
+        cost = 5
+        x = -5
         y = 1
     
 		available = {
@@ -1628,6 +1811,45 @@ focus_tree = {
 				type = annex_everything
 			}
         }
+
+		search_filters = { FOCUS_FILTER_ANNEXATION }
+    }
+
+	focus = {
+        id = r56_SAM_alliance_with_the_nzl_legion
+        icon = GFX_goal_NZL_jo
+        prerequisite = { focus = r56_SAM_join_the_east_asian_hegemon focus = r56_SAM_entrance_into_the_nauru_pact }
+		mutually_exclusive = { focus = r56_SAM_conquer_the_oppressor }
+		relative_position_id = r56_SAM_join_the_east_asian_hegemon
+    
+        cost = 2
+        x = -3
+        y = 1
+    
+		available = {
+			is_subject = no
+			is_in_faction = yes
+			NZL = {
+				is_subject = no
+				NOT = { has_war_with = ROOT }
+				OR = {
+					has_government = fascism
+					has_country_leader = {
+						character = NZL_john_ormond
+						ruling_only = yes
+					}
+				}
+			}
+		}
+	
+		bypass = {  is_ally_with = NZL }
+        ai_will_do = { factor = 1 }
+	
+        completion_reward = {
+			# if faction leader, send nzl invitation. if not ask nzl if it wants to join and then send event to faction leader
+        }
+
+		search_filters = { FOCUS_FILTER_ALLIANCE }
     }
 
 	focus = {
@@ -1727,6 +1949,8 @@ focus_tree = {
 				OWNER = { country_event = { id = r56_samoa.17 hours = 4 random_hours = 2 } }
 			} #TODO - EVENT IS SOMEWHAT BROKEN (GIVES CLAIM TO ALL STATES)FIX!!
         }
+
+		search_filters = { FOCUS_FILTER_ANNEXATION }
     }
 
 	focus = {
@@ -1794,6 +2018,8 @@ focus_tree = {
 				add_compliance = 10
 			}
         }
+
+		search_filters = { FOCUS_FILTER_INDUSTRY }
     }
 
 	focus = {
@@ -4370,7 +4596,7 @@ focus_tree = {
         icon = GFX_goal_generic_consumer_goods
         prerequisite = { focus = r56_SAM_enact_the_aliesa_scheme } 
 		relative_position_id = r56_SAM_enact_the_aliesa_scheme
-		mutually_exclusive { focus = r56_SAM_rely_on_agricultural_exports }
+		mutually_exclusive = { focus = r56_SAM_rely_on_agricultural_exports }
         
         cost = 5
         x = -3
@@ -4595,10 +4821,6 @@ focus_tree = {
 					}
 				}
 			}
-			custom_effect_tooltip = {
-				localization_key = building_state_modifier|dam
-				INDENT = "    "
-			}
         }
     }
 
@@ -4628,7 +4850,7 @@ focus_tree = {
         icon = GFX_focus_generic_agricultural_subsidies
         prerequisite = { focus = r56_SAM_enact_the_aliesa_scheme }
 		relative_position_id = r56_SAM_enact_the_aliesa_scheme
-		mutually_exclusive { focus = r56_SAM_begin_moderate_industrialization }
+		mutually_exclusive = { focus = r56_SAM_begin_moderate_industrialization }
         
         cost = 10
         x = 3
