@@ -285,6 +285,7 @@ focus_tree = {
 		}
 	}
 
+	shared_focus = AH_austro_hungarian_unification #R56
 	shared_focus = HABSBURG_part_of_something_bigger
 
 	#	focus = {
@@ -840,6 +841,25 @@ focus_tree = {
 				custom_effect_tooltip = generic_skip_one_line_tt
 				CZE_bop_very_low_decrease_effect = yes	
 			}
+			hidden_effect = {
+				if = {
+					limit = {
+						NOT = {
+							OR = {
+								has_cosmetic_tag = CZE_union
+								has_cosmetic_tag = CZE_union_expanded
+								has_cosmetic_tag = CZE_fall_of_the_republic
+								has_cosmetic_tag = CZE_CEF
+								has_cosmetic_tag = CZE_second_republic
+								has_cosmetic_tag = CZE_ONLY
+								has_cosmetic_tag = CZE_great_moravia
+								has_cosmetic_tag = CZE_SLO_bohemia_expansion
+							}
+						}
+					}
+					set_cosmetic_tag = CZE_first_monarchy_color
+				}
+			}
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_BALANCE_OF_POWER }
 	}
@@ -875,7 +895,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_restore_noble_titles
-		icon = GFX_goal_generic_aristocratic_cooperation
+		icon = GFX_goal_generic_aristocratic_cooperation #R56
 
 		prerequisite = {
 			focus = CZE_semi_constitutional_monarchy
@@ -965,7 +985,7 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			add_ideas = POL_state_catholicism
+			add_ideas = CZE_state_catholicism
 
 			if = {
 				limit = {
@@ -1058,7 +1078,7 @@ focus_tree = {
 			add_ideas = CZE_religious_tolerance
 
 			custom_effect_tooltip = generic_skip_one_line_tt
-			if = {
+			if = { #R56
 				limit = {
 					NOT = {
 						has_idea = r56i_laws_war_historical
@@ -1508,7 +1528,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_demand_katowice
-		icon = GFX_goal_GER_prepare_to_invade_poland
+		icon = GFX_goal_GER_prepare_to_invade_poland #R56
 
 		prerequisite = {
 			focus = CZE_claim_lands_of_the_bohemian_crown
@@ -1725,6 +1745,7 @@ focus_tree = {
 			}
 			custom_effect_tooltip = generic_skip_one_line_tt
 			set_cosmetic_tag = CZE_SLO_bohemia_expansion
+			mark_focus_tree_layout_dirty = yes
 		}
 		search_filters = { FOCUS_FILTER_MANPOWER }
 	}
@@ -1750,7 +1771,7 @@ focus_tree = {
 		cost = 10
 
 		relative_position_id = CZE_proclaim_the_restoration_of_bohemia
-		x = -1
+		x = 0
 		y = 1
 
 		available = {
@@ -1818,30 +1839,33 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			every_subject_country = {
-				if = {
-					limit = {
-						has_autonomy_state = autonomy_dominion
-					}
-					overlord = {
-						set_autonomy = {
-							target = PREV
-							autonomous_state = autonomy_puppet
-							end_wars = no
-							end_civil_wars = no
+			custom_effect_tooltip = CZE_decrease_autonomy_tier
+			hidden_effect = {
+				every_subject_country = {
+					if = {
+						limit = {
+							has_autonomy_state = autonomy_dominion
+						}
+						overlord = {
+							set_autonomy = {
+								target = PREV
+								autonomous_state = autonomy_puppet
+								end_wars = no
+								end_civil_wars = no
+							}
 						}
 					}
-				}
-				else_if = {
-					limit = {
-						has_autonomy_state = autonomy_puppet
-					}
-					overlord = {
-						set_autonomy = {
-							target = PREV
-							autonomous_state = autonomy_integrated_puppet
-							end_wars = no
-							end_civil_wars = no
+					else_if = {
+						limit = {
+							has_autonomy_state = autonomy_puppet
+						}
+						overlord = {
+							set_autonomy = {
+								target = PREV
+								autonomous_state = autonomy_integrated_puppet
+								end_wars = no
+								end_civil_wars = no
+							}
 						}
 					}
 				}
@@ -1849,6 +1873,108 @@ focus_tree = {
 		}
 	}
 
+	focus = {
+		id = CZE_usurp_the_mantle
+		icon = GFX_focus_POL_habsburg
+
+		# prerequisite = {
+		# 	focus = CZE_catholic_focus
+		# 	focus = CZE_hussite_legacy
+		# }
+
+		allow_branch = {
+			OR = {
+				#is_debug = yes
+				has_completed_focus = CZE_proclaim_the_restoration_of_bohemia
+			}
+		}
+
+		prerequisite = {
+			focus = CZE_integrate_lost_territories
+		}
+
+		prerequisite = {
+			focus = CZE_demand_the_istrian_peninsula
+		}
+
+		cost = 10
+
+		relative_position_id = CZE_proclaim_the_restoration_of_bohemia
+		x = 2
+		y = 2
+
+		available = {
+			is_subject = no
+		}
+
+		completion_reward = {
+			unlock_decision_tooltip = {
+				decision = form_hre
+				show_effect_tooltip = no
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			every_other_country = {
+				limit = {
+					NOT = {
+						is_ally_with = ROOT
+						has_war_with = ROOT
+						ROOT = {
+							has_wargoal_against = PREV
+						}
+					}
+					OR = {
+						any_owned_state = {
+							is_in_array = { HRE_states = THIS }
+						}
+						any_controlled_state = {
+							is_in_array = { HRE_states = THIS }
+						}
+					}
+				}
+				hidden_effect = {
+					clear_temp_array = temp_states
+					every_owned_state = {
+						limit = {
+							is_in_array = { HRE_states = THIS }
+							NOT = {
+								is_in_array = { temp_states = THIS }
+							}
+						}
+						add_to_temp_array = {
+							temp_states = THIS
+						}
+					}
+					every_controlled_state = {
+						limit = {
+							is_in_array = { HRE_states = THIS }
+							NOT = {
+								is_in_array = { temp_states = THIS }
+							}
+						}
+						add_to_temp_array = {
+							temp_states = THIS
+						}
+					}
+				}
+				ROOT = {
+					create_wargoal = {
+						type = take_state_focus
+						target = PREV
+						generator = temp_states
+					}
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_relation_modifier = {
+				target = GER
+				modifier = CZE_usurp_the_mantle
+			}
+		}
+	}
 	############################
 	#####     Fascist     ######
 	############################
@@ -1899,13 +2025,19 @@ focus_tree = {
 			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = available_political_advisor
 			show_ideas_tooltip = CZE_karel_schwarzenberg
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_timed_idea = {
+				idea = CZE_unify_the_fascist_parties_idea
+				days = 90
+			}
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL_CHARACTER }
 	}
 
 	focus = {
 		id = CZE_revive_the_december_bloc
-		icon = GFX_focus_generic_limited_social_mobilization
+		icon = GFX_focus_generic_worker_administration
 
 		prerequisite = {
 			focus = CZE_unify_the_fascist_parties
@@ -1928,6 +2060,17 @@ focus_tree = {
 		}
 
 		completion_reward = {
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_party_popularity_stability_factor = 0.025
+				tooltip = party_popularity_stability_factor_tt
+			}
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_command_power_gain_mult = 0.05
+				tooltip = command_power_gain_mult_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = {
 				localization_key = remove_character_as_tt
 				CHARACTER = CZE_jan_sramek
@@ -1952,6 +2095,12 @@ focus_tree = {
 			custom_effect_tooltip = generic_skip_one_line_tt
 
 			CZE_get_rid_of_agrarian_politics_with_less_steps = yes
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_timed_idea = {
+				idea = CZE_revive_the_december_bloc
+				days = 180
+			}
 		}
 	}
 
@@ -2059,7 +2208,33 @@ focus_tree = {
 
 	focus = {
 		id = CZE_rally_against_germany
-		icon = GFX_goal_GER_great_black_menace
+		icon = {
+			trigger = {
+				GER = {
+					has_government = fascism
+				}
+				NOT = {
+					ROOT = {
+						has_completed_focus = CZE_restore_the_monarchy
+					}
+				}
+			}
+			value = GFX_focus_GER_subdue_the_wehrmacht
+		}
+		icon = {
+			trigger = {
+				GER = {
+					has_government = fascism
+				}
+				ROOT = {
+					has_completed_focus = CZE_restore_the_monarchy
+				}
+			}
+			value = GFX_focus_SWE_undermine_fascism
+		}
+		icon = {
+			value = GFX_goal_generic_defence
+		}
 
 		cost = 5
 
@@ -2119,7 +2294,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_pro_rearmament_propaganda
-		icon = GFX_focus_secret_rearmament
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = fascism
+				}
+			}
+			value = GFX_focus_generic_fascist_propaganda
+		}
+		icon = {
+			value = GFX_focus_secret_rearmament
+		}
 
 		cost = 5
 
@@ -2153,6 +2338,17 @@ focus_tree = {
 		}
 
 		completion_reward = {
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_training_time_factor = -0.05
+				tooltip = training_time_factor_tt
+			}
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_mobilization_speed = 0.05
+				tooltip = mobilization_speed_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_timed_idea = {
 				idea = CZE_pro_rearmament_propaganda_idea
 				days = 180
@@ -2232,11 +2428,22 @@ focus_tree = {
 			else = { #here just as preview of the forthcoming real reward - logan
 				add_popularity = {
 					ideology = fascism
-					popularity = 0.03
+					popularity = 0.05
 				}
 				custom_effect_tooltip = generic_skip_one_line_tt
 			}
 
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_party_popularity_stability_factor = 0.025
+				tooltip = party_popularity_stability_factor_tt
+			}
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_command_power_gain_mult = 0.05
+				tooltip = command_power_gain_mult_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			show_unit_leaders_tooltip = CZE_emanuel_moravec
 		}
 		search_filters = { FOCUS_FILTER_MILITARY_CHARACTER FOCUS_FILTER_POLITICAL }
@@ -2244,7 +2451,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_power_to_the_military
-		icon = GFX_goal_military_government
+		icon = GFX_goal_military_government #R56
 
 		prerequisite = {
 			focus = CZE_revert_1926_anti_military_laws
@@ -2271,6 +2478,17 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_experience_gain_army_unit_factor = 0.05
+				tooltip = experience_gain_army_unit_factor_tt
+			}
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_party_popularity_stability_factor = 0.05
+				tooltip = party_popularity_stability_factor_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_command_power = 25
 
 			if = {
@@ -2283,13 +2501,32 @@ focus_tree = {
 				CZE_bop_very_low_increase_effect = yes
 				custom_effect_tooltip = generic_skip_one_line_tt
 			}
+			hidden_effect = {
+				if = {
+					limit = {
+						NOT = {
+							OR = {
+								has_cosmetic_tag = CZE_union
+								has_cosmetic_tag = CZE_union_expanded
+								has_cosmetic_tag = CZE_fall_of_the_republic
+								has_cosmetic_tag = CZE_CEF
+								has_cosmetic_tag = CZE_second_republic
+								has_cosmetic_tag = CZE_ONLY
+								has_cosmetic_tag = CZE_great_moravia
+								has_cosmetic_tag = CZE_SLO_bohemia_expansion
+							}
+						}
+					}
+					set_cosmetic_tag = CZE_fascist_color
+				}
+			}
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_BALANCE_OF_POWER }
 	}
 
 	focus = {
 		id = CZE_militarize_the_associations
-		icon = GFX_goal_generic_propaganda
+		icon = GFX_focus_SWE_revoke_militia_law
 		
 		prerequisite = {
 			focus = CZE_power_to_the_military
@@ -2307,6 +2544,47 @@ focus_tree = {
 				popularity = 0.03
 			}
 
+			if = {
+				limit = {
+					NOT = {
+						has_tech = r56_militia_tech
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				set_technology = { 
+					r56_militia_tech = 1
+					popup = no
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_mobilization_speed = 0.05
+				tooltip = mobilization_speed_tt
+			}
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_modifier_army_sub_unit_militia_defence_factor = 0.05
+				tooltip = modifier_army_sub_unit_militia_defence_factor_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			custom_effect_tooltip = CZE_militias_officer_random_general_tt
+			hidden_effect = {
+				every_army_leader = {
+					limit = {
+						NOT = {
+							has_trait = militias_officer 
+						}
+					}
+					random_select_amount = 1
+					add_trait = {
+						trait = militias_officer
+					}
+				}
+			}
 			custom_effect_tooltip = generic_skip_one_line_tt
 
 			add_ideas = CZE_militarized_organizations
@@ -2327,7 +2605,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_aggressive_foreign_policy
-		icon = GFX_focus_generic_subjugation
+		icon = GFX_focus_CZE_czechoslovakian_hegemony
 
 		cost = 5
 
@@ -2381,6 +2659,13 @@ focus_tree = {
 		}
 		completion_reward = {
 			mark_focus_tree_layout_dirty = yes
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_mobilization_speed = 0.05
+				tooltip = mobilization_speed_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_ideas = CZE_aggressive_foreign_policy_idea
 
 			effect_tooltip = { #in the idea
@@ -3039,7 +3324,7 @@ focus_tree = {
 		x = -1
 		y = 1
 		
-		cost = 5
+		cost = 5 #R56?
 		
 		available = {
 			any_controlled_state = {
@@ -3074,8 +3359,8 @@ focus_tree = {
 		}
 
 		relative_position_id = CZE_the_legacy_of_ottokar
-		x = -1
-		y = 3
+		x = -2
+		y = 1
 
 		available = {
 			is_subject = no
@@ -3101,8 +3386,8 @@ focus_tree = {
 			every_other_country = {
 				limit = {
 					OR = {
-						controls_state = 852
-						controls_state = 736
+						owns_state = 852
+						owns_state = 736
 					}
 				}
 				country_event = MUN_czech.1005
@@ -3149,9 +3434,9 @@ focus_tree = {
 			every_other_country = {
 				limit = {
 					OR = {
-						controls_state = 102
-						controls_state = 956
-						controls_state = 853
+						owns_state = 102
+						owns_state = 956
+						owns_state = 853
 					}
 				}
 				country_event = MUN_czech.1005
@@ -3571,18 +3856,35 @@ focus_tree = {
 			focus = CZE_subjegate_serbia
 		}
 
-		cost = 5
+		cost = 10
 
 		relative_position_id = CZE_subjegate_romania
-		x = -2
+		x = -1
 		y = 1
 
 		available = {
-			has_subject = HUN
+			OR = {
+				has_subject = HUN
+				has_subject = ROM
+				has_subject = CRO
+				has_subject = SLV
+				has_subject = TRA
+			}
 		}
 
 		completion_reward = {
-			HUN = {
+			every_subject_country = {
+				tooltip = CZE_austro_hungary_puppets
+				visible_when_empty = yes
+				limit = {
+					OR = {
+						original_tag = HUN
+						original_tag = ROM
+						original_tag = CRO
+						original_tag = SLV
+						original_tag = TRA
+					}
+				}
 				add_timed_idea = {
 					idea = CZE_integration_efforts
 					days = 600
@@ -3760,7 +4062,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_central_european_faction
-		icon = GFX_focus_GER_european_confederation
+		icon = {
+			trigger = {
+				ROOT = {
+					has_completed_focus = CZE_petition_the_nobles
+				}
+			}
+			value = GFX_focus_GER_european_confederation
+		}
+		icon = {
+			value = GFX_focus_generic_subjugation
+		}
 
 		prerequisite = {
 			focus = CZE_claim_lands_of_the_bohemian_crown
@@ -3770,7 +4082,7 @@ focus_tree = {
 		cost = 10
 
 		relative_position_id = CZE_deepen_ties_with_puppet_kingdoms
-		x = 12
+		x = 11
 		y = 3
 		offset = {
 			x = -5
@@ -4151,6 +4463,13 @@ focus_tree = {
 		
 		
 		completion_reward = {
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_mobilization_speed = 0.10
+				tooltip = mobilization_speed_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_ideas = CZE_form_the_government_army_idea
 
 			custom_effect_tooltip = generic_skip_one_line_tt
@@ -4502,7 +4821,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_placate_benes_faction
-		icon = GFX_goal_generic_major_alliance
+		icon = GFX_focus_generic_befriend_czechoslovakia
 		prerequisite = { focus = CZE_coalition_building }
 		mutually_exclusive = {
 			focus = CZE_negotiations_with_the_autonomous_bloc
@@ -4774,17 +5093,6 @@ focus_tree = {
 		cancel_if_invalid = no
 
 		completion_reward = {			
-			if = {
-				limit = {
-					NOT = {
-						has_tech = r56_militia_tech
-					}
-				}
-				set_technology = { 
-					r56_militia_tech = 1
-					popup = no
-				}
-			}
 			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
 			add_to_variable = {
 				CZE_ceskoslovenska_armada_conscription_factor = 0.05
@@ -4799,6 +5107,18 @@ focus_tree = {
 				tooltip = modifier_army_sub_unit_militia_defence_factor_tt
 			}
 
+			if = {
+				limit = {
+					NOT = {
+						has_tech = r56_militia_tech
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				set_technology = { 
+					r56_militia_tech = 1
+					popup = no
+				}
+			}
 			custom_effect_tooltip = generic_skip_one_line_tt
 
 			add_command_power = 25
@@ -4869,10 +5189,137 @@ focus_tree = {
 		}
 		search_filters = { FOCUS_FILTER_MILITARY_CHARACTER FOCUS_FILTER_MANPOWER }
 	}
+	
+	focus = {
+		id = CZE_wielding_the_hammer
+		icon = GFX_focus_AUS_lawmaking_leniency
+		x = -2
+		y = 0
+		cost = 5
+
+		prerequisite = { focus = CZE_placate_benes_faction focus =  CZE_unify_the_fascist_parties }
+
+		relative_position_id = CZE_merge_the_paramilitaries
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			if = {
+				limit = {
+					has_government = democratic
+					NOT = {
+						has_completed_focus = CZE_appeal_to_the_castle
+					}
+				}
+				democratic > 0.75
+			}
+			if = {
+				limit = {
+					has_completed_focus = CZE_appeal_to_the_castle
+				}
+				fascism > 0.75
+			}
+		}
+		
+
+		completion_reward = {
+			add_political_power = 25
+			add_command_power = 25
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			add_ideas = CZE_wielding_the_hammer_idea
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+	}
+
+	focus = {
+		id = CZE_emergency_measures
+		icon = GFX_focus_generic_expropriate_industrialist
+		x = 0
+		y = 1
+		cost = 10
+
+		prerequisite = { focus = CZE_wielding_the_hammer }
+
+		relative_position_id = CZE_wielding_the_hammer
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		available = {
+			OR = {
+				has_war = yes
+				threat > 0.14
+				GER = {
+					has_completed_focus = GER_anschluss
+				}
+				any_neighbor_country = {
+					OR = {
+						has_added_tension_amount > 10
+						is_justifying_wargoal_against = PREV #PREV is ROOT (CZE) here
+					}
+				}
+			}
+		}
+
+		cancel_if_invalid = no
+		continue_if_invalid = yes	#dont cancel on dropping tension/ws
+
+		completion_reward = {
+			custom_effect_tooltip = AUS_seek_papal_support_tt
+			hidden_effect = {
+				add_popularity = {
+					ideology = ROOT
+					popularity = 0.05
+				}
+			}
+			if = {
+				limit = {
+					has_dlc = "La Resistance"
+					has_intelligence_agency = yes
+				}
+				IF = {
+					limit = {
+						agency_upgrade_number < 4
+					}
+				
+					custom_effect_tooltip = generic_skip_one_line_tt
+
+					upgrade_intelligence_agency = upgrade_passive_defense
+
+					custom_effect_tooltip = generic_skip_one_line_tt
+
+				}
+			}
+			else = {
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+
+			add_timed_idea = {
+				idea = CZE_emergency_measures_idea
+				days = 1095
+			}
+
+			if = {
+				limit = {
+					has_power_balance = {
+    					id = CZE_bop_army_readiness
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				CZE_bop_very_low_increase_effect = yes
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_BALANCE_OF_POWER }
+	}
 
 	focus = {
 		id = CZE_leverage_sokol
-		icon = GFX_focus_generic_workers
+		icon = GFX_focus_CZE_mobilize_the_sokol
 		prerequisite = { focus = CZE_negotiations_with_the_autonomous_bloc focus = CZE_placate_benes_faction }
 		relative_position_id = CZE_placate_benes_faction
 		x = 4
@@ -4946,128 +5393,6 @@ focus_tree = {
 			}
 		}
 		search_filters = { FOCUS_FILTER_POLITICAL_CHARACTER FOCUS_FILTER_BALANCE_OF_POWER FOCUS_FILTER_MANPOWER }
-	}
-
-	focus = {
-		id = CZE_wielding_the_hammer
-		icon = GFX_focus_AUS_lawmaking_leniency
-		x = -2
-		y = 0
-		cost = 5
-
-		prerequisite = { focus = CZE_placate_benes_faction focus =  CZE_unify_the_fascist_parties }
-
-		relative_position_id = CZE_merge_the_paramilitaries
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		available = {
-			if = {
-				limit = {
-					has_government = democratic
-					NOT = {
-						has_completed_focus = CZE_appeal_to_the_castle
-					}
-				}
-				democratic > 0.75
-			}
-			if = {
-				limit = {
-					has_completed_focus = CZE_appeal_to_the_castle
-				}
-				fascism > 0.75
-			}
-		}
-		
-
-		completion_reward = {
-			add_political_power = 25
-			add_command_power = 25
-
-			custom_effect_tooltip = generic_skip_one_line_tt
-
-			add_ideas = CZE_wielding_the_hammer_idea
-		}
-		search_filters = { FOCUS_FILTER_POLITICAL }
-	}
-
-	focus = {
-		id = CZE_emergency_measures
-		icon = GFX_focus_generic_expropriate_industrialist
-		x = 0
-		y = 1
-		cost = 10
-
-		prerequisite = { focus = CZE_wielding_the_hammer }
-
-		relative_position_id = CZE_wielding_the_hammer
-
-		ai_will_do = {
-			factor = 1
-		}
-
-		available = {
-			OR = {
-				has_war = yes
-				threat > 0.15
-				GER = {
-					has_completed_focus = GER_anschluss
-				}
-				any_neighbor_country = {
-					OR = {
-						has_added_tension_amount > 10
-						is_justifying_wargoal_against = PREV #PREV is ROOT (CZE) here
-					}
-				}
-			}
-		}
-		
-
-		completion_reward = {
-			custom_effect_tooltip = AUS_seek_papal_support_tt
-			hidden_effect = {
-				add_popularity = {
-					ideology = ROOT
-					popularity = 0.05
-				}
-			}
-			if = {
-				limit = {
-					has_dlc = "La Resistance"
-					has_intelligence_agency = yes
-				}
-				IF = {
-					limit = {
-						agency_upgrade_number < 4
-					}
-				
-					custom_effect_tooltip = generic_skip_one_line_tt
-
-					upgrade_intelligence_agency = upgrade_passive_defense
-
-					custom_effect_tooltip = generic_skip_one_line_tt
-
-				}
-			}
-
-			add_timed_idea = {
-				idea = CZE_emergency_measures_idea
-				days = 1095
-			}
-
-			if = {
-				limit = {
-					has_power_balance = {
-    					id = CZE_bop_army_readiness
-					}
-				}
-				custom_effect_tooltip = generic_skip_one_line_tt
-				CZE_bop_very_low_increase_effect = yes
-			}
-		}
-		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_BALANCE_OF_POWER }
 	}
 
 	focus = {
@@ -5282,9 +5607,33 @@ focus_tree = {
 	
 		
 		completion_reward = {
-			custom_effect_tooltip = CZE_slovakia_autonomy_agreement_2_tt
-
-			custom_effect_tooltip = generic_skip_one_line_tt
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = CZE_failed_SLO_demands
+					}
+				}
+				custom_effect_tooltip = CZE_slovakia_autonomy_agreement_2_tt
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+			else_if = {
+				limit = {
+					any_owned_state = {
+						has_dynamic_modifier = {
+							modifier = CZE_nationalist_protests
+						}
+					}
+				}
+				every_owned_state = {
+					limit = {
+						has_dynamic_modifier = CZE_nationalist_protests
+					}
+					remove_dynamic_modifier = {
+						modifier = CZE_nationalist_protests
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
 
 			effect_tooltip = {
 				release_autonomy = {
@@ -5569,9 +5918,30 @@ focus_tree = {
 		available_if_capitulated = no
 		
 		completion_reward = {
-			custom_effect_tooltip = CZE_the_rut_demands_add_35_CZE_comprise_with_the_carpathians_tt
-
-			custom_effect_tooltip = generic_skip_one_line_tt
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = CZE_failed_RUT_demands
+					}
+				}
+				custom_effect_tooltip = CZE_the_rut_demands_add_35_CZE_comprise_with_the_carpathians_tt
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+			else_if = {
+				limit = {
+					73 = {
+						has_dynamic_modifier = {
+							modifier = CZE_nationalist_protests
+						}
+					}
+				}
+				73 = {
+					remove_dynamic_modifier = {
+						modifier = CZE_nationalist_protests
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
 
 			73 = {
 				add_dynamic_modifier = { modifier = CZE_rut_comprise_agreement_modifier }
@@ -5644,9 +6014,30 @@ focus_tree = {
 		available_if_capitulated = no
 		
 		completion_reward = {
-			custom_effect_tooltip = CZE_the_rut_demands_add_35_CZE_comprise_with_the_carpathians_tt
-
-			custom_effect_tooltip = generic_skip_one_line_tt
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = CZE_failed_RUT_demands
+					}
+				}
+				custom_effect_tooltip = CZE_the_rut_demands_add_35_CZE_comprise_with_the_carpathians_tt
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+			else_if = {
+				limit = {
+					73 = {
+						has_dynamic_modifier = {
+							modifier = CZE_nationalist_protests
+						}
+					}
+				}
+				73 = {
+					remove_dynamic_modifier = {
+						modifier = CZE_nationalist_protests
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
 
 			if = {
 				limit = {
@@ -5808,7 +6199,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_reorient_the_broad_coalition
-		icon = GFX_goal_generic_improve_relations	
+		icon = GFX_focus_ETH_re-convene_the_parliament	
 		prerequisite = { focus = CZE_placate_benes_faction focus = CZE_negotiations_with_the_autonomous_bloc }
 		relative_position_id =  CZE_placate_benes_faction
 		x = 6
@@ -5877,7 +6268,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_compromise_with_the_veteran_agrarian
-		icon = GFX_focus_generic_farmland
+		icon = GFX_focus_CZE_rszml
 		prerequisite = {focus = CZE_reorient_the_broad_coalition }
 		relative_position_id = CZE_reorient_the_broad_coalition
 		x = -1
@@ -5916,7 +6307,7 @@ focus_tree = {
 
 	focus = {
 		id =  CZE_deepend_ties_with_the_trademans
-		icon = GFX_focus_eng_concessions_to_the_trade_unions
+		icon = GFX_focus_CZE_czos
 		prerequisite = {focus = CZE_reorient_the_broad_coalition }
 		relative_position_id = CZE_reorient_the_broad_coalition
 		x = 1
@@ -5955,7 +6346,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_truth_prevails
-		icon = GFX_goal_democracy_people
+		icon = GFX_goal_democracy_people #R56
 		prerequisite = { focus = CZE_compromise_with_the_veteran_agrarian focus = CZE_deepend_ties_with_the_trademans }
 		relative_position_id = CZE_compromise_with_the_veteran_agrarian
 		x = 1
@@ -6004,7 +6395,7 @@ focus_tree = {
 			}
 
 			custom_effect_tooltip = generic_skip_one_line_tt
-			if = {
+			if = { #R56
 				limit = {
 					NOT = {
 						has_idea = r56i_laws_leadership_cult
@@ -6098,6 +6489,7 @@ focus_tree = {
 						OR = {
 							has_government = ROOT
 							has_government = neutrality
+							original_tag = AUS
 						}
 					}
 					OR = { #TODO_logan better checks then doing stats, use has_railway_connection
@@ -6136,6 +6528,7 @@ focus_tree = {
 					OR = {
 						has_government = ROOT
 						has_government = neutrality
+						original_tag = AUS
 					}
 					OR = {
 						controls_state = 88
@@ -6479,7 +6872,28 @@ focus_tree = {
 				limit = {
 					is_subject_of = ROOT
 				}
-				set_cosmetic_tag = CZE_CEF_puppet
+				
+				add_autonomy_score = {
+    				value = -50
+    				localization = CZE_form_a_federation
+				}
+
+				hidden_effect = {
+					set_cosmetic_tag = CZE_CEF_puppet
+				}
+
+				#custom_effect_tooltip = generic_skip_one_line_tt
+
+				if = {
+					limit = {
+						NOT = {
+							original_tag = RUT
+							original_tag = SLO
+							has_idea = CZE_federalization_agreement_puppets
+						}
+					}
+					add_ideas = CZE_federalization_agreement_puppets
+				}
 			}
 		}
 	}
@@ -6859,7 +7273,7 @@ focus_tree = {
 		icon = GFX_goal_generic_air_fighter
 		prerequisite = {focus = CZE_outreach_to_the_western_powers }
 
-		cost = 5
+		cost = 10
 		
 		relative_position_id = CZE_outreach_to_the_western_powers
 		x = 0
@@ -7011,13 +7425,13 @@ focus_tree = {
 
 	focus = {
 		id = CZE_demand_guarantees 
-		icon = GFX_allies
+		icon = GFX_allies #R56
 		prerequisite = {focus = CZE_supply_fighters_for_allies }
 		relative_position_id = CZE_supply_fighters_for_allies
 		x = 0
 		y = 1
 	
-		cost = 10
+		cost = 5	#shortened as guarantees come really late
 	
 		ai_will_do = {
 			factor = 1
@@ -7254,7 +7668,7 @@ focus_tree = {
 			value = GFX_focus_attack_soviet
 		}
 		icon = {
-			value = GFX_goal_generic_occupy_states_ongoing_war
+			value = GFX_focus_attack_soviet
 		}
 
 		dynamic = yes
@@ -7371,7 +7785,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_destroy_the_fascist_threats
-		icon = GFX_focus_ITA_liberation_or_death
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = fascism
+				}
+			}
+			value = GFX_goal_generic_major_war
+		}
+		icon = {
+			value = GFX_focus_ITA_liberation_or_death
+		}
 		prerequisite = {
 			focus = CZE_guardian_of_central_europe
 			focus = CZE_central_european_faction
@@ -7477,17 +7901,48 @@ focus_tree = {
 		completion_reward = {
 			add_political_power = 25
 
+			# custom_effect_tooltip = generic_skip_one_line_tt
+
+			# custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			# add_to_variable = {
+			# 	CZE_ceskoslovenska_armada_military_leader_cost_factor = -0.25
+			# 	tooltip = military_leader_cost_factor_tt
+			# }
+
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
-			add_to_variable = {
-				CZE_ceskoslovenska_armada_military_leader_cost_factor = -0.25
-				tooltip = military_leader_cost_factor_tt
+			if = { #Should always have ones of these ideas, also for TT
+				limit = {
+					NOT = {
+						OR = {
+							has_idea = CZE_guardian_of_central_europe_idea
+							has_idea = CZE_central_european_faction_idea
+						}
+					}
+				}
+				add_ideas = CZE_peace_on_our_time_idea
 			}
-
-			custom_effect_tooltip = generic_skip_one_line_tt
-
-			add_ideas = CZE_peace_on_our_time_idea
+			else_if = {
+				limit = {
+					has_idea = CZE_guardian_of_central_europe_idea
+				}
+				swap_ideas = {
+    				remove_idea = CZE_guardian_of_central_europe_idea
+    				add_idea = CZE_peace_on_our_time_from_guardian_of_central_europe_idea
+				}
+			}
+			else_if = {
+				limit = {
+					has_idea = CZE_central_european_faction_idea
+				}
+				swap_ideas = {
+    				remove_idea = CZE_central_european_faction_idea
+    				add_idea = CZE_peace_on_our_time_central_european_faction_idea
+				}
+			}
+			else = {
+				add_ideas = CZE_peace_on_our_time_idea
+			}
 		}
 
 		search_filters = { FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_POLITICAL }
@@ -7771,7 +8226,7 @@ focus_tree = {
 	
 	focus = {
 		id = CZE_no_compromise_with_the_sdp
-		icon = GFX_focus_generic_anti_fascist_diplomacy
+		icon = GFX_focus_focus_fra_fascist_threat
 		prerequisite = {focus = CZE_placate_benes_faction }
 
 		relative_position_id = CZE_placate_benes_faction
@@ -7889,7 +8344,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_closer_ties_with_the_moderate_germany_parties
-		icon = GFX_focus_GER_defender_of_democracy
+		icon = GFX_focus_generic_befriend_germany_democratic
 		prerequisite = { focus = CZE_no_compromise_with_the_sdp }
 		relative_position_id = CZE_no_compromise_with_the_sdp
 		x = 2
@@ -8103,7 +8558,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_increase_funding_from_moscow
-		icon = GFX_focus_generic_communist
+		icon = GFX_focus_focus_fra_revolution_utmost
 
 		prerequisite = {
 			focus = CZE_coalition_building
@@ -8164,6 +8619,10 @@ focus_tree = {
 				OR = {
 					has_completed_focus = CZE_negotiations_with_the_autonomous_bloc
 					has_completed_focus = CZE_placate_benes_faction
+				}
+				has_game_rule = {
+					rule = obsolete_focus_branches_visibility
+					option = HIDE
 				}
 			}
 		}
@@ -8263,7 +8722,59 @@ focus_tree = {
 		y = 1
 
 		completion_reward = {
-			add_stability = -0.05
+			if = {
+				limit = {
+					NOT = {
+						has_tech = r56_militia_tech
+					}
+				}
+				set_technology = { 
+					r56_militia_tech = 1
+					popup = no
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_conscription_factor = 0.05
+				tooltip = conscription_factor_tt
+			}
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_training_time_factor = -0.05
+				tooltip = training_time_factor_tt
+			}
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_modifier_army_sub_unit_militia_defence_factor = 0.05
+				tooltip = modifier_army_sub_unit_militia_defence_factor_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			custom_effect_tooltip = CZE_militias_officer_random_general_tt
+			hidden_effect = {
+				every_army_leader = {
+					limit = {
+						NOT = {
+							has_trait = militias_officer 
+						}
+					}
+					random_select_amount = 1
+					add_trait = {
+						trait = militias_officer
+					}
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			if = {
+				limit = {
+					NOT = {
+						has_government = communism
+					}
+				}
+				add_stability = -0.05
+			}
 			add_popularity = {
 				ideology = communism
 				popularity = 0.1
@@ -8273,7 +8784,7 @@ focus_tree = {
 				amount = -100
 			}
 		}
-		search_filters = { FOCUS_FILTER_POLITICAL }
+		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_MANPOWER }
 	}
 
 	focus = {
@@ -8297,12 +8808,15 @@ focus_tree = {
 			GER = {
 				OR = {
 					has_completed_focus = GER_oppose_hitler_ww
+					has_completed_focus = GER_kill_hitler #R56
+					has_completed_focus = GER_die_letzte_verschwoerung #R56
 					has_completed_focus = GER_oppose_hitler
 				}
 			}
 		}
 		completion_reward = {
-			if = {
+			add_stability = 0.03
+			custom_effect_tooltip = generic_skip_one_line_tt			if = {
 				limit = {
 					has_power_balance = {
     					id = CZE_bop_army_readiness
@@ -8317,7 +8831,7 @@ focus_tree = {
 				days = 180
 			}
 		}
-		search_filters = { FOCUS_FILTER_BALANCE_OF_POWER FOCUS_FILTER_POLITICAL  }
+		search_filters = { FOCUS_FILTER_BALANCE_OF_POWER FOCUS_FILTER_POLITICAL FOCUS_FILTER_STABILITY }
 	}
 
 	focus = {
@@ -8389,7 +8903,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_ally_with_moderate_socialists
-		icon = GFX_focus_GER_european_confederation
+		icon = GFX_focus_CHL_union_of_hispanic_republics
 
 		relative_position_id = CZE_zapotocky_faction
 		x = 0
@@ -8586,6 +9100,27 @@ focus_tree = {
 		}
 
 		completion_reward = {
+			if = {
+				limit = {
+					has_dlc = "No Compromise, No Surrender"
+				}
+				add_mastery_bonus = {
+					name = CZE_revolutionary_brigades
+					bonus = 0.10
+					days = 180
+					sub_doctrine = peoples_war
+				}
+			}
+			else = {
+				add_mastery_bonus = {
+					name = CZE_revolutionary_brigades
+					bonus = 0.10
+					days = 180
+					sub_doctrine = irregulars
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_ideas = CZE_revolutionary_brigades_idea
 		}
 		search_filters = { FOCUS_FILTER_MANPOWER }
@@ -8730,6 +9265,13 @@ focus_tree = {
 		}
 
 		completion_reward = {
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_mobilization_speed = 0.05
+				tooltip = mobilization_speed_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			add_ideas = CZE_control_organizations
 		}
 		search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_STABILITY FOCUS_FILTER_WAR_SUPPORT }
@@ -9005,7 +9547,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_change_the_narrative #Intentionally on the side of the communist tree intended to border democratic in case they wanna use the church for propaganda too
-		icon = GFX_focus_SOV_rebuild_the_savior_cathedral
+		icon = GFX_focus_ARG_liberation_theology
 
 		relative_position_id = CZE_realign_the_church
 		x = 2
@@ -9104,7 +9646,13 @@ focus_tree = {
 		}
 
 		completion_reward = {
-			
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_experience_gain_army_unit_factor = 0.05
+				tooltip = experience_gain_army_unit_factor_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
 			if = {
 				limit = {
 					NOT = {
@@ -9256,6 +9804,11 @@ focus_tree = {
 		y = 1
 
 		completion_reward = {
+			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
+			add_to_variable = {
+				CZE_ceskoslovenska_armada_dynamic_modifier_party_popularity_stability_factor = 0.05
+				tooltip = party_popularity_stability_factor_tt
+			}
 			custom_effect_tooltip = CZE_recruit_communist_generic_general_tt
 			custom_effect_tooltip = generic_skip_one_line_tt
 			show_unit_leaders_tooltip = CZE_richard_tesarik
@@ -9340,7 +9893,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_denounce_stalinism
-		icon = GFX_SOV_coup_detat_ccp_2d_sov_compatibility
+		icon = GFX_focus_spr_masters_of_our_own_fate
 
 		prerequisite = {
 			focus = CZE_ally_with_moderate_socialists
@@ -9566,7 +10119,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_balkan_union
-		icon = GFX_focus_generic_balkan_diplomacy
+		icon = GFX_focus_AUS_danubian_socialist_communes
 
 		prerequisite = {
 			focus = CZE_czechoslovak_union
@@ -9590,7 +10143,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_spread_the_revolution
-		icon = GFX_SOV_a_global_class_struggle_ccp_2d_sov_compatibility
+		icon = GFX_focus_ger_great_red_menace
 
 		prerequisite = {
 			focus = CZE_ally_with_moderate_socialists
@@ -9616,7 +10169,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_exchange_military_expertise
-		icon = GFX_SOV_shift_to_armaments_production_ccp_2d_sov_compatibility
+		icon = GFX_focus_generic_combined_arms
 
 		cost = 10
 
@@ -9896,7 +10449,7 @@ focus_tree = {
 			trigger = {
 				has_government = communism
 			}
-			value = GFX_SOV_a_global_class_struggle_ccp_2d_sov_compatibility
+			value = GFX_focus_ger_great_red_menace
 		}
 		icon = {
 			trigger = {
@@ -10220,7 +10773,17 @@ focus_tree = {
 	#Demo/Commie Diplo
 	focus = {
 		id = CZE_vonapo_20
-		icon = GFX_focus_generic_secret_service_agency
+		icon = {
+			trigger = {
+				SOV = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_JAP_learn_from_the_nkvd
+		}
+		icon = {
+			value = GFX_focus_generic_secret_service_agency
+		}
 
 		prerequisite = {
 			focus = CZE_coalition_building
@@ -10231,6 +10794,20 @@ focus_tree = {
 		y = 1
 		cost = 5
 
+		available = {
+			SOV = {
+				exists = yes
+				NOT = {
+					has_war_with = ROOT
+				}
+			}
+		}
+		
+		bypass = {
+			SOV = {
+				exists = no
+			}
+		}
 		completion_reward = {
 			if = {
 				limit = {
@@ -10604,7 +11181,7 @@ focus_tree = {
 	#Demo/Commie Diplo
 	focus = {
 		id = CZE_forgive_trading_debts
-		icon = GFX_focus_eng_concessions_to_the_trade_unions
+		icon = GFX_focus_CZE_forgive_trading_debts
 
 		prerequisite = {
 			focus = CZE_coalition_building
@@ -10647,10 +11224,90 @@ focus_tree = {
 		cost = 5
 
 		completion_reward = {
+			if = {
+				limit = {
+					YUG = {
+						exists = yes
+						NOT = {
+							has_war_with = ROOT
+						}
+					}
+				}
+				YUG = {
+					add_opinion_modifier = {
+						target = ROOT
+						modifier = small_increase 
+					}	
+				}
+
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+			if = {
+				limit = {
+					ROM = {
+						exists = yes
+						NOT = {
+							has_war_with = ROOT
+						}
+					}
+				}
+				ROM = {
+					add_opinion_modifier = {
+						target = ROOT
+						modifier = small_increase 
+					}	
+				}
+
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+			if = {
+				limit = {
+					AUS = {
+						exists = yes
+						has_government = ROOT
+						NOT = {
+							has_war_with = ROOT
+						}
+					}
+				}
+				AUS = {
+					add_opinion_modifier = {
+						target = ROOT
+						modifier = small_increase 
+					}	
+				}
+
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+
+			if = {
+				limit = {
+					HUN = {
+						exists = yes
+						has_government = ROOT
+						NOT = {
+							has_war_with = ROOT
+						}
+					}
+				}
+				HUN = {
+					add_opinion_modifier = {
+						target = ROOT
+						modifier = small_increase 
+					}	
+				}
+
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
 			add_timed_idea = {
-				idea = GRE_paying_off_debt_small
+				idea = CZE_forgive_trading_debts_idea
 				days = 180
 			}
+
 		}
 	}
 
@@ -11006,7 +11663,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_neutralize_the_hungarian_threat
-		icon = GFX_focus_generic_attack_hungary
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_generic_communist_attack_hungary
+		}
+		icon = {
+			value = GFX_focus_generic_attack_hungary
+		}
 
 		cost = 5
 
@@ -11264,7 +11931,6 @@ focus_tree = {
 		prerequisite = {
 			focus = CZE_ally_austria
 			focus = CZE_demand_the_czech_corridor
-			#focus = CZE_ally_yugoslavia
 			focus = CZE_ally_romania
 		}
 
@@ -11551,7 +12217,6 @@ focus_tree = {
 		prerequisite = {
 			focus = CZE_ally_austria
 			focus = CZE_demand_the_czech_corridor
-			#focus = CZE_ally_yugoslavia
 			focus = CZE_ally_romania
 		}
 
@@ -11628,7 +12293,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_double_down_on_heavy_industry
-		icon = GFX_focus_generic_military_industry
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_generic_communist_industry
+		}
+		icon = {
+			value = GFX_focus_generic_military_industry
+		}
 
 		prerequisite = {
 			focus = CZE_increase_food_and_resource_imports
@@ -11658,10 +12333,24 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
+			if = {
+				limit = {
+					OR = {
+						is_in_faction = no
+						NOT = {
+							any_other_country = {
+								is_in_faction_with = ROOT
+							}
+						}
+					}
+				}
+				custom_effect_tooltip = ALL_FACTION_MEMBERS
+			}
 			every_other_country = {
 				limit = {
 					is_in_faction_with = ROOT
 				}
+				visible_when_empty = yes
 				country_event = MUN_czech.1035
 				custom_effect_tooltip = if_they_accept_tt
 				effect_tooltip = {
@@ -11830,7 +12519,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_demand_corridor_to_ussr
-		icon = GFX_focus_generic_attack_poland
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_generic_communist_attack_poland
+		}
+		icon = {
+			value = GFX_focus_GER_danzig_or_war
+		}
 		
 		relative_position_id = CZE_soviet_alliance
 		x = 0
@@ -12018,6 +12717,7 @@ focus_tree = {
 			}
 			POL = {
 				exists = yes
+				is_subject = no
 				is_in_faction = no
 				NOT = {
 					has_war_with = ROOT
@@ -12039,6 +12739,15 @@ focus_tree = {
 			}
 		}
 
+		bypass = {
+			POL = {
+				is_ally_with = ROOT
+				OR = {
+					is_subject = no
+					is_subject_of = ROOT
+				}
+			}
+		}
 		completion_reward = {
 			if = {
 				limit = {
@@ -12095,6 +12804,9 @@ focus_tree = {
 					is_subject_of = ROOT
 				}
 				has_capitulated = yes
+				all_enemy_country = {
+					has_war_with = ROOT
+				}
 			}
 		}
 
@@ -12105,6 +12817,9 @@ focus_tree = {
 				effect_tooltip = {
 					every_core_state = {
 						add_core_of = ROOT
+					}
+					every_unit_leader = {
+						set_nationality = ROOT
 					}
 				}
 			}
@@ -12723,7 +13438,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_complete_the_power_grid
-		icon = GFX_focus_generic_energy
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_AFG_helmand_river_authority
+		}
+		icon = {
+			value = GFX_focus_generic_energy
+		}
 		prerequisite = { focus = CZE_raise_more_industrial_funds }
 		relative_position_id = CZE_raise_more_industrial_funds
 		x = -7
@@ -13200,7 +13925,7 @@ focus_tree = {
 						state = 75
 					}
 				}
-				add_extra_state_shared_building_slots = 1
+				add_extra_state_shared_building_slots = 2
 				add_building_construction = {
 					type = industrial_complex
 					level = 1
@@ -13341,7 +14066,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_shrink_educational_disparities 
-		icon = GFX_focus_generic_education
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_NOR_moscows_education_centers 
+		}
+		icon = {
+			value = GFX_focus_generic_education
+		}
 		prerequisite = { focus = CZE_balance_industrial_invevestments}
 		relative_position_id = CZE_balance_industrial_invevestments
 		x = 1
@@ -13386,8 +14121,17 @@ focus_tree = {
 
 	focus = { 
 		id = CZE_grow_ckd_secondary_facilities 
-		icon = GFX_focus_generic_industry_1
-		overlay = GFX_focus_overlay_cze_industry_focus
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_generic_communist_industry
+		}
+		icon = {
+			value = GFX_focus_generic_industry_1
+		}
 		prerequisite = { focus = CZE_continue_the_central_bohemia_plan focus = CZE_balance_industrial_invevestments }
 
 		relative_position_id = CZE_continue_the_central_bohemia_plan
@@ -13401,7 +14145,6 @@ focus_tree = {
 		}
 	
 		available = {
-			CZE_has_a_skoda_no_focus = yes
 			any_core_state = {
 				is_controlled_by = ROOT
 			}
@@ -13531,7 +14274,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_bolster_domestic_construction
-		icon = GFX_goal_generic_construction
+		icon = GFX_focus_generic_industral_devlopment_bucket
 		prerequisite = { focus = CZE_grow_ckd_secondary_facilities }
 
 		relative_position_id = CZE_continue_the_central_bohemia_plan
@@ -13617,7 +14360,7 @@ focus_tree = {
 
 	focus = { 
 		id = CZE_expand_trinec_ironworks
-		icon =  GFX_goal_generic_construct_civ_factory
+		icon =  GFX_focus_CZE_trinec_ironwork
 		prerequisite = { focus = CZE_bolster_domestic_construction focus = CZE_joint_stock_schemes }
 
 		relative_position_id = CZE_bolster_domestic_construction
@@ -13740,9 +14483,20 @@ focus_tree = {
 					limit = {
 						has_dlc = "Gotterdammerung"
 					}
-					mio:CZE_praga_aviation_organization = {
-						add_mio_size = 1
-						add_mio_funds_gain_factor = 0.25
+					if = {
+						limit = {
+							is_special_project_completed = sp_air_helicopter
+						}
+						mio:CZE_praga_aviation_organization = {
+							add_mio_size = 1
+							add_mio_funds_gain_factor = 0.25
+						}
+					}
+					else = {
+						mio:CZE_praga_aviation_organization = {
+							add_mio_funds = 250
+							add_mio_funds_gain_factor = 0.25
+						}
 					}
 				}
 				custom_effect_tooltip = generic_skip_one_line_tt
@@ -14014,7 +14768,18 @@ focus_tree = {
 
 	focus = { 
 		id = CZE_invest_in_vhht
-		icon = GFX_focus_generic_public_works
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_goal_generic_soviet_construction
+		}
+		icon = {
+			value = GFX_focus_generic_public_works
+		}
+		overlay = GFX_focus_overlay_cze_industry_focus
 		prerequisite = { focus = CZE_bolster_domestic_construction }
 
 		relative_position_id = CZE_bolster_domestic_construction
@@ -14029,6 +14794,7 @@ focus_tree = {
 	
 		available = {
 			#has_tech = excavation1
+			CZE_has_a_skoda_no_focus = yes
 			any_core_state = {
 				is_controlled_by = ROOT
 			}
@@ -14258,7 +15024,7 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			# if = {
+			# if = { #R56?
 			# 	limit = {
 			# 		NOT = {
 			# 			has_tech = advanced_equipment_conversion
@@ -14996,7 +15762,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_giant_of_central_europe_industry
-		icon = GFX_focus_SWE_landsverk
+		icon = GFX_focus_generic_modernize_industry
 		overlay = GFX_focus_overlay_cze_level_four
 		prerequisite = { focus = CZE_merge_skodas_consumer_good_plants }
 		prerequisite = { focus = CZE_consolidate_mining_operations }
@@ -15040,9 +15806,23 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			add_ideas = CZE_giant_of_central_europe_industry_idea
+			if = { #Should always have this idea
+				limit = {
+					NOT = {
+						has_idea = CZE_czech_state_mines
+					}
+				}
+				add_ideas = CZE_giant_of_central_europe_industry_idea
 
-			custom_effect_tooltip = generic_skip_one_line_tt
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+			else = {
+				swap_ideas = {
+    				remove_idea = CZE_czech_state_mines
+    				add_idea = CZE_giant_of_central_europe_industry_idea
+				}
+			}
 
 			random_owned_controlled_state = {
 				prioritize = { 9 }
@@ -15488,7 +16268,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_force_the_industrialists_hand
-		icon = GFX_focus_RAJ_union_busting
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_spr_class_war
+		}
+		icon = {
+			value = GFX_focus_RAJ_union_busting
+		}
 		mutually_exclusive = { focus = CZE_embrace_corporatism }
 
 		prerequisite = {
@@ -15604,7 +16394,28 @@ focus_tree = {
 
 	focus = {
 		id = CZE_embrace_corporatism 
-		icon = GFX_focus_generic_industrialists
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = fascism
+					NOT = {
+						has_completed_focus = CZE_catholic_focus
+					}
+				}
+			}
+			value = GFX_focus_ICE_state_corporatism
+		}
+		icon = {
+			trigger = {
+				ROOT = {
+					has_completed_focus = CZE_catholic_focus
+				}
+			}
+			value = GFX_focus_BEL_christian_corporatism
+		}
+		icon = {
+			value = GFX_focus_generic_industrialists
+		}
 		mutually_exclusive = { focus = CZE_force_the_industrialists_hand }
 
 
@@ -15712,7 +16523,7 @@ focus_tree = {
 	
 	focus = {
 		id = CZE_continue_industrial_relocation_schemes
-		icon = GFX_SOV_move_industry_to_the_urals_ccp_2d_sov_compatibility
+		icon = GFX_focus_CZE_continue_industrial_relocation_schemes
 		mutually_exclusive = { focus = CZE_expand_existing_armory_plants }
 		prerequisite = { focus = CZE_kickstart_rapid_rearmanent focus = CZE_keep_focus_on_weapon_exports }
 
@@ -16982,9 +17793,23 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			add_ideas = CZE_only_the_best_is_good_enough_idea
+			if = { #Should always have this idea
+				limit = {
+					NOT = {
+						has_idea = CZE_merged_consumer_good_plants
+					}
+				}
+				add_ideas = CZE_only_the_best_is_good_enough_idea
 
-			custom_effect_tooltip = generic_skip_one_line_tt
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+			else = {
+				swap_ideas = {
+    				remove_idea = CZE_merged_consumer_good_plants
+    				add_idea = CZE_only_the_best_is_good_enough_idea
+				}
+			}
 
 			random_owned_controlled_state = {
 				prioritize = { 70 }
@@ -17054,7 +17879,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_an_industrial_legacy
-		icon = GFX_focus_generic_modernize_industry
+		icon = GFX_focus_SWE_landsverk
 		overlay = GFX_focus_overlay_cze_level_five
 		prerequisite = { focus = CZE_giant_of_central_europe_industry }
 		prerequisite = { focus = CZE_only_the_best_is_good_enough }
@@ -17103,9 +17928,23 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			add_ideas = CZE_an_industrial_legacy_idea
+			if = { #Should always have this idea, also for TT
+				limit = {
+					NOT = {
+						has_idea = CZE_giant_of_central_europe_industry_idea
+					}
+				}
+				add_ideas = CZE_an_industrial_legacy_idea
 
-			custom_effect_tooltip = generic_skip_one_line_tt
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+			else = {
+				swap_ideas = {
+    				remove_idea = CZE_giant_of_central_europe_industry_idea
+    				add_idea = CZE_an_industrial_legacy_idea
+				}
+			}
 
 			if = {
 				limit = {
@@ -17130,7 +17969,7 @@ focus_tree = {
 
 	focus = {
 		id = CZE_powerhouse_of_europe
-		icon = GFX_focus_ARG_develop_the_electricity_sector
+		icon = GFX_focus_CZE_skoda_menace
 		overlay = GFX_focus_overlay_cze_industry_focus
 		prerequisite = { focus = CZE_an_industrial_legacy }
 		
@@ -17215,7 +18054,23 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 			
-			add_ideas = CZE_powerhouse_of_europe_idea
+			if = { #Should always have this idea, also for TT
+				limit = {
+					NOT = {
+						has_idea = CZE_an_industrial_legacy_idea
+					}
+				}
+				add_ideas = CZE_powerhouse_of_europe_idea
+
+				custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+			else = {
+				swap_ideas = {
+    				remove_idea = CZE_an_industrial_legacy_idea
+    				add_idea = CZE_powerhouse_of_europe_idea
+				}
+			}
 		}
 
 		search_filters = { FOCUS_FILTER_INDUSTRY }
@@ -17664,7 +18519,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_trust_in_old_guard
-		icon = GFX_focus_generic_air_partners
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_PER_the_peoples_airforce
+		}
+		icon = {
+			value = GFX_focus_generic_air_partners
+		}
 		prerequisite = { focus = CZE_expand_airfield_capacity }
 
 		relative_position_id = CZE_expand_airfield_capacity
@@ -18203,7 +19068,25 @@ focus_tree = {
 
 	focus = {
 		id = CZE_mobilize_the_reserves 
-		icon = GFX_focus_generic_limited_social_mobilization
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_SOV_mobilization_plan
+		}
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = fascism
+				}
+			}
+			value = GFX_focus_generic_fascist_troops
+		}
+		icon = {
+			value = GFX_focus_generic_limited_social_mobilization
+		}
 		prerequisite = { focus = CZE_national_defense_act }
 		relative_position_id = CZE_national_defense_act
 		x = 1
@@ -19730,7 +20613,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_opl_exercises
-		icon = GFX_focus_generic_army_doctrines_2
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_PRC_a_modern_army
+		}
+		icon = {
+			value = GFX_goal_generic_army_doctrines
+		}
 		prerequisite = { focus =  CZE_form_the_state_defense_guard}
 
 		x = -3
@@ -19867,7 +20760,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_redouble_tank_development_efforts
-		icon = GFX_goal_generic_army_tanks
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = fascism
+				}
+			}
+			value = GFX_focus_generic_army_tanks2
+		}
+		icon = {
+			value = GFX_goal_generic_army_tanks
+		}
 		overlay = GFX_focus_overlay_cze_tank_focus
 		prerequisite = { focus = CZE_national_defense_act }
 
@@ -20182,7 +21085,25 @@ focus_tree = {
 
 	focus = {
 		id = CZE_expand_the_land_department_of_vtu
-		icon = GFX_focus_research
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_generic_socialist_science
+		}
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = fascism
+				}
+			}
+			value = GFX_focus_ARG_fascist_researchers
+		}
+		icon = {
+			value = GFX_focus_research
+		}
 		overlay = GFX_focus_overlay_cze_military_equipment
 		prerequisite = { focus = CZE_the_tvp_project }
 		prerequisite = { focus = CZE_rearmed_and_retooled }
@@ -20656,6 +21577,11 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
+			custom_effect_tooltip = available_theorist
+			show_ideas_tooltip = CZE_silvestr_blaha
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
 			every_army_leader = {
 				add_planning = 1
 			}
@@ -20921,7 +21847,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_improve_the_current_officer_pool
-		icon = GFX_focus_generic_military_academy
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_PRC_army_command
+		}
+		icon = {
+			value = GFX_focus_generic_military_academy
+		}
 		prerequisite = { focus = CZE_go_with_vojcechovskys_plan_dynamic focus = CZE_continue_with_snejdareks_plan_dynamic }
 		mutually_exclusive = { focus = CZE_elevate_slovak_officers }
 
@@ -21024,7 +21960,25 @@ focus_tree = {
 
 	focus = {
 		id = CZE_lessons_of_war
-		icon = GFX_focus_generic_army_doctrines_2
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_SOV_the_glory_of_the_red_army_communism
+		}
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = neutrality
+				}
+			}
+			value = GFX_focus_generic_advanced_military_studies
+		}
+		icon = {
+			value = GFX_focus_generic_army_doctrines_2
+		}
 		prerequisite = { focus = CZE_elevate_slovak_officers focus = CZE_improve_the_current_officer_pool }
 
 		x = 0
@@ -21060,10 +22014,10 @@ focus_tree = {
 			custom_effect_tooltip = generic_skip_one_line_tt
 
 			custom_effect_tooltip = CZE_ceskoslovenska_armada_ns_intro_tt
-			add_to_variable = {
-				CZE_ceskoslovenska_armada_military_leader_cost_factor = -0.25
-				tooltip = military_leader_cost_factor_tt
-			}
+			# add_to_variable = {
+			# 	CZE_ceskoslovenska_armada_military_leader_cost_factor = -0.25
+			# 	tooltip = military_leader_cost_factor_tt
+			# }
 			add_to_variable = {
 				CZE_ceskoslovenska_armada_army_org_factor = 0.02
 				tooltip = army_org_factor_tt
@@ -21112,8 +22066,24 @@ focus_tree = {
 					promote_leader = yes
 				}
 			}
+			if = {
+				limit = {
+					has_power_balance = {
+    					id = CZE_bop_army_readiness
+					}
+					has_power_balance_modifier = {
+    					id = CZE_bop_army_readiness
+    					modifier = CZE_bop_modifier_czech_sovereignty_is_threatened
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				remove_power_balance_modifier = {
+    				id = CZE_bop_army_readiness
+    				modifier = CZE_bop_modifier_czech_sovereignty_is_threatened
+				}
+			}
 		}
-		search_filters = { FOCUS_FILTER_ARMY_XP FOCUS_FILTER_MILITARY_CHARACTER }
+		search_filters = { FOCUS_FILTER_ARMY_XP FOCUS_FILTER_MILITARY_CHARACTER FOCUS_FILTER_BALANCE_OF_POWER }
 	}
 
 	focus = {
@@ -21233,7 +22203,23 @@ focus_tree = {
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 
-			add_ideas = CZE_the_lions_roar_idea
+			if = { #Should always have this idea, also for TT
+				limit = {
+					NOT = {
+						has_idea = CZE_national_defense_act_idea
+					}
+				}
+				add_ideas = CZE_the_lions_roar_idea
+
+				#custom_effect_tooltip = generic_skip_one_line_tt
+
+			}
+			else = {
+				swap_ideas = {
+    				remove_idea = CZE_national_defense_act_idea
+    				add_idea = CZE_the_lions_roar_idea
+				}
+			}
 			
 		}
 		search_filters = { FOCUS_FILTER_WAR_SUPPORT FOCUS_FILTER_ARMY_XP }
@@ -21714,7 +22700,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_reform_the_naval_detachment
-		icon = GFX_goal_generic_build_navy
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_PHI_maritime_communism
+		}
+		icon = {
+			value = GFX_goal_generic_build_navy
+		}
 		prerequisite = { focus = CZE_continue_armed_force_reform }
 
 		x = 18
@@ -22278,7 +23274,17 @@ focus_tree = {
 
 	focus = {
 		id = CZE_a_modern_navy
-		icon = GFX_focus_SMB_blue_water_fleet
+		icon = {
+			trigger = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			value = GFX_focus_PER_the_peoples_navy
+		}
+		icon = {
+			value = GFX_focus_SMB_blue_water_fleet
+		}
 		overlay = GFX_focus_overlay_cze_navy_focus
 		prerequisite = { focus = CZE_build_off_old_ganz_danubius_designs focus = CZE_modernize_trieste_designs focus = CZE_revive_kraljevica_designs focus = CZE_raider_lineage }
 

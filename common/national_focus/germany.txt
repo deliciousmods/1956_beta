@@ -12027,6 +12027,14 @@ focus_tree = {
 					is_in_faction_with = ROOT
 					NOT = { is_subject_of = ROOT }
 				}
+				CZE = { 
+					is_subject_of = ROOT
+					OR = {
+						has_completed_focus = CZE_german_minor_ally
+						has_completed_focus = CZE_german_puppet
+						has_completed_focus = CZE_complete_capitulation
+					}
+				}
 				NOT = {
 					country_exists = CZE
 					9 = { is_controlled_by = ROOT }
@@ -12054,8 +12062,13 @@ focus_tree = {
 			if = {
 				limit = {
 					CZE = {
+						exists = yes
 						has_war = no
 						is_subject = no
+						NOT = {		#refused Sudetenland
+							owns_state = 69
+							owns_state = 1078
+						}
 					}
 				}
 				set_global_flag = end_of_czechoslovakia
@@ -12076,14 +12089,88 @@ focus_tree = {
 					}
 					9 = {
 						is_controlled_by = ROOT
+						NOT = { is_claimed_by = ROOT }
 					}
 					75 = {
 						is_controlled_by = ROOT
+						NOT = { is_claimed_by = ROOT }
 					}
 				}
 				add_state_claim = 9
 				add_state_claim = 75
-				country_event = { id = germany.55 hours = 6 }
+				if = { #Don't get claims or wargoal on Romania or its puppet if you agreed to split CZE with them
+					limit = {
+						NOT = {
+							has_country_flag = GER_split_CZE_with_ROM_flag
+						}
+					}
+					country_event = { id = germany.55 hours = 6 }
+				}
+				else =  {
+					if = { #Lower the MEFO Bills 
+						limit = { 
+							OR = {
+								has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+								has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+							}
+						}
+						if = {
+							limit = {
+								CZE = {
+									any_core_state = {
+										is_on_continent = europe
+										is_controlled_by = ROOT
+										NOT = { is_core_of = ROOT }
+										NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
+									}
+								}
+							}
+							
+							ROOT = { set_temp_variable = { occupied_state_num_factory = 0 } } #This will show how many factories in total Germany controls from FROM's cores
+							add_to_temp_variable = { GER.occupied_state_num_factory = CZE.num_of_military_factories_in_cores@GER }
+							add_to_temp_variable = { GER.occupied_state_num_factory = CZE.num_of_civilian_factories_in_cores@GER }
+							add_to_temp_variable = { GER.occupied_state_num_factory = CZE.num_of_naval_factories_in_cores@GER }
+							hidden_effect = {
+								CZE = {
+									every_core_state = {
+										limit = {
+											is_on_continent = europe
+											is_fully_controlled_by = ROOT
+											NOT = { is_core_of = ROOT }
+											NOT = { has_state_flag = GER_seize_gold_reserves_state_flag }
+										}
+										set_state_flag = GER_seize_gold_reserves_state_flag
+									}
+								}
+							}
+
+							ROOT = {			
+								divide_temp_variable = { occupied_state_num_factory = 200 } #This is necessary since a single factory will increase the occupied_state_num_factory number to 1, which in turn translates to -100% when subtracting from the Consumer Goods. Dividing it by 100 here will give you 1% instead, which is more like what we want.
+								multiply_temp_variable = { occupied_state_num_factory = -1 }
+								
+								if = {
+									limit = {
+										has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
+									}
+									custom_effect_tooltip = GER_modify_mefo_bills_modifier_tt
+								}
+								else_if = {
+									limit = {
+										has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
+									}
+									custom_effect_tooltip = GER_modify_economy_of_conquest_modifier_tt
+								}
+
+								add_to_variable = {
+									GER_industrial_consumer_goods_factor = occupied_state_num_factory
+									tooltip = consumer_goods_factor_tt
+								}
+								GER_reduce_mefo_bills_penalty = yes
+								custom_effect_tooltip = generic_skip_one_line_tt
+							}
+						}
+					}
+				}
 			}
 			else_if = {
 				limit = {
@@ -12096,10 +12183,6 @@ focus_tree = {
 					target = CZE
 				}
 			}
-
-			custom_effect_tooltip = generic_skip_one_line_tt
-
-			unlock_decision_tooltip = GER_reichsprotektorat_bohemia_moravia
 		}
 	}
 
@@ -12135,6 +12218,7 @@ focus_tree = {
 					has_completed_focus = GER_oppose_hitler
 					has_completed_focus = GER_oppose_hitler_ww
 					has_completed_focus = GER_die_letzte_verschwoerung
+					has_completed_focus = GER_heed_von_neuraths_concerns
 				}
 			}
 		}
@@ -14390,6 +14474,11 @@ focus_tree = {
 					exists = no
 				}
 			}
+		}
+
+		bypass = {
+			8 = { is_core_of = ROOT }
+			28 = { is_core_of = ROOT }
 		}
 
 		ai_will_do = {
@@ -17378,8 +17467,8 @@ focus_tree = {
 			}
 		}
 		offset = {
-			x = -11
-			y = 6
+			x = -9
+			y = 7
 			trigger = { has_completed_focus = GER_kill_hitler}
 		}
 		available = {
@@ -17525,8 +17614,8 @@ focus_tree = {
 			}
 		}
 		offset = {
-			x = -11
-			y = 6
+			x = -9
+			y = 7
 			trigger = { has_completed_focus = GER_kill_hitler}
 		}
 		ai_will_do = {
@@ -31476,6 +31565,17 @@ focus_tree = {
 								state = 856
 								state = 293
 								state = 453
+								state = 966
+								state = 1016
+								state = 949
+								state = 1017
+								state = 1022
+								state = 1021
+								state = 1049
+								state = 1048
+								state = 1047
+								state = 1046
+								state = 1045
 							}
 						}
 						add_claim_by = TUR
@@ -66733,7 +66833,7 @@ focus_tree = {
 
 		completion_reward = {
 			custom_effect_tooltip = available_political_advisor
-			show_ideas_tooltip = kurt_schumacher
+			show_ideas_tooltip = GER_kurt_schumacher
 			if = {
 				limit = {
 					date < 1942.01.01
@@ -67287,7 +67387,7 @@ focus_tree = {
 			trigger = {
 				has_completed_focus = GER_kill_hitler
 			}
-			x = -4
+			x = -2
 		}
 		completion_reward = {
 			add_political_power = 25
