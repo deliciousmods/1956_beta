@@ -1,0 +1,2649 @@
+ on_actions = {
+
+ 	on_join_faction = {
+ 		effect = {
+
+
+ 			# ROOT = joiner, FROM = faction leader
+ 			# If HOL joins a faction, go through all of the faction members (aside from HOL / DEI) and give them the strategy
+ 			if = {
+ 				limit = {
+ 					ROOT = {
+ 						OR = {
+ 							tag = HOL
+ 							is_subject_of = HOL
+ 						}
+ 					}
+ 				}
+ 				every_country = {
+ 					limit = {
+ 						is_in_faction_with = FROM
+ 						NOT = {
+ 							tag = HOL
+ 							is_subject_of = HOL
+ 						}
+ 					}
+ 					INS_set_hol_ally_strategy_effect = yes
+ 				}
+ 			}
+ 			# If HOL is already in a faction, and someone new joins, give them the strategy
+ 			else_if = {
+ 				limit = {
+ 					# hol is in the same faction
+ 					HOL = {
+ 						is_in_faction_with = FROM
+ 					}
+ 					# its not hol joining
+ 					ROOT = {
+ 						NOT = {
+ 							original_tag = HOL
+ 							is_subject_of = HOL
+ 						}
+ 					}
+ 				}
+ 				ROOT = {
+ 					INS_set_hol_ally_strategy_effect = yes
+ 				}
+ 			}
+ 		}
+ 	}
+
+ 	on_join_faction = {
+ 		effect = {
+ 			if = {
+ 				limit = {
+ 					ROOT = {
+ 						is_in_faction_with = HOL
+ 						NOT = {
+ 							tag = HOL
+ 							is_subject_of = HOL
+ 						}
+ 					}
+ 					INS = {
+ 						has_country_flag = INS_revolution_has_started
+ 					}
+ 				}
+ 				INS_set_hol_ally_strategy_effect = yes
+ 			}
+ 		}
+ 	}
+
+ 	on_monthly_INS = {
+ 		effect = {
+ 			set_variable_to_random = {
+ 				var = INS_random_seed
+ 				min = 1
+ 				max = 100
+ 				integer = yes
+ 			}
+ 		}
+ 	}
+
+ 	on_before_peace_conference_start = {
+ 		effect = {
+	 		if = {
+	 			limit = {
+	 				has_event_target = INS_dutch_indonesia
+	 				FROM = {
+	 					OR = {
+	 						tag = HOL
+	 						tag = event_target:INS_dutch_indonesia
+	 					}
+	 				}
+	 				INS = {
+	 					exists = yes
+	 					has_country_flag = INS_revolution_has_started
+	 				}
+	 			}
+				every_owned_state = {
+					limit = {
+						is_in_array = {
+							array = INS.owned_states_at_game_start
+							value = THIS
+						}
+					}
+					transfer_state_to = INS
+				}
+				event_target:INS_dutch_indonesia = {
+					every_owned_state = {
+						limit = {
+							is_in_array = {
+								array = INS.owned_states_at_game_start
+								value = THIS
+							}
+						}
+						transfer_state_to = INS
+					}
+				}
+	 		}
+	 	}
+ 	}
+
+	on_monthly_SIA = {
+		effect = {
+
+			#Investigation by the military beureu 
+			if = {
+				limit = { has_idea = idea_SIA_the_military_oversight_bureau }
+
+				if = {
+					limit = {
+						check_variable = { SIA_mob_max_investigations < 10 }
+						check_variable = {
+						 	var = SIA_mob_investigation_counter
+						 	value = SIA_time_for_mob_to_investigate_someone
+						 	compare = greater_than_or_equals
+						 }
+					}
+
+					set_variable = { SIA_mob_investigation_counter = 0 }
+					add_to_variable = { SIA_mob_max_investigations = 1 }
+					set_variable_to_random = { 
+						var = SIA_time_for_mob_to_investigate_someone 
+						min =  5
+						max =  9
+						integer = yes
+					} 
+
+					random_army_leader = {
+						limit = { NOT = { has_trait = SIA_under_investigation } }
+						add_timed_unit_leader_trait = {
+							trait = SIA_under_investigation
+							days = 180
+						}
+					}
+				}
+			}
+			
+
+			SIA = { SIA_refresh_indochina_controllers = yes }
+
+			if = {
+				limit = {
+					has_dynamic_modifier = { modifier = idea_SIA_printing_money }
+					check_variable = { SIA_printing_money_consumer_goods_factor < idea_SIA_printing_money_monthly_change_max }
+				}
+
+				add_to_variable = { SIA_printing_money_consumer_goods_factor = idea_SIA_printing_money_monthly_change }
+			}
+
+			if = {
+				limit = {
+					has_dynamic_modifier = { modifier = idea_SIA_agricultural_tax_reduction }
+					check_variable = { SIA_agricultural_tax_reduction_cg > 0 }
+				}
+
+				add_stability = var:SIA_agricultural_tax_reduction_stability_gain
+				subtract_from_variable = { SIA_agricultural_tax_reduction_cg = SIA_agricultural_tax_reduction_cg_decrease_rate }
+			}
+			else_if = {
+				limit = {
+					has_dynamic_modifier = { modifier = idea_SIA_agricultural_tax_reduction }
+					check_variable = { var = SIA_agricultural_tax_reduction_cg value = 0 compare = less_than_or_equals	}
+				}
+
+				remove_dynamic_modifier = { modifier = idea_SIA_agricultural_tax_reduction }
+				add_stability = var:SIA_agricultural_tax_reduction_stability_gain
+				
+			}
+		
+			#Using ships as generators
+			if = {
+				limit = {
+					has_dlc = "Thunder at Our Gates"
+					has_completed_focus = SIA_use_ships_as_generators
+				}
+				subtract_from_variable = { SIA_aep_factory_energy_consumption = capital_ship_count }
+				set_variable = { capital_ship_count = 0 }
+				every_core_state = {
+					limit = {
+						ROOT = {
+							ships_in_state_ports = {
+								type = capital_ship # optional
+								state = PREV
+								size > 0
+							}
+						}
+					}
+					
+					set_variable = { i = 0 }
+
+					while_loop_effect = {
+						limit = {  
+							ROOT = {
+								ships_in_state_ports = {
+									type = capital_ship # optional
+									state = PREV
+									size > PREV.i
+								}
+							}
+						}  
+						break = b
+
+						add_to_variable = { ROOT.capital_ship_count = 1 }
+						add_to_variable = { i = 1 }
+
+
+						
+
+					}
+				}
+
+				
+				multiply_variable = { capital_ship_count = -1 }
+				multiply_variable = { capital_ship_count = 0.02 }
+				
+				clamp_variable = {
+					var = capital_ship_count #less = good
+					min = -0.15
+					max = 0
+				}
+
+				add_to_variable = { SIA_aep_factory_energy_consumption = capital_ship_count }
+			}
+
+			if = {
+				limit = {
+					has_dlc = "Thunder at Our Gates"
+					has_completed_focus = SIA_contingency_funds
+					NOT = { 
+						has_country_flag = has_released_contingency_funds 
+					}
+				}
+				if = {
+					limit = { has_war = no }
+					add_to_variable = { SIA_contingency_funds = 1 }
+				}
+			}
+			else_if = {
+				limit = {
+					has_country_flag = has_released_contingency_funds
+					has_dynamic_modifier = { modifier = idea_SIA_contingency_funds }
+				}
+
+
+
+				subtract_from_variable = { SIA_contingency_funds = 1 }
+				if = {
+					limit = {
+						check_variable = { SIA_contingency_funds < 1 }
+					}
+
+					remove_dynamic_modifier = { modifier = idea_SIA_contingency_funds }
+				}
+			}
+		}
+	}
+
+	on_daily_AST = { #Veterans_civil_war
+		effect = {
+			if = {
+				limit = {
+					has_country_flag = AST_veterans_revolt_active
+					has_stability < 0.40
+					NOT = { has_country_flag = AST_revolt_triggered_early }
+				}
+				set_country_flag = AST_revolt_triggered_early
+				set_country_flag = AST_veterans_revolt_fired
+				clr_country_flag = AST_veterans_revolt_active
+				custom_override_tooltip = {
+					tooltip = AST_peace_out_all_wars_tt
+					every_enemy_country = {
+						white_peace = PREV
+					}
+				}	
+				if = {
+				    limit = {
+				        check_variable = { AST.AST_seize_leadership_states^num = 0 }
+				    }
+				    start_civil_war = {
+				        ruling_party = communism
+				        ideology = ROOT
+				        size = 0.5
+				        states = { 518 517 285 521 872 520 870 522 871 674 873 523 1096 737 1138 }	#56 - Hopefully did state corrections right
+				    }
+				    set_capital = { state = 519 }
+				    else = {
+				        start_civil_war = {
+				            ruling_party = communism
+				            ideology = ROOT
+				            size = 0.5
+				            states = all
+				            states_filter = {
+				                NOT = {
+				                    is_in_array = { AST.AST_seize_leadership_states = THIS }
+				                }
+				            }
+				        }
+				    }
+				}
+				set_capital = { state = 285 }
+			custom_effect_tooltip = generic_skip_one_line_tt
+				add_ideas = idea_AST_civil_war_on_their_own
+				every_enemy_country = {
+					limit = { civilwar_target = ROOT }
+					hidden_effect = {
+						save_event_target_as = AST_revolter_country
+						every_enemy_country = {
+							limit = {
+								NOT = { original_tag = ROOT }
+							}
+							white_peace = event_target:AST_revolter_country
+						}
+					}
+				}
+			}
+		}
+	}
+
+	# ROOT is attacker, FROM is defender 
+	on_war_relation_added = {
+		effect = {
+			if = {
+				limit = {
+					ROOT = {
+						original_tag = AST
+						IRE = { has_country_flag = AST_IRE_joined_anti_britain_pact }
+					}
+					FROM = {
+						original_tag = ENG
+					}
+				}
+				IRE = {
+					leave_faction = yes
+				}
+				ROOT = {
+					add_to_faction = IRE
+				}
+				IRE = {
+					for_loop_effect = {
+						value = AST_IRE_stationed_troops_count_var
+						random_owned_controlled_state = {
+							create_unit = {
+								division = "name = \"Infantry Division\" division_template = \"Infantry Division\" start_experience_factor = 0.5"
+								owner = IRE
+							}
+						}
+					}
+					add_to_war = {
+						targeted_alliance = ROOT
+						enemy = FROM
+						hostility_reason = asked_to_join
+					}
+					remove_ideas = AST_IRE_stationed_troops_idea
+					if ={
+						limit = {
+							ENG = { communism > 0.099 }
+							ROOT = { has_completed_focus = AST_out_of_the_den }
+						}
+						132 = {
+							teleport_armies = {
+								to_province = 6318
+							}
+							create_unit = {
+								division = "name = \"Infantry Division\" division_template = \"Infantry Division\" start_experience_factor = 0.5"
+								prioritize_location = 6384
+								allow_spawning_on_enemy_provs = yes
+								count = 2
+								owner = IRE
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						has_completed_focus = SIA_plan_for_a_short_war
+						NOT = { has_idea = idea_SIA_short_war_temp_buff }
+					}
+				}
+				add_timed_idea = {
+					idea = idea_SIA_short_war_temp_buff
+					days = 120
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+					}
+					ROOT = {
+						original_tag = SIA
+					}
+				}
+				FROM = {
+					if = {
+						limit = {
+							has_completed_focus = SIA_american_investment_aid
+						}
+						add_cic = 15000
+						add_equipment_to_stockpile = {
+							type = infantry_equipment
+							amount = 1200
+							producer = USA
+						}
+						add_equipment_to_stockpile = {
+							type = support_equipment
+							amount = 150
+							producer = USA
+						}
+						add_equipment_to_stockpile = {
+							type = artillery_equipment
+							amount = 70
+							producer = USA
+						}
+					}
+					if = {
+						limit = {
+							has_completed_focus = SIA_thai_students_in_the_oss
+						}
+						if = {
+							limit = {
+								has_dlc = "La Resistance"
+							}
+							create_intelligence_agency = yes
+							upgrade_intelligence_agency = upgrade_form_department
+							upgrade_intelligence_agency = upgrade_commando_training
+							upgrade_intelligence_agency = upgrade_army_department
+							USA = {
+								create_intelligence_agency = yes
+								upgrade_intelligence_agency = upgrade_form_department
+								upgrade_intelligence_agency = upgrade_commando_training
+								upgrade_intelligence_agency = upgrade_army_department
+							}
+						}
+						add_intel = {
+							target = JAP
+							civilian_intel = 2
+							army_intel = 2
+							navy_intel = 2
+							airforce_intel = 2
+						}
+						add_decryption = {
+							target = JAP
+							ratio = 0.33
+						}
+						USA = {
+							add_intel = {
+								target = JAP
+								civilian_intel = 2
+								army_intel = 2
+								navy_intel = 2
+								airforce_intel = 2
+							}
+							add_decryption = {
+								target = JAP
+								ratio = 0.33
+							}
+						}
+					}
+					if = {
+						limit = {
+							has_completed_focus = SIA_prepare_to_drop
+						}
+						division_template = {
+							name = "Expeditionary Paratrooper Division"
+							division_names_group = ENG_PAR_01
+							is_locked = yes
+							regiments = {
+								paratrooper = { x = 0 y = 0 }
+								paratrooper = { x = 0 y = 1 }
+								paratrooper = { x = 0 y = 2 }
+
+								paratrooper = { x = 1 y = 0 }
+								paratrooper = { x = 1 y = 1 }
+								paratrooper = { x = 1 y = 2 }
+							}
+						}
+
+						random_owned_controlled_state = {
+							create_unit = { 
+								division = "name = \"Expeditionary Paratrooper Division\" division_template = \"Expeditionary Paratrooper Division\" start_experience_factor = 1.0" 
+								owner = PREV
+							}
+						}
+						random_owned_controlled_state = {
+							create_unit = { 
+								division = "name = \"Expeditionary Paratrooper Division\" division_template = \"Expeditionary Paratrooper Division\" start_experience_factor = 1.0" 
+								owner = PREV
+							}
+						}
+						random_owned_controlled_state = {
+							create_unit = { 
+								division = "name = \"Expeditionary Paratrooper Division\" division_template = \"Expeditionary Paratrooper Division\" start_experience_factor = 1.0" 
+								owner = PREV
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_global_flag = sia_dlc_focus_tree	#56
+					FROM = {
+						original_tag = SIA
+						OR = {
+							is_faction_leader = no
+							NOT = {
+								any_allied_country = { has_war_with = ROOT }
+							}
+						}
+						NOT = {
+							OR = {
+								has_completed_focus = SIA_reluctant_submission
+								has_completed_focus = SIA_standing_our_ground
+							}
+						}
+					}
+					ROOT = {
+						is_major = yes
+					}
+				}
+				FROM = {
+					set_variable = {
+						var = SIA_first_major_attacking_country
+						value = ROOT
+					}
+					country_event = {
+						id = siam.34
+						hours = 1
+					}
+				}
+			}
+
+			#diversitifaction focus
+			if = {
+				limit = {
+					OR = {
+						FROM = {
+							original_tag = SIA
+							has_completed_focus = SIA_diversity_foreign_reserves
+							NOT = { has_country_flag = SIA_diversity_foreign_reserves_flag }
+						}
+						ROOT = {
+							original_tag = SIA
+							has_completed_focus = SIA_diversity_foreign_reserves
+							NOT = { has_country_flag = SIA_diversity_foreign_reserves_flag }
+						}
+					}
+				}
+
+				SIA = {
+					set_country_flag = SIA_diversity_foreign_reserves_flag
+					add_offsite_building = {
+						type = arms_factory
+						level = 3
+					}
+
+					random_core_state = {
+						limit = {
+							is_controlled_by = SIA
+						}
+
+						add_resource = {
+							type = steel
+							amount = 8
+						}
+					}
+				}
+			}
+
+			if = {
+				limit = {
+					FROM = {
+						NOT = { original_tag = SIA } 
+					}
+					ROOT = { has_idea = idea_SIA_war_fervor }
+				}
+
+				ROOT = {
+					remove_ideas = idea_SIA_war_fervor
+					add_timed_idea = {
+						idea = idea_SIA_bloodlusted_irredentism	
+						days = 90
+					}
+				}
+			}
+
+			if = {
+				limit = {
+					FROM = { original_tag = SIA }
+					ROOT = { original_tag = SIA }
+					SIA = { 
+						has_civil_war = yes 
+					}
+				}
+
+				if = {
+					limit = {
+						SIA = {
+							has_completed_focus = SIA_support_songsuradets_military_clique
+							NOT = { has_completed_focus = SIA_the_songsuradet_rebellion }
+							NOT = { has_country_flag = has_spawned_senior_officer_loyalists }
+						}
+					}
+
+					SIA = {
+						set_country_flag = has_spawned_senior_officer_loyalists
+						division_template = {
+							name = "Senior Officer Loyalists"
+							is_locked = no
+							regiments = {
+								infantry = { x = 0 y = 0 }
+								infantry = { x = 0 y = 1 }
+								infantry = { x = 0 y = 2 }
+								infantry = { x = 0 y = 3 }
+
+								infantry = { x = 1 y = 0 }
+								infantry = { x = 1 y = 1 }
+								infantry = { x = 1 y = 2 }
+							}
+							support = {
+								
+							}
+						}
+
+						random_controlled_state = {
+							create_unit = {
+								division = "name = \"Senior Officer Loyalists\" division_template = \"Senior Officer Loyalists\" start_experience_factor = 0.5 start_equipment_factor = 1 start_manpower_factor = 1"
+								owner = SIA
+								allow_spawning_on_enemy_provs = yes
+								count = 3  
+							}
+						}
+					}
+
+				}
+
+				if = {
+					limit = {
+						SIA = {
+							has_completed_focus = SIA_the_royal_police_counterweight 
+							NOT = { has_country_flag = has_spawned_royal_police }
+						}
+					}
+
+					SIA = {
+						set_country_flag = has_spawned_royal_police
+						set_technology = {
+							militia_tech = 1
+							popup = no
+						}
+						division_template = {
+							name = "Royal Police"
+							is_locked = no
+							regiments = {
+								militia = { x = 0 y = 0 }
+								militia = { x = 0 y = 1 }
+								militia = { x = 0 y = 2 }
+								militia = { x = 0 y = 3 }
+
+								militia = { x = 1 y = 0 }
+								militia = { x = 1 y = 1 }
+								militia = { x = 1 y = 2 }
+							}
+							support = {
+								
+							}
+						}
+
+						random_controlled_state = {
+							create_unit = {
+								division = "name = \"Royal Police\" division_template = \"Royal Police\" start_experience_factor = 0.5 start_equipment_factor = 1 start_manpower_factor = 1"
+								owner = SIA
+								allow_spawning_on_enemy_provs = yes
+								count = 2
+							}
+						}
+					}
+				}
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					AST = {
+						has_war_with = JAP
+						has_country_flag = AST_advance_pacific_initiatives_jap
+					}	
+				}
+				add_offsite_building = {
+					type = dockyard
+			   		level = -2
+				}
+				clr_country_flag = AST_advance_pacific_initiatives_jap
+			}
+			IF = {
+				limit = {
+					AST = {
+						has_war_with = INS
+						has_country_flag = AST_advance_pacific_initiatives_ins
+					}	
+				}
+				add_offsite_building = {
+					type = synthetic_refinery
+			   		level = -1
+				}
+				clr_country_flag = AST_advance_pacific_initiatives_ins
+			}
+			IF = {
+				limit = {
+					AST = {
+						has_war_with = CHI
+						has_country_flag = AST_advance_pacific_initiatives_chi
+					}	
+				}
+				add_offsite_building = {
+					type = industrial_complex
+			   		level = -2
+				}
+				clr_country_flag = AST_advance_pacific_initiatives_chi
+			}	
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					OR = {
+						ROOT = {
+							original_tag = AST
+							has_idea = AST_australian_war_cabinet_idea
+						}
+						FROM = {
+							original_tag = AST
+							has_idea = AST_australian_war_cabinet_idea
+						}
+					}
+				}
+				AST = {
+					swap_ideas = {
+						remove_idea = AST_australian_war_cabinet_idea
+						add_idea = AST_australian_war_cabinet_war_idea
+					} 
+				} 
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					OR = {
+						ROOT = {
+							original_tag = AST
+							has_country_flag = AST_scorch_the_north
+						}
+						FROM = {
+							original_tag = AST
+							has_country_flag = AST_scorch_the_north
+						}
+					}
+				}
+				AST = {
+					every_owned_state = {
+						limit = {
+							is_controlled_by = ROOT
+							infrastructure > 0
+							OR = {
+								state = 870
+								state = 520
+								state = 872
+							}
+						}
+						damage_building = {
+							type = infrastructure
+							damage = 3
+						}
+					}
+					clr_country_flag = AST_scorch_the_north
+				} 
+			}
+		}
+	}
+
+	# ROOT is capitulated country, FROM is winner
+	#Fra can cap etc
+	on_capitulation = {
+		effect = {
+			if = {
+				limit = {
+					is_in_array = { array = SIA.indochina_controllers value = ROOT }
+				}
+
+				SIA = { SIA_refresh_indochina_controllers = yes }
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						has_country_flag = achievement_grand_siam_flag_1
+						has_country_flag = achievement_grand_siam_flag_2
+						has_country_flag = achievement_grand_siam_flag_3
+						NOT = { has_country_flag = achievement_grand_siam_flag_4 }
+						NOT = { has_country_flag = achievement_grand_siam }
+					}
+				}
+				FROM = { set_country_flag = { flag = achievement_grand_siam_flag_4 value = 1 days = 365 } }
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						has_country_flag = achievement_grand_siam_flag_1
+						has_country_flag = achievement_grand_siam_flag_2
+						NOT = { has_country_flag = achievement_grand_siam_flag_3 }
+						NOT = { has_country_flag = achievement_grand_siam }
+					}
+				}
+				FROM = { set_country_flag = { flag = achievement_grand_siam_flag_3 value = 1 days = 365 } }
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						has_country_flag = achievement_grand_siam_flag_1
+						NOT = { has_country_flag = achievement_grand_siam_flag_2 }
+						NOT = { has_country_flag = achievement_grand_siam }
+					}
+				}
+				FROM = { set_country_flag = { flag = achievement_grand_siam_flag_2 value = 1 days = 365 } }
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						NOT = { has_country_flag = achievement_grand_siam_flag_1 }
+						NOT = { has_country_flag = achievement_grand_siam }
+					}
+				}
+				FROM = { set_country_flag = { flag = achievement_grand_siam_flag_1 value = 1 days = 365 } }
+			}
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						has_country_flag = achievement_grand_siam_flag_1
+						has_country_flag = achievement_grand_siam_flag_2
+						has_country_flag = achievement_grand_siam_flag_3
+						has_country_flag = achievement_grand_siam_flag_4
+					}
+				}
+				FROM = { set_country_flag = achievement_grand_siam }
+			}
+
+			# AST union control: if Azad Hind (RAJ tag without the loyalist cosmetic) capitulates,
+			# the civil war doesn't formally end while they're protected by a faction, so
+			# on_civil_war_end never fires. Swap AST's array entry to the surviving loyalist Raj
+			# (the one wearing the RAJ_UK cosmetic) so Union Control can keep progressing.
+			if = {
+				limit = {
+					ROOT = {
+						original_tag = RAJ
+						NOT = { has_cosmetic_tag = RAJ_UK }
+					}
+					any_country = {
+						original_tag = RAJ
+						has_cosmetic_tag = RAJ_UK
+					}
+					AST = {
+						is_in_array = { array = AST_union_control_target_array value = ROOT }
+					}
+				}
+				random_country = {
+					limit = {
+						original_tag = RAJ
+						has_cosmetic_tag = RAJ_UK
+					}
+					save_event_target_as = ast_raj_loyalist_survivor
+				}
+				AST = {
+					remove_from_array = {
+						array = AST_union_control_target_array
+						value = ROOT
+					}
+					add_to_array = {
+						array = AST_union_control_target_array
+						value = event_target:ast_raj_loyalist_survivor
+					}
+				}
+			}
+		}
+	}
+
+	# 	ROOT is the country which called, FROM is the country that joined.  Trigger the following commands whenever a country accepts the call to war. 
+	on_call_allies = {
+		effect = {
+			if = {
+				limit = {
+					SIA = { has_variable = limited_war_target }
+					OR = {
+						check_variable = { SIA.limited_war_target = ROOT }
+						ROOT = { 
+							is_ally_with = var:SIA.limited_war_target 
+							has_war_with = SIA
+						}
+						
+					}
+					NOT = {
+						is_in_array = { array = SIA.limited_war_target_allies value = FROM }
+					}
+				}
+
+				add_to_array = { array = SIA.limited_war_target_allies value = FROM }
+			}
+		}
+	}
+
+	#ROOT is civil war winner, FROM gets annexed. This will also fire on_annex. 
+	on_civil_war_end = {
+		effect = {
+			# SIA
+			if = {
+				limit = {
+					ROOT = {
+						has_country_leader = { character = SIA_plaek_phibunsongkhram }
+					}
+
+					FROM = {
+						has_country_leader = { character = SIA_phraya_songsuradet }
+					}
+				}
+
+				ROOT = { country_event = { id = siam.9 hours = 2 } }
+			}
+
+			if = {
+				limit = {
+					ROOT = { 
+						has_completed_focus = SIA_the_kings_gambit
+					}
+				}
+
+				ROOT = { 
+					set_variable = { total_constructed_civilian_factory_target = total_constructed_civilian_factory }
+					set_variable = { total_constructed_military_factory_target = total_constructed_military_factory } 
+
+					add_to_variable = { total_constructed_civilian_factory_target = 2 }
+					add_to_variable = { total_constructed_military_factory_target = 2 }
+
+				}
+			}
+			# AST
+			if = {
+				limit = {
+					ROOT = {
+						has_country_flag = AST_instigated_communist_civil_war
+					}
+				}
+				AST = {
+					puppet = {
+						target = ROOT
+						end_wars = yes
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					FROM = {
+						has_country_flag = AST_instigated_communist_civil_war
+					}
+				}
+				set_country_flag = AST_defeated_communist_uprising_civil_war
+				AST = {
+					create_wargoal = {
+						type = puppet_wargoal_focus
+						target = ROOT
+					}
+					remove_from_array = {
+						array = AST_union_control_target_array
+						value = FROM
+					}
+					add_to_array = {
+						array = AST_union_control_target_array
+						value = ROOT
+					}
+				}
+			}
+
+			# AST union control: if a RAJ-civil-war flips which tag holds India, swap the array entry
+			# so Union Control keeps targeting the surviving India rather than a dead tag.
+			# RAJ_UK is the canonical cosmetic marker for the British-loyalist Raj.
+			if = {
+				limit = {
+					ROOT = { has_cosmetic_tag = RAJ_UK }
+					AST = {
+						is_in_array = { array = AST_union_control_target_array value = FROM }
+					}
+				}
+				AST = {
+					remove_from_array = {
+						array = AST_union_control_target_array
+						value = FROM
+					}
+					add_to_array = {
+						array = AST_union_control_target_array
+						value = ROOT
+					}
+				}
+			}
+		}
+	}
+
+	# Script Documentation - On Action ID 1: Removes Dutch-Loyal Generals, Admirals, Field Marshals from Indonesia, and sets a flag that among other things, removes dutch-loyal advisors/MHCs
+	on_subject_free = {
+		effect = {
+			if = {
+				limit = {
+					ROOT = {
+						original_tag = INS
+						NOT = { has_country_flag = INS_freed_from_dutch }
+					}
+					FROM = {
+						original_tag = HOL
+					}
+				}
+				indonesia_free_effect = yes
+			}
+		}
+		
+		# AST
+		effect = {
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = AST
+						has_completed_focus = AST_the_ultimate_overseas_duty
+					}
+					FROM = {
+						original_tag = ENG
+					}
+				}
+				mark_focus_tree_layout_dirty = yes
+			}
+		}
+	}
+	
+	# Script Documentation - On Action ID 2: Removes Dutch-Loyal Generals, Admirals, Field Marshals from Indonesia, and sets a flag that among other things, removes dutch-loyal advisors/MHCs
+	on_subject_annex = {
+		effect = {
+			if = {
+				limit = {
+					ROOT = {
+						original_tag = INS
+						NOT = { has_country_flag = INS_freed_from_dutch }
+					}
+					FROM = {
+						original_tag = HOL
+					}
+				}
+				indonesia_free_effect = yes
+			}
+		}
+	}
+
+	# Script Documentation - On Action ID 3: Events
+	on_startup = {
+		effect = {
+			if = {
+				limit = { has_dlc = "Thunder at Our Gates" }
+
+				SIA = { #Anandas bday Sep 20
+					set_variable = { SIA_anandas_age = 10 }
+					country_event = {
+						id = siam.26
+						days = 264
+					}
+
+					SIA_phraya_songsuradet = {
+						set_unit_leader_flag = dont_move_in_cw
+					}
+					SIA_adul_aduldejajaras = {
+						set_unit_leader_flag = dont_move_in_cw
+					}
+				}
+			}
+
+			if = {
+				limit = {
+					has_dlc = "Thunder at Our Gates"
+					has_start_date < 1936.1.2
+				}
+				INS = {
+					country_event = {
+						id = INS_political_events.1 #New Governor General for Indonesia
+						days = 259 #September 16th, 1936
+					}
+					activate_mission = INS_soetardjo_pending
+				}
+			}
+
+			AST = {
+				add_to_array = { array = AST_seize_target_states value = 517 }
+				add_to_array = { array = AST_seize_target_states value = 285 }
+				add_to_array = { array = AST_seize_target_states value = 521 }
+				add_to_array = { array = AST_seize_target_states value = 519 }
+				add_to_array = { array = AST_seize_target_states value = 518 }
+				add_to_array = { array = AST_seize_target_states value = 873 }
+				add_to_array = { array = AST_seize_target_states value = 674 }
+				add_to_array = { array = AST_seize_target_states value = 872 }
+				add_to_array = { array = AST_seize_target_states value = 520 }
+				add_to_array = { array = AST_seize_target_states value = 870 }
+				add_to_array = { array = AST_seize_target_states value = 522 }
+				add_to_array = { array = AST_seize_target_states value = 871 }
+			}
+		}
+	}
+
+	###################
+	#### AUSTRALIA ####
+	###################
+	on_daily_AST = {
+		effect = {
+			IF = {
+				limit = {
+					has_political_power < 1
+					has_idea = AST_election_campaign_pp_cost_hidden_idea
+				}
+				remove_ideas = AST_election_campaign_pp_cost_hidden_idea
+			}
+			# Democratic Election Campaigning
+			IF = { # UAP
+				limit = {
+					check_variable = {
+						var = AST_campaigning_for_party
+						value = 1
+						compare = equals
+					}
+				}
+				add_to_variable = {
+					var = AST_uap_votes_var
+					value = 0.05 #Edit - AST_uap_election_campaign_tt /AND/ AST_alp_election_campaign_tt /AND/ AST_uap_votes_change_var /AND/ AST_alp_votes_change_var - if changed
+				}
+				add_to_variable = {
+					var = AST_alp_votes_var
+					value = -0.05 #Edit - AST_uap_election_campaign_tt /AND/ AST_alp_election_campaign_tt /AND/ AST_uap_votes_change_var /AND/ AST_alp_votes_change_var - if changed
+				}
+			}
+			IF = { # ALP
+				limit = {
+					check_variable = {
+						var = AST_campaigning_for_party
+						value = 2
+						compare = equals
+					}
+				}
+				add_to_variable = {
+					var = AST_alp_votes_var
+					value = 0.05 #Edit - AST_uap_election_campaign_tt /AND/ AST_alp_election_campaign_tt /AND/ AST_uap_votes_change_var, AST_alp_votes_change_var in AST_uap_campaign - if changed
+				}
+				add_to_variable = {
+					var = AST_uap_votes_var
+					value = -0.05 #Edit - AST_uap_election_campaign_tt /AND/ AST_alp_election_campaign_tt /AND/ AST_uap_votes_change_var, AST_alp_votes_change_var in AST_uap_campaign - if changed
+				}
+			}
+			IF = { # failsafe for campaigning not ending
+				limit = {
+					OR = {
+						NOT = {
+							OR = {
+								check_variable = {
+									var = AST_campaigning_for_party
+									value = 1
+									compare = equals
+								}
+								check_variable = {
+									var = AST_campaigning_for_party
+									value = 2
+									compare = equals
+								}
+							}
+						}
+						NOT = {
+							has_government = democratic
+						}
+						has_completed_focus = AST_australia_first
+						has_completed_focus = AST_against_war_and_fascism
+					}
+				}
+				remove_ideas = AST_election_campaign_pp_cost_hidden_idea
+			}
+			clamp_variable = {
+				var = AST_uap_votes_var
+				min = 0
+				max = 100
+			}
+			clamp_variable = {
+				var = AST_alp_votes_var
+				min = 0
+				max = 100
+			}
+		}
+
+		effect = { #Scaling focus completion time based on UAP/ALP votes
+
+			IF = {
+				limit = {
+					original_tag = AST
+					has_dlc = "Thunder at Our Gates"
+				}
+
+				IF = { #Reduce UAP focus completion time if votes > 50
+					limit = {
+						check_variable = {
+							var = AST_uap_votes_var
+							value = 50
+							compare = greater_than
+						}
+						NOT = {
+							has_country_flag = AST_uap_50_discount
+						}
+					}
+					AST_uap_5_time_discount_effect = yes
+					set_country_flag = AST_uap_50_discount
+				}
+
+				IF = { #Reverse reduced UAP focus completion time if votes < 50
+					limit = {
+						check_variable = {
+							var = AST_uap_votes_var
+							value = 50
+							compare = less_than_or_equals
+						}
+						has_country_flag = AST_uap_50_discount
+					}
+					AST_uap_5_time_discount_effect_reverse = yes
+					clr_country_flag = AST_uap_50_discount
+				}
+
+				IF = { #Reduce UAP focus completion time if votes > 70
+					limit = {
+						check_variable = {
+							var = AST_uap_votes_var
+							value = 70
+							compare = greater_than
+						}
+						NOT = {
+							has_country_flag = AST_uap_70_discount
+						}
+					}
+					AST_uap_5_time_discount_effect = yes
+					set_country_flag = AST_uap_70_discount
+				}
+
+				IF = { #Reverse reduced UAP focus completion time if votes < 70
+					limit = {
+						check_variable = {
+							var = AST_uap_votes_var
+							value = 70
+							compare = less_than_or_equals
+						}
+						has_country_flag = AST_uap_70_discount
+					}
+					AST_uap_5_time_discount_effect_reverse = yes
+					clr_country_flag = AST_uap_70_discount
+				}
+				
+				IF = { #Reduce ALP focus completion time if votes > 50
+					limit = {
+						check_variable = {
+							var = AST_alp_votes_var
+							value = 50
+							compare = greater_than
+						}
+						NOT = {
+							has_country_flag = AST_alp_50_discount
+						}
+					}
+					AST_alp_5_time_discount_effect = yes
+					set_country_flag = AST_alp_50_discount
+				}
+
+				IF = { #Reverse reduced ALP focus completion time if votes < 50
+					limit = {
+						check_variable = {
+							var = AST_alp_votes_var
+							value = 50
+							compare = less_than_or_equals
+						}
+						has_country_flag = AST_alp_50_discount
+					}
+					AST_alp_5_time_discount_effect_reverse = yes
+					clr_country_flag = AST_alp_50_discount
+				}
+
+				IF = { #Reduce ALP focus completion time if votes > 70
+					limit = {
+						check_variable = {
+							var = AST_alp_votes_var
+							value = 70
+							compare = greater_than
+						}
+						NOT = {
+							has_country_flag = AST_alp_70_discount
+						}
+					}
+					AST_alp_5_time_discount_effect = yes
+					set_country_flag = AST_alp_70_discount
+				}
+
+				IF = { #Reverse reduced ALP focus completion time if votes < 75
+					limit = {
+						check_variable = {
+							var = AST_alp_votes_var
+							value = 70
+							compare = less_than_or_equals
+						}
+						has_country_flag = AST_alp_70_discount
+					}
+					AST_alp_5_time_discount_effect_reverse = yes
+					clr_country_flag = AST_alp_70_discount
+				}
+
+				IF = { #Shared focuses gets reversed discount if the other party unlocks them. Remove 50 discount here from loyalist branch
+					limit = {
+						OR = {
+							AND = {
+								has_completed_focus = AST_pleading_britain
+								has_country_flag = AST_uap_50_discount
+							}
+							AND = {
+								has_completed_focus = AST_the_ultimate_overseas_duty
+								has_country_flag = AST_alp_50_discount
+							}
+						}
+						NOT = {
+							has_country_flag = AST_50_discount_shared_loyalist_reversed
+						}
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_under_the_rule_of_canberra
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_taking_the_helm
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_a_change_of_authority
+						cost = -5
+					}
+					set_country_flag = AST_50_discount_shared_loyalist_reversed
+				}
+
+				IF = { #Shared focuses gets reversed discount if the other party unlocks them. Remove 70 discount here from loyalist branch
+					limit = {
+						OR = {
+							AND = {
+								has_completed_focus = AST_pleading_britain
+								has_country_flag = AST_uap_70_discount
+							}
+							AND = {
+								has_completed_focus = AST_the_ultimate_overseas_duty
+								has_country_flag = AST_alp_70_discount
+							}
+						}
+						NOT = {
+							has_country_flag = AST_70_discount_shared_loyalist_reversed
+						}
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_under_the_rule_of_canberra
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_taking_the_helm
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_a_change_of_authority
+						cost = -5
+					}
+					set_country_flag = AST_70_discount_shared_loyalist_reversed
+				}
+
+				IF = { #Shared focuses gets reversed discount if the other party unlocks them. Remove 50 discount here from independence branch
+					limit = {
+						OR = {
+							AND = {
+								has_completed_focus = AST_bring_on_the_giant
+								has_country_flag = AST_uap_50_discount
+							}
+							AND = {
+								has_completed_focus = AST_inevitably_independent
+								has_country_flag = AST_alp_50_discount
+							}
+						}
+						NOT = {
+							has_country_flag = AST_50_discount_shared_independence_reversed
+						}
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_allied_after_all
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_the_pacific_resistance
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_equal_training
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_a_northern_barrier
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_demand_resources
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_reclaim_the_lost_territory
+						cost = -5
+					}
+					set_country_flag = AST_50_discount_shared_independence_reversed
+				}
+
+				IF = { #Shared focuses gets reversed discount if the other party unlocks them. Remove 70 discount here from independence branch
+					limit = {
+						OR = {
+							AND = {
+								has_completed_focus = AST_bring_on_the_giant
+								has_country_flag = AST_uap_70_discount
+							}
+							AND = {
+								has_completed_focus = AST_inevitably_independent
+								has_country_flag = AST_alp_70_discount
+							}
+						}
+						NOT = {
+							has_country_flag = AST_70_discount_shared_independence_reversed
+						}
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_allied_after_all
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_the_pacific_resistance
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_equal_training
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_a_northern_barrier
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_demand_resources
+						cost = -5
+					}
+					reduce_focus_completion_cost = {
+						focus = AST_reclaim_the_lost_territory
+						cost = -5
+					}
+					set_country_flag = AST_70_discount_shared_independence_reversed
+				}
+			}
+		}
+
+		effect = { #Country Party Support idea
+			
+			IF = { #UAP
+				limit = {
+					has_idea = AST_country_party_influence_uap
+				}
+				add_to_variable = {
+					var = AST_uap_votes_var
+					value = 0.02 #Edit AST_country_party_influence_uap_tt if changed
+				}
+				add_to_variable = {
+					var = AST_alp_votes_var
+					value = -0.02 #Edit AST_country_party_influence_uap_tt if changed
+				}
+			}
+
+			IF = { #ALP
+				limit = {
+					has_idea = AST_country_party_influence_alp
+				}
+				add_to_variable = {
+					var = AST_alp_votes_var
+					value = 0.02 #Edit AST_country_party_influence_alp_tt if changed
+				}
+				add_to_variable = {
+					var = AST_uap_votes_var
+					value = -0.02 #Edit AST_country_party_influence_alp_tt if changed
+				}
+			}
+			
+			IF = { # failsafe
+				limit = {
+					has_idea = AST_country_party_influence_uap
+					OR = {
+						NOT = {
+							has_government = democratic
+						}
+						has_completed_focus = AST_australia_first
+						has_completed_focus = AST_against_war_and_fascism
+					}
+				}
+				remove_ideas = AST_country_party_influence_uap
+			}
+			
+			IF = { # failsafe
+				limit = {
+					has_idea = AST_country_party_influence_alp
+					OR = {
+						NOT = {
+							has_government = democratic
+						}
+						has_completed_focus = AST_australia_first
+						has_completed_focus = AST_against_war_and_fascism
+					}
+				}
+				remove_ideas = AST_country_party_influence_alp
+			}
+
+			clamp_variable = {
+				var = AST_uap_votes_var
+				min = 0
+				max = 100
+			}
+			clamp_variable = {
+				var = AST_alp_votes_var
+				min = 0
+				max = 100
+			}
+		}
+
+		effect = { #Advisor Support 
+
+			IF = { #UAP Billy Hughes
+				limit = {
+					has_government = democratic
+					has_completed_focus = AST_war_is_coming
+					AST_billy_hughes = {
+						is_hired_as_advisor = yes
+					}
+				}
+				add_to_variable = {
+					var = AST_uap_votes_var
+					value = 0.01 #Edit AST_advisor_uap_increase_modifier_tt /AND/ AST_billy_hughes_votes /AND/ AST_alp_votes_change_var in on_add if changed
+				}
+				add_to_variable = {
+					var = AST_alp_votes_var
+					value = -0.01 #Edit AST_advisor_uap_increase_modifier_tt /AND/ AST_billy_hughes_votes /AND/ AST_alp_votes_change_var in on_add if changed
+				}
+			}
+
+			#Remove if don't end up using
+			#IF = { #UAP Arthur Fadden
+			#	limit = {
+			#		has_government = democratic
+			#		has_completed_focus = AST_war_is_coming
+			#		AST_arthur_fadden = {
+			#			is_hired_as_advisor = yes
+			#		}
+			#	}
+			#	add_to_variable = {
+			#		var = AST_uap_votes_var
+			#		value = 0.01 #Edit AST_advisor_uap_increase_modifier_tt /AND/ AST_arthur_fadden_votes /AND/ AST_alp_votes_change_var in on_add if changed
+			#	}
+			#	add_to_variable = {
+			#		var = AST_alp_votes_var
+			#		value = -0.01 #Edit AST_advisor_uap_increase_modifier_tt /AND/ AST_arthur_fadden_votes /AND/ AST_alp_votes_change_var in on_add if changed
+			#	}
+			#}
+			
+			#IF = { #ALP Ben Chifley
+			#	limit = {
+			#		has_government = democratic
+			#		has_completed_focus = AST_war_is_coming
+			#		AST_ben_chifley = {
+			#			is_hired_as_advisor = yes
+			#		}
+			#	}
+			#	add_to_variable = {
+			#		var = AST_alp_votes_var
+			#		value = 0.01 #Edit AST_advisor_alp_increase_modifier_tt /AND/ AST_ben_chifley_votes /AND/ AST_alp_votes_change_var in on_add if changed
+			#	}
+			#	add_to_variable = {
+			#		var = AST_uap_votes_var
+			#		value = -0.01 #Edit AST_advisor_alp_increase_modifier_tt /AND/ AST_ben_chifley_votes /AND/ AST_alp_votes_change_var in on_add if changed
+			#	}
+			#}
+
+			IF = { #ALP James Scullin
+				limit = {
+					has_government = democratic
+					has_completed_focus = AST_war_is_coming
+					AST_james_scullin = {
+						is_hired_as_advisor = yes
+					}
+				}
+				add_to_variable = {
+					var = AST_alp_votes_var
+					value = 0.01 #Edit AST_advisor_alp_increase_modifier_tt /AND/ AST_james_scullin_votes /AND/ AST_alp_votes_change_var in on_add if changed
+				}
+				add_to_variable = {
+					var = AST_uap_votes_var
+					value = -0.01 #Edit AST_advisor_alp_increase_modifier_tt /AND/ AST_james_scullin_votes /AND/ AST_alp_votes_change_var in on_add if changed
+				}
+			}
+
+			IF = { #Maurice Blackburn
+				limit = {
+					has_government = democratic
+					has_completed_focus = AST_war_is_coming
+					AST_maurice_blackburn = {
+						is_hired_as_advisor = yes
+					}
+				}
+				IF = { #UAP Ruling
+					limit = {
+						check_variable = {
+							var = AST_ruling_party
+							value = 0
+							compare = equals
+						}
+					}
+					add_to_variable = {
+						var = AST_uap_votes_var
+						value = -0.01 #Edit AST_uap_decrease /AND/ AST_maurice_blackburn_votes /AND/ AST_alp_votes_change_var in on_add if changed
+					}
+					add_to_variable = {
+						var = AST_alp_votes_var
+						value = 0.01 #Edit AST_uap_decrease /AND/ AST_maurice_blackburn_votes /AND/ AST_alp_votes_change_var in on_add if changed
+					}
+				}
+				ELSE = { #ALP Ruling
+					add_to_variable = {
+						var = AST_alp_votes_var
+						value = -0.01 #Edit AST_alp_decrease /AND/ AST_maurice_blackburn_votes /AND/ AST_alp_votes_change_var in on_add if changed
+					}
+					add_to_variable = {
+						var = AST_uap_votes_var
+						value = 0.01 #Edit AST_alp_decrease /AND/ AST_maurice_blackburn_votes /AND/ AST_alp_votes_change_var in on_add if changed
+					}
+				}
+			}
+
+			clamp_variable = {
+				var = AST_uap_votes_var
+				min = 0
+				max = 100
+			}
+			clamp_variable = {
+				var = AST_alp_votes_var
+				min = 0
+				max = 100
+			}
+		}
+
+		effect = { #Campaign Tour
+			IF = {
+				limit = {
+					original_tag = AST
+					has_government = democratic
+					has_country_flag = AST_labor_campaign_tour_flag
+				}
+
+				add_to_variable = {
+					var = AST_alp_votes_var
+					value = 0.05 #Edit AST_labor_campaign_tour_votes /AND/ AST_labor_campaign_tour_effect_tt /AND/ AST_labor_campaign_tour_mission_desc if changed
+				}
+				add_to_variable = {
+					var = AST_uap_votes_var
+					value = -0.05 #Edit AST_labor_campaign_tour_votes /AND/ AST_labor_campaign_tour_effect_tt /AND/ AST_labor_campaign_tour_mission_desc if changed
+				}
+
+				clamp_variable = {
+					var = AST_uap_votes_var
+					min = 0
+					max = 100
+				}
+				clamp_variable = {
+					var = AST_alp_votes_var
+					min = 0
+					max = 100
+				}
+			}
+		}
+
+		effect = { #Communist: Launch Canberra Air Disaster on historical date if not launched before
+			IF = {
+				limit = {
+					date > 1940.08.12
+					has_completed_focus = AST_against_war_and_fascism
+					NOT = { #Event has not been/waiting on to be triggered yet
+						has_country_flag = AST_com_late_canberra
+					}
+				}
+				country_event = { id = AST_canberra_air_disaster_events.1 hours = 1 }
+				set_country_flag = AST_com_late_canberra #Make sure it doesn't trigger again, although it's not actually late canberra
+			}
+		}
+
+		effect = { #Launch event The 1938 Sesquicentenary 
+			IF = {
+				limit = {
+					tag = AST
+					date > 1938.01.26
+					NOT = {
+						has_country_flag = AST_the_1938_sesquicentenary_trigger
+						has_country_flag = AST_1939_start
+					}
+				}
+				country_event = { id = AST_political_events.6 hours = 1 }
+				set_country_flag = AST_the_1938_sesquicentenary_trigger
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					tag = AST
+					has_completed_focus = AST_war_is_coming
+					threat > 0.35
+					NOT = {
+						has_country_flag = AST_war_is_coming_decisions_trigger
+						has_country_flag = AST_1939_start
+					}
+				}
+				country_event = { id = AST_political_events.8 hours = 1 }
+
+				ELSE_IF = {
+					limit = {
+						tag = AST
+						NOT = {
+							has_country_flag = AST_war_is_coming_decisions_trigger
+						}
+						has_country_flag = AST_1939_start
+					}
+					country_event = { id = AST_diplomatic_events.77 hours = 3 }
+				}
+			}
+		}
+
+		effect = { #Election Season event
+			IF = {
+				limit = {
+					tag = AST
+					has_dlc = "Thunder at Our Gates"
+				}
+				IF = {
+					limit = {
+						date > 1937.06.17
+						NOT = {
+							has_completed_focus = AST_australia_first
+							has_completed_focus = AST_against_war_and_fascism
+							has_country_flag = AST_election_season_trigger_37
+							has_country_flag = AST_1939_start
+						}
+					}
+					country_event = { id = AST_election_events.3 hours = 1 }
+					set_country_flag = AST_election_season_trigger_37
+				}
+
+				ELSE_IF = {
+					limit = {
+						date > 1940.06.17
+						NOT = {
+							has_completed_focus = AST_australia_first
+							has_completed_focus = AST_against_war_and_fascism
+							has_country_flag = AST_election_season_trigger_40
+						}
+					}
+					country_event = { id = AST_election_events.3 hours = 1 }
+					set_country_flag = AST_election_season_trigger_40
+				}
+
+				ELSE_IF = {
+					limit = {
+						date > 1943.06.17
+						NOT = {
+							has_completed_focus = AST_australia_first
+							has_completed_focus = AST_against_war_and_fascism
+							has_country_flag = AST_election_season_trigger_43
+						}
+					}
+					country_event = { id = AST_election_events.3 hours = 1 }
+					set_country_flag = AST_election_season_trigger_43
+				}
+
+				ELSE_IF = {
+					limit = {
+						date > 1946.06.17
+						NOT = {
+							has_completed_focus = AST_australia_first
+							has_completed_focus = AST_against_war_and_fascism
+							has_country_flag = AST_election_season_trigger_46
+						}
+					}
+					country_event = { id = AST_election_events.3 hours = 1 }
+					set_country_flag = AST_election_season_trigger_46
+				}
+
+				ELSE_IF = {
+					limit = {
+						date > 1949.06.17
+						NOT = {
+							has_completed_focus = AST_australia_first
+							has_completed_focus = AST_against_war_and_fascism
+							has_country_flag = AST_election_season_trigger_49
+						}
+					}
+					country_event = { id = AST_election_events.3 hours = 1 }
+					set_country_flag = AST_election_season_trigger_49
+				}
+			}
+		}
+
+		effect = {
+			IF = {
+				limit = {
+					original_tag = AST
+					has_completed_focus = AST_the_ultimate_overseas_duty
+					NOT = {
+						is_subject_of = ENG
+						is_in_faction_with = ENG
+						has_country_flag = AST_bound_once_more_visible
+					}
+				}
+				mark_focus_tree_layout_dirty = yes
+				set_country_flag = AST_bound_once_more_visible
+			}
+		}
+		
+	}
+
+	on_new_term_election = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = AST
+					has_dlc = "Thunder at Our Gates"
+					NOT = { has_completed_focus = AST_australia_first }
+        			NOT = { has_completed_focus = AST_against_war_and_fascism }
+					has_government = democratic
+				}
+				AST = {
+					remove_ideas = AST_election_campaign_pp_cost_hidden_idea
+					set_variable = {
+                        var = AST_campaigning_for_party
+                        value = 0
+                    }
+
+                    IF = {
+                    	limit = {
+                    		has_idea = AST_country_party_influence_uap
+                    	}
+                    	remove_ideas = AST_country_party_influence_uap
+                    }
+
+                    IF = {
+                    	limit = {
+                    		has_idea = AST_country_party_influence_alp
+                    	}
+                    	remove_ideas = AST_country_party_influence_alp
+                    }
+
+                    if = { #Swap advisor's decrease of votes to current ruling party
+				        limit = { #Swap from UAP to ALP
+				            check_variable = {
+								var = AST_alp_votes_var
+								value = AST_uap_votes_var
+								compare = greater_than
+							}
+							check_variable = {
+								var = AST_ruling_party
+								value = 0 #UAP
+								compare = equals
+							}
+							AST_maurice_blackburn = { #Decreases votes for current ruling party
+								is_hired_as_advisor = yes
+							}
+				         }
+						add_to_variable = { #Remove old decrease
+							var = AST_uap_votes_daily_var
+							value = 0.01 
+						}
+						add_to_variable = { #Add new decrease
+							var = AST_alp_votes_daily_var
+							value = -0.01 
+						}
+						AST_votes_change_effect = yes
+					}#
+
+						else_if = {
+							limit = { #Swap from ALP to UAP
+							    check_variable = {
+									var = AST_uap_votes_var
+									value = AST_alp_votes_var
+									compare = greater_than
+								}
+								check_variable = {
+									var = AST_ruling_party
+									value = 1 #ALP
+									compare = equals
+								}
+								AST_maurice_blackburn = { #Decreases votes for current ruling party
+									is_hired_as_advisor = yes
+								}
+							}
+							add_to_variable = { #Remove old decrease
+								var = AST_alp_votes_daily_var
+								value = 0.01 
+							}
+							add_to_variable = { #Add new decrease
+								var = AST_uap_votes_daily_var
+								value = -0.01 
+							}
+							AST_votes_change_effect = yes
+						#}
+				   	}
+
+					if = { #Sets ALP as ruling party
+						limit = {
+							OR = {
+								check_variable = {
+									var = AST_alp_votes_var
+									value = AST_uap_votes_var
+									compare = greater_than
+								}
+								AND = {
+									check_variable = {
+										var = AST_alp_votes_var
+										value = AST_uap_votes_var
+										compare = greater_than_or_equals
+									}
+									check_variable = {
+										var = AST_ruling_party
+										value = 1
+										compare = equals
+									}
+								}
+							#If AST is historical AI, steer election wins instead of follow votes
+								AND = { 
+									AST = { is_ai = yes }
+									is_historical_focus_on = yes
+									date > 1941.1.1
+								}
+							}
+							OR = {
+								AST = { is_ai = no }
+								AND = {
+									AST = { is_ai = yes }							
+									is_historical_focus_on = yes
+									date > 1941.1.1
+								}
+							}
+						}
+						add_to_variable = {
+							var = AST_alp_election_win_count
+							value = 1
+						}
+						set_variable = {
+							var = AST_ruling_party
+							value = 1
+						}
+						set_party_name = {
+							ideology = democratic
+							long_name = AST_labor_party_long
+							name = AST_labor_party
+						}
+						if = {
+							limit = {
+								has_country_flag = ben_chifley_leads_alp
+								has_character = AST_ben_chifley
+							}
+							if = {
+								limit = {
+									NOT = { can_be_country_leader = AST_ben_chifley }
+								}
+								add_country_leader_role = {
+									character = AST_ben_chifley
+									promote_leader = yes
+									country_leader = {
+										ideology = socialism
+										expire = "1989.1.1.1"
+									}
+								}
+							}
+							else = {
+								promote_character = AST_ben_chifley
+							}
+						}
+						else = {
+							if = {
+								limit = {
+									NOT = { can_be_country_leader = AST_john_curtin }
+								}
+								add_country_leader_role = {
+									character = AST_john_curtin
+									promote_leader = yes
+									country_leader = {
+										ideology = socialism
+										expire = "1989.1.1.1"
+									}
+								}
+							}
+							else = {
+								promote_character = AST_john_curtin
+							}
+						}
+					}
+					else_if = { #Sets UAP as ruling party
+						limit = {
+							OR = {
+								check_variable = {
+									var = AST_uap_votes_var
+									value = AST_alp_votes_var
+									compare = greater_than
+								}
+								AND = {
+									check_variable = {
+										var = AST_uap_votes_var
+										value = AST_alp_votes_var
+										compare = greater_than_or_equals
+									}
+									check_variable = {
+										var = AST_ruling_party
+										value = 0
+										compare = equals
+									}
+								}
+							#If AST is historical AI, steer election wins instead of follow votes	
+								AND = { 
+									AST = { is_ai = yes }
+									is_historical_focus_on = yes
+									date < 1941.1.1
+								}
+							}
+							OR = {
+								AST = { is_ai = no }
+								AND = {
+									AST = { is_ai = yes }							
+									is_historical_focus_on = yes
+									date < 1941.1.1
+								}
+							}
+						}
+						add_to_variable = {
+							var = AST_uap_election_win_count
+							value = 1
+						}
+						set_variable = {
+							var = AST_ruling_party
+							value = 0
+						}
+						set_party_name = {
+							ideology = democratic
+							long_name = AST_democratic_party_long
+							name = AST_democratic_party
+						}
+						if = {
+							limit = {
+								has_country_flag = billy_hughes_leads_uap
+								has_character = AST_billy_hughes
+							}
+							if = {
+								limit = {
+									NOT = { can_be_country_leader = AST_billy_hughes }
+								}
+								add_country_leader_role = {
+									character = AST_billy_hughes
+									promote_leader = yes
+									country_leader = {
+										ideology = socialism
+										expire = "1952.1.1.1"
+									}
+								}
+							}
+							else = {
+								promote_character = AST_billy_hughes
+							}
+						}
+						else = {
+							if = {
+								limit = {
+									NOT = { can_be_country_leader = AST_robert_menzies }
+								}
+								add_country_leader_role = {
+									character = AST_robert_menzies
+									promote_leader = yes
+									country_leader = {
+										ideology = socialism
+										expire = "1989.1.1.1"
+									}
+								}
+							}
+							else = {
+								promote_character = AST_robert_menzies
+							}
+						}
+					}
+					clamp_variable = {
+						var = AST_uap_votes_var
+						min = 0
+						max = 100
+					}
+					clamp_variable = {
+						var = AST_alp_votes_var
+						min = 0
+						max = 100
+					}
+					country_event = AST_election_events.1
+					set_country_flag = {
+						flag = AST_election_recently_concluded
+						days = 15 #Edit AST_election_recently_concluded /AND/ AST_15_natunity if changed
+						value = 1
+					}
+				}
+			}
+		}
+	}
+
+	#ROOT is new controller, FROM is old controller, FROM.FROM is state ID
+	on_state_control_changed = {
+		effect = {
+			if = {
+				limit = {
+					has_dlc = "Thunder at Our Gates"
+					is_in_array = {
+						array = SIA.indochina_states
+						value = FROM.FROM.FROM
+					}
+					NOT = {
+						ROOT = {
+							original_tag = SIA
+						}
+					}
+				}
+				SIA = { SIA_refresh_indochina_controllers = yes }
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = INS
+						has_completed_focus = INS_the_jewel_in_the_crown
+						NOT = {
+							has_country_flag = INS_has_gotten_invasion_event
+							has_completed_focus = INSHOL_netherlands_indonesia_union
+						}
+					}
+					FROM.FROM = {
+						is_in_array = {
+							array = INS.owned_states_at_game_start
+							value = THIS
+						}
+					}
+					ROOT = {
+						is_major = yes
+						has_war_with = FROM
+					}
+				}
+				if = {
+					limit = {
+						ROOT = {
+							original_tag = JAP
+						}
+					}
+					FROM = {
+						set_country_flag = INS_has_gotten_invasion_event #ensures event only fires once
+					}
+					ROOT = {
+						save_event_target_as = INS_invasion_event_invader
+					}
+					FROM.FROM = {
+						save_event_target_as = INS_invasion_event_invaded_state
+					}
+					ROOT = {
+						country_event = {
+							id = INS_political_events.12
+							hours = 12
+						}
+					}
+				}
+				else = {
+					FROM = {
+						set_country_flag = INS_has_gotten_invasion_event #ensures event only fires once
+					}
+					ROOT = {
+						save_event_target_as = INS_invasion_event_invader
+					}
+					FROM.FROM = {
+						save_event_target_as = INS_invasion_event_invaded_state
+					}
+					FROM = {
+						country_event = {
+							id = INS_political_events.8
+							hours = 24
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	#FROM is the faction Leader, ROOT is the country leaving the faction 
+	on_leave_faction  = {
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						has_completed_focus = SIA_asian_democratic_compact
+					}
+				}
+
+				FROM = { SIA_update_adc = yes }
+			}
+		}
+
+		effect = {
+			IF = { #Downgrade AST Training Initiative spirit if <5 faction members
+				limit = {
+					OR = {
+						FROM = {
+							is_in_faction_with = AST						
+						}
+						ROOT = {
+							is_in_faction_with = AST
+						}
+					}
+					AST = {
+						OR = {
+							has_idea = AST_faction_training_initiative_idea_1
+							has_idea = AST_faction_training_initiative_idea_2
+						}
+						num_faction_members < 5
+					}
+				}
+				every_country = {
+					limit = {
+						has_idea = AST_faction_training_initiative_idea_2
+					}
+					swap_ideas = {
+						remove_idea = AST_faction_training_initiative_idea_2
+						add_idea = AST_faction_training_initiative_idea_1
+					}
+				}
+			}
+		}
+	}
+
+	on_offer_join_faction = {
+
+		# Late ABDACOM invite: covers add_to_faction and accepted offers
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						OR = {
+							tag = ENG
+							tag = USA
+							tag = HOL
+							tag = FRA
+							tag = INS
+						}
+						NOT = { has_country_flag = abdacom_member }
+						NOT = { has_country_flag = abdacom_declined }
+						has_war_with = JAP
+						is_major = yes
+						OR = {
+							has_government = democratic
+							has_government = neutrality
+						}
+						any_other_country = {
+							is_in_faction_with = FROM
+							has_country_flag = abdacom_member
+						}
+					}
+				}
+				random_country = {
+					limit = {
+						is_in_faction_with = FROM
+						has_country_flag = abdacom_member
+						NOT = { tag = FROM }
+					}
+					set_variable = { global.ABDA_repair_speed_factor_snapshot = ABDA_repair_speed_factor }
+					set_variable = { global.ABDA_convoy_escort_efficiency_snapshot = ABDA_convoy_escort_efficiency }
+					set_variable = { global.ABDA_submarine_attack_factor_snapshot = ABDA_submarine_attack_factor }
+					set_variable = { global.ABDA_submarine_defence_factor_snapshot = ABDA_submarine_defence_factor }
+					set_variable = { global.ABDA_screening_efficiency_snapshot = ABDA_screening_efficiency }
+					set_variable = { global.ABDA_screen_defence_factor_snapshot = ABDA_screen_defence_factor }
+					set_variable = { global.ABDA_experience_gain_navy_unit_factor_snapshot = ABDA_experience_gain_navy_unit_factor }
+					FROM = { country_event = { id = ABDA_events.5 days = 1 } }
+				}
+			}
+		}
+
+		effect = {
+			IF = { #Joiners gain AST Training Initiative spirit
+				limit = {
+					OR = {
+						FROM = {
+							is_in_faction_with = AST						
+						}
+						ROOT = {
+							is_in_faction_with = AST
+						}
+					}
+					AST = {
+						OR = {
+							has_idea = AST_faction_training_initiative_idea_1
+							has_idea = AST_faction_training_initiative_idea_2
+						}
+					}
+				}
+	
+				IF = {
+					limit = {
+						AST = { 
+							num_faction_members < 5
+						}
+					}
+					FROM = {
+						add_ideas = AST_faction_training_initiative_idea_1
+					}
+				}
+
+				ELSE = {
+					FROM = {
+						add_ideas = AST_faction_training_initiative_idea_2
+					}
+				}	
+			}
+
+			IF = { #Upgrade AST Training Initiative spirit if >4 faction members
+				limit = {
+					OR = {
+						FROM = {
+							is_in_faction_with = AST						
+						}
+						ROOT = {
+							is_in_faction_with = AST
+						}
+					}
+					AST = {
+						OR = {
+							has_idea = AST_faction_training_initiative_idea_1
+							has_idea = AST_faction_training_initiative_idea_2
+						}
+						num_faction_members > 4
+					}
+				}
+				every_country = {
+					limit = {
+						has_idea = AST_faction_training_initiative_idea_1
+					}
+					swap_ideas = {
+						remove_idea = AST_faction_training_initiative_idea_1
+						add_idea = AST_faction_training_initiative_idea_2
+					}
+				}
+			}
+		}
+
+		effect = {	#Add to Cominwealth research
+			FROM = {
+				if = {
+					limit = {
+						any_other_country = {
+							is_in_faction_with = FROM
+							is_in_tech_sharing_group = cominwealth_allied_research
+						}
+					}
+					add_to_tech_sharing_group = cominwealth_allied_research
+				}
+			}
+		}
+
+	}
+
+	#FROM is faction leader, ROOT and THIS are the country that joins. 	
+	on_join_faction = {
+
+		# Late ABDACOM invite: a potential major joins a faction that already has an ABDACOM member
+		effect = {
+			if = {
+				limit = {
+					OR = {
+						tag = ENG
+						tag = USA
+						tag = HOL
+						tag = FRA
+						tag = INS
+					}
+					NOT = { has_country_flag = abdacom_member }
+					NOT = { has_country_flag = abdacom_declined }
+					has_war_with = JAP
+					is_major = yes
+					OR = {
+						has_government = democratic
+						has_government = neutrality
+					}
+					any_other_country = {
+						is_in_faction_with = ROOT
+						has_country_flag = abdacom_member
+					}
+				}
+				random_other_country = {
+					limit = {
+						is_in_faction_with = ROOT
+						has_country_flag = abdacom_member
+					}
+					set_variable = { global.ABDA_repair_speed_factor_snapshot = ABDA_repair_speed_factor }
+					set_variable = { global.ABDA_convoy_escort_efficiency_snapshot = ABDA_convoy_escort_efficiency }
+					set_variable = { global.ABDA_submarine_attack_factor_snapshot = ABDA_submarine_attack_factor }
+					set_variable = { global.ABDA_submarine_defence_factor_snapshot = ABDA_submarine_defence_factor }
+					set_variable = { global.ABDA_screening_efficiency_snapshot = ABDA_screening_efficiency }
+					set_variable = { global.ABDA_screen_defence_factor_snapshot = ABDA_screen_defence_factor }
+					set_variable = { global.ABDA_experience_gain_navy_unit_factor_snapshot = ABDA_experience_gain_navy_unit_factor }
+					PREV = { country_event = { id = ABDA_events.5 days = 1 } }
+				}
+			}
+		}
+
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = SIA
+						has_completed_focus = SIA_asian_democratic_compact
+					}
+				}
+
+				FROM = { SIA_update_adc = yes }
+			}
+		}
+
+		effect = {
+			IF = { #Joiners gain AST Training Initiative spirit
+				limit = {
+					OR = {
+						FROM = {
+							is_in_faction_with = AST						
+						}
+						ROOT = {
+							is_in_faction_with = AST
+						}
+					}
+					AST = {
+						OR = {
+							has_idea = AST_faction_training_initiative_idea_1
+							has_idea = AST_faction_training_initiative_idea_2
+						}
+					}
+				}
+	
+				IF = {
+					limit = {
+						AST = { 
+							num_faction_members < 5
+						}
+					}
+					FROM = {
+						add_ideas = AST_faction_training_initiative_idea_1
+					}
+				}
+
+				ELSE = {
+					FROM = {
+						add_ideas = AST_faction_training_initiative_idea_2
+					}
+				}	
+			}
+
+			IF = { #Upgrade AST Training Initiative spirit if >4 faction members
+				limit = {
+					OR = {
+						FROM = {
+							is_in_faction_with = AST						
+						}
+						ROOT = {
+							is_in_faction_with = AST
+						}
+					}
+					AST = {
+						OR = {
+							has_idea = AST_faction_training_initiative_idea_1
+							has_idea = AST_faction_training_initiative_idea_2
+						}
+						num_faction_members > 4
+					}
+				}
+				every_country = {
+					limit = {
+						has_idea = AST_faction_training_initiative_idea_1
+					}
+					swap_ideas = {
+						remove_idea = AST_faction_training_initiative_idea_1
+						add_idea = AST_faction_training_initiative_idea_2
+					}
+				}
+			}
+		}
+
+		effect = {			#Add to Cominwealth research
+			if = {
+				limit = {
+					any_other_country = {
+						is_in_faction_with = ROOT
+						is_in_tech_sharing_group = cominwealth_allied_research
+					}
+				}
+				add_to_tech_sharing_group = cominwealth_allied_research
+			}
+		}
+
+	}
+
+	#FROM - Country (owner)
+	#ROOT - leader
+	#FROMFROM - original owner for exiled leaders
+
+	on_unit_leader_level_up = {
+		effect = {
+			if = { 
+				limit = { 
+					FROM = { 
+						has_country_flag = upgrade_leader_extra_on_level_up #set country flag to trigger this
+					} 
+				}
+
+				FROM = {
+					if = {
+						limit = {
+							check_variable = { extra_stat_on_unit_leader_level_up_override^num > 0 }
+						}
+						#Array that can be used to override the chances of individual stats being picked on leveling up. 
+						# index 0 = attack chance
+						# index 1 = defense chance
+						# index 2 = planning chance
+						# index 3 = logistics chance
+
+						# Example: 
+						# set_variable = { extra_stat_on_unit_leader_level_up_override^0 = 0.10 }
+						# set_variable = { extra_stat_on_unit_leader_level_up_override^1 = 0.20 }
+						# set_variable = { extra_stat_on_unit_leader_level_up_override^2 = 0.30 }
+						# set_variable = { extra_stat_on_unit_leader_level_up_override^3 = 0.40 }
+						# Chance is now 10% for attack, 20% for defense, 30% for planning, 40% for logistics. If no value is set for an index id defaults to 0. If the array doesn't exist everything defaults to 25% per stat
+						character = { 
+							if = { 
+								limit = { is_army_leader = yes }
+							
+								random_list = { 
+									var:extra_stat_on_unit_leader_level_up_override^0 = { add_attack = 1 } 
+									var:extra_stat_on_unit_leader_level_up_override^1 = { add_defense = 1 } 
+									var:extra_stat_on_unit_leader_level_up_override^2 = { add_planning  = 1 } 
+									var:extra_stat_on_unit_leader_level_up_override^3 = { add_logistics  = 1 } 
+								} 
+							}
+						}
+					}
+					else = {
+						#if nothing is set use equal weight (25% per)
+						character = { 
+							if = { 
+								limit = { is_army_leader = yes }
+								
+								random_list = { 
+									1 = { add_attack = 1 } 
+									1 = { add_defense = 1 } 
+									1 = { add_planning  = 1 } 
+									1 = { add_logistics  = 1 } 
+								} 
+							}
+						}
+					}
+				}
+			}
+		}  
+	}
+
+	on_release_as_free = {
+
+		effect = {
+
+			IF = {
+				limit = {
+					ROOT = {
+						original_tag = AST
+						has_completed_focus = AST_stephensen
+						is_in_faction_with = ENG
+					}
+				}
+				ENG = {
+					remove_from_faction = AST
+				}
+				
+			}
+
+		}
+		
+	}
+
+	on_ruling_party_change = {
+		effect = {
+			if = {
+				limit = {
+					tag = AST
+					has_government = communism
+					has_idea = AST_strike_ongoing
+				}
+				remove_ideas = AST_strike_ongoing
+			}
+		}
+	}
+
+}
