@@ -109,16 +109,20 @@
 		completion_reward = {
 			SIA_increase_civilian_approval = yes
 			SIA_decrease_military_approval = yes
-			remove_trait = {
-				character = SIA_pridi_banomyong # optional if inside character scope 
-				trait = JUNO_minister_of_foreign_affairs
-				slot = political_advisor #Only required for updating advisor 
-			}
+			# Pridi may have left the roster (e.g. exiled by a civil war) - only shuffle him if he is still here.
+			if = {
+				limit = { has_character = SIA_pridi_banomyong }
+				remove_trait = {
+					character = SIA_pridi_banomyong # optional if inside character scope
+					trait = JUNO_minister_of_foreign_affairs
+					slot = political_advisor #Only required for updating advisor
+				}
 
-			add_trait = {
-				character = SIA_pridi_banomyong # optional if inside character scope 
-				trait = SIA_minister_of_interior
-				slot = political_advisor #Only required for updating advisor 
+				add_trait = {
+					character = SIA_pridi_banomyong # optional if inside character scope
+					trait = SIA_minister_of_interior
+					slot = political_advisor #Only required for updating advisor
+				}
 			}
 
 			custom_effect_tooltip = newline_tt
@@ -200,7 +204,7 @@
 				bonus = 0.5
 				uses = 1
 				category = electronics # optional 
-				# technology  = technology_id # optional
+				name = SIA_the_true_heirs_of_1932
 			}
 		}
 	}
@@ -315,7 +319,6 @@
 			factor = 10
 		}
 		available = {
-			has_idea = idea_SIA_civil_service_heroism_1
 		}
 		#allow_branch = {
 		#}
@@ -822,6 +825,8 @@
 			add_war_support = -0.03
 
 			custom_effect_tooltip = newline_tt
+			custom_effect_tooltip = SIA_the_king_of_the_white_elephant_tt
+
 		}
 	}
 
@@ -855,6 +860,9 @@
 		search_filters = { FOCUS_FILTER_POLITICAL FOCUS_FILTER_WAR_SUPPORT }
 
 		completion_reward = {
+			hidden_effect = {
+				set_rule = { can_send_volunteers = yes } 
+			}
 			add_ideas = idea_SIA_thai_irredentism
 
 			custom_effect_tooltip = newline_tt
@@ -1760,7 +1768,7 @@
 
 	focus = {
 		id = SIA_the_provincial_council_of_state
-		icon = GFX_focus_BUL_form_a_regency_council
+		icon = GFX_goal_tfv_strengthen_commonwealth_ties
 		x = 1
 		y = 1
 		relative_position_id = SIA_the_kings_gambit
@@ -2333,6 +2341,7 @@
 		search_filters = { FOCUS_FILTER_MANPOWER FOCUS_FILTER_POLITICAL FOCUS_FILTER_STABILITY }
 
 		completion_reward = {
+			add_country_leader_trait = SIA_civilian_wing_leader
 			add_stability = 0.1
 			add_political_power = 60
 			add_manpower = 6000
@@ -2385,6 +2394,8 @@
 			custom_effect_tooltip = SIA_achieve_domestic_legitimacy_tt
 			custom_effect_tooltip = newline_tt
 			set_country_flag = SIA_turn_off_the_khana_ratsadon
+
+			# Dissolve the military wing entirely, whatever its standing.
 			if = {
 				limit = { has_idea = idea_SIA_military_rebellious }
 				remove_ideas = idea_SIA_military_rebellious
@@ -2397,7 +2408,14 @@
 				limit = { has_idea = idea_SIA_military_neutral }
 				remove_ideas = idea_SIA_military_neutral
 			}
-
+			else_if = {
+				limit = { has_idea = idea_SIA_military_slight_support }
+				remove_ideas = idea_SIA_military_slight_support
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_military_full_support }
+				remove_ideas = idea_SIA_military_full_support
+			}
 
 			if = {
 				limit = { has_idea = idea_SIA_civilian_rebellious }
@@ -2415,8 +2433,12 @@
 				limit = { has_idea = idea_SIA_civilian_slight_support }
 				remove_ideas = idea_SIA_civilian_slight_support
 			}
+			else_if = {
+				limit = { has_idea = idea_SIA_civilian_full_support }
+				remove_ideas = idea_SIA_civilian_full_support
+			}
 
-			add_ideas = idea_SIA_civilian_full_support
+			add_ideas = idea_SIA_unwavering_civilian_support
 		}
 	}
 	focus = {
@@ -2476,7 +2498,25 @@
 				idea = idea_SIA_rebuilding_the_war_torn_economy
 				days = 365
 			}
-			#custom_effect_tooltip = 
+			every_core_state = {
+				random_select_amount = 2
+				limit = {
+					NOT = { state = 1134 }	#56
+				}
+
+				add_extra_state_shared_building_slots = 2
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
+			}
 		}
 	}
 
@@ -2654,7 +2694,10 @@
 			factor = 30
 		}
 		available = {
-
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 		}
 		#allow_branch = {
 		#}
@@ -3073,6 +3116,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 		}
 		#allow_branch = {
 		#}
@@ -3127,6 +3174,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 		}
 		#allow_branch = {
 		#}
@@ -3688,6 +3739,7 @@
 				leave_faction = yes
 			}
 			create_faction_from_template = faction_template_SIA_asian_democratic_compact
+			add_dynamic_modifier = { modifier = idea_SIA_asian_democratic_compact }
 		}
 	}
 
@@ -3855,7 +3907,7 @@
 						}
 						OR = {
 							tag = JAP
-							overlord = { tag = JAP }
+							is_subject_of = JAP
 						}
 					}
 				}
@@ -3929,7 +3981,6 @@
 	  		}
 
 	  		promote_character = SIA_plaek_phibunsongkhram
-	  		retire_character = SIA_nangklao_suriyawongse
 
 	  		custom_effect_tooltip = newline_tt
 	  		SIA_increase_military_approval = yes
@@ -3960,12 +4011,15 @@
 			factor = 10
 		}
 		available = {
+			is_faction_leader = yes
 		}
 		#allow_branch = {
 		#}
 		search_filters = { FOCUS_FILTER_POLITICAL }
 
 		completion_reward = {
+
+			custom_effect_tooltip = SIA_asian_democratic_compact_modify
 			custom_effect_tooltip = SIA_southeast_asia_joint_command_tt
 			SIA_update_adc = yes
 		}
@@ -3984,12 +4038,14 @@
 			factor = 10
 		}
 		available = {
+			is_faction_leader = yes
 		}
 		#allow_branch = {
 		#}
 		search_filters = { FOCUS_FILTER_RESEARCH }
 
 		completion_reward = {
+			custom_effect_tooltip = SIA_asian_democratic_compact_modify
 			custom_effect_tooltip = SIA_pan_asian_weapon_standardization_tt
 			SIA_update_adc = yes
 		}
@@ -4008,12 +4064,14 @@
 			factor = 10
 		}
 		available = {
+			is_faction_leader = yes
 		}
 		#allow_branch = {
 		#}
 		search_filters = { FOCUS_FILTER_WAR_SUPPORT }
 
 		completion_reward = {
+			custom_effect_tooltip = SIA_asian_democratic_compact_modify
 			custom_effect_tooltip = SIA_united_against_aggression_tt
 			SIA_update_adc = yes
 		}
@@ -4032,12 +4090,14 @@
 			factor = 10
 		}
 		available = {
+			is_faction_leader = yes
 		}
 		#allow_branch = {
 		#}
 		search_filters = { FOCUS_FILTER_WAR_SUPPORT }
 
 		completion_reward = {
+			custom_effect_tooltip = SIA_asian_democratic_compact_modify
 			custom_effect_tooltip = SIA_the_hammers_that_strike_tt
 			SIA_update_adc = yes
 		}
@@ -4056,6 +4116,7 @@
 			factor = 10
 		}
 		available = {
+			is_faction_leader = yes
 		}
 		#allow_branch = {
 		#}
@@ -4253,10 +4314,10 @@
 					}
 				}
 				prioritize = { 1134 } #optional: to pick those states first if they fulfill the limit
-				add_extra_state_shared_building_slots = 2
+				add_extra_state_shared_building_slots = 3
 				add_building_construction = {
 					type = arms_factory
-					level = 2
+					level = 3
 					instant_build = yes
 				}
 			}
@@ -4929,12 +4990,15 @@
 		y = 0
 		relative_position_id = SIA_retake_lost_british_states	
 		prerequisite = { focus = SIA_pan_thaiism }
-		mutually_exclusive = { focus = SIA_demand_the_return_of_lost_territory }
 		cost = 5
 		ai_will_do = {
 			factor = 15
 		}
 		available = {
+			any_of_scopes = {
+				array = ROOT.indochina_states
+				NOT = { is_controlled_by = ROOT }
+			}
 		}
 		#allow_branch = {
 		#}
@@ -4965,8 +5029,8 @@
 		y = 0
 		relative_position_id = SIA_recover_indochina	
 		prerequisite = { focus = SIA_pan_thaiism }
-		mutually_exclusive = { focus = SIA_recover_indochina }
-		cost = 5
+
+		cost = 10
 		ai_will_do = {
 			factor = 15
 		}
@@ -4999,6 +5063,7 @@
 					
 					every_state = {
 						limit = {
+							controller = { NOT = { original_tag = SIA } }
 							NOT = { is_owned_by = ROOT } # skip states we already own
 							OR = {
 								state = 926
@@ -5014,6 +5079,7 @@
 						if = {
 							limit = {
 								NOT = { is_in_array = { array = ROOT.SIA_demand_the_return_of_lost_territory_countries value = owner } }
+								
 							}
 							add_to_array = { array = ROOT.SIA_demand_the_return_of_lost_territory_countries value = owner } 
 						}
@@ -5154,7 +5220,6 @@
 
 		completion_reward = {
 			add_timed_idea = { idea = idea_SIA_royal_palace_bureau_directive_no_1523 days = 365 }
-			
 
 			if = {
 				limit = { has_dlc = "Arms Against Tyranny" }
@@ -5164,6 +5229,92 @@
 				}
 			}
 
+			custom_effect_tooltip = newline_tt
+			unlock_decision_tooltip = {
+				decision = SIA_cultivate_civilian_wing
+				show_effect_tooltip = yes # default is no
+				show_modifiers = yes # default is no
+			}
+
+			unlock_decision_tooltip = {
+				decision = SIA_cultivate_military_wing
+				show_effect_tooltip = yes # default is no
+				show_modifiers = yes # default is no
+			}
+
+		}
+	}
+
+	focus = {
+		id = SIA_end_factionalism
+		icon = GFX_goal_generic_national_unity
+		x = 0
+		y = 1
+		relative_position_id = SIA_royal_palace_bureau_directive_no_1523
+		prerequisite = { focus = SIA_royal_palace_bureau_directive_no_1523 }
+		cost = 10
+		ai_will_do = {
+			factor = 10
+		}
+		available = {
+			NOT = { has_country_flag = SIA_turn_off_the_khana_ratsadon }
+			custom_trigger_tooltip = {
+				tooltip = SIA_end_factionalism_available_tt
+				has_country_flag = SIA_factionalism_overcome
+			}
+		}
+		search_filters = { FOCUS_FILTER_POLITICAL }
+
+		completion_reward = {
+			custom_effect_tooltip = SIA_end_factionalism_tt
+			custom_effect_tooltip = newline_tt
+
+			set_country_flag = SIA_turn_off_the_khana_ratsadon
+
+			# Both wings should be at full support per the mission, but guard against a late drop.
+			if = {
+				limit = { has_idea = idea_SIA_military_full_support }
+				remove_ideas = idea_SIA_military_full_support
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_military_slight_support }
+				remove_ideas = idea_SIA_military_slight_support
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_military_neutral }
+				remove_ideas = idea_SIA_military_neutral
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_military_opposition }
+				remove_ideas = idea_SIA_military_opposition
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_military_rebellious }
+				remove_ideas = idea_SIA_military_rebellious
+			}
+
+			if = {
+				limit = { has_idea = idea_SIA_civilian_full_support }
+				remove_ideas = idea_SIA_civilian_full_support
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_civilian_slight_support }
+				remove_ideas = idea_SIA_civilian_slight_support
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_civilian_neutral }
+				remove_ideas = idea_SIA_civilian_neutral
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_civilian_opposition }
+				remove_ideas = idea_SIA_civilian_opposition
+			}
+			else_if = {
+				limit = { has_idea = idea_SIA_civilian_rebellious }
+				remove_ideas = idea_SIA_civilian_rebellious
+			}
+			custom_effect_tooltip = newline_tt
+			add_ideas = idea_SIA_unified_khana_ratsadon
 		}
 	}
 
@@ -6109,7 +6260,10 @@
 			factor = 10
 		}
 		available = {
-
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			controls_province = 7408
 		}
 		#allow_branch = {
@@ -6397,7 +6551,7 @@
 		icon = GFX_focus_SWE_landsverk
 		x = 2
 		y = 0
-		relative_position_id = SIA_foreign_currency_exchange	
+		relative_position_id = SIA_foreign_currency_exchange
 		prerequisite = { focus = SIA_irrigation  }
 		prerequisite = {focus = SIA_mechanization_of_agriculture }
 		#mutually_exclusive = { focus =  }
@@ -6406,6 +6560,10 @@
 			factor = 20
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			1134 = {
 				is_controlled_by = ROOT
 			}
@@ -6635,6 +6793,15 @@
 
 			custom_effect_tooltip = newline_tt
 			custom_effect_tooltip = SIA_reduction_of_agricultural_yield_taxes_tt
+			effect_tooltip = {
+				add_tech_bonus = {
+					name = SIA_agricultural_tax_reduction
+					bonus = 0.25 
+					ahead_reduction = 2
+					uses = 1
+					category = industry 
+				}
+			}
 		}
 	}
 
@@ -7145,7 +7312,7 @@
 		icon = GFX_focus_generic_cruiser_submarines
 		x = -2
 		y = 1
-		relative_position_id = SIA_contingency_funds	
+		relative_position_id = SIA_contingency_funds
 		prerequisite = { focus = SIA_contingency_funds }
 		#mutually_exclusive = { focus =  }
 		cost = 10
@@ -7153,6 +7320,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 		}
 		#allow_branch = {
 		#}
@@ -7326,7 +7497,7 @@
 			add_to_variable = { SIA_aep_supply_consumption_factor = -0.10 tooltip = supply_consumption_factor_tt }
 			add_to_variable = { SIA_aep_production_speed_bunker_factor = 0.1 tooltip = production_speed_bunker_factor_tt }
 			add_to_variable = { SIA_aep_production_speed_coastal_bunker_factor = 0.1 tooltip = production_speed_coastal_bunker_factor_tt }
-			add_to_variable = {  SIA_aep_compliance_growth = 0.1 tooltip = compliance_growth_tt }
+			add_to_variable = {  SIA_aep_compliance_growth = 0.05 tooltip = compliance_growth_tt }
 		}
 	}
 
@@ -7354,7 +7525,8 @@
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 
 		completion_reward = {
-			add_ideas = idea_SIA_army_of_siam
+			add_dynamic_modifier = { modifier = idea_SIA_the_army_of_siam }
+
 			SIA_increase_military_approval = yes
 		}
 	}
@@ -7405,8 +7577,12 @@
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 
 		completion_reward = {
+			custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+			add_to_variable = { SIA_army_of_siam_industrial_capacity_factory = 0.05 tooltip = industrial_capacity_factory_tt }
+			add_to_variable = { SIA_army_of_siam_production_speed_industrial_complex_factor = 0.05 tooltip = production_speed_industrial_complex_factor_tt }
+			add_to_variable = { SIA_army_of_siam_production_speed_arms_factory_factor = 0.05 tooltip = production_speed_arms_factory_factor_tt }
+			
 			add_offsite_building = { type = arms_factory level = 1 }
-			add_ideas = idea_SIA_intermediate_war
 		}
 	}
 
@@ -7429,7 +7605,11 @@
 		search_filters = { FOCUS_FILTER_ARMY_XP FOCUS_FILTER_RESEARCH }
 
 		completion_reward = {
-			add_ideas = idea_SIA_long_war
+			custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+			add_to_variable = { SIA_army_of_siam_line_change_production_efficiency_factor = 0.10 tooltip = line_change_production_efficiency_factor_tt }
+			add_to_variable = { SIA_army_of_siam_production_factory_max_efficiency_factor = 0.05 tooltip = production_factory_max_efficiency_factor_tt }
+			add_to_variable = { SIA_army_of_siam_research_speed_factor = 0.06 tooltip = research_speed_factor_tt }
+			add_to_variable = { SIA_army_of_siam_land_mastery_gain_factor = 0.10 tooltip = land_mastery_gain_factor_tt }
 		}
 	}
 
@@ -7452,7 +7632,9 @@
 		search_filters = { FOCUS_FILTER_POLITICAL }
 
 		completion_reward = {
-			add_ideas = idea_SIA_specialized_warfare
+			custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+			add_to_variable = { SIA_army_of_siam_supply_consumption_factor = -0.05 tooltip = supply_consumption_factor_tt }
+			add_to_variable = { SIA_army_of_siam_no_supply_grace = 48 tooltip = SIA_no_supply_grace_tt }
 			add_potential_special_forces_tree = yes
 		}
 	}
@@ -7615,10 +7797,9 @@
 				uses = 3
 				category = air_equipment
 			}
-			swap_ideas = {
-				remove_idea = idea_SIA_army_of_siam
-				add_idea = idea_SIA_army_of_siam_2
-			}
+			custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+			add_to_variable = { SIA_army_of_siam_air_range_factor = 0.15 tooltip = air_range_factor_tt }
+			add_to_variable = { SIA_army_of_siam_air_agility_factor = 0.05 tooltip = air_agility_factor_tt }
 		}
 	}
 
@@ -7691,10 +7872,10 @@
 		search_filters = { FOCUS_FILTER_POLITICAL }
 
 		completion_reward = {
-			swap_ideas = {
-				remove_idea = idea_SIA_specialized_warfare
-				add_idea = idea_SIA_nighttime_training
-			}
+			custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+			add_to_variable = { SIA_army_of_siam_supply_consumption_factor = -0.03 tooltip = supply_consumption_factor_tt }
+			add_to_variable = { SIA_army_of_siam_no_supply_grace = 30 tooltip = SIA_no_supply_grace_tt }
+			add_to_variable = { SIA_army_of_siam_land_night_attack = 0.10 tooltip = land_night_attack_tt }
 		}
 	}
 
@@ -7717,8 +7898,10 @@
 		search_filters = { FOCUS_FILTER_INDUSTRY }
 
 		completion_reward = {
-			add_ideas = idea_SIA_steel_arteries
-
+			custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+			add_to_variable = { SIA_production_speed_supply_node_factor = 0.2 tooltip = production_speed_supply_node_factor_tt }
+			add_to_variable = { SIA_army_of_siam_production_speed_infrastructure_factor = 0.2 tooltip = production_speed_infrastructure_factor_tt }
+			add_to_variable = { SIA_army_of_siam_supply_consumption_factor = -0.05 tooltip = supply_consumption_factor_tt }
 			SIA_increase_civilian_approval = yes
 		}
 	}
@@ -8021,13 +8204,14 @@
 		search_filters = { FOCUS_FILTER_ARMY_XP FOCUS_FILTER_POLITICAL }
 
 		completion_reward = {
-			unlock_decision_tooltip = SIA_sway_generals_to_seri_thai
+			custom_effect_tooltip = SIA_sway_generals_to_seri_thai_tt
 			custom_effect_tooltip = {
 				localization_key = SIA_unlock_character_as_advisor_tt
 				CHARACTER = SIA_rambai_barni
 			}
 			add_dynamic_modifier = { modifier = idea_SIA_seri_thai_contacts }
 
+			set_Variable = { SIA_seri_thai_cw_scale = 0 }
 			SIA_increase_civilian_approval = yes
 			SIA_decrease_military_approval = yes
 			
@@ -8151,45 +8335,7 @@
 		completion_reward = {
 			custom_effect_tooltip = SIA_when_civil_war_starts
 			effect_tooltip = {
-				if = {
-					limit = {
-						has_dlc = "La Resistance"
-					}
-					create_intelligence_agency = yes
-					upgrade_intelligence_agency = upgrade_form_department
-					upgrade_intelligence_agency = upgrade_commando_training
-					upgrade_intelligence_agency = upgrade_army_department
-					USA = {
-						create_intelligence_agency = yes
-						upgrade_intelligence_agency = upgrade_form_department
-						upgrade_intelligence_agency = upgrade_commando_training
-						upgrade_intelligence_agency = upgrade_army_department
-					}
-				}
-				add_intel = {
-					target = JAP
-					civilian_intel = 2
-					army_intel = 2
-					navy_intel = 2
-					airforce_intel = 2
-				}
-				add_decryption = {
-					target = JAP
-					ratio = 0.33
-				}
-				USA = {
-					add_intel = {
-						target = JAP
-						civilian_intel = 2
-						army_intel = 2
-						navy_intel = 2
-						airforce_intel = 2
-					}
-					add_decryption = {
-						target = JAP
-						ratio = 0.33
-					}
-				}
+				SIA_thai_students_in_the_oss_effect = yes
 			}
 		}
 	}
@@ -8213,12 +8359,13 @@
 		search_filters = { FOCUS_FILTER_MANPOWER }
 
 		completion_reward = {
+			add_ideas = idea_SIA_oss_special_forces_training
 			custom_effect_tooltip = SIA_when_civil_war_starts
 			effect_tooltip = {
 				division_template = {
 					name = "Expeditionary Paratrooper Division"
 					division_names_group = ENG_PAR_01
-					is_locked = yes
+					is_locked = no
 					regiments = {
 						paratrooper = { x = 0 y = 0 }
 						paratrooper = { x = 0 y = 1 }
@@ -8227,6 +8374,10 @@
 						paratrooper = { x = 1 y = 0 }
 						paratrooper = { x = 1 y = 1 }
 						paratrooper = { x = 1 y = 2 }
+
+						paratrooper = { x = 2 y = 0 }
+						paratrooper = { x = 2 y = 1 }
+						paratrooper = { x = 2 y = 2 }
 					}
 				}
 
@@ -8274,42 +8425,60 @@
 
 		completion_reward = {
 			custom_effect_tooltip = SIA_unseat_the_government_tt
+			custom_effect_tooltip = newline_tt
 			hidden_effect = {
-				every_unit_leader = {
-					add_to_array = {
-						array = ROOT.unit_leaders_array
-						value = THIS
-					}
-				}
-				set_temp_variable = { num_unit_leaders_temp = unit_leaders_array^num }
+				# Generals swayed via the Seri Thai decisions stay with us; everyone else joins the loyalist revolt.
+				# These always side with us, regardless of the sway decisions.
+				if = { limit = { has_character = SIA_bowardej } SIA_bowardej = { set_character_flag = SIA_seri_thai_swayed } }
+				if = { limit = { has_character = SIA_rangsit_prayurasakdi } SIA_rangsit_prayurasakdi = { set_character_flag = SIA_seri_thai_swayed } }
+				if = { limit = { has_character = SIA_adul_aduldejajaras } SIA_adul_aduldejajaras = { set_character_flag = SIA_seri_thai_swayed } }
+				if = { limit = { has_character = SIA_phraya_songsuradet } SIA_phraya_songsuradet = { set_character_flag = SIA_seri_thai_swayed } }
+				if = { limit = { has_character = SIA_prince_subhasvasti } SIA_prince_subhasvasti = { set_character_flag = SIA_seri_thai_swayed } }
+				
+				add_to_variable = { SIA_seri_thai_cw_scale = party_popularity@democratic }
+
 				if = {
-					limit = {
-						has_country_flag = SIA_swayed_generals_to_seri_thai
+					limit = { check_variable = { SIA_seri_thai_cw_scale > 0.8 } }
+					set_politics = {
+						ruling_party = democratic
+						elections_allowed = yes
 					}
-					multiply_temp_variable = { num_unit_leaders_temp = 0.2 }
 				}
 				else = {
-					multiply_temp_variable = { num_unit_leaders_temp = 0.5 }
-				}
-				resize_temp_array = { unit_leaders_array = num_unit_leaders_temp }
-				for_each_scope_loop = {
-					array = ROOT.unit_leaders_array
-					set_unit_leader_flag = SIA_will_join_other_side_cw
-				}
-				start_civil_war = {
-					ruling_party = democratic
-					ideology = ROOT
-					keep_political_leader = yes
-					keep_all_characters = yes
-					keep_unit_leaders_trigger = {
-						has_unit_leader_flag = SIA_will_join_other_side_cw
+					start_civil_war = {
+						ruling_party = democratic
+						ideology = ROOT
+						size = var:SIA_seri_thai_cw_scale
+						# the current (revolting-ideology) leader heads the loyalist revolt
+						keep_political_leader = no
+						keep_unit_leaders_trigger = {
+							has_character_flag = SIA_seri_thai_swayed
+						}
+						# Phibun always sides with the loyalist revolt, never us
+						PREV = {
+							if = {
+								limit = { has_character = SIA_plaek_phibunsongkhram }
+								SIA_plaek_phibunsongkhram = { set_nationality = PREV.PREV }
+							}
+						}
 					}
 				}
 				join_allies_effect = yes
 			}
 
 			SIA_increase_civilian_approval = yes
-			SIA_decrease_military_approval = yes
+			# The printing-money arrangement with Japan ends; we seize their funds for our own use.
+			if = {
+				limit = { has_dynamic_modifier = { modifier = idea_SIA_printing_money } }
+				remove_dynamic_modifier = { modifier = idea_SIA_printing_money }
+			}
+			add_timed_idea = {
+				idea = idea_SIA_seized_japanese_funds
+				days = 365
+			}
+			# The victors must now choose who heads the new government.
+			custom_effect_tooltip = SIA_choose_new_leader_tt
+			country_event = { id = siam_dem.5 hours = 2 }
 		}
 	}
 
@@ -8336,11 +8505,13 @@
 				bonus = 0.25
 				uses = 1
 				category = artillery
+				name = SIA_the_phayap_army
 			}
 			add_tech_bonus = {
 				bonus = 0.50
 				uses = 1
 				category = support_tech
+				name = SIA_the_phayap_army
 			}
 			random_owned_controlled_state = {
 				create_unit = { 
@@ -8390,6 +8561,7 @@
 				bonus = 0.25
 				uses = 2
 				category = excavation_tech
+				name = SIA_securing_the_rubber_islands
 			}
 			add_timed_idea = {
 				idea = idea_SIA_secure_rubber_islands
@@ -8627,7 +8799,7 @@
 		relative_position_id = SIA_japanese_fighters	
 		prerequisite = { focus = SIA_standing_our_ground }
 		#mutually_exclusive = { focus = }
-		cost = 5
+		cost = 1
 		ai_will_do = {
 			factor = 10
 		}
@@ -8815,6 +8987,10 @@
 		}
 		available = {
 			has_war_support > 0.03
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 		}
         offset = {
             x = -6
@@ -8846,6 +9022,7 @@
 			add_dynamic_modifier = {
 				modifier = idea_SIA_thai_royal_navy
 			}
+			add_to_variable = { SIA_royal_navy_experience_gain_navy = 0.02 tooltip = experience_gain_navy_tt }
 
 			random_core_state = {
 				limit = {
@@ -8864,8 +9041,6 @@
 					instant_build = yes
 				}
 			}
-
-			add_to_variable = { SIA_royal_navy_experience_gain_navy = 0.02 tooltip = experience_gain_navy_tt }
 		}
 	}
 
@@ -8999,6 +9174,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			1134 = { # R56
 				is_owned_by = ROOT
 				is_fully_controlled_by = ROOT
@@ -9046,6 +9225,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			1134 = {
 				is_owned_by = ROOT
 				is_fully_controlled_by = ROOT
@@ -9093,6 +9276,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			1134 = {
 				is_owned_by = ROOT
 				is_fully_controlled_by = ROOT
@@ -9140,6 +9327,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			1134 = {
 				is_owned_by = ROOT
 				is_fully_controlled_by = ROOT
@@ -9194,6 +9385,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			1134 = {
 				is_owned_by = ROOT
 				is_fully_controlled_by = ROOT
@@ -9248,6 +9443,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 		}
 		#allow_branch = {
 		#}
@@ -9313,6 +9512,10 @@
 			factor = 10
 		}
 		available = {
+			any_controlled_state = {
+				is_coastal = yes
+				is_owned_by = ROOT
+			}
 			1134 = {
 				is_owned_by = ROOT
 				is_fully_controlled_by = ROOT
