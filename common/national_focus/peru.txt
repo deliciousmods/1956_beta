@@ -13466,7 +13466,7 @@ focus = {
 	focus = {
 		id = PRU_industrial_modernization
 		icon = GFX_goal_generic_production
-		x = 0
+		x = -8
 		y = 0
 		cost =5
 
@@ -13513,8 +13513,9 @@ focus = {
 	focus = {
 		id = PRU_diversify_steel_production
 		icon = GFX_goal_ROM_steel_mill_investment
-		x = 6
+		x = 13
 		y = 0
+		relative_position_id = PRU_industrial_modernization
 		cost = 5
 
 		ai_will_do = {
@@ -13531,6 +13532,10 @@ focus = {
 			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
 			add_to_variable = {
+				r56_PRU_economy_dm_industrial_capacity_factory = 0.05
+				tooltip = industrial_capacity_factory_tt
+			}
+			add_to_variable = {
 				r56_PRU_economy_dm_min_export = -0.05
 				tooltip = min_export_tt
 			}
@@ -13541,6 +13546,45 @@ focus = {
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY }
 	}
+	focus = {
+		id = PRU_maranon_basin_model
+		icon = GFX_focus_CHL_expand_the_forestry
+		relative_position_id = PRU_industrial_modernization
+		x = 2
+		y = 0
+		cost = 5
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			has_full_control_of_state = 491
+		}
+
+		completion_reward = {
+			491 = {
+				add_extra_state_shared_building_slots = 1
+				add_dynamic_modifier = { modifier = r56_river_port_system_state_modifier } 
+			}
+			
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_timed_idea = {
+				idea = r56_idea_PRU_new_extraction_model_idea
+				days = 375
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_consumer_goods_factor = -0.05
+				tooltip = consumer_goods_factor_tt
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	
 	focus = {
 		id = PRU_strengthen_locomotive_industry
 		icon = GFX_goal_generic_train
@@ -13569,6 +13613,7 @@ focus = {
 						include_locked = yes
 					}
 				}
+				prioritize = { 303 }
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = arms_factory
@@ -13611,6 +13656,10 @@ focus = {
 				r56_PRU_economy_dm_min_export = 0.05
 				tooltip = min_export_tt
 			}
+			add_to_variable = {
+				r56_PRU_economy_dm_production_speed_rail_way_factor = 0.1
+				tooltip = production_speed_rail_way_factor_tt
+			}
 
 			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = available_industrial_concern
@@ -13618,6 +13667,7 @@ focus = {
 		}
 		search_filters = { FOCUS_FILTER_RESEARCH FOCUS_FILTER_INDUSTRY}
 	}
+
 	focus = {
 		id = PRU_rely_on_international_trade
 		icon = GFX_goal_generic_business_bills
@@ -13626,7 +13676,7 @@ focus = {
 		y = 1
 		cost = 5
 		prerequisite = { focus = PRU_industrial_modernization }
-		prerequisite = { focus = PRU_diversify_steel_production }
+		prerequisite = { focus = PRU_maranon_basin_model }
 		mutually_exclusive = { focus = PRU_prioritize_self_sufficiency }
 
 		ai_will_do = {
@@ -13634,13 +13684,47 @@ focus = {
 		}
 
 		completion_reward = {
-			add_stability = 0.02
-			add_popularity = {
-				ideology = ROOT
-				popularity = -0.05
+			if = {
+				limit = {
+					has_idea = export_focus
+				}
+				add_political_power = 15
+				add_popularity = {
+					ideology = ROOT
+					popularity = -0.05
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				swap_ideas = {
+					remove_idea = export_focus
+					add_idea = free_trade
+				}
 			}
-
-			custom_effect_tooltip = generic_skip_one_line_tt
+			else_if = {
+				limit = { 
+					OR = {
+						has_idea = limited_exports
+						has_idea = closed_economy
+					}
+				}
+				add_political_power = 25
+				add_popularity = {
+					ideology = ROOT
+					popularity = -0.1
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				add_ideas = export_focus
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+			else = {
+				add_political_power = 35
+				add_stability = 0.02
+				add_popularity = {
+					ideology = ROOT
+					popularity = 0.05
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+			}
+			
 			every_other_country = {
 				limit = {
 					OR = {
@@ -13680,7 +13764,7 @@ focus = {
 			}
 		}
 	}
-
+	
 	focus = {
 		id = PRU_invite_foreign_experts
 		icon = GFX_goal_research_silver_cooperation
@@ -13733,6 +13817,527 @@ focus = {
 
 		search_filters = { FOCUS_FILTER_RESEARCH }
 	}
+	
+	focus = {
+		id = PRU_enlarge_paita_seaport
+		icon = GFX_goal_ROM_naval_dockyards
+		relative_position_id = PRU_rely_on_international_trade
+		x = 1
+		y = 1
+		cost = 8
+		prerequisite = { focus = PRU_rely_on_international_trade }
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			controls_province = 2156
+		}
+
+		completion_reward = {
+			303 = {
+				add_building_construction = {
+					type = naval_base
+					level = 1
+					instant_build = yes
+					province = {
+						id = 2156
+					}
+				}
+				if = {
+					limit = {
+						is_controlled_by = ROOT
+						free_building_slots = {
+							building = dockyard
+							size > 0
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 1
+					add_building_construction = {
+						type = dockyard
+						level = 1
+						instant_build = yes
+					}	
+				}
+				else = {
+					ROOT = {
+						add_offsite_building = {
+							type = dockyard
+							level = 1
+						}
+					}
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_industrial_capacity_dockyard = 0.1
+				tooltip = industrial_capacity_dockyard_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_resource_trade_cost_bonus_per_factory = 1
+				tooltip = resource_trade_cost_bonus_per_factory_tt
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+	
+	focus = {
+		id = PRU_economic_centralization
+		icon = GFX_goal_generic_urban
+		relative_position_id = PRU_enlarge_paita_seaport
+		x = 1
+		y = 1
+		cost = 10
+		prerequisite = { focus = PRU_enlarge_paita_seaport }
+		prerequisite = { focus = PRU_finish_callahuanca_hydroelectric_plant }
+
+		mutually_exclusive = { focus = PRU_end_the_lima_arequipa_rivalry }
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			has_full_control_of_state = 303
+		}
+
+		completion_reward = {
+			303 = {
+				add_victory_points = {
+					province = 2156
+					value = 2
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				add_victory_points = {
+					province = 12997
+					value = 5
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				if = {
+					limit = {
+						free_building_slots = {
+							building = arms_factory
+							size > 1
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 2
+					add_building_construction = {
+						type = arms_factory
+						level = 2
+						instant_build = yes
+					}	
+				}
+				else = {
+					ROOT = {		#late game reward if you somehow got slots full
+						add_offsite_building = {
+							type = arms_factory
+							level = 2
+						}
+					}
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_industrial_capacity_dockyard = 0.05
+				tooltip = industrial_capacity_dockyard_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_production_factory_efficiency_gain_factor = 0.08
+				tooltip = production_factory_efficiency_gain_factor_tt
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+	
+	focus = {
+		id = PRU_end_the_lima_arequipa_rivalry
+		icon = GFX_goal_generic_heavy_industry
+		relative_position_id = PRU_enlarge_paita_seaport
+		x = 3
+		y = 1
+		cost = 10
+		prerequisite = { focus = PRU_finish_callahuanca_hydroelectric_plant focus = PRU_bolster_the_timber_industry }
+
+		mutually_exclusive = { focus = PRU_economic_centralization }
+
+		ai_will_do = {
+			factor = 15
+		}
+
+		available = {
+			has_full_control_of_state = 492
+		}
+
+		completion_reward = {
+			492 = {
+				if = {
+					limit = {
+						free_building_slots = {
+							building = industrial_complex
+							size > 2
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 3
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+					add_building_construction = {
+						type = arms_factory
+						level = 1
+						instant_build = yes
+					}
+				}
+				else = {
+					ROOT = {		#late game reward if you somehow got slots full
+						add_offsite_building = {
+							type = industrial_complex
+							level = 1
+						}
+						add_offsite_building = {
+							type = arms_factory
+							level = 1
+						}
+					}
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_production_speed_industrial_complex_factor = 0.05
+				tooltip = production_speed_industrial_complex_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_production_speed_arms_factory_factor = 0.05
+				tooltip = production_speed_arms_factory_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_production_factory_efficiency_gain_factor = 0.03
+				tooltip = production_factory_efficiency_gain_factor_tt
+			}
+			
+			custom_effect_tooltip = generic_skip_one_line_tt
+			492 = {
+				if = {
+					limit = {
+						OR = {
+							has_dynamic_modifier = r56_moderate_economic_inequality_modifier
+							has_dynamic_modifier = r56_severe_economic_inequality_modifier
+							has_dynamic_modifier = r56_critical_economic_inequality_modifier
+						}
+					}
+					r56_scripted_effect_PRU_state_development_level_up = yes
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			303 = {
+				if = {
+					limit = {
+						has_dynamic_modifier = r56_economic_favoritism_modifier
+					}
+					remove_dynamic_modifier = { modifier = r56_economic_favoritism_modifier }
+				}
+
+			}
+		}
+
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	focus = {
+		id = PRU_finish_callahuanca_hydroelectric_plant
+		icon = GFX_focus_generic_hydroelectric_energy
+		relative_position_id = PRU_rely_on_international_trade
+		x = 3
+		y = 1
+		cost = 10
+		prerequisite = { focus = PRU_rely_on_international_trade focus = PRU_prioritize_self_sufficiency }
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			has_full_control_of_state = 303
+		}
+
+		select_effect = {
+			add_to_variable = {
+				r56_PRU_economy_dm_consumer_goods_factor = 0.15
+				tooltip = consumer_goods_factor_tt
+			}
+		}
+
+		completion_reward = {
+			custom_effect_tooltip = SOV_focus_select_effect_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_consumer_goods_factor = 0.15
+				tooltip = consumer_goods_factor_tt
+			}
+
+			custom_effect_tooltip = SOV_focus_complete_effect_tt
+			hidden_effect = {
+				set_province_name = {
+					id = 2162
+					name = PRU_huinco_dam
+				}
+			}
+			303 = {
+				if = {
+					limit = {
+						free_building_slots = {
+							building = industrial_complex
+							size > 0
+							include_locked = yes
+						}
+					}
+					add_extra_state_shared_building_slots = 2
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}	
+				}
+				else = {
+					ROOT = {		#late game reward if you somehow got slots full
+						add_offsite_building = {
+							type = industrial_complex
+							level = 2
+						}
+					}
+				}
+				add_building_construction = {
+					type = dam
+					level = 1
+					instant_build = yes
+					province = { id = 11885 }
+				}
+				custom_effect_tooltip = {
+					localization_key = building_state_modifier|dam
+					INDENT = "   "
+				}
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_production_speed_buildings_factor = 0.05
+				tooltip = production_speed_buildings_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_industrial_capacity_factory = 0.05
+				tooltip = industrial_capacity_factory_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_consumer_goods_factor = -0.2
+				tooltip = consumer_goods_factor_tt
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	focus = {
+		id = PRU_bolster_the_timber_industry
+		icon = GFX_goal_timber_industry
+		relative_position_id = PRU_rely_on_international_trade
+		x = 5
+		y = 1
+		cost = 8
+		prerequisite = { focus = PRU_rely_on_international_trade focus = PRU_prioritize_self_sufficiency }
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			has_tech = construction2
+			num_of_controlled_states > 3
+		}
+
+		completion_reward = {
+			random_owned_controlled_state = {
+				limit = {
+					is_core_of = ROOT
+					is_fully_controlled_by = ROOT
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = yes
+					}
+				}
+				prioritize = { 491 }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}	
+			}
+			random_owned_controlled_state = {
+				limit = {
+					is_core_of = ROOT
+					is_fully_controlled_by = ROOT
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = yes
+					}
+				}
+				prioritize = { 494 }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}	
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_production_speed_buildings_factor = 0.05
+				tooltip = production_speed_buildings_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_global_building_slots_factor = 0.05
+				tooltip = global_building_slots_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_min_export = 0.05
+				tooltip = min_export_tt
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			if = {
+				limit = {
+					any_controlled_state = {
+						OR = {
+							state = 490
+							state = 491
+							state = 494
+						}
+						OR = {
+							has_dynamic_modifier = r56_moderate_economic_inequality_modifier
+							has_dynamic_modifier = r56_severe_economic_inequality_modifier
+							has_dynamic_modifier = r56_critical_economic_inequality_modifier
+						}
+					}
+				}
+				every_controlled_state = {
+					limit = {
+						OR = {
+							state = 490
+							state = 491
+							state = 494
+						}
+					}
+					random_select_amount = 1
+					r56_scripted_effect_PRU_state_development_level_up = yes
+				}
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	focus = {
+		id = PRU_settle_amazonian_frontier
+		icon = GFX_goal_generic_relocate_settlers
+		relative_position_id = PRU_bolster_the_timber_industry
+		x = 0
+		y = 2
+		cost = 5
+		prerequisite = { focus = PRU_bolster_the_timber_industry }
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		available = {
+			OR = {
+				controls_state = 490
+				controls_state = 491
+				controls_state = 494
+			}
+		}
+
+		completion_reward = {
+			every_controlled_state = {
+				limit = {
+					OR = {
+						state = 490
+						state = 491
+						state = 494
+					}
+				}
+				add_manpower = 20000
+				add_extra_state_shared_building_slots = 1
+				add_dynamic_modifier = { modifier = r56_local_development }
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_production_speed_buildings_factor = 0.05
+				tooltip = production_speed_buildings_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_global_building_slots_factor = 0.05
+				tooltip = global_building_slots_factor_tt
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
+	focus = {
+		id = PRU_finalize_transition_from_libra_to_sol_de_oro
+		icon = GFX_goal_generic_financial_markets
+		relative_position_id = PRU_rely_on_international_trade
+		x = 7
+		y = 1
+		cost = 5
+		prerequisite = { focus = PRU_rely_on_international_trade focus = PRU_prioritize_self_sufficiency }
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		completion_reward = {
+			add_offsite_building = {
+				type = industrial_complex
+				level = 1
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
+			add_to_variable = {
+				r56_PRU_economy_dm_production_speed_buildings_factor = 0.05
+				tooltip = production_speed_buildings_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_consumer_goods_factor = -0.05
+				tooltip = consumer_goods_factor_tt
+			}
+			add_to_variable = {
+				r56_PRU_economy_dm_resource_trade_cost_bonus_per_factory = 1
+				tooltip = resource_trade_cost_bonus_per_factory_tt
+			}
+		}
+		search_filters = { FOCUS_FILTER_INDUSTRY }
+	}
+
 	focus = {
 		id = PRU_prioritize_self_sufficiency
 		icon = GFX_goal_generic_state_economy
@@ -13748,7 +14353,7 @@ focus = {
 		}
 
 		available = {
-			democratic < 0.25
+			democratic < 0.35
 		}
 
 		completion_reward = {
@@ -13792,48 +14397,10 @@ focus = {
 	}
 
 	focus = {
-		id = PRU_finalize_transition_from_libra_to_sol_de_oro
-		icon = GFX_goal_generic_financial_markets
-		relative_position_id = PRU_prioritize_self_sufficiency
-		x = -4
-		y = 1
-		cost = 5
-		prerequisite = { focus = PRU_rely_on_international_trade focus = PRU_prioritize_self_sufficiency }
-
-		ai_will_do = {
-			factor = 5
-		}
-
-		completion_reward = {
-			add_offsite_building = {
-				type = industrial_complex
-				level = 1
-			}
-
-			custom_effect_tooltip = generic_skip_one_line_tt
-			custom_effect_tooltip = r56_PRU_peruvian_economy_dm_tt
-			add_to_variable = {
-				r56_PRU_economy_dm_production_speed_buildings_factor = 0.05
-				tooltip = production_speed_buildings_factor_tt
-			}
-			add_to_variable = {
-				r56_PRU_economy_dm_consumer_goods_factor = -0.05
-				tooltip = consumer_goods_factor_tt
-			}
-			add_to_variable = {
-				r56_PRU_economy_dm_resource_trade_cost_bonus_per_factory = 1
-				tooltip = resource_trade_cost_bonus_per_factory_tt
-			}
-		}
-
-		search_filters = { FOCUS_FILTER_INDUSTRY }
-	}
-
-	focus = {
 		id = PRU_support_private_resource_ventures
 		icon = GFX_goal_excavation
 		relative_position_id = PRU_prioritize_self_sufficiency
-		x = -1
+		x = -3
 		y = 1
 		cost = 5
 		prerequisite = { focus = PRU_rely_on_international_trade focus = PRU_prioritize_self_sufficiency }
@@ -14015,7 +14582,7 @@ focus = {
 				}
 				has_opinion = {
 					target = ROOT
-					value < 0
+					value < -19
 				}
 			}
 		}
@@ -14031,6 +14598,7 @@ focus = {
 						include_locked = yes
 					}
 				}
+				prioritize = { 303 }
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = industrial_complex
@@ -14057,6 +14625,7 @@ focus = {
 						include_locked = yes
 					}
 				}
+				prioritize = { 491 }
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = industrial_complex
@@ -14074,6 +14643,25 @@ focus = {
 						include_locked = yes
 					}
 				}
+				prioritize = { 494 }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}	
+			}
+			random_owned_controlled_state = {
+				limit = {
+					is_core_of = ROOT
+					is_fully_controlled_by = ROOT
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = yes
+					}
+				}
+				prioritize = { 303 }
 				add_extra_state_shared_building_slots = 1
 				add_building_construction = {
 					type = industrial_complex
@@ -14180,7 +14768,7 @@ focus = {
 
 		completion_reward = {
 			add_timed_idea = {
-				idea = PRU_funding_the_urban_normal_school_development
+				idea = r56_idea_PRU_funding_the_urban_normal_school_development
 				days = 180
 			}
             custom_effect_tooltip = GEN_when_national_idea_expires_tt
@@ -14197,70 +14785,5 @@ focus = {
 		}
 
 		search_filters = { FOCUS_FILTER_RESEARCH }
-	}
-	focus = {
-		id = PRU_oil_industry_developments
-		icon = GFX_goal_refining
-		x = -4
-		y = 2
-		cost = 10
-		relative_position_id = PRU_rely_on_international_trade
-		ai_will_do = {
-			factor = 5
-		}
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 303 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = fuel_silo
-					level = 1
-					instant_build = yes
-				}
-			}
-			add_tech_bonus = {
-				name = industrial_bonus
-				bonus = 1
-				uses = 2
-				category = refining_tech
-			}
-			add_tech_bonus = {
-				name = excavation_tech_bonus_name
-				bonus = 1
-				uses = 1
-				category = excavation_tech
-			}
-		}
-		search_filters = { FOCUS_FILTER_OIL }
-	}
-	focus = {
-		id = PRU_the_pan-american_highway
-		icon = GFX_focus_CHL_work_on_the_panamerican_highway
-		x = -2
-		y = 5
-		cost = 10
-		relative_position_id = PRU_rely_on_international_trade
-		ai_will_do = {
-			factor = 5
-		}
-		completion_reward = {
-			random_owned_controlled_state = {
-				prioritize = { 492 }
-				add_extra_state_shared_building_slots = 1
-				add_building_construction = {
-					type = infrastructure
-					level = 1
-					instant_build = yes
-				}
-			}
-			random_owned_controlled_state = {
-				prioritize = { 494  }
-				add_building_construction = {
-					type = infrastructure
-					level = 2
-					instant_build = yes
-				}
-			}
-		}
 	}
 }
