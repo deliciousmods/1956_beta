@@ -4629,21 +4629,18 @@ foreign_support = {
 				}
 			}
 
-			any_state = {
-				OR = {
-					state = 288
-					state = 640
-					state = 325
-					state = 747
-				}
+			any_state_of = {
+				target = { 288 640 325 747 }
 				CONTROLLER = {
 					OR = {
 						has_completed_focus = uk_burma_focus
 						has_completed_focus = KMT_expand_military_aid
 						AND = {
 							is_in_faction_with = ROOT
-							has_completed_focus = uk_burma_focus
-							has_completed_focus = KMT_expand_military_aid
+							OR = {
+								has_completed_focus = uk_burma_focus
+								has_completed_focus = KMT_expand_military_aid
+							}
 						}
 						if = {
 							limit = {
@@ -4653,6 +4650,11 @@ foreign_support = {
 								OR = {
 									has_completed_focus = uk_burma_focus
 									has_completed_focus = KMT_expand_military_aid
+								}
+							}
+							else = {
+								hidden_trigger = {
+									always = no
 								}
 							}
 						}
@@ -4668,16 +4670,12 @@ foreign_support = {
 				has_focus_tree = british_focus
 			}
 			OR = {
-				AND = {
-					OR = {
-						controls_state = 325
-						325 = {
-							CONTROLLER = {
-								OR = {
-									is_subject_of = ROOT
-									is_in_faction_with = ROOT
-								}
-							}
+				controls_state = 325
+				325 = {
+					CONTROLLER = {
+						OR = {
+							is_subject_of = ROOT
+							is_in_faction_with = ROOT
 						}
 					}
 				}
@@ -7695,6 +7693,34 @@ CHI_internal_politics_cat = {
 		}
 	}
 
+	CHI_invest_in_officer_training = {
+		icon = GFX_decision_generic_military
+		priority = 20
+		cost = 100
+		allowed = {
+			original_tag = CHI
+		}
+		visible = {
+			has_completed_focus = CHI_crackdown_on_corruption_in_recruitment
+		}
+		available = {
+			num_of_civilian_factories_available_for_projects > 4
+			has_completed_focus = CHI_focus_on_meritocratic_principles
+		}
+
+		days_remove = 175
+		modifier = {
+			civilian_factory_use = 5
+		}
+		remove_effect = {
+			add_to_variable = { 
+				CHI_corruption_in_the_armed_forces_conscription_factor_improvement = 0.01
+				tooltip = CHI_invest_in_officer_training_tt
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = CHI_corruption_in_the_armed_forces_conscription_factor_improvement_tt
+		}
+	}
 }
 
 CHI_integrate_the_warlords_sea_cat = {
@@ -8718,10 +8744,10 @@ CHI_integrate_the_warlords_sea_cat = {
 				has_faction_template = faction_template_wang_front
 				has_faction_template = faction_template_chinese_united_front
 			}
-			NOT = { has_completed_focus = CHI_impair_the_control_yuan }
 		}
 
 		visible = {
+			NOT = { has_completed_focus = CHI_impair_the_control_yuan }
 		} 
 
 		ai_hint_pp_cost = 50
@@ -9058,7 +9084,7 @@ CHI_integrate_the_warlords_sea_cat = {
 			FROM = {
 				add_autonomy_ratio = { 
 					value = -0.1
-					localization = CHI_warlord_autonomy_allocate_lend_lease_decision
+					localization = CHI_warlord_autonomy_allocate_lend_lease_decision_tt
 				}
 
 				add_equipment_to_stockpile = {
@@ -9554,7 +9580,7 @@ CHI_avoid_another_crisis_cat = {
 	}
 
 	CHI_concessions_give_resource_rights = {
-
+		icon = GFX_decision_eng_trade_unions_demand
 		visible = {
 			NOT = {
 				has_war_with = JAP
@@ -10398,6 +10424,9 @@ CHI_the_political_tutelage_cat = {
 	        		has_state_category = metropolis
 	        		has_state_category = large_city
 	        	}
+			NOT = {
+	        		has_state_flag = CHI_urban_political_tutelage_has_been_epedited_here_state_flag 
+	        	}
 	        }
 	    }
 	    on_map_mode = map_and_decisions_view 
@@ -10505,6 +10534,9 @@ CHI_the_political_tutelage_cat = {
 	        		has_state_category = rural
 	        		has_state_category = town
 	        		has_state_category = enclave
+	        	}
+				NOT = {
+	        		has_state_flag = CHI_rural_political_tutelage_has_been_epedited_here_state_flag 
 	        	}
 	        }
 	    }
@@ -10667,10 +10699,9 @@ CHI_republican_interests_cat = {
 	        FROM = {
 	        	NOT = {
 	        		has_war_with = ROOT
+	        		has_government = democratic
 	        	}
-	        	NOT = {
-	        		has_government = communism
-	        	}
+	        	is_literally_china = no # They are targets of a different democratization decision
 	        }
 	    }
 
@@ -10717,6 +10748,18 @@ CHI_republican_interests_cat = {
 	CHI_oust_the_empires_decision = {
 		icon = GFX_decision_generic_political_rally
 		target_array = CHI.asian_democracies_countries_to_liberate
+		target_trigger = {
+			FROM = {
+				capital_scope = {
+					controller = {
+						NOT = {
+							original_tag = ROOT
+							is_ally_with = ROOT
+						}
+					}
+				}
+			}
+		}
 		target_root_trigger = { original_tag = CHI }
 		fire_only_once = no
 		target_non_existing = yes
@@ -11174,6 +11217,7 @@ CHI_x_y_force_cat = {
 			command_power > 75
 		}
 		custom_cost_text = decision_cost_CP_75
+		fire_only_once = yes
 		ai_will_do = {
 			base = 10
 			modifier = {
@@ -11205,9 +11249,7 @@ CHI_x_y_force_cat = {
 
 		complete_effect = {
 			custom_effect_tooltip = CHI_form_x_force_tt
-			hidden_effect = {
-				add_command_power = -75
-			}
+			custom_effect_tooltip = generic_skip_one_line_tt
 
 			if = {
 				limit = {
@@ -11606,7 +11648,7 @@ RNG_state_shintoism_decisions = {
 
 			RNG_add_or_modify_state_shintoism = yes
 
-			add_to_variable = { ROOT.RNG_state_shinotism_stability_factor = 0.075 tooltip = stability_factor_tt }
+			add_to_variable = { ROOT.RNG_state_shintoism_stability_factor = 0.075 tooltip = stability_factor_tt }
 
 		}
 
