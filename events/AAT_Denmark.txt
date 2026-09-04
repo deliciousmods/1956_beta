@@ -65,31 +65,33 @@ country_event = { #Motion of No Confidence
 		trigger = {
 			OR = {
 				has_stability < 0.5
-				AND = {
-					has_government = democratic
-					OR = {
-						democratic < 0.5
-						communism > 0.19
-						neutrality > 0.19
-						fascism > 0.19
+				OR = {
+					AND = {
+						has_government = democratic
+						OR = {
+							democratic < 0.5
+							communism > 0.19
+							neutrality > 0.19
+							fascism > 0.19
+						}
 					}
-				}
-				AND = {
-					has_government = communism
-					OR = {
-						democratic > 0.19 
-						communism < 0.5 
-						neutrality > 0.19 
-						fascism > 0.19
+					AND = {
+						has_government = communism
+						OR = {
+							democratic > 0.19 
+							communism < 0.5 
+							neutrality > 0.19 
+							fascism > 0.19
+						}
 					}
-				}
-				AND = {
-					has_government = neutrality
-					OR = {
-						democratic > 0.19 
-						communism  > 0.19 
-						neutrality < 0.5 
-						fascism > 0.19 
+					AND = {
+						has_government = neutrality
+						OR = {
+							democratic > 0.19 
+							communism  > 0.19 
+							neutrality < 0.5 
+							fascism > 0.19 
+						}
 					}
 				}
 			}
@@ -138,7 +140,7 @@ country_event = { #Vote of No Confidence
 			DEN_thorvald_stauning = { is_country_leader = no }
 			DEN_vilhelm_buhl = { is_country_leader = no }
 			check_variable = { DEN_democratic_popularity > 29 }
-			NOT = { has_country_flag = ROOT_banned_democratic_party }
+			NOT = { has_country_flag = banned_democratic_flag }
 		}
 
 		custom_effect_tooltip = DEN_prime_minister_resigns_tt
@@ -170,7 +172,7 @@ country_event = { #Vote of No Confidence
 		trigger = {
 			DEN_knud_kristensen = { is_country_leader = no }
 			check_variable = { DEN_democratic_popularity > 29 }
-			NOT = { has_country_flag = ROOT_banned_democratic_party }
+			NOT = { has_country_flag = banned_democratic_flag }
 		}
 
 		custom_effect_tooltip = DEN_prime_minister_resigns_tt
@@ -195,7 +197,7 @@ country_event = { #Vote of No Confidence
 	}
 
 	option = { #DKP
-		name = denmark_political_events.2.C
+		name = denmark_political_events.2.c
 		ai_chance = {
 			base = 1
 			modifier = {
@@ -277,7 +279,7 @@ country_event = { #Vote of No Confidence
 		trigger = {
 			DEN_christmas_moller = { is_country_leader = no }
 			check_variable = { DEN_democratic_popularity > 29 }
-			NOT = { has_country_flag = ROOT_banned_democratic_party }
+			NOT = { has_country_flag = banned_democratic_flag }
 		}
 
 		custom_effect_tooltip = DEN_prime_minister_resigns_tt
@@ -302,7 +304,7 @@ country_event = { #Vote of No Confidence
 	}
 
 	option = { #Bondepartiet
-		name = denmark_political_events.2.E
+		name = denmark_political_events.2.e
 		ai_chance = {
 			base = 1
 			modifier = {
@@ -369,6 +371,17 @@ country_event = { #Election Campaigns
 		tag = DEN
 		has_global_flag = DEN_use_DLC_tree
 		has_elections = yes
+		NOT = { has_country_flag = DEN_at_war_flag }
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				has_war = yes
+				NOT = { has_country_flag = DEN_at_war_flag }
+			}
+			set_country_flag = DEN_at_war_flag
+		}
 	}
 
 	option = { #Support the Democratic Party
@@ -401,7 +414,7 @@ country_event = { #Election Campaigns
 		}
 		trigger = {
 			democratic > 0.14
-			NOT = { has_country_flag = ROOT_banned_democratic_party }
+			NOT = { has_country_flag = banned_democratic_flag }
 		}
 
 		custom_effect_tooltip = DEN_election_consequences_democratic_tt
@@ -1071,11 +1084,8 @@ country_event = { #Political Opposition
 		days = 180
 	}
 
-	option = { #fascist lies!
+	option = { #Damn Royalists!
 		name = denmark_political_events.11.a
-		trigger = {
-			has_government = communism
-		}
 		add_timed_idea = {
 			idea = DEN_monarchist_discontent_ns
 			days = 365
@@ -1095,6 +1105,9 @@ country_event = { #Someone attacked us :'(
 	desc = denmark_occupation_event.1.desc
 	picture = GFX_report_event_DEN_danish_troops
 
+	trigger = {
+		is_subject = no
+	}
 	is_triggered_only = yes
 
 	fire_only_once = yes
@@ -1128,7 +1141,19 @@ country_event = { #Someone attacked us :'(
 			}
 		}
 			
-		remove_ideas = DEN_declaration_of_neutrality
+		if = {
+			limit = {
+				has_dlc = "By Blood Alone"
+			}
+			remove_ideas = {
+				DEN_declaration_of_neutrality
+			}
+			else = {
+				remove_ideas = {
+					DEN_declaration_of_neutrality_no_BBA
+				}
+			}
+		}
 
 		add_popularity = { 
 			ideology = ROOT 
@@ -1141,6 +1166,7 @@ country_event = { #Someone attacked us :'(
 		effect_tooltip = {
 			FROM = { puppet = ROOT }
 			custom_effect_tooltip = DEN_denmark_keeps_government_form_tt
+			set_rule = { can_join_factions = no }
 			set_rule = { can_decline_call_to_war = yes }
 			DEN_limited_manpower = yes
 		}
@@ -1154,7 +1180,7 @@ country_event = { #Someone attacked us :'(
 		name = denmark_occupation_event.1.b
 		ai_chance = {
 			base = 1
-			modifier = {
+			modifier = { # R56?
 				factor = 0
 				DEN_historical_ai = yes
 				FROM = {
@@ -1180,10 +1206,25 @@ country_event = { #Someone attacked us :'(
 		}
 		add_stability = -0.15
 		
-		remove_ideas = DEN_declaration_of_neutrality
+		if = {
+			limit = {
+				has_dlc = "By Blood Alone"
+			}
+			remove_ideas = {
+				DEN_declaration_of_neutrality
+			}
+			else = {
+				remove_ideas = {
+					DEN_declaration_of_neutrality_no_BBA
+				}
+			}
+		}
 
 		hidden_effect = { #TODO_DANNE; can I remove the neutrality_flag?
 			clr_country_flag = DEN_neutrality_flag
+		}	
+		hidden_effect = {
+			play_song = "danish_song_of_liberation"
 		}
 	}
 }
@@ -1208,6 +1249,7 @@ country_event = { #Denmark wants to become a puppet
 			custom_effect_tooltip = DEN_denmark_keeps_government_form_tt
 			FROM = {
 				DEN_limited_manpower = yes
+				set_rule = { can_join_factions = no }
 				set_rule = { can_decline_call_to_war = yes }
 				add_dynamic_modifier = { modifier = DEN_occupation_laws_dynamic_modifier }
 				add_to_variable = {
@@ -1227,7 +1269,7 @@ country_event = { #Denmark wants to become a puppet
 				}
 				transfer_state_to = FROM
 			}
-			964 = {
+			964 = { # R56?
 				if = {
 					limit = {
 						is_controlled_by = ROOT 
@@ -1302,6 +1344,7 @@ country_event = { #Denmark becomes a puppet
 		}
 		hidden_effect = {
 			set_global_flag = achievement_den_has_never_been_puppeted
+			set_country_flag = DEN_is_protectorate_flag
 		}
 		if = {
 			limit = {
@@ -1333,6 +1376,9 @@ country_event = { #Denmark becomes a puppet
 
 	option = { #Becomes puppet
 		name = denmark_occupation_event.3.a
+		hidden_effect = {
+			set_global_flag = DEN_white_peacing_everyone_flag #Necessary to NOT trigger the Achievement "You Shall Not Pass"
+		}
 		add_stability = -0.15
 		add_war_support = -0.05
 
@@ -1431,19 +1477,23 @@ country_event = { #Denmark becomes a puppet
 			ROOT = {
 				country_event = { id = denmark_occupation_event.4 }
 			}
+			
+			mark_focus_tree_layout_dirty = yes
 
-			if = {
-				limit = {
-					has_game_rule = {
-						rule = obsolete_focus_branches_visibility
-						option = HIDE
-					}
-				}
-				mark_focus_tree_layout_dirty = yes
-			}
 		}
 		FROM = {
 			add_ideas = DEN_sahnefront_ns
+		}
+		hidden_effect = {
+			every_other_country = {
+				limit = {
+					has_war_with = FROM
+					has_war_with = ROOT
+				}
+				white_peace = ROOT
+			}
+
+			play_song =  "rising_tension"
 		}
 	}
 }
@@ -1533,14 +1583,7 @@ country_event = { #Denmark keeps elections
 				}
 			}
 		}
-
-		every_other_country = {
-			limit = {
-				has_war_with = FROM
-				has_war_with = ROOT
-			}
-			white_peace = ROOT
-		}
+		clr_global_flag = DEN_white_peacing_everyone_flag
 	}
 }
 
@@ -1577,10 +1620,13 @@ country_event = { #Denmark is refused to become a puppet
 			DEN_resistance_damage_to_garrison_on_our_occupied_states = 0.1
 			tooltip = resistance_damage_to_garrison_on_our_occupied_states_tt
 		}
+		hidden_effect = {
+			play_song = "danish_song_of_liberation"
+		}
 	}
 }
 
-country_event = { #Danish Declares Independence
+country_event = { #Denmark Declares Independence
 	id = denmark_occupation_event.6
 	title = denmark_occupation_event.6.t
 	desc = denmark_occupation_event.6.desc
@@ -1678,6 +1724,16 @@ country_event = { #Danish Declares Independence
 				is_major = no
 				has_war_with_major = yes
 			}
+			modifier = { #You're ain't goin' nowhere! Unless we really hurtin' :,(
+				factor = 0.5
+				surrender_progress < 0.5
+			}
+			modifier = { #Don't accept if installed the plenipotentiary
+				factor = 0.5
+				FROM = {
+					has_country_leader_with_trait = DEN_plenipotentiary
+				}
+			}
 		}
 		effect_tooltip = {
 			ROOT = { end_puppet = FROM }
@@ -1699,6 +1755,16 @@ country_event = { #Danish Liberation War
 
 	is_triggered_only = yes
 
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = DEN_is_protectorate_flag
+				}
+				clr_country_flag = DEN_is_protectorate_flag
+			}
+		}
+	}
 	option = { #Change Government form
 		name = denmark_occupation_event.7.a
 		ai_chance = {
@@ -1726,11 +1792,14 @@ country_event = { #Danish Liberation War
 
 		DEN_independence_war_effects = yes
 
+		hidden_effect = {
+			play_song = "danish_song_of_liberation"
+		}
 	}
 	option = { #Keep current Government form
 		name = denmark_occupation_event.7.b
 		ai_chance = {
-			base = 5 #TODO_DANNE modify this based on if DEN was fasc/commie since before
+			base = 5 
 			modifier = { #Don't keep ideology if it was forced upon Denmark
 				factor = 0
 				has_country_leader_with_trait = DEN_plenipotentiary
@@ -1747,6 +1816,16 @@ country_event = { #Danish Liberation War
 		}
 
 		DEN_independence_war_effects = yes
+		if = { #If the Overlord installed a country leader of their own, that dude needs to go for ever
+			limit = {	
+				has_country_leader_with_trait = DEN_plenipotentiary
+			}
+			retire_country_leader = yes
+		}
+
+		hidden_effect = {
+			play_song = "danish_song_of_liberation"
+		}
 	}
 }
 country_event = { #Denmark becomes independent peacefully
@@ -1757,6 +1836,16 @@ country_event = { #Denmark becomes independent peacefully
 
 	is_triggered_only = yes
 
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = DEN_is_protectorate_flag
+				}
+				clr_country_flag = DEN_is_protectorate_flag
+			}
+		}
+	}
 	option = { 
 		name = denmark_occupation_event.8.a
 		
@@ -1781,6 +1870,13 @@ country_event = { #Denmark becomes independent peacefully
 				}
 				white_peace = ROOT
 			}
+		}
+
+		if = { #If the Overlord installed a country leader of their own, that dude needs to go for ever
+			limit = {	
+				has_country_leader_with_trait = DEN_plenipotentiary
+			}
+			retire_country_leader = yes
 		}
 
 		DEN_restore_manpower = yes
@@ -1812,6 +1908,7 @@ country_event = { #Denmark becomes independent peacefully
 			right_side = DEN_warfare_side
 			set_value = 0
 		}
+
 		if = {
 			limit = {
 				has_country_flag = DEN_create_danish_brigades_flag
@@ -1841,6 +1938,9 @@ country_event = { #Denmark becomes independent peacefully
 		}
 
 		DEN_activate_bought_ships = yes #Denmark receives the Destroyers it bought
+		hidden_effect = {
+			play_song = "danish_song_of_liberation"
+		}
 	}
 }
 
@@ -2058,6 +2158,15 @@ country_event = { #Denmark joins overlord's faction
 			add_to_faction = ROOT
 		}
 
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = DEN_is_protectorate_flag
+				}
+				clr_country_flag = DEN_is_protectorate_flag
+			}
+		}
+
 		DEN_restore_manpower = yes
 
 		OVERLORD = {
@@ -2203,6 +2312,14 @@ country_event = { #Overlord accepts allegiance
 			clr_country_flag = DEN_cannot_join_factions_flag
 		}
 
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = DEN_is_protectorate_flag
+				}
+				clr_country_flag = DEN_is_protectorate_flag
+			}
+		}
 		OVERLORD = {
 			add_opinion_modifier = {
 				modifier = DEN_cooperative_subject
@@ -2766,7 +2883,7 @@ country_event = { #Denmark provides intel
 		}
 	}
 	option = { #Nope
-		name = denmark_resistance_event.11.a 
+		name = denmark_resistance_event.11.b
 		ai_chance = {
 			base = 1
 			modifier = {
@@ -2842,7 +2959,7 @@ country_event = { #DEN ask Nation to host Danish Brigades
 	is_triggered_only = yes
 
 	option = { #Sure
-		name = denmark_resistance_event.21.a
+		name = denmark_resistance_event.20.a
 		ai_chance = {
 			base = 2
 			modifier = {
@@ -2887,7 +3004,7 @@ country_event = { #DEN ask Nation to host Danish Brigades
 		set_variable = { DEN.hosts_danish_brigades = ROOT }
 	}
 	option = { #Nope
-		name = denmark_resistance_event.21.b
+		name = denmark_resistance_event.20.b
 		ai_chance = {
 			base = 1
 			modifier = {
@@ -3130,10 +3247,15 @@ country_event = { #Denmark: Telegram Crisis Begins
 	id = denmark_overlord_events.1
 	title = denmark_overlord_events.1.t
 	desc = denmark_overlord_events.1.desc
-	picture = GFX_report_event_german_troops
+	picture = GFX_report_event_DEN_christian_x
 
 	fire_only_once = yes
 
+	immediate = {
+		hidden_effect = { 
+			set_country_flag = DEN_telegram_crisis_flag #For trackability's sake
+		}
+	}
 	trigger = {
 		tag = DEN
 		has_global_flag = DEN_use_DLC_tree
@@ -3141,7 +3263,7 @@ country_event = { #Denmark: Telegram Crisis Begins
 		has_country_flag = DEN_has_occupation_flag
 		NOT = { #Communists don't care about the King and democratic leader's don't get butthurt
 			OR = {
-				has_government = communism 
+				has_country_flag = DEN_exiled_royal_family 
 				OVERLORD = {
 					OR = {
 						has_government = democratic
@@ -3150,10 +3272,16 @@ country_event = { #Denmark: Telegram Crisis Begins
 				}
 			}
 		}
-		OVERLORD = {
-			has_opinion = {
-			    target = DEN
-			    value < -15
+		OR = {
+			power_balance_value = {
+				id = DEN_occupation_balance
+				value > 0.29
+			}
+			OVERLORD = {
+				has_opinion = {
+				    target = DEN
+				    value < 0
+				}
 			}
 		}
 		OR = { #The Telegram Crisis was triggered after the Kings Birthday
@@ -3186,11 +3314,11 @@ country_event = { #Denmark: Telegram Crisis Begins
 				date < 1945.10.26
 			}
 		}
-	}
+	} 
 
-	mean_time_to_happen = {
-		days = 30
-	}
+	#mean_time_to_happen = {
+	#	days = 30
+	#}
 
 	option = { #Apologize
 		name = denmark_overlord_events.1.a 
@@ -3221,7 +3349,7 @@ country_event = { #Denmark: Telegram Crisis Begins
 					OVERLORD = {
 						has_opinion = {
 						    target = DEN
-						    value < 0
+						    value < -15
 						}
 					}
 				}
@@ -3295,17 +3423,14 @@ country_event = { #Overlord: Denmark tries to placate the Overlord
 	option = { #Accept the Apology
 		name = denmark_overlord_events.2.a 
 		ai_chance = {
-			base = 5
+			base = 2
 			modifier = {
 				factor = 10
 				has_government = FROM
 			}
 			modifier = {
-				factor = 2
-				has_opinion = {
-					target = FROM
-					value > 49
-				} 
+				factor = 10
+				is_in_faction_with = FROM
 			}
 		}
 		add_political_power = 25
@@ -3326,7 +3451,7 @@ country_event = { #Overlord: Denmark tries to placate the Overlord
 				factor = 2
 				has_opinion = {
 					target = FROM
-					value < 0
+					value < -10
 				} 
 			}
 			modifier = {
@@ -3358,7 +3483,7 @@ country_event = { #Overlord: Denmark tries to placate the Overlord
 			}
 		}
 		unlock_decision_tooltip = DEN_demand_country_leader_resignation
-		set_country_flag = DEN_overlord_demands_resignation_flag
+		set_country_flag = DEN_overlord_can_demand_resignation_flag
 
 		custom_effect_tooltip = DEN_deteriorating_subject_relations
 		FROM = { country_event = { id = denmark_overlord_events.4 days = 1 } } 
@@ -3479,7 +3604,7 @@ country_event = { #Overlord: Denmark is being a shitty subject
 			}
 		}
 		unlock_decision_tooltip = DEN_demand_country_leader_resignation
-		set_country_flag = DEN_overlord_demands_resignation_flag
+		set_country_flag = DEN_overlord_can_demand_resignation_flag
 
 		custom_effect_tooltip = DEN_deteriorating_subject_relations
 		FROM = { country_event = { id = denmark_overlord_events.7 days = 1 } } 
@@ -3757,8 +3882,10 @@ country_event = { #Denmark: Choose democratic country leader
 			base = 1
 		}
 		trigger = {
-			has_character = DEN_thorvald_stauning
-			DEN_thorvald_stauning = { is_country_leader = no }
+			AND = {
+				has_character = DEN_thorvald_stauning
+				DEN_thorvald_stauning = { is_country_leader = no }
+			}
 			DEN_vilhelm_buhl = { is_country_leader = no }
 		}
 		DEN_socialdemokratiet_takes_over = yes
@@ -4072,7 +4199,7 @@ country_event = { #Denmark: Overlord installs new leader
 
 	immediate = {
 		hidden_effect = {
-			DEN_install_a_plenipotentiary = yes
+			DEN_create_the_plenipotentiary = yes
 		}
 	}
 	option = { #Comply...
@@ -4088,20 +4215,8 @@ country_event = { #Denmark: Overlord installs new leader
 				DEN_historical_ai = yes
 			}
 		}
-		FROM = {
-			random_character = {
-				limit = {
-					has_trait = DEN_plenipotentiary
-				}
-				set_nationality = DEN
-			}
-		}
-		every_character = {
-			limit = {
-				has_trait = DEN_plenipotentiary
-			}
-			promote_character = yes
-		}
+
+		DEN_install_a_plenipotentiary = yes
 
 		DEN_bop_occupation_medium_decrease_effect = yes
 
@@ -4416,7 +4531,7 @@ country_event = { #Overlord: Denmark refuses to change government form
 		add_political_power = -50
 	}
 	option = { #Install a new government form
-		name = denmark_overlord_events.24.b
+		name = denmark_overlord_events.24.a 
 		ai_chance = {
 			base = 5
 			modifier = {
@@ -5315,7 +5430,7 @@ country_event = { #Denmark: Overlord wants to install a Plenipotentiary
 
 	immediate = {
 		hidden_effect = {
-			DEN_install_a_plenipotentiary = yes
+			DEN_create_the_plenipotentiary = yes
 		}
 	}
 	option = { #Comply...
@@ -5335,20 +5450,8 @@ country_event = { #Denmark: Overlord wants to install a Plenipotentiary
 				DEN_rearming_ai = yes
 			}
 		}
-		FROM = {
-			random_character = {
-				limit = {
-					has_trait = DEN_plenipotentiary
-				}
-				set_nationality = DEN
-			}
-		}
-		every_character = {
-			limit = {
-				has_trait = DEN_plenipotentiary
-			}
-			promote_character = yes
-		}
+
+		DEN_install_a_plenipotentiary = yes
 
 		DEN_bop_occupation_medium_decrease_effect = yes
 
@@ -5491,31 +5594,15 @@ country_event = { #Denmark: overlord tries to install a loyal governor anyways!
 	picture = GFX_report_event_gathering_protest
 
 	is_triggered_only = yes
-	#immediate = {
-	#	hidden_effect = {
-	#		DEN_install_a_plenipotentiary = yes
-	#	}
-	#}
 
 	option = { #Yield
 		name = denmark_overlord_events.43.a 	
 		ai_chance = {
 			base = 5
 		}
-		FROM = {
-			random_character = {
-				limit = {
-					has_trait = DEN_plenipotentiary
-				}
-				set_nationality = DEN
-			}
-		}
-		every_character = {
-			limit = {
-				has_trait = DEN_plenipotentiary
-			}
-			promote_character = yes
-		}
+		
+		DEN_install_a_plenipotentiary= yes
+
 		DEN_bop_occupation_medium_decrease_effect = yes
 
 		DEN_modify_overlord_relations_big = yes
@@ -6059,7 +6146,10 @@ country_event = { #ENG/GER/DEN canceled our trade deal
 					has_idea = DEN_danish_produce_export_ns
 				}
 			}
-			DEN = {	add_offsite_building = { type = industrial_complex level = -1 }}
+			custom_effect_tooltip = DEN_remove_one_offmap_civ_tt
+			hidden_effect = {
+				DEN = {	add_offsite_building = { type = industrial_complex level = -1 }}
+			}
 			FROM = { remove_ideas = DEN_danish_produce_export_ns }
 		}
 		else_if = {
@@ -6068,7 +6158,10 @@ country_event = { #ENG/GER/DEN canceled our trade deal
 					has_idea = DEN_danish_produce_export_ns_improved
 				}
 			}
-			DEN = {	add_offsite_building = { type = industrial_complex level = -2 }}
+			custom_effect_tooltip = DEN_remove_two_offmap_civ_tt
+			hidden_effect = {
+				DEN = {	add_offsite_building = { type = industrial_complex level = -2 }}
+			}
 			FROM = { remove_ideas = DEN_danish_produce_export_ns_improved}
 		}
 		hidden_effect = {
@@ -6094,7 +6187,10 @@ country_event = { #ENG/GER/DEN canceled our trade deal
 				}
 			}
 			ROOT = { remove_ideas = DEN_danish_produce_export_ns }
-			DEN = {	add_offsite_building = { type = industrial_complex level = -1 }}
+			custom_effect_tooltip = DEN_loses_one_offmap_civ_tt
+			hidden_effect = {
+				DEN = {	add_offsite_building = { type = industrial_complex level = -1 }}
+			}
 		}
 		else_if = {
 			limit = {
@@ -6103,7 +6199,10 @@ country_event = { #ENG/GER/DEN canceled our trade deal
 				}
 			}
 			ROOT = { remove_ideas = DEN_danish_produce_export_ns_improved}
-			DEN = {	add_offsite_building = { type = industrial_complex level = -2 }}
+			custom_effect_tooltip = DEN_loses_two_offmap_civ_tt
+			hidden_effect = {
+				DEN = {	add_offsite_building = { type = industrial_complex level = -2 }}
+			}
 		}
 		hidden_effect = {
 			ROOT = {
@@ -6136,6 +6235,11 @@ country_event = { #Cancel Danish Produce Trade
 				limit = {
 					FROM = {
 						has_country_flag = has_danish_produce_basic_flag
+					}
+				}
+				if = {
+					limit = {
+						ROOT = { original_tag = DEN}
 					}
 				}
 				DEN = {	add_offsite_building = { type = industrial_complex level = -1 }}
@@ -6800,7 +6904,7 @@ country_event = { #Denmark is refused
 	is_triggered_only = yes
 
 	option = { #damnit
-		name =  denmark_protection_event.12.b		
+		name =  denmark_protection_event.102.a		
 	}
 }
 
@@ -6834,8 +6938,11 @@ country_event = { #Denmark wants to join/create alliance
 				has_government = FROM
 			}
 			modifier = {
-				factor = 5
-				has_war = no
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.5
+				}
 			}
 			modifier = {
 				factor = 2
@@ -6851,7 +6958,10 @@ country_event = { #Denmark wants to join/create alliance
 					value > 75
 				} 
 			}
-
+			modifier = {
+				factor = 2
+				has_war = yes
+			}
 		}
 		add_political_power = 50
 		add_war_support = 0.1
@@ -6867,7 +6977,11 @@ country_event = { #Denmark wants to join/create alliance
 					set_rule = {
 						can_create_factions = yes
 					}
-					create_faction = DEN_nordic_cooperation_alliance
+					create_faction_from_template = { # R56
+						template = faction_template_defensive_democratic
+						name = DEN_nordic_cooperation_alliance
+						icon = GFX_faction_logo_generic_8
+					}
 					add_to_faction = ROOT
 				}
 			}
@@ -6886,7 +7000,7 @@ country_event = { #Denmark wants to join/create alliance
 			}
 		}
 		ai_chance = {
-			base = 1
+			base = 2
 			modifier = {
 				factor = 5
 				has_civil_war = yes
@@ -6904,6 +7018,10 @@ country_event = { #Denmark wants to join/create alliance
 			}
 			modifier = {
 				factor = 2
+				NORDIC_is_nordic = yes
+			}
+			modifier = {
+				factor = 0.5
 				has_war_with_major = yes
 			}
 		}
@@ -6939,7 +7057,11 @@ country_event = { #Denmark joins the alliance
 			set_rule = {
 				can_create_factions = yes
 			}
-			create_faction = DEN_nordic_cooperation_alliance
+			create_faction_from_template = {
+				template = faction_template_defensive_democratic
+				name = DEN_nordic_cooperation_alliance
+				icon = GFX_faction_logo_generic_8
+			}
 			add_to_faction = FROM
 		}
 	}
@@ -7393,6 +7515,8 @@ country_event = { #Nordic country accepts Denmark's invitation
 	desc =  denmark_protection_event.131.desc
 	picture = GFX_report_event_generic_sign_treaty2
 
+	fire_only_once = no
+
 	is_triggered_only = yes
 
 	option = { #Great
@@ -7408,6 +7532,8 @@ country_event = { #Nordic country dismisses Denmark's invitation
 	title =  denmark_protection_event.132.t
 	desc =  denmark_protection_event.132.desc
 	picture = GFX_report_event_military_planning
+
+	fire_only_once = no
 
 	is_triggered_only = yes
 
@@ -7431,6 +7557,8 @@ country_event = { #Army Drills
 	desc = denmark_protection_event.200.desc
 	picture = GFX_report_event_generic_defensive_preparations
 
+	fire_only_once = no
+
 	is_triggered_only = yes
 
 	option = { #DEN receives good news
@@ -7445,6 +7573,8 @@ country_event = { #Navy Drills
 	desc = denmark_protection_event.201.desc
 	picture = GFX_report_event_ast_navy
 
+	fire_only_once = no
+
 	is_triggered_only = yes
 
 	option = { #DEN receives good news
@@ -7458,6 +7588,8 @@ country_event = { #Air Drills
 	title = denmark_protection_event.202.t
 	desc = denmark_protection_event.202.desc
 	picture = GFX_report_event_SOV_purge_aircraft_2
+
+	fire_only_once = no
 
 	is_triggered_only = yes
 
@@ -7504,11 +7636,18 @@ country_event = { #Denmark Demands Iceland's Annexation
 				has_capitulated = yes
 			}
 			modifier = {
-				factor = 3
+				factor = 2
 				has_government = FROM
 			}
 			modifier = {
-				factor = 3
+				factor = 1.5
+				has_opinion = {
+					target = FROM
+					value > 50
+				}
+			}
+			modifier = {
+				factor = 1.5
 				has_opinion = {
 					target = FROM
 					value > 75
@@ -7516,7 +7655,17 @@ country_event = { #Denmark Demands Iceland's Annexation
 			}
 			modifier = {
 				factor = 2
-				enemies_strength_ratio > 0.5
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.75
+				}
+			}
+			modifier = {
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.5
+				}
 			}
 			modifier = {
 				factor = 5
@@ -7565,14 +7714,31 @@ country_event = { #Denmark Demands Iceland's Annexation
 				is_faction_leader = yes
 			}
 			modifier = {
-				factor = 5
-				enemies_strength_ratio < 0.5
+				factor = 3
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.25
+				}
+			}
+			modifier = {
+				factor = 3
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.5
+				}
 			}
 			modifier = {
 				factor = 5
 				has_opinion = {
 					target = FROM
 					value < 0
+				}
+			}
+			modifier = {
+				factor = 5
+				has_opinion = {
+					target = FROM
+					value < -24
 				}
 			}
 			modifier = {
@@ -7640,12 +7806,22 @@ country_event = { #Denmark Demands Iceland from Overlord
 		ai_chance = {
 			base = 1
 			modifier = {
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.5
+				}
+			}
+			modifier = {
 				factor = 0.5
 				any_allied_country = {
 					is_major = yes
 				}
 			}
-			
+			modifier = {
+				factor = 0.5
+				is_major = yes
+			}		
 		}
 		effect_tooltip = {
 			FROM = { puppet = ICE }
@@ -7667,7 +7843,10 @@ country_event = { #Denmark Demands Iceland from Overlord
 			}
 			modifier = {
 				factor = 2
-				enemies_strength_ratio < 0.5
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.5
+				}
 			}
 			modifier = {
 				factor = 2
@@ -7787,7 +7966,14 @@ country_event = { #Denmark Demands Sweden's Subjugation
 				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
+				}
+			}
+			modifier = {
+				factor = 5
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.5
 				}
 			}
 		}
@@ -7899,10 +8085,10 @@ country_event = { #Denmark Demands Sweden from Norway
 				}
 			}
 			modifier = {
-				factor = 5
+				factor = 10
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
 				}
 			}
 		}
@@ -8019,7 +8205,14 @@ country_event = { #Denmark Demands Norway's Subjugation
 				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
+				}
+			}
+			modifier = {
+				factor = 5
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.5
 				}
 			}
 		}
@@ -8130,10 +8323,10 @@ country_event = { #Denmark Demands Norway from Sweden
 				}
 			}
 			modifier = {
-				factor = 5
+				factor = 10
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
 				}
 			}
 		}
@@ -8241,6 +8434,13 @@ country_event = { #Denmark Demands Icelandic Territory
 				factor = 2
 				strength_ratio = {
 				    tag = FROM
+				    ratio < 0.75
+				}
+			}
+			modifier = {
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
 				    ratio < 0.5
 				}
 			}
@@ -8285,7 +8485,7 @@ country_event = { #Denmark Demands Icelandic Territory
 				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
 				}
 			}
 		}
@@ -8412,7 +8612,7 @@ country_event = { #Denmark Demands Swedish Territory
 				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
 				}
 			}
 		}
@@ -8539,7 +8739,7 @@ country_event = { #Denmark Demands Finnish Territory
 				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
 				}
 			}
 		}
@@ -8666,7 +8866,7 @@ country_event = { #Denmark Demands Norwegian Territory
 				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
 				}
 			}
 		}
@@ -8745,6 +8945,12 @@ country_event = { #Denmark offers Swedish steel for guarantees
 					value > 49
 				}
 			}
+			modifier = {
+				factor = 2
+				FROM = {
+					is_major = yes
+				}
+			}
 		}
 		effect_tooltip = {
 			ROOT = { give_guarantee = FROM }
@@ -8778,7 +8984,7 @@ country_event = { #Denmark offers Swedish steel for guarantees
 				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1.5
 				}
 			}
 		}
@@ -8836,21 +9042,171 @@ country_event = { #The Question of Neutrality
 
 	is_triggered_only = yes
 
-	#option = { #Join Germany
-	#	name = denmark_expansion_event.400.a
-	#	ai_chance = {
-	#		base = 10
-	#	}
-	#	trigger= {
-	#		GER = {
-	#			OR = {
-	#				has_government = democratic
-	#				has_government = neutrality
-	#			}
-	#			is_faction_leader = yes
-	#		}
-	#	}
-	#}
+	option = { #Join Germany
+		name = denmark_expansion_event.400.a
+		ai_chance = {
+			base = 5
+		}
+		trigger= {
+			Not = { is_in_faction_with = GER }
+			GER = {
+				OR = {
+					has_government = democratic
+					has_government = neutrality
+				}
+				is_faction_leader = yes
+				has_civil_war = no
+			}
+		}
+		GER = {
+			country_event = { id =  denmark_expansion_event.401 days = 2 } 
+		}
+
+		custom_effect_tooltip = if_they_accept_tt
+		effect_tooltip = {
+			GER = {
+				add_to_faction = ROOT
+			}
+		}
+		custom_effect_tooltip = DEN_remove_declaration_of_neutrality_tt
+	}
+	option = { #Create Faction
+		name = denmark_expansion_event.400.b
+		ai_chance = {
+			base = 10
+		}
+
+		if = {
+			limit = {
+				NOT = { has_rule = can_create_factions }
+			}
+			set_rule = { can_create_factions = yes }
+		}
+		create_faction_from_template = {
+			template = faction_template_DEN_nordic_cooperation_alliance
+			name = DEN_northern_security_pact
+			icon = GFX_faction_logo_generic_8
+		}
+
+		unlock_decision_tooltip = DEN_northern_security_pact_invitation
+		if = {
+			limit = {
+				has_tech_sharing_feature = yes
+			}
+			custom_effect_tooltip = DEN_invite_allies_to_tech_sharing_decision_tt
+		}
+
+		custom_effect_tooltip = DEN_remove_declaration_of_neutrality_tt
+		set_country_flag = DEN_can_create_faction_flag
+	}
+	option = { #Stay Neutral... for now hehehe >:D
+		name = denmark_expansion_event.400.c
+		ai_chance = {
+			base = 1
+		}
+		add_stability = 0.05
+	}
+}
+country_event = { #Denmark offers an Alliance to Germany
+	id = denmark_expansion_event.401
+	title = denmark_expansion_event.401.t
+	desc = denmark_expansion_event.401.desc
+	picture = GFX_report_event_military_planning
+
+	#fire_only_once = yes
+
+	is_triggered_only = yes
+
+	option = { #Accept
+		name = denmark_occupation_event.100.a #Intentional
+		ai_chance = {
+			base = 5
+			modifier = {
+				factor = 2
+				has_government = FROM
+			}
+			modifier = {
+				factor = 2
+				has_opinion = {
+					target = FROM
+					value > 24
+				}
+			}
+			modifier = {
+				factor = 0
+				FROM = {
+					is_justifying_wargoal_against = ROOT
+				}
+			}
+			modifier = {
+				factor = 0
+				FROM = {
+					has_wargoal_against = ROOT
+				}
+			}
+		}
+		add_political_power = 25
+		add_war_support = 0.05
+		effect_tooltip = {
+			ROOT = {
+				add_to_faction = FROM
+			}
+		}
+		FROM = {
+			country_event = { id =  denmark_expansion_event.402 days = 2 } 
+		}
+	}
+	option = { #Refuse
+		name = denmark_occupation_event.100.b #Intentional
+		ai_chance = {
+			base = 1
+			modifier = {
+				factor = 15
+				has_opinion = {
+					target = FROM
+					value < 0
+				}
+			}
+		}
+		FROM = {
+			country_event = { id =  denmark_expansion_event.403 days = 2 } 
+		}
+	}
+}
+country_event = { #Denmark gains an Ally
+	id = denmark_expansion_event.402
+	title = denmark_expansion_event.501.t #Intentional
+	desc = denmark_expansion_event.501.desc #Intentional
+	picture = GFX_report_event_generic_sign_treaty1
+
+	#fire_only_once = yes
+
+	is_triggered_only = yes
+
+	option = { #Great
+		name = denmark_resistance_event.2.a #Intentional
+		add_political_power = 25
+		add_war_support = 0.05
+		FROM = {
+			add_to_faction = ROOT
+		}
+		if = { # R56
+			limit = { has_dlc = "By Blood Alone" }
+			remove_ideas = { DEN_declaration_of_neutrality }
+			else = { remove_ideas = { DEN_declaration_of_neutrality_no_BBA } }
+		}
+	}
+}
+country_event = { #Germany doesn't want to become Allies
+	id = denmark_expansion_event.403
+	title = denmark_expansion_event.502.t #Intentional
+	desc = denmark_expansion_event.502.desc #Intentional
+	picture = GFX_report_event_journalists_speech
+
+	#fire_only_once = yes
+
+	is_triggered_only = yes
+
 	option = { #Create Faction
 		name = denmark_expansion_event.400.b
 		ai_chance = {
@@ -8863,7 +9219,11 @@ country_event = { #The Question of Neutrality
 			}
 			set_rule = { can_create_factions = yes }
 		}
-		create_faction = DEN_northern_security_pact
+		create_faction_from_template = {
+			template = faction_template_DEN_nordic_cooperation_alliance
+			name = DEN_northern_security_pact
+			icon = GFX_faction_logo_generic_8
+		}
 
 		unlock_decision_tooltip = DEN_northern_security_pact_invitation
 		if = {
@@ -8904,7 +9264,7 @@ country_event = { #Denmark offers an Alliance
 				has_civil_war = yes
 			}
 			modifier = {
-				factor = 1.5
+				factor = 2
 				has_government = FROM
 			}
 			modifier = {
@@ -8912,6 +9272,20 @@ country_event = { #Denmark offers an Alliance
 				has_opinion = {
 					target = FROM
 					value > 24
+				}
+			}
+			modifier = {
+				factor = 2
+				has_opinion = {
+					target = FROM
+					value > 49
+				}
+			}
+			modifier = {
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.75
 				}
 			}
 			modifier = {
@@ -8950,12 +9324,26 @@ country_event = { #Denmark offers an Alliance
 	option = { #Refuse
 		name = denmark_expansion_event.500.b
 		ai_chance = {
-			base = 1
+			base = 2
 			modifier = {
-				factor = 15
+				factor = 5
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1.25
+				}
+			}
+			modifier = {
+				factor = 5
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.5
+				}
+			}
+			modifier = {
+				factor = 5
+				has_opinion = {
+					target = FROM
+					value < 0
 				}
 			}
 		}
@@ -9018,7 +9406,7 @@ country_event = { #Denmark offers tech sharing
 				has_civil_war = yes
 			}
 			modifier = {
-				factor = 1.5
+				factor = 2
 				has_government = FROM
 			}
 			modifier = {
@@ -9026,6 +9414,20 @@ country_event = { #Denmark offers tech sharing
 				has_opinion = {
 					target = FROM
 					value > 24
+				}
+			}
+			modifier = {
+				factor = 2
+				has_opinion = {
+					target = FROM
+					value > 49
+				}
+			}
+			modifier = {
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.75
 				}
 			}
 			modifier = {
@@ -9071,7 +9473,7 @@ country_event = { #Denmark offers tech sharing
 				factor = 15
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1.25
 				}
 			}
 		}
@@ -9140,20 +9542,41 @@ country_event = { #Denmark interferce in our politics; they try to change our id
 				has_civil_war = yes
 			}
 			modifier = {
-				factor = 3
+				factor = 2
+				any_neighbor_country = {
+					is_major = yes
+				}
+			}
+			modifier = {
+				factor = 2
 				has_opinion = {
 					target = FROM
 					value > 24
 				}
 			}
 			modifier = {
-				factor = 3
-				enemies_strength_ratio > 0.5
+				factor = 2
+				has_opinion = {
+					target = FROM
+					value > 49
+				}
 			}
 			modifier = {
 				factor = 2
-				any_neighbor_country = {
-					is_major = yes
+				is_in_faction_with = FROM
+			}
+			modifier = {
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.75
+				}
+			}
+			modifier = {
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.5
 				}
 			}
 			modifier = {
@@ -9199,11 +9622,31 @@ country_event = { #Denmark interferce in our politics; they try to change our id
 				add = 10
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
+				}
+			}
+			modifier = {
+				add = 10
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.25
+				}
+			}
+			modifier = {
+				add = 10
+				has_opinion = {
+					target = FROM
+					value < 0
+				}
+			}
+			modifier = {
+				add = 10
+				has_opinion = {
+					target = FROM
+					value < -24
 				}
 			}
 		}
-		set_country_flag = DEN_rejected_influence_flag
 		hidden_effect = {
 			FROM = {
 				country_event = { id =  denmark_expansion_event.701 days = 3 } 
@@ -9265,8 +9708,15 @@ country_event = { #Denmark offers subjugation
 				has_civil_war = yes
 			}
 			modifier = {
-				factor = 1.5
+				factor = 2
 				has_government = FROM
+			}
+			modifier = {
+				factor = 2
+				has_opinion = {
+					target = FROM
+					value > 24
+				}
 			}
 			modifier = {
 				factor = 2
@@ -9277,40 +9727,90 @@ country_event = { #Denmark offers subjugation
 			}
 			modifier = {
 				factor = 2
-				enemies_strength_ratio > 0.75
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.75
+				}
 			}
 			modifier = {
-				factor = 1.5
+				factor = 2
+				strength_ratio = {
+				    tag = FROM
+				    ratio < 0.5
+				}
+			}
+			modifier = {
+				factor = 2
 				any_neighbor_country = {
 					is_major = yes
 				}
 			}
+			modifier = {
+				factor = 0
+				FROM = {
+					is_justifying_wargoal_against = ROOT
+				}
+			}
+			modifier = {
+				factor = 0
+				FROM = {
+					has_wargoal_against = ROOT
+				}
+			}
 		}
+
 		effect_tooltip = {
+
 			FROM = { puppet = ROOT }
+
 		}
+
 		FROM = {
 			country_event = { id =  denmark_expansion_event.801 days = 2 } 
 		}
+
 	}
 	option = { #Refuse
 		name = denmark_protection_event.100.b #Intentional
 		ai_chance = {
 			base = 2
 			modifier = {
-				factor = 5
+				factor = 10
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
+				}
+			}
+			modifier = {
+				factor = 10
+				strength_ratio = {
+				    tag = FROM
+				    ratio > 1.25
+				}
+			}
+			modifier = {
+				factor = 10
+				has_opinion = {
+					target = FROM
+					value < 0
+				}
+			}
+			modifier = {
+				factor = 10
+				has_opinion = {
+					target = FROM
+					value < -24
 				}
 			}
 		}
+
 		FROM = {
 			country_event = { id =  denmark_expansion_event.802 days = 2 } 
 		}
+
 	}
 }
-country_event = { #Denmark gains a Puppet
+country_event = { # ROOT gains a Puppet
 	id = denmark_expansion_event.801
 	title = denmark_expansion_event.801.t
 	desc = denmark_expansion_event.801.desc
@@ -9322,10 +9822,12 @@ country_event = { #Denmark gains a Puppet
 
 	option = { #Great
 		name = denmark_expansion_event.301.a #Intentional
-		ROOT = { puppet = FROM }
+
+		puppet = FROM 
+
 	}
 }
-country_event = { #FROM doesn't want to become a Puppet
+country_event = { # FROM doesn't want to become a Puppet
 	id = denmark_expansion_event.802
 	title = denmark_expansion_event.802.t
 	desc = denmark_expansion_event.802.desc
@@ -9501,7 +10003,11 @@ country_event = { #Germany Rejects Denmark
 			}
 			set_rule = { can_create_factions = yes }
 		}
-		create_faction = DEN_northern_national_front
+		create_faction_from_template = { # R56
+			template = faction_template_anti_communist
+			name = DEN_northern_security_pact
+			icon = GFX_faction_logo_generic_10
+		}
 		custom_effect_tooltip = DEN_remove_declaration_of_neutrality_tt
 		unlock_decision_tooltip = DEN_northern_national_front_invitation
 
@@ -9656,11 +10162,12 @@ country_event = { #End of the Economic Crisis
 
 	option = { #DEN receives good news
 		name = denmark_events.1.a
+		add_stability = 0.05
 		
 		add_to_variable = { DEN_industrial_improvement_tracker_var = 1 }
 		DEN_improve_industrial_capabilities_NS = yes
 		add_to_variable = {
-			DEN_industrial_capabilities_consumer_goods = -0.15
+			DEN_industrial_capabilities_consumer_goods = -0.1
 			tooltip = consumer_goods_factor_tt
 		}
 	}
@@ -9677,7 +10184,7 @@ country_event = { #Forts makes the people feels safe
 	trigger = {
 		original_tag = DEN
 		has_dlc = "Arms Against Tyranny"
-		if = {
+		if = { # R56
 			limit = {
 				has_global_flag = DEN_use_DLC_tree
 			}
@@ -9704,6 +10211,7 @@ country_event = { #Forts makes the people feels safe
 	}
 }
 
+#MM: Never used. Unlocalized
 country_event = { #removing Neutrality spirit
 	id = denmark_events.3
 	title = denmark_events.3.t
@@ -9732,6 +10240,7 @@ country_event = { #The Danish King seeks refuge
 		set_country_flag = DEN_received_danish_king_flag
 	}
 
+	fire_only_once = no
 	is_triggered_only = yes
 
 	option = { #Welcome him
@@ -9744,10 +10253,6 @@ country_event = { #The Danish King seeks refuge
 					has_government = neutrality
 					has_government = fascism
 				}
-			}
-			modifier = {
-				factor = 2
-				has_government = democratic
 			}
 			modifier = {
 				factor = 2
@@ -9767,7 +10272,7 @@ country_event = { #The Danish King seeks refuge
 				factor = 2
 				strength_ratio = {
 				    tag = FROM
-				    ratio > 0.5
+				    ratio > 1
 				}
 			}
 		}
@@ -9853,12 +10358,22 @@ country_event = { #Stauning Dies
 	desc = denmark_events.200.desc
 	picture = GFX_report_event_generic_funeral
 
-	fire_only_once = yes
-	is_triggered_only = yes
 	trigger = {
-		has_global_flag = DEN_use_DLC_tree
+		original_tag = DEN
 		has_character = DEN_thorvald_stauning
+		date > 1942.05.03
 	}
+
+	mean_time_to_happen = {
+		days = 20
+		modifier = {
+			factor = 0.1
+			date > 1942.06.01
+			has_country_flag = DEN_has_occupation_flag
+		} 
+	}
+
+	fire_only_once = yes
 
 	option = { #
 		name = denmark_events.200.a
@@ -10009,5 +10524,170 @@ country_event = { #Play Well
 			uses = 1
 			category = industry
 		}
+	}
+}
+
+country_event = { #Danish Empire Cores
+	id = denmark_events.666
+	title = denmark_events.666.t
+	desc = denmark_events.666.desc
+	picture = GFX_report_event_DEN_celebration
+
+	trigger = {
+		original_tag = DEN
+		NOT = { has_idea = DEN_declaration_of_neutrality }
+		ROOT = {
+			has_army_manpower = { size > 99999 }
+			is_subject = no
+			has_civil_war = no
+ 			all_core_state = {
+ 				is_controlled_by = ROOT
+ 			}
+ 		}
+		998 = { is_fully_controlled_by = ROOT }
+		138 = { is_fully_controlled_by = ROOT }
+	}
+
+	mean_time_to_happen = {
+		days = 365		
+	}
+
+	fire_only_once = yes
+
+	option = {
+		name = denmark_events.666.a
+		ai_chance = {
+			base = 2
+		}
+		set_cosmetic_tag = DEN_greater_denmark
+
+		add_political_power = 50
+
+		if = {
+			limit = {
+				OR = {
+					138 = { is_claimed_by = ROOT }
+					138 = { is_fully_controlled_by = ROOT }
+				}
+				NOT = { 138 = { is_core_of = ROOT }}
+			}
+			138 = {	add_core_of = ROOT }
+		}
+		else_if = {
+			limit = {
+				NOT = { 138 = { is_claimed_by = ROOT }}
+				NOT = { 138 = { is_core_of = ROOT }}
+			}
+			138 = { add_claim_by = ROOT } 
+		}
+		if = {
+			limit = {
+				OR = {
+					124 = { is_claimed_by = ROOT }
+					124 = { is_fully_controlled_by = ROOT }
+				}
+				NOT = { 124 = { is_core_of = ROOT }}
+			}
+			124 = {	add_core_of = ROOT }
+		}
+		else_if = {
+			limit = {
+				NOT = { 124 = { is_claimed_by = ROOT }}
+				NOT = { 124 = { is_core_of = ROOT }}
+			}
+			124 = { add_claim_by = ROOT } 
+		}
+		if = {
+			limit = {
+				OR = {
+					998 = { is_claimed_by = ROOT }
+					998 = { is_fully_controlled_by = ROOT }
+				}
+				NOT = { 998 = { is_core_of = ROOT }}
+			}
+			998 = {	add_core_of = ROOT }
+		}
+		else_if = {
+			limit = {
+				NOT = { 998 = { is_claimed_by = ROOT }}
+				NOT = { 998 = { is_core_of = ROOT }}
+			}
+			998 = { add_claim_by = ROOT } 
+		}
+		if = {
+			limit = {
+				OR = {
+					58 = { is_claimed_by = ROOT }
+					58 = { is_fully_controlled_by = ROOT }
+				}
+				NOT = { 58 = { is_core_of = ROOT }}
+			}
+			58 = {	add_core_of = ROOT }
+		}
+		else_if = {
+			limit = {
+				NOT = { 58 = { is_claimed_by = ROOT }}
+				NOT = { 58 = { is_core_of = ROOT }}
+			}
+			58 = { add_claim_by = ROOT } 
+		}
+		if = {
+			limit = {
+				OR = {
+					61 = { is_claimed_by = ROOT }
+					61 = { is_fully_controlled_by = ROOT }
+				}
+				NOT = { 61 = { is_core_of = ROOT }}
+			}
+			61 = {	add_core_of = ROOT }
+		}
+		else_if = {
+			limit = {
+				NOT = { 61 = { is_claimed_by = ROOT }}
+				NOT = { 61 = { is_core_of = ROOT }}
+			}
+			61 = { add_claim_by = ROOT } 
+		}
+		if = {
+			limit = {
+				OR = {
+					62 = { is_claimed_by = ROOT }
+					62 = { is_fully_controlled_by = ROOT }
+				}
+				NOT = { 62 = { is_core_of = ROOT }}
+			}
+			62 = {	add_core_of = ROOT }
+		}
+		else_if = {
+			limit = {
+				NOT = { 62 = { is_claimed_by = ROOT }}
+				NOT = { 62 = { is_core_of = ROOT }}
+			}
+			62 = { add_claim_by = ROOT } 
+		}
+		if = {
+			limit = {
+				OR = {
+					63 = { is_claimed_by = ROOT }
+					63 = { is_fully_controlled_by = ROOT }
+				}
+				NOT = { 63 = { is_core_of = ROOT }}
+			}
+			63 = {	add_core_of = ROOT }
+		}
+		else_if = {
+			limit = {
+				NOT = { 63 = { is_claimed_by = ROOT }}
+				NOT = { 63 = { is_core_of = ROOT }}
+			}
+			63 = { add_claim_by = ROOT } 
+		}
+	}
+	option = {
+		name = denmark_events.666.b
+		ai_chance = {
+			base = 2
+		}		
+		add_stability = 0.1
 	}
 }

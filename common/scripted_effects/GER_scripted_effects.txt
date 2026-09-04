@@ -1265,17 +1265,33 @@ GER_stop_rearmament = {
 			has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
 		}
 		hidden_effect = { #The rearmament program has cost Germany dearly
+			GER_clear_mefo_bills_penalty = yes #The 100% CGFF penalty must go with the MEFO Bills, otherwise it sticks forever on the Recovering Economy
 			remove_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
 			add_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
 			set_variable = { #Reset CG to 0 so that you don't suffer doubly when paying back the MEFO Bills
 				GER_industrial_consumer_goods_factor = 0
 			}
 		}
-		GER_pay_back_mefo_bills = yes
+		IF = { #R56
+			limit = {
+				NOT = { has_country_flag = GER_r56_cw_flag }
+			}
+			GER_pay_back_mefo_bills = yes
+		}
+		# GER_pay_back_mefo_bills = yes
 		
 		custom_effect_tooltip = generic_skip_one_line_tt
 		
 		custom_effect_tooltip = GER_replace_mefo_bills_with_recovering_economy_tt
+		IF = { #R56
+			limit = {
+				has_country_flag = GER_r56_cw_flag
+			}
+			add_to_variable = { 
+				GER_industrial_consumer_goods_factor = 0.75
+				tooltip = consumer_goods_factor_tt
+			}
+		}
 		add_to_variable = {
 			GER_mefo_bills_civilian_intel_to_others = 0.25
 			tooltip = civilian_intel_to_others_tt
@@ -1308,11 +1324,16 @@ GER_stop_rearmament = {
 			GER_industrial_industrial_capacity_dockyard = -0.1
 			tooltip = industrial_capacity_dockyard_tt
 		}
-		effect_tooltip = { #Show the consequences once the MEFO Bills have been paid
-			custom_effect_tooltip = GER_after_mefo_bills_payment_tt
-			add_to_variable = { #These numbers must match the once set in GER_mefo_bills_ended idea 
-				GER_industrial_consumer_goods_factor = 0.75
-				tooltip = consumer_goods_factor_tt
+		IF = {#R56
+			limit = {
+				NOT = { has_country_flag = GER_r56_cw_flag}
+			}
+			effect_tooltip = { #Show the consequences once the MEFO Bills have been paid
+				custom_effect_tooltip = GER_after_mefo_bills_payment_tt
+				add_to_variable = { #These numbers must match the once set in GER_mefo_bills_ended idea 
+					GER_industrial_consumer_goods_factor = 0.75
+					tooltip = consumer_goods_factor_tt
+				}
 			}
 		}
 	}
@@ -1321,6 +1342,7 @@ GER_stop_rearmament = {
 			has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
 		}
 		hidden_effect = { #The rearmament program has cost Germany dearly
+			GER_clear_mefo_bills_penalty = yes #The 100% CGFF penalty must go with the Economy of Conquest, otherwise it sticks forever on the Recovering Economy
 			remove_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
 			add_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
 			set_variable = { #Reset CG to 0 so that you don't suffer doubly when paying back the MEFO Bills
@@ -1377,6 +1399,15 @@ GER_reduce_mefo_bills_penalty = {
 			has_country_flag = GER_mefo_bills_penalty_flag
 			check_variable = { GER_industrial_consumer_goods_factor < 1 }
 		}
+		GER_clear_mefo_bills_penalty = yes
+	}
+}
+
+GER_clear_mefo_bills_penalty = { #Removes the 100% CGFF penalty no matter the current CG value. Used when the MEFO Bills/Economy of Conquest NS is swapped out, since the monthly fail-safe in on_actions only runs while one of those two NS is active
+	if = {
+		limit = {
+			has_country_flag = GER_mefo_bills_penalty_flag
+		}
 		clr_country_flag = GER_mefo_bills_penalty_flag
 		subtract_from_variable = { GER_industrial_consumer_goods_expected_value = GER_expected_consumer_goods_penalty }
 		add_to_variable = { GER_industrial_industrial_capacity_factory = GER_factory_output_penalty }
@@ -1390,6 +1421,7 @@ GER_autarky_achieved_effects = {
 			has_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
 		}
 		hidden_effect = {
+			GER_clear_mefo_bills_penalty = yes #The 100% CGFF penalty must go with the MEFO Bills, otherwise it sticks forever on the Wirtschaftswunder
 			remove_dynamic_modifier = { modifier = GER_mefo_bills_modifier }
 			add_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
 		}
@@ -1416,6 +1448,7 @@ GER_autarky_achieved_effects = {
 			has_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
 		}
 		hidden_effect = {
+			GER_clear_mefo_bills_penalty = yes #The 100% CGFF penalty must go with the Economy of Conquest, otherwise it sticks forever on the Wirtschaftswunder
 			remove_dynamic_modifier = { modifier = GER_economy_of_conquest_modifier }
 			add_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
 		}
@@ -1426,6 +1459,7 @@ GER_autarky_achieved_effects = {
 			has_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
 		}
 		hidden_effect = {
+			GER_clear_mefo_bills_penalty = yes #Fail-safe for old saves where the penalty was left over by an earlier NS swap
 			remove_dynamic_modifier = { modifier = GER_recovering_economy_modifier }
 			add_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
 		}
@@ -1478,6 +1512,10 @@ GER_modify_industrial_modifier = {
 			has_dynamic_modifier = { modifier = GER_wirtschaftswunder_modifier }
 		}
 		custom_effect_tooltip = GER_modify_wirtschaftswunder_modifier_tt
+	}
+	else_if = {
+		limit = { has_dynamic_modifier = { modifier = GER_eco_scripted }}
+		custom_effect_tooltip = GER_modify_eco_scripted_tt
 	}
 }
 
@@ -1896,9 +1934,9 @@ GER_set_array_of_sudetenland_targeted_states = {
 	}
 	if = {
 		limit = {
-			controls_state = 972
+			controls_state = 1078
 		}
-		972 = {
+		1078 = {
 			add_to_array = {
 				array = PREV.sudetenland_states_for_wargoal
 				value = THIS
@@ -1996,7 +2034,7 @@ GER_setup_GER_sphere_of_influence_array = { #REMEMBER to update the focus toolti
 
 						#CZECHIA
 						state = 69
-						state = 972
+						state = 1078
 						state = 9
 						state = 75
 						state = 74

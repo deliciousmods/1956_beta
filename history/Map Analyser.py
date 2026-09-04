@@ -1,9 +1,12 @@
 #created by marijn211
 #this script is focused on generating map statistics based on the state history files of a mod, taking vanilla values if there is gaps in state numbers, the script ignores commented out lines in the history files, but doesnt in localization
 HOIIVPath = "E:\Games\Steam\steamapps\common\Hearts of Iron IV"
-SavetoFile = True                   #Save results to a csv and excel file, use "pip install openpyxl" if the latter throws an error
+SavetoFile = True                   #Save results to a file, csv by default
+UseExcel = True                     #Save as Excel file instead, use "pip install openpyxl" if the latter throws an error
+PrintConsole = False                #Useful for debugging so the console isn't filled with results
 GetStateNames = True                #Get state names if they are in the same path as in vanilla
-UseRoadto56 = False                 #Wether to check for Road to 56 buildings (just modify this with entries of any other mod if desired)
+UseRoadto56 = False                 #Whether to check for Road to 56 buildings (just modify this with entries of any other mod if desired)
+IgnoreDupeOwnerKeys = True          #Whether to only note the initial owner of a state or let history blocks override this value
 
 import os
 import pandas as pd #use "pip install pandas" in console if you are using something which doesnt auto-download
@@ -15,13 +18,13 @@ DefaultDir()
 filelistmod = os.listdir()
 
 if UseRoadto56:
-    modstringkeys = ("rubber_refinery", "aluminum_mill", "steel_mill")
+    modnumkeys = ("rubber_refinery", "aluminum_mill", "steel_mill")
 else:
-    modstringkeys = tuple()
+    modnumkeys = tuple()
 numkeys = ("id", "infrastructure", "industrial_complex", "arms_factory", "synthetic_refinery", "air_base", "anti_air_building", "radar_station", "manpower", "local_supplies", "steel", "tungsten", "oil", "rubber", "aluminium", "chromium") #excluding nuclear because obviously it isnt a typical starting one
 sumkeys = ("naval_base", "bunker", "coastal_bunker") #can be spread across several province entries
 stringkeys = ("owner", "state_category", "add_core_of", "add_claim_by")
-validkeys = numkeys + sumkeys + stringkeys + modstringkeys
+validkeys = numkeys + sumkeys + stringkeys + modnumkeys
 statistics = list()
 statenumbers = list()
 
@@ -63,13 +66,14 @@ def extract_statistics(filelist):
     for file in filelist:
         dupecore = False
         dupeclaim = False
+        owner_set = False
         statedict = dict.fromkeys(validkeys, None)
-        for key in sumkeys + numkeys + modstringkeys:
+        for key in sumkeys + numkeys + modnumkeys:
             statedict[key] = 0
         corelist = list()
         claimlist = list()
         #the following can be in individual provinces so should be summed
-        with open( file ) as fp:
+        with open( file, encoding='utf-8' ) as fp:
             currtext = fp.read()
             currtext = currtext.replace(" ", "") #remove spaces
             currtext = currtext.replace("\t", "") #remove spaces
@@ -94,7 +98,10 @@ def extract_statistics(filelist):
                         elif key == "add_core_of" and value in corelist: #note files with dupe
                             dupecore = True
                         else:
-                            statedict[key] = value.replace("\"", "") #copy over strings, but remove any bracket anomalies
+                            if key != "owner" or owner_set == False:
+                                statedict[key] = value.replace("\"", "") #copy over strings, but remove any bracket anomalies
+                            if key == "owner" and IgnoreDupeOwnerKeys:
+                                owner_set = True
         if dupecore == True and not "KUR" in corelist: #exclude conditional cores on Kurdistan, which are correct from basegame
             print("Duplicate core entry in state file " + str(statedict["id"]))
         if dupeclaim == True:
@@ -122,8 +129,11 @@ elif getmissingstateinfo:
 
 df = pd.DataFrame(statistics)
 sorted_df = df.sort_values(by='id')
-print(sorted_df.to_string(index = False))
+if PrintConsole:
+    print(sorted_df.to_string(index = False))
 if SavetoFile:
     os.chdir(ROOT_PATH)
-    sorted_df.to_csv('output.csv', index = False)
-    sorted_df.to_excel('output.xlsx', index = False)
+    if UseExcel:
+        sorted_df.to_excel('output.xlsx', index = False)
+    else:
+        sorted_df.to_csv('output.csv', index = False)

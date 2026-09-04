@@ -16,82 +16,170 @@ country_event = {
 	option = { # Breaking point!
 		name = china.1.a
 		ai_chance = { 
-			base = 85
+			base = 90 
 			modifier = {
-				add = -15
-				is_historical_focus_on = no
+				factor = 0.5
+				has_war = yes
+			}
+			modifier = {
+				factor = 0.5
+				any_enemy_country = {
+					is_major = yes
+				}
 			}
 		}
+
 		effect_tooltip = {
 			JAP = {
 				add_war_support = 0.05
 				country_event = { id = japan.1 }
+				declare_war_on = {
+					target = CHI
+					type = annex_everything
+				}
+				declare_war_on = {
+					target = SHX
+					type = annex_everything
+				}
+				declare_war_on = {
+					target = SND
+					type = annex_everything
+				}
+				declare_war_on = {
+					target = HBC
+					type = annex_everything
+				}
 			}
 		}
+
 		hidden_effect = {
 			JAP = { country_event = { id = japan.1 } }
 		}
+
 	}
+
 	option = { # Make more concessions
 		name = china.1.b
 		ai_chance = { 
-			base = 15
+			base = 10 
 			modifier = {
-				add = -14
-				is_historical_focus_on = yes
-			}
-		}
-		effect_tooltip = {
-			JAP = {
-				if = {
-					limit = {
-						country_exists = PGR
-						PGR = {
-							is_puppet_of = CHI
-						}
-					}
-					puppet = PGR
-					else = {
-						transfer_state = 608
-						transfer_state = 614
-						transfer_state = 597
-						transfer_state = 743
-						if = {
-							limit = {
-								MEN = { is_subject_of = CHI }
-								611 = { is_controlled_by = MEN }	
-							}
-							JAP = { 
-								transfer_state = 611
-							}
-						}
+				factor = 0
+				OR = {
+					is_historical_focus_on = yes
+					has_country_flag = CHI_AI_RANDOM_HISTORICAL
+					has_game_rule = {
+						rule = CHI_ai_behavior
+						option = HISTORICAL
 					}
 				}
-				country_event = { id = japan.2 }
+				#NOT = { #r56 not an option - was giving errors
+				#	has_game_rule = { #used here instead of checking for default because people might not have WTT
+				#		rule = CHI_ai_behavior
+				#		option = ALTERNATE
+				#	}
+				#}
 			}
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					country_exists = PGR
-				}
-				PGR = {
-					country_event = { id = kmt.349 }
-				}
-				set_global_flag = PGR_wait_bridge
-			}
-			if = {
-				limit = {
-					NOT = {
-						country_exists = PGR
-					}
-				}
+			modifier = {
+				factor = 0.5
 				JAP = {
-					country_event = { id = japan.2 }
+					has_war = yes
+				}
+			}
+			modifier = {
+				factor = 0.25
+				JAP = {
+					any_enemy_country = {
+						is_major = yes
+					}
 				}
 			}
 		}
+
+		JAP = {
+
+			set_truce = { target = ROOT days = 180 }
+			effect_tooltip = {
+				IF = {
+					limit = {
+						ROOT = { controls_state = 608 }
+					}
+					transfer_state = 608
+				}
+				IF = {
+					limit = {
+						ROOT = { controls_state = 597 }
+					}
+					transfer_state = 597
+				}
+				IF = {
+					limit = {
+						ROOT = { controls_state = 1038 }
+					}
+					transfer_state = 1038
+				}
+				IF = {
+					limit = {
+						ROOT = { controls_state = 614 }
+					}
+					transfer_state = 614
+				}
+				IF = {
+					limit = {
+						ROOT = { controls_state = 743 }
+					}
+					transfer_state = 743
+				}
+				IF = {
+					limit = {
+						ROOT = { controls_state = 1039 }
+						JAP = {
+							has_subject = MEN
+						}
+					}
+					MEN = {
+						transfer_state = 1039
+					}
+				}
+				ELSE_IF = {
+					limit = {
+						ROOT = { controls_state = 1039 }
+						JAP = {
+							NOT = {
+								has_subject = MEN
+							}
+						}
+					}
+					transfer_state = 1039
+				}
+				add_state_claim = 613
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			if = {
+				limit = {
+					SND = { exists = yes }
+					
+				}
+
+				custom_effect_tooltip =  china.1.b_tt_SND
+			}
+
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			if = {
+				limit = {
+					HBC = { exists = yes }
+					
+				}
+
+				custom_effect_tooltip =  china.1.b_tt_HBC
+			}
+
+									
+			country_event = { id = japan.2 }
+		}
+
 	}
+
 }
 
 # Germany Withdraws Advisors
@@ -149,8 +237,21 @@ country_event = {
 	title = china.5.t
 	desc = china.5.d
 	picture = GFX_report_event_chinese_officers
-	is_triggered_only = yes
+	
 	fire_only_once = yes
+
+	mean_time_to_happen = {
+		days = 1
+	}
+
+	trigger = {
+		tag = PRC
+		num_of_controlled_states > 3
+		has_country_leader = { ruling_only = yes character = PRC_mao_zedong }
+		NOT = {
+			has_dlc = "No Compromise, No Surrender"
+		}
+	}
 	
 	option = {
 		name = china.5.a
@@ -254,6 +355,91 @@ country_event = {
 				event_target:CHI_united_front_leader = {set_country_flag = xsm_sumitted}
 				
 			}
+
+			if = {
+				limit = {
+					ROOT = {
+						tag = SIC
+					}
+				}
+				SIC = {
+					every_unit_leader = {
+						set_nationality = event_target:CHI_united_front_leader
+					}
+					retire_country_leader = yes #probably to be improved as it should take into account other ideologies, especially if they lose and are puppeted					
+				}					
+				event_target:CHI_united_front_leader = {
+					set_country_flag = sic_sumitted
+				}
+			}
+
+			if = {
+				limit = {
+					ROOT = {
+						tag = XIC
+					}
+				}
+				XIC = {
+					every_unit_leader = {
+						set_nationality = event_target:CHI_united_front_leader
+					}
+					retire_country_leader = yes #probably to be improved as it should take into account other ideologies, especially if they lose and are puppeted					
+				}					
+				event_target:CHI_united_front_leader = {
+					set_country_flag = xic_sumitted
+				}
+			}
+
+			if = {
+				limit = {
+					ROOT = {
+						tag = GDC
+					}
+				}
+				GDC = {
+					every_unit_leader = {
+						set_nationality = event_target:CHI_united_front_leader
+					}
+					retire_country_leader = yes #probably to be improved as it should take into account other ideologies, especially if they lose and are puppeted					
+				}					
+				event_target:CHI_united_front_leader = {
+					set_country_flag = gdc_sumitted
+				}
+			}
+
+			if = {
+				limit = {
+					ROOT = {
+						tag = HBC
+					}
+				}
+				HBC = {
+					every_unit_leader = {
+						set_nationality = event_target:CHI_united_front_leader
+					}
+					retire_country_leader = yes #probably to be improved as it should take into account other ideologies, especially if they lose and are puppeted					
+				}					
+				event_target:CHI_united_front_leader = {
+					set_country_flag = hbc_sumitted
+				}
+			}
+
+			if = {
+				limit = {
+					ROOT = {
+						tag = SND
+					}
+				}
+				SND = {
+					every_unit_leader = {
+						set_nationality = event_target:CHI_united_front_leader
+					}
+					retire_country_leader = yes #probably to be improved as it should take into account other ideologies, especially if they lose and are puppeted					
+				}					
+				event_target:CHI_united_front_leader = {
+					set_country_flag = snd_sumitted
+				}
+			}
 		}
 	}
 
@@ -283,7 +469,10 @@ country_event = {
 			modifier = {
 				add = 50
 				ROOT = {
-					has_completed_focus = CHI_opposition2
+					OR = {	#56 - Changes needed to accompany r56 content
+						has_completed_focus = CHI_seek_japanese_support
+						has_completed_focus = CHI_abandon_china
+					}
 				}
 			}
 			modifier = {	#on historical, do not refuse to join
@@ -404,11 +593,16 @@ country_event = {
 					tag = XSM
 					tag = YUN
 					tag = GXC
+					tag = SIC
+					tag = XIC
+					tag = GDC
+					tag = HBC
+					tag = SND
 				}
 				NOT = {
 					has_war_together_with = JAP
 					is_in_faction_with = JAP
-					is_puppet_of = JAP
+					is_subject_of = JAP
 				}
 				has_war_with = ROOT
 			}
@@ -661,6 +855,7 @@ country_event = {
 			exists = yes
 			has_government = communism
 		}
+		NOT = { has_dlc = "No Compromise, No Surrender" }
 	}
 
 	mean_time_to_happen = {
