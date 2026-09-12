@@ -772,6 +772,7 @@
 		"resistance_leader",
 		"partisans_organizer",
 		"maan_turva_headman",
+		"comintern_workhorse",
 
 		--  r56 traits
 		"KMT_co_founder_of_the_blueshirts",
