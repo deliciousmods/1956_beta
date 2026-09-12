@@ -723,8 +723,7 @@
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MIN = 100.0 -- Min range for victory point dot
 	NDefines_Graphics.NGraphics.VICTORY_POINT_MAP_ICON_DOT_CUTOFF_MAX = 1000.0 -- Max range for victory point dot
 
-NFactions = {
-	FACTION_INTELLIGENCE_ALLOWED_ADVISOR_TRAIT = { -- Which advisor traits you need to have to be able to be selected as spymaster. You need to be of slottype political advisor regardless
+	NDefines.NFactions.FACTION_INTELLIGENCE_ALLOWED_ADVISOR_TRAIT = { -- Which advisor traits you need to have to be able to be selected as spymaster. You need to be of slottype political advisor regardless
 		"head_of_intelligence",
 		"mastermind_code_cracker",
 		"expert_code_cracker",
@@ -756,33 +755,32 @@ NFactions = {
 		"JAP_tokko_chief",
 		"CHI_spymaster",
 		"AST_intelligence_director",
-		"AST_indomitable_scout"
+		"AST_indomitable_scout",
 		
 		--  generic traits added to the list of faction intelligence in r56
-		"prince_of_terror"
-		"princess_of_terror"
-		"baron_of_terror"
-		"nkvd_rezident"
-		"national_determinist"
-		"falangist_militarist"
-		"NOR_ruthless_police_captain"
-		"bold_intelligence_officer"
-		"bold_intelligence_officer_no_lar"
-		"bold_intelligence_officer_lesser"
-		"bold_intelligence_officer_no_lar_lesser"
-		"resistance_leader"
-		"partisans_organizer"
-		"maan_turva_headman"
+		"prince_of_terror",
+		"princess_of_terror",
+		"baron_of_terror",
+		"nkvd_rezident",
+		"national_determinist",
+		"falangist_militarist",
+		"NOR_ruthless_police_captain",
+		"bold_intelligence_officer",
+		"bold_intelligence_officer_no_lar",
+		"bold_intelligence_officer_lesser",
+		"bold_intelligence_officer_no_lar_lesser",
+		"resistance_leader",
+		"partisans_organizer",
+		"maan_turva_headman",
 
 		--  r56 traits
-		"KMT_co_founder_of_the_blueshirts"
-		"eye_above_the_population"
-		"KMT_chiangs_right_hand_man"
-		"KMT_chiangs_loyal_right_hand_man"
-		"GER_the_grey_eminence"
-		"foreign_intelligence_contacts"
-		"naw_partisan_leader"
-		"intelligence_analyst" -- maybe used only for Dai Li as leader but better put it there
+		"KMT_co_founder_of_the_blueshirts",
+		"eye_above_the_population",
+		"KMT_chiangs_right_hand_man",
+		"KMT_chiangs_loyal_right_hand_man",
+		"GER_the_grey_eminence",
+		"foreign_intelligence_contacts",
+		"naw_partisan_leader",
+		"intelligence_analyst", -- maybe used only for Dai Li as leader but better put it there
 		"AFG_modernizer" -- has +1 operative in LaR version compared to AFG_modernizer_no_lar
-	},
-},
+	}
