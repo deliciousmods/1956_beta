@@ -103,7 +103,7 @@ focus_tree = {
 		icon = GFX_allies
 		prerequisite = { focus = YUG_western_focus }
 		mutually_exclusive = { focus = YUG_friendship_treaty_with_italy }
-		x = 2
+		x = 3
 		y = 1
 		relative_position_id = YUG_western_focus
 
@@ -1437,8 +1437,8 @@ focus_tree = {
 		id = YUG_zara_for_axis
 		icon = GFX_goal_generic_attack_allies
 		prerequisite = { focus = YUG_join_axis }
-		mutually_exclusive = { focus = YUG_surrender_italian_claims }
-		x = 0
+		mutually_exclusive = { focus = YUG_surrender_italian_claims focus = YUG_irredentism_towards_italy }
+		x = -1
 		y = 1
 		relative_position_id = YUG_join_axis
 
@@ -1486,8 +1486,8 @@ focus_tree = {
 		id = YUG_surrender_italian_claims
 		icon = GFX_goal_italy_italianize_dalmatia
 		prerequisite = { focus = YUG_join_axis }
-		mutually_exclusive = { focus = YUG_zara_for_axis }
-		x = -2
+		mutually_exclusive = { focus = YUG_zara_for_axis focus = YUG_irredentism_towards_italy }
+		x = -3
 		y = 1
 		relative_position_id = YUG_join_axis
 
@@ -1586,9 +1586,173 @@ focus_tree = {
 	}
 
 	focus = {
+		id = YUG_irredentism_towards_italy
+		icon = GFX_focus_SWI_fortify_border_with_italy
+		prerequisite = { focus = YUG_join_axis focus = YUG_end_the_regency }
+		mutually_exclusive = { focus = YUG_surrender_italian_claims focus = YUG_zara_for_axis }
+		x = 1
+		y = 1
+		relative_position_id = YUG_join_axis
+		cost = 5
+	
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				factor = 0.5
+				has_completed_focus = YUG_friendship_treaty_with_italy
+			}		
+		}
+
+		available = {
+			NOT = {
+				is_in_faction_with = ITA
+			}
+			has_army_manpower = { size > 79999 }
+		}
+
+		completion_reward = {
+			if = {
+				limit = {
+					controls_state = 958
+					controls_state = 853
+					controls_state = 103
+				}
+				ITA = { custom_effect_tooltip = SWI_add_forts_bordering }
+				hidden_effect = {	
+					every_owned_state = {
+						add_building_construction = {
+							type = bunker
+							level = 2
+							instant_build = yes
+							province = {
+								all_provinces = yes
+								limit_to_border_country = ITA
+							}
+						}
+					}
+				}
+				add_political_power = 75
+				add_war_support = 0.10				
+			}
+			else = {
+				add_political_power = 100
+				add_war_support = 0.15				
+			}
+
+			add_opinion_modifier = { 
+				target = ITA
+				modifier = huge_decrease
+			}
+			if = {
+				limit = {
+					country_exists = VNZ
+					VNZ = {
+						NOT = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				add_opinion_modifier = { 
+					target = VNZ
+					modifier = huge_decrease
+				}				
+			}
+		}
+	}
+	focus = {
+		id = YUG_attack_italy
+		icon = GFX_goal_generic_attack_italy
+		relative_position_id = YUG_irredentism_towards_italy
+		x = 0
+		y = 1
+		prerequisite = {
+			focus = YUG_irredentism_towards_italy
+		}
+		available = {
+			is_subject = no
+			NOT = {
+				is_ally_with = 852.owner
+			}
+			has_army_manpower = { size > 99999 }
+		}
+
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				factor = 0.5
+				has_completed_focus = YUG_friendship_treaty_with_italy
+			}		
+		}
+
+		will_lead_to_war_with = ITA
+		cost = 5
+		completion_reward = {
+			
+			if = {
+				limit = {
+					852 = {
+						owner = {
+							NOT = {
+								original_tag = ROOT
+								is_ally_with = ROOT
+							}
+						}
+					}
+				}
+				create_wargoal = {
+					target = 852.owner
+					type = take_claimed_state
+					generator = { 852 736 163 }
+				}
+			}
+			if = {
+				limit = {
+					736 = {
+						owner = {
+							NOT = {
+								original_tag = ROOT
+								is_ally_with = ROOT
+								owns_state = 852
+							}
+						}
+					}
+				}
+				create_wargoal = {
+					target = 736.owner
+					type = take_claimed_state
+					generator = { 852 736 163 }
+				}
+			}
+			if = {
+				limit = {
+					163 = {
+						owner = {
+							NOT = {
+								original_tag = AUS
+								is_ally_with = AUS
+								owns_state = 852
+								owns_state = 736
+							}
+						}
+					}
+				}
+				create_wargoal = {
+					target = 163.owner
+					type = take_claimed_state
+					generator = { 852 736 163 }
+				}
+			}
+			add_named_threat = {
+				threat = 2
+				name = AUS_our_western_lands
+			}
+		}
+	}
+
+	focus = {
 		id = YUG_claim_bulgaria
 		icon = GFX_focus_generic_attack_bulgaria
-		prerequisite = { focus = YUG_zara_for_axis focus = YUG_surrender_italian_claims }
+		prerequisite = { focus = YUG_zara_for_axis focus = YUG_surrender_italian_claims focus = YUG_attack_italy }
 		x = -2
 		y = 2
 		relative_position_id = YUG_zara_for_axis
@@ -1642,7 +1806,7 @@ focus_tree = {
 	
 	focus = {
 		id = YUG_subjugate_albania
-		prerequisite = { focus = YUG_zara_for_axis focus = YUG_surrender_italian_claims }
+		prerequisite = { focus = YUG_zara_for_axis focus = YUG_surrender_italian_claims focus = YUG_attack_italy}
 		icon = GFX_goal_generic_attack_albania
 		x = 0
 		y = 2
