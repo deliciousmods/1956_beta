@@ -1,37 +1,399 @@
-political_actions = {
-	ELS_purge_the_fourteen_families = {
-		
-		icon = generic_assassination
+### El Salvador Decisions ###
+### By Tjscott ###
+
+### El Salvador - Communist Decisions ###
+
+# Unlocked by Rebuild the Party Cells. Grows communist support while the party is still underground,
+# the category hides once the communists are in power.
+
+ELS_clandestine_network = {
+
+	ELS_print_clandestine_newspapers = {
+
+		icon = generic_propaganda
 
 		allowed = {
 			original_tag = ELS
 		}
 
-		available = {
-			num_of_factories > 6
-			has_idea = r56_ELS_coffee_republic
+		cost = 25
+
+		fire_only_once = no
+		days_re_enable = 60
+
+		ai_will_do = {
+			factor = 1
 		}
 
-		visible = {
-			has_idea = r56_ELS_coffee_republic
+		complete_effect = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.03
+			}
+		}
+	}
+
+	ELS_organize_workers_study_circles = {
+
+		icon = generic_political_rally
+
+		allowed = {
+			original_tag = ELS
 		}
 
-		cost = 75
+		cost = 40
+
+		fire_only_once = no
+		days_re_enable = 90
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		# Bigger gain than the newspapers, but the Guardia Nacional notices the meetings
+		complete_effect = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			add_stability = -0.02
+		}
+	}
+
+	ELS_contact_socorro_rojo = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 50
 
 		fire_only_once = yes
 
 		ai_will_do = {
-			factor = 50
-			modifier = {
-				is_historical_focus_on = yes
-				factor = 0
+			factor = 1
+		}
+
+		# International Red Aid, the Comintern's support network for imprisoned and exiled communists
+		complete_effect = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			custom_effect_tooltip = ELS_modify_coffee_tt
+			add_to_variable = { ELS_coffee_communism_drift = 0.01 tooltip = communism_drift_tt }
+		}
+	}
+}
+
+# Unlocked by Fund the Revolutionary Cells. One decision targeting each Central American neighbor (FROM is the target).
+# The civilian factory is only used while the decision is active (90 days), the same length as the idea it gives.
+
+ELS_export_the_revolution = {
+
+	ELS_fund_communist_cells = {
+
+		icon = generic_prepare_civil_war
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		targets = { GUA HON NIC COS PAN }
+
+		target_trigger = {
+			FROM = { exists = yes }
+			NOT = { has_war_with = FROM }
+			OR = {
+				NOT = { FROM = { original_tag = PAN } }
+				has_completed_focus = ELS_revolution_in_panama
 			}
 		}
 
-		priority = -1
-		
-		complete_effect = { 
-			remove_ideas = r56_ELS_coffee_republic
+		available = {
+			FROM = {
+				NOT = { has_government = communism }
+				NOT = { has_idea = r56_ELS_funded_communist_cells }
+			}
+		}
+
+		fire_only_once = no
+		days_remove = 90
+
+		custom_cost_trigger = {
+			has_equipment = { infantry_equipment > 99 }
+		}
+		custom_cost_text = decision_cost_ie_100
+
+		modifier = {
+			civilian_factory_use = 1
+		}
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = -100
+			}
+			FROM = {
+				add_timed_idea = {
+					idea = r56_ELS_funded_communist_cells
+					days = 90
+				}
+			}
+		}
+	}
+}
+
+# Unlocked by Central American Revolutionary Front. One decision targeting each Central American neighbor (FROM is the target).
+# All four neighbors are single-state countries, so a civil war isn't possible (sadly)
+
+ELS_revolutionary_front = {
+
+	ELS_stage_communist_coup = {
+
+		icon = generic_ignite_civil_war
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		targets = { GUA HON NIC COS PAN }
+
+		target_trigger = {
+			FROM = { exists = yes }
+			NOT = { has_war_with = FROM }
+			OR = {
+				NOT = { FROM = { original_tag = PAN } }
+				has_completed_focus = ELS_revolution_in_panama
+			}
+		}
+
+		available = {
+			FROM = {
+				NOT = { has_government = communism }
+				is_subject = no # the coup puppets them, so don't take another country's subject
+				custom_trigger_tooltip = {
+					tooltip = ELS_coup_conditions_tt
+					OR = {
+						communism > 0.5
+						AND = {
+							communism > 0.3
+							has_stability < 0.2
+						}
+					}
+				}
+			}
+		}
+
+		cost = 50
+
+		fire_only_once = no
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			# Panama is only targetable after Revolution in Panama, when the union already exists, so it joins directly
+			if = {
+				limit = { FROM = { original_tag = PAN } }
+				annex_country = { target = FROM transfer_troops = yes }
+				every_owned_state = {
+					limit = {
+						is_core_of = PAN
+						NOT = { is_core_of = ROOT }
+					}
+					add_core_of = ROOT
+				}
+			}
+			else = {
+				FROM = {
+					set_politics = {
+						ruling_party = communism
+						elections_allowed = no
+					}
+					add_popularity = {
+						ideology = communism
+						popularity = 0.1
+					}
+					country_event = { id = el_salvador.23 }
+				}
+				# The new government becomes our puppet, subjects join their overlord's faction automatically
+				puppet = FROM
+			}
+		}
+	}
+}
+
+
+### El Salvador - Central American Federation Decisions ###
+
+# Unlocked by Draft A Federal Constitution. Lets El Salvador core the land of any
+# Central American nation that refused to join the federation, once we control it.
+# Integrating the first nation also forms the United States of Central America if no one joined through the focus.
+
+ELS_central_american_federation = {
+
+	ELS_integrate_guatemala = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 313 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 313
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 313
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_honduras = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 312 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 312
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 312
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_nicaragua = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 317 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 317
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 317
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_costa_rica = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 316 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 316
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 316
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_panama = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			has_completed_focus = ELS_invite_panama
+			OR = {
+				NOT = { 304 = { is_core_of = ROOT } }
+				NOT = { 937 = { is_core_of = ROOT } }
+			}
+		}
+
+		available = {
+			controls_state = 304
+			controls_state = 937
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 304
+			add_state_core = 937
 		}
 	}
 }
