@@ -2,6 +2,7 @@ add_namespace = siam
 add_namespace = TAOG_siam_movie_campaign_events
 add_namespace = siam_adc
 add_namespace = siam_dem
+add_namespace = siam_air
 
 
 # Phraya Phahon scandal
@@ -465,6 +466,20 @@ country_event = {
 			set_rule = { can_join_factions = yes }
 			clr_country_flag = SIA_limited_war_could_join_factions
 		}
+		else_if = {
+			limit = {
+				country_exists = VIC
+				tag = VIC
+				VIC = {
+					OR = {
+						NOT = { has_completed_focus = VIC_end_the_occupation }
+						NOT = { focus_progress = { focus = VIC_end_the_occupation progress > 0 } }
+					}
+				}
+			}
+			
+			set_rule = { can_join_factions = no }
+		}
 	}
 
 	#Continue the war as Defender
@@ -488,6 +503,20 @@ country_event = {
 			limit = { has_country_flag = SIA_limited_war_could_join_factions }
 			set_rule = { can_join_factions = yes }
 			clr_country_flag = SIA_limited_war_could_join_factions
+		}
+		else_if = {
+			limit = {
+				country_exists = VIC
+				tag = VIC
+				VIC = {
+					OR = {
+						NOT = { has_completed_focus = VIC_end_the_occupation }
+						NOT = { focus_progress = { focus = VIC_end_the_occupation progress > 0 } }
+					}
+				}
+			}
+			
+			set_rule = { can_join_factions = no }
 		}
 	}
 }
@@ -547,6 +576,20 @@ country_event = {
     				set_rule = { can_join_factions = yes }
     				clr_country_flag = SIA_limited_war_could_join_factions
     			}
+				else_if = {
+					limit = {
+						country_exists = VIC
+						tag = VIC
+						VIC = {
+							OR = {
+								NOT = { has_completed_focus = VIC_end_the_occupation }
+								NOT = { focus_progress = { focus = VIC_end_the_occupation progress > 0 } }
+							}
+						}
+					}
+					
+					set_rule = { can_join_factions = no }
+				}
     		}
 		}
 	}
@@ -582,6 +625,9 @@ country_event = {
 				limit = { has_country_flag = SIA_limited_war_could_join_factions }
 				set_rule = { can_join_factions = yes }
 				clr_country_flag = SIA_limited_war_could_join_factions
+			}
+			else = {
+				set_rule = { can_join_factions = no }
 			}
 		}
 		SIA_re_add_to_old_faction = yes
@@ -2034,6 +2080,17 @@ country_event = {
 			}
 			FROM = { add_to_faction = ROOT }
 		}
+		else_if = {
+			limit = {
+				FROM = { is_in_faction = yes }
+			}
+			# add_to_faction no-ops unless it runs in the leader's scope, so step up to the leader.
+			FROM = {
+				faction_leader = {
+					add_to_faction = ROOT
+				}
+			}
+		}
 
 	}
 }
@@ -2469,6 +2526,11 @@ country_event = {
 				var:SIA_adc_demand_country_to_be_released = { exists = no }
 			}
 			release = var:SIA_adc_demand_country_to_be_released
+			# Non-existent target (LAO/CAM/VIN) has no puppet to reply, so notify SIA directly
+			SIA = {
+				set_variable = { SIA_tag_that_was_released_due_to_sia_pressure = ROOT.var:SIA_adc_demand_country_to_be_released }
+				country_event = { id = siam_adc.3 hours = 2 }
+			}
 		}
 		if = {
 			limit = {
@@ -2667,6 +2729,76 @@ country_event = {
 }
 
 
+
+##############################
+###  AIR BRANCH (siam_air)  ###
+##############################
+
+# Tokyo Sends Instructors - follows Accept a Japanese Technical Mission
+country_event = {
+	id = siam_air.1
+	title = siam_air.1.t
+	desc = siam_air.1.desc
+	picture = GFX_report_event_generic_conference
+	is_triggered_only = yes
+
+	option = { # Fighter instruction
+		name = siam_air.1.a
+		ai_chance = { base = 10 }
+		if = {
+			limit = { has_dlc = "Arms Against Tyranny" }
+			mio:SIA_directorate_of_aeronautical_engineering = {
+				add_mio_size = 1
+			}
+		}
+		else = {
+			add_timed_idea = {
+				idea = idea_SIA_japanese_fighter_instruction
+				days = 365
+			}
+		}
+		air_experience = 20
+	}
+	option = { # Strike instruction
+		name = siam_air.1.b
+		ai_chance = { base = 10 }
+		custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+		add_to_variable = { SIA_army_of_siam_air_doctrine_cost_factor = -0.2 tooltip = air_doctrine_cost_factor_tt }
+
+	}
+	option = { 
+		name = siam_air.1.c
+		ai_chance = { base = 5 }
+		custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+		add_to_variable = { SIA_army_of_siam_production_factory_efficiency_gain_factor = 0.05 tooltip = production_factory_efficiency_gain_factor_tt }
+	}
+}
+
+# How Far to Push the Aviators - follows Veteran Jungle Aviators
+country_event = {
+	id = siam_air.2
+	title = siam_air.2.t
+	desc = siam_air.2.desc
+	picture = GFX_report_event_generic_conference
+	is_triggered_only = yes
+
+	option = { # Accept the losses
+		name = siam_air.2.a
+		ai_chance = { base = 10 }
+		add_war_support = -0.02
+		custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+		add_to_variable = { SIA_army_of_siam_air_accidents_factor = 0.10 tooltip = air_accidents_factor_tt }
+		add_to_variable = { SIA_army_of_siam_air_ace_generation_chance_factor = 0.2 tooltip = air_ace_generation_chance_factor_tt }
+	}
+	option = { # Ground the green pilots
+		name = siam_air.2.b
+		ai_chance = { base = 10 }
+		add_stability = 0.02
+		custom_effect_tooltip = idea_SIA_the_army_of_siam_tt
+		add_to_variable = { SIA_army_of_siam_air_accidents_factor = -0.1 tooltip = air_accidents_factor_tt }
+		add_to_variable = { SIA_army_of_siam_air_ace_generation_chance_factor = 0.05 tooltip = air_ace_generation_chance_factor_tt }
+	}
+}
 
 #Selector event for military critique
 country_event = {
