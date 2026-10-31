@@ -1,4 +1,5 @@
-version="1.14.*"
+version="1.19.*"
+supported_version="1.19.*"
 tags={
 	"Beta"
 }
