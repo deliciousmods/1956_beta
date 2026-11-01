@@ -1,0 +1,73 @@
+on_actions = {
+	on_civil_war_end_before_annexation = {
+		effect = {
+			# ROOT is the winner; FROM is still alive here.
+
+			if = {
+				limit = {
+					original_tag = BOL
+					has_country_flag = BOL_second_revolutionaries
+					FROM = { has_country_flag = BOL_second_loyalists }
+				}
+				FROM = { every_character = { set_nationality = ROOT } }
+				set_country_flag = BOL_second_victory_pending
+			}
+		}
+	}
+
+	on_civil_war_end = {
+		effect = {
+
+			if = {
+				limit = { original_tag = BOL has_country_flag = BOL_second_victory_pending }
+				clr_country_flag = BOL_second_victory_pending
+				clr_country_flag = BOL_second_revolutionaries
+				set_country_flag = BOL_second_civil_war_won
+				remove_ideas = BOL_revolutionary_momentum
+				if = { limit = { has_country_flag = BOL_nationalist_backers } BOL_falange_leader = yes }
+				else = { BOL_indigenous_leader = yes }
+				BOL_end_emergency_rule = yes
+				country_event = { id = bolivia.72 days = 1 }
+			}
+		}
+	}
+
+	# Repair already-progressed saves without starting a retroactive civil war.
+	on_daily_BOL = {
+		effect = {
+			if = {
+				limit = {
+					NOT = { has_country_flag = BOL_political_routes_v2 }
+					has_civil_war = no
+					OR = {
+						has_completed_focus = BOL_accept_help_from_nationalists
+						has_completed_focus = BOL_seek_help_from_indigenous_peoples
+					}
+				}
+				if = {
+					limit = { has_completed_focus = BOL_accept_help_from_nationalists }
+					set_country_flag = BOL_nationalist_backers
+					clr_country_flag = BOL_indigenous_backers
+					BOL_falange_leader = yes
+				}
+				else = {
+					set_country_flag = BOL_indigenous_backers
+					clr_country_flag = BOL_nationalist_backers
+					BOL_indigenous_leader = yes
+				}
+				set_country_flag = BOL_second_civil_war_started
+				set_country_flag = BOL_second_civil_war_won
+			}
+
+ if = {
+  limit = { has_government = communism has_country_flag = BOL_indigenous_backers NOT = { has_country_flag = BOL_ayllu_command_established } }
+  BOL_establish_ayllu_command = yes
+ }
+ if = {
+  limit = { has_government = fascism has_country_flag = BOL_nationalist_backers NOT = { has_idea = BOL_falange_assault_cadres } NOT = { has_idea = BOL_falange_professional_army } }
+  if = { limit = { OR = { has_completed_focus = BOL_bolivian_national_syndicalism has_completed_focus = BOL_the_sacred_sun_of_andean_falangism } } add_ideas = BOL_falange_professional_army }
+  else = { add_ideas = BOL_falange_assault_cadres }
+ }
+		}
+	}
+}
