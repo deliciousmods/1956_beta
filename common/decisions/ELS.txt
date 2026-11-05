@@ -1,19 +1,597 @@
-political_actions = {
-	ELS_purge_the_fourteen_families = {
-		
-		icon = generic_assassination
+### El Salvador Decisions ###
+### By Tjscott ###
+
+### El Salvador - Communist Decisions ###
+
+# Unlocked by Rebuild the Party Cells.
+
+ELS_clandestine_network = {
+
+	ELS_print_clandestine_newspapers = {
+
+		icon = generic_political_discourse
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 25
+
+		fire_only_once = no
+		days_re_enable = 60
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.03
+			}
+		}
+	}
+
+	ELS_organize_workers_study_circles = {
+
+		icon = generic_political_rally
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 40
+
+		fire_only_once = no
+		days_re_enable = 90
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			add_stability = -0.02
+		}
+	}
+
+	ELS_contact_socorro_rojo = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			add_popularity = {
+				ideology = communism
+				popularity = 0.05
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+
+			custom_effect_tooltip = ELS_modify_coffee_tt
+			add_to_variable = { ELS_coffee_communism_drift = 0.01 tooltip = communism_drift_tt }
+		}
+	}
+}
+
+# Unlocked by Fund the Revolutionary Cells.
+
+ELS_export_the_revolution = {
+
+	ELS_fund_communist_cells = {
+
+		icon = generic_prepare_civil_war
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		targets = { GUA HON NIC COS PAN }
+
+		target_trigger = {
+			FROM = { exists = yes }
+			NOT = { has_war_with = FROM }
+			OR = {
+				NOT = { FROM = { original_tag = PAN } }
+				has_completed_focus = ELS_revolution_in_panama
+			}
+		}
+
+		available = {
+			FROM = {
+				NOT = { has_government = communism }
+				NOT = { has_idea = r56_ELS_funded_communist_cells }
+			}
+		}
+
+		fire_only_once = no
+		days_remove = 90
+
+		custom_cost_trigger = {
+			has_equipment = { infantry_equipment > 99 }
+		}
+		custom_cost_text = decision_cost_ie_100
+
+		modifier = {
+			civilian_factory_use = 1
+		}
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = -100
+			}
+			FROM = {
+				add_timed_idea = {
+					idea = r56_ELS_funded_communist_cells
+					days = 90
+				}
+			}
+		}
+	}
+}
+
+# Unlocked by Central American Revolutionary Front. All four neighbors are single-state countries, so a civil war isn't possible (sadly)
+
+ELS_revolutionary_front = {
+
+	ELS_stage_communist_coup = {
+
+		icon = generic_ignite_civil_war
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		targets = { GUA HON NIC COS PAN }
+
+		target_trigger = {
+			FROM = { exists = yes }
+			NOT = { has_war_with = FROM }
+			OR = {
+				NOT = { FROM = { original_tag = PAN } }
+				has_completed_focus = ELS_revolution_in_panama
+			}
+		}
+
+		available = {
+			FROM = {
+				NOT = { has_government = communism }
+				is_subject = no # the coup puppets them, so don't take another country's subject
+				custom_trigger_tooltip = {
+					tooltip = ELS_coup_conditions_tt
+					OR = {
+						communism > 0.5
+						AND = {
+							communism > 0.3
+							has_stability < 0.2
+						}
+					}
+				}
+			}
+		}
+
+		cost = 50
+
+		fire_only_once = no
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			# Panama is only targetable after Revolution in Panama, when the union already exists, so it joins directly
+			if = {
+				limit = { FROM = { original_tag = PAN } }
+				annex_country = { target = FROM transfer_troops = yes }
+				every_owned_state = {
+					limit = {
+						is_core_of = PAN
+						NOT = { is_core_of = ROOT }
+					}
+					add_core_of = ROOT
+				}
+			}
+			else = {
+				FROM = {
+					set_politics = {
+						ruling_party = communism
+						elections_allowed = no
+					}
+					add_popularity = {
+						ideology = communism
+						popularity = 0.1
+					}
+					country_event = { id = el_salvador.23 }
+				}
+				# The new government becomes our puppet, subjects join their overlord's faction automatically
+				puppet = FROM
+			}
+		}
+	}
+}
+
+
+### El Salvador - Central American Federation Decisions ###
+
+# Unlocked by Draft A Federal Constitution, or once the union has formed. Lets El Salvador core the land of any
+# Central American nation that refused to join the federation, once we control it.
+# Integrating the first nation also forms the United States of Central America if no one joined through the focus.
+
+ELS_central_american_federation = {
+
+	ELS_integrate_guatemala = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 313 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 313
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 313
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_honduras = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 312 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 312
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 312
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_nicaragua = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 317 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 317
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 317
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_costa_rica = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 316 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 316
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 316
+			ELS_form_central_america_tooltip = yes
+		}
+	}
+
+	ELS_integrate_panama = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			OR = {
+				has_completed_focus = ELS_invite_panama
+				has_completed_focus = ELS_revolution_in_panama
+			}
+			OR = {
+				NOT = { 304 = { is_core_of = ROOT } }
+				NOT = { 937 = { is_core_of = ROOT } }
+			}
+		}
+
+		available = {
+			controls_state = 304
+			controls_state = 937
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 304
+			add_state_core = 937
+		}
+	}
+
+	ELS_integrate_belize = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 311 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 311
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 311
+		}
+	}
+
+	ELS_integrate_the_canal_zone = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { 685 = { is_core_of = ROOT } }
+		}
+
+		available = {
+			controls_state = 685
+		}
+
+		cost = 50
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_state_core = 685
+		}
+	}
+}
+
+
+### El Salvador - Oligarchy vs Military Decisions ###
+
+# Shown with the balance of power
+ELS_oligarchy_military_bop_category = {
+
+	ELS_court_the_coffee_growers = {
+
+		icon = generic_political_address
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 50
+
+		fire_only_once = no
+		days_re_enable = 90
+
+		ai_will_do = {
+			factor = 0
+			modifier = {
+				add = 10
+				power_balance_value = { id = ELS_oligarchy_military_bop value > 0.3 }
+			}
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = -0.1 tooltip_side = ELS_oligarchy_side }
+		}
+	}
+
+	ELS_appease_the_officers = {
+
+		icon = generic_army_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 50
+
+		fire_only_once = no
+		days_re_enable = 90
+
+		ai_will_do = {
+			factor = 0
+			modifier = {
+				add = 10
+				power_balance_value = { id = ELS_oligarchy_military_bop value < -0.3 }
+			}
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = 0.1 tooltip_side = ELS_military_side }
+		}
+	}
+
+	ELS_purge_disloyal_officers = {
+
+		icon = generic_military
 
 		allowed = {
 			original_tag = ELS
 		}
 
 		available = {
-			num_of_factories > 6
-			has_idea = r56_ELS_coffee_republic
+			power_balance_value = { id = ELS_oligarchy_military_bop value > 0.4 }
 		}
 
-		visible = {
-			has_idea = r56_ELS_coffee_republic
+		cost = 75
+
+		fire_only_once = no
+		days_re_enable = 180
+
+		ai_will_do = {
+			factor = 0
+			modifier = {
+				add = 10
+				power_balance_value = { id = ELS_oligarchy_military_bop value > 0.6 }
+			}
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = -0.15 tooltip_side = ELS_oligarchy_side }
+			add_stability = -0.05
+		}
+	}
+
+	ELS_tax_the_coffee_exports = {
+
+		icon = generic_industry
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			power_balance_value = { id = ELS_oligarchy_military_bop value < -0.4 }
+		}
+
+		cost = 25
+
+		fire_only_once = no
+		days_re_enable = 180
+
+		ai_will_do = {
+			factor = 0
+			modifier = {
+				add = 10
+				power_balance_value = { id = ELS_oligarchy_military_bop value < -0.6 }
+			}
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = 0.1 tooltip_side = ELS_military_side }
+			add_political_power = 50
+			add_timed_idea = { idea = r56_ELS_coffee_export_tax days = 180 }
+		}
+	}
+}
+
+
+### El Salvador - The Federal Question Decisions ###
+
+# Shown with the balance of power
+ELS_federal_question_category = {
+
+	ELS_integrate_guatemalan_administration = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			owns_state = 313
 		}
 
 		cost = 75
@@ -21,17 +599,297 @@ political_actions = {
 		fire_only_once = yes
 
 		ai_will_do = {
-			factor = 50
+			factor = 10
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_federal_question_bop value = 0.1 tooltip_side = ELS_federation_side }
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = ELS_jacobo_arbenz_joins_tt
+			hidden_effect = {
+				every_possible_country = {
+					limit = { has_character = GUA_jacobo_arbenz }
+					set_nationality = { target_country = ROOT character = GUA_jacobo_arbenz }
+				}
+			}
+		}
+	}
+
+	ELS_integrate_honduran_administration = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			owns_state = 312
+		}
+
+		cost = 75
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_federal_question_bop value = 0.1 tooltip_side = ELS_federation_side }
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = ELS_julio_lozano_diaz_joins_tt
+			hidden_effect = {
+				every_possible_country = {
+					limit = { has_character = HON_julio_lozano_diaz }
+					set_nationality = { target_country = ROOT character = HON_julio_lozano_diaz }
+				}
+			}
+		}
+	}
+
+	ELS_integrate_nicaraguan_administration = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			owns_state = 317
+		}
+
+		cost = 75
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_federal_question_bop value = 0.1 tooltip_side = ELS_federation_side }
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = ELS_vicente_cuadra_gomez_joins_tt
+			hidden_effect = {
+				every_possible_country = {
+					limit = { has_character = NIC_vicente_guadra_gomez }
+					set_nationality = { target_country = ROOT character = NIC_vicente_guadra_gomez }
+				}
+			}
+		}
+	}
+
+	ELS_integrate_costa_rican_administration = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			owns_state = 316
+		}
+
+		cost = 75
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_federal_question_bop value = 0.1 tooltip_side = ELS_federation_side }
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = ELS_rodrigo_facio_brenes_joins_tt
+			hidden_effect = {
+				every_possible_country = {
+					limit = { has_character = COS_rodrigo_facio_brenes }
+					set_nationality = { target_country = ROOT character = COS_rodrigo_facio_brenes }
+				}
+			}
+		}
+	}
+
+	ELS_unify_the_state_armies = {
+
+		icon = generic_army_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		custom_cost_trigger = {
+			has_political_power > 49
+			command_power > 19.9
+		}
+		custom_cost_text = ELS_unify_the_state_armies_cost
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_political_power = -50
+			add_command_power = -20
+			add_power_balance_value = { id = ELS_federal_question_bop value = 0.15 tooltip_side = ELS_federation_side }
+			custom_effect_tooltip = generic_skip_one_line_tt
+			custom_effect_tooltip = ELS_state_generals_join_tt
+			hidden_effect = {
+				every_possible_country = {
+					limit = { has_character = GUA_eduardo_villagran_ariza }
+					set_nationality = { target_country = ROOT character = GUA_eduardo_villagran_ariza }
+				}
+				every_possible_country = {
+					limit = { has_character = HON_jose_castro_lopez }
+					set_nationality = { target_country = ROOT character = HON_jose_castro_lopez }
+				}
+				every_possible_country = {
+					limit = { has_character = NIC_francisco_parajon_montealegre }
+					set_nationality = { target_country = ROOT character = NIC_francisco_parajon_montealegre }
+				}
+				every_possible_country = {
+					limit = { has_character = COS_ricardo_fernandez_peralta }
+					set_nationality = { target_country = ROOT character = COS_ricardo_fernandez_peralta }
+				}
+			}
+		}
+	}
+
+	ELS_establish_the_federal_courts = {
+
+		icon = generic_political_discourse
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 100
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_federal_question_bop value = 0.15 tooltip_side = ELS_federation_side }
+		}
+	}
+
+	ELS_federal_investment = {
+
+		icon = generic_construction
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			num_of_available_civilian_factories > 1
+		}
+
+		cost = 50
+
+		fire_only_once = no
+		days_re_enable = 90
+		days_remove = 60
+
+		modifier = {
+			civilian_factory_use = 2
+		}
+
+		ai_will_do = {
+			factor = 5
 			modifier = {
-				is_historical_focus_on = yes
 				factor = 0
+				power_balance_value = { id = ELS_federal_question_bop value > 0.98 }
 			}
 		}
 
-		priority = -1
-		
-		complete_effect = { 
-			remove_ideas = r56_ELS_coffee_republic
+		complete_effect = {
+			add_power_balance_value = { id = ELS_federal_question_bop value = 0.1 tooltip_side = ELS_federation_side }
+		}
+	}
+}
+
+
+### El Salvador - Reconstitute the Federal Republic ###
+
+# Replaces form_united_central_america for El Salvador, so One Central America can be taken afterwards
+ELS_reconstitute_the_federal_republic_category = {
+
+	ELS_reconstitute_the_federal_republic = {
+
+		icon = generic_form_nation
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			NOT = { has_global_flag = form_united_central_america_flag }
+			NOT = { has_country_flag = ELS_central_america_formed }
+		}
+
+		available = {
+			is_subject = no
+			controls_state = 313
+			controls_state = 314
+			controls_state = 312
+			controls_state = 317
+			controls_state = 316
+		}
+
+		ai_will_do = {
+			factor = 200
+			modifier = {
+				factor = 0
+				is_historical_focus_on = yes
+			}
+		}
+
+		complete_effect = {
+			hidden_effect = { set_country_flag = ELS_formed_by_decision }
+			ELS_form_central_america_tooltip = yes
+			every_state = {
+				limit = {
+					NOT = { is_core_of = ROOT }
+					OR = {
+						state = 313
+						state = 314
+						state = 312
+						state = 317
+						state = 316
+					}
+				}
+				add_core_of = ROOT
+			}
+			hidden_effect = {
+				if = {
+					limit = { has_dlc = "La Resistance" }
+					every_country = {
+						every_operative = {
+							limit = {
+								OR = {
+									has_nationality = GUA
+									has_nationality = HON
+									has_nationality = NIC
+									has_nationality = COS
+								}
+								NOT = { has_nationality = ROOT }
+							}
+							add_nationality = ROOT
+						}
+					}
+				}
+				news_event = { id = wtt_news.59 hours = 6 }
+			}
 		}
 	}
 }
