@@ -516,6 +516,8 @@
 
 	NDefines.NAI.GARRISON_FRACTION = 0.05 					-- How large part of a front should always be holding the line rather than advancing at the enemy
 
+	NDefines.NAI.ARMY_LEADER_ASSIGN_KEEP_CURRENT_LEADER_FACTOR = 3.0		-- Boosts the score for keeping the current leader. Value > 1.0 favors the current leader.
+	NDefines.NAI.ARMY_LEADER_ASSIGN_DONT_STEAL_OTHER_FACTOR = 0.6         -- Reduces the score for leaders assigned elsewhere. Value < 1.0 discourages reassigning these leaders.
 --------------------------------------------------------------------------------------------------------------
 -- NAVY
 --------------------------------------------------------------------------------------------------------------
