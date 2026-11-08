@@ -1,0 +1,100 @@
+# The focus is taken after the second civil war, so the old staff remains available
+# during that war. The daily repair applies this transition to already-progressed saves.
+BOL_replace_ayllu_roster = {
+ if = {
+  limit = {
+   original_tag = BOL
+   has_government = communism
+   has_civil_war = no
+   OR = { has_country_flag = BOL_indigenous_backers has_completed_focus = BOL_seek_help_from_indigenous_peoples }
+   NOT = { has_country_flag = BOL_ayllu_roster_replaced }
+  }
+  hidden_effect = {
+   # Fresh games register these hidden characters in history. A save from before
+   # this revision needs their newly defined tokens recruited, once and only once.
+   if = { limit = { NOT = { has_character = BOL_marcelino_llanqui } } recruit_character = BOL_marcelino_llanqui }
+   if = { limit = { NOT = { has_character = BOL_gregorio_titiriku } } recruit_character = BOL_gregorio_titiriku }
+   if = { limit = { NOT = { has_character = BOL_toribio_miranda } } recruit_character = BOL_toribio_miranda }
+   if = { limit = { NOT = { has_character = BOL_meliton_gallardo } } recruit_character = BOL_meliton_gallardo }
+   if = { limit = { NOT = { has_character = BOL_avelino_sinani } } recruit_character = BOL_avelino_sinani }
+   if = { limit = { NOT = { has_character = BOL_eduardo_nina_quispe } } recruit_character = BOL_eduardo_nina_quispe }
+   if = { limit = { NOT = { has_character = BOL_leandro_condori_chura } } recruit_character = BOL_leandro_condori_chura }
+   if = {
+    limit = { NOT = { has_character = BOL_santos_marka_tula } }
+    recruit_character = BOL_santos_marka_tula
+    set_country_flag = BOL_indigenous_leader_role_ready
+   }
+   set_country_flag = BOL_indigenous_backers
+   clr_country_flag = BOL_nationalist_backers
+   BOL_indigenous_leader = yes
+   # Unlike visibility alone, retirement also clears hired advisers and their bonuses.
+   every_character = {
+    include_invisible = yes
+    limit = {
+     NOT = {
+      OR = {
+       is_character = BOL_santos_marka_tula
+       is_character = BOL_marcelino_llanqui
+       is_character = BOL_gregorio_titiriku
+       is_character = BOL_toribio_miranda
+       is_character = BOL_meliton_gallardo
+       is_character = BOL_avelino_sinani
+       is_character = BOL_eduardo_nina_quispe
+       is_character = BOL_leandro_condori_chura
+      }
+     }
+    }
+    retire = yes
+   }
+   # Flip the flag after retirement so the four officers and the new cabinet appear together.
+   set_country_flag = BOL_ayllu_roster_replaced
+   BOL_refresh_ayllu_portraits = yes
+  }
+ }
+}
+
+# Update stored portrait paths in existing saves without recreating their commanders.
+BOL_refresh_ayllu_portraits = {
+ if = {
+  limit = {
+   has_country_flag = BOL_ayllu_roster_replaced
+   NOT = { has_country_flag = BOL_ayllu_portraits_named_v2 }
+   has_character = BOL_marcelino_llanqui
+   has_character = BOL_gregorio_titiriku
+   has_character = BOL_toribio_miranda
+  }
+  hidden_effect = {
+   set_portraits = { character = BOL_marcelino_llanqui army = { large = "gfx/leaders/BOL/r56_portrait_BOL_Marcelino_Llanqui.dds" } }
+   set_portraits = { character = BOL_gregorio_titiriku army = { large = "gfx/leaders/BOL/r56_portrait_BOL_Gregorio_Titiriku.dds" } }
+   set_portraits = { character = BOL_toribio_miranda army = { large = "gfx/leaders/BOL/r56_portrait_BOL_Toribio_Miranda.dds" } }
+   set_country_flag = BOL_ayllu_portraits_named_v2
+  }
+ }
+}
+
+# Preserve the same character, political leadership and any earned military experience.
+BOL_ensure_santos_field_marshal = {
+ if = {
+  limit = {
+   original_tag = BOL
+   has_government = communism
+   has_country_flag = BOL_indigenous_backers
+   has_character = BOL_santos_marka_tula
+   NOT = { has_country_flag = BOL_santos_field_marshal_ready }
+  }
+  hidden_effect = {
+   BOL_santos_marka_tula = {
+    if = {
+     limit = { is_field_marshal = no }
+     add_field_marshal_role = {
+      skill = 2 attack_skill = 1 defense_skill = 2 planning_skill = 1 logistics_skill = 3
+      traits = { politically_connected }
+      visible = { has_government = communism has_country_flag = BOL_indigenous_backers }
+     }
+    }
+    set_portraits = { army = { large = "gfx/leaders/BOL/r56_Portrait_BOL_santos_marka_tula.dds" } }
+   }
+   set_country_flag = BOL_santos_field_marshal_ready
+  }
+ }
+}
