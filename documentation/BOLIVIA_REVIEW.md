@@ -156,3 +156,11 @@ La revisión posterior ejecuta 30 combinaciones completas del guion y cubre los 
 No se elimina la recuperación del Chaco ni se fuerza el desarme prematuro de las milicias históricas. El remate militar deja de saltarse el desarme político. Las modificaciones conservan los 270 focos y el ancho del árbol; solo se recolocan el mercado pragmático y su consejo para representar la nueva entrada sin costa.
 
 La guía con límites de la simulación, comparación de programas y casos manuales está en [BOLIVIA_HUMAN_TESTS.md](BOLIVIA_HUMAN_TESTS.md). El equilibrio de batallas, bajas, suministros y conquistas queda pendiente de esas pruebas en HOI4.
+
+## Revisión final del 15 de noviembre de 2026
+
+- Revisadas las 270 recompensas; modificadas 75. Se diferenciaron proyectos repetidos y se eliminaron 31 renovaciones de programas sin cambio de etapa y 16 retiradas de ideas duplicadas.
+- Corregidos los ocho escapes de apóstrofos señalados en error.log del 12 de noviembre. Unificados los avisos del mando indígena y ocultas las tareas internas de limpieza de programas.
+- Guardias y plantilla reclutable Infanteria del Ayllu usan CHL_infantry_alt_1_entity con Trial of Allegiance, con alternativa normal sin DLC. Se conservan plantillas antiguas/personalizadas. También se corrigió la referencia inexistente alt_2 de los Orejones peruanos.
+- El Plan Bohan político deja de duplicar la fábrica de su proyecto económico. Los focos de investigación ofrecen un bono cuando ya se alcanzaron cinco espacios. La purga intelectual tiene un coste de investigación de 180 días.
+- Verificados requisitos, exclusiones, geometría, iconos, categorías de investigación, referencias, 844 órdenes de etapas, 15 perfiles y el inicio de guerra con/sin DLC. La comparación de cierres y sus límites consta en BOLIVIA_HUMAN_TESTS.md. No se ejecutó una partida de HOI4.

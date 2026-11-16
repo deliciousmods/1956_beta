@@ -78,3 +78,54 @@ Para cada caso, registrar fecha, focos elegidos, espíritus activos, industria, 
 ## Comprobaciones automáticas adicionales
 
 Se comprobaron 120 órdenes de concesión de etapas mineras; las cuatro etapas indígenas y sus llamadas repetidas; la distinción entre juntas mineras antiguas y COB histórica; las prioridades temporales; el límite de 19/20 fábricas; los aviones con y sin By Blood Alone; las reservas de espacios industriales; y la capacidad de infraestructura. Se revisan también sintaxis estricta, referencias, exclusiones y posiciones del árbol. Las comprobaciones se ejecutan desde memoria y no se dejan archivos `.py` de pruebas.
+
+
+## Revisión final del 15 de noviembre de 2026
+
+Se revisaron las 270 recompensas y se modificaron 75, incluyendo limpieza de efectos duplicados. Se retiraron 31 llamadas que anunciaban de nuevo el mismo programa sin avanzar de etapa y 16 retiradas de ideas que ya realizaban los efectos de reemplazo. Las recompensas idénticas que permanecen pertenecen a caminos excluyentes —por ejemplo, reclamar Acre— y no se pueden acumular siguiendo una misma ruta.
+
+Los proyectos diferenciados incluyen estudios de construcción, electrónica, formación especializada, experiencia y mando, equipo de apoyo e infraestructura. Son recompensas limitadas, no otra capa de espíritus permanentes. La purga de intelectuales ahora cuesta estabilidad e investigación durante 180 días. El paso político del Plan Bohan prepara financiación e investigación; el paso económico conserva la fábrica, evitando premiar dos veces el mismo proyecto. Los focos de investigación conceden una bonificación útil si ya se alcanzaron cinco espacios.
+
+Se corrigieron los ocho apóstrofos escapados que el registro del 12 de noviembre marcó como caracteres ilegales. El evento indígena presenta un aviso de mando y otro de guerra, sin repetir el listado completo del gabinete. La normalización interna de ideas deja de aparecer como una recompensa adicional.
+
+### Modelos indígenas
+
+Con Trial of Allegiance, las tres guardias creadas al iniciar la guerra utilizan `CHL_infantry_alt_1_entity`. Se ofrece también la plantilla reclutable **Infanteria del Ayllu**, con seis batallones y el mismo modelo. Editar o duplicar esta plantilla permite desarrollar el ejército indígena. Sin el DLC, ambas plantillas usan la representación normal.
+
+No se transforman automáticamente las plantillas antiguas o personalizadas del jugador: hacerlo mediante conversión de divisiones podría cambiar sus batallones, equipo y experiencia. Para revisar el aspecto de las guardias desde su creación, usar una partida nueva. La nueva plantilla también se habilita en una guardada reciente de la rama indígena sin conceder tropas.
+
+Perú utilizaba `CHL_infantry_alt_2_entity` en sus Orejones, pero ese recurso no existe en la instalación comprobada. Se corrigió por `CHL_infantry_alt_1_entity`, ya utilizado por sus Asháninkas y definido por el DLC.
+
+### Comparación de cierres
+
+Esta tabla compara conjuntos de ideas de referencia, con ejército reformado, complejo minero, programa económico final, ferrocarril, refinación y escuelas. **No representa el total universal de una partida:** excluye leyes, líderes, asesores, tecnología, doctrinas, políticas sobre terratenientes y efectos temporales. Las variantes históricas aliadas incluyen el acuerdo de estaño y su misión militar; cada ruta incorpora sus propias instituciones y programas finales.
+
+| Ruta | Producción militar | Organización | Ataque | Factor de bienes de consumo | Poder político |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Siles, cierre aliado | +16,2 % | +9,5 % | 0 % | +4 % | +1 % |
+| Lechín, cierre aliado | +25,2 % | +9,5 % | 0 % | +10 % | −12 % |
+| Sorzano liberal y bienestar | +13,6 % | +6,5 % | 0 % | +4 % | +2 % |
+| Continuidad constitucional de 1943 | +16,2 % | +9,5 % | 0 % | +4 % | +2 % |
+| Directorio Cóndor | +13,6 % | +9,5 % | 0 % | +10 % | +1 % |
+| Busch pragmático | +13,6 % | +6,5 % | 0 % | 0 % | +0,6 % |
+| Internacional obrera | +19,6 % | +10,5 % | 0 % | +7 % | −12 % |
+| Falange hispanista continental | +16,6 % | +12,5 % | +7 % | +7 % | −4 % |
+| Falange andina continental | +8,6 % | +4,5 % | 0 % | +3 % | −6 % |
+| Santos, caminos y Abya Yala | +7,6 % | −1,5 % | −4 % | +8 % | −14 % |
+| Santos, confederación y Abya Yala | +5,6 % | −3,5 % | −6 % | +8 % | −16 % |
+
+La confederación indígena aporta 6,5 puntos de población reclutable mediante su programa militar; caminos aporta 4,5. La combinación con la administración federal añade un factor de reclutamiento de +45 % o +35 %, respectivamente. Son modificadores distintos, no porcentajes que se sumen directamente. Las grandes levas siguen requiriendo fusiles y suministro.
+
+Como referencia del mismo mod, el último ejército inca comunista de Perú aporta 5 puntos de población reclutable, +15 % de defensa, −15 % de consumo de suministro y otras reducciones de desgaste. Bolivia conserva una mayor especialización numérica, con peores ataque, organización e industria. El programa hispanista boliviano tiene menos ataque que el último programa inca fascista peruano (+7 % frente a +15 %), pero debe evaluarse junto con población, industria y calendario.
+
+La evaluación de guion no detecta una ventaja final sin coste que requiera otro recorte general. La economía de Lechín y el crecimiento indígena después de integrar territorios son las prioridades de balance para las pruebas humanas. La continuidad constitucional de 1943 puede continuar después hacia los finales de Siles o Lechín; su fila representa el cierre de sus instituciones propias con la economía compartida desarrollada.
+
+### Comprobaciones y recorrido manual adicional
+
+- Los 270 focos tienen una combinación posible de requisitos y exclusiones; todos sus padres están por encima y no hay iconos superpuestos ni líneas rectas de dependencia atravesando el centro de otro foco.
+- Se acercó una columna el intercambio revolucionario americano a sus antecedentes, sin aumentar el árbol.
+- Las 844 permutaciones de etapas y los 15 perfiles militares siguen pasando las comprobaciones.
+- La guerra indígena se comprobó con y sin DLC: tres guardias, dos milicias enemigas, cuatro generales y Santos; repetir los efectos no crea más plantillas ni unidades. La Falange conserva sus plantillas y personajes.
+- Las categorías de investigación, referencias, traducciones e iconos utilizados están definidos en el mod o en el juego instalado.
+
+En la partida manual, revisar el modelo al acercar la cámara a una Guardia del Ayllu y al reclutar una Infanteria del Ayllu; comprobar que editarla conserva el aspecto. Comparar el aviso del evento con las tropas realmente recibidas y revisar los textos de reemplazo al cambiar de etapa. Generar un nuevo `error.log`: no se ha ejecutado el motor con esta revisión.
