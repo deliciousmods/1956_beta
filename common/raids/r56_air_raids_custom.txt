@@ -1,0 +1,420 @@
+types = {
+		### PEARL HARBOR ###
+
+	JAP_pearl_harbor_strike = {
+
+		days_to_prepare = 35 
+
+		range_factor = 14
+		unlimited_ai_range = yes
+
+		category = air_raids
+		custom_map_icon = GFX_raid_target_icon_carrier_raid
+
+		ai_will_do = {
+			base = 0 # unique Raid
+			modifier = {
+				add = 100
+				date > 1941.10.17
+			}
+		}
+
+		command_power = 15
+
+		allowed = {
+			original_tag = JAP
+		}
+
+		fire_only_once = yes
+
+		visible = {
+			has_completed_focus = JAP_nanshin_ron
+		}
+
+		show_target = {
+			629 = {
+				is_owned_and_controlled_by = USA
+			}
+		}
+
+		available = {
+			is_subject = no
+		}
+
+		launchable = {
+			OR = {
+				has_completed_focus = JAP_strike_the_southern_road
+				has_war_with = USA
+			}
+		}
+
+		target_type = { 
+			province = 4180 
+		}
+		target_icon = GFX_naval_base_target_icon 
+		launch_sound = raid_launch_air
+
+		arrow = {
+		    type = air
+		}
+
+		# Two separate means OR, in same means AND  
+		unit_requirements = {
+			equipment = {
+				type = { cas }
+				amount = { min = 10 }
+			}
+		}
+		unit_requirements = {
+			equipment = {
+				type = { naval_bomber }
+				amount = { min = 10 }
+			}
+		}
+
+		starting_point = {
+		    types = { carrier }
+		}
+
+		success_factors = {
+			success = {
+				base = 0.7
+
+				completed_kido_butai_focus = {
+				    
+			        # MTTH block
+			        formula = {
+			            base = 0
+			            modifier = {
+			                has_completed_focus = JAP_form_the_kido_butai
+			                add = 1
+			            }
+			        }
+				    
+				    weight = 0.1
+				    can_actor_affect = yes # If true, this modifier will be included in the list of measures the actor country can take to increase the success chance of the raid
+				    can_target_affect = no # If true, this modifier will be included in the list of countermeasures the target country can take to decreases the success chance of the raid
+				}
+
+				# Raiding unit modifiers
+				experience = {
+					weight = 0.05
+					start_weight = -0.05
+					reference = 1.0
+				}
+				air_agility = {
+					reference = 100.0 # As air unit agility approaches 100 (as defined by the value above), increase chance by this value
+					weight = 0.05 # At 0 agility, the modifier will have negative effect.
+					start_weight = -0.05 # The modifier will scale linearly, meaning at 50 agility, the modifier will be 0.
+				}
+				reliability = {
+					reference = 1
+					weight = 0.05
+					start_weight = -0.1
+				}
+				air_defence = {
+					reference = 100
+					weight = 0.05
+					start_weight = -0.05
+				}
+
+				air_superiority = {
+					reference = 1
+					weight = 0.1
+					start_weight = -0.1
+				}
+
+				### Target Modifiers
+				anti_air = {
+					reference = 5
+					weight = -0.1
+				}
+				interception = {
+					reference = 500 # More than 500 fighters won't really make any difference
+					weight = -0.2
+				}
+				intel = {
+					weight = 0.2
+					#start_reference = 50
+					reference = 100
+				}
+
+			}
+
+			critical = {
+				base = 0.1
+
+					completed_kido_butai_focus = {
+					    
+				        # MTTH block
+				        formula = {
+				            base = 0
+				            modifier = {
+				                has_completed_focus = JAP_form_the_kido_butai
+				                add = 1
+				            }
+				        }
+					    
+					    weight = 0.05 
+					    can_actor_affect = yes # If true, this modifier will be included in the list of measures the actor country can take to increase the success chance of the raid
+					    can_target_affect = no # If true, this modifier will be included in the list of countermeasures the target country can take to decreases the success chance of the raid
+					}
+
+				completed_midget_submarine_project = {
+					formula = {
+						base = 0
+						modifier = {
+							is_special_project_completed = sp:sp_naval_midget_submarine
+							add = 1
+						}
+					}
+
+					weight = 0.1
+					can_actor_affect = yes
+					can_target_affect = no
+				}
+
+			}
+		}
+
+		success_levels = {
+			failure = {
+				victim_effects = {
+					var:target_state = {
+						damage_building = {
+							tags = naval_buildings_tag
+							damage = 0.05 # levels of damage
+							province = var:ROOT.target_province
+						}
+						damage_units = {
+							state = THIS 
+							limit = { tag = USA } 
+							damage = 0.05
+							ratio = yes  
+							army = no
+							navy = yes
+						}
+					}
+				}
+				actor_effects = {
+					raid_damage_units = {
+						plane_loss = 1 
+						ratio = yes
+					}
+
+					var:actor_country = { #a failure doesn't help morale
+						add_war_support = -0.05
+						# Declare the war if it's not already happened 
+						IF = {
+							limit = {
+								NOT = {
+									has_war_with = USA
+								}
+							}
+							declare_war_on = {
+								target = USA
+								type = take_state_focus
+								generator = { 629 }
+							}	
+						}
+					}
+					var:victim_country = {
+						
+						country_event = {
+							id = SEA_japan_foreign_policy.136
+							hours = 6
+						}	
+
+					}
+				}
+				visual_effect = {
+					entity = "raid_failed_entity"
+					animation = "attack"
+				}
+			}
+			limited_success = {
+				victim_effects = {
+					var:target_state = {
+						damage_building = {
+							tags = naval_buildings_tag
+							damage = 0.25 # levels of damage
+							province = var:ROOT.target_province
+							repair_speed_modifier = -0.05
+						}
+						damage_units = {
+							state = THIS 
+							limit = { tag = USA } 
+							damage = 0.3
+							ratio = yes  
+							army = no
+							navy = yes
+						}
+					}
+				}
+				actor_effects = {
+					raid_damage_units = {
+						plane_loss = 0.5 
+						ratio = yes
+					}
+					raid_add_unit_experience = 0.1
+
+					var:actor_country = {
+						add_war_support = 0.02
+						# Declare the war if it's not already happened 
+						IF = {
+							limit = {
+								NOT = {
+									has_war_with = USA
+								}
+							}
+							declare_war_on = {
+								target = USA
+								type = take_state_focus
+								generator = { 629 }
+							}	
+						}
+					}
+					var:victim_country = {
+						
+						country_event = {
+							id = SEA_japan_foreign_policy.136
+							hours = 6
+						}	
+						set_country_flag = JAP_inflicted_loss_nr_1
+						add_timed_idea = {
+							idea = JAP_day_of_infamy_1 
+							days = 180
+						}	
+
+					}
+				}
+				visual_effect = {
+					entity = "air_raids_2_limited_success_entity"
+					animation = "attack"
+				}
+			}
+			success = {
+				victim_effects = {
+					var:target_state = {
+						damage_building = {
+							tags = naval_buildings_tag
+							damage = 0.65 # levels of damage
+							province = var:ROOT.target_province
+							repair_speed_modifier = -0.15
+						}
+						damage_units = {
+							state = THIS 
+							limit = { tag = USA } 
+							damage = 0.5
+							ratio = yes  
+							army = no
+							navy = yes
+						}
+					}
+				}
+				actor_effects = {
+					raid_damage_units = {
+						plane_loss = 0.3 
+						ratio = yes
+					}
+					raid_add_unit_experience = 0.2
+
+					var:actor_country = {
+						add_war_support = 0.05
+						# Declare the war if it's not already happened 
+						IF = {
+							limit = {
+								NOT = {
+									has_war_with = USA
+								}
+							}
+							declare_war_on = {
+								target = USA
+								type = take_state_focus
+								generator = { 629 }
+							}	
+						}
+					}
+					var:victim_country = {
+						
+						country_event = {
+							id = SEA_japan_foreign_policy.136
+							hours = 6
+						}	
+						set_country_flag = JAP_inflicted_loss_nr_2
+						add_timed_idea = {
+							idea = JAP_day_of_infamy_2 
+							days = 180
+						}	
+
+					}
+				}
+				visual_effect = {
+					entity = "air_raids_2_success_entity"
+					animation = "attack"
+				}
+			}
+			critical_success = {
+				victim_effects = {
+					var:target_state = {
+						damage_building = {
+							tags = naval_buildings_tag
+							damage = 0.9 # levels of damage
+							province = var:ROOT.target_province
+							repair_speed_modifier = -0.25
+						}
+						damage_units = {
+							state = THIS 
+							limit = { tag = USA } 
+							damage = 0.7
+							ratio = yes  
+							army = no
+							navy = yes
+						}
+					}
+				}
+				actor_effects = {
+					raid_damage_units = {
+						plane_loss = 0.1 
+						ratio = yes
+					}
+					raid_add_unit_experience = 0.35
+
+					var:actor_country = {
+						add_war_support = 0.05
+						# Declare the war if it's not already happened 
+						IF = {
+							limit = {
+								NOT = {
+									has_war_with = USA
+								}
+							}
+							declare_war_on = {
+								target = USA
+								type = take_state_focus
+								generator = { 629 }
+							}	
+						}
+					}
+					var:victim_country = {
+						
+						country_event = {
+							id = SEA_japan_foreign_policy.136
+							hours = 6
+						}	
+						set_country_flag = JAP_inflicted_loss_nr_3
+						add_timed_idea = {
+							idea = JAP_day_of_infamy_3 
+							days = 180
+						}	
+
+					}
+				}
+				visual_effect = {
+					entity = "air_raids_2_critical_success_entity"
+					animation = "attack"
+				}
+			}
+		}
+	}
+}
