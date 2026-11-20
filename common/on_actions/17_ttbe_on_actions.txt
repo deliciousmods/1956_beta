@@ -1,0 +1,903 @@
+ on_actions = {
+	on_startup = {
+		effect = {
+			ROM = {
+				remove_ideas = {
+					ROM_underdeveloped_arms_industry_fake
+					ROM_armed_forces_fake
+				}
+			}
+			every_country = {
+				limit = {
+					BUL_is_balkan_nation = yes
+				}
+				
+				add_to_array = { global.is_balkan_nation = THIS }
+			}
+		}
+	}
+	on_war_relation_added = {
+		effect = {
+			if = {
+				limit = {
+					ROOT = {
+						original_tag = ROM 
+						has_completed_focus = ROM_to_reclaim_our_land
+					}
+					FROM = {
+						original_tag = SOV
+					}
+				}
+				ROOT = {
+					add_timed_idea = {
+						idea = ROM_the_war_in_the_east_idea
+						days = 180
+					}
+				}
+			}
+			if = {
+				limit = {
+					FROM = {
+						has_variable = ROM_relation_var
+					}
+					ROOT = {
+						original_tag = ROM
+					}
+				}
+				FROM = {
+					set_variable = { ROM_relation_var = 1 }
+					if = {
+						limit = {
+							ROM_is_improving_relations = yes
+						}
+						ROM_diplo_stop_improving_tier = yes
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					ROOT = {
+						has_variable = ROM_relation_var
+					}
+					FROM = {
+						original_tag = ROM
+					}
+				}
+				ROOT = {
+					set_variable = { ROM_relation_var = 1 }
+					if = {
+						limit = {
+							ROM_is_improving_relations = yes
+						}
+						ROM_diplo_stop_improving_tier = yes
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = ROM_anti_hungarian_operation_plans_granted
+					}
+					OR = {
+						AND = {
+							ROOT = {
+								original_tag = ROM
+								has_completed_focus = ROM_build_the_carol_line
+							}
+							FROM = {
+								original_tag = HUN
+							}
+						}
+						AND = {
+							FROM = {
+								original_tag = ROM
+								has_completed_focus = ROM_build_the_carol_line
+							}
+							ROOT = {
+								original_tag = HUN
+							}
+						}
+					}
+				}
+				ROM = {
+					add_timed_idea = {
+						idea = ROM_anti_hungarian_operation_plans
+						days = 180
+					}
+					set_country_flag = ROM_anti_hungarian_operation_plans_granted
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							ROOT = {
+								original_tag = ROM
+							}
+							FROM = {
+								original_tag = SOV
+							}
+						}
+						AND = {
+							FROM = {
+								original_tag = ROM
+							}
+							ROOT = {
+								original_tag = SOV
+							}
+						}
+					}
+				}
+				ROM = {
+					if = {
+						limit = {
+							NOT = {
+								has_country_flag = ROM_anti_soviet_operation_plans_granted
+							}
+							has_completed_focus = ROM_construct_the_traian_line
+						}
+						add_timed_idea = {
+							idea = ROM_anti_soviet_operation_plans
+							days = 180
+						}
+						set_country_flag = ROM_anti_soviet_operation_plans_granted
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_country_flag = ROM_activated_odessa_mission
+							}
+							has_completed_focus = ROM_to_reclaim_our_land
+						}
+						activate_mission = ROM_seize_odessa_mission
+						set_country_flag = ROM_activated_odessa_mission
+					}
+				}
+			}
+		}
+	}
+	on_daily_ROM = {
+		effect = {
+			for_each_scope_loop = {
+				array = ROM.unavailable_diplomacy_partners
+				if = {
+					limit = {
+						exists = yes
+						NOT = {
+							is_in_array = {	#trying to fix repeat firing
+								array = global.rom_diplomacy_partners
+								value = THIS.id
+							}
+						}
+					}
+					add_to_array = {
+						array = global.rom_diplomacy_partners
+						value = THIS.id
+					}
+					remove_from_array = {
+						array = ROM.unavailable_diplomacy_partners
+						value = THIS.id
+					}
+				}
+			}
+			for_each_scope_loop = {
+				array = ROM.blocked_diplo_countries
+				#are they an ally while being on the block list? remove them
+				if = {
+					limit = {
+						is_ally_with = ROM
+					}
+					remove_from_array = {
+						array = ROM.blocked_diplo_countries
+						value = THIS.id
+					}
+				}
+			}
+			for_each_scope_loop = {
+				array = global.rom_diplomacy_partners
+				#if they stopped existing? remove them
+				if = {
+					limit = {
+						exists = no
+						NOT = {
+							is_in_array = {	#trying to fix repeat firing
+								array = ROM.unavailable_diplomacy_partners
+								value = THIS.id
+							}
+						}
+					}
+					set_variable = { ROM_relation_var = 1 }
+					if = {
+						limit = {
+							ROM_is_improving_relations = yes
+						}
+						ROM_diplo_stop_improving_tier = yes
+					}
+					remove_from_array = {
+						array = global.rom_diplomacy_partners
+						value = THIS.id
+					}
+					add_to_array = {
+						array = ROM.unavailable_diplomacy_partners
+						value = THIS.id
+					}
+				}
+				#for optimization, check if anyone changed tier and only then run the bonus recalculations
+				if = {
+					limit = {
+						check_variable = { ROM_relation_var > 4.5 }
+					}
+					set_temp_variable = { ROM_old_tier = 5 }
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 3.5 }
+					}
+					set_temp_variable = { ROM_old_tier = 4 }
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 2.5 }
+					}
+					set_temp_variable = { ROM_old_tier = 3 }
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 1.5 }
+					}
+					set_temp_variable = { ROM_old_tier = 2 }
+				}
+				else = {
+					set_temp_variable = { ROM_old_tier = 1 }
+				}
+				#decay
+				set_variable = { decay_multiplier = opinion@ROM }	#range: -100 - +100
+				multiply_variable = { decay_multiplier = -0.005 }	#range: +0.5 - -0.5
+				add_to_variable = { decay_multiplier = 1 }			#range: +1.5 - +0.5
+				if = {
+					limit = {
+						check_variable = {
+							ROM_relation_var > 3.5
+						}
+					}
+					#subtract_from_variable = { ROM_relation_var = 0.0066 }
+					set_temp_variable = { relation_loss = 0.0066 }
+					multiply_temp_variable = { relation_loss = decay_multiplier }
+					subtract_from_variable = { ROM_relation_var = relation_loss }
+				}
+				else_if = {
+					limit = {
+						check_variable = {
+							ROM_relation_var > 1.003
+						}
+					}
+					#subtract_from_variable = { ROM_relation_var = 0.0033 }
+					set_temp_variable = { relation_loss = 0.0033 }
+					multiply_temp_variable = { relation_loss = decay_multiplier }
+					subtract_from_variable = { ROM_relation_var = relation_loss }
+				}
+				else_if = {
+					limit = {
+						check_variable = {
+							ROM_relation_var > 1
+						}
+					}
+					set_variable = {
+						ROM_relation_var = 1
+					}
+				}
+				#improving relations
+				if = {
+					limit = {
+						ROM_is_improving_relations = yes
+					}
+					if = {
+						limit = {
+							ROOT = {
+								check_variable = {	#political power is decreasing daily
+									political_power_daily < 0
+								}
+								set_temp_variable = {
+									neg_political_power_daily = 0
+								}
+								subtract_from_temp_variable = {
+									neg_political_power_daily = political_power_daily
+								}
+								NOT = {
+									check_variable = {	#our daily decrease must be smaller than our current reserve
+										neg_political_power_daily < political_power
+									}
+								}
+							}
+						}
+						ROM_diplo_stop_improving_tier = yes
+					}
+					else = {
+						add_to_variable = { ROM_relation_var = 0.02 }
+						if = {
+							limit = {
+								check_variable = {
+									ROM_relation_var > 5.5
+								}
+							}
+							set_variable = { ROM_relation_var = 5.5 }	#prevent building to huge values
+							#ROM_diplo_stop_improving_tier = yes
+							if = {
+								limit = {
+									NOT = {
+										has_country_flag = ROM_maintaining_relations_high
+									}
+								}
+								clr_country_flag = ROM_improving_relations
+								set_country_flag = ROM_maintaining_relations_high
+								ROOT = {
+									subtract_from_variable = {
+										ROM_international_relations_political_power_cost = ROM_one_country_relations_boosting_cost
+									}
+									add_to_variable = {
+										ROM_international_relations_political_power_cost = ROM_one_country_relations_maintain_cost
+									}
+								}
+							}
+						}
+						else_if = {	#if focuses/events lowered the relation, go back to normal boosting
+							limit = {
+								has_country_flag = ROM_maintaining_relations_high
+							}
+							set_country_flag = ROM_improving_relations
+							clr_country_flag = ROM_maintaining_relations_high
+							ROOT = {
+								add_to_variable = {
+									ROM_international_relations_political_power_cost = ROM_one_country_relations_boosting_cost
+								}
+								subtract_from_variable = {
+									ROM_international_relations_political_power_cost = ROM_one_country_relations_maintain_cost
+								}
+							}
+						}
+					}
+				}
+				#see if the dynamic modifier needs to be refreshed
+				if = {
+					limit = {
+						check_variable = { ROM_relation_var > 4.5 }
+					}
+					set_temp_variable = { ROM_new_tier = 5 }
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 3.5 }
+					}
+					set_temp_variable = { ROM_new_tier = 4 }
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 2.5 }
+					}
+					set_temp_variable = { ROM_new_tier = 3 }
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 1.5 }
+					}
+					set_temp_variable = { ROM_new_tier = 2 }
+				}
+				else = {
+					set_temp_variable = { ROM_new_tier = 1 }
+				}
+				if = {
+					limit = {
+						check_variable = {
+							var = ROM_new_tier
+							value = ROM_old_tier
+							compare = not_equals
+						}
+					}
+					set_temp_variable = {
+						ROM_modifier_must_refresh = 1
+					}
+					if = {
+						limit = {
+							OR = {
+								has_idea = ROM_relation_with_romania_2
+								has_idea = ROM_relation_with_romania_3
+								has_idea = ROM_relation_with_romania_4
+								has_idea = ROM_relation_with_romania_5
+							}
+						}
+						remove_ideas = {
+							ROM_relation_with_romania_2
+							ROM_relation_with_romania_3
+							ROM_relation_with_romania_4
+							ROM_relation_with_romania_5
+						}
+						if = {
+							limit = {
+								check_variable = { ROM_relation_var > 4.5 }
+							}
+							add_ideas = ROM_relation_with_romania_5
+						}
+						else_if = {
+							limit = {
+								check_variable = { ROM_relation_var > 3.5 }
+							}
+							add_ideas = ROM_relation_with_romania_4
+						}
+						else_if = {
+							limit = {
+								check_variable = { ROM_relation_var > 2.5 }
+							}
+							add_ideas = ROM_relation_with_romania_3
+						}
+						else_if = {
+							limit = {
+								check_variable = { ROM_relation_var > 1.5 }
+							}
+							add_ideas = ROM_relation_with_romania_2
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					check_variable = {
+						ROM_modifier_must_refresh > 0
+					}
+				}
+				ROM_update_foreign_relations_dynamic_modifier = yes
+			}
+		}
+	}
+	on_monthly_ROM = {
+		effect = {
+			if = {
+				limit = {
+					is_ai = yes
+					has_dlc = "To The Bitter End"
+				}
+				for_each_scope_loop = {
+					array = global.rom_diplomacy_partners
+					if = {
+						limit = {
+							exists = yes
+							ROM = {
+								NOT = {
+									is_in_array = { blocked_diplo_countries = PREV.id }
+								}
+							}
+							NOT = {
+								has_war_with = ROM
+								is_subject = yes
+							}
+							OR = {
+								has_idea = POL_the_polish_romanian_alliance
+								AND = {
+									original_tag = CZE
+									ROM = {
+										NOT = {
+											has_completed_focus = ROM_institute_a_royal_dictatorship
+											has_completed_focus = ROM_undermine_the_monarchy
+											has_completed_focus = ROM_cordon_sanitaire_ba
+										}
+									}
+								}
+								AND = {
+									ROM = {
+										has_war = yes
+									}
+									OR = {	#all good countries for war stats
+										original_tag = FRA
+										original_tag = ENG
+										original_tag = GER
+										original_tag = SOV
+										original_tag = ITA
+										original_tag = GRE
+									}
+								}
+							}
+						}
+						if = {
+							limit = {
+								amount_taken_ideas = {
+									amount > 2
+									slots = {
+										political_advisor
+									}
+								}
+								OR = {	#AI can't time this well, so spend at most 0.5pp daily
+									check_variable = {
+										ROM_current_improving_countries < 2
+									}
+									AND = {
+										check_variable = {
+											ROM_current_improving_countries < 3
+										}
+										OR = {
+											has_idea_with_trait = ROM_the_white_prince
+											has_idea_with_trait = ROM_camarilla_council_member_2
+											has_idea_with_trait = ROM_pragmatic_diplomat
+										}
+									}
+								}
+								NOT = {
+									ROM_is_improving_relations = yes
+								}
+							}
+							ROM_diplo_start_improving_tier = yes
+						}
+					}
+					else_if = {
+						limit = {
+							ROM_is_improving_relations = yes
+						}
+						ROM_diplo_stop_improving_tier = yes
+					}
+				}
+			}
+		}
+	}
+	on_ruling_party_change = {
+		effect = {
+			if = {
+				limit = {
+					original_tag = ROM
+					has_character = ROM_mihail_ralea
+				}
+				ROM_update_ralea = yes
+			}
+			if = {
+				limit = {
+					original_tag = ROM
+					has_dlc = "To The Bitter End"
+					has_character = ROM_boris_stefanov
+					has_country_leader = {
+						character = ROM_boris_stefanov
+						ruling_only = yes
+					}
+				}
+				retire_character = ROM_boris_stefanov
+			}
+			if = {  
+				limit = {
+					is_in_faction_with = ROM
+					OR = {
+						has_idea = ROM_bucharest_pact_spirit
+						has_idea = ROM_bucharest_pact_spirit_2
+						has_idea = ROM_bucharest_pact_spirit_3
+					}
+					OR = {
+						has_government = communism
+						has_government = fascism
+					}
+					NOT = {
+						has_war = yes
+					}					
+				}
+				country_event = { id = BA_romania_flavour.34 days = 2 }
+			}			
+		}
+	}
+	on_offer_join_faction = {
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						OR = {
+							original_tag = ROM
+							is_ally_with = ROM
+						}
+					}
+					ROM = {
+						has_completed_focus = ROM_economic_cooperation
+					}
+					is_in_array = {
+						array = global.rom_diplomacy_partners
+						value = THIS.id
+					}
+					NOT = {
+						has_idea = ROM_relation_with_romania_2
+						has_idea = ROM_relation_with_romania_3
+						has_idea = ROM_relation_with_romania_4
+						has_idea = ROM_relation_with_romania_5
+					}
+				}
+				if = {
+					limit = {
+						check_variable = { ROM_relation_var > 4.5 }
+					}
+					add_ideas = ROM_relation_with_romania_5
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 3.5 }
+					}
+					add_ideas = ROM_relation_with_romania_4
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 2.5 }
+					}
+					add_ideas = ROM_relation_with_romania_3
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 1.5 }
+					}
+					add_ideas = ROM_relation_with_romania_2
+				}
+			}
+		}
+		effect = {
+			if = {  
+				limit = {
+					ROOT = {
+						original_tag = ROM
+						has_completed_focus = ROM_the_bucharest_security_convention
+					}
+					FROM = {
+						NOT = {
+							has_idea = ROM_bucharest_pact_spirit
+						#	is_major = yes
+						}
+					}
+				}
+				#add_ideas = ROM_bucharest_pact_spirit
+				FROM = { country_event = { id = BA_romania_flavour.29 days = 5 } }
+			}
+			if = {
+				limit = {
+					ROOT = {
+						OR = {
+							original_tag = ROM
+							is_ally_with = ROM
+						}
+					}
+					ROM = {
+						has_completed_focus = ROM_economic_cooperation
+					}
+					FROM = {
+						is_in_array = {
+							array = global.rom_diplomacy_partners
+							value = THIS.id
+						}
+						NOT = {
+							has_idea = ROM_relation_with_romania_2
+							has_idea = ROM_relation_with_romania_3
+							has_idea = ROM_relation_with_romania_4
+							has_idea = ROM_relation_with_romania_5
+						}
+					}
+				}
+				FROM = {
+					if = {
+						limit = {
+							check_variable = { ROM_relation_var > 4.5 }
+						}
+						add_ideas = ROM_relation_with_romania_5
+					}
+					else_if = {
+						limit = {
+							check_variable = { ROM_relation_var > 3.5 }
+						}
+						add_ideas = ROM_relation_with_romania_4
+					}
+					else_if = {
+						limit = {
+							check_variable = { ROM_relation_var > 2.5 }
+						}
+						add_ideas = ROM_relation_with_romania_3
+					}
+					else_if = {
+						limit = {
+							check_variable = { ROM_relation_var > 1.5 }
+						}
+						add_ideas = ROM_relation_with_romania_2
+					}
+				}
+			}	
+		}
+	}	
+	on_join_faction = {
+		effect = {
+			if = {  
+				limit = {
+					FROM = {
+						original_tag = ROM
+						has_completed_focus = ROM_the_bucharest_security_convention
+					}
+					NOT = {
+						has_idea = ROM_bucharest_pact_spirit
+					#	is_major = yes
+					}			
+				}
+				#add_ideas = ROM_bucharest_pact_spirit
+				country_event = { id = BA_romania_flavour.29 days = 5 }
+			}		
+			if = {
+				limit = {
+					FROM = {
+						has_completed_focus = ROM_economic_cooperation
+					}
+					ROOT = {
+						is_in_array = {
+							array = global.rom_diplomacy_partners
+							value = THIS.id
+						}
+						NOT = {
+							has_idea = ROM_relation_with_romania_2
+							has_idea = ROM_relation_with_romania_3
+							has_idea = ROM_relation_with_romania_4
+							has_idea = ROM_relation_with_romania_5
+						}
+					}
+				}
+				if = {
+					limit = {
+						check_variable = { ROM_relation_var > 4.5 }
+					}
+					add_ideas = ROM_relation_with_romania_5
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 3.5 }
+					}
+					add_ideas = ROM_relation_with_romania_4
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 2.5 }
+					}
+					add_ideas = ROM_relation_with_romania_3
+				}
+				else_if = {
+					limit = {
+						check_variable = { ROM_relation_var > 1.5 }
+					}
+					add_ideas = ROM_relation_with_romania_2
+				}
+			}
+		}
+	}
+	on_capitulation = {
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = ROM
+						OR = {
+							has_completed_focus = ROM_maintain_regional_stability
+							has_completed_focus = ROM_dominance_over_the_balkans
+						}
+					}
+				}
+				every_core_state = {
+					limit = {
+						is_owned_by = ROOT
+					}
+					add_to_temp_variable = {
+						ROOT.casualties_max = state_population_k
+					}
+				}
+				divide_temp_variable = {
+					casualties_max = 100
+				}
+				set_temp_variable = {
+					casualties_max_low = casualties_max
+				}
+				divide_temp_variable = {
+					casualties_max_low = 2
+				}
+				#log = "Max casualties in k: [?casualties_max]"
+				if = {
+					limit = {
+						FROM = {
+							has_completed_focus = ROM_dominance_over_the_balkans
+						}
+					}
+					if = {
+						limit = {
+							casualties_inflicted_by = {
+								opponent = FROM
+								thousands < casualties_max
+							}
+						}
+						FROM = {
+							every_controlled_state = {
+								limit = {
+									is_core_of = ROOT
+								}
+								add_compliance = 15
+							}
+						}
+					}
+					if = {
+						limit = {
+							casualties_inflicted_by = {
+								opponent = FROM
+								thousands < casualties_max_low
+							}
+						}
+						FROM = {
+							add_to_variable = {
+								ROM_countries_defeated_low_casualties = 1
+							}
+							every_controlled_state = {
+								limit = {
+									is_core_of = ROOT
+								}
+								add_compliance = 15
+							}
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						casualties_inflicted_by = {
+							opponent = FROM
+							thousands < casualties_max_low
+						}
+					}
+					set_country_flag = ROM_allow_max_good_idea
+				}
+				else_if = {
+					limit = {
+						casualties_inflicted_by = {
+							opponent = FROM
+							thousands < casualties_max
+						}
+					}
+					set_country_flag = ROM_allow_lesser_good_idea
+				}
+			}
+		}
+	}
+	on_release_as_puppet = {
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = ROM
+						has_completed_focus = ROM_maintain_regional_stability
+					}
+					has_autonomy_state = autonomy_supervised_state
+				}
+				add_ideas = ROM_supervised_government_buff_3
+			}
+		}
+	}
+	on_puppet = {
+		effect = {
+			if = {
+				limit = {
+					FROM = {
+						original_tag = ROM
+						has_completed_focus = ROM_maintain_regional_stability
+					}
+					has_autonomy_state = autonomy_supervised_state
+				}
+				if = {
+					limit = {
+						has_country_flag = ROM_allow_max_good_idea
+					}
+					add_ideas = ROM_supervised_government_buff
+					clr_country_flag = ROM_allow_max_good_idea
+					FROM = {
+						add_to_variable = {
+							ROM_countries_defeated_low_casualties = 1
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						has_country_flag = ROM_allow_lesser_good_idea
+					}
+					add_ideas = ROM_supervised_government_buff_2
+					clr_country_flag = ROM_allow_lesser_good_idea
+				}
+				else = {
+					add_ideas = ROM_supervised_government_buff_3
+				}
+			}
+		}
+	}
+}
