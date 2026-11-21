@@ -1,0 +1,1475 @@
+###############################################################
+### calculating the effect of claim strength in Yugoslavia ####
+###############################################################
+
+calculate_claimant_effect = {	
+	if = {
+		limit = {
+			check_variable = { claim_strength_@PREV < 2 }
+		}
+		add_to_variable = { var = claim_strength_@PREV value = 1 }
+		custom_effect_tooltip = romania_add_claims_tt
+	}
+	else_if = {
+		limit = {
+			NOT = {
+				any_country = {
+					has_country_flag = invited_to_split_yugo
+					PREV = {
+						is_claimed_by = PREV
+					}
+				}
+			}
+		}
+		add_to_variable = { var = claim_strength_@PREV value = 1 }
+		custom_effect_tooltip = newline_tt
+		add_claim_by = PREV
+	}
+	if = {
+		limit = {
+			check_variable = {claim_strength_ROM > claim_strength_HUN }
+			check_variable = {claim_strength_ROM > claim_strength_ITA }
+			check_variable = {claim_strength_ROM > claim_strength_GER }
+		}
+		set_state_flag = strongest_claimant_ROM
+		clr_state_flag = strongest_claimant_GER
+		clr_state_flag = strongest_claimant_ITA
+		clr_state_flag = strongest_claimant_HUN
+	}
+	if = {
+		limit = {
+			check_variable = {claim_strength_GER > claim_strength_HUN }
+			check_variable = {claim_strength_GER > claim_strength_ITA }
+			check_variable = {claim_strength_GER > claim_strength_ROM }
+		}
+		set_state_flag = strongest_claimant_GER
+		clr_state_flag = strongest_claimant_ROM
+		clr_state_flag = strongest_claimant_ITA
+		clr_state_flag = strongest_claimant_HUN
+	}
+	if = {
+		limit = {
+			check_variable = {claim_strength_ITA > claim_strength_HUN }
+			check_variable = {claim_strength_ITA > claim_strength_ROM }
+			check_variable = {claim_strength_ITA > claim_strength_GER }
+		}
+		set_state_flag = strongest_claimant_ITA
+		clr_state_flag = strongest_claimant_GER
+		clr_state_flag = strongest_claimant_ROM
+		clr_state_flag = strongest_claimant_HUN
+	}
+	if = {
+		limit = {
+			check_variable = {claim_strength_HUN > claim_strength_ROM }
+			check_variable = {claim_strength_HUN > claim_strength_ITA }
+			check_variable = {claim_strength_HUN > claim_strength_GER }
+		}
+		set_state_flag = strongest_claimant_HUN
+		clr_state_flag = strongest_claimant_GER
+		clr_state_flag = strongest_claimant_ITA
+		clr_state_flag = strongest_claimant_ROM
+	}
+}
+ROM_clear_diplo_variables = {
+	#all variables EXCEPT political power cost from ROM_international_relations dynamic modifier
+	clear_variable = ROM_diplo_army_armor_speed_factor
+	clear_variable = ROM_diplo_air_attack_factor
+	clear_variable = ROM_diplo_dig_in_speed_factor
+	clear_variable = ROM_diplo_decryption_factor
+	clear_variable = ROM_diplo_decryption_power_factor
+	clear_variable = ROM_diplo_command_power_gain
+	clear_variable = ROM_diplo_compliance_gain
+	clear_variable = ROM_diplo_subversive_activites_upkeep
+	clear_variable = ROM_diplo_war_support_factor
+	clear_variable = ROM_diplo_resistance_target
+	clear_variable = ROM_diplo_generate_wargoal_tension
+	clear_variable = ROM_diplo_army_org_regain
+	clear_variable = ROM_diplo_production_speed_arms_factory_factor
+
+	#shared
+	clear_variable = ROM_diplo_resistance_growth_on_our_occupied_states
+	clear_variable = ROM_diplo_command_abilities_cost_factor
+	clear_variable = ROM_diplo_stability_factor
+	clear_variable = ROM_diplo_mountaineers_special_forces_contribution_factor
+	clear_variable = ROM_diplo_army_claim_attack_factor
+	clear_variable = ROM_diplo_supply_consumption_factor
+	clear_variable = ROM_diplo_winter_attrition
+
+	#added in rebalance
+	clear_variable = ROM_diplo_production_factory_start_efficiency_factor
+	clear_variable = ROM_diplo_production_factory_max_efficiency_factor
+	clear_variable = ROM_diplo_production_factory_efficiency_gain_factor
+	clear_variable = ROM_diplo_local_resources_factor
+	clear_variable = ROM_diplo_industrial_capacity_factory
+	clear_variable = ROM_diplo_production_speed_industrial_complex_factor
+	clear_variable = ROM_diplo_production_lack_of_resource_penalty_factor
+	#clear_variable = ROM_diplo_line_change_production_efficiency_factor	#currently unused, would be a good candidate if something else is unbalanced
+}
+ROM_update_foreign_relations_dynamic_modifier = {			#ran by on-action if any relation changed
+	ROM_clear_diplo_variables = yes
+	for_each_scope_loop = {
+		array = global.rom_diplomacy_partners
+		if = {
+			limit = {
+				check_variable = { ROM_relation_var > 4.5 }
+			}
+			ROM_add_country_tier_5_buff = yes
+		}
+		else_if = {
+			limit = {
+				check_variable = { ROM_relation_var > 3.5 }
+			}
+			ROM_add_country_tier_4_buff = yes
+		}
+		else_if = {
+			limit = {
+				check_variable = { ROM_relation_var > 2.5 }
+			}
+			#ROM_add_country_tier_3_buff = yes
+		}
+		else_if = {
+			limit = {
+				check_variable = { ROM_relation_var > 1.5 }
+			}
+			ROM_add_country_tier_2_buff = yes
+		}
+		if = {	#tier 3 bonus stacks with the stats of 4 OR 5
+			limit = {
+				check_variable = { ROM_relation_var > 2.5 }
+			}
+			ROM_add_country_tier_3_buff = yes
+		}
+	}
+	force_update_dynamic_modifier = yes
+}
+ROM_add_country_tier_2_buff = {
+	if = {
+		limit = {
+			original_tag = GER
+		}
+		add_to_variable = {
+			ROM_diplo_supply_consumption_factor = -0.03
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_command_abilities_cost_factor = -0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ENG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_command_abilities_cost_factor = -0.05
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_stability_factor = 0.02
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = SOV
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_supply_consumption_factor = -0.03
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_winter_attrition = -0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = FRA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_growth_on_our_occupied_states = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = CZE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_stability_factor = 0.02
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = POL
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_winter_attrition = -0.05
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_growth_on_our_occupied_states = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ITA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_mountaineers_special_forces_contribution_factor = -0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = YUG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_growth_on_our_occupied_states = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = TUR
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_stability_factor = 0.02
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = GRE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_mountaineers_special_forces_contribution_factor = -0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = BUL
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_claim_attack_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = HUN
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_claim_attack_factor = 0.03
+		}
+	}
+}
+ROM_add_country_tier_3_buff = {
+	if = {
+		limit = {
+			original_tag = GER
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_command_abilities_cost_factor = -0.1
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_supply_consumption_factor = -0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ENG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_command_abilities_cost_factor = -0.1
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_stability_factor = 0.04
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = SOV
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_supply_consumption_factor = -0.05
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_winter_attrition = -0.1
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = FRA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_growth_on_our_occupied_states = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = CZE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_stability_factor = 0.04
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = POL
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_winter_attrition = -0.1
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_growth_on_our_occupied_states = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ITA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_mountaineers_special_forces_contribution_factor = -0.1
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = YUG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_growth_on_our_occupied_states = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = TUR
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_stability_factor = 0.04
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = GRE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_mountaineers_special_forces_contribution_factor = -0.1
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = BUL
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_claim_attack_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = HUN
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_claim_attack_factor = 0.05
+		}
+	}
+}
+ROM_add_country_tier_4_buff = {
+	if = {
+		limit = {
+			original_tag = GER
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_armor_speed_factor = 0.05
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_lack_of_resource_penalty_factor = -0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ENG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_air_attack_factor = 0.05
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_speed_industrial_complex_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = SOV
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_org_regain = 0.05
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_max_efficiency_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = FRA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_dig_in_speed_factor = 0.15
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_efficiency_gain_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = CZE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_speed_arms_factory_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = POL
+		}
+		if = {
+			limit = {
+				has_dlc = "La Resistance"
+			}
+			add_to_variable = {
+				ROM.ROM_diplo_decryption_power_factor = 0.15
+			}
+			else = {
+				add_to_variable = {
+					ROM.ROM_diplo_decryption_factor = 0.15
+					tooltip = decryption_factor_tt
+				}
+			}
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_industrial_capacity_factory = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ITA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_command_power_gain = 0.1
+			tooltip = command_power_gain_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_start_efficiency_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = YUG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_compliance_gain = 0.03
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_start_efficiency_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = TUR
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_subversive_activites_upkeep = -0.3
+			tooltip = subversive_activites_upkeep_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_local_resources_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = GRE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_war_support_factor = 0.1
+			tooltip = war_support_factor_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_efficiency_gain_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = BUL
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_target = -0.1
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_local_resources_factor = 0.03
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = HUN
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_generate_wargoal_tension = -0.15
+			tooltip = generate_wargoal_tension_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_max_efficiency_factor = 0.03
+		}
+	}
+}
+ROM_add_country_tier_5_buff = {
+	if = {
+		limit = {
+			original_tag = GER
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_armor_speed_factor = 0.1
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_lack_of_resource_penalty_factor = -0.1
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ENG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_air_attack_factor = 0.1
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_speed_industrial_complex_factor = 0.07
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = SOV
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_army_org_regain = 0.1
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_max_efficiency_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = FRA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_dig_in_speed_factor = 0.15
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_efficiency_gain_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = CZE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_speed_arms_factory_factor = 0.07
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = POL
+		}
+		if = {
+			limit = {
+				has_dlc = "La Resistance"
+			}
+			add_to_variable = {
+				ROM.ROM_diplo_decryption_power_factor = 0.2
+			}
+			else = {
+				add_to_variable = {
+					ROM.ROM_diplo_decryption_factor = 0.25
+					tooltip = decryption_factor_tt
+				}
+			}
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_industrial_capacity_factory = 0.07
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = ITA
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_command_power_gain = 0.15
+			tooltip = command_power_gain_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_start_efficiency_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = YUG
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_compliance_gain = 0.05
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_start_efficiency_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = TUR
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_subversive_activites_upkeep = -0.5
+			tooltip = subversive_activites_upkeep_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_local_resources_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = GRE
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_war_support_factor = 0.15
+			tooltip = war_support_factor_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_efficiency_gain_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = BUL
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_resistance_target = -0.15
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_local_resources_factor = 0.05
+		}
+	}
+	else_if = {
+		limit = {
+			original_tag = HUN
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_generate_wargoal_tension = -0.3
+			tooltip = generate_wargoal_tension_tt
+		}
+		add_to_variable = {
+			ROM.ROM_diplo_production_factory_max_efficiency_factor = 0.05
+		}
+	}
+}
+ROM_recalculate_foreign_relations_political_power_cost = {
+	set_variable = {
+		ROM_international_relations_political_power_cost = 0
+	}
+	for_each_scope_loop = {
+		array = global.rom_diplomacy_partners
+		if = {
+			limit = {
+				has_country_flag = ROM_improving_relations
+			}
+			ROM = {
+				add_to_variable = {
+					ROM_international_relations_political_power_cost = ROM_one_country_relations_boosting_cost
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_country_flag = ROM_maintaining_relations_high
+			}
+			ROM = {
+				add_to_variable = {
+					ROM_international_relations_political_power_cost = ROM_one_country_relations_boosting_cost
+				}
+			}
+		}
+	}
+}
+ROM_update_arms_industry_modifier_cosmetics = {
+	hidden_effect = {
+		if = {
+			limit = {
+				count_triggers = {
+					amount = 2
+					has_completed_focus = ROM_invest_in_galati_shipyards
+					has_completed_focus = ROM_diversify_malaxa
+					has_completed_focus = ROM_domestic_tank_designs
+					has_completed_focus = ROM_invest_in_the_resita_group
+				}
+			}
+			if = {
+				limit = {
+					has_dynamic_modifier = {
+						modifier = ROM_underdeveloped_arms_industry_no_navy
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				remove_dynamic_modifier = {
+					modifier = ROM_underdeveloped_arms_industry_no_navy
+				}
+				add_dynamic_modifier = {
+					modifier = ROM_developing_arms_industry_no_navy
+				}
+			}
+			if = {
+				limit = {
+					has_dynamic_modifier = {
+						modifier = ROM_underdeveloped_arms_industry
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				remove_dynamic_modifier = {
+					modifier = ROM_underdeveloped_arms_industry
+				}
+				add_dynamic_modifier = {
+					modifier = ROM_developing_arms_industry
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_completed_focus = ROM_invest_in_galati_shipyards
+				count_triggers = {
+					amount = 2
+					has_completed_focus = ROM_diversify_malaxa
+					has_completed_focus = ROM_domestic_tank_designs
+					has_completed_focus = ROM_invest_in_the_resita_group
+				}
+				OR = {
+					has_dynamic_modifier = {
+						modifier = ROM_developing_arms_industry_no_navy
+					}
+					has_dynamic_modifier = {
+						modifier = ROM_developing_arms_industry
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_dynamic_modifier = {
+						modifier = ROM_developing_arms_industry_no_navy
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				remove_dynamic_modifier = {
+					modifier = ROM_developing_arms_industry_no_navy
+				}
+			}
+			if = {
+				limit = {
+					has_dynamic_modifier = {
+						modifier = ROM_developing_arms_industry
+					}
+				}
+				custom_effect_tooltip = generic_skip_one_line_tt
+				remove_dynamic_modifier = {
+					modifier = ROM_developing_arms_industry
+				}
+			}
+			add_dynamic_modifier = {
+				modifier = ROM_developed_arms_industry
+			}
+		}
+	}
+}
+ROM_start_diplo_mechanic = {
+	set_country_flag = ROM_diplomacy_enabled
+	every_other_country = {
+		limit = {
+			OR = {
+				has_opinion_modifier = BFTB_balkan_pact_enemy
+				has_opinion_modifier = BFTB_balkan_pact_ally
+				has_guaranteed = ROOT
+				is_guaranteed_by = ROOT
+				original_tag = GER
+				original_tag = POL
+				original_tag = HUN
+				original_tag = ENG
+				original_tag = SOV
+				original_tag = BUL
+				original_tag = ITA
+			}
+		}
+
+		#used in localisation, so generate even before its first used
+		set_variable = { decay_multiplier = opinion@ROM }	#range: -100 - +100
+		multiply_variable = { decay_multiplier = -0.005 }	#range: +0.5 - -0.5
+		add_to_variable = { decay_multiplier = 1 }			#range: +1.5 - +0.5
+
+		add_to_array = {
+			global.rom_diplomacy_partners = THIS.id
+		}
+		set_variable = { ROM_relation_var = 1 } 
+	}
+	if = {
+		limit = {
+			has_start_date < 1937.1.1
+		}
+		FRA = { set_variable = { ROM_relation_var = 4 } }
+		POL = {
+			set_variable = { ROM_relation_var = 4 }
+		}
+		CZE = {
+			if = {
+				limit = {
+					is_guaranteed_by = ROOT
+				}
+				set_variable = { ROM_relation_var = 3 }
+			}
+		}
+		YUG = {
+			if = {
+				limit = {
+					is_guaranteed_by = ROOT
+				}
+				set_variable = { ROM_relation_var = 2 }
+			}
+		}
+		GRE = {
+			if = {
+				limit = {
+					is_guaranteed_by = ROOT
+				}
+				set_variable = { ROM_relation_var = 2 }
+			}
+		}
+		TUR = {
+			if = {
+				limit = {
+					is_guaranteed_by = ROOT
+				}
+				set_variable = { ROM_relation_var = 2 }
+			}
+		}
+	}
+	else = {
+		GER = { set_variable = { ROM_relation_var = 4 } }	#moving towards axis alliance
+		ITA = { set_variable = { ROM_relation_var = 4 } }	#moving towards axis alliance
+		FRA = { set_variable = { ROM_relation_var = 2 } }	#losing trust, but still guaranteed
+		POL = { set_variable = { ROM_relation_var = 3 } }	#arranged british guarantee, recent politics slightly damaged relation
+		ENG = { set_variable = { ROM_relation_var = 2 } }	#guaranteed irl, currently isnt represented in-game
+		YUG = {
+			if = {
+				limit = {
+					is_guaranteed_by = ROOT
+				}
+				set_variable = { ROM_relation_var = 3 }
+			}
+		}
+		GRE = {
+			if = {
+				limit = {
+					is_guaranteed_by = ROOT
+				}
+				set_variable = { ROM_relation_var = 3 }
+			}
+		}
+		TUR = {
+			if = {
+				limit = {
+					is_guaranteed_by = ROOT
+				}
+				set_variable = { ROM_relation_var = 3 }
+			}
+		}
+	}
+	SOV = { add_to_array = { ROM.blocked_diplo_countries = THIS.id } }
+	HUN = { add_to_array = { ROM.blocked_diplo_countries = THIS.id } }
+	BUL = { add_to_array = { ROM.blocked_diplo_countries = THIS.id } }
+	add_dynamic_modifier = {
+		modifier = ROM_international_relations
+	}
+	set_variable = { ROM_one_country_relations_boosting_cost = 0.25 }
+	set_variable = { ROM_one_country_relations_maintain_cost = 0.08 }
+
+	ROM_update_foreign_relations_dynamic_modifier = yes
+}
+ROM_setup_civil_war = {
+	hidden_effect = {	#Civil war setup
+		remove_ideas = ROM_king_carol_ii_ba
+		create_dynamic_country = {
+			original_tag = ROOT
+			reserve_dynamic_country = yes
+			set_country_flag = ROM_container_country
+			save_global_event_target_as = temp_ROM
+		}
+		create_dynamic_country = {
+			original_tag = ROOT
+			reserve_dynamic_country = yes
+			set_country_flag = ROM_status_quo_opposition
+			save_global_event_target_as = authoritarian_ROM
+		}
+		if = {
+			limit = {
+				#has_completed_focus = ROM_demand_legalization	#no longer available to democrats, makes it ever so slightly easier to debug this way
+			}
+			create_dynamic_country = {
+				original_tag = ROOT
+				reserve_dynamic_country = yes
+				set_country_flag = ROM_democratic_opposition
+				save_global_event_target_as = democratic_ROM
+			}
+			set_country_flag = ROM_communist_opposition
+			save_global_event_target_as = communist_ROM
+		}
+		# else = {
+		# 	create_dynamic_country = {
+		# 		original_tag = ROOT
+		# 		reserve_dynamic_country = yes
+		# 		set_country_flag = ROM_communist_opposition
+		# 		save_global_event_target_as = communist_ROM
+		# 	}
+		# 	set_country_flag = ROM_democratic_opposition
+		# 	save_global_event_target_as = democratic_ROM
+		# }
+		event_target:temp_ROM = {
+			ROOT = {
+				random_owned_state = {
+					transfer_state_to = PREV
+				}
+				every_character = {
+					if = {
+						limit = {
+							NOT = {
+								AND = {
+									ROOT = {
+										has_country_flag = ROM_communist_opposition
+									}
+									has_character_flag = ROM_is_communist_char
+								}
+								AND = {
+									ROOT = {
+										has_country_flag = ROM_democratic_opposition
+									}
+									has_character_flag = ROM_is_democratic_char
+								}
+							}
+						}
+						set_nationality = PREV.PREV
+					}
+				}
+			}
+			annex_country = {
+				target = PREV
+				transfer_troops = yes
+			}
+			every_owned_state = {
+				limit = {
+					is_core_of = ROM
+				}
+				teleport_armies = {
+					limit = {
+						tag = PREV
+					}
+					to_state = 46	#teleport out of enemies lands
+				}
+			}
+			766 = {
+				if = {
+					limit = {
+						is_owned_by = PREV
+					}
+					transfer_state_to = event_target:communist_ROM
+				}
+			}
+			78 = {
+				if = {
+					limit = {
+						is_owned_by = PREV
+					}
+					transfer_state_to = event_target:communist_ROM
+					79 = {
+						transfer_state_to = event_target:democratic_ROM
+					}
+				}
+				else = {
+					79 = {
+						transfer_state_to = event_target:communist_ROM
+					}
+					80 = {
+						if = {
+							limit = {
+								is_owned_by = PREV.PREV
+							}
+							transfer_state_to = event_target:communist_ROM
+						}
+					}
+				}
+			}
+			84 = {
+				if = {
+					limit = {
+						is_owned_by = PREV
+					}
+					transfer_state_to = event_target:democratic_ROM
+				}
+				else = {
+					81 = {
+						transfer_state_to = event_target:democratic_ROM
+					}
+				}
+			}
+			every_owned_state = {
+				limit = {
+					OR = {
+						region = 27
+						state = 80
+					}
+				}
+				transfer_state_to = event_target:democratic_ROM
+			}
+			#every remaining character/state/unit goes to the monarchists
+			every_character = {
+				set_nationality = event_target:authoritarian_ROM
+			}
+			transfer_units_fraction= {
+				target = event_target:communist_ROM
+				size = 0.2
+				stockpile_ratio = 0.2
+				army_ratio = 0.13		#improvised value based on previous civil war-making
+				navy_ratio = 0.2		#they do have a port, let a few captains defect
+				air_ratio = 0.08		#based on airforce in their region
+				keep_unit_leaders_trigger = {
+					always = yes
+				}
+			}
+			transfer_units_fraction= {
+				target = event_target:democratic_ROM
+				size = 0.5
+				stockpile_ratio = 0.45	#doesnt have most defense industry
+				army_ratio = 0.55		#little bit to compensate
+				navy_ratio = 0			#doesnt spawn coastal
+				air_ratio = 0.6			#lots of planes in their region
+				keep_unit_leaders_trigger = {
+					always = yes
+				}
+			}
+			event_target:authoritarian_ROM = {
+				annex_country = {
+					target = PREV
+					transfer_troops = yes
+				}
+			}
+			reserve_dynamic_country = no
+			clear_global_event_target = temp_ROM
+		}
+		event_target:communist_ROM = {
+			set_politics = {
+				ruling_party = communism
+				elections_allowed = no
+			}
+			remove_ideas = ROM_a_flawed_democracy
+			add_ideas = {
+				extensive_conscription
+				war_economy
+			}
+			event_target:authoritarian_ROM = {
+				every_character = {
+					limit = {
+						has_character_flag = ROM_is_communist_char
+					}
+					set_nationality = PREV.PREV
+				}
+			}
+			add_offsite_building = { type = arms_factory level = 2 }
+			create_corps_commander = {
+				traits = { JAP_communist_sympathizer politically_connected }
+				attack_skill = 2
+				defense_skill = 2
+				planning_skill = 2
+				logistics_skill = 1
+				skill = 2
+			}
+			set_variable = {
+				var = ROM_soviet_influence
+				value = 0
+			}
+			add_equipment_to_stockpile = { #buff to compensate for lack of industry, 4 divisions worth
+				type = infantry_equipment
+				amount = 3000	#nerfed from 4k since it was too easy
+				producer = ROM
+			}
+			division_template = {
+				name = "Militia Muncitorilor"
+				#is_locked = yes
+
+				division_names_group = ROM_Inf_01
+
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+					infantry = { x = 0 y = 3 }
+				}
+				support = {
+					engineer = { x = 0 y = 0 }
+				}
+			}
+			set_temp_variable = {
+				unit_count_target = 8	#nerfed from 11 since it was too easy
+			}
+			while_loop_effect = {
+				limit = {
+					check_variable = {
+						unit_count_target > 0
+					}
+				}
+				every_controlled_state = {
+					if = {
+						limit = {
+							check_variable = {
+								unit_count_target > 0
+							}
+						}
+						subtract_from_temp_variable = { unit_count_target = 1 }
+						create_unit = {
+							division = "name = \"Militia Muncitorilor\" division_template = \"Militia Muncitorilor\" start_experience_factor = 0.05"
+							owner = PREV
+						}
+					}
+				}
+			}
+			promote_character = ROM_petru_groza
+			set_popularities = {
+				democratic = 20
+				neutrality = 5
+				fascism = 0
+				communism = 75
+			}
+			if = {
+				limit = {
+					owns_state = 766
+				}
+				set_capital = {
+					state = 766
+				}
+			}
+			else_if = {
+				limit = {
+					owns_state = 79
+				}
+				add_victory_points = {
+					province = 9716
+					value = 1
+				}
+				set_capital = {
+					state = 79
+				}
+			}
+		}
+		event_target:democratic_ROM = {
+			set_country_flag = CZE_remove_cores
+			set_politics = {
+				ruling_party = democratic
+				elections_allowed = yes
+			}
+			add_ideas = {
+				limited_conscription
+				partial_economic_mobilisation
+			}
+			event_target:authoritarian_ROM = {
+				every_character = {
+					limit = {
+						has_character_flag = ROM_is_democratic_char
+					}
+					set_nationality = PREV.PREV
+				}
+			}
+			set_country_flag = ROM_recalled_radescu
+			promote_character = ROM_constantin_bratianu
+			set_popularities = {
+				democratic = 70
+				neutrality = 15
+				fascism = 10
+				communism = 5
+			}
+			division_template = {
+				name = "Brigada de Aparare Civila"
+				is_locked = yes
+
+				division_names_group = ROM_Inf_01
+
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+					infantry = { x = 0 y = 3 }
+				}
+				support = {
+					engineer = { x = 0 y = 0 }
+				}
+			}
+			set_temp_variable = {
+				unit_count_target = 8
+			}
+			while_loop_effect = {
+				limit = {
+					check_variable = {
+						unit_count_target > 0
+					}
+				}
+				every_controlled_state = {
+					if = {
+						limit = {
+							check_variable = {
+								unit_count_target > 0
+							}
+						}
+						subtract_from_temp_variable = { unit_count_target = 1 }
+						create_unit = {
+							division = "name = \"Brigada de Aparare Civila\" division_template = \"Brigada de Aparare Civila\" start_experience_factor = 0.05"
+							owner = PREV
+							allow_spawning_on_enemy_provs = yes
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					owns_state = 76
+				}
+				set_capital = {
+					state = 76
+				}
+			}
+			else_if = {
+				limit = {
+					owns_state = 81
+				}
+				set_capital = {
+					state = 81
+				}
+			}
+		}
+		event_target:authoritarian_ROM = {
+			set_country_flag = CZE_remove_cores
+			set_politics = {
+				ruling_party = neutrality
+				elections_allowed = no
+			}
+			add_ideas = {
+				limited_conscription
+				partial_economic_mobilisation
+			}
+			add_ideas = ROM_king_carol_ii_ba
+			promote_character = ROM_carol_ii
+			division_template = {
+				name = "Militia Regala"
+				is_locked = yes
+
+				division_names_group = ROM_Inf_01
+
+				regiments = {
+					infantry = { x = 0 y = 0 }
+					infantry = { x = 0 y = 1 }
+					infantry = { x = 0 y = 2 }
+					infantry = { x = 0 y = 3 }
+				}
+				support = {
+					engineer = { x = 0 y = 0 }
+				}
+			}
+			set_temp_variable = {
+				unit_count_target = 8
+			}
+			while_loop_effect = {
+				limit = {
+					check_variable = {
+						unit_count_target > 0
+					}
+				}
+				every_controlled_state = {
+					if = {
+						limit = {
+							check_variable = {
+								unit_count_target > 0
+							}
+						}
+						subtract_from_temp_variable = { unit_count_target = 1 }
+						create_unit = {
+							division = "name = \"Militia Regala\" division_template = \"Militia Regala\" start_experience_factor = 0.05"
+							owner = PREV
+							allow_spawning_on_enemy_provs = yes
+						}
+					}
+				}
+			}
+			set_popularities = {
+				democratic = 5
+				neutrality = 60
+				fascism = 35
+				communism = 0
+			}
+			set_capital = {
+				state = 46
+			}
+			civil_war_anti_exploiter_punitive_action = yes
+			if = {
+				limit = {
+					ROOT = {
+						NOT = {
+							has_completed_focus = ROM_modernize_the_land_forces
+						}
+					}
+				}
+				ROM_grigore_georgescu = {
+					set_nationality = ROOT
+				}
+				ROM_gheorghe_avramescu = {
+					set_nationality = ROOT
+				}
+				ROM_ioan_mihail_racovita = {
+					set_nationality = ROOT
+				}
+			}
+			if = {
+				limit = {
+					ROOT = {
+						NOT = {
+							has_completed_focus = ROM_funding_for_the_academies
+						}
+					}
+				}
+				ROM_constantin_atanasescu = {
+					set_nationality = ROOT
+				}
+			}
+			if = {
+				limit = {
+					ROOT = {
+						NOT = {
+							has_completed_focus = ROM_look_to_the_past
+						}
+					}
+				}
+				ROM_constantin_prezan = {
+					set_nationality = ROOT
+				}
+			}
+			if = {
+				limit = {
+					ROOT = {
+						NOT = {
+							has_completed_focus = ROM_found_the_ministry_of_air_and_navy
+						}
+					}
+				}
+				ROM_petre_barbuneanu = {
+					set_nationality = ROOT
+				}
+			}
+		}
+		every_country_with_original_tag = {
+			original_tag_to_check = ROM
+			every_country_with_original_tag = {
+				original_tag_to_check = ROM
+				limit = {
+					NOT = {
+						tag = PREV
+						has_war_with = PREV
+					}
+				}
+				declare_war_on = {
+					target = PREV
+					type = civil_war
+				}
+				add_civil_war_target = PREV
+			}
+		}
+	}
+}
+ROM_diplo_stop_improving_tier = {
+	if = {
+		limit = {
+			NOT = {
+				has_country_flag = ROM_maintaining_relations_high
+			}
+		}
+		subtract_from_variable = {
+			ROM.ROM_international_relations_political_power_cost = ROM.ROM_one_country_relations_boosting_cost
+		}
+	}
+	else = {
+		subtract_from_variable = {
+			ROM.ROM_international_relations_political_power_cost = ROM.ROM_one_country_relations_maintain_cost
+		}
+	}
+	clr_country_flag = ROM_improving_relations
+	clr_country_flag = ROM_maintaining_relations_high
+	subtract_from_variable = {
+		ROM.ROM_current_improving_countries = 1
+	}
+}
+ROM_diplo_start_improving_tier = {
+	set_country_flag = ROM_improving_relations
+	ROM = {
+		add_to_variable = {
+			ROM_international_relations_political_power_cost = ROM_one_country_relations_boosting_cost
+		}
+		add_to_variable = {
+			ROM_current_improving_countries = 1
+		}
+	}
+}
+ROM_update_ralea = {
+	ROM_mihail_ralea = {
+		if = {
+			limit = {
+				has_trait = turncoat_journalist_dem
+			}
+			remove_trait = {
+				slot = political_advisor
+				trait = turncoat_journalist_dem
+			}
+		}
+		else_if = {
+			limit = {
+				has_trait = turncoat_journalist_neutrality
+			}
+			remove_trait = {
+				slot = political_advisor
+				trait = turncoat_journalist_neutrality
+			}
+		}
+		else_if = {
+			limit = {
+				has_trait = turncoat_journalist_com
+			}
+			remove_trait = {
+				slot = political_advisor
+				trait = turncoat_journalist_com
+			}
+		}
+		#readd trait
+		if = {
+			limit = {
+				ROOT = {
+					has_government = democratic
+				}
+			}
+			add_trait = {
+				slot = political_advisor
+				trait = turncoat_journalist_dem
+			}
+		}
+		else_if = {
+			limit = {
+				ROOT = {
+					has_government = neutrality
+				}
+			}
+			add_trait = {
+				slot = political_advisor
+				trait = turncoat_journalist_neutrality
+			}
+		}
+		else_if = {
+			limit = {
+				ROOT = {
+					has_government = communism
+				}
+			}
+			add_trait = {
+				slot = political_advisor
+				trait = turncoat_journalist_com
+			}
+		}
+	}
+}
