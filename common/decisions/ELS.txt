@@ -229,6 +229,238 @@ ELS_revolutionary_front = {
 }
 
 
+# Unlocked by Gifts for the Motherland. Hands puppets outside Central America and the Caribbean to the Soviet Union
+ELS_gifts_for_the_motherland_category = {
+
+	ELS_gift_to_the_motherland = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		target_trigger = {
+			FROM = {
+				is_subject_of = ROOT
+				r56_is_caribbean_country = no
+				capital_scope = {
+					NOT = {
+						state = 304
+						state = 311
+						state = 312
+						state = 313
+						state = 314
+						state = 316
+						state = 317
+						state = 685
+						state = 937
+					}
+				}
+			}
+		}
+
+		available = {
+			has_government = communism
+			is_in_faction_with = SOV
+			SOV = { has_government = communism }
+		}
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			set_autonomy = {
+				target = FROM
+				autonomy_state = autonomy_free
+			}
+			SOV = {
+				puppet = FROM
+				add_opinion_modifier = {
+					target = ROOT
+					modifier = ELS_gift_to_moscow_opinion
+				}
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_political_power = 50
+			random_owned_controlled_state = {
+				limit = { is_core_of = ROOT }
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = 1000
+				producer = SOV
+			}
+			add_equipment_to_stockpile = {
+				type = artillery_equipment
+				amount = 200
+				producer = SOV
+			}
+		}
+	}
+}
+
+ELS_arms_for_the_comrades_category = {
+
+	ELS_arms_for_the_comrades_decision = {
+
+		icon = generic_prepare_civil_war
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		target_trigger = {
+			FROM = {
+				exists = yes
+				NOT = { tag = ROOT }
+				has_government = communism
+				has_civil_war = yes
+				capital_scope = {
+					OR = {
+						is_on_continent = north_america
+						is_on_continent = south_america
+					}
+				}
+			}
+			NOT = { has_war_with = FROM }
+		}
+
+		available = {
+			has_government = communism
+			NOT = { has_idea = r56_ELS_aid_to_the_comrades }
+		}
+
+		cost = 25
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			FROM = {
+				add_equipment_to_stockpile = {
+					type = infantry_equipment
+					amount = 600
+					producer = ELS
+				}
+				add_equipment_to_stockpile = {
+					type = support_equipment
+					amount = 200
+					producer = ELS
+				}
+				add_equipment_to_stockpile = {
+					type = artillery_equipment
+					amount = 100
+					producer = ELS
+				}
+				add_opinion_modifier = { target = ROOT modifier = ELS_arms_for_the_comrades_opinion }
+			}
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_timed_idea = {
+				idea = r56_ELS_aid_to_the_comrades
+				days = 150
+			}
+		}
+	}
+}
+
+# Unlocked by The Hour of Revolution. Countries of one state can't hold a civil war, so they are couped and puppeted instead
+ELS_hour_of_revolution_category = {
+
+	ELS_ignite_the_revolution = {
+
+		icon = generic_ignite_civil_war
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		target_trigger = {
+			FROM = {
+				exists = yes
+				NOT = { tag = ROOT }
+				capital_scope = {
+					OR = {
+						is_on_continent = north_america
+						is_on_continent = south_america
+					}
+				}
+			}
+			NOT = { has_war_with = FROM }
+			NOT = { is_in_faction_with = FROM }
+		}
+
+		visible = {
+			FROM = {
+				NOT = { has_government = communism }
+				communism > 0.2
+			}
+		}
+
+		available = {
+			has_government = communism
+			FROM = {
+				is_subject = no
+				custom_trigger_tooltip = {
+					tooltip = ELS_ignite_the_revolution_conditions_tt
+					communism > 0.4
+				}
+			}
+		}
+
+		custom_cost_trigger = {
+			has_political_power > 49
+			has_equipment = { infantry_equipment > 499 }
+		}
+		custom_cost_text = ELS_ignite_the_revolution_cost
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 1
+		}
+
+		complete_effect = {
+			add_political_power = -50
+			add_equipment_to_stockpile = {
+				type = infantry_equipment
+				amount = -500
+			}
+			if = {
+				limit = { FROM = { num_of_controlled_states > 1 } }
+				FROM = {
+					start_civil_war = {
+						ideology = communism
+						size = party_popularity@communism
+					}
+				}
+			}
+			else = {
+				FROM = {
+					set_politics = {
+						ruling_party = communism
+						elections_allowed = no
+					}
+					add_popularity = {
+						ideology = communism
+						popularity = 0.1
+					}
+					country_event = { id = el_salvador.23 }
+				}
+				puppet = FROM
+			}
+		}
+	}
+}
+
 ### El Salvador - Central American Federation Decisions ###
 
 # Unlocked by Draft A Federal Constitution, or once the union has formed. Lets El Salvador core the land of any
@@ -367,10 +599,6 @@ ELS_central_american_federation = {
 
 		visible = {
 			OR = {
-				has_completed_focus = ELS_invite_panama
-				has_completed_focus = ELS_revolution_in_panama
-			}
-			OR = {
 				NOT = { 304 = { is_core_of = ROOT } }
 				NOT = { 937 = { is_core_of = ROOT } }
 			}
@@ -483,6 +711,7 @@ ELS_oligarchy_military_bop_category = {
 
 		complete_effect = {
 			add_power_balance_value = { id = ELS_oligarchy_military_bop value = -0.1 tooltip_side = ELS_oligarchy_side }
+			add_popularity = { ideology = neutrality popularity = 0.03 }
 		}
 	}
 
@@ -509,6 +738,7 @@ ELS_oligarchy_military_bop_category = {
 
 		complete_effect = {
 			add_power_balance_value = { id = ELS_oligarchy_military_bop value = 0.1 tooltip_side = ELS_military_side }
+			add_popularity = { ideology = fascism popularity = 0.03 }
 		}
 	}
 
@@ -539,6 +769,7 @@ ELS_oligarchy_military_bop_category = {
 
 		complete_effect = {
 			add_power_balance_value = { id = ELS_oligarchy_military_bop value = -0.15 tooltip_side = ELS_oligarchy_side }
+			add_popularity = { ideology = neutrality popularity = 0.03 }
 			add_stability = -0.05
 		}
 	}
@@ -570,8 +801,119 @@ ELS_oligarchy_military_bop_category = {
 
 		complete_effect = {
 			add_power_balance_value = { id = ELS_oligarchy_military_bop value = 0.1 tooltip_side = ELS_military_side }
+			add_popularity = { ideology = fascism popularity = 0.03 }
 			add_political_power = 50
 			add_timed_idea = { idea = r56_ELS_coffee_export_tax days = 180 }
+		}
+	}
+
+	ELS_expand_the_officer_corps = {
+
+		icon = generic_military
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			power_balance_value = { id = ELS_oligarchy_military_bop value > 0.4 }
+		}
+
+		cost = 75
+
+		fire_only_once = no
+		days_re_enable = 365
+
+		ai_will_do = {
+			factor = 0
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = 0.15 tooltip_side = ELS_military_side }
+			add_popularity = { ideology = fascism popularity = 0.03 }
+			army_experience = 10
+		}
+	}
+
+	ELS_give_the_army_a_free_hand = {
+
+		icon = generic_police_action
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			power_balance_value = { id = ELS_oligarchy_military_bop value > 0.85 }
+		}
+
+		cost = 100
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 0
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = 0.15 tooltip_side = ELS_military_side }
+			add_popularity = { ideology = fascism popularity = 0.05 }
+			add_stability = -0.05
+		}
+	}
+
+	ELS_sell_state_lands_to_the_planters = {
+
+		icon = generic_forestry
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			power_balance_value = { id = ELS_oligarchy_military_bop value < -0.4 }
+		}
+
+		cost = 75
+
+		fire_only_once = no
+		days_re_enable = 365
+
+		ai_will_do = {
+			factor = 0
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = -0.15 tooltip_side = ELS_oligarchy_side }
+			add_popularity = { ideology = neutrality popularity = 0.03 }
+			add_political_power = 25
+		}
+	}
+
+	ELS_hand_the_ministries_to_the_fourteen_families = {
+
+		icon = generic_political_address
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			power_balance_value = { id = ELS_oligarchy_military_bop value < -0.85 }
+		}
+
+		cost = 100
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 0
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_oligarchy_military_bop value = -0.15 tooltip_side = ELS_oligarchy_side }
+			add_popularity = { ideology = neutrality popularity = 0.05 }
+			add_stability = -0.05
 		}
 	}
 }
@@ -737,6 +1079,7 @@ ELS_federal_question_category = {
 		complete_effect = {
 			add_political_power = -50
 			add_command_power = -20
+			set_country_flag = ELS_state_armies_unified
 			add_power_balance_value = { id = ELS_federal_question_bop value = 0.15 tooltip_side = ELS_federation_side }
 			custom_effect_tooltip = generic_skip_one_line_tt
 			custom_effect_tooltip = ELS_state_generals_join_tt
@@ -819,6 +1162,197 @@ ELS_federal_question_category = {
 }
 
 
+### Communist Union - The Countryside and the City ###
+
+# Shown with the balance of power
+ELS_countryside_city_category = {
+
+	ELS_distribute_the_fincas = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 75
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				factor = 0
+				power_balance_value = { id = ELS_countryside_city_bop value < -0.7 }
+			}
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_countryside_city_bop value = -0.15 tooltip_side = ELS_countryside_side }
+		}
+	}
+
+	ELS_congress_of_peasant_councils = {
+
+		icon = generic_political_discourse
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 100
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				factor = 0
+				power_balance_value = { id = ELS_countryside_city_bop value < -0.7 }
+			}
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_countryside_city_bop value = -0.15 tooltip_side = ELS_countryside_side }
+		}
+	}
+
+	ELS_fix_grain_prices = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 50
+
+		fire_only_once = no
+		days_re_enable = 90
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 0
+				power_balance_value = { id = ELS_countryside_city_bop value < -0.7 }
+			}
+		}
+
+		complete_effect = {
+			add_timed_idea = { idea = r56_ELS_grain_price_controls days = 90 }
+			add_power_balance_value = { id = ELS_countryside_city_bop value = -0.1 tooltip_side = ELS_countryside_side }
+		}
+	}
+
+	ELS_move_people_into_the_capital = {
+
+		icon = generic_construction
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			owns_state = 314 # El Salvador
+			owns_state = 313 # Guatemala
+			owns_state = 312 # Honduras
+			owns_state = 317 # Nicaragua
+			owns_state = 316 # Costa Rica
+		}
+
+		cost = 100
+
+		fire_only_once = yes
+
+		ai_will_do = {
+			factor = 10
+			modifier = {
+				factor = 0
+				power_balance_value = { id = ELS_countryside_city_bop value > 0.7 }
+			}
+		}
+
+		complete_effect = {
+			313 = { add_manpower = -15000 }
+			312 = { add_manpower = -15000 }
+			317 = { add_manpower = -15000 }
+			316 = { add_manpower = -15000 }
+			314 = {
+				add_manpower = 60000
+				set_state_category = city
+			}
+			add_victory_points = { province = 12823 value = 7 }
+			add_stability = -0.05
+			custom_effect_tooltip = generic_skip_one_line_tt
+			add_power_balance_value = { id = ELS_countryside_city_bop value = 0.15 tooltip_side = ELS_city_side }
+		}
+	}
+
+	ELS_requisition_the_harvest = {
+
+		icon = generic_industry
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		cost = 25
+
+		fire_only_once = no
+		days_re_enable = 90
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 0
+				power_balance_value = { id = ELS_countryside_city_bop value > 0.7 }
+			}
+		}
+
+		complete_effect = {
+			add_stability = -0.03
+			add_power_balance_value = { id = ELS_countryside_city_bop value = 0.1 tooltip_side = ELS_city_side }
+		}
+	}
+
+	ELS_shock_brigades = {
+
+		icon = generic_construction
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		available = {
+			num_of_available_civilian_factories > 1
+		}
+
+		cost = 50
+
+		fire_only_once = no
+		days_re_enable = 90
+
+		days_remove = 60
+
+		modifier = {
+			civilian_factory_use = 2
+		}
+
+		ai_will_do = {
+			factor = 5
+			modifier = {
+				factor = 0
+				power_balance_value = { id = ELS_countryside_city_bop value > 0.7 }
+			}
+		}
+
+		complete_effect = {
+			add_power_balance_value = { id = ELS_countryside_city_bop value = 0.1 tooltip_side = ELS_city_side }
+		}
+	}
+}
+
+
 ### El Salvador - Reconstitute the Federal Republic ###
 
 # Replaces form_united_central_america for El Salvador, so One Central America can be taken afterwards
@@ -889,6 +1423,236 @@ ELS_reconstitute_the_federal_republic_category = {
 					}
 				}
 				news_event = { id = wtt_news.59 hours = 6 }
+			}
+		}
+	}
+}
+
+ELS_bank_of_central_america_category = {
+
+	ELS_bank_fund_civilian_factory = {
+
+		icon = generic_factory
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		state_target = yes
+		target_array = core_states
+		on_map_mode = map_and_decisions_view
+
+		target_trigger = {
+			FROM = {
+				is_fully_controlled_by = ROOT
+				NOT = { has_state_flag = ELS_bank_civilian_factory_funded }
+			}
+		}
+
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = ELS_bank_ready_tt
+				NOT = { has_country_flag = ELS_bank_cooldown }
+			}
+		}
+
+		cost = 75
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		complete_effect = {
+			set_country_flag = { flag = ELS_bank_cooldown value = 1 days = 90 }
+			FROM = {
+				set_state_flag = ELS_bank_civilian_factory_funded
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = industrial_complex
+					level = 1
+					instant_build = yes
+				}
+			}
+		}
+	}
+
+	ELS_bank_fund_dockyard = {
+
+		icon = generic_naval
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		state_target = yes
+		target_array = core_states
+		on_map_mode = map_and_decisions_view
+
+		target_trigger = {
+			FROM = {
+				is_fully_controlled_by = ROOT
+				NOT = { has_state_flag = ELS_bank_dockyard_funded }
+				is_coastal = yes
+			}
+		}
+
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = ELS_bank_ready_tt
+				NOT = { has_country_flag = ELS_bank_cooldown }
+			}
+		}
+
+		cost = 60
+
+		ai_will_do = {
+			factor = 5
+		}
+
+		complete_effect = {
+			set_country_flag = { flag = ELS_bank_cooldown value = 1 days = 90 }
+			FROM = {
+				set_state_flag = ELS_bank_dockyard_funded
+				add_extra_state_shared_building_slots = 1
+				add_building_construction = {
+					type = dockyard
+					level = 1
+					instant_build = yes
+				}
+			}
+		}
+	}
+
+	ELS_bank_development_loan = {
+
+		icon = generic_civil_support
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		target_trigger = {
+			FROM = {
+				exists = yes
+				NOT = { tag = ROOT }
+				NOT = { has_country_flag = ELS_bank_loan_received }
+			}
+			NOT = { has_war_with = FROM }
+			is_in_faction_with = FROM
+		}
+
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = ELS_bank_ready_tt
+				NOT = { has_country_flag = ELS_bank_cooldown }
+			}
+			FROM = {
+				any_owned_state = {
+					is_controlled_by = FROM
+					free_building_slots = {
+						building = industrial_complex
+						size > 0
+						include_locked = no
+					}
+				}
+			}
+		}
+
+		cost = 50
+
+		days_remove = 180
+
+		ai_will_do = {
+			factor = 3
+		}
+
+		complete_effect = {
+			set_country_flag = { flag = ELS_bank_cooldown value = 1 days = 90 }
+			FROM = {
+				set_country_flag = ELS_bank_loan_received
+				random_owned_controlled_state = {
+					limit = {
+						free_building_slots = {
+							building = industrial_complex
+							size > 0
+							include_locked = no
+						}
+					}
+					add_building_construction = {
+						type = industrial_complex
+						level = 1
+						instant_build = yes
+					}
+				}
+				add_opinion_modifier = { target = ROOT modifier = ELS_bank_loan_opinion }
+			}
+		}
+
+		remove_effect = {
+			custom_effect_tooltip = ELS_modify_central_american_economy_tt
+			add_to_variable = { ELS_coffee_consumer_goods_factor = -0.01 tooltip = consumer_goods_factor_tt }
+		}
+	}
+
+	ELS_bank_issue_defense_bonds = {
+
+		icon = generic_industry
+
+		allowed = {
+			original_tag = ELS
+		}
+
+		visible = {
+			check_variable = { ELS_defense_bonds_issued < 3 }
+		}
+
+		available = {
+			custom_trigger_tooltip = {
+				tooltip = ELS_bank_ready_tt
+				NOT = { has_country_flag = ELS_bank_cooldown }
+			}
+			OR = {
+				has_war = yes
+				threat > 0.5
+			}
+			any_core_state = {
+				is_owned_and_controlled_by = ROOT
+				free_building_slots = {
+					building = arms_factory
+					size > 0
+					include_locked = no
+				}
+			}
+		}
+
+		cost = 50
+
+		ai_will_do = {
+			factor = 3
+			modifier = {
+				factor = 3
+				has_war = yes
+			}
+		}
+
+		complete_effect = {
+			set_country_flag = { flag = ELS_bank_cooldown value = 1 days = 90 }
+			add_to_variable = { ELS_defense_bonds_issued = 1 }
+			add_stability = -0.03
+			random_core_state = {
+				limit = {
+					is_owned_and_controlled_by = ROOT
+					free_building_slots = {
+						building = arms_factory
+						size > 0
+						include_locked = no
+					}
+				}
+				add_building_construction = {
+					type = arms_factory
+					level = 1
+					instant_build = yes
+				}
 			}
 		}
 	}
