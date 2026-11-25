@@ -119,7 +119,6 @@ PRU_ltp_template_and_production = {
 	create_equipment_variant = {
 		name = "Lehky Tank Peruánský"
 		type = light_tank_chassis_1
-		parent_version = 1
 		modules = {
 			main_armament_slot = tank_high_velocity_cannon
 			turret_type_slot = tank_light_two_man_tank_turret
@@ -319,7 +318,11 @@ PRU_caudillismo_init = {
 }
 PRU_caudillismo_limits = {
 clamp_variable = { var = PRU_trust_ramirez min = 0 max = 100 }
+clamp_variable = { var = PRU_trust_santisteban min = 0 max = 100 }
+clamp_variable = { var = PRU_trust_montagne_command min = 0 max = 100 }
 clamp_variable = { var = PRU_influence_ramirez min = 0 max = 100 }
+clamp_variable = { var = PRU_influence_santisteban min = 0 max = 100 }
+clamp_variable = { var = PRU_influence_montagne_command min = 0 max = 100 }
 
 clamp_variable = { var = PRU_legitimacy min = 0 max = 100 }
 clamp_variable = { var = PRU_trust_ureta min = 0 max = 100 }
@@ -365,6 +368,20 @@ if = {
 	set_variable = { PRU_command_influence = PRU_influence_ramirez }
 	set_variable = { PRU_command_ambition = 100 }
 	subtract_from_variable = { PRU_command_ambition = PRU_trust_ramirez }
+}
+if = {
+	limit = { has_country_flag = PRU_circle_santisteban }
+	set_variable = { PRU_command_trust = PRU_trust_santisteban }
+	set_variable = { PRU_command_influence = PRU_influence_santisteban }
+	set_variable = { PRU_command_ambition = 100 }
+	subtract_from_variable = { PRU_command_ambition = PRU_trust_santisteban }
+}
+if = {
+	limit = { has_country_flag = PRU_circle_montagne_command }
+	set_variable = { PRU_command_trust = PRU_trust_montagne_command }
+	set_variable = { PRU_command_influence = PRU_influence_montagne_command }
+	set_variable = { PRU_command_ambition = 100 }
+	subtract_from_variable = { PRU_command_ambition = PRU_trust_montagne_command }
 }
 set_variable = { PRU_command_meter = PRU_command_influence } divide_variable = { PRU_command_meter = 5 } round_variable = PRU_command_meter add_to_variable = { PRU_command_meter = 1 }
 set_variable = { PRU_cabinet_trust = 0 } set_variable = { PRU_cabinet_influence = 0 } set_variable = { PRU_cabinet_ambition = 0 }
@@ -448,11 +465,69 @@ PRU_caudillismo_weekly = {
 			activate_mission = PRU_demand_ramirez
 		}
 	}
+if = {
+		limit = { has_country_flag = PRU_circle_santisteban }
+		if = {
+			limit = { check_variable = { PRU_trust_santisteban < 60 } NOT = { OR = { has_country_flag = PRU_demand_santisteban has_country_flag = PRU_demand_cooldown_santisteban } } }
+			set_country_flag = PRU_demand_santisteban
+			activate_mission = PRU_demand_santisteban
+		}
+		if = {
+			limit = { check_variable = { PRU_trust_santisteban < 40 } }
+			add_to_variable = { PRU_influence_santisteban = 0.5 }
+		}
+		if = {
+			limit = { NOT = { has_country_flag = PRU_unified_command } }
+			add_power_balance_value = { id = PRU_army_navy_bop value = 0.002 }
+		}
+		if = {
+			limit = { check_variable = { PRU_trust_santisteban > 59 } NOT = { OR = { has_country_flag = PRU_demand_santisteban has_country_flag = PRU_demand_cooldown_santisteban } } }
+			set_country_flag = PRU_demand_santisteban
+			activate_mission = PRU_demand_santisteban
+		}
+	}
+if = {
+		limit = { has_country_flag = PRU_circle_montagne_command }
+		if = {
+			limit = { check_variable = { PRU_trust_montagne_command < 60 } NOT = { OR = { has_country_flag = PRU_demand_montagne_command has_country_flag = PRU_demand_cooldown_montagne_command } } }
+			set_country_flag = PRU_demand_montagne_command
+			activate_mission = PRU_demand_montagne_command
+		}
+		if = {
+			limit = { check_variable = { PRU_trust_montagne_command < 40 } }
+			add_to_variable = { PRU_influence_montagne_command = 0.5 }
+		}
+		if = {
+			limit = { NOT = { has_country_flag = PRU_unified_command } }
+			add_power_balance_value = { id = PRU_army_navy_bop value = 0.002 }
+		}
+		if = {
+			limit = { check_variable = { PRU_trust_montagne_command > 59 } NOT = { OR = { has_country_flag = PRU_demand_montagne_command has_country_flag = PRU_demand_cooldown_montagne_command } } }
+			set_country_flag = PRU_demand_montagne_command
+			activate_mission = PRU_demand_montagne_command
+		}
+	}
 	if = {
 		limit = { has_country_flag = PRU_circle_ramirez has_civil_war = no NOT = { OR = { has_country_flag = PRU_crisis_active has_country_flag = PRU_crisis_recovery } } check_variable = { PRU_trust_ramirez < 40 } check_variable = { PRU_influence_ramirez > 64 } }
 		set_country_flag = PRU_crisis_active
 		set_country_flag = PRU_crisis_command
 		set_country_flag = PRU_instigator_ramirez
+		activate_mission = PRU_command_ultimatum
+		country_event = { id = peru.230 hours = 1 }
+	}
+if = {
+		limit = { has_country_flag = PRU_circle_santisteban has_civil_war = no NOT = { OR = { has_country_flag = PRU_crisis_active has_country_flag = PRU_crisis_recovery } } check_variable = { PRU_trust_santisteban < 40 } check_variable = { PRU_influence_santisteban > 64 } }
+		set_country_flag = PRU_crisis_active
+		set_country_flag = PRU_crisis_command
+		set_country_flag = PRU_instigator_santisteban
+		activate_mission = PRU_command_ultimatum
+		country_event = { id = peru.230 hours = 1 }
+	}
+if = {
+		limit = { has_country_flag = PRU_circle_montagne_command has_civil_war = no NOT = { OR = { has_country_flag = PRU_crisis_active has_country_flag = PRU_crisis_recovery } } check_variable = { PRU_trust_montagne_command < 40 } check_variable = { PRU_influence_montagne_command > 64 } }
+		set_country_flag = PRU_crisis_active
+		set_country_flag = PRU_crisis_command
+		set_country_flag = PRU_instigator_montagne_command
 		activate_mission = PRU_command_ultimatum
 		country_event = { id = peru.230 hours = 1 }
 	}
@@ -2778,6 +2853,14 @@ PRU_caudillismo_refresh = {
 		limit = { has_country_flag = PRU_circle_ramirez NOT = { has_character = PRU_rodriguez_ramirez NOT = { OR = { has_country_leader = { character = PRU_rodriguez_ramirez ruling_only = yes } has_country_flag = PRU_jailed_ramirez has_country_flag = PRU_exiled_ramirez has_country_flag = PRU_eliminated_ramirez } } } }
 		PRU_dismiss_ramirez = yes
 	}
+if = {
+		limit = { has_country_flag = PRU_circle_santisteban NOT = { has_character = PRU_antonio_silva NOT = { OR = { has_country_leader = { character = PRU_antonio_silva ruling_only = yes } has_country_flag = PRU_jailed_santisteban has_country_flag = PRU_exiled_santisteban has_country_flag = PRU_eliminated_santisteban } } } }
+		PRU_dismiss_santisteban = yes
+	}
+if = {
+		limit = { has_country_flag = PRU_circle_montagne_command NOT = { has_character = PRU_ernesto_montagne_markholz NOT = { OR = { has_country_leader = { character = PRU_ernesto_montagne_markholz ruling_only = yes } has_country_flag = PRU_jailed_montagne has_country_flag = PRU_exiled_montagne has_country_flag = PRU_eliminated_montagne } } } }
+		PRU_dismiss_montagne_command = yes
+	}
 	if = {
 		limit = { has_country_flag = PRU_circle_ramirez }
 		if = {
@@ -2793,6 +2876,42 @@ PRU_caudillismo_refresh = {
 				limit = { NOT = { has_idea = PRU_patron_ramirez } }
 				remove_ideas = PRU_patron_ramirez_hostile
 				add_ideas = PRU_patron_ramirez
+			}
+		}
+	}
+if = {
+		limit = { has_country_flag = PRU_circle_santisteban }
+		if = {
+			limit = { check_variable = { PRU_trust_santisteban < 40 } }
+			if = {
+				limit = { NOT = { has_idea = PRU_patron_santisteban_hostile } }
+				remove_ideas = PRU_patron_santisteban
+				add_ideas = PRU_patron_santisteban_hostile
+			}
+		}
+		else = {
+			if = {
+				limit = { NOT = { has_idea = PRU_patron_santisteban } }
+				remove_ideas = PRU_patron_santisteban_hostile
+				add_ideas = PRU_patron_santisteban
+			}
+		}
+	}
+if = {
+		limit = { has_country_flag = PRU_circle_montagne_command }
+		if = {
+			limit = { check_variable = { PRU_trust_montagne_command < 40 } }
+			if = {
+				limit = { NOT = { has_idea = PRU_patron_montagne_command_hostile } }
+				remove_ideas = PRU_patron_montagne_command
+				add_ideas = PRU_patron_montagne_command_hostile
+			}
+		}
+		else = {
+			if = {
+				limit = { NOT = { has_idea = PRU_patron_montagne_command } }
+				remove_ideas = PRU_patron_montagne_command_hostile
+				add_ideas = PRU_patron_montagne_command
 			}
 		}
 	}
@@ -2864,7 +2983,7 @@ PRU_caudillismo_refresh = {
 	}
 	clr_country_flag = PRU_command_filled
 	if = {
-		limit = { OR = { has_country_flag = PRU_circle_ramirez has_country_flag = PRU_circle_ureta has_country_flag = PRU_circle_saldias has_country_flag = PRU_circle_odria } }
+		limit = { OR = { has_country_flag = PRU_circle_santisteban has_country_flag = PRU_circle_montagne_command has_country_flag = PRU_circle_ramirez has_country_flag = PRU_circle_ureta has_country_flag = PRU_circle_saldias has_country_flag = PRU_circle_odria } }
 		set_country_flag = PRU_command_filled
 	}
 	if = {
@@ -2934,7 +3053,7 @@ PRU_caudillismo_refresh = {
 		}
 	}
 	if = {
-		limit = { has_country_flag = PRU_circle_villaran NOT = { has_character = PRU_manuel_villaran NOT = { OR = { has_country_leader = { character = PRU_manuel_villaran ruling_only = yes } has_country_flag = PRU_jailed_villaran has_country_flag = PRU_exiled_villaran has_country_flag = PRU_eliminated_villaran } } has_country_flag = PRU_development_legacy_politics } }
+		limit = { has_country_flag = PRU_circle_villaran NOT = { has_character = PRU_manuel_villaran NOT = { OR = { has_country_leader = { character = PRU_manuel_villaran ruling_only = yes } has_country_flag = PRU_jailed_villaran has_country_flag = PRU_exiled_villaran has_country_flag = PRU_eliminated_villaran } } OR = { has_country_flag = PRU_development_legacy_politics has_country_flag = PRU_permit_villaran } } }
 		PRU_dismiss_villaran = yes
 	}
 	if = {
@@ -3027,7 +3146,7 @@ PRU_caudillismo_refresh = {
 		}
 	}
 	if = {
-		limit = { has_country_flag = PRU_circle_ravines NOT = { has_character = PRU_eudocio_revines_perez NOT = { OR = { has_country_leader = { character = PRU_eudocio_revines_perez ruling_only = yes } has_country_flag = PRU_jailed_ravines has_country_flag = PRU_exiled_ravines has_country_flag = PRU_eliminated_ravines } } has_country_flag = PRU_development_legacy_politics } }
+		limit = { has_country_flag = PRU_circle_ravines NOT = { has_character = PRU_eudocio_revines_perez NOT = { OR = { has_country_leader = { character = PRU_eudocio_revines_perez ruling_only = yes } has_country_flag = PRU_jailed_ravines has_country_flag = PRU_exiled_ravines has_country_flag = PRU_eliminated_ravines } } OR = { has_country_flag = PRU_development_legacy_politics has_country_flag = PRU_permit_ravines } } }
 		PRU_dismiss_ravines = yes
 	}
 	if = {
@@ -3115,7 +3234,7 @@ PRU_caudillismo_refresh = {
 		}
 	}
 	if = {
-		limit = { has_country_flag = PRU_circle_churata NOT = { has_character = PRU_arturo_peralta NOT = { OR = { has_country_leader = { character = PRU_arturo_peralta ruling_only = yes } has_country_flag = PRU_jailed_churata has_country_flag = PRU_exiled_churata has_country_flag = PRU_eliminated_churata } } has_country_flag = PRU_development_legacy_politics } }
+		limit = { has_country_flag = PRU_circle_churata NOT = { has_character = PRU_arturo_peralta NOT = { OR = { has_country_leader = { character = PRU_arturo_peralta ruling_only = yes } has_country_flag = PRU_jailed_churata has_country_flag = PRU_exiled_churata has_country_flag = PRU_eliminated_churata } } OR = { has_country_flag = PRU_development_legacy_politics has_country_flag = PRU_permit_churata } } }
 		PRU_dismiss_churata = yes
 	}
 	if = {
@@ -3330,7 +3449,7 @@ PRU_dismiss_odria = {
 
 PRU_appoint_montagne = {
 	if = {
-		limit = { has_character = PRU_ernesto_montagne_markholz NOT = { OR = { has_country_leader = { character = PRU_ernesto_montagne_markholz ruling_only = yes } has_country_flag = PRU_jailed_montagne has_country_flag = PRU_exiled_montagne has_country_flag = PRU_eliminated_montagne } } NOT = { has_country_flag = PRU_circle_montagne } }
+		limit = { NOT = { has_country_flag = PRU_montagne_transferred } has_character = PRU_ernesto_montagne_markholz NOT = { OR = { has_country_leader = { character = PRU_ernesto_montagne_markholz ruling_only = yes } has_country_flag = PRU_jailed_montagne has_country_flag = PRU_exiled_montagne has_country_flag = PRU_eliminated_montagne } } NOT = { has_country_flag = PRU_circle_montagne } }
 		PRU_replace_cabinet_consequences = yes
 		PRU_clear_cabinet = yes
 		set_country_flag = PRU_circle_montagne
@@ -3355,6 +3474,8 @@ PRU_dismiss_montagne = {
 
 PRU_clear_command = {
 	PRU_dismiss_ramirez = yes
+PRU_dismiss_santisteban = yes
+PRU_dismiss_montagne_command = yes
 	PRU_dismiss_ureta = yes
 	PRU_dismiss_saldias = yes
 	PRU_dismiss_odria = yes
@@ -3412,7 +3533,7 @@ PRU_dismiss_jorge = {
 
 PRU_appoint_villaran = {
 	if = {
-		limit = { has_character = PRU_manuel_villaran NOT = { OR = { has_country_leader = { character = PRU_manuel_villaran ruling_only = yes } has_country_flag = PRU_jailed_villaran has_country_flag = PRU_exiled_villaran has_country_flag = PRU_eliminated_villaran } } has_country_flag = PRU_development_legacy_politics NOT = { has_country_flag = PRU_circle_villaran } }
+		limit = { has_character = PRU_manuel_villaran NOT = { OR = { has_country_leader = { character = PRU_manuel_villaran ruling_only = yes } has_country_flag = PRU_jailed_villaran has_country_flag = PRU_exiled_villaran has_country_flag = PRU_eliminated_villaran } } OR = { has_country_flag = PRU_development_legacy_politics has_country_flag = PRU_permit_villaran } NOT = { has_country_flag = PRU_circle_villaran } }
 		PRU_replace_cabinet_consequences = yes
 		PRU_clear_cabinet = yes
 		set_country_flag = PRU_circle_villaran
@@ -3521,7 +3642,7 @@ PRU_dismiss_haya = {
 
 PRU_appoint_ravines = {
 	if = {
-		limit = { has_character = PRU_eudocio_revines_perez NOT = { OR = { has_country_leader = { character = PRU_eudocio_revines_perez ruling_only = yes } has_country_flag = PRU_jailed_ravines has_country_flag = PRU_exiled_ravines has_country_flag = PRU_eliminated_ravines } } has_country_flag = PRU_development_legacy_politics NOT = { has_country_flag = PRU_circle_ravines } }
+		limit = { has_character = PRU_eudocio_revines_perez NOT = { OR = { has_country_leader = { character = PRU_eudocio_revines_perez ruling_only = yes } has_country_flag = PRU_jailed_ravines has_country_flag = PRU_exiled_ravines has_country_flag = PRU_eliminated_ravines } } OR = { has_country_flag = PRU_development_legacy_politics has_country_flag = PRU_permit_ravines } NOT = { has_country_flag = PRU_circle_ravines } }
 		PRU_replace_movement_consequences = yes
 		PRU_clear_movement = yes
 		set_country_flag = PRU_circle_ravines
@@ -3621,7 +3742,7 @@ PRU_dismiss_bustamante = {
 
 PRU_appoint_churata = {
 	if = {
-		limit = { has_character = PRU_arturo_peralta NOT = { OR = { has_country_leader = { character = PRU_arturo_peralta ruling_only = yes } has_country_flag = PRU_jailed_churata has_country_flag = PRU_exiled_churata has_country_flag = PRU_eliminated_churata } } has_country_flag = PRU_development_legacy_politics NOT = { has_country_flag = PRU_circle_churata } }
+		limit = { has_character = PRU_arturo_peralta NOT = { OR = { has_country_leader = { character = PRU_arturo_peralta ruling_only = yes } has_country_flag = PRU_jailed_churata has_country_flag = PRU_exiled_churata has_country_flag = PRU_eliminated_churata } } OR = { has_country_flag = PRU_development_legacy_politics has_country_flag = PRU_permit_churata } NOT = { has_country_flag = PRU_circle_churata } }
 		PRU_replace_movement_consequences = yes
 		PRU_clear_movement = yes
 		set_country_flag = PRU_circle_churata
@@ -3690,6 +3811,14 @@ PRU_reward_command_trust = {
 		limit = { has_country_flag = PRU_circle_ramirez }
 		add_to_variable = { PRU_trust_ramirez = 10 }
 	}
+if = {
+		limit = { has_country_flag = PRU_circle_santisteban }
+		add_to_variable = { PRU_trust_santisteban = 10 }
+	}
+if = {
+		limit = { has_country_flag = PRU_circle_montagne_command }
+		add_to_variable = { PRU_trust_montagne_command = 10 }
+	}
 	PRU_caudillismo_refresh = yes
 }
 
@@ -3738,6 +3867,8 @@ clr_country_flag = PRU_instigator_belaunde
 
 
 	clr_country_flag = PRU_instigator_ramirez
+clr_country_flag = PRU_instigator_santisteban
+clr_country_flag = PRU_instigator_montagne_command
 }
 
 PRU_install_patron_ureta = {
@@ -3810,6 +3941,16 @@ if = {
 	retire_country_leader = yes
 		PRU_install_patron_ramirez = yes
 }
+else_if = {
+	limit = { has_country_flag = PRU_instigator_santisteban has_character = PRU_antonio_silva }
+	retire_country_leader = yes
+		PRU_install_patron_santisteban = yes
+}
+else_if = {
+	limit = { has_country_flag = PRU_instigator_montagne_command has_character = PRU_ernesto_montagne_markholz }
+	retire_country_leader = yes
+		PRU_install_patron_montagne_command = yes
+}
 else_if = { limit = { has_country_flag = PRU_instigator_ureta has_character = PRU_eloy_ureta_montehermoso } retire_country_leader = yes
 		PRU_install_patron_ureta = yes }
 else_if = { limit = { has_country_flag = PRU_instigator_saldias has_character = PRU_roque_saldias_maninat } retire_country_leader = yes
@@ -3855,6 +3996,38 @@ PRU_appoint_ramirez = {
 		PRU_caudillismo_limits = yes
 	}
 }
+PRU_appoint_santisteban = {
+	if = {
+		limit = { has_character = PRU_antonio_silva NOT = { OR = { has_country_leader = { character = PRU_antonio_silva ruling_only = yes } has_country_flag = PRU_jailed_santisteban has_country_flag = PRU_exiled_santisteban has_country_flag = PRU_eliminated_santisteban } } NOT = { has_country_flag = PRU_circle_santisteban } }
+		PRU_replace_command_consequences = yes
+		PRU_clear_command = yes
+		set_country_flag = PRU_circle_santisteban
+		set_country_flag = PRU_command_filled
+		set_country_flag = PRU_seen_santisteban
+		set_variable = { PRU_trust_santisteban = 75 }
+		set_variable = { PRU_influence_santisteban = 20 }
+		set_country_flag = { flag = PRU_demand_cooldown_santisteban days = 30 }
+		add_ideas = PRU_patron_santisteban
+		PRU_caudillismo_limits = yes
+	}
+}
+PRU_appoint_montagne_command = {
+	if = {
+		limit = { has_character = PRU_ernesto_montagne_markholz NOT = { OR = { has_country_leader = { character = PRU_ernesto_montagne_markholz ruling_only = yes } has_country_flag = PRU_jailed_montagne has_country_flag = PRU_exiled_montagne has_country_flag = PRU_eliminated_montagne } } NOT = { has_country_flag = PRU_circle_montagne_command } }
+		PRU_dismiss_montagne = yes
+		set_country_flag = PRU_montagne_transferred
+		PRU_replace_command_consequences = yes
+		PRU_clear_command = yes
+		set_country_flag = PRU_circle_montagne_command
+		set_country_flag = PRU_command_filled
+		set_country_flag = PRU_seen_montagne_command
+		set_variable = { PRU_trust_montagne_command = 75 }
+		set_variable = { PRU_influence_montagne_command = 20 }
+		set_country_flag = { flag = PRU_demand_cooldown_montagne_command days = 30 }
+		add_ideas = PRU_patron_montagne_command
+		PRU_caudillismo_limits = yes
+	}
+}
 
 PRU_dismiss_ramirez = {
 	if = {
@@ -3863,6 +4036,24 @@ PRU_dismiss_ramirez = {
 		clr_country_flag = PRU_command_filled
 		remove_ideas = PRU_patron_ramirez
 		remove_ideas = PRU_patron_ramirez_hostile
+	}
+}
+PRU_dismiss_santisteban = {
+	if = {
+		limit = { has_country_flag = PRU_circle_santisteban }
+		clr_country_flag = PRU_circle_santisteban
+		clr_country_flag = PRU_command_filled
+		remove_ideas = PRU_patron_santisteban
+		remove_ideas = PRU_patron_santisteban_hostile
+	}
+}
+PRU_dismiss_montagne_command = {
+	if = {
+		limit = { has_country_flag = PRU_circle_montagne_command }
+		clr_country_flag = PRU_circle_montagne_command
+		clr_country_flag = PRU_command_filled
+		remove_ideas = PRU_patron_montagne_command
+		remove_ideas = PRU_patron_montagne_command_hostile
 	}
 }
 
@@ -3894,6 +4085,32 @@ PRU_install_patron_ramirez = {
 	set_politics = { ruling_party = neutrality elections_allowed = no }
 	add_country_leader_role = {
 	 character = PRU_rodriguez_ramirez
+	 promote_leader = yes
+	 country_leader = { ideology = despotism expire = "1965.1.1" traits = { army_connections } }
+	}
+	set_country_flag = PRU_alternate_government
+	set_country_flag = PRU_regime_crisis
+	clr_country_flag = PRU_historical_calendar
+	PRU_end_coalition_crisis = yes
+	PRU_caudillismo_refresh = yes
+}
+PRU_install_patron_santisteban = {
+	set_politics = { ruling_party = neutrality elections_allowed = no }
+	add_country_leader_role = {
+	 character = PRU_antonio_silva
+	 promote_leader = yes
+	 country_leader = { ideology = despotism expire = "1965.1.1" traits = { army_connections } }
+	}
+	set_country_flag = PRU_alternate_government
+	set_country_flag = PRU_regime_crisis
+	clr_country_flag = PRU_historical_calendar
+	PRU_end_coalition_crisis = yes
+	PRU_caudillismo_refresh = yes
+}
+PRU_install_patron_montagne_command = {
+	set_politics = { ruling_party = neutrality elections_allowed = no }
+	add_country_leader_role = {
+	 character = PRU_ernesto_montagne_markholz
 	 promote_leader = yes
 	 country_leader = { ideology = despotism expire = "1965.1.1" traits = { army_connections } }
 	}
@@ -4166,11 +4383,6 @@ PRU_historical_calendar_daily = {
 			country_event = { id = peru.304 hours = 1 }
 		}
 		if = {
-			limit = { date > 1941.7.4 NOT = { has_country_flag = PRU_northern_campaign_reported } has_country_flag = PRU_prado_first_term has_country_leader = { character = PRU_manuel_prado_ugarteche ruling_only = yes } }
-			set_country_flag = PRU_northern_campaign_reported
-			country_event = { id = peru.305 hours = 1 }
-		}
-		if = {
 			limit = { date > 1945.6.9 NOT = { has_country_flag = PRU_front_election_reported } has_country_flag = PRU_prado_first_term has_country_leader = { character = PRU_manuel_prado_ugarteche ruling_only = yes } }
 			set_country_flag = PRU_front_election_reported
 			country_event = { id = peru.306 hours = 1 }
@@ -4227,16 +4439,6 @@ PRU_historical_calendar_daily = {
 		}
 		if = {
 			limit = {
-				date > 1942.1.28
-				has_country_flag = PRU_northern_campaign_ready
-				NOT = { has_country_flag = PRU_rio_protocol_reported }
-				has_country_leader = { character = PRU_manuel_prado_ugarteche ruling_only = yes }
-			}
-			set_country_flag = PRU_rio_protocol_reported
-			country_event = { id = peru.310 hours = 1 }
-		}
-		if = {
-			limit = {
 				date > 1949.1.2
 				date < 1954.4.6
 				has_country_flag = PRU_odria_junta
@@ -4265,4 +4467,497 @@ PRU_reconcile_the_services = {
 			add_power_balance_value = { id = PRU_army_navy_bop value = 0.08 }
 		}
 	}
+}
+
+PRU_check_pastaza_armistice = {
+    if = {
+        limit = { has_country_flag = PRU_zarumilla_limited_war }
+        if = {
+            limit = {
+                has_war_with = ECU
+                is_in_faction = no
+                ECU = { is_in_faction = no NOT = { any_enemy_country = { NOT = { tag = PRU } } } }
+                NOT = { any_enemy_country = { NOT = { tag = ECU } } }
+                OR = { controls_state = 490 surrender_progress > 0.09 }
+            }
+            if = {
+                limit = { controls_state = 490 ECU = { owns_state = 490 } }
+                white_peace = ECU
+                transfer_state = 490
+            }
+            else = { white_peace = ECU }
+            set_truce = { target = ECU days = 365 }
+            clr_country_flag = PRU_zarumilla_limited_war
+            country_event = peru.310
+        }
+        else_if = {
+            limit = { NOT = { has_war_with = ECU } }
+            clr_country_flag = PRU_zarumilla_limited_war
+        }
+    }
+}
+
+PRU_advance_army_reform = {
+	custom_effect_tooltip = PRU_army_reform_tt
+	hidden_effect = {
+		if = {
+			limit = { has_idea = PRU_service_army_01 }
+			swap_ideas = { remove_idea = PRU_service_army_01 add_idea = PRU_service_army_02 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_02 }
+			swap_ideas = { remove_idea = PRU_service_army_02 add_idea = PRU_service_army_03 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_03 }
+			swap_ideas = { remove_idea = PRU_service_army_03 add_idea = PRU_service_army_04 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_04 }
+			swap_ideas = { remove_idea = PRU_service_army_04 add_idea = PRU_service_army_05 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_05 }
+			swap_ideas = { remove_idea = PRU_service_army_05 add_idea = PRU_service_army_06 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_06 }
+			swap_ideas = { remove_idea = PRU_service_army_06 add_idea = PRU_service_army_07 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_07 }
+			swap_ideas = { remove_idea = PRU_service_army_07 add_idea = PRU_service_army_08 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_08 }
+			swap_ideas = { remove_idea = PRU_service_army_08 add_idea = PRU_service_army_09 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_09 }
+			swap_ideas = { remove_idea = PRU_service_army_09 add_idea = PRU_service_army_10 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_10 }
+			swap_ideas = { remove_idea = PRU_service_army_10 add_idea = PRU_service_army_11 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_11 }
+			swap_ideas = { remove_idea = PRU_service_army_11 add_idea = PRU_service_army_12 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_12 }
+			swap_ideas = { remove_idea = PRU_service_army_12 add_idea = PRU_service_army_13 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_13 }
+			swap_ideas = { remove_idea = PRU_service_army_13 add_idea = PRU_service_army_14 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_14 }
+			swap_ideas = { remove_idea = PRU_service_army_14 add_idea = PRU_service_army_15 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_15 }
+			swap_ideas = { remove_idea = PRU_service_army_15 add_idea = PRU_service_army_16 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_16 }
+			swap_ideas = { remove_idea = PRU_service_army_16 add_idea = PRU_service_army_17 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_17 }
+			swap_ideas = { remove_idea = PRU_service_army_17 add_idea = PRU_service_army_18 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_18 }
+			swap_ideas = { remove_idea = PRU_service_army_18 add_idea = PRU_service_army_19 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_19 }
+			swap_ideas = { remove_idea = PRU_service_army_19 add_idea = PRU_service_army_20 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_20 }
+			swap_ideas = { remove_idea = PRU_service_army_20 add_idea = PRU_service_army_21 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_21 }
+			swap_ideas = { remove_idea = PRU_service_army_21 add_idea = PRU_service_army_22 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_22 }
+			swap_ideas = { remove_idea = PRU_service_army_22 add_idea = PRU_service_army_23 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_23 }
+			swap_ideas = { remove_idea = PRU_service_army_23 add_idea = PRU_service_army_24 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_24 }
+			swap_ideas = { remove_idea = PRU_service_army_24 add_idea = PRU_service_army_25 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_25 }
+			swap_ideas = { remove_idea = PRU_service_army_25 add_idea = PRU_service_army_26 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_26 }
+			swap_ideas = { remove_idea = PRU_service_army_26 add_idea = PRU_service_army_27 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_27 }
+			swap_ideas = { remove_idea = PRU_service_army_27 add_idea = PRU_service_army_28 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_28 }
+			swap_ideas = { remove_idea = PRU_service_army_28 add_idea = PRU_service_army_29 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_29 }
+			swap_ideas = { remove_idea = PRU_service_army_29 add_idea = PRU_service_army_30 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_30 }
+			swap_ideas = { remove_idea = PRU_service_army_30 add_idea = PRU_service_army_31 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_31 }
+			swap_ideas = { remove_idea = PRU_service_army_31 add_idea = PRU_service_army_32 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_32 }
+			swap_ideas = { remove_idea = PRU_service_army_32 add_idea = PRU_service_army_33 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_33 }
+			swap_ideas = { remove_idea = PRU_service_army_33 add_idea = PRU_service_army_34 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_34 }
+			swap_ideas = { remove_idea = PRU_service_army_34 add_idea = PRU_service_army_35 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_35 }
+			swap_ideas = { remove_idea = PRU_service_army_35 add_idea = PRU_service_army_36 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_36 }
+			swap_ideas = { remove_idea = PRU_service_army_36 add_idea = PRU_service_army_37 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_37 }
+			swap_ideas = { remove_idea = PRU_service_army_37 add_idea = PRU_service_army_38 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_38 }
+			swap_ideas = { remove_idea = PRU_service_army_38 add_idea = PRU_service_army_39 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_39 }
+			swap_ideas = { remove_idea = PRU_service_army_39 add_idea = PRU_service_army_40 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_40 }
+			swap_ideas = { remove_idea = PRU_service_army_40 add_idea = PRU_service_army_41 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_army_41 }
+			swap_ideas = { remove_idea = PRU_service_army_41 add_idea = PRU_service_army_42 }
+		}
+	}
+}
+
+PRU_advance_navy_reform = {
+	custom_effect_tooltip = PRU_navy_reform_tt
+	hidden_effect = {
+		if = {
+			limit = { has_idea = PRU_service_navy_01 }
+			swap_ideas = { remove_idea = PRU_service_navy_01 add_idea = PRU_service_navy_02 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_02 }
+			swap_ideas = { remove_idea = PRU_service_navy_02 add_idea = PRU_service_navy_03 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_03 }
+			swap_ideas = { remove_idea = PRU_service_navy_03 add_idea = PRU_service_navy_04 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_04 }
+			swap_ideas = { remove_idea = PRU_service_navy_04 add_idea = PRU_service_navy_05 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_05 }
+			swap_ideas = { remove_idea = PRU_service_navy_05 add_idea = PRU_service_navy_06 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_06 }
+			swap_ideas = { remove_idea = PRU_service_navy_06 add_idea = PRU_service_navy_07 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_07 }
+			swap_ideas = { remove_idea = PRU_service_navy_07 add_idea = PRU_service_navy_08 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_08 }
+			swap_ideas = { remove_idea = PRU_service_navy_08 add_idea = PRU_service_navy_09 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_09 }
+			swap_ideas = { remove_idea = PRU_service_navy_09 add_idea = PRU_service_navy_10 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_10 }
+			swap_ideas = { remove_idea = PRU_service_navy_10 add_idea = PRU_service_navy_11 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_11 }
+			swap_ideas = { remove_idea = PRU_service_navy_11 add_idea = PRU_service_navy_12 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_12 }
+			swap_ideas = { remove_idea = PRU_service_navy_12 add_idea = PRU_service_navy_13 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_13 }
+			swap_ideas = { remove_idea = PRU_service_navy_13 add_idea = PRU_service_navy_14 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_14 }
+			swap_ideas = { remove_idea = PRU_service_navy_14 add_idea = PRU_service_navy_15 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_15 }
+			swap_ideas = { remove_idea = PRU_service_navy_15 add_idea = PRU_service_navy_16 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_16 }
+			swap_ideas = { remove_idea = PRU_service_navy_16 add_idea = PRU_service_navy_17 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_17 }
+			swap_ideas = { remove_idea = PRU_service_navy_17 add_idea = PRU_service_navy_18 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_18 }
+			swap_ideas = { remove_idea = PRU_service_navy_18 add_idea = PRU_service_navy_19 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_19 }
+			swap_ideas = { remove_idea = PRU_service_navy_19 add_idea = PRU_service_navy_20 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_20 }
+			swap_ideas = { remove_idea = PRU_service_navy_20 add_idea = PRU_service_navy_21 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_21 }
+			swap_ideas = { remove_idea = PRU_service_navy_21 add_idea = PRU_service_navy_22 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_22 }
+			swap_ideas = { remove_idea = PRU_service_navy_22 add_idea = PRU_service_navy_23 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_23 }
+			swap_ideas = { remove_idea = PRU_service_navy_23 add_idea = PRU_service_navy_24 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_24 }
+			swap_ideas = { remove_idea = PRU_service_navy_24 add_idea = PRU_service_navy_25 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_25 }
+			swap_ideas = { remove_idea = PRU_service_navy_25 add_idea = PRU_service_navy_26 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_26 }
+			swap_ideas = { remove_idea = PRU_service_navy_26 add_idea = PRU_service_navy_27 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_27 }
+			swap_ideas = { remove_idea = PRU_service_navy_27 add_idea = PRU_service_navy_28 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_28 }
+			swap_ideas = { remove_idea = PRU_service_navy_28 add_idea = PRU_service_navy_29 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_29 }
+			swap_ideas = { remove_idea = PRU_service_navy_29 add_idea = PRU_service_navy_30 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_30 }
+			swap_ideas = { remove_idea = PRU_service_navy_30 add_idea = PRU_service_navy_31 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_31 }
+			swap_ideas = { remove_idea = PRU_service_navy_31 add_idea = PRU_service_navy_32 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_32 }
+			swap_ideas = { remove_idea = PRU_service_navy_32 add_idea = PRU_service_navy_33 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_33 }
+			swap_ideas = { remove_idea = PRU_service_navy_33 add_idea = PRU_service_navy_34 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_navy_34 }
+			swap_ideas = { remove_idea = PRU_service_navy_34 add_idea = PRU_service_navy_35 }
+		}
+	}
+}
+
+PRU_advance_air_reform = {
+	custom_effect_tooltip = PRU_air_reform_tt
+	hidden_effect = {
+		if = {
+			limit = { has_idea = PRU_service_air_01 }
+			swap_ideas = { remove_idea = PRU_service_air_01 add_idea = PRU_service_air_02 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_02 }
+			swap_ideas = { remove_idea = PRU_service_air_02 add_idea = PRU_service_air_03 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_03 }
+			swap_ideas = { remove_idea = PRU_service_air_03 add_idea = PRU_service_air_04 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_04 }
+			swap_ideas = { remove_idea = PRU_service_air_04 add_idea = PRU_service_air_05 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_05 }
+			swap_ideas = { remove_idea = PRU_service_air_05 add_idea = PRU_service_air_06 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_06 }
+			swap_ideas = { remove_idea = PRU_service_air_06 add_idea = PRU_service_air_07 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_07 }
+			swap_ideas = { remove_idea = PRU_service_air_07 add_idea = PRU_service_air_08 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_08 }
+			swap_ideas = { remove_idea = PRU_service_air_08 add_idea = PRU_service_air_09 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_09 }
+			swap_ideas = { remove_idea = PRU_service_air_09 add_idea = PRU_service_air_10 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_10 }
+			swap_ideas = { remove_idea = PRU_service_air_10 add_idea = PRU_service_air_11 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_11 }
+			swap_ideas = { remove_idea = PRU_service_air_11 add_idea = PRU_service_air_12 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_12 }
+			swap_ideas = { remove_idea = PRU_service_air_12 add_idea = PRU_service_air_13 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_13 }
+			swap_ideas = { remove_idea = PRU_service_air_13 add_idea = PRU_service_air_14 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_14 }
+			swap_ideas = { remove_idea = PRU_service_air_14 add_idea = PRU_service_air_15 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_15 }
+			swap_ideas = { remove_idea = PRU_service_air_15 add_idea = PRU_service_air_16 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_16 }
+			swap_ideas = { remove_idea = PRU_service_air_16 add_idea = PRU_service_air_17 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_17 }
+			swap_ideas = { remove_idea = PRU_service_air_17 add_idea = PRU_service_air_18 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_18 }
+			swap_ideas = { remove_idea = PRU_service_air_18 add_idea = PRU_service_air_19 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_19 }
+			swap_ideas = { remove_idea = PRU_service_air_19 add_idea = PRU_service_air_20 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_20 }
+			swap_ideas = { remove_idea = PRU_service_air_20 add_idea = PRU_service_air_21 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_21 }
+			swap_ideas = { remove_idea = PRU_service_air_21 add_idea = PRU_service_air_22 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_22 }
+			swap_ideas = { remove_idea = PRU_service_air_22 add_idea = PRU_service_air_23 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_23 }
+			swap_ideas = { remove_idea = PRU_service_air_23 add_idea = PRU_service_air_24 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_24 }
+			swap_ideas = { remove_idea = PRU_service_air_24 add_idea = PRU_service_air_25 }
+		}
+		else_if = {
+			limit = { has_idea = PRU_service_air_25 }
+			swap_ideas = { remove_idea = PRU_service_air_25 add_idea = PRU_service_air_26 }
+		}
+	}
+}
+
+# Rebuild service grades when a campaign already has completed military focuses.
+PRU_credit_completed_service_reforms = {
+	if = { limit = { has_completed_focus = PRU_czech_equipment_aquisition } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_andean_warfare } set_technology = { PRU_andean_field_manual = 1 } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_paratrooper_company } PRU_advance_army_reform = yes PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_modernize_the_infantry_kit } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_jungle_training } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_motorization } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_reformed_logistics } if = { limit = { has_idea = PRU_reformed_logistics } remove_ideas = PRU_reformed_logistics } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_create_the_infantry_and_cavalry_schools } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_include_llamas_in_the_army } if = { limit = { has_idea = PRU_llama_idea } remove_ideas = PRU_llama_idea } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_czech_tanks } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_study_the_blueprints } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_foreign_licenses } if = { limit = { has_idea = GEN_Licences_I } remove_ideas = GEN_Licences_I } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_italian_guns } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_invite_italian_military_mission } if = { limit = { has_idea = PRU_italian_military_mission } remove_ideas = PRU_italian_military_mission } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_invite_soviet_military_mission } if = { limit = { has_idea = PRU_soviet_military_mission } remove_ideas = PRU_soviet_military_mission } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_expand_the_national_arsenal } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_new_weapons_new_tactics } PRU_advance_army_reform = yes }
+	if = { limit = { has_completed_focus = PRU_a_reborn_navy } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_work_with_foreigners } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_expand_the_naval_factory_of_bellavista } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_naval_industry } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_expand_naval_production } if = { limit = { has_idea = PRU_great_marina } remove_ideas = PRU_great_marina } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_naval_doctrine } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_National_Admiralty_Corps } if = { limit = { has_idea = SCO_idea_national_admiralty } remove_ideas = SCO_idea_national_admiralty } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_Modernize_our_submarines } if = { limit = { has_idea = AFG_under_the_radar_idea } remove_ideas = AFG_under_the_radar_idea } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_the_grau_class_project } if = { limit = { has_idea = AST_R56_submarine_hunters_idea } remove_ideas = AST_R56_submarine_hunters_idea } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_modernize_destroyers } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_modernize_battleships } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_modernize_carrier } PRU_advance_navy_reform = yes }
+	if = { limit = { has_completed_focus = PRU_fly_with_the_sun } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_strengthen_the_air_force } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_air_innovations } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_heroes_of_the_air } if = { limit = { has_idea = arg_air_heroes } remove_ideas = arg_air_heroes } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_total_production } if = { limit = { has_idea = JAP_airframe_supplies_improvements } remove_ideas = JAP_airframe_supplies_improvements } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_start_aircraft_purchase } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_acquire_usa_planes } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_acquire_italian_planes } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_work_with_our_designs } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_work_on_light_aircraft } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_work_on_heavy_aircraft } PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_defence_estimates } PRU_advance_army_reform = yes PRU_advance_navy_reform = yes PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_callao_patrol_school } PRU_advance_navy_reform = yes PRU_advance_air_reform = yes }
+	if = { limit = { has_completed_focus = PRU_pisco_manoeuvres } PRU_advance_army_reform = yes PRU_advance_navy_reform = yes PRU_advance_air_reform = yes }
 }
